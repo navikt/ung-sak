@@ -1,16 +1,7 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
-
-import java.util.Optional;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
@@ -20,8 +11,16 @@ import no.nav.ung.domenetjenester.arkiv.VurderStrukturertDokumentTask;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.kodeverdi.BrevkodeInformasjonUtleder;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@ApplicationScoped
+import java.util.Optional;
+import java.util.Set;
+
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
+
+@Dependent
 public class StrukturertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(StrukturertJournalpost.class);
@@ -83,7 +82,6 @@ public class StrukturertJournalpost implements Journalpostvurderer {
         } else {
             var bi = brevkodeInfo.get();
             bi.getYtelseType().ifPresent(dataWrapper::setYtelseType);
-            bi.getBehandlingTema().ifPresent(dataWrapper::setBehandlingTema);
             if (journalpostInfo.getInnholderStrukturertInformasjon()) {
                 bi.getBehandlingTypeHvisStrukturert().ifPresent(dataWrapper::setBehandlingType);
             }

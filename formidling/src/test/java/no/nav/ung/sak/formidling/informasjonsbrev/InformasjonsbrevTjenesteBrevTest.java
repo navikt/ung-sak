@@ -14,6 +14,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.PdlKlientFake;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
@@ -73,7 +74,7 @@ class InformasjonsbrevTjenesteBrevTest {
                 new InformasjonsbrevMottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID),
                 new GenereltFritekstBrevDto(overskrift, brødtekstMedMarkdown)
                 ),
-            true
+            BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, true
             );
 
         // Then
@@ -114,8 +115,8 @@ class InformasjonsbrevTjenesteBrevTest {
                 behandling.getId(), DokumentMalType.GENERELT_FRITEKSTBREV,
                 new InformasjonsbrevMottakerDto(behandling.getAktørId().getId(), IdType.AKTØRID),
                 new GenereltFritekstBrevDto(overskrift, brødtekst)
-            )
-        );
+            ),
+            BrevScenarioerUtils.SAKSBEHANDLER1_IDENT);
 
         // Then
         var behandlingBrevbestillingEntitets = brevbestillingRepository.hentForBehandling(behandling.getId());

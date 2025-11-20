@@ -232,7 +232,7 @@ public class PostgreSQLRangeType extends UserTypeSupport<Range<?>> {
     public static final PostgreSQLRangeType INSTANCE = new PostgreSQLRangeType();
 
     public PostgreSQLRangeType() {
-        super(Range.class, Types.OTHER);
+        super((Class<Range<?>>)(Class<?>)Range.class, Types.OTHER); //må ha casting her for å kunne ha ønsket generics i signaturene
     }
 
     @Override

@@ -9,9 +9,9 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.engine.jdbc.ClobProxy;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -277,7 +277,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         if (this.id != null && this.regelEvaluering != null) {
             throw new IllegalStateException("Kan ikke overskrive regelEvaluering for VilkårPeriode: " + this.id);
         }
-        this.regelEvaluering = regelEvaluering == null || regelEvaluering.isEmpty() ? null : ClobProxy.generateProxy(regelEvaluering);
+        this.regelEvaluering = regelEvaluering == null || regelEvaluering.isEmpty() ? null : Hibernate.getLobHelper().createClob(regelEvaluering);
     }
 
     public String getRegelInput() {
@@ -288,7 +288,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         if (this.id != null && this.regelInput != null) {
             throw new IllegalStateException("Kan ikke overskrive regelInput for VilkårPeriode: " + this.id);
         }
-        this.regelInput = regelInput == null || regelInput.isEmpty() ? null : ClobProxy.generateProxy(regelInput);
+        this.regelInput = regelInput == null || regelInput.isEmpty() ? null : Hibernate.getLobHelper().createClob(regelInput);
     }
 
     @Override

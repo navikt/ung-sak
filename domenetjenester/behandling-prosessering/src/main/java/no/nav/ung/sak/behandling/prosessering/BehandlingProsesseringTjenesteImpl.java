@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -13,6 +14,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingDersomIkkePåVentTask;
 import no.nav.ung.sak.behandling.prosessering.task.FortsettBehandlingTask;
 import no.nav.ung.sak.behandling.prosessering.task.GjenopptaBehandlingTask;
 import no.nav.ung.sak.behandling.prosessering.task.HoppTilbakeTilStegTask;
@@ -55,6 +57,7 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     private RegisterdataEndringshåndterer registerdataEndringshåndterer;
     private EndringsresultatSjekker endringsresultatSjekker;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private boolean oppfriskKontrollbehandlingEnabled;
 
     private Instance<InformasjonselementerUtleder> informasjonselementer;
 
@@ -66,13 +69,15 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
                                               @Any Instance<InformasjonselementerUtleder> informasjonselementer,
                                               @Any Instance<EndringStartpunktUtleder> startpunktUtledere,
                                               EndringsresultatSjekker endringsresultatSjekker,
-                                              FagsakProsessTaskRepository fagsakProsessTaskRepository) {
+                                              FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                              @KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.registerdataEndringshåndterer = registerdataEndringshåndterer;
         this.informasjonselementer = informasjonselementer;
         this.startpunktUtledere = startpunktUtledere;
         this.endringsresultatSjekker = endringsresultatSjekker;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.oppfriskKontrollbehandlingEnabled = oppfriskKontrollbehandlingEnabled;
     }
 
     public BehandlingProsesseringTjenesteImpl() {
@@ -116,9 +121,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
 
         ProsessTaskGruppe gruppe = new ProsessTaskGruppe();
         if (behandling.erYtelseBehandling()) {
-            ProsessTaskData registerdataOppdatererTask = ProsessTaskData.forProsessTask(OppfriskingAvBehandlingTask.class);
-            registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-            gruppe.addNesteSekvensiell(registerdataOppdatererTask);
+            if (!oppfriskKontrollbehandlingEnabled) {
+                ProsessTaskData registerdataOppdatererTask = ProsessTaskData.forProsessTask(OppfriskingAvBehandlingTask.class);
+                registerdataOppdatererTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+                gruppe.addNesteSekvensiell(registerdataOppdatererTask);
+            }
             if (innhentRegisterdataFørst) {
                 log.info("Innhenter registerdata på nytt for å sjekke endringer for behandling: {}", behandling.getId());
                 leggTilTasksForInnhentRegisterdataPåNytt(behandling, gruppe, true);
@@ -127,10 +134,16 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
                 leggTilTaskForDiffOgReposisjoner(behandling, gruppe, true);
             }
         }
-        ProsessTaskData fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+        ProsessTaskData fortsettBehandlingTask;
+        if (oppfriskKontrollbehandlingEnabled) {
+            fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingDersomIkkePåVentTask.class);
+        } else {
+            fortsettBehandlingTask = ProsessTaskData.forProsessTask(FortsettBehandlingTask.class);
+            fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
+        }
         fortsettBehandlingTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
-        fortsettBehandlingTask.setProperty(FortsettBehandlingTask.MANUELL_FORTSETTELSE, String.valueOf(true));
         gruppe.addNesteSekvensiell(fortsettBehandlingTask);
+
         gruppe.setCallIdFraEksisterende();
         return gruppe;
     }

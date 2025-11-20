@@ -7,6 +7,9 @@ import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static no.nav.ung.sak.behandlingslager.behandling.klage.HjemmelBruktKlagebrev.*;
 
 public class KlageFormkravAdapter {
 
@@ -89,6 +92,47 @@ public class KlageFormkravAdapter {
             return Optional.of(KlageVurderingType.AVVIS_KLAGE);
         }
         return Optional.empty();
+    }
+
+    public List<HjemmelBruktKlagebrev> hentArbeidsmarkedParagrafer() {
+        List<HjemmelBruktKlagebrev> paragrafer = new ArrayList<>();
+
+        if (!isFristOverholdt()) {
+            paragrafer.add(ARBEIDSMARKEDSLOVEN_17);
+        }
+
+        return paragrafer;
+    }
+
+    public List<HjemmelBruktKlagebrev> hentForvaltningslovParagrafer() {
+        List<HjemmelBruktKlagebrev> paragrafer = new ArrayList<>();
+
+        paragrafer.add(FL_SAKSFORBEREDELSE_I_KLAGESAK);
+
+        if (!gjelderVedtak()) {
+            paragrafer.add(FL_VEDTAK_SOM_KAN_PÅKLAGES);
+        }
+
+        if (!isErKlagerPart()) {
+            paragrafer.add(FL_VEDTAK_SOM_KAN_PÅKLAGES);
+        }
+
+        if (!isFristOverholdt()) {
+            paragrafer.add(FL_OVERSITTING_AV_KLAGEFRIST);
+        }
+
+        if (!isErKonkret()) {
+            paragrafer.add(FL_ADRESSAT_FORM_OG_INNHOLD);
+        }
+
+        if (!isErSignert()) {
+            paragrafer.add(FL_ADRESSAT_FORM_OG_INNHOLD);
+        }
+
+        return paragrafer.stream()
+            .distinct()
+            .sorted()
+            .collect(Collectors.toList());
     }
 
 

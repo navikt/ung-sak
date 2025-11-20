@@ -47,13 +47,19 @@ public class BekreftedeAksjonspunkterDto {
     @Valid
     private Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
 
+    public BekreftedeAksjonspunkterDto() {
+    }
+
+    public BekreftedeAksjonspunkterDto(BehandlingIdDto behandlingId, Long behandlingVersjon, Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer) {
+        this.behandlingId = behandlingId;
+        this.behandlingVersjon = behandlingVersjon;
+        this.bekreftedeAksjonspunktDtoer = bekreftedeAksjonspunktDtoer;
+    }
+
     public static BekreftedeAksjonspunkterDto lagDto(Long behandlingId, Long behandlingVersjon,
                                                      Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer) {
-        BekreftedeAksjonspunkterDto dto = new BekreftedeAksjonspunkterDto();
-        dto.behandlingId = new BehandlingIdDto(behandlingId);
-        dto.behandlingVersjon = behandlingVersjon;
-        dto.bekreftedeAksjonspunktDtoer = bekreftedeAksjonspunktDtoer;
-        return dto;
+        final var behandlingIdDto = new BehandlingIdDto(behandlingId);
+        return new BekreftedeAksjonspunkterDto(behandlingIdDto, behandlingVersjon, bekreftedeAksjonspunktDtoer);
     }
 
     @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)

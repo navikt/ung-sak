@@ -17,10 +17,10 @@ import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerI
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
+import no.nav.ung.sak.kontroll.InntektType;
+import no.nav.ung.sak.kontroll.RapportertInntekt;
+import no.nav.ung.sak.kontroll.RapporterteInntekter;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

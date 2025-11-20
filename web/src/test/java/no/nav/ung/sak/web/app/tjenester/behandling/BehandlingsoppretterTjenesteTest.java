@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -62,6 +63,9 @@ class BehandlingsoppretterTjenesteTest {
     private KlageVurderingTjeneste klageVurderingTjeneste;
 
     @Inject
+    private HistorikkinnslagRepository historikkinnslagRepository;
+
+    @Inject
     TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
@@ -76,7 +80,7 @@ class BehandlingsoppretterTjenesteTest {
         opprettRevurderingsKandidat();
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any())).thenReturn(new OrganisasjonsEnhet("1234", "Nav Test"));
-        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, new UnitTestLookupInstanceImpl<>(new GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder(tilkjentYtelseRepository, behandlingRepository)), behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository);
+        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, new UnitTestLookupInstanceImpl<>(new GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder(tilkjentYtelseRepository, behandlingRepository)), behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository);
     }
 
     @Test

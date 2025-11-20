@@ -6,7 +6,7 @@ import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.kodeverk.Fagsystem;
 
-record Vurderingsgrunnlag(
+public record Vurderingsgrunnlag(
         MottattMelding melding,
         JournalpostInfo journalpostInfo) {
 

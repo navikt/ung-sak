@@ -158,15 +158,9 @@ class ForeslåVedtakTjeneste {
     }
 
     private boolean skalUtføreTotrinnsbehandling(Behandling behandling) {
-        var totrinn = !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
+        return !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
             behandling.harAksjonspunktMedTotrinnskontroll();
 
-        if (totrinn) {
-            var totrinnAks = behandling.getAksjonspunkter().stream()
-                .filter(Aksjonspunkt::isToTrinnsBehandling).toList();
-            return !totrinnAks.isEmpty();
-        }
-        return totrinn;
     }
 
     private void settForeslåOgFatterVedtakAksjonspunkterAvbrutt(Behandling behandling, BehandlingskontrollKontekst kontekst) {

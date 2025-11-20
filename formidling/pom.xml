@@ -19,6 +19,10 @@
 			<groupId>no.nav.k9.felles</groupId>
 			<artifactId>k9-felles-db</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-microsoft-graph-klient</artifactId>
+        </dependency>
 		<dependency>
 			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>domenetjenester-bom</artifactId>

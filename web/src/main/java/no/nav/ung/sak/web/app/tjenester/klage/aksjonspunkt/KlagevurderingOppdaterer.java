@@ -15,12 +15,8 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.historikk.HistorikkTjenesteAdapter;
 import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.klage.KlageVurderingResultatAksjonspunktDto;
-import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-
-import java.util.Objects;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = KlageVurderingResultatAksjonspunktDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -47,6 +43,8 @@ public class KlagevurderingOppdaterer implements AksjonspunktOppdaterer<KlageVur
 
     @Override
     public OppdateringResultat oppdater(KlageVurderingResultatAksjonspunktDto dto, AksjonspunktOppdaterParameter param) {
+        dto.valider();
+
         Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
         AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.fraKode(dto.getKode());
 

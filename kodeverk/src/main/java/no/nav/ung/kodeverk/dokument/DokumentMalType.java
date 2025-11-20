@@ -1,5 +1,6 @@
 package no.nav.ung.kodeverk.dokument;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
@@ -18,8 +19,8 @@ public enum DokumentMalType implements Kodeverdi {
     INNVILGELSE_DOK("INNVILGELSE", "Innvilgelse", true),
     ENDRING_BARNETILLEGG("ENDRING_BARNETILLEGG", "Endring barnetillegg", true),
     ENDRING_PROGRAMPERIODE("ENDRING_PROGRAMPERIODE", "Endring programperiode", true),
-    ENDRING_INNTEKT("ENDRING_INNTEKT", "Endring inntekt", true),
-    ENDRING_INNTEKT_UTEN_REDUKSJON("ENDRING_INNTEKT_UTEN_REDUKSJON", "Endring inntekt uten reduksjon", true),
+    ENDRING_INNTEKT("ENDRING_INNTEKT", "Kontroll av inntekt", true),
+    ENDRING_INNTEKT_UTEN_REDUKSJON("ENDRING_INNTEKT_UTEN_REDUKSJON", "Kontroll av inntekt uten reduksjon", true),
     ENDRING_HØY_SATS("ENDRING_HØY_SATS", "Endring høy sats", true),
     OPPHØR_DOK("OPPHOR", "Opphør", true),
     AVSLAG__DOK("AVSLAG", "Avslag", true),
@@ -79,6 +80,7 @@ public enum DokumentMalType implements Kodeverdi {
         return vedtaksbrevmal;
     }
 
+    @JsonCreator
     public static DokumentMalType fraKode(final String kode) {
         var ad = Optional.ofNullable(KODER.get(kode));
         if (ad.isEmpty()) {

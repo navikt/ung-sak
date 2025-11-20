@@ -7,8 +7,8 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.AvvikResultatType;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.Avviksvurdering;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
-import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import no.nav.ung.sak.kontroll.EtterlysningOgRegisterinntekt;
+import no.nav.ung.sak.kontroll.RapporterteInntekter;
 
 import java.math.BigDecimal;
 import java.util.List;

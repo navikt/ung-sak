@@ -21,6 +21,7 @@
         <module>dokumentarkiv</module>
         <module>hendelsemottak</module>
         <module>inngangsvilkar</module>
+        <module>inntektskontroll</module>
         <module>arbeidsforhold</module>
         <module>arbeidsforhold-domene</module>
         <module>mottak</module>

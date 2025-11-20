@@ -1,30 +1,31 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.saf.Journalstatus;
+import no.nav.k9.felles.integrasjon.saf.Tema;
+import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.Optional;
+
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.StrukturertJournalpost.GODKJENTE_KODER;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.k9.felles.integrasjon.saf.Journalstatus;
-import no.nav.k9.felles.integrasjon.saf.Tema;
-import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
-import no.nav.ung.kodeverk.dokument.Brevkode;
-
-@ApplicationScoped
+@Dependent
 public class IgnorertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(IgnorertJournalpost.class);
 
     private static final List<Tema> RELEVANTE_TEMAER = List.of(Tema.UNG);
+
+    @Inject
+    public IgnorertJournalpost() {
+    }
 
     @Override
     public VurdertJournalpost gjørVurdering(Vurderingsgrunnlag vurderingsgrunnlag) {
@@ -34,7 +35,7 @@ public class IgnorertJournalpost implements Journalpostvurderer {
         Tema temaPåJournalpostInfo = journalpostInfo.getTema();
 
         if (!RELEVANTE_TEMAER.contains(temaPåMelding) || !RELEVANTE_TEMAER.contains(temaPåJournalpostInfo)) {
-            log.info("Ignorerer dokument som ikke er på forventet tema. Tema=" + temaPåJournalpostInfo);
+            log.info("Ignorerer dokument som ikke er på forventet tema. Tema={}", temaPåJournalpostInfo);
             return håndtert();
         }
 
@@ -47,12 +48,8 @@ public class IgnorertJournalpost implements Journalpostvurderer {
             return håndtert();
         }
 
-        if (ignorer(vurderingsgrunnlag)) {
-            // Feiler her i stedet for å ignorere, slik at vi kan se hvilke brevkoder som ikke er håndtert.
-            throw new IllegalArgumentException("Fikk brevkode som ikke kunne håndteres: " + journalpostInfo.getBrevkode());
-        }
-
         return ikkeHåndtert();
+
     }
 
     private boolean hendelseErMottattMenStatusErJournalført(Optional<JournalføringHendelsetype> hendelsetype, Journalstatus journalstatus) {

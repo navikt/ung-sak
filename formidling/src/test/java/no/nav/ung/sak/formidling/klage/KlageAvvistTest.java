@@ -27,14 +27,13 @@ class KlageAvvistTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
         var klage = KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuellUtenBeslutter(fnr,
             """
                 NAV har avvist klagen din på vedtaket om ungdomsprogramytelse \
                 Vi har avvist klagen fordi du har klaget for sent. \
                 Du har ikke oppgitt en grunn til at du klaget for sent som gjør at vi kan behandle klagen. \
-                FTRL/FL \
+                Vedtaket er gjort etter arbeidsmarkedsloven § 17 og forvaltningsloven §§ 31 og 33. \
                 """);
-
 
 
         GenerertBrev generertBrev = genererVedtaksbrev(klage);

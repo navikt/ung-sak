@@ -14,6 +14,7 @@ import java.util.UUID;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,24 @@ public class AksjonspunktRestTjenesteTest {
 
         aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class), BekreftedeAksjonspunkterDto.lagDto(behandlingId, behandlingVersjon, aksjonspunkt));
 
+        verify(aksjonspunktApplikasjonTjenesteMock).bekreftAksjonspunkter(ArgumentMatchers.anyCollection(), anyLong(), any(BehandlingskontrollKontekst.class));
+    }
+
+    @Test
+    public void skal_bekrefte_fatte_vedtak_med_uuid_behandling_id() throws URISyntaxException {
+        when(behandling.getStatus()).thenReturn(BehandlingStatus.FATTER_VEDTAK);
+        Collection<BekreftetAksjonspunktDto> aksjonspunkt = new ArrayList<>();
+        Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos = new ArrayList<>();
+        AksjonspunktGodkjenningDto godkjentAksjonspunkt = opprettetGodkjentAksjonspunkt(true);
+        aksjonspunktGodkjenningDtos.add(godkjentAksjonspunkt);
+        aksjonspunkt.add(
+            new FatterVedtakAksjonspunktDto(
+                begrunnelse,
+                aksjonspunktGodkjenningDtos));
+
+        final var uuidBehandlingIdDto = new BehandlingIdDto(UUID.randomUUID());
+        final var bekreftedeAksjonspunkterDtoMedUuid = new BekreftedeAksjonspunkterDto(uuidBehandlingIdDto, behandlingVersjon, aksjonspunkt);
+        aksjonspunktRestTjeneste.bekreft(mock(HttpServletRequest.class), bekreftedeAksjonspunkterDtoMedUuid);
         verify(aksjonspunktApplikasjonTjenesteMock).bekreftAksjonspunkter(ArgumentMatchers.anyCollection(), anyLong(), any(BehandlingskontrollKontekst.class));
     }
 

@@ -5,15 +5,9 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.etterlysning.UttalelseEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
-import no.nav.ung.sak.uttalelse.EtterlysningInfo;
-import no.nav.ung.sak.uttalelse.EtterlysningsPeriode;
-import no.nav.ung.sak.ytelse.EtterlysningOgRegisterinntekt;
-import no.nav.ung.sak.ytelse.RapportertInntektMapper;
-import no.nav.ung.sak.ytelse.kontroll.RelevanteKontrollperioderUtleder;
+import no.nav.ung.sak.kontroll.*;
 
 import java.util.List;
 
@@ -49,9 +43,9 @@ public class KontrollerInntektInputMapper {
 
     private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnGjeldendeEtterlysningTidslinje(List<EtterlysningData> etterlysninger, BehandlingReferanse behandlingReferanse) {
         var etterlysningsperioder = etterlysninger.stream()
-            .map(it -> new EtterlysningsPeriode(
+            .map(it -> new InntektskontrollEtterlysningsPeriode(
                 it.periode().toLocalDateInterval(),
-                new EtterlysningInfo(it.status(), it.uttalelseData() != null ? it.uttalelseData().harUttalelse() : null),
+                new InntektskontrollEtterlysningInfo(it.status(), it.uttalelseData() != null ? it.uttalelseData().harUttalelse() : null),
                 it.grunnlagsreferanse())).toList();
         return rapportertInntektMapper.finnRegisterinntekterForEtterlysninger(behandlingReferanse.getBehandlingId(), etterlysningsperioder);
     }

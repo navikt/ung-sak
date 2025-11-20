@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
-import no.nav.ung.sak.ytelse.kontroll.RelevanteKontrollperioderUtleder;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
