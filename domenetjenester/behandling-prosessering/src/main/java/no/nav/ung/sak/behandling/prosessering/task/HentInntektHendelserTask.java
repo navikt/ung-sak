@@ -33,7 +33,8 @@ import java.util.stream.Collectors;
 public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "registerinnhenting.hentInntektHendelser";
-    private static final String SEKVENSNUMMER_KEY = "sekvensnummer";
+    public static final String SEKVENSNUMMER_KEY = "sekvensnummer";
+
 
     private static final Logger log = LoggerFactory.getLogger(HentInntektHendelserTask.class);
 
@@ -43,6 +44,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private boolean hentInntektHendelserEnabled;
     private boolean oppfriskKontrollbehandlingEnabled;
     private Duration ventetidFørNesteKjøring;
+    private
 
     public HentInntektHendelserTask() {
         // For CDI
@@ -72,7 +74,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         }
 
         if (oppfriskKontrollbehandlingEnabled) {
-            //log.info("Oppfrisk Task av kontrollbehandlinger er aktivert. Hopper over task for henting av inntektshendelser.");
+            log.info("Oppfrisk Task av kontrollbehandlinger er aktivert. Hopper over task for henting av inntektshendelser.");
             return;
         }
 
@@ -83,6 +85,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
         if (nyeInntektHendelser.isEmpty()) {
             log.info("Ingen nye inntektshendelser funnet");
+            opprettNesteTask(sekvensnummer + 1);
             return;
         }
 
@@ -118,11 +121,8 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
             var behandlinger = finnBehandlingerSomVenterPåInntektUttalelse(aktørId);
 
             if (behandlinger.isEmpty()) {
-                log.debug("Ingen behandlinger å oppfriske for aktørId={}", aktørId.getId());
                 continue;
             }
-
-            log.info("Fant {} behandlinger som skal oppfriskes for aktørId={}", behandlinger.size(), aktørId.getId());
 
             for (Behandling behandling : behandlinger) {
                 log.info("Oppretter oppfrisk-task for behandling={} saksnummer={}",
