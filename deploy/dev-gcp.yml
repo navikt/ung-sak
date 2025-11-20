@@ -265,7 +265,7 @@ spec:
       value: "P1D"
     - name: OVERSTYR_REGISTERDATA_DURATION
       value: "PT30M"
-    - name: HENT_INNTEKT_HENDElSER_INTERVALl
+    - name: HENT_INNTEKT_HENDElSER_INTERVALL
       value: "PT1M"
 
     # Audit logging

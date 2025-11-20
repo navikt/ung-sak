@@ -44,7 +44,6 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private boolean hentInntektHendelserEnabled;
     private boolean oppfriskKontrollbehandlingEnabled;
     private Duration ventetidFørNesteKjøring;
-    private
 
     public HentInntektHendelserTask() {
         // For CDI
@@ -55,7 +54,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
                                     EntityManager entityManager,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled,
-                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALl", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring,
+                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALL", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring,
                                     @KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled){
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.entityManager = entityManager;
