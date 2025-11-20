@@ -33,7 +33,7 @@ public class InntektAbonnentKlient {
     @Inject
     public InntektAbonnentKlient(
         @KonfigVerdi(value = "inntektskomponenten.url",
-            defaultVerdi = "http://ikomp.team-inntekt") String baseUrl,
+            defaultVerdi = "https://ikomp.intern.nav.no/") String baseUrl,
         OidcRestClient oidcRestClient) {
         this.oidcRestClient = oidcRestClient;
         this.opprettAbonnementURI = tilUri(baseUrl, "rs/api/v1/abonnement");
@@ -45,46 +45,45 @@ public class InntektAbonnentKlient {
     public InntektAbonnement opprettAbonnement(AktørId aktørId, String formaal, List<String> filter,
                                                String fomMaanedObservasjon, String tomMaanedObservasjon,
                                                LocalDate sisteBruksdag) {
-        var request = new OpprettAbonnementRequest(
-            aktørId.getId(),
-            formaal,
-            filter,
-            fomMaanedObservasjon,
-            tomMaanedObservasjon,
-            sisteBruksdag
-        );
-        AbonnementResponse response;
         try {
-            response = oidcRestClient.post(opprettAbonnementURI, request, AbonnementResponse.class);
+            var request = new OpprettAbonnementRequest(
+                aktørId.getId(),
+                formaal,
+                filter,
+                fomMaanedObservasjon,
+                tomMaanedObservasjon,
+                sisteBruksdag
+            );
+            AbonnementResponse response = oidcRestClient.post(opprettAbonnementURI, request, AbonnementResponse.class);
+
+            var abonnement = new InntektAbonnement(String.valueOf(response.abonnementId()), aktørId);
+            log.info("Opprettet abonnementId: {} for aktør: {}", response.abonnementId(), aktørId.getId());
+
+            return abonnement;
         } catch (Exception e) {
             throw new TekniskException("UNG-947528", "Feil ved opprettelse av abonnement", e);
         }
-
-        var abonnement = new InntektAbonnement(String.valueOf(response.abonnementId()), aktørId);
-        log.info("Opprettet abonnementId: {} for aktør: {}", response.abonnementId(), aktørId.getId());
-        return abonnement;
     }
 
     public long hentStartSekvensnummer(LocalDate dato) {
-        var request = new AbonnementHendelseStartApiInn(dato);
-        AbonnementHendelseStartApiUt response;
         try {
-            response = oidcRestClient.post(hendelseStartURI, request, AbonnementHendelseStartApiUt.class);
+            var request = new AbonnementHendelseStartApiInn(dato);
+            AbonnementHendelseStartApiUt response = oidcRestClient.post(hendelseStartURI, request, AbonnementHendelseStartApiUt.class);
+            return response.sekvensnummer();
         } catch (Exception e) {
             throw new TekniskException("UNG-440600", "Feil ved henting av startsekvensnummer", e);
         }
-        return response.sekvensnummer();
     }
 
     public List<AbonnementHendelse> hentAbonnentHendelser(long fraSekvensnummer, List<String> filter) {
-        var request = new InntektHendelserRequest(fraSekvensnummer, INNTEKT_HENDELSE_LIMIT, filter);
-        AbonnementHendelseApiUt response;
         try {
-            response = oidcRestClient.post(hendelseURI, request, AbonnementHendelseApiUt.class);
+            var request = new InntektHendelserRequest(fraSekvensnummer, INNTEKT_HENDELSE_LIMIT, filter);
+            AbonnementHendelseApiUt response = oidcRestClient.post(hendelseURI, request, AbonnementHendelseApiUt.class);
+            return response.data();
         } catch (Exception e) {
             throw new TekniskException("UNG-769025", "Feil ved henting av nye hendelser", e);
         }
-        return response.data();
+
     }
 
     public void avsluttAbonnement(long abonnementId) {
@@ -95,7 +94,6 @@ public class InntektAbonnentKlient {
         } catch (Exception e) {
             throw new TekniskException("UNG-328650", "Feil ved avslutning av abonnement", e);
         }
-        log.info("Avsluttet abonnement {}", abonnementId);
     }
 
     private static URI tilUri(String baseUrl, String path) {
