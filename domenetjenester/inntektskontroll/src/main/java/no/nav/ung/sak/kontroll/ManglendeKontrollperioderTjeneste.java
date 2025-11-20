@@ -74,8 +74,8 @@ public class ManglendeKontrollperioderTjeneste {
             .getLocalDateIntervals();
     }
 
-    private LocalDateTimeline<Set<BehandlingÅrsakType>> finnPerioderMarkertForKontroll(Long behandlingId) {
-        return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+    private LocalDateTimeline<Boolean> finnPerioderMarkertForKontroll(Long behandlingId) {
+        return relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
     }
 
     private LocalDateTimeline<Boolean> finnPerioderSomErKontrollertITidligereBehandlinger(Long behandlingId) {
