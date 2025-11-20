@@ -22,7 +22,7 @@ public class InntektAbonnementRepository {
 
     public Optional<InntektAbonnement> hentAbonnementForAktør(AktørId aktørId) {
         var query = entityManager.createQuery(
-            "SELECT r FROM InntektAbonnement r WHERE r.aktørId = :aktørId",
+            "SELECT i FROM InntektAbonnement i WHERE i.aktørId = :aktørId AND i.aktiv = true",
             InntektAbonnement.class
         );
         query.setParameter("aktørId", aktørId);
