@@ -104,7 +104,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS(
         AksjonspunktKodeDefinisjon.VURDERING_AV_FORMKRAV_KLAGE_KODE, AksjonspunktType.MANUELL, "Vurder formkrav (Vedtaksinstans)",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS, UTEN_VILKÅR,
-        SkjermlenkeType.FORMKRAV_KLAGE_VEDTAKSINSTANS, ENTRINN, AVVENTER_SAKSBEHANDLER),
+        SkjermlenkeType.FORMKRAV_KLAGE_VEDTAKSINSTANS, ENTRINN,
+        true, false, false, AVVENTER_SAKSBEHANDLER),
 
     MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS(
         AksjonspunktKodeDefinisjon.MANUELL_VURDERING_AV_KLAGE_KODE, AksjonspunktType.MANUELL, "Manuell vurdering av klage (Vedtaksinstans)",
