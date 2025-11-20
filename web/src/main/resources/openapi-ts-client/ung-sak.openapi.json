@@ -8115,7 +8115,7 @@
     },
     "/api/oppgave/forvaltning/fjern-uttalelse" : {
       "post" : {
-        "description" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "description" : "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
         "operationId" : "fjernUttalelser",
         "parameters" : [ {
           "in" : "query",
@@ -8133,7 +8133,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "summary" : "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
         "tags" : [ "oppgave" ]
       }
     },
@@ -8163,7 +8163,7 @@
     },
     "/api/oppgave/forvaltning/opprett-inntektsrapportering" : {
       "post" : {
-        "description" : "Oppretter oppgave for inntektsrapportering for gitt sak",
+        "description" : "KUN FOR TEST: Oppretter oppgave for inntektsrapportering for gitt sak",
         "operationId" : "opprettInntektsrapportering",
         "parameters" : [ {
           "description" : "måned",
@@ -8198,13 +8198,13 @@
             "description" : "default response"
           }
         },
-        "summary" : "Oppretter oppgave for inntektsrapportering",
+        "summary" : "KUN FOR TEST: Oppretter oppgave for inntektsrapportering",
         "tags" : [ "oppgave" ]
       }
     },
     "/api/oppgave/forvaltning/start-inntektskontroll" : {
       "post" : {
-        "description" : "Starter inntektskontroll for sak",
+        "description" : "KUN FOR TEST: Starter inntektskontroll for sak.",
         "operationId" : "startInntektskontroll",
         "parameters" : [ {
           "description" : "måned",
@@ -8239,7 +8239,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Starter inntektskontroll for sak",
+        "summary" : "KUN FOR TEST: Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
       }
     },
