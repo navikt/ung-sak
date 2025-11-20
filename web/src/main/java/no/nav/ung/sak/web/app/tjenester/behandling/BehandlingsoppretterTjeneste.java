@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -83,6 +84,17 @@ public class BehandlingsoppretterTjeneste {
         if (!kanRevurderingOpprettes) {
             throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
+
+        var gyldigePerioderForRevurdering = finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
+        boolean skalSjekkeGyldighetAvPeriode = gyldigePerioderForRevurdering.stream().anyMatch(dto -> dto.årsak() == behandlingÅrsakType);
+        var periodenErVurdert = gyldigePerioderForRevurdering.stream().filter(
+            dto -> dto.årsak() == behandlingÅrsakType)
+            .anyMatch(dto -> dto.perioder().stream().anyMatch(p -> DatoIntervallEntitet.fra(p).equals(periode.get())));
+
+        if (skalSjekkeGyldighetAvPeriode && !periodenErVurdert){
+            throw new UnsupportedOperationException("Perioden er ikke revurdert");
+        }
+
         var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsak.getId())
             .orElseThrow(() -> RevurderingFeil.FACTORY.tjenesteFinnerIkkeBehandlingForRevurdering(fagsak.getId()).toException());
 
