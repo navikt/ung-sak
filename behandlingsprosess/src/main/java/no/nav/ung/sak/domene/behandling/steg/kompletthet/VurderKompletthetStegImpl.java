@@ -97,7 +97,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
             programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
             if (hentInntektHendelserEnabled) {
-                inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId());
+                inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), behandling.getFagsak().getPeriode().tilPeriode());
             }
         } else {
             log.info("Behandling {} har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.", kontekst.getBehandlingId());

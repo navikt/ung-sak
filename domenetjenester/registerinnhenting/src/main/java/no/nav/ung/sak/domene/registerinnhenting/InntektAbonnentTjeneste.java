@@ -7,6 +7,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class InntektAbonnentTjeneste {
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
-    public InntektAbonnement opprettAbonnement(AktørId aktørId) {
+    public InntektAbonnement opprettAbonnement(AktørId aktørId, Periode periode) {
         var tomFagsakPeriode = fagsakTjeneste.finnFagsakerForAktør(aktørId).stream()
             .filter(Fagsak::erÅpen)
             .map(fagsak -> fagsak.getPeriode().getTomDato())
@@ -49,8 +50,8 @@ public class InntektAbonnentTjeneste {
             aktørId,
             UNG_INNTEKT_FORMAAL,
             List.of(UNG_INNTEKT_FILTER),
-            LocalDate.now().minusMonths(1).toString(),
-            LocalDate.now().plusMonths(1).toString(),
+            periode.getFom().getMonth().toString(),
+            periode.getTom().getMonth().toString(),
             tomFagsakPeriode
         );
         inntektAbonnementRepository.lagre(inntektAbonnement);
