@@ -104,7 +104,7 @@ public class InntektAbonnentKlient {
         }
     }
 
-    public record OpprettAbonnementRequest(
+    private record OpprettAbonnementRequest(
         String norskident,
         String formaal,
         List<String> filter,
@@ -113,22 +113,22 @@ public class InntektAbonnentKlient {
         LocalDate sisteBruksdag
     ) {}
 
-    public record AbonnementResponse(String abonnementId) {
+    private record AbonnementResponse(String abonnementId) {
     }
 
-    public record AbonnementHendelseStartApiInn(LocalDate dato) {}
+    private record AbonnementHendelseStartApiInn(LocalDate dato) {}
 
-    public record AbonnementHendelseStartApiUt(long sekvensnummer) {}
+    private record AbonnementHendelseStartApiUt(long sekvensnummer) {}
 
-    public record InntektHendelserRequest(
+    private record InntektHendelserRequest(
         long fra,
         int antall,
         List<String> filter
     ) {}
 
-    public record AbonnementHendelseApiUt(List<AbonnementHendelse> data) {}
+    private record AbonnementHendelseApiUt(List<AbonnementHendelse> data) {}
 
-    public record AbonnementHendelse(
+    record AbonnementHendelse(
         long sekvensnummer,
         String norskident,
         String maaned,
