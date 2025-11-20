@@ -269,7 +269,7 @@ spec:
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P14D"
-    - name: HENT_INNTEKT_HENDElSER_INTERVALl
+    - name: HENT_INNTEKT_HENDElSER_INTERVALL
       value: "PT1M"
 
     # Audit logging
