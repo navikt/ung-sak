@@ -97,18 +97,6 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         opprettNesteTask(sisteSekvensnummer + 1);
     }
 
-    private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
-        log.info("Hentet {} nye inntektshendelser", nyeInntektHendelser.size());
-
-        var unikeAktørIder = nyeInntektHendelser.stream()
-            .map(hendelse -> hendelse.aktørId())
-            .collect(Collectors.toSet());
-
-        log.info("Fant {} unike aktørIder i hendelsene", unikeAktørIder.size());
-
-        opprettOppfriskTaskerForAktører(unikeAktørIder);
-    }
-
     private boolean skalHoppeOverTask() {
         if (!hentInntektHendelserEnabled) {
             log.info("Henting av inntektshendelser er deaktivert. Hopper over task.");
@@ -123,6 +111,23 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         return false;
     }
 
+    private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
+        log.info("Hentet {} nye inntektshendelser", nyeInntektHendelser.size());
+
+        var unikeAktørIder = nyeInntektHendelser.stream()
+            .map(hendelse -> hendelse.aktørId())
+            .collect(Collectors.toSet());
+
+        log.info("Fant {} unike aktørIder i hendelsene", unikeAktørIder.size());
+
+        var oppfriskTasker = opprettOppfriskTaskerForAktører(unikeAktørIder);
+        if (oppfriskTasker.isEmpty()) {
+            log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
+            return;
+        }
+        opprettOppfriskTaskGruppe(oppfriskTasker);
+    }
+
     private long hentEllerInitialiserSekvensnummer(ProsessTaskData prosessTaskData) {
         String sekvensnummerVerdi = prosessTaskData.getPropertyValue(SEKVENSNUMMER_KEY);
 
@@ -134,30 +139,17 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         return Long.parseLong(sekvensnummerVerdi);
     }
 
-    private void opprettOppfriskTaskerForAktører(Set<AktørId> aktørIder) {
-        var oppfriskTasker = new ArrayList<ProsessTaskData>();
-
-        for (AktørId aktørId : aktørIder) {
-            fagsakTjeneste.finnFagsakerForAktør(aktørId).stream()
-                .filter(Fagsak::erÅpen)
-                .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
-                .filter(this::venterPåInntektUttalelse)
-                .forEach(behandling -> {
-                    log.info("Oppretter oppfrisk-task for behandling={} saksnummer={}", behandling.getId(), behandling.getFagsak().getSaksnummer());
-                    oppfriskTasker.add(OppfriskTask.create(behandling, true));
-                });
-
-        }
-
-        if (oppfriskTasker.isEmpty()) {
-            log.info("Ingen behandlinger funnet som skal oppfriskes");
-            return;
-        }
-
-        var gruppe = new ProsessTaskGruppe();
-        gruppe.addNesteParallell(oppfriskTasker);
-        String gruppeId = prosessTaskTjeneste.lagre(gruppe);
-        log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
+    private List<ProsessTaskData> opprettOppfriskTaskerForAktører(Set<AktørId> aktørIder) {
+        return aktørIder.stream()
+            .flatMap(aktørId -> fagsakTjeneste.finnFagsakerForAktør(aktørId).stream())
+            .filter(Fagsak::erÅpen)
+            .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
+            .filter(this::venterPåInntektUttalelse)
+            .map(behandling -> {
+                log.info("Oppretter oppfrisk-task for behandling={} saksnummer={}", behandling.getId(), behandling.getFagsak().getSaksnummer());
+                return OppfriskTask.create(behandling, true);
+            })
+            .toList();
     }
 
     private boolean venterPåInntektUttalelse(Behandling behandling) {
@@ -171,6 +163,12 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
                     && ap.getVenteårsak() == Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE);
     }
 
+    private void opprettOppfriskTaskGruppe(List<ProsessTaskData> oppfriskTasker) {
+        var gruppe = new ProsessTaskGruppe();
+        gruppe.addNesteParallell(oppfriskTasker);
+        String gruppeId = prosessTaskTjeneste.lagre(gruppe);
+        log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
+    }
 
     private void opprettNesteTask(long nesteSekvensnummer) {
         var nesteTask = ProsessTaskData.forProsessTask(HentInntektHendelserTask.class);
