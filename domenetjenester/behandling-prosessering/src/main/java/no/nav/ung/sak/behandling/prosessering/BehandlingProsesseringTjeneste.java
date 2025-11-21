@@ -24,10 +24,10 @@ public interface BehandlingProsesseringTjeneste {
     void tvingInnhentingRegisteropplysninger(Behandling behandling);
 
     /** Innhenter registerdata hvis utdatert. */
-    ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling);
+    ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean manuellFortsettelse);
 
     /** Returnerer tasks for oppdatering/fortsett for bruk med BehandlingskontrollAsynkTjeneste. Blir ikke lagret her */
-    ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent);
+    ProsessTaskGruppe lagOppdaterFortsettTasksForPolling(Behandling behandling, boolean forceInnhent, boolean manuellFortsettelse);
 
     // Til bruk for å kjøre behandlingsprosessen videre. Lagrer tasks. Returnerer gruppe-handle
     String opprettTasksForFortsettBehandling(Behandling behandling);
