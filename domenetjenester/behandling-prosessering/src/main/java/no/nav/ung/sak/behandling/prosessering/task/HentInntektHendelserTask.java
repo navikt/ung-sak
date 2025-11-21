@@ -3,7 +3,6 @@ package no.nav.ung.sak.behandling.prosessering.task;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -20,16 +19,12 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
-import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 @ProsessTask(value = HentInntektHendelserTask.TASKTYPE)
@@ -114,18 +109,16 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
         log.info("Hentet {} nye inntektshendelser", nyeInntektHendelser.size());
 
-        var relevanteHendelser = nyeInntektHendelser.stream()
-            .filter(this::harRelevantBehandling)
-            .toList();
+        var relevanteBehandlinger = finnRelevanteBehandlinger(nyeInntektHendelser);
 
-        if (relevanteHendelser.isEmpty()) {
+        if (relevanteBehandlinger.isEmpty()) {
             log.info("Ingen hendelser matchet aktive behandlinger");
             return;
         }
-        log.info("Fant {} relevante hendelser av {} totalt", relevanteHendelser.size(), nyeInntektHendelser.size());
 
-        var unikeAktørIder = unikeAktørIdFraHendelser(relevanteHendelser);
-        var oppfriskTasker = opprettOppfriskTaskerForAktører(unikeAktørIder);
+        log.info("Fant {} relevante behandlinger fra {} hendelser", relevanteBehandlinger.size(), nyeInntektHendelser.size());
+
+        var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
         if (oppfriskTasker.isEmpty()) {
             log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
             return;
@@ -133,18 +126,15 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         opprettOppfriskTaskGruppe(oppfriskTasker);
     }
 
-    private boolean harRelevantBehandling(InntektAbonnentTjeneste.InntektHendelse hendelse) {
-        return fagsakTjeneste.finnFagsakerForAktør(hendelse.aktørId()).stream()
-            .filter(Fagsak::erÅpen)
-            .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
-            .filter(this::venterPåInntektUttalelse)
-            .anyMatch(behandling -> behandling.getFagsak().getPeriode().overlapper(hendelse.periode().getFom(), hendelse.periode().getTom()));
-    }
-
-    private static Set<AktørId> unikeAktørIdFraHendelser(List<InntektAbonnentTjeneste.InntektHendelse> relevanteHendelser) {
-        return relevanteHendelser.stream()
-            .map(InntektAbonnentTjeneste.InntektHendelse::aktørId)
-            .collect(Collectors.toSet());
+    private List<Behandling> finnRelevanteBehandlinger(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
+        return nyeInntektHendelser.stream()
+            .flatMap(hendelse -> fagsakTjeneste.finnFagsakerForAktør(hendelse.aktørId()).stream()
+                .filter(Fagsak::erÅpen)
+                .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
+                .filter(this::venterPåInntektUttalelse)
+                .filter(behandling -> behandling.getFagsak().getPeriode().overlapper(hendelse.periode().getFom(), hendelse.periode().getTom())))
+            .distinct()
+            .toList();
     }
 
     private long hentEllerInitialiserSekvensnummer(ProsessTaskData prosessTaskData) {
@@ -158,12 +148,8 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         return Long.parseLong(sekvensnummerVerdi);
     }
 
-    private List<ProsessTaskData> opprettOppfriskTaskerForAktører(Set<AktørId> aktørIder) {
-        return aktørIder.stream()
-            .flatMap(aktørId -> fagsakTjeneste.finnFagsakerForAktør(aktørId).stream())
-            .filter(Fagsak::erÅpen)
-            .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
-            .filter(this::venterPåInntektUttalelse)
+    private List<ProsessTaskData> opprettOppfriskTaskerForBehandlinger(List<Behandling> behandlinger) {
+        return behandlinger.stream()
             .map(behandling -> {
                 log.info("Oppretter oppfrisk-task for behandling={} saksnummer={}", behandling.getId(), behandling.getFagsak().getSaksnummer());
                 return OppfriskTask.create(behandling, true);
