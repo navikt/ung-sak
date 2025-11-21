@@ -162,7 +162,9 @@ public class KontrollerteInntektperioderTjeneste {
                         .medKilde(s.getValue().kilde())
                         .medErManueltVurdert(false)
                         .medRegisterInntekt(rapporterteInntekter.map(it -> it.registerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
+                        .medRegisterInntektPrMnd(rapporterteInntekter.map(it -> it.registerRapporterteInntekter().stream().map(RapportertInntekt::fulltRapporteringsbeløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
                         .medRapportertInntekt(rapporterteInntekter.map(it -> it.brukerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
+                        .medRapportertInntektPrMnd(rapporterteInntekter.map(it -> it.brukerRapporterteInntekter().stream().map(RapportertInntekt::fulltRapporteringsbeløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
                         .build();
                 }
             ).toList();
@@ -183,7 +185,9 @@ public class KontrollerteInntektperioderTjeneste {
                     .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
                     .medInntekt(s.getValue().samletInntekt())
                     .medRegisterInntekt(rapporterteInntekter.map(it -> it.registerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
+                    .medRegisterInntektPrMnd(rapporterteInntekter.map(it -> it.registerRapporterteInntekter().stream().map(RapportertInntekt::fulltRapporteringsbeløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
                     .medRapportertInntekt(rapporterteInntekter.map(it -> it.brukerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
+                    .medRapportertInntektPrMnd(rapporterteInntekter.map(it -> it.brukerRapporterteInntekter().stream().map(RapportertInntekt::fulltRapporteringsbeløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
                     .medKilde(s.getValue().kilde())
                     .medErManueltVurdert(true)
                     .medBegrunnelse(s.getValue().begrunnelse())

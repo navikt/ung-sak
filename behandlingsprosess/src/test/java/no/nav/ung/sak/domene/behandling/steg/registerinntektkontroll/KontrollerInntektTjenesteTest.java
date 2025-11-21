@@ -30,7 +30,7 @@ class KontrollerInntektTjenesteTest {
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, register, bruker);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> harUttalelseTidslinje = new LocalDateTimeline<>(fom, tom,
             new EtterlysningOgRegisterinntekt(
-                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))),
+                Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register), BigDecimal.valueOf(register))),
                 new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, true)
             ));
 
@@ -100,7 +100,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
             fom, tom,
             new EtterlysningOgRegisterinntekt(
-                Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001))),
+                Set.of(new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(1001), BigDecimal.valueOf(1001))),
                 new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false)
             ));
 
@@ -122,8 +122,8 @@ class KontrollerInntektTjenesteTest {
             fom, tom,
             new EtterlysningOgRegisterinntekt(
                 Set.of(
-                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000)),
-                    new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000))
+                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000), BigDecimal.valueOf(2000)),
+                    new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000), BigDecimal.valueOf(10_000))
                 ),
                 new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false))
         );
@@ -177,7 +177,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, register, bruker);
         LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje = new LocalDateTimeline<>(fom, tom,
-            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.UTLØPT, null)));
+            new EtterlysningOgRegisterinntekt(Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register), BigDecimal.valueOf(register))), new InntektskontrollEtterlysningInfo(EtterlysningStatus.UTLØPT, null)));
 
         // Act
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
@@ -212,8 +212,8 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter = new LocalDateTimeline<>(
             List.of(
                 new LocalDateSegment<>(fom, tom, new RapporterteInntekter(Set.of(
-                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(bruker))), Set.of(
-                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))
+                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(bruker), BigDecimal.valueOf(bruker))), Set.of(
+                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register), BigDecimal.valueOf(register))
                 )))
             )
         );
@@ -225,9 +225,9 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter = new LocalDateTimeline<>(
             List.of(
                 new LocalDateSegment<>(fom, tom, new RapporterteInntekter(Set.of(
-                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(bruker))), Set.of(
-                    new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(registerYtelse)),
-                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(registerATFL))
+                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(bruker), BigDecimal.valueOf(bruker))), Set.of(
+                    new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(registerYtelse), BigDecimal.valueOf(registerYtelse)),
+                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(registerATFL), BigDecimal.valueOf(registerATFL))
                 )))
             )
         );
