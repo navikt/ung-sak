@@ -15,7 +15,10 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
@@ -39,6 +42,8 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(HentInntektHendelserTask.class);
 
     private InntektAbonnentTjeneste inntektAbonnentTjeneste;
+    private FagsakTjeneste fagsakTjeneste;
+    private BehandlingRepository behandlingRepository;
     private EntityManager entityManager;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private boolean hentInntektHendelserEnabled;
@@ -51,12 +56,16 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     @Inject
     public HentInntektHendelserTask(InntektAbonnentTjeneste inntektAbonnentTjeneste,
+                                    FagsakTjeneste fagsakTjeneste,
+                                    BehandlingRepository behandlingRepository,
                                     EntityManager entityManager,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALL", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring,
                                     @KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled){
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
+        this.fagsakTjeneste = fagsakTjeneste;
+        this.behandlingRepository = behandlingRepository;
         this.entityManager = entityManager;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
@@ -129,17 +138,15 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         var oppfriskTasker = new ArrayList<ProsessTaskData>();
 
         for (AktørId aktørId : aktørIder) {
-            var behandlinger = finnBehandlingerSomVenterPåInntektUttalelse(aktørId);
+            fagsakTjeneste.finnFagsakerForAktør(aktørId).stream()
+                .filter(Fagsak::erÅpen)
+                .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
+                .filter(this::venterPåInntektUttalelse)
+                .forEach(behandling -> {
+                    log.info("Oppretter oppfrisk-task for behandling={} saksnummer={}", behandling.getId(), behandling.getFagsak().getSaksnummer());
+                    oppfriskTasker.add(OppfriskTask.create(behandling, true));
+                });
 
-            if (behandlinger.isEmpty()) {
-                continue;
-            }
-
-            for (Behandling behandling : behandlinger) {
-                log.info("Oppretter oppfrisk-task for behandling={} saksnummer={}",
-                    behandling.getId(), behandling.getFagsak().getSaksnummer().getVerdi());
-                oppfriskTasker.add(OppfriskTask.create(behandling, true));
-            }
         }
 
         if (oppfriskTasker.isEmpty()) {
@@ -153,28 +160,17 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
     }
 
-    private List<Behandling> finnBehandlingerSomVenterPåInntektUttalelse(AktørId aktørId) {
-        TypedQuery<Behandling> query = entityManager.createQuery(
-            "SELECT DISTINCT b FROM Behandling b " +
-                "JOIN b.behandlingÅrsaker ba " +
-                "JOIN b.aksjonspunkter ap " +
-                "WHERE b.fagsak.brukerAktørId = :aktørId " +
-                "AND b.status = :status " +
-                "AND ba.behandlingÅrsakType = :behandlingArsakType " +
-                "AND ap.aksjonspunktDefinisjon = :aksjonspunktDef " +
-                "AND ap.status = :aksjonspunktStatus " +
-                "AND ap.venteårsak = :ventearsak",
-            Behandling.class);
-
-        query.setParameter("aktørId", aktørId);
-        query.setParameter("status", BehandlingStatus.UTREDES);
-        query.setParameter("behandlingArsakType", BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
-        query.setParameter("aksjonspunktDef", AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE);
-        query.setParameter("aksjonspunktStatus", AksjonspunktStatus.OPPRETTET);
-        query.setParameter("ventearsak", Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE);
-
-        return query.getResultList();
+    private boolean venterPåInntektUttalelse(Behandling behandling) {
+        return behandling.getStatus() == BehandlingStatus.UTREDES
+            && behandling.getBehandlingÅrsaker().stream()
+            .anyMatch(ba -> ba.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
+            && behandling.getAksjonspunkter().stream()
+            .anyMatch(ap ->
+                ap.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE
+                    && ap.getStatus() == AksjonspunktStatus.OPPRETTET
+                    && ap.getVenteårsak() == Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE);
     }
+
 
     private void opprettNesteTask(long nesteSekvensnummer) {
         var nesteTask = ProsessTaskData.forProsessTask(HentInntektHendelserTask.class);
