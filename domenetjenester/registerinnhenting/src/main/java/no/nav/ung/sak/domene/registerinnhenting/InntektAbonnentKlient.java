@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.registerinnhenting;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.exception.HttpStatuskodeException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
@@ -75,7 +75,10 @@ public class InntektAbonnentKlient {
             var request = new AbonnementHendelseStartApiInn(dato);
             AbonnementHendelseStartApiUt response = oidcRestClient.post(hendelseStartURI, request, AbonnementHendelseStartApiUt.class);
             return response.sekvensnummer();
-        } catch (Exception e) {
+        } catch (HttpStatuskodeException e) {
+            if(e.getHttpStatuskode() == 404) {
+                throw RestTjenesteFeil.FEIL.ingenHendelserFunnet(dato).toException();
+            }
             throw RestTjenesteFeil.FEIL.feilVedHentingAvStartsekvensnummer(dato, e).toException();
         }
     }
@@ -113,6 +116,9 @@ public class InntektAbonnentKlient {
 
         @TekniskFeil(feilkode = "UNG-947528", feilmelding = "Feil ved opprettelse av abonnement", logLevel = LogLevel.WARN)
         Feil feilVedOpprettelseAvAbonnement(Throwable t);
+
+        @TekniskFeil(feilkode = "UNG-440604", feilmelding = "Ingen hendelser funnet siden dato: %s", logLevel = LogLevel.INFO)
+        Feil ingenHendelserFunnet(LocalDate dato);
 
         @TekniskFeil(feilkode = "UNG-440600", feilmelding = "Feil ved henting av startsekvensnummer for dato: %s", logLevel = LogLevel.WARN)
         Feil feilVedHentingAvStartsekvensnummer(LocalDate dato, Throwable t);
