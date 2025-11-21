@@ -16,7 +16,9 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
+import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
@@ -29,11 +31,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
@@ -73,6 +78,7 @@ class BehandlingsoppretterTjenesteTest {
 
     private Behandling behandling;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
+    private GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder gyldigePerioderForRevurderingUtleder = mock(GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder.class);
 
 
     @BeforeEach
@@ -80,13 +86,15 @@ class BehandlingsoppretterTjenesteTest {
         opprettRevurderingsKandidat();
         behandlendeEnhetTjeneste = Mockito.mock(BehandlendeEnhetTjeneste.class);
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any())).thenReturn(new OrganisasjonsEnhet("1234", "Nav Test"));
-        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, new UnitTestLookupInstanceImpl<>(new GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder(tilkjentYtelseRepository, behandlingRepository)), behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository);
+        when(gyldigePerioderForRevurderingUtleder.utledPerioder(anyLong())).thenReturn(new ÅrsakOgPerioderDto(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, List.of()));
+        behandlingsoppretterTjeneste = new BehandlingsoppretterTjeneste(repositoryProvider, behandlendeEnhetTjeneste, new UnitTestLookupInstanceImpl<>(gyldigePerioderForRevurderingUtleder), behandlingskontrollTjeneste, klageVurderingTjeneste, personopplysningRepository, historikkinnslagRepository);
     }
 
     @Test
     void skalOppretteProsesstriggerNårPeriodeErOppgitt() {
         Fagsak fagsak = behandling.getFagsak();
         var periode = behandling.getFagsak().getPeriode();
+        when(gyldigePerioderForRevurderingUtleder.utledPerioder(anyLong())).thenReturn(new ÅrsakOgPerioderDto(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, List.of(periode.tilPeriode())));
         var revurdering = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Optional.of(periode));
         assertTrue(revurdering.erRevurdering());
 
@@ -101,7 +109,7 @@ class BehandlingsoppretterTjenesteTest {
     @Test
     void skalOppretteProsesstriggerNårPeriodeIkkeErOppgitt() {
         Fagsak fagsak = behandling.getFagsak();
-        var revurdering = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Optional.empty());
+        var revurdering = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.RE_SATS_ENDRING, Optional.empty());
         assertTrue(revurdering.erRevurdering());
 
         Optional<ProsessTriggere> prosessTriggere = prosessTriggereRepository.hentGrunnlag(revurdering.getId());
