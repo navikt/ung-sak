@@ -83,7 +83,7 @@ public class InntektAbonnentTjeneste {
             });
     }
 
-    public record InntektHendelse(Long sekvensnummer, AktørId aktørId, LocalDate hendelsesdato) {
+    public record InntektHendelse(Long sekvensnummer, AktørId aktørId, Periode periode) {
     }
 
     private List<InntektAbonnentKlient.AbonnementHendelse> hentAbonnentHendelser(long sekvensnummer) {
@@ -97,10 +97,12 @@ public class InntektAbonnentTjeneste {
         }
 
         static InntektHendelse tilDomene(InntektAbonnentKlient.AbonnementHendelse hendelse) {
+            LocalDate fom = LocalDate.parse(hendelse.maaned() + "-01");
+            LocalDate tom = fom.withDayOfMonth(fom.lengthOfMonth());
             return new InntektHendelse(
                 hendelse.sekvensnummer(),
                 new AktørId(hendelse.norskident()),
-                LocalDate.parse(hendelse.maaned() + "-01")
+                new Periode(fom, tom)
             );
         }
     }

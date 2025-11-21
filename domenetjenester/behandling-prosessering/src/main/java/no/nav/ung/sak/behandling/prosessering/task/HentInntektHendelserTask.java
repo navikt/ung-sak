@@ -114,18 +114,37 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
         log.info("Hentet {} nye inntektshendelser", nyeInntektHendelser.size());
 
-        var unikeAktørIder = nyeInntektHendelser.stream()
-            .map(hendelse -> hendelse.aktørId())
-            .collect(Collectors.toSet());
+        var relevanteHendelser = nyeInntektHendelser.stream()
+            .filter(this::harRelevantBehandling)
+            .toList();
 
-        log.info("Fant {} unike aktørIder i hendelsene", unikeAktørIder.size());
+        if (relevanteHendelser.isEmpty()) {
+            log.info("Ingen hendelser matchet aktive behandlinger");
+            return;
+        }
+        log.info("Fant {} relevante hendelser av {} totalt", relevanteHendelser.size(), nyeInntektHendelser.size());
 
+        var unikeAktørIder = unikeAktørIdFraHendelser(relevanteHendelser);
         var oppfriskTasker = opprettOppfriskTaskerForAktører(unikeAktørIder);
         if (oppfriskTasker.isEmpty()) {
             log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
             return;
         }
         opprettOppfriskTaskGruppe(oppfriskTasker);
+    }
+
+    private boolean harRelevantBehandling(InntektAbonnentTjeneste.InntektHendelse hendelse) {
+        return fagsakTjeneste.finnFagsakerForAktør(hendelse.aktørId()).stream()
+            .filter(Fagsak::erÅpen)
+            .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
+            .filter(this::venterPåInntektUttalelse)
+            .anyMatch(behandling -> behandling.getFagsak().getPeriode().overlapper(hendelse.periode().getFom(), hendelse.periode().getTom()));
+    }
+
+    private static Set<AktørId> unikeAktørIdFraHendelser(List<InntektAbonnentTjeneste.InntektHendelse> relevanteHendelser) {
+        return relevanteHendelser.stream()
+            .map(InntektAbonnentTjeneste.InntektHendelse::aktørId)
+            .collect(Collectors.toSet());
     }
 
     private long hentEllerInitialiserSekvensnummer(ProsessTaskData prosessTaskData) {
