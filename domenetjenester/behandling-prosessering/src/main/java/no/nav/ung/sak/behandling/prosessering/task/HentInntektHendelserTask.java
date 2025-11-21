@@ -44,6 +44,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private boolean hentInntektHendelserEnabled;
     private boolean oppfriskKontrollbehandlingEnabled;
     private Duration ventetidFørNesteKjøring;
+    private boolean hentInntektHendelserUtenOppfriskingEnabled;
 
     public HentInntektHendelserTask() {
         // For CDI
@@ -56,6 +57,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
                                     EntityManager entityManager,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled,
+                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_UTEN_OPPFRISKING_ENABLED", required = false, defaultVerdi = "true") boolean hentInntektHendelserUtenOppfriskingEnabled,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALL", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring,
                                     @KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled){
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
@@ -64,6 +66,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         this.entityManager = entityManager;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
+        this.hentInntektHendelserUtenOppfriskingEnabled = hentInntektHendelserUtenOppfriskingEnabled;
         this.oppfriskKontrollbehandlingEnabled = oppfriskKontrollbehandlingEnabled;
         this.ventetidFørNesteKjøring = Duration.parse(ventetidFørNesteKjøring);
     }
@@ -118,12 +121,19 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
         log.info("Fant {} relevante behandlinger fra {} hendelser", relevanteBehandlinger.size(), nyeInntektHendelser.size());
 
-        var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
-        if (oppfriskTasker.isEmpty()) {
-            log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
-            return;
+
+        if (!hentInntektHendelserUtenOppfriskingEnabled) {
+            var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
+            if (oppfriskTasker.isEmpty()) {
+                log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
+                return;
+            }
+            opprettOppfriskTaskGruppe(oppfriskTasker);
+        } else {
+            for (Behandling behandling : relevanteBehandlinger) {
+                log.info("Mottatt inntektshendelse for behandling={} saksnummer={} men oppfrisking er deaktivert", behandling.getId(), behandling.getFagsak().getSaksnummer());
+            }
         }
-        opprettOppfriskTaskGruppe(oppfriskTasker);
     }
 
     private List<Behandling> finnRelevanteBehandlinger(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
