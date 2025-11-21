@@ -67,27 +67,28 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        if (!hentInntektHendelserEnabled) {
-            log.info("Henting av inntektshendelser er deaktivert. Hopper over task.");
+
+        if (skalHoppeOverTask()) {
             return;
         }
 
-        if (oppfriskKontrollbehandlingEnabled) {
-            log.info("Oppfrisk Task av kontrollbehandlinger er aktivert. Hopper over task for henting av inntektshendelser.");
-            return;
-        }
+        long fraSekvensnummer = hentEllerInitialiserSekvensnummer(prosessTaskData);
+        log.info("Starter henting av inntektshendelser fra sekvensnummer={}", fraSekvensnummer);
 
-        long sekvensnummer = hentEllerInitialiserSekvensnummer(prosessTaskData);
-        log.info("Starter henting av inntektshendelser fra sekvensnummer={}", sekvensnummer);
-
-        var nyeInntektHendelser = inntektAbonnentTjeneste.hentNyeInntektHendelser(sekvensnummer).toList();
-
+        var nyeInntektHendelser = inntektAbonnentTjeneste.hentNyeInntektHendelser(fraSekvensnummer).toList();
         if (nyeInntektHendelser.isEmpty()) {
             log.info("Ingen nye inntektshendelser funnet");
-            opprettNesteTask(sekvensnummer + 1);
+            opprettNesteTask(fraSekvensnummer);
             return;
         }
 
+        behandleHendelser(nyeInntektHendelser);
+
+        var sisteSekvensnummer = nyeInntektHendelser.get(nyeInntektHendelser.size() - 1).sekvensnummer();
+        opprettNesteTask(sisteSekvensnummer + 1);
+    }
+
+    private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
         log.info("Hentet {} nye inntektshendelser", nyeInntektHendelser.size());
 
         var unikeAktørIder = nyeInntektHendelser.stream()
@@ -97,15 +98,26 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         log.info("Fant {} unike aktørIder i hendelsene", unikeAktørIder.size());
 
         opprettOppfriskTaskerForAktører(unikeAktørIder);
+    }
 
-        var sisteSekvensnummer = nyeInntektHendelser.get(nyeInntektHendelser.size() - 1).sekvensnummer();
-        opprettNesteTask(sisteSekvensnummer + 1);
+    private boolean skalHoppeOverTask() {
+        if (!hentInntektHendelserEnabled) {
+            log.info("Henting av inntektshendelser er deaktivert. Hopper over task.");
+            return true;
+        }
+
+        if (oppfriskKontrollbehandlingEnabled) {
+            log.info("Oppfrisk Task av kontrollbehandlinger er aktivert. Hopper over task for henting av inntektshendelser.");
+            return true;
+        }
+
+        return false;
     }
 
     private long hentEllerInitialiserSekvensnummer(ProsessTaskData prosessTaskData) {
         String sekvensnummerVerdi = prosessTaskData.getPropertyValue(SEKVENSNUMMER_KEY);
 
-        if (sekvensnummerVerdi == null || sekvensnummerVerdi.equals("-1")) {
+        if (sekvensnummerVerdi == null) {
             log.info("Første kjøring av task for henting av inntektshendelser. Henter første sekvensnummer fra inntektskomponenten.");
             return inntektAbonnentTjeneste.hentFørsteSekvensnummer();
         }
