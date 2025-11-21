@@ -6883,6 +6883,30 @@
         "tags" : [ "fagsak" ]
       }
     },
+    "/api/fagsak/fjern-ikkedigital-flagg" : {
+      "post" : {
+        "description" : "Setter en ikke-digital bruker til å være digital",
+        "operationId" : "fjernIkkedigitalFlagg",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Setter en ikke-digital bruker til å være digital",
+        "tags" : [ "fagsak" ]
+      }
+    },
     "/api/fagsak/hendelse/innsending" : {
       "post" : {
         "description" : "Mottak av dokument.",
