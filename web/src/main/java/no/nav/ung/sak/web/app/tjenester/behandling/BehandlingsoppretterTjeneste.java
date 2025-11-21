@@ -182,6 +182,7 @@ public class BehandlingsoppretterTjeneste {
     private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
         var gyldigePerioderForRevurderingPrÅrsak = finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
         boolean skalSjekkeGyldighetAvPeriode = gyldigePerioderForRevurderingPrÅrsak.stream().anyMatch(dto -> dto.årsak() == behandlingÅrsakType);
+        //Dersom det ikke er utledet gyldige perioder for årsak så aksepteres alle perioder, også ingen periode.
         if (!skalSjekkeGyldighetAvPeriode) {
             return true;
         }
