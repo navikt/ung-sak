@@ -356,15 +356,6 @@ public class BehandlingRestTjeneste {
         Fagsak fagsak = funnetFagsak.get();
         if (BehandlingType.REVURDERING.getKode().equals(behandlingType.getKode())) {
             BehandlingÅrsakType behandlingÅrsakType = BehandlingÅrsakType.fraKode(dto.getBehandlingArsakType().getKode());
-
-//            if (behandlingÅrsakType == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT) {
-//                if (dto.getPeriode() == null) {
-//                    throw new UnsupportedOperationException("Ikke implementert støtte for å opprette revurdering for inntektskontroll uten definert periode");
-//                }
-//                if (dto.getPeriode().getTom().isAfter(LocalDate.now())){
-//                    throw new IllegalArgumentException("Kan ikke opprette revurdering av inntektskontroll for periode som helt eller delivs er i fremtiden");
-//                }
-//            }
             Behandling behandling = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, behandlingÅrsakType, dto.getPeriode() == null ? Optional.empty() : Optional.of(DatoIntervallEntitet.fra(dto.getPeriode())));
             String gruppe = behandlingsprosessTjeneste.asynkStartBehandlingsprosess(behandling);
             return Redirect.tilBehandlingPollStatus(request, behandling.getUuid(), Optional.of(gruppe));

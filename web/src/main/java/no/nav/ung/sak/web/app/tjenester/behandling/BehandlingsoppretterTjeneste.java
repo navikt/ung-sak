@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
@@ -26,13 +25,15 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
+import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.typer.Saksnummer;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static no.nav.k9.felles.feil.LogLevel.INFO;
 
@@ -84,15 +85,8 @@ public class BehandlingsoppretterTjeneste {
         if (!kanRevurderingOpprettes) {
             throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
-
-        var gyldigePerioderForRevurdering = finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
-        boolean skalSjekkeGyldighetAvPeriode = gyldigePerioderForRevurdering.stream().anyMatch(dto -> dto.årsak() == behandlingÅrsakType);
-        var periodenErVurdert = gyldigePerioderForRevurdering.stream().filter(
-            dto -> dto.årsak() == behandlingÅrsakType)
-            .anyMatch(dto -> dto.perioder().stream().anyMatch(p -> DatoIntervallEntitet.fra(p).equals(periode.get())));
-
-        if (skalSjekkeGyldighetAvPeriode && !periodenErVurdert){
-            throw new UnsupportedOperationException("Perioden er ikke revurdert");
+        if (!periodeKanRevurderesForÅrsak(fagsak, behandlingÅrsakType, periode)) {
+            throw new IllegalArgumentException("Perioden er ikke tidligere kontrollert");
         }
 
         var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsak.getId())
@@ -127,7 +121,7 @@ public class BehandlingsoppretterTjeneste {
                 }
                 beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
                 beh.setBehandlendeEnhet(enhet);
-        });
+            });
     }
 
     public boolean kanOppretteNyBehandlingAvType(Long fagsakId, BehandlingType type) {
@@ -184,4 +178,20 @@ public class BehandlingsoppretterTjeneste {
 
         historikkinnslagRepository.lagre(historikkBuilder.build());
     }
+
+    private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
+        var gyldigePerioderForRevurderingPrÅrsak = finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
+        boolean skalSjekkeGyldighetAvPeriode = gyldigePerioderForRevurderingPrÅrsak.stream().anyMatch(dto -> dto.årsak() == behandlingÅrsakType);
+        if (!skalSjekkeGyldighetAvPeriode) {
+            return true;
+        }
+        if (periode.isEmpty()) {
+            return false;
+        }
+        return gyldigePerioderForRevurderingPrÅrsak.stream().filter(
+                dto -> dto.årsak() == behandlingÅrsakType).flatMap(dto -> dto.perioder().stream())
+            .map(DatoIntervallEntitet::fra)
+            .anyMatch(periode.get()::equals);
+    }
+
 }
