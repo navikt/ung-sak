@@ -3,6 +3,11 @@ package no.nav.ung.sak.domene.registerinnhenting;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.exception.TekniskException;
+import no.nav.k9.felles.feil.Feil;
+import no.nav.k9.felles.feil.FeilFactory;
+import no.nav.k9.felles.feil.LogLevel;
+import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -61,7 +66,7 @@ public class InntektAbonnentKlient {
 
             return abonnement;
         } catch (Exception e) {
-            throw new TekniskException("UNG-947528", "Feil ved opprettelse av abonnement", e);
+            throw RestTjenesteFeil.FEIL.feilVedOpprettelseAvAbonnement(e).toException();
         }
     }
 
@@ -71,7 +76,7 @@ public class InntektAbonnentKlient {
             AbonnementHendelseStartApiUt response = oidcRestClient.post(hendelseStartURI, request, AbonnementHendelseStartApiUt.class);
             return response.sekvensnummer();
         } catch (Exception e) {
-            throw new TekniskException("UNG-440600", "Feil ved henting av startsekvensnummer", e);
+            throw RestTjenesteFeil.FEIL.feilVedHentingAvStartsekvensnummer(dato, e).toException();
         }
     }
 
@@ -81,9 +86,8 @@ public class InntektAbonnentKlient {
             AbonnementHendelseApiUt response = oidcRestClient.post(hendelseURI, request, AbonnementHendelseApiUt.class);
             return response.data();
         } catch (Exception e) {
-            throw new TekniskException("UNG-769025", "Feil ved henting av nye hendelser", e);
+            throw RestTjenesteFeil.FEIL.feilVedHentingAvHendelser(fraSekvensnummer, e).toException();
         }
-
     }
 
     public void avsluttAbonnement(long abonnementId) {
@@ -92,7 +96,7 @@ public class InntektAbonnentKlient {
             oidcRestClient.delete(uri);
             log.info("Avslutter abonnement med id {}", abonnementId);
         } catch (Exception e) {
-            throw new TekniskException("UNG-328650", "Feil ved avslutning av abonnement", e);
+            throw RestTjenesteFeil.FEIL.feilVedAvsluttingAvAbonnement(abonnementId, e).toException();
         }
     }
 
@@ -102,6 +106,22 @@ public class InntektAbonnentKlient {
         } catch (URISyntaxException e) {
             throw new IllegalArgumentException("Ugyldig konfigurasjon for inntektskomponenten.url", e);
         }
+    }
+
+    interface RestTjenesteFeil extends DeklarerteFeil {
+        RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
+
+        @TekniskFeil(feilkode = "UNG-947528", feilmelding = "Feil ved opprettelse av abonnement", logLevel = LogLevel.WARN)
+        Feil feilVedOpprettelseAvAbonnement(Throwable t);
+
+        @TekniskFeil(feilkode = "UNG-440600", feilmelding = "Feil ved henting av startsekvensnummer for dato: %s", logLevel = LogLevel.WARN)
+        Feil feilVedHentingAvStartsekvensnummer(LocalDate dato, Throwable t);
+
+        @TekniskFeil(feilkode = "UNG-769025", feilmelding = "Feil ved henting av hendelser fra sekvensnummer: %s", logLevel = LogLevel.WARN)
+        Feil feilVedHentingAvHendelser(long fraSekvensnummer, Throwable t);
+
+        @TekniskFeil(feilkode = "UNG-328650", feilmelding = "Feil ved avslutning av abonnement: %s", logLevel = LogLevel.WARN)
+        Feil feilVedAvsluttingAvAbonnement(long abonnementId, Throwable t);
     }
 
     private record OpprettAbonnementRequest(
