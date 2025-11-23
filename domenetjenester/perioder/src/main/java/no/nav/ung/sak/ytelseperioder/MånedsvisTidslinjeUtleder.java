@@ -37,6 +37,9 @@ public class MånedsvisTidslinjeUtleder {
         final var fagsakPeriode = fagsak.getPeriode();
         LocalDateTimeline<Boolean> programOgFagsakTidslinje = ungdomsprogramperioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
             .compress();
+        if (programOgFagsakTidslinje.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
         return programOgFagsakTidslinje
             .splitAtRegular(ungdomsprogramperioder.getMinLocalDate().withDayOfMonth(1), fagsakPeriode.getTomDato(), Period.ofMonths(1))
             .map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonthValue()))));
