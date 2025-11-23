@@ -51,15 +51,15 @@ public class EtterlysningTjeneste {
      *
      * @param behandlingId Behandling ID
      * @param fagsakId     Fagsak ID
-     * @param type         Type av etterlysning
+     * @param typer         Type av etterlysning
      * @return Liste med gjeldende etterlysninger
      */
     public List<EtterlysningData> hentGjeldendeEtterlysninger(
         Long behandlingId,
         Long fagsakId,
-        EtterlysningType type) {
-        final var etterlysninger = etterlysningOgUttalelseTjeneste.hentEtterlysningerOgUttalelser(behandlingId, type).stream().filter(it -> !it.status().equals(EtterlysningStatus.AVBRUTT) && !it.status().equals(EtterlysningStatus.SKAL_AVBRYTES)).toList();
-        log.info("Fant {} etterlysninger for behandlingId={} og fagsakId={} av type {}", etterlysninger.size(), behandlingId, fagsakId, type);
+        EtterlysningType... typer) {
+        final var etterlysninger = etterlysningOgUttalelseTjeneste.hentEtterlysningerOgUttalelser(behandlingId, typer).stream().filter(it -> !it.status().equals(EtterlysningStatus.AVBRUTT) && !it.status().equals(EtterlysningStatus.SKAL_AVBRYTES)).toList();
+        log.info("Fant {} etterlysninger for behandlingId={} og fagsakId={} av type {}", etterlysninger.size(), behandlingId, fagsakId, typer);
         final var journalpostIder = etterlysninger.stream().filter(it -> it.uttalelseData() != null).map(it -> it.uttalelseData().svarJournalpostId()).collect(Collectors.toSet());
         final var mottattDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder);
 
