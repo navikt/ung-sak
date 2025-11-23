@@ -108,6 +108,7 @@ public class HistorikkinnslagTjeneste {
             case ENDRET_INNTEKT -> "Svar på varsel: Avvik i registerinntekt";
             case ENDRET_STARTDATO -> "Svar på varsel: Endret startdato";
             case ENDRET_SLUTTDATO -> "Svar på varsel: Endret sluttdato";
+            case FJERNET_PERIODE ->  "Svar på varsel: Fjernet periode";
         };
     }
 

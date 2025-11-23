@@ -56,6 +56,8 @@ public class OpprettOppgaveTjeneste {
                 endretStartdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
             case UTTALELSE_ENDRET_SLUTTDATO ->
                 endretSluttdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
+            case UTTALELSE_FJERNET_PERIODE ->
+                endretSluttdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
             default ->
                 throw new IllegalArgumentException("Har ikke implementert oppretting av oppgave for etterlysningstype: " + etterlysningType);
         }

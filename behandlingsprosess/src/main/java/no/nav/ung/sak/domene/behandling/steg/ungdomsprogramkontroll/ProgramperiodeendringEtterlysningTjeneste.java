@@ -23,6 +23,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -59,13 +61,32 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     public void opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse behandlingReferanse) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
         var initiellPeriodegrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell programperiodegrunnlag for behandling " + behandlingReferanse.getBehandlingId()));
-        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
-        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
+        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag, List.of(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO));
+        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag, List.of(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO));
+        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_FJERNET_PERIODE, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag, List.of(
+            EtterlysningType.UTTALELSE_FJERNET_PERIODE,
+            EtterlysningType.UTTALELSE_ENDRET_STARTDATO,
+            EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO
+        ));
         opprettTaskerForOpprettelseAvEtterlysning(behandlingReferanse);
     }
 
-    private void opprettEtterlysningDersomRelevantEndringForType(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType, UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag) {
-        var gjeldendeEtterlysning = finnGjeldendeEtterlysning(behandlingReferanse, etterlysningType);
+    /** Oppretter etterlysning og eventuelt avbryter avhengige etterlysninger dersom det er relevant endring.
+     *
+     * @param behandlingReferanse Behandlingreferanse
+     * @param etterlysningType Etterlysningstype som skal vurderes
+     * @param ungdomsprogramPeriodeGrunnlag Aktivt grunnlag
+     * @param initiellPeriodegrunnlag Grunnlag fra original behandling
+     * @param avhengigeEtterlysningTyper Etterlysningstyper som potensielt skal avbrytes dersom det er endring siden siste etterlysning
+     */
+    private void opprettEtterlysningDersomRelevantEndringForType(BehandlingReferanse behandlingReferanse,
+                                                                 EtterlysningType etterlysningType,
+                                                                 UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag,
+                                                                 UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag,
+                                                                 List<EtterlysningType> avhengigeEtterlysningTyper) {
+
+        var gjeldendeEtterlysning = finnGjeldendeEtterlysning(behandlingReferanse, avhengigeEtterlysningTyper.toArray(new EtterlysningType[0]));
+
 
         var input = new EndretUngdomsprogramEtterlysningInput(
             etterlysningType,
@@ -97,10 +118,10 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         }
     }
 
-    private Optional<EtterlysningData> finnGjeldendeEtterlysning(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType) {
-        var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), etterlysningType);
+    private Optional<EtterlysningData> finnGjeldendeEtterlysning(BehandlingReferanse behandlingReferanse, EtterlysningType... etterlysningTyper) {
+        var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), etterlysningTyper);
         if (gjeldendeEtterlysninger.size() > 1) {
-            throw new IllegalStateException("Forventet å finne maksimalt en etterlysning for type " + etterlysningType + " , fant " + gjeldendeEtterlysninger.size());
+            throw new IllegalStateException("Forventet å finne maksimalt en etterlysning for type " + Arrays.toString(etterlysningTyper) + " , fant " + gjeldendeEtterlysninger.size());
         }
         return gjeldendeEtterlysninger.isEmpty() ? Optional.empty() : Optional.of(gjeldendeEtterlysninger.get(0));
     }
@@ -114,7 +135,10 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             logger.info("Avbryter etterlysning {}", etterlysningerSomSkalAvbrytes);
             prosessTaskGruppe.addNesteSekvensiell(lagTaskForAvbrytelseAvEtterlysning(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId()));
         }
-        var etterlysningerSomSkalOpprettes = etterlysningRepository.hentOpprettetEtterlysninger(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
+        var etterlysningerSomSkalOpprettes = etterlysningRepository.hentOpprettetEtterlysninger(behandlingReferanse.getBehandlingId(),
+            EtterlysningType.UTTALELSE_ENDRET_STARTDATO,
+            EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO,
+            EtterlysningType.UTTALELSE_FJERNET_PERIODE);
 
         if (!etterlysningerSomSkalOpprettes.isEmpty()) {
             logger.info("Oppretter etterlysning {}", etterlysningerSomSkalOpprettes);
