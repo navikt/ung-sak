@@ -74,8 +74,9 @@ class VurderKompletthetStegImplTest {
             mock(ProgramperiodeendringEtterlysningTjeneste.class),
             mock(InntektAbonnentTjeneste.class),
             rapporteringsfristAutopunktUtleder,
-            "P14D");
-
+            "P14D",
+            false
+        );
     }
 
     @Test
