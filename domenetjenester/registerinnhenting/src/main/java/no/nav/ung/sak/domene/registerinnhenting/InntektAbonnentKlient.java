@@ -7,6 +7,7 @@ import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
+import no.nav.k9.felles.feil.deklarasjon.IntegrasjonFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
@@ -48,15 +50,15 @@ public class InntektAbonnentKlient {
     }
 
     public long opprettAbonnement(PersonIdent personIdent, String formaal, List<String> filter,
-                                               YearMonth fomMaanedObservasjon, YearMonth tomMaanedObservasjon,
+                                               YearMonth fomMånedObservasjon, YearMonth tomMånedObservasjon,
                                                LocalDate sisteBruksdag, int bevaringstid) {
         try {
             var request = new AbonnementAdministrasjonOpprettApiInn(
                 personIdent.getIdent(),
                 formaal,
                 filter,
-                fomMaanedObservasjon,
-                tomMaanedObservasjon,
+                fomMånedObservasjon,
+                tomMånedObservasjon,
                 sisteBruksdag,
                 bevaringstid
             );
@@ -65,7 +67,7 @@ public class InntektAbonnentKlient {
             log.info("Opprettet abonnementId: {}", response.abonnementId());
             return response.abonnementId();
         } catch (Exception e) {
-            throw RestTjenesteFeil.FEIL.feilVedOpprettelseAvAbonnement(e).toException();
+            throw InntektAbonnentKlientFeil.FEIL.feilVedOpprettelseAvAbonnement(e).toException();
         }
     }
 
@@ -78,7 +80,7 @@ public class InntektAbonnentKlient {
             if(e.getHttpStatuskode() == 404) {
                 return Optional.empty();
             }
-            throw RestTjenesteFeil.FEIL.feilVedHentingAvStartsekvensnummer(dato, e).toException();
+            throw InntektAbonnentKlientFeil.FEIL.feilVedHentingAvStartsekvensnummer(dato, e).toException();
         }
     }
 
@@ -88,7 +90,7 @@ public class InntektAbonnentKlient {
             AbonnementHendelseApiUt response = oidcRestClient.post(hendelseURI, request, AbonnementHendelseApiUt.class);
             return response.data();
         } catch (Exception e) {
-            throw RestTjenesteFeil.FEIL.feilVedHentingAvHendelser(fraSekvensnummer, e).toException();
+            throw InntektAbonnentKlientFeil.FEIL.feilVedHentingAvHendelser(fraSekvensnummer, e).toException();
         }
     }
 
@@ -98,7 +100,7 @@ public class InntektAbonnentKlient {
             oidcRestClient.post(avsluttAbonnementURI, request, AbonnementAdministrasjonOpphoerApiUt.class);
             log.info("Avslutter abonnement med id {}", abonnementId);
         } catch (Exception e) {
-            throw RestTjenesteFeil.FEIL.feilVedAvsluttingAvAbonnement(abonnementId, e).toException();
+            throw InntektAbonnentKlientFeil.FEIL.feilVedAvsluttingAvAbonnement(abonnementId, e).toException();
         }
     }
 
@@ -110,22 +112,19 @@ public class InntektAbonnentKlient {
         }
     }
 
-    interface RestTjenesteFeil extends DeklarerteFeil {
-        RestTjenesteFeil FEIL = FeilFactory.create(RestTjenesteFeil.class);
+    interface InntektAbonnentKlientFeil extends DeklarerteFeil {
+        InntektAbonnentKlientFeil FEIL = FeilFactory.create(InntektAbonnentKlientFeil.class);
 
-        @TekniskFeil(feilkode = "UNG-947528", feilmelding = "Feil ved opprettelse av abonnement", logLevel = LogLevel.WARN)
+        @IntegrasjonFeil(feilkode = "UNG-947528", feilmelding = "Feil ved opprettelse av abonnement", logLevel = LogLevel.WARN)
         Feil feilVedOpprettelseAvAbonnement(Throwable t);
 
-        @TekniskFeil(feilkode = "UNG-440604", feilmelding = "Ingen hendelser funnet siden dato: %s", logLevel = LogLevel.INFO)
-        Feil ingenHendelserFunnet(LocalDate dato);
-
-        @TekniskFeil(feilkode = "UNG-440600", feilmelding = "Feil ved henting av startsekvensnummer for dato: %s", logLevel = LogLevel.WARN)
+        @IntegrasjonFeil(feilkode = "UNG-440600", feilmelding = "Feil ved henting av startsekvensnummer for dato: %s", logLevel = LogLevel.WARN)
         Feil feilVedHentingAvStartsekvensnummer(LocalDate dato, Throwable t);
 
-        @TekniskFeil(feilkode = "UNG-769025", feilmelding = "Feil ved henting av hendelser fra sekvensnummer: %s", logLevel = LogLevel.WARN)
+        @IntegrasjonFeil(feilkode = "UNG-769025", feilmelding = "Feil ved henting av hendelser fra sekvensnummer: %s", logLevel = LogLevel.WARN)
         Feil feilVedHentingAvHendelser(long fraSekvensnummer, Throwable t);
 
-        @TekniskFeil(feilkode = "UNG-328650", feilmelding = "Feil ved avslutning av abonnement: %s", logLevel = LogLevel.WARN)
+        @IntegrasjonFeil(feilkode = "UNG-328650", feilmelding = "Feil ved avslutning av abonnement: %s", logLevel = LogLevel.WARN)
         Feil feilVedAvsluttingAvAbonnement(long abonnementId, Throwable t);
     }
 
@@ -161,8 +160,8 @@ public class InntektAbonnentKlient {
     record AbonnementHendelse(
         long sekvensnummer,
         String norskident,
-        String maaned,
-        String behandlet,
+        YearMonth maaned,
+        LocalDateTime behandlet,
         List<String> filter
     ) {}
 }
