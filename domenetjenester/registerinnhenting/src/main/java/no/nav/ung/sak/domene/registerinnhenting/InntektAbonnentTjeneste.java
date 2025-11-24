@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
@@ -40,7 +39,7 @@ public class InntektAbonnentTjeneste {
         this.fagsakTjeneste = fagsakTjeneste;
     }
 
-    public InntektAbonnement opprettAbonnement(AktørId aktørId, Periode periode) {
+    public void opprettAbonnement(AktørId aktørId, Periode periode) {
         var tomFagsakPeriode = fagsakTjeneste.finnFagsakerForAktør(aktørId).stream()
             .filter(Fagsak::erÅpen)
             .map(fagsak -> fagsak.getPeriode().getTomDato())
@@ -57,7 +56,6 @@ public class InntektAbonnentTjeneste {
         );
         inntektAbonnementRepository.lagre(inntektAbonnement);
 
-        return inntektAbonnement;
     }
 
     public Optional<Long> hentFørsteSekvensnummer() {
