@@ -23,7 +23,7 @@ create sequence seq_inntekt_abonnement increment by 50 minvalue 1000000;
 
 comment on table inntekt_abonnement is 'Kobling mellom abonnement-ID og aktør-ID for abonnementer i inntektskomponenten.';
 comment on column inntekt_abonnement.abonnement_id is 'Unik abonnement identifikator for spørring mot inntekskomponenten';
-comment on column inntekt_abonnement.aktoer_id is 'Aktør-ID som eier abonnementet';
+comment on column inntekt_abonnement.aktoer_id is 'AktørId for personen hvis abonnering på inntektshendelser i ung-sak er påskrudd';
 comment on column inntekt_abonnement.periode is 'Periode for abonnementet';
 comment on column inntekt_abonnement.siste_bruksdag is 'Siste bruksdato for abonnementet';
 
