@@ -150,7 +150,12 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     }
 
     private boolean venterPåInntektUttalelse(Behandling behandling) {
-        return
+        return behandling.getAksjonspunkter().stream()
+            .anyMatch(ap ->
+                ap.getAksjonspunktDefinisjon() ==
+                AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE
+                    && ap.getStatus() == AksjonspunktStatus.OPPRETTET
+                    && ap.getVenteårsak() == Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE);
 
 
         return behandling.getStatus() == BehandlingStatus.UTREDES
