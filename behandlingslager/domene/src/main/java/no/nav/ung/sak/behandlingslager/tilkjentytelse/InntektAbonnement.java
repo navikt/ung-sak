@@ -61,11 +61,4 @@ public class InntektAbonnement extends BaseEntitet {
     public void setAktiv(boolean aktiv) {
         this.aktiv = aktiv;
     }
-    public long getVersjon() {
-        return versjon;
-    }
-
-    public void setVersjon(long versjon) {
-        this.versjon = versjon;
-    }
 }
