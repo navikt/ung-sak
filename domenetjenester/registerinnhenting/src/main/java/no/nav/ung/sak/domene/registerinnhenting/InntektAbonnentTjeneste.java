@@ -71,15 +71,12 @@ public class InntektAbonnentTjeneste {
         return  inntektAbonnentKlient.hentStartSekvensnummer(LocalDate.now());
     }
 
-    public Stream<InntektHendelse> hentNyeInntektHendelser(long startSekvensnummer) {
+    public List<InntektHendelse> hentNyeInntektHendelser(long startSekvensnummer) {
         log.info("Henter inntektshendelser fra sekvensnummer={}", startSekvensnummer);
 
-        return Stream.iterate(
-                hentAbonnentHendelser(startSekvensnummer),
-                abonnentHendelser -> !abonnentHendelser.isEmpty(),
-                abonnentHendelser -> hentAbonnentHendelser(abonnentHendelser.getLast().sekvensnummer() + 1)
-            )
-            .flatMap(InntektHendelseMapper::tilDomeneListe);
+        return inntektAbonnentKlient.hentAbonnentHendelser(startSekvensnummer, List.of(UNG_INNTEKT_FILTER)).stream()
+            .map(InntektHendelseMapper::tilDomene)
+            .toList();
     }
 
     public void avsluttAbonnentHvisFinnes(AktørId aktørId) {
@@ -100,9 +97,10 @@ public class InntektAbonnentTjeneste {
 
 
     private static class InntektHendelseMapper {
-        static Stream<InntektHendelse> tilDomeneListe(List<InntektAbonnentKlient.AbonnementHendelse> hendelser) {
+        static List<InntektHendelse> tilDomeneListe(List<InntektAbonnentKlient.AbonnementHendelse> hendelser) {
             return hendelser.stream()
-                .map(InntektHendelseMapper::tilDomene);
+                .map(InntektHendelseMapper::tilDomene)
+                .toList();
         }
 
         static InntektHendelse tilDomene(InntektAbonnentKlient.AbonnementHendelse hendelse) {

@@ -76,7 +76,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
         log.info("Starter henting av inntektshendelser fra sekvensnummer={}", fraSekvensnummer);
 
-        var nyeInntektHendelser = inntektAbonnentTjeneste.hentNyeInntektHendelser(fraSekvensnummer.get()).toList();
+        var nyeInntektHendelser = inntektAbonnentTjeneste.hentNyeInntektHendelser(fraSekvensnummer.get());
         if (nyeInntektHendelser.isEmpty()) {
             log.info("Ingen nye inntektshendelser funnet");
             opprettNesteTask(fraSekvensnummer.get());
