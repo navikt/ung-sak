@@ -12,10 +12,10 @@ import no.nav.ung.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonTypeName(Hendelse.UNGDOMSPROGRAM_FJERN_DELTAKELSE)
+@JsonTypeName(Hendelse.UNGDOMSPROGRAM_FJERN_PERIODE)
 public class UngdomsprogramFjernDeltakelseHendelse implements Hendelse {
 
-    private static final HendelseType HENDELSETYPE_FJERN = HendelseType.UNGDOMSPROGRAM_FJERN_DELTAKELSE;
+    private static final HendelseType HENDELSETYPE_FJERN = HendelseType.UNGDOMSPROGRAM_FJERN_PERIODE;
 
     @JsonProperty(value = "hendelseInfo", required = true)
     @NotNull

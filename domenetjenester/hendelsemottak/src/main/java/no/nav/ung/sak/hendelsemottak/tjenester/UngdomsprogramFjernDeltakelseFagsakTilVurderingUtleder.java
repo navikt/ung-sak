@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
-@HendelseTypeRef("UNGDOMSPROGRAM_FJERN_DELTAKELSE")
+@HendelseTypeRef("UNGDOMSPROGRAM_FJERN_PERIODE")
 public class UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
     private static final Logger logger = LoggerFactory.getLogger(UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder.class);
@@ -58,7 +58,7 @@ public class UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder implements F
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), fjernetPeriode, hendelseId)) {
                 fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(
-                    BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+                    BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM,
                     DatoIntervallEntitet.fra(fjernetPeriode)))
                 );
             }
@@ -78,14 +78,14 @@ public class UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder implements F
         }
 
         Behandling behandling = behandlingOpt.get();
-        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FJERN_DELTAKELSE_UNGDOMSPROGRAM)) {
+        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM)) {
 
             final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
-            final var harFjernetPeriode = ungdomsprogramPeriodeGrunnlag.stream()
+            final var fjernetPeriodeFinnesIGrunnlag = ungdomsprogramPeriodeGrunnlag.stream()
                 .flatMap(it -> it.getUngdomsprogramPerioder().getPerioder().stream())
-                .anyMatch(it -> it.getPeriode().equals(DatoIntervallEntitet.fra(fjernetPeriode)));
+                .anyMatch(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fra(fjernetPeriode)));
 
-            if (harFjernetPeriode) {
+            if (fjernetPeriodeFinnesIGrunnlag) {
                 logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert. Ignorer hendelse " + hendelseId);
                 return false;
             }
