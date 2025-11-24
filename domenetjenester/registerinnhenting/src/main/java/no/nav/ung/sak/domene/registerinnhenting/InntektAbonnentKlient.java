@@ -11,8 +11,6 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +29,7 @@ public class InntektAbonnentKlient {
     private static final Logger log = LoggerFactory.getLogger(InntektAbonnentKlient.class);
     public static final int INNTEKT_HENDELSE_LIMIT = 100;
 
-    private OidcRestClient oidcRestClient;
+    private final OidcRestClient oidcRestClient;
     private final URI opprettAbonnementURI;
     private final URI avsluttAbonnementURI;
     private final URI hendelseStartURI;
