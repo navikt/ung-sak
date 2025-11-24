@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-@ApplicationScoped
+@Dependent
 public class InntektAbonnentTjeneste {
 
     private static final String UNG_INNTEKT_FORMAAL = "Ung";
