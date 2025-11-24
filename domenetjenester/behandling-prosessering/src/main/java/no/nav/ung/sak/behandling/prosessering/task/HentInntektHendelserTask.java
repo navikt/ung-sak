@@ -99,7 +99,6 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
         if (relevanteBehandlinger.isEmpty()) {
             log.info("Ingen hendelser matchet aktive behandlinger");
-            return;
         }
 
         log.info("Fant {} relevante behandlinger fra {} hendelser", relevanteBehandlinger.size(), nyeInntektHendelser.size());
@@ -109,9 +108,9 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
             var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
             if (oppfriskTasker.isEmpty()) {
                 log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
-                return;
+            } else {
+                opprettOppfriskTaskGruppe(oppfriskTasker);
             }
-            opprettOppfriskTaskGruppe(oppfriskTasker);
         } else {
             for (Behandling behandling : relevanteBehandlinger) {
                 log.info("Mottatt inntektshendelse for behandling={} saksnummer={} men oppfrisking er deaktivert", behandling.getId(), behandling.getFagsak().getSaksnummer());
@@ -151,6 +150,9 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     }
 
     private boolean venterPåInntektUttalelse(Behandling behandling) {
+        return
+
+
         return behandling.getStatus() == BehandlingStatus.UTREDES
             && behandling.getBehandlingÅrsaker().stream()
             .anyMatch(ba -> ba.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
