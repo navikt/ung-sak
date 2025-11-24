@@ -83,7 +83,7 @@ public class UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder implements F
             final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
             final var fjernetPeriodeFinnesIGrunnlag = ungdomsprogramPeriodeGrunnlag.stream()
                 .flatMap(it -> it.getUngdomsprogramPerioder().getPerioder().stream())
-                .anyMatch(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fra(fjernetPeriode)));
+                .noneMatch(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fra(fjernetPeriode)));
 
             if (fjernetPeriodeFinnesIGrunnlag) {
                 logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert. Ignorer hendelse " + hendelseId);
