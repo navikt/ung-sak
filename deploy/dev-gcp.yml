@@ -200,6 +200,11 @@ spec:
     - name: KABAL_SCOPE
       value: api://dev-gcp.klage.kabal-api/.default
 
+    - name: INNTEKTSKOMPONENTEN_URL
+      value: http://ikomp.team-inntekt
+    - name: INNTEKTSKOMPONENTEN_SCOPE
+      value: api://dev-gcp.team-inntekt.ikomp/.default
+
     # Saf
     - name: SAF_BASE_URL
       value: https://saf-q2.dev-fss-pub.nais.io
