@@ -13,12 +13,14 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +29,7 @@ import java.util.Optional;
 public class InntektAbonnentKlient {
 
     private static final Logger log = LoggerFactory.getLogger(InntektAbonnentKlient.class);
-    public static final int INNTEKT_HENDELSE_LIMIT = 1000;
+    public static final int INNTEKT_HENDELSE_LIMIT = 100;
 
     private OidcRestClient oidcRestClient;
     private final URI opprettAbonnementURI;
@@ -47,12 +49,12 @@ public class InntektAbonnentKlient {
         this.hendelseURI = tilUri(baseUrl, "hendelse");
     }
 
-    public InntektAbonnement opprettAbonnement(AktørId aktørId, String formaal, List<String> filter,
-                                               String fomMaanedObservasjon, String tomMaanedObservasjon,
+    public long opprettAbonnement(PersonIdent personIdent, String formaal, List<String> filter,
+                                               YearMonth fomMaanedObservasjon, YearMonth tomMaanedObservasjon,
                                                LocalDate sisteBruksdag, int bevaringstid) {
         try {
             var request = new AbonnementAdministrasjonOpprettApiInn(
-                aktørId.getId(),
+                personIdent.getIdent(),
                 formaal,
                 filter,
                 fomMaanedObservasjon,
@@ -62,10 +64,8 @@ public class InntektAbonnentKlient {
             );
             AbonnementAdministrasjonOpprettApiUt response = oidcRestClient.post(opprettAbonnementURI, request, AbonnementAdministrasjonOpprettApiUt.class);
 
-            var abonnement = new InntektAbonnement(String.valueOf(response.abonnementId()), aktørId);
-            log.info("Opprettet abonnementId: {} for aktør: {}", response.abonnementId(), aktørId.getId());
-
-            return abonnement;
+            log.info("Opprettet abonnementId: {}", response.abonnementId());
+            return response.abonnementId();
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilVedOpprettelseAvAbonnement(e).toException();
         }
@@ -135,8 +135,8 @@ public class InntektAbonnentKlient {
         String norskident,
         String formaal,
         List<String> filter,
-        String fomMaanedObservasjon,
-        String tomMaanedObservasjon,
+        YearMonth fomMaanedObservasjon,
+        YearMonth tomMaanedObservasjon,
         LocalDate sisteBruksdag,
         int bevaringstid
     ) {}

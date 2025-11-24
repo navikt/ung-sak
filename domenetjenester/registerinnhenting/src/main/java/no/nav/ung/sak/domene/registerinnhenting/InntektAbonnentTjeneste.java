@@ -4,13 +4,17 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
+import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.PersonIdent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -18,13 +22,15 @@ import java.util.stream.Stream;
 @ApplicationScoped
 public class InntektAbonnentTjeneste {
 
-    private InntektAbonnementRepository inntektAbonnementRepository;
-    private InntektAbonnentKlient inntektAbonnentKlient;
-    private FagsakTjeneste fagsakTjeneste;
     private static final String UNG_INNTEKT_FORMAAL = "Ung";
     private static final String UNG_INNTEKT_FILTER = "Ung";
     private static final int BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER = 1;
     private static final Logger log = LoggerFactory.getLogger(InntektAbonnentTjeneste.class);
+
+    private InntektAbonnementRepository inntektAbonnementRepository;
+    private InntektAbonnentKlient inntektAbonnentKlient;
+    private FagsakTjeneste fagsakTjeneste;
+    private TpsTjeneste tpsTjeneste;
 
 
     public InntektAbonnentTjeneste() {
@@ -34,10 +40,11 @@ public class InntektAbonnentTjeneste {
     @Inject
     public InntektAbonnentTjeneste(InntektAbonnementRepository inntektAbonnementRepository,
                                    InntektAbonnentKlient inntektAbonnentKlient,
-                                   FagsakTjeneste fagsakTjeneste) {
+                                   FagsakTjeneste fagsakTjeneste, TpsTjeneste tpsTjeneste) {
         this.inntektAbonnementRepository = inntektAbonnementRepository;
         this.inntektAbonnentKlient = inntektAbonnentKlient;
         this.fagsakTjeneste = fagsakTjeneste;
+        this.tpsTjeneste = tpsTjeneste;
     }
 
     public void opprettAbonnement(AktørId aktørId, Periode periode) {
@@ -47,17 +54,17 @@ public class InntektAbonnentTjeneste {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("Fant ingen åpen fagsak med gyldig periode"));
 
-        var inntektAbonnement = inntektAbonnentKlient.opprettAbonnement(
-            aktørId,
+        var personIdent = tpsTjeneste.hentFnr(aktørId).orElseThrow();
+        long abonnementId = inntektAbonnentKlient.opprettAbonnement(
+            personIdent,
             UNG_INNTEKT_FORMAAL,
             List.of(UNG_INNTEKT_FILTER),
-            periode.getFom().getMonth().toString(),
-            periode.getTom().getMonth().toString(),
+            YearMonth.from(periode.getFom()),
+            YearMonth.from(periode.getTom()),
             tomFagsakPeriode,
             BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER
         );
-        inntektAbonnementRepository.lagre(inntektAbonnement);
-
+        inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId));
     }
 
     public Optional<Long> hentFørsteSekvensnummer() {
@@ -90,6 +97,7 @@ public class InntektAbonnentTjeneste {
     private List<InntektAbonnentKlient.AbonnementHendelse> hentAbonnentHendelser(long sekvensnummer) {
         return inntektAbonnentKlient.hentAbonnentHendelser(sekvensnummer, List.of(UNG_INNTEKT_FILTER));
     }
+
 
     private static class InntektHendelseMapper {
         static Stream<InntektHendelse> tilDomeneListe(List<InntektAbonnentKlient.AbonnementHendelse> hendelser) {
