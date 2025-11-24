@@ -142,10 +142,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     private List<ProsessTaskData> opprettOppfriskTaskerForBehandlinger(List<Behandling> behandlinger) {
         return behandlinger.stream()
-            .map(behandling -> {
-                log.info("Oppretter oppfrisk-task for behandling={} saksnummer={}", behandling.getId(), behandling.getFagsak().getSaksnummer());
-                return OppfriskTask.create(behandling, true);
-            })
+            .map(behandling -> OppfriskTask.create(behandling, true))
             .toList();
     }
 
@@ -155,7 +152,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
                 ap.getAksjonspunktDefinisjon() ==
                 AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE
                     && ap.getStatus() == AksjonspunktStatus.OPPRETTET
-                    && ap.getVenteårsak() == Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE)
+                    && ap.getVenteårsak() == Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE);
     }
 
     private void opprettOppfriskTaskGruppe(List<ProsessTaskData> oppfriskTasker) {
