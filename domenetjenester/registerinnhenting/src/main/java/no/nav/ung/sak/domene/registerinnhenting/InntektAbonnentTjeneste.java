@@ -23,6 +23,7 @@ public class InntektAbonnentTjeneste {
     private FagsakTjeneste fagsakTjeneste;
     private static final String UNG_INNTEKT_FORMAAL = "Ung";
     private static final String UNG_INNTEKT_FILTER = "Ung";
+    private static final int BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER = 1;
     private static final Logger log = LoggerFactory.getLogger(InntektAbonnentTjeneste.class);
 
 
@@ -52,7 +53,8 @@ public class InntektAbonnentTjeneste {
             List.of(UNG_INNTEKT_FILTER),
             periode.getFom().getMonth().toString(),
             periode.getTom().getMonth().toString(),
-            tomFagsakPeriode
+            tomFagsakPeriode,
+            BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER
         );
         inntektAbonnementRepository.lagre(inntektAbonnement);
 

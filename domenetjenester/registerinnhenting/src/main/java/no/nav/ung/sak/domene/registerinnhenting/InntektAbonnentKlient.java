@@ -38,28 +38,29 @@ public class InntektAbonnentKlient {
     @Inject
     public InntektAbonnentKlient(
         @KonfigVerdi(value = "inntektskomponenten.url",
-            defaultVerdi = "http://ikomp.team-inntekt") String baseUrl,
+            defaultVerdi = "http://ikomp.team-inntekt/rest/v2/abonnement") String baseUrl,
         OidcRestClient oidcRestClient) {
         this.oidcRestClient = oidcRestClient;
-        this.opprettAbonnementURI = tilUri(baseUrl, "rs/api/v1/abonnement");
-        this.avsluttAbonnementURI = tilUri(baseUrl, "rs/api/v1/abonnement/%s");
-        this.hendelseStartURI = tilUri(baseUrl, "rest/v2/abonnement/hendelse/start");
-        this.hendelseURI = tilUri(baseUrl, "rest/v2/abonnement/hendelse");
+        this.opprettAbonnementURI = tilUri(baseUrl, "administrasjon/opprett");
+        this.avsluttAbonnementURI = tilUri(baseUrl, "administrasjon/opphoer");
+        this.hendelseStartURI = tilUri(baseUrl, "hendelse/start");
+        this.hendelseURI = tilUri(baseUrl, "hendelse");
     }
 
     public InntektAbonnement opprettAbonnement(AktørId aktørId, String formaal, List<String> filter,
                                                String fomMaanedObservasjon, String tomMaanedObservasjon,
-                                               LocalDate sisteBruksdag) {
+                                               LocalDate sisteBruksdag, int bevaringstid) {
         try {
-            var request = new OpprettAbonnementRequest(
+            var request = new AbonnementAdministrasjonOpprettApiInn(
                 aktørId.getId(),
                 formaal,
                 filter,
                 fomMaanedObservasjon,
                 tomMaanedObservasjon,
-                sisteBruksdag
+                sisteBruksdag,
+                bevaringstid
             );
-            AbonnementResponse response = oidcRestClient.post(opprettAbonnementURI, request, AbonnementResponse.class);
+            AbonnementAdministrasjonOpprettApiUt response = oidcRestClient.post(opprettAbonnementURI, request, AbonnementAdministrasjonOpprettApiUt.class);
 
             var abonnement = new InntektAbonnement(String.valueOf(response.abonnementId()), aktørId);
             log.info("Opprettet abonnementId: {} for aktør: {}", response.abonnementId(), aktørId.getId());
@@ -95,8 +96,8 @@ public class InntektAbonnentKlient {
 
     public void avsluttAbonnement(long abonnementId) {
         try {
-            var uri = URI.create(String.format(avsluttAbonnementURI.toString(), abonnementId));
-            oidcRestClient.delete(uri);
+            var request = new AbonnementAdministrasjonOpphoerApiInn(abonnementId);
+            oidcRestClient.post(avsluttAbonnementURI, request, AbonnementAdministrasjonOpphoerApiUt.class);
             log.info("Avslutter abonnement med id {}", abonnementId);
         } catch (Exception e) {
             throw RestTjenesteFeil.FEIL.feilVedAvsluttingAvAbonnement(abonnementId, e).toException();
@@ -130,17 +131,22 @@ public class InntektAbonnentKlient {
         Feil feilVedAvsluttingAvAbonnement(long abonnementId, Throwable t);
     }
 
-    private record OpprettAbonnementRequest(
+    private record AbonnementAdministrasjonOpprettApiInn(
         String norskident,
         String formaal,
         List<String> filter,
         String fomMaanedObservasjon,
         String tomMaanedObservasjon,
-        LocalDate sisteBruksdag
+        LocalDate sisteBruksdag,
+        int bevaringstid
     ) {}
 
-    private record AbonnementResponse(String abonnementId) {
+    private record AbonnementAdministrasjonOpprettApiUt(long abonnementId) {
     }
+
+    private record AbonnementAdministrasjonOpphoerApiInn(long abonnementId) {}
+
+    private record AbonnementAdministrasjonOpphoerApiUt() {}
 
     private record AbonnementHendelseStartApiInn(LocalDate dato) {}
 
