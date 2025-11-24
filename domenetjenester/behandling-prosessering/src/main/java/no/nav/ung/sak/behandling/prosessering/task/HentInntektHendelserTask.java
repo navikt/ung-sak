@@ -85,7 +85,10 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
         behandleHendelser(nyeInntektHendelser);
 
-        var sisteSekvensnummer = nyeInntektHendelser.getLast().sekvensnummer();
+        var sisteSekvensnummer = nyeInntektHendelser.stream()
+            .mapToLong(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
+            .max()
+            .orElseThrow();
         opprettNesteTask(sisteSekvensnummer + 1);
     }
 
@@ -120,9 +123,9 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         return nyeInntektHendelser.stream()
             .flatMap(hendelse -> fagsakTjeneste.finnFagsakerForAktør(hendelse.aktørId()).stream()
                 .filter(Fagsak::erÅpen)
+                .filter(fagsak -> fagsak.getPeriode().overlapper(hendelse.periode().getFom(), hendelse.periode().getTom())))
                 .flatMap(fagsak -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).stream())
                 .filter(this::venterPåInntektUttalelse)
-                .filter(behandling -> behandling.getFagsak().getPeriode().overlapper(hendelse.periode().getFom(), hendelse.periode().getTom())))
             .distinct()
             .toList();
     }
