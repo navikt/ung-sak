@@ -105,12 +105,10 @@ public class InntektAbonnentTjeneste {
         }
 
         static InntektHendelse tilDomene(InntektAbonnentKlient.AbonnementHendelse hendelse) {
-            LocalDate fom = LocalDate.parse(hendelse.maaned() + "-01");
-            LocalDate tom = fom.withDayOfMonth(fom.lengthOfMonth());
             return new InntektHendelse(
                 hendelse.sekvensnummer(),
                 new AktørId(hendelse.norskident()),
-                new Periode(fom, tom)
+                new Periode(hendelse.maaned())
             );
         }
     }
