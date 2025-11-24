@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 @ProsessTask(value = HentInntektHendelserTask.TASKTYPE)
@@ -66,19 +67,25 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
 
-        long fraSekvensnummer = hentEllerInitialiserSekvensnummer(prosessTaskData);
+        var fraSekvensnummer = hentEllerInitialiserSekvensnummer(prosessTaskData);
+        if (fraSekvensnummer.isEmpty()) {
+            log.info("Ingen hendelser tilgjengelig fra inntektskomponenten, hopper over henting. Prøver igjen senere.");
+            opprettNesteTask(null);
+            return;
+        }
+
         log.info("Starter henting av inntektshendelser fra sekvensnummer={}", fraSekvensnummer);
 
-        var nyeInntektHendelser = inntektAbonnentTjeneste.hentNyeInntektHendelser(fraSekvensnummer).toList();
+        var nyeInntektHendelser = inntektAbonnentTjeneste.hentNyeInntektHendelser(fraSekvensnummer.get()).toList();
         if (nyeInntektHendelser.isEmpty()) {
             log.info("Ingen nye inntektshendelser funnet");
-            opprettNesteTask(fraSekvensnummer);
+            opprettNesteTask(fraSekvensnummer.get());
             return;
         }
 
         behandleHendelser(nyeInntektHendelser);
 
-        var sisteSekvensnummer = nyeInntektHendelser.get(nyeInntektHendelser.size() - 1).sekvensnummer();
+        var sisteSekvensnummer = nyeInntektHendelser.getLast().sekvensnummer();
         opprettNesteTask(sisteSekvensnummer + 1);
     }
 
@@ -120,7 +127,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
             .toList();
     }
 
-    private long hentEllerInitialiserSekvensnummer(ProsessTaskData prosessTaskData) {
+    private Optional<Long> hentEllerInitialiserSekvensnummer(ProsessTaskData prosessTaskData) {
         String sekvensnummerVerdi = prosessTaskData.getPropertyValue(SEKVENSNUMMER_KEY);
 
         if (sekvensnummerVerdi == null) {
@@ -128,7 +135,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
             return inntektAbonnentTjeneste.hentFørsteSekvensnummer();
         }
 
-        return Long.parseLong(sekvensnummerVerdi);
+        return Optional.of(Long.parseLong(sekvensnummerVerdi));
     }
 
     private List<ProsessTaskData> opprettOppfriskTaskerForBehandlinger(List<Behandling> behandlinger) {
@@ -158,11 +165,15 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
     }
 
-    private void opprettNesteTask(long nesteSekvensnummer) {
+    private void opprettNesteTask(Long nesteSekvensnummer) {
         var nesteTask = ProsessTaskData.forProsessTask(HentInntektHendelserTask.class);
         nesteTask.setNesteKjøringEtter(LocalDateTime.now().plus(ventetidFørNesteKjøring));
-        nesteTask.setProperty(SEKVENSNUMMER_KEY, String.valueOf(nesteSekvensnummer));
+        if (nesteSekvensnummer != null) {
+            nesteTask.setProperty(SEKVENSNUMMER_KEY, String.valueOf(nesteSekvensnummer));
+            log.info("Opprettet neste task med sekvensnummer={}", nesteSekvensnummer);
+        } else {
+            log.info("Opprettet neste task uten sekvensnummer");
+        }
         prosessTaskTjeneste.lagre(nesteTask);
-        log.info("Opprettet neste task med sekvensnummer={}", nesteSekvensnummer);
     }
 }

@@ -20,10 +20,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Dependent
-//TODO Endre default verdi til produksjonsurl når vi går til prod
-@ScopedRestIntegration(scopeKey = "inntektskomponenten.scope", defaultScope = "api://ikomp-q2.intern.dev.nav.no/.default")
+@ScopedRestIntegration(scopeKey = "inntektskomponenten.scope", defaultScope = "api://prod-fss.team-inntekt.ikomp/.default")
 public class InntektAbonnentKlient {
 
     private static final Logger log = LoggerFactory.getLogger(InntektAbonnentKlient.class);
@@ -38,7 +38,7 @@ public class InntektAbonnentKlient {
     @Inject
     public InntektAbonnentKlient(
         @KonfigVerdi(value = "inntektskomponenten.url",
-            defaultVerdi = "https://ikomp.intern.nav.no/") String baseUrl,
+            defaultVerdi = "http://ikomp.team-inntekt") String baseUrl,
         OidcRestClient oidcRestClient) {
         this.oidcRestClient = oidcRestClient;
         this.opprettAbonnementURI = tilUri(baseUrl, "rs/api/v1/abonnement");
@@ -70,14 +70,14 @@ public class InntektAbonnentKlient {
         }
     }
 
-    public long hentStartSekvensnummer(LocalDate dato) {
+    public Optional<Long> hentStartSekvensnummer(LocalDate dato) {
         try {
             var request = new AbonnementHendelseStartApiInn(dato);
             AbonnementHendelseStartApiUt response = oidcRestClient.post(hendelseStartURI, request, AbonnementHendelseStartApiUt.class);
-            return response.sekvensnummer();
+            return Optional.of(response.sekvensnummer());
         } catch (HttpStatuskodeException e) {
             if(e.getHttpStatuskode() == 404) {
-                throw RestTjenesteFeil.FEIL.ingenHendelserFunnet(dato).toException();
+                return Optional.empty();
             }
             throw RestTjenesteFeil.FEIL.feilVedHentingAvStartsekvensnummer(dato, e).toException();
         }

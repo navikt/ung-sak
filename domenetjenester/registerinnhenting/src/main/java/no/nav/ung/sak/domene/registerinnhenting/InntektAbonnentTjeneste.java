@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @ApplicationScoped
@@ -59,7 +60,7 @@ public class InntektAbonnentTjeneste {
         return inntektAbonnement;
     }
 
-    public long hentFørsteSekvensnummer() {
+    public Optional<Long> hentFørsteSekvensnummer() {
         return  inntektAbonnentKlient.hentStartSekvensnummer(LocalDate.now());
     }
 
