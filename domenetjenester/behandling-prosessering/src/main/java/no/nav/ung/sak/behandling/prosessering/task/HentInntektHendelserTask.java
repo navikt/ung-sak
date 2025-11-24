@@ -33,15 +33,12 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     public static final String TASKTYPE = "registerinnhenting.hentInntektHendelser";
     public static final String SEKVENSNUMMER_KEY = "sekvensnummer";
 
-
     private static final Logger log = LoggerFactory.getLogger(HentInntektHendelserTask.class);
 
     private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingRepository behandlingRepository;
-    private EntityManager entityManager;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private boolean hentInntektHendelserEnabled;
     private boolean oppfriskKontrollbehandlingEnabled;
     private Duration ventetidFørNesteKjøring;
     private boolean hentInntektHendelserUtenOppfriskingEnabled;
@@ -54,30 +51,20 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     public HentInntektHendelserTask(InntektAbonnentTjeneste inntektAbonnentTjeneste,
                                     FagsakTjeneste fagsakTjeneste,
                                     BehandlingRepository behandlingRepository,
-                                    EntityManager entityManager,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
-                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_UTEN_OPPFRISKING_ENABLED", required = false, defaultVerdi = "true") boolean hentInntektHendelserUtenOppfriskingEnabled,
-                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALL", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring,
-                                    @KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled){
+                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALL", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring){
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.entityManager = entityManager;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
         this.hentInntektHendelserUtenOppfriskingEnabled = hentInntektHendelserUtenOppfriskingEnabled;
-        this.oppfriskKontrollbehandlingEnabled = oppfriskKontrollbehandlingEnabled;
         this.ventetidFørNesteKjøring = Duration.parse(ventetidFørNesteKjøring);
     }
 
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-
-        if (skalHoppeOverTask()) {
-            return;
-        }
 
         long fraSekvensnummer = hentEllerInitialiserSekvensnummer(prosessTaskData);
         log.info("Starter henting av inntektshendelser fra sekvensnummer={}", fraSekvensnummer);
@@ -93,20 +80,6 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
         var sisteSekvensnummer = nyeInntektHendelser.get(nyeInntektHendelser.size() - 1).sekvensnummer();
         opprettNesteTask(sisteSekvensnummer + 1);
-    }
-
-    private boolean skalHoppeOverTask() {
-        if (!hentInntektHendelserEnabled) {
-            log.info("Henting av inntektshendelser er deaktivert. Hopper over task.");
-            return true;
-        }
-
-        if (oppfriskKontrollbehandlingEnabled) {
-            log.info("Oppfrisk Task av kontrollbehandlinger er aktivert. Hopper over task for henting av inntektshendelser.");
-            return true;
-        }
-
-        return false;
     }
 
     private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
