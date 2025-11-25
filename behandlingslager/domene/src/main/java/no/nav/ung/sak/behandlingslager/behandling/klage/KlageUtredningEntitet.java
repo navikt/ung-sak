@@ -89,9 +89,10 @@ public class KlageUtredningEntitet extends BaseEntitet {
             formkrav = new KlageFormkravEntitet();
         }
         formkrav.oppdater(formkravAdapter);
-        if (!formkrav.hentAvvistÅrsaker().isEmpty()) {
-            // TODO: Utled og lagre hjemmel brukt i avvisning, i vurdering
+        if (erKlageAvvist()) {
             setKlagevurdering(KlageVurderingAdapter.Templates.AVVIST_VURDERING_VEDTAKSINSTANS);
+        } else {
+            fjernKlageVurdering(KlageVurdertAv.VEDTAKSINSTANS);
         }
         return formkrav.utledAvvistÅrsak();
     }
@@ -100,17 +101,18 @@ public class KlageUtredningEntitet extends BaseEntitet {
         return KlageVurderingType.HJEMSENDE_UTEN_Å_OPPHEVE.equals(hentGjeldendeKlagevurderingType());
     }
 
+    // Bruker formkravet, i tilfelle den utledede klagevurderingen skulle være ute av synk.
     public boolean erKlageAvvist() {
-        return KlageVurderingType.AVVIS_KLAGE.equals(hentGjeldendeKlagevurderingType());
+        return !formkrav.hentAvvistÅrsaker().isEmpty();
     }
 
     public KlageVurderingType hentGjeldendeKlagevurderingType() {
-        return getKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).or(() ->
-            getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
+        return hentKlageVurderingType(KlageVurdertAv.KLAGEINSTANS).or(() ->
+            hentKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
         ).orElse(null);
     }
 
-    public Optional<KlageVurderingType> getKlageVurderingType(KlageVurdertAv klageVurdertAv) {
+    public Optional<KlageVurderingType> hentKlageVurderingType(KlageVurdertAv klageVurdertAv) {
         var klagevurdering = hentKlagevurdering(klageVurdertAv);
         return klagevurdering
             .map(kv -> kv.getKlageresultat().getKlageVurdering())

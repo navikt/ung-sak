@@ -42,7 +42,7 @@ public class VenterPåAndreinstansVedtakSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var klageVurdering = klageRepository.hentKlageUtredning(behandling.getId());
-        var skalOversendesKabal = klageVurdering.getKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
+        var skalOversendesKabal = klageVurdering.hentKlageVurderingType(KlageVurdertAv.VEDTAKSINSTANS)
             .map(KlageVurderingType.STADFESTE_YTELSESVEDTAK::equals)
             .orElse(false);
 

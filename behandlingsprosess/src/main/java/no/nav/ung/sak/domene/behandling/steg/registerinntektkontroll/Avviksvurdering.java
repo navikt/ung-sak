@@ -3,10 +3,9 @@ package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.ytelse.InntektType;
-import no.nav.ung.sak.ytelse.RapportertInntekt;
-import no.nav.ung.sak.ytelse.RapporterteInntekter;
+import no.nav.ung.sak.kontroll.InntektType;
+import no.nav.ung.sak.kontroll.RapportertInntekt;
+import no.nav.ung.sak.kontroll.RapporterteInntekter;
 
 import java.math.BigDecimal;
 import java.util.Set;

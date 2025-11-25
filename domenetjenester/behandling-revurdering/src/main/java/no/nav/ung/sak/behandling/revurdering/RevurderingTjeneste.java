@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -58,7 +57,6 @@ public class RevurderingTjeneste {
 
         DatoIntervallEntitet revurderingPeriode = periode.orElse(revurdering.getFagsak().getPeriode());
         prosessTriggereRepository.leggTil(revurdering.getId(), Set.of(new Trigger(revurderingsÅrsak, revurderingPeriode)));
-
 
         var grunnlagKopierer = getGrunnlagKopierer(origBehandling.getFagsakYtelseType());
         grunnlagKopierer.kopierGrunnlagVedManuellOpprettelse(origBehandling, revurdering);

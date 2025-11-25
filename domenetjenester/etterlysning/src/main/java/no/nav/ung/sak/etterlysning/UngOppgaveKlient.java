@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
@@ -26,6 +27,7 @@ public class UngOppgaveKlient {
     private final URI utløptURI;
     private final URI opprettEndretSluttdatoURI;
     private final URI opprettEndretStartdatoURI;
+    private final URI løsSøkYtelseURI;
 
 
     @Inject
@@ -40,6 +42,7 @@ public class UngOppgaveKlient {
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
         this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgave/utlopt/forTypeOgPeriode");
+        this.løsSøkYtelseURI = tilUri(url, "oppgave/los/sokytelse");
     }
 
     public void avbrytOppgave(UUID eksternRef) {
@@ -99,6 +102,16 @@ public class UngOppgaveKlient {
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
+    }
+
+
+    public void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO) {
+        try {
+            restClient.post(løsSøkYtelseURI, deltakerDTO);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+
     }
 
 

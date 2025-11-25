@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
-import no.nav.ung.sak.ytelse.kontroll.Inntektsresultat;
+
+import no.nav.ung.sak.kontroll.Inntektsresultat;
 
 public record Kontrollresultat(KontrollResultatType type, Inntektsresultat inntektsresultat) {
 

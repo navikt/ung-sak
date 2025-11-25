@@ -1162,9 +1162,9 @@
         "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS", "VURDER_KLAGE_FØRSTEINSTANS", "OVERFØRT_NK" ]
       },
       "ung.kodeverk.behandling.BehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-003", "BT-008", "-" ],
+        "enum" : [ "BT-002", "BT-004", "BT-003", "BT-008", "BT-007", "BT-009", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "UDEFINERT" ]
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingÅrsakType" : {
         "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
@@ -1277,9 +1277,9 @@
         "x-enum-varnames" : [ "KVINNE", "MANN", "UDEFINERT" ]
       },
       "ung.kodeverk.produksjonsstyring.OppgaveÅrsak" : {
-        "enum" : [ "BEH_SAK_VL", "RV_VL", "GOD_VED_VL", "REG_SOK_VL", "VUR_KONS_YTE", "VUR", "FEILUTBET", "INNH_DOK", "SETTVENT", "BEH_SAK", "-" ],
+        "enum" : [ "BEH_SAK", "RV", "GOD_VED", "REG_SOK", "VUR_KONS_YTE", "VUR", "FEILUTBET", "INNH_DOK", "SETTVENT", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BEHANDLE_SAK_VL", "REVURDER_VL", "GODKJENN_VEDTAK_VL", "REG_SOKNAD_VL", "VURDER_KONSEKVENS_YTELSE", "VURDER_DOKUMENT", "FEILUTBETALING", "INNHENT_DOK", "SETTVENT", "BEHANDLE_SAK_IT", "UDEFINERT" ]
+        "x-enum-varnames" : [ "BEHANDLE_SAK", "REVURDER", "GODKJENN_VEDTAK", "REG_SOKNAD", "VURDER_KONSEKVENS_YTELSE", "VURDER_DOKUMENT", "FEILUTBETALING", "INNHENT_DOK", "SETTVENT", "UDEFINERT" ]
       },
       "ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet" : {
         "properties" : {
@@ -2068,10 +2068,7 @@
             "type" : "integer"
           },
           "visningsnavn" : {
-            "maxLength" : 100,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$",
-            "type" : "string"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.BehandlingVisningsnavn"
           }
         },
         "required" : [ "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
@@ -2158,6 +2155,11 @@
         },
         "required" : [ "stegStatus", "stegType" ],
         "type" : "object"
+      },
+      "ung.sak.kontrakt.behandling.BehandlingVisningsnavn" : {
+        "enum" : [ "BEREGNING_AV_HØY_SATS", "ENDRING_AV_BARNETILLEGG", "BRUKERS_DØDSFALL", "UNGDOMSPROGRAMENDRING", "KONTROLL_AV_INNTEKT", "INGEN_RELEVANT_BEHANDLINGÅRSAK", "FLERE_BEHANDLINGÅRSAKER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "BEREGNING_AV_HØY_SATS", "ENDRING_AV_BARNETILLEGG", "BRUKERS_DØDSFALL", "UNGDOMSPROGRAMENDRING", "KONTROLL_AV_INNTEKT", "INGEN_RELEVANT_BEHANDLINGÅRSAK", "FLERE_BEHANDLINGÅRSAKER" ]
       },
       "ung.sak.kontrakt.behandling.BehandlingsresultatDto" : {
         "properties" : {
@@ -2860,6 +2862,9 @@
           "forklaring" : {
             "type" : "string"
           },
+          "harTidligereRedigertBrevHtml" : {
+            "type" : "boolean"
+          },
           "hindret" : {
             "type" : "boolean"
           },
@@ -2925,6 +2930,45 @@
           }
         },
         "type" : "object"
+      },
+      "ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse" : {
+        "properties" : {
+          "original" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon"
+            },
+            "type" : "array"
+          },
+          "redigert" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon"
+            },
+            "type" : "array"
+          },
+          "tidligereRedigert" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon" : {
+        "properties" : {
+          "innhold" : {
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType" : {
+        "enum" : [ "STATISK", "REDIGERBAR", "STYLE" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "STATISK", "REDIGERBAR", "STYLE" ]
       },
       "ung.sak.kontrakt.hendelser.DødsfallHendelse" : {
         "properties" : {
@@ -3124,7 +3168,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer" ],
+        "required" : [ "aktør", "dokumenter", "historikkinnslagUuid", "linjer", "opprettetTidspunkt" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.historikk.HistorikkinnslagDto.HistorikkAktørDto" : {
@@ -3218,6 +3262,17 @@
           },
           "påklagdBehandlingType" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingType"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.klage.KlageHjemmelDto" : {
+        "properties" : {
+          "kode" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
           }
         },
         "type" : "object"
@@ -6828,6 +6883,30 @@
         "tags" : [ "fagsak" ]
       }
     },
+    "/api/fagsak/fjern-ikkedigital-flagg" : {
+      "post" : {
+        "description" : "Setter en ikke-digital bruker til å være digital",
+        "operationId" : "fjernIkkedigitalFlagg",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Setter en ikke-digital bruker til å være digital",
+        "tags" : [ "fagsak" ]
+      }
+    },
     "/api/fagsak/hendelse/innsending" : {
       "post" : {
         "description" : "Mottak av dokument.",
@@ -7273,6 +7352,40 @@
         "tags" : [ "formidling" ]
       }
     },
+    "/api/formidling/vedtaksbrev/editor" : {
+      "get" : {
+        "description" : "Html versjoner av original, redigert og evt. tidligere redigert vedtaksbrev",
+        "operationId" : "editor",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "dokumentMalType",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.dokument.DokumentMalType"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "formidling" ]
+      }
+    },
     "/api/formidling/vedtaksbrev/forhaandsvis" : {
       "post" : {
         "description" : "Forhåndsvise vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
@@ -7635,6 +7748,28 @@
               }
             },
             "description" : "Returnerer vurdering av en klage fra ulike instanser"
+          }
+        },
+        "tags" : [ "no/nav/k9/klage" ]
+      }
+    },
+    "/api/klage-v2/hjemler" : {
+      "get" : {
+        "description" : "Henter hjemler aktuelle for bruk i klagevurdering",
+        "operationId" : "hentValgbareKlagehjemler",
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.klage.KlageHjemmelDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "Returnerer alle valgbare hjemler for klagevurdering"
           }
         },
         "tags" : [ "no/nav/k9/klage" ]
@@ -8004,7 +8139,7 @@
     },
     "/api/oppgave/forvaltning/fjern-uttalelse" : {
       "post" : {
-        "description" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "description" : "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
         "operationId" : "fjernUttalelser",
         "parameters" : [ {
           "in" : "query",
@@ -8022,7 +8157,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "summary" : "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
         "tags" : [ "oppgave" ]
       }
     },
@@ -8052,7 +8187,7 @@
     },
     "/api/oppgave/forvaltning/opprett-inntektsrapportering" : {
       "post" : {
-        "description" : "Oppretter oppgave for inntektsrapportering for gitt sak",
+        "description" : "KUN FOR TEST: Oppretter oppgave for inntektsrapportering for gitt sak",
         "operationId" : "opprettInntektsrapportering",
         "parameters" : [ {
           "description" : "måned",
@@ -8087,13 +8222,13 @@
             "description" : "default response"
           }
         },
-        "summary" : "Oppretter oppgave for inntektsrapportering",
+        "summary" : "KUN FOR TEST: Oppretter oppgave for inntektsrapportering",
         "tags" : [ "oppgave" ]
       }
     },
     "/api/oppgave/forvaltning/start-inntektskontroll" : {
       "post" : {
-        "description" : "Starter inntektskontroll for sak",
+        "description" : "KUN FOR TEST: Starter inntektskontroll for sak.",
         "operationId" : "startInntektskontroll",
         "parameters" : [ {
           "description" : "måned",
@@ -8128,7 +8263,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Starter inntektskontroll for sak",
+        "summary" : "KUN FOR TEST: Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
       }
     },
@@ -8334,6 +8469,36 @@
       "get" : {
         "description" : "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først",
         "operationId" : "sakerPåAksjonspunkt",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "*/*" : {
+                "schema" : {
+                  "items" : {
+                    "type" : "string"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Brukes for produksjonsstyring",
+        "tags" : [ "produksjonsstyring" ]
+      }
+    },
+    "/api/produksjonsstyring/forvaltning/saker-med-etterlysninger-av-type" : {
+      "get" : {
+        "description" : "Henter alle saker som har en etterlysning av type",
+        "operationId" : "sakerMedEtterlysningerAvType",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "etterlysningType",
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.varsel.EtterlysningType"
+          }
+        } ],
         "responses" : {
           "default" : {
             "content" : {

@@ -81,10 +81,6 @@
             <artifactId>etterlysning</artifactId>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>behandling-revurdering</artifactId>
-        </dependency>
     </dependencies>
 
 </project>

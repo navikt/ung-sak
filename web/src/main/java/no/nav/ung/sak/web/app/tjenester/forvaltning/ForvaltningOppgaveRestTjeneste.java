@@ -80,7 +80,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @POST
     @Path("opprett-inntektsrapportering")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Operation(description = "Oppretter oppgave for inntektsrapportering for gitt sak", summary = ("Oppretter oppgave for inntektsrapportering"), tags = "oppgave")
+    @Operation(description = "KUN FOR TEST: Oppretter oppgave for inntektsrapportering for gitt sak", summary = ("KUN FOR TEST: Oppretter oppgave for inntektsrapportering"), tags = "oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response opprettInntektsrapportering(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                                 @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedForRapportering måned) {
@@ -117,7 +117,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @POST
     @Path("start-inntektskontroll")
     @Consumes(MediaType.APPLICATION_FORM_URLENCODED)
-    @Operation(description = "Starter inntektskontroll for sak", summary = ("Starter inntektskontroll for sak"), tags = "oppgave")
+    @Operation(description = "KUN FOR TEST: Starter inntektskontroll for sak.", summary = ("KUN FOR TEST: Starter inntektskontroll for sak"), tags = "oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response startInntektskontroll(@NotNull @FormParam("saksnummer") @Parameter(description = "saksnummer", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) Saksnummer saksnummer,
                                           @NotNull @QueryParam("måned") @Parameter(description = "måned", required = true) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) MånedForRapportering måned) {
@@ -147,7 +147,7 @@ public class ForvaltningOppgaveRestTjeneste {
     @POST
     @Path("fjern-uttalelse")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling", summary = ("Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling"), tags = "oppgave")
+    @Operation(description = "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling", summary = ("KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling"), tags = "oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.DELETE, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response fjernUttalelser(@NotNull @QueryParam("behandlingId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
         if (isProd) {

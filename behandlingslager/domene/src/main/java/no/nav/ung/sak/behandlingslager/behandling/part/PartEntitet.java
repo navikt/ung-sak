@@ -20,9 +20,11 @@ public class PartEntitet extends BaseEntitet {
     public String identifikasjon;
 
     @Column(name = "identifikasjon_type", nullable = false)
+    @Enumerated(EnumType.STRING)
     public IdType identifikasjonType;
 
     @Column(name = "rolle_type", nullable = false)
+    @Enumerated(EnumType.STRING)
     public RolleType rolleType;
 
     public PartEntitet() {

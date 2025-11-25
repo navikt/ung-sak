@@ -14,6 +14,8 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.domenetjenester.papirsøknad.PapirsøknadHåndteringTjeneste;
+import no.nav.ung.domenetjenester.papirsøknad.PapirsøknadPdf;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
 import no.nav.ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto;

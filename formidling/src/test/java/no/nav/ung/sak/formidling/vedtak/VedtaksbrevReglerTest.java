@@ -63,7 +63,7 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektReduksjonInnholdBygger.class);
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
     }
 
     @Test
@@ -83,8 +83,8 @@ class VedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_gi_redigerbar_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_med_ap_8000() {
-        UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endring0KrInntekt_19år(LocalDate.of(2024, 12, 1));
+    void skal_gi_redigerbar_brev_ved_avkortning_men_fastsatt_til_0_kr_og_register_er_0kr() {
+        UngTestScenario ungTestGrunnlag = EndringInntektScenarioer.endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(LocalDate.of(2024, 12, 1));
         var behandling = EndringInntektScenarioer.lagBehandlingMedAksjonspunktKontrollerInntekt(ungTestGrunnlag, ungTestRepositories);
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
@@ -93,7 +93,7 @@ class VedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        assertRedigerbarBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON, EndringRapportertInntektUtenReduksjonInnholdBygger.class);
+        assertRedigerbarBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON, EndringInntektUtenReduksjonInnholdBygger.class);
     }
 
     @Test
@@ -162,7 +162,8 @@ class VedtaksbrevReglerTest {
     void skal_ikke_kunne_redigere_eller_hindre_automatisk_brev_for_andre_totrinn_ap_enn_kontroller_inntekt() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         // Bruker aksjonspunkt med totrinn for å trigge redigering av brev
-        var behandling = BrevScenarioerUtils.lagBehandlingMedAP(
+
+        var behandling = BrevScenarioerUtils.lagAvsluttetBehandlingMedAP(
           EndringHøySatsScenarioer.endring25År(fom.minusYears(25)), ungTestRepositories,
             AksjonspunktDefinisjon.VURDER_TILBAKETREKK
         );
@@ -219,7 +220,7 @@ class VedtaksbrevReglerTest {
             .findFirst()
             .orElseThrow();
 
-        assertRedigerbarBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringRapportertInntektReduksjonInnholdBygger.class);
+        assertRedigerbarBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
 
         assertThat(inntektResultat.forklaring()).contains(AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode());
 
@@ -234,7 +235,7 @@ class VedtaksbrevReglerTest {
         assertThat(barnetilleggResultat.forklaring()).contains("barn");
     }
 
-    private static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
+     static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
         assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);

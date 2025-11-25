@@ -19,7 +19,6 @@ import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingResultatKodeverdiConve
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsystemKodeverkConverter;
-import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.typer.AktørId;
 import org.hibernate.annotations.*;
 
@@ -546,6 +545,7 @@ public class Behandling extends BaseEntitet {
     public void nullstillToTrinnsBehandling() {
         guardTilstandPåBehandling();
         this.toTrinnsBehandling = false;
+        this.ansvarligBeslutter = null;
     }
 
     public String getAnsvarligSaksbehandler() {
@@ -562,6 +562,9 @@ public class Behandling extends BaseEntitet {
     }
 
     public void setAnsvarligBeslutter(String ansvarligBeslutter) {
+        if (ansvarligBeslutter != null && ansvarligBeslutter.equals(ansvarligSaksbehandler)) {
+            throw new IllegalArgumentException("Kan ikke sette beslutter lik saksbehandler");
+        }
         guardTilstandPåBehandling();
         this.ansvarligBeslutter = ansvarligBeslutter;
     }
