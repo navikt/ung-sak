@@ -62,7 +62,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
         var initiellPeriodegrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell programperiodegrunnlag for behandling " + behandlingReferanse.getBehandlingId()));
         opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag, List.of(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO));
-        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag, List.of(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO));
+        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag, List.of(EtterlysningType.UTTALELSE_ENDRET_STARTDATO));
         opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_FJERNET_PERIODE, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag, List.of(
             EtterlysningType.UTTALELSE_FJERNET_PERIODE,
             EtterlysningType.UTTALELSE_ENDRET_STARTDATO,
@@ -103,7 +103,10 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         lagreSporing(behandlingReferanse, etterlysningType, input, resultatEndretProgramperiode);
 
         // Håndter resultat, opprett etterlysning dersom det er relevant
-        resultatHåndterer.håndterResultat(resultatEndretProgramperiode, behandlingReferanse, etterlysningType, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag());
+        resultatHåndterer.håndterResultat(resultatEndretProgramperiode,
+            behandlingReferanse, etterlysningType, gjeldendeEtterlysning,
+            input.gjeldendePeriodeGrunnlag(),
+            input.initiellPeriodegrunnlag());
     }
 
     private void lagreSporing(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType, EndretUngdomsprogramEtterlysningInput input, ResultatType resultatEndretProgramperiode) {
