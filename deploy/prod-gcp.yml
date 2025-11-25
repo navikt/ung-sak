@@ -245,8 +245,6 @@ spec:
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "false"
-    - name: HENT_INNTEKT_HENDELSER_ENABLED
-      value: "false"
     - name: KLAGE_ENABLED
       value: "false"
     - name: INTEGRASJON_KABAL
