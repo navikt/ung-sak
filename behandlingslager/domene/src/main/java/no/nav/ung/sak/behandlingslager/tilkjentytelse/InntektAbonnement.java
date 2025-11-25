@@ -10,8 +10,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
+import no.nav.ung.sak.behandlingslager.Range;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
+import org.hibernate.annotations.Type;
+
+import java.time.LocalDate;
 
 @Entity(name = "InntektAbonnement")
 @Table(name = "INNTEKT_ABONNEMENT")
@@ -27,6 +34,13 @@ public class InntektAbonnement extends BaseEntitet {
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", nullable = false)))
     private AktørId aktørId;
+
+    @Type(PostgreSQLRangeType.class)
+    @Column(name = "periode", columnDefinition = "daterange")
+    private Range<LocalDate> periode;
+
+    @Column(name = "siste_bruksdag", nullable = false, unique = false)
+    private LocalDate sisteBruksdag;
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -53,6 +67,28 @@ public class InntektAbonnement extends BaseEntitet {
 
     public AktørId getAktørId() {
         return aktørId;
+    }
+
+    public DatoIntervallEntitet getPeriode() {
+        return DatoIntervallEntitet.fra(periode);
+    }
+
+    void setPeriode(LocalDate fom, LocalDate tom) {
+        if ((fom == null || fom.equals(Tid.TIDENES_BEGYNNELSE))) {
+            throw new IllegalArgumentException(String.format("Alle saker må angi en startdato: [%s, %s]", fom, tom));
+        }
+        if (tom == null || tom.equals(Tid.TIDENES_ENDE)) {
+            throw new IllegalArgumentException();
+        }
+        this.periode = DatoIntervallEntitet.fra(fom, tom).toRange();
+    }
+
+    public LocalDate getSisteBruksdag() {
+        return sisteBruksdag;
+    }
+
+    public void setSisteBruksdag(LocalDate sisteBruksdag) {
+        this.sisteBruksdag = sisteBruksdag;
     }
 
     public boolean erAktiv() {
