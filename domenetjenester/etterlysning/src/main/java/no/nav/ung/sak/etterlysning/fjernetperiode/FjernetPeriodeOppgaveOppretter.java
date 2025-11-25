@@ -3,6 +3,7 @@ package no.nav.ung.sak.etterlysning.fjernetperiode;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.FjernetPeriodeOppgaveDTO;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -35,15 +36,15 @@ public class FjernetPeriodeOppgaveOppretter {
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
         var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode)).toList();
-        oppgaveDtoer.forEach(ungOppgaveKlient::opprettEndretSluttdatoOppgave);
+        oppgaveDtoer.forEach(ungOppgaveKlient::opprettFjernetPeriodeOppgave);
     }
 
-    private EndretSluttdatoOppgaveDTO mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, Optional<DatoIntervallEntitet> originalPeriode) {
-        return new EndretSluttdatoOppgaveDTO(
+    private FjernetPeriodeOppgaveDTO mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, Optional<DatoIntervallEntitet> originalPeriode) {
+        return new FjernetPeriodeOppgaveDTO(
             deltakerIdent.getIdent(),
             etterlysning.getEksternReferanse(),
             etterlysning.getFrist(),
-            hentSluttdato(etterlysning.getGrunnlagsreferanse()),
+            originalPeriode.map(DatoIntervallEntitet::getFomDato).orElseThrow(() -> new IllegalStateException("Finner ikke original periode for etterlysning " + etterlysning.getEksternReferanse())),
             originalPeriode.map(DatoIntervallEntitet::getTomDato).filter(d -> !d.equals(TIDENES_ENDE)).orElse(null)
         );
     }

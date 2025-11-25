@@ -53,7 +53,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
     private static boolean harEndretPeriodeSidenInitiell(EndretUngdomsprogramEtterlysningInput input,
                                                          BehandlingReferanse behandlingReferanse,
                                                          EtterlysningType etterlysningType) {
-        var erEndringSidenInitiell = !erEndring(etterlysningType, input.initiellPeriodegrunnlag(), input.gjeldendePeriodeGrunnlag());
+        var erEndringSidenInitiell = erEndring(etterlysningType, input.initiellPeriodegrunnlag(), input.gjeldendePeriodeGrunnlag());
 
         if (erEndringSidenInitiell) {
             return true;
@@ -64,11 +64,16 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
             return switch (etterlysningType) {
                 case UTTALELSE_ENDRET_STARTDATO -> harEndretStartdato(input);
                 case UTTALELSE_ENDRET_SLUTTDATO -> harEndretSluttdato(input.gjeldendePeriodeGrunnlag());
+                case UTTALELSE_FJERNET_PERIODE -> harIngenPerioder(input.gjeldendePeriodeGrunnlag());
                 default ->
                         throw new IllegalArgumentException("Ugyldig etterlysningstype for endring i programperiode: " + etterlysningType);
             };
         }
         return false;
+    }
+
+    private static boolean harIngenPerioder(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag) {
+        return ungdomsprogramPeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().isEmpty();
     }
 
     private static boolean harEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag) {
@@ -88,7 +93,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         return switch (etterlysningType) {
             case UTTALELSE_ENDRET_STARTDATO -> !finnEndretStartdatoer(førsteVersjonAvGrunnlag, andreVersjonAvGrunnlag).isEmpty();
             case UTTALELSE_ENDRET_SLUTTDATO -> !finnEndretSluttdatoer(førsteVersjonAvGrunnlag, andreVersjonAvGrunnlag).isEmpty();
-            case UTTALELSE_FJERNET_PERIODE -> !førsteVersjonAvGrunnlag.getUngdomsprogramPerioder().getPerioder().isEmpty() && andreVersjonAvGrunnlag.getUngdomsprogramPerioder().getPerioder().isEmpty();
+            case UTTALELSE_FJERNET_PERIODE -> !harIngenPerioder(førsteVersjonAvGrunnlag) && harIngenPerioder(andreVersjonAvGrunnlag);
             default ->
                     throw new IllegalArgumentException("Ikke gyldig etterlysningstype for endring i programperiode: " + etterlysningType);
         };
