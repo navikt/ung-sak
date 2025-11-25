@@ -48,7 +48,17 @@ public class InntektAbonnentTjeneste {
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    public void opprettAbonnement(AktørId aktørId, Periode periode) {
+    public void opprettAbonnement(AktørId aktørId, Periode periode){
+        var eksisterendeAbonnement = inntektAbonnementRepository.hentAbonnementForAktør(aktørId).orElse(null);
+        if (eksisterendeAbonnement != null) {
+            if (eksisterendeAbonnement.getPeriode().tilPeriode().equals(periode)) {
+                log.info("Prøver å opprette abonnement for aktør, men abonnementID = {} eksisterer allerede for denne periode", eksisterendeAbonnement.getAbonnementId());
+                return;
+            } else {
+                throw new IllegalStateException("Prøver å opprette at abonnement, men det eksisterer en abbonnentId = {} for aktøren, på en annen periode" + eksisterendeAbonnement.getAbonnementId());
+            }
+        }
+
         var tomFagsakPeriode = fagsakTjeneste.finnFagsakerForAktør(aktørId).stream()
             .filter(Fagsak::erÅpen)
             .map(fagsak -> fagsak.getPeriode().getTomDato())
