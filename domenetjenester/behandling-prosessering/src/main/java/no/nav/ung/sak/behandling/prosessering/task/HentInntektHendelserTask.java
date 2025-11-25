@@ -2,15 +2,12 @@ package no.nav.ung.sak.behandling.prosessering.task;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -40,9 +37,8 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private FagsakTjeneste fagsakTjeneste;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private boolean oppfriskKontrollbehandlingEnabled;
     private Duration ventetidFørNesteKjøring;
-    private boolean hentInntektHendelserUtenOppfriskingEnabled;
+    private boolean oppfriskVedInkommendeInntektshendelseEnabled;
 
     public HentInntektHendelserTask() {
         // For CDI
@@ -53,13 +49,13 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
                                     FagsakTjeneste fagsakTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
-                                    @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_UTEN_OPPFRISKING_ENABLED", required = false, defaultVerdi = "true") boolean hentInntektHendelserUtenOppfriskingEnabled,
+                                    @KonfigVerdi(value = "OPPFRISK_VED_INNKOMMENDE_INNTEKTSHENDELSE_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskVedInkommendeInntektshendelseEnabled,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALL", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring){
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.hentInntektHendelserUtenOppfriskingEnabled = hentInntektHendelserUtenOppfriskingEnabled;
+        this.oppfriskVedInkommendeInntektshendelseEnabled = oppfriskVedInkommendeInntektshendelseEnabled;
         this.ventetidFørNesteKjøring = Duration.parse(ventetidFørNesteKjøring);
     }
 
@@ -104,7 +100,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         log.info("Fant {} relevante behandlinger fra {} hendelser", relevanteBehandlinger.size(), nyeInntektHendelser.size());
 
 
-        if (!hentInntektHendelserUtenOppfriskingEnabled) {
+        if (!oppfriskVedInkommendeInntektshendelseEnabled) {
             var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
             if (oppfriskTasker.isEmpty()) {
                 log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
