@@ -28,7 +28,7 @@ public class InntektAbonnement extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_INNTEKT_ABONNEMENT")
     private Long id;
 
-    @Column(name = "abonnement_id", nullable = false, unique = true)
+    @Column(name = "abonnement_id", nullable = false)
     private String abonnementId;
 
     @Embedded
@@ -39,7 +39,7 @@ public class InntektAbonnement extends BaseEntitet {
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
-    @Column(name = "siste_bruksdag", nullable = false, unique = false)
+    @Column(name = "siste_bruksdag", nullable = false)
     private LocalDate sisteBruksdag;
 
     @Version
