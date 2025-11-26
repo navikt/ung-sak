@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @ApplicationScoped
 @ProsessTask(value = HentInntektHendelserTask.TASKTYPE)
@@ -62,30 +61,47 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-
-        var fraSekvensnummer = hentEllerInitialiserSekvensnummer(prosessTaskData);
-        if (fraSekvensnummer.isEmpty()) {
+        var inntektHendelseTilstand = lagreInntektHendelseTilstand(prosessTaskData);
+        if (!inntektHendelseTilstand.kanHenteHendelser()) {
             log.info("Ingen hendelser tilgjengelig fra inntektskomponenten, hopper over henting. Prøver igjen senere.");
-            opprettNesteTask(null);
+            opprettNesteTask(inntektHendelseTilstand);
             return;
         }
 
-        log.info("Starter henting av inntektshendelser fra sekvensnummer={}", fraSekvensnummer);
-
-        var nyeInntektHendelser = inntektAbonnentTjeneste.hentNyeInntektHendelser(fraSekvensnummer.get());
+        var nyeInntektHendelser = hentNyeHendelser(inntektHendelseTilstand);
         if (nyeInntektHendelser.isEmpty()) {
             log.info("Ingen nye inntektshendelser funnet");
-            opprettNesteTask(fraSekvensnummer.get());
+            opprettNesteTask(inntektHendelseTilstand);
             return;
         }
-
         behandleHendelser(nyeInntektHendelser);
+        opprettNesteTask(inntektHendelseTilstand.oppdaterTilstand(nyeInntektHendelser));
+    }
 
-        var sisteSekvensnummer = nyeInntektHendelser.stream()
-            .mapToLong(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
-            .max()
-            .orElseThrow();
-        opprettNesteTask(sisteSekvensnummer + 1);
+    private InntektHendelseTilstand lagreInntektHendelseTilstand(ProsessTaskData prosessTaskData) {
+        String fraSekvensnummer = prosessTaskData.getPropertyValue(SEKVENSNUMMER_KEY);
+        if (fraSekvensnummer == null) {
+            log.info("Første kjøring av task for henting av inntektshendelser. Henter første sekvensnummer fra inntektskomponenten.");
+            return new InntektHendelseTilstand(inntektAbonnentTjeneste.hentFørsteSekvensnummer().orElse(null));
+        }
+        return new InntektHendelseTilstand(Long.parseLong(fraSekvensnummer));
+    }
+
+    private List<InntektAbonnentTjeneste.InntektHendelse> hentNyeHendelser(InntektHendelseTilstand inntektHendelseTilstand){
+        log.info("Starter henting av inntektshendelser fra sekvensnummer={}", inntektHendelseTilstand.fraSekvensnummer());
+        return inntektAbonnentTjeneste.hentNyeInntektHendelser(inntektHendelseTilstand.fraSekvensnummer());
+    }
+
+    private void opprettNesteTask(InntektHendelseTilstand inntektHendelseTilstand) {
+        var nesteTask = ProsessTaskData.forProsessTask(HentInntektHendelserTask.class);
+        nesteTask.setNesteKjøringEtter(LocalDateTime.now().plus(ventetidFørNesteKjøring));
+        if (inntektHendelseTilstand.kanHenteHendelser()) {
+            nesteTask.setProperty(SEKVENSNUMMER_KEY, String.valueOf(inntektHendelseTilstand.fraSekvensnummer()));
+            log.info("Opprettet neste task med sekvensnummer={}", inntektHendelseTilstand.fraSekvensnummer());
+        } else {
+            log.info("Opprettet neste task uten sekvensnummer");
+        }
+        prosessTaskTjeneste.lagre(nesteTask);
     }
 
     private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
@@ -125,16 +141,6 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
             .toList();
     }
 
-    private Optional<Long> hentEllerInitialiserSekvensnummer(ProsessTaskData prosessTaskData) {
-        String sekvensnummerVerdi = prosessTaskData.getPropertyValue(SEKVENSNUMMER_KEY);
-
-        if (sekvensnummerVerdi == null) {
-            log.info("Første kjøring av task for henting av inntektshendelser. Henter første sekvensnummer fra inntektskomponenten.");
-            return inntektAbonnentTjeneste.hentFørsteSekvensnummer();
-        }
-
-        return Optional.of(Long.parseLong(sekvensnummerVerdi));
-    }
 
     private List<ProsessTaskData> opprettOppfriskTaskerForBehandlinger(List<Behandling> behandlinger) {
         return behandlinger.stream()
@@ -158,15 +164,18 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
     }
 
-    private void opprettNesteTask(Long nesteSekvensnummer) {
-        var nesteTask = ProsessTaskData.forProsessTask(HentInntektHendelserTask.class);
-        nesteTask.setNesteKjøringEtter(LocalDateTime.now().plus(ventetidFørNesteKjøring));
-        if (nesteSekvensnummer != null) {
-            nesteTask.setProperty(SEKVENSNUMMER_KEY, String.valueOf(nesteSekvensnummer));
-            log.info("Opprettet neste task med sekvensnummer={}", nesteSekvensnummer);
-        } else {
-            log.info("Opprettet neste task uten sekvensnummer");
+    private record InntektHendelseTilstand(Long fraSekvensnummer) {
+        boolean kanHenteHendelser(){
+            return fraSekvensnummer != null;
         }
-        prosessTaskTjeneste.lagre(nesteTask);
+
+        InntektHendelseTilstand oppdaterTilstand(List<InntektAbonnentTjeneste.InntektHendelse> hendelser) {
+            Long nesteSekvensnummer = hendelser.stream()
+                .mapToLong(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
+                .max()
+                .orElseThrow() + 1;
+            return new InntektHendelseTilstand(nesteSekvensnummer);
+        }
     }
+
 }
