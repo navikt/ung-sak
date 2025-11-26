@@ -9,6 +9,7 @@
     <sequence-generator name="SEQ_GR_KONTROLLERT_INNTEKT" allocation-size="50" sequence-name="SEQ_GR_KONTROLLERT_INNTEKT"/>
     <sequence-generator name="SEQ_KONTROLLERT_INNTEKT_PERIODER" allocation-size="50" sequence-name="SEQ_KONTROLLERT_INNTEKT_PERIODER"/>
     <sequence-generator name="SEQ_KONTROLLERT_INNTEKT_PERIODE" allocation-size="50" sequence-name="SEQ_KONTROLLERT_INNTEKT_PERIODE"/>
+    <sequence-generator name="SEQ_INNTEKT_ABONNEMENT" allocation-size="50" sequence-name="SEQ_INNTEKT_ABONNEMENT"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelse"/>
     <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode"/>
@@ -17,5 +18,5 @@
     <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPerioder"/>
     <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode"/>
 
-
+    <entity class="no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement"/>
 </entity-mappings>
