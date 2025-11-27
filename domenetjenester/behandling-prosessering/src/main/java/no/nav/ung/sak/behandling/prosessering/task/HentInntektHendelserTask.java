@@ -164,7 +164,7 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
     }
 
-    private record InntektHendelseTilstand(Long fraSekvensnummer) {
+    record InntektHendelseTilstand(Long fraSekvensnummer) {
         boolean kanHenteHendelser(){
             return fraSekvensnummer != null;
         }
