@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
 import no.nav.ung.sak.behandlingslager.Range;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Periode;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
@@ -52,9 +53,10 @@ public class InntektAbonnement extends BaseEntitet {
     public InntektAbonnement() {
     }
 
-    public InntektAbonnement(String abonnementId, AktørId aktørId) {
+    public InntektAbonnement(String abonnementId, AktørId aktørId, Periode periode) {
         this.abonnementId = abonnementId;
         this.aktørId = aktørId;
+        setPeriode(periode.getFom(), periode.getTom());
     }
 
     public Long getId() {

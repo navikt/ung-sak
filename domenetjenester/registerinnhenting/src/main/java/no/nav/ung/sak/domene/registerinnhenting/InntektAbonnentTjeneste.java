@@ -75,11 +75,13 @@ public class InntektAbonnentTjeneste {
             tomFagsakPeriode,
             BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER
         );
-        inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId));
+        inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId, periode));
     }
 
     public Optional<Long> hentFørsteSekvensnummer() {
-        return  inntektAbonnentKlient.hentStartSekvensnummer(LocalDate.now());
+        Optional<Long> resultat = inntektAbonnentKlient.hentStartSekvensnummer(LocalDate.now());
+        log.info("Forsøkte å hente første sekvensnummer for hendelser fra inntektskomponenten, fikk {}", resultat.orElse(null));
+        return resultat;
     }
 
     public List<InntektHendelse> hentNyeInntektHendelser(long startSekvensnummer) {
