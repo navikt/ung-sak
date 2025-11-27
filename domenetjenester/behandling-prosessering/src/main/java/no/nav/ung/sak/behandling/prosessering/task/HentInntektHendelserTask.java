@@ -98,18 +98,10 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     }
 
     private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
-        log.info("Hentet {} nye inntektshendelser", nyeInntektHendelser.size());
-
         var relevanteBehandlinger = finnRelevanteBehandlinger(nyeInntektHendelser);
-
-        if (relevanteBehandlinger.isEmpty()) {
-            log.info("Ingen hendelser matchet aktive behandlinger");
-        }
-
         log.info("Fant {} relevante behandlinger fra {} hendelser", relevanteBehandlinger.size(), nyeInntektHendelser.size());
 
-
-        if (!oppfriskVedInkommendeInntektshendelseEnabled) {
+        if (oppfriskVedInkommendeInntektshendelseEnabled) {
             var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
             if (oppfriskTasker.isEmpty()) {
                 log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
