@@ -70,11 +70,17 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         String sekvensnummerFraTask = prosessTaskData.getPropertyValue(SEKVENSNUMMER_KEY);
         Long sekvensnummer = sekvensnummerFraTask != null ? Long.valueOf(Long.parseLong(sekvensnummerFraTask)) : inntektAbonnentTjeneste.hentFørsteSekvensnummer().orElse(null);
         List<InntektAbonnentTjeneste.InntektHendelse> hendelser = sekvensnummer != null ? inntektAbonnentTjeneste.hentNyeInntektHendelser(sekvensnummer) : List.of();
-        Long høyesteSekvensnummerIHendelser = hendelser.stream()
-            .map(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
-            .max(Comparator.naturalOrder())
-            .orElse(null);
-        Long nesteSekvensnummer = hendelser.isEmpty() ? sekvensnummer : Long.valueOf(høyesteSekvensnummerIHendelser + 1);
+
+        Long nesteSekvensnummer;
+        if (hendelser.isEmpty()) {
+            nesteSekvensnummer = sekvensnummer;
+        } else {
+            Long høyesteSekvensnummerIHendelser = hendelser.stream()
+                .map(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
+                .max(Comparator.naturalOrder())
+                .orElseThrow();
+            nesteSekvensnummer = høyesteSekvensnummerIHendelser + 1;
+        }
         opprettNesteTask(nesteSekvensnummer);
         return hendelser;
     }
