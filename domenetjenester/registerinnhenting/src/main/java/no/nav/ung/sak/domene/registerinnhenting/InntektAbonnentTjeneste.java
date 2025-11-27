@@ -104,11 +104,6 @@ public class InntektAbonnentTjeneste {
     public record InntektHendelse(Long sekvensnummer, AktørId aktørId, Periode periode) {
     }
 
-    private List<InntektAbonnentKlient.AbonnementHendelse> hentAbonnentHendelser(long sekvensnummer) {
-        return inntektAbonnentKlient.hentAbonnentHendelser(sekvensnummer, List.of(UNG_INNTEKT_FILTER));
-    }
-
-
     private static class InntektHendelseMapper {
         static List<InntektHendelse> tilDomeneListe(List<InntektAbonnentKlient.AbonnementHendelse> hendelser) {
             return hendelser.stream()
