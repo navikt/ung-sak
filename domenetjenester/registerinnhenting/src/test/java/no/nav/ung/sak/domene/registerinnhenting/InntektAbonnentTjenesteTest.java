@@ -1,11 +1,11 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -111,6 +111,49 @@ class InntektAbonnentTjenesteTest {
         assertThatThrownBy(() -> inntektAbonnenentTjeneste.opprettAbonnement(aktørId, periode))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Fant ingen åpen fagsak");
+    }
+
+    @Test
+    void opprettelse_av_abonnement_skal_opprette_nytt_abonnement_og_lagre() {
+        // Arrange
+        long forventetAbonnementId = 98765L;
+        Fagsak fagsak = mock(Fagsak.class);
+        DatoIntervallEntitet periodeEntitet = mock(DatoIntervallEntitet.class);
+
+        when(fagsak.erÅpen()).thenReturn(true);
+        when(fagsak.getPeriode()).thenReturn(periodeEntitet);
+        when(periodeEntitet.getTomDato()).thenReturn(tomFagsakPeriode);
+
+        when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
+            .thenReturn(Optional.empty());
+        when(fagsakTjeneste.finnFagsakerForAktør(aktørId))
+            .thenReturn(List.of(fagsak));
+        when(tpsTjeneste.hentFnr(aktørId))
+            .thenReturn(Optional.of(personIdent));
+        when(inntektAbonnentKlient.opprettAbonnement(
+            any(), any(), anyList(), any(), any(), any(), anyInt()
+        )).thenReturn(forventetAbonnementId);
+
+        ArgumentCaptor<InntektAbonnement> abonnementCaptor = ArgumentCaptor.forClass(InntektAbonnement.class);
+
+        // Act
+        inntektAbonnenentTjeneste.opprettAbonnement(aktørId, periode);
+
+        // Assert
+        verify(inntektAbonnentKlient).opprettAbonnement(
+            personIdent,
+            "Ung",
+            List.of("Ung"),
+            YearMonth.from(periode.getFom()),
+            YearMonth.from(periode.getTom()),
+            tomFagsakPeriode,
+            1
+        );
+
+        verify(inntektAbonnementRepository).lagre(abonnementCaptor.capture());
+        InntektAbonnement lagretAbonnement = abonnementCaptor.getValue();
+        assertThat(lagretAbonnement.getAbonnementId()).isEqualTo(String.valueOf(forventetAbonnementId));
+        assertThat(lagretAbonnement.getAktørId()).isEqualTo(aktørId);
     }
 
     @Test

@@ -148,5 +148,18 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
     }
 
+    record InntektHendelseTilstand(Long fraSekvensnummer) {
+        boolean kanHenteHendelser(){
+            return fraSekvensnummer != null;
+        }
+
+        InntektHendelseTilstand oppdaterTilstand(List<InntektAbonnentTjeneste.InntektHendelse> hendelser) {
+            Long nesteSekvensnummer = hendelser.stream()
+                .mapToLong(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
+                .max()
+                .orElseThrow() + 1;
+            return new InntektHendelseTilstand(nesteSekvensnummer);
+        }
+    }
 
 }

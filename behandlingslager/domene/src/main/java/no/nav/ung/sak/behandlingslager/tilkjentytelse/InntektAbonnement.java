@@ -29,7 +29,7 @@ public class InntektAbonnement extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_INNTEKT_ABONNEMENT")
     private Long id;
 
-    @Column(name = "abonnement_id", nullable = false)
+    @Column(name = "abonnement_id", nullable = false, unique = true)
     private String abonnementId;
 
     @Embedded
@@ -75,7 +75,7 @@ public class InntektAbonnement extends BaseEntitet {
         return DatoIntervallEntitet.fra(periode);
     }
 
-    void setPeriode(LocalDate fom, LocalDate tom) {
+    public void setPeriode(LocalDate fom, LocalDate tom) {
         if ((fom == null || fom.equals(Tid.TIDENES_BEGYNNELSE))) {
             throw new IllegalArgumentException(String.format("Alle saker må angi en startdato: [%s, %s]", fom, tom));
         }
