@@ -105,12 +105,6 @@ public class InntektAbonnentTjeneste {
     }
 
     private static class InntektHendelseMapper {
-        static List<InntektHendelse> tilDomeneListe(List<InntektAbonnentKlient.AbonnementHendelse> hendelser) {
-            return hendelser.stream()
-                .map(InntektHendelseMapper::tilDomene)
-                .toList();
-        }
-
         static InntektHendelse tilDomene(InntektAbonnentKlient.AbonnementHendelse hendelse) {
             return new InntektHendelse(
                 hendelse.sekvensnummer(),
@@ -119,5 +113,4 @@ public class InntektAbonnentTjeneste {
             );
         }
     }
-
 }
