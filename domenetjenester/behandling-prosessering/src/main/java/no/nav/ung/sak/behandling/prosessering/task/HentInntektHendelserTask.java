@@ -68,10 +68,13 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
 
     private List<InntektAbonnentTjeneste.InntektHendelse> hentHendelserOgReschedulerTask(ProsessTaskData prosessTaskData) {
         String sekvensnummerFraTask = prosessTaskData.getPropertyValue(SEKVENSNUMMER_KEY);
-        Long sekvensnummer = sekvensnummerFraTask != null ? Long.parseLong(sekvensnummerFraTask) : inntektAbonnentTjeneste.hentFørsteSekvensnummer().orElse(null);
+        Long sekvensnummer = sekvensnummerFraTask != null ? Long.valueOf(Long.parseLong(sekvensnummerFraTask)) : inntektAbonnentTjeneste.hentFørsteSekvensnummer().orElse(null);
         List<InntektAbonnentTjeneste.InntektHendelse> hendelser = sekvensnummer != null ? inntektAbonnentTjeneste.hentNyeInntektHendelser(sekvensnummer) : List.of();
-        Long høyesteSekvensnummerIHendelser = hendelser.stream().map(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer).max(Comparator.naturalOrder()).orElse(null);
-        Long nesteSekvensnummer = hendelser.isEmpty() ? sekvensnummer : høyesteSekvensnummerIHendelser + 1;
+        Long høyesteSekvensnummerIHendelser = hendelser.stream()
+            .map(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
+            .max(Comparator.naturalOrder())
+            .orElse(null);
+        Long nesteSekvensnummer = hendelser.isEmpty() ? sekvensnummer : Long.valueOf(høyesteSekvensnummerIHendelser + 1);
         opprettNesteTask(nesteSekvensnummer);
         return hendelser;
     }
@@ -147,19 +150,4 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
         String gruppeId = prosessTaskTjeneste.lagre(gruppe);
         log.info("Lagret {} oppfrisk-tasker i taskgruppe [{}]", oppfriskTasker.size(), gruppeId);
     }
-
-    record InntektHendelseTilstand(Long fraSekvensnummer) {
-        boolean kanHenteHendelser(){
-            return fraSekvensnummer != null;
-        }
-
-        InntektHendelseTilstand oppdaterTilstand(List<InntektAbonnentTjeneste.InntektHendelse> hendelser) {
-            Long nesteSekvensnummer = hendelser.stream()
-                .mapToLong(InntektAbonnentTjeneste.InntektHendelse::sekvensnummer)
-                .max()
-                .orElseThrow() + 1;
-            return new InntektHendelseTilstand(nesteSekvensnummer);
-        }
-    }
-
 }
