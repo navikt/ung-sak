@@ -1,6 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
