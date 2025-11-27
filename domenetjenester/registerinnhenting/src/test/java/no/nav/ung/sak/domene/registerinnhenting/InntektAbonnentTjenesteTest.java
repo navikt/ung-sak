@@ -72,8 +72,7 @@ class InntektAbonnentTjenesteTest {
     @Test
     void opprettelse_av_abonnement_skal_returnene_tidlig_dersom_det_finnes_et_abonnement_for_aktøren_i_samme_periode() {
         // Arrange
-        var eksisterendeAbonnement = new InntektAbonnement("12345", aktørId);
-        eksisterendeAbonnement.setPeriode(periode.getFom(),periode.getTom());
+        var eksisterendeAbonnement = new InntektAbonnement("12345", aktørId, periode);
         when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
             .thenReturn(Optional.of(eksisterendeAbonnement));
 
@@ -89,8 +88,7 @@ class InntektAbonnentTjenesteTest {
     void opprettelse_av_abonnement_skal_kaste_feil_dersom_det_finnes_et_abonnement_for_aktøren_i_en_annen_periode() {
         // Arrange
         var annenPeriode = new Periode(LocalDate.now().minusYears(1), LocalDate.now().minusMonths(6));
-        var eksisterendeAbonnement = new InntektAbonnement("12345", aktørId);
-        eksisterendeAbonnement.setPeriode(annenPeriode.getFom(),annenPeriode.getTom());
+        var eksisterendeAbonnement = new InntektAbonnement("12345", aktørId, annenPeriode);
 
         when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
             .thenReturn(Optional.of(eksisterendeAbonnement));
@@ -221,7 +219,7 @@ class InntektAbonnentTjenesteTest {
     void avslutning_av_abonnement_skal_slette_om_abonnement_finnes() {
         // Arrange
         String abonnementId = "99999";
-        var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId);
+        var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId, periode);
 
 
         when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
@@ -239,7 +237,7 @@ class InntektAbonnentTjenesteTest {
     void avslutt_abonnement_skal_parse_abonnementId_riktig() {
         // Arrange
         String abonnementId = "123456789";
-        var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId);
+        var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId, periode);
 
         when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
             .thenReturn(Optional.of(eksisterendeAbonnement));
