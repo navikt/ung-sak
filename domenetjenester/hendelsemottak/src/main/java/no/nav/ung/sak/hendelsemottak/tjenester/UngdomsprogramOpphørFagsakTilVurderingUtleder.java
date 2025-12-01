@@ -2,9 +2,6 @@ package no.nav.ung.sak.hendelsemottak.tjenester;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -12,16 +9,13 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
-import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 
 @ApplicationScoped
@@ -31,9 +25,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     private static final Logger logger = LoggerFactory.getLogger(UngdomsprogramOpphørFagsakTilVurderingUtleder.class);
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
-    private boolean kontrollSisteMndEnabled;
 
     public UngdomsprogramOpphørFagsakTilVurderingUtleder() {
         // For CDI
@@ -42,14 +34,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     @Inject
     public UngdomsprogramOpphørFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-                                                         KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
-                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
-                                                         @KonfigVerdi(value = "KONTROLL_SISTE_MND_ENABLED", defaultVerdi = "false") boolean kontrollSisteMndEnabled) {
+                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
-        this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
-        this.kontrollSisteMndEnabled = kontrollSisteMndEnabled;
     }
 
     @Override
