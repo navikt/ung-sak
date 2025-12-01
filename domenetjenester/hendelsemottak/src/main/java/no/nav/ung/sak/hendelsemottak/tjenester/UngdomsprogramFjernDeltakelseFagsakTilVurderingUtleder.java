@@ -55,7 +55,6 @@ public class UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder implements F
             if (relevantFagsak.isEmpty()) {
                 continue;
             }
-            // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), fjernetPeriode, hendelseId)) {
                 fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(
                     BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM,
@@ -81,11 +80,11 @@ public class UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder implements F
         if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM)) {
 
             final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
-            final var fjernetPeriodeFinnesIGrunnlag = ungdomsprogramPeriodeGrunnlag.stream()
+            final var fjernetPeriodeFinnesIkkeIGrunnlag = ungdomsprogramPeriodeGrunnlag.stream()
                 .flatMap(it -> it.getUngdomsprogramPerioder().getPerioder().stream())
                 .noneMatch(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fra(fjernetPeriode)));
 
-            if (fjernetPeriodeFinnesIGrunnlag) {
+            if (fjernetPeriodeFinnesIkkeIGrunnlag) {
                 logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert. Ignorer hendelse " + hendelseId);
                 return false;
             }
