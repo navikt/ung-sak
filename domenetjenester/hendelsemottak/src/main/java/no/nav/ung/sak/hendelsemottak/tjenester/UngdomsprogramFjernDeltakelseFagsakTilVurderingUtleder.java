@@ -82,7 +82,7 @@ public class UngdomsprogramFjernDeltakelseFagsakTilVurderingUtleder implements F
             .noneMatch(it -> it.getPeriode().overlapper(DatoIntervallEntitet.fra(fjernetPeriode)));
 
         if (fjernetPeriodeFinnesIkkeIGrunnlag) {
-            logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert. Ignorer hendelse " + hendelseId);
+            logger.info("Grunnlagsdata er oppdatert med fjernet periode. Ignorer hendelse " + hendelseId);
             return false;
         }
         return true;
