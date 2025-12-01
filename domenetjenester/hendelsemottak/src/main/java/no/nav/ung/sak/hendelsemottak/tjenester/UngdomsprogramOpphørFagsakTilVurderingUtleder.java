@@ -78,34 +78,15 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
             if (erNyInformasjonIHendelsen(sisteBehandling, opphørsdatoFraHendelse, hendelseId, saksnummer)) {
                 var årsaker = new ArrayList<ÅrsakOgPerioder>();
-
                 var opphørsÅrsak = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse));
                 årsaker.add(opphørsÅrsak);
-
-                if (kontrollSisteMndEnabled) {
-                    // Sjekker om det er gjort inntektskontroll for opphørsmåneden
-                    // Dersom det er gjort kontroll må vi gjøre ny kontroll med ny periode
-                    LocalDateTimeline<BigDecimal> kontrollertePerioder = kontrollerteInntektperioderTjeneste.hentTidslinje(sisteBehandling.getId());
-                    LocalDate sisteDagIOpphørsmåned = opphørsdatoFraHendelse.with(TemporalAdjusters.lastDayOfMonth());
-                    LocalDate førsteDagIOpphørsmåneden = opphørsdatoFraHendelse.withDayOfMonth(1);
-                    LocalDateInterval heleOpphørsmåneden = new LocalDateInterval(førsteDagIOpphørsmåneden, sisteDagIOpphørsmåned);
-                    if (harGjortKontrollIRestenAvMåneden(kontrollertePerioder, heleOpphørsmåneden)) {
-                        årsaker.add(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, Set.of(DatoIntervallEntitet.fraOgMedTilOgMed(førsteDagIOpphørsmåneden, opphørsdatoFraHendelse))));
-                    }
-                }
-
-                fagsaker.put(relevantFagsak.get(), årsaker);
+                fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse))));
             }
         }
 
 
         return fagsaker;
     }
-
-    private static boolean harGjortKontrollIRestenAvMåneden(LocalDateTimeline<BigDecimal> kontrollertePerioder, LocalDateInterval restenAvMåneden) {
-        return !kontrollertePerioder.intersection(restenAvMåneden).isEmpty();
-    }
-
 
     private DatoIntervallEntitet utledPeriode(Fagsak fagsak, LocalDate nyTomdato) {
         var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow();

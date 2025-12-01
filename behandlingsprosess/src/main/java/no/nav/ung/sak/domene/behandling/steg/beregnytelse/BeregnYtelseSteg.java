@@ -109,13 +109,13 @@ public class BeregnYtelseSteg implements BehandlingSteg {
     }
 
     private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<BigDecimal> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {
-        final var rapporterteInntekterSomIkkeOverlapperYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeMatchendeYtelseMåned(s, månedstidslinjeForYtelse)).toList();
+        final var rapporterteInntekterSomIkkeOverlapperYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeOverlappendeYtelseMåned(s, månedstidslinjeForYtelse)).toList();
         if (!rapporterteInntekterSomIkkeOverlapperYtelsesperiode.isEmpty()) {
             throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av månedstidslinjen: " + rapporterteInntekterSomIkkeOverlapperYtelsesperiode.stream().map(LocalDateSegment::getLocalDateInterval).toList());
         }
     }
 
-    private static boolean harIkkeMatchendeYtelseMåned(LocalDateSegment<?> s, LocalDateTimeline<YearMonth> månedstidslinje) {
+    private static boolean harIkkeOverlappendeYtelseMåned(LocalDateSegment<?> s, LocalDateTimeline<YearMonth> månedstidslinje) {
         return månedstidslinje.getLocalDateIntervals().stream().noneMatch(intervall -> intervall.overlaps(s.getLocalDateInterval()));
     }
 
