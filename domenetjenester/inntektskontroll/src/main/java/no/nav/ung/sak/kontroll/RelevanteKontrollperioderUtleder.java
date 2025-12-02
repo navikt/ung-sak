@@ -42,7 +42,7 @@ public class RelevanteKontrollperioderUtleder {
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(behandlingId);
         final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.stream().anyMatch(årsakerForKontroll::contains));
         if (markertForKontrollTidslinje.stream().anyMatch(s -> s.getLocalDateInterval().getFomDato().getDayOfMonth() != 1 || s.getLocalDateInterval().getTomDato().getDayOfMonth() != s.getLocalDateInterval().getTomDato().lengthOfMonth())) {
-            throw new IllegalStateException("Forventet at alle perioder markert for kontroll er hele måneder");
+            throw new IllegalStateException("Forventet at alle perioder markert for kontroll er hele måneder: " + markertForKontrollTidslinje.getLocalDateIntervals());
         }
         return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje);
     }
