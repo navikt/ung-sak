@@ -38,16 +38,23 @@ public class InntektkontrollOppgaveOppretter {
     private Function<Etterlysning, RegisterInntektOppgaveDTO> mapTilDto(long behandlingId, PersonIdent deltakerIdent, LocalDateTimeline<Boolean> programTidslinje) {
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
-            boolean gjelderSistePeriode = programTidslinje.intersection(new LocalDateInterval(etterlysning.getPeriode().getTomDato().plusDays(1), etterlysning.getPeriode().getTomDato().plusDays(1))).isEmpty();
+            LocalDateInterval etterlysningPeriode = etterlysning.getPeriode().toLocalDateInterval();
             return new RegisterInntektOppgaveDTO(deltakerIdent.getIdent(),
                 etterlysning.getEksternReferanse(),
                 etterlysning.getFrist(),
                 etterlysning.getPeriode().getFomDato(),
                 etterlysning.getPeriode().getTomDato(),
                 InntektKontrollOppgaveMapper.mapTilRegisterInntekter(registerinntekter),
-                gjelderSistePeriode
+                overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, programTidslinje)
                 );
         };
+    }
+
+    private static <T> boolean overlapperPeriodeDelvisMedProgramtidslinje(LocalDateInterval periode, LocalDateTimeline<T> programtidslinje) {
+        LocalDateTimeline<Boolean> periodeSomTidslinje = new LocalDateTimeline<>(periode, true);
+        LocalDateTimeline<T> overlapp = programtidslinje.intersection(periode);
+        LocalDateTimeline<Boolean> periodeEtterFjernetOverlapp = periodeSomTidslinje.disjoint(overlapp);
+        return !periodeEtterFjernetOverlapp.isEmpty();
     }
 
 
