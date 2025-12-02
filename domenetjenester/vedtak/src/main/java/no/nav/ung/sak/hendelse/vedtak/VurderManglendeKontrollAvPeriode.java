@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -41,7 +42,8 @@ public class VurderManglendeKontrollAvPeriode implements VurderOmVedtakPåvirker
         var saksnummer = new Saksnummer(vedtakHendelse.getSaksnummer());
         var fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer).orElseThrow();
         Behandling vedtattBehandling = behandlingRepository.hentBehandling(((YtelseV1) vedtakHendelse).getVedtakReferanse());
-        if (vedtattBehandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE) || erEndretOppstartTilTidligereMåned(vedtattBehandling)) {
+        if (erFørstegangssøknadEllerSøknadOmNyPeriode(vedtattBehandling) ||
+            erEndretOppstartTilTidligereMåned(vedtattBehandling)) {
             var perioderMedManglendeKontroll = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(vedtattBehandling.getId());
             if (!perioderMedManglendeKontroll.isEmpty()) {
                 return List.of(new SakMedPeriode(
@@ -53,6 +55,11 @@ public class VurderManglendeKontrollAvPeriode implements VurderOmVedtakPåvirker
         }
 
         return List.of();
+    }
+
+    private static boolean erFørstegangssøknadEllerSøknadOmNyPeriode(Behandling vedtattBehandling) {
+        return vedtattBehandling.getType() == BehandlingType.FØRSTEGANGSSØKNAD ||
+            vedtattBehandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE);
     }
 
     private boolean erEndretOppstartTilTidligereMåned(Behandling vedtattBehandling) {
