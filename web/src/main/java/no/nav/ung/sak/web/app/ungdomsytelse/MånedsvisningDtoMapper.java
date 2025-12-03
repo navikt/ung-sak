@@ -12,6 +12,7 @@ import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedD
 import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -52,7 +53,7 @@ public class MånedsvisningDtoMapper {
 
     private static Optional<BigDecimal> finnReduksjonsgrunnlag(LocalDateSegment<YearMonth> måned, Optional<BigDecimal> rapportertInntekt, Integer antallYtelsesdagerIMåned) {
         final var totaltAntallDagerIMåned = måned.getTom().lengthOfMonth();
-        final var reduksjonsgrunnlag = rapportertInntekt.map(it -> BigDecimal.valueOf(antallYtelsesdagerIMåned).divide(BigDecimal.valueOf(totaltAntallDagerIMåned))
+        final var reduksjonsgrunnlag = rapportertInntekt.map(it -> BigDecimal.valueOf(antallYtelsesdagerIMåned).divide(BigDecimal.valueOf(totaltAntallDagerIMåned), 0, RoundingMode.HALF_UP)
             .multiply(it));
         return reduksjonsgrunnlag;
     }
