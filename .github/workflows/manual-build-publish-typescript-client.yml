@@ -62,7 +62,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client
@@ -80,7 +80,7 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client
