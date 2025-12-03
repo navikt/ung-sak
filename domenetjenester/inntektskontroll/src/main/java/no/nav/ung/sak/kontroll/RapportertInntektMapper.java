@@ -13,14 +13,12 @@ import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.typer.Beløp;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.util.*;
 
 @Dependent
@@ -106,10 +104,10 @@ public class RapportertInntektMapper {
         return registerinntekter;
     }
 
-    private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<Boolean> månedsvisYtelseTidslinje, List<InntekterForKilde> grupperteInntekter) {
+    private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<Boolean> relevantTidslinje, List<InntekterForKilde> grupperteInntekter) {
         var registerTidslinje = new LocalDateTimeline<Set<RapportertInntekt>>(Set.of());
 
-        for (var intervall : månedsvisYtelseTidslinje.getLocalDateIntervals()) {
+        for (var intervall : relevantTidslinje.getLocalDateIntervals()) {
 
             final var inntekterForPeriode = finnRegisterinntektForPeriode(grupperteInntekter, intervall);
             if (!inntekterForPeriode.isEmpty()) {
@@ -205,9 +203,9 @@ public class RapportertInntektMapper {
         throw new IllegalArgumentException("Kunne ikke håndtere inntektsposttype: " + it.getInntektspostType());
     }
 
-    private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> månedsvisYtelseTidslinje) {
+    private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> relevantTidslinje) {
         // Finner rapporterte inntekter pr journalpost sortert på mottattdato med siste mottatt journalpost først
-        final var sorterteInntekttidslinjerPåMottattdato = finnSorterteInntektstidslinjer(iayGrunnlag, månedsvisYtelseTidslinje);
+        final var sorterteInntekttidslinjerPåMottattdato = finnSorterteInntektstidslinjer(iayGrunnlag, relevantTidslinje);
 
         var brukersRapporterteInntekter = new LocalDateTimeline<Set<RapportertInntekt>>(List.of());
         for (InntektForMottattidspunkt journalpostMedInntekttidslinje : sorterteInntekttidslinjerPåMottattdato) {
@@ -224,20 +222,20 @@ public class RapportertInntektMapper {
         return brukersRapporterteInntekter;
     }
 
-    private List<InntektForMottattidspunkt> finnSorterteInntektstidslinjer(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> månedsvisYtelseTidslinje) {
+    private List<InntektForMottattidspunkt> finnSorterteInntektstidslinjer(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> relevantTidslinje) {
         return iayGrunnlag.getOppgittOpptjeningAggregat()
             .stream()
             .flatMap(o -> o.getOppgitteOpptjeninger().stream())
-            .filter(o -> erRapportertForGyldigPeriode(o, månedsvisYtelseTidslinje))
+            .filter(o -> erRapportertForGyldigPeriode(o, relevantTidslinje))
             .map(RapportertInntektMapper::finnInntekterPrMottattidspunkt)
             .sorted(Comparator.reverseOrder())
             .toList();
     }
 
-    private boolean erRapportertForGyldigPeriode(OppgittOpptjening o, LocalDateTimeline<Boolean> månedsvisYtelseTidslinje) {
+    private boolean erRapportertForGyldigPeriode(OppgittOpptjening o, LocalDateTimeline<Boolean> relevantTidslinje) {
         return o.getOppgittArbeidsforhold().stream().map(OppgittArbeidsforhold::getPeriode)
             .map(DatoIntervallEntitet::toLocalDateInterval)
-            .allMatch(p -> månedsvisYtelseTidslinje.getLocalDateIntervals().stream().anyMatch(p::equals));
+            .allMatch(p -> relevantTidslinje.getLocalDateIntervals().stream().anyMatch(p::equals));
     }
 
     private static InntektForMottattidspunkt finnInntekterPrMottattidspunkt(OppgittOpptjening o) {
