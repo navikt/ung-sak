@@ -40,6 +40,10 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+    cooldown:
+      default-days: 7
+      exclude:
+        - "no.nav.*"
     open-pull-requests-limit: 15
     registries:
       - ung-sak
@@ -67,6 +71,8 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 15
 
   - package-ecosystem: docker

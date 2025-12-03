@@ -3,13 +3,11 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -17,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
+import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,8 +56,10 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private BehandlingRepository behandlingRepository;
     private KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter;
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
+    private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
     private Duration ventePeriode;
+    private boolean hentInntektHendelserEnabled;
 
 
     VurderKompletthetStegImpl() {
@@ -69,14 +70,18 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
                                      BehandlingRepository behandlingRepository,
                                      KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter,
                                      ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
+                                     InntektAbonnentTjeneste inntektAbonnentTjeneste,
                                      RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder,
-                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
+                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
+                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.kontrollerInntektEtterlysningOppretter = kontrollerInntektEtterlysningOppretter;
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
+        this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.rapporteringsfristAutopunktUtleder = rapporteringsfristAutopunktUtleder;
         this.ventePeriode = Duration.parse(ventePeriode);
+        this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
     }
 
     @Override
@@ -95,6 +100,10 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             log.info("Behandling {} har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.", kontekst.getBehandlingId());
         }
 
+        if (hentInntektHendelserEnabled) {
+            inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), behandling.getFagsak().getPeriode().tilPeriode());
+        }
+
         // Steg 2: Utled aksjonspunkter
         List<AksjonspunktResultat> aksjonspunktResultater = new ArrayList<>();
 
@@ -105,6 +114,11 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         // Sjekker etterlysninger opprettet i steg 1
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
+
+        if(etterlysningerSomVenterPåSvar.isEmpty()) {
+            inntektAbonnentTjeneste.avsluttAbonnentHvisFinnes(behandlingReferanse.getAktørId());
+        }
+
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }
 

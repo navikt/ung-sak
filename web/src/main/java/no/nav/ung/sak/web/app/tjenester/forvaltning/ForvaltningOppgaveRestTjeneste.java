@@ -107,11 +107,15 @@ public class ForvaltningOppgaveRestTjeneste {
 
         final var periodisertMånedvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(sisteBehandling.getId());
 
-        final var periode = periodisertMånedvis.stream()
+        final var overlappendeYtelsesperiode = periodisertMånedvis.stream()
             // Enum ordinal er 0-indeksert og montvalue er 1-indeksert
             .filter(it -> it.getFom().getMonth() == måned.tilMonth())
-            .findFirst().map(LocalDateSegment::getLocalDateInterval).get();
-        return periode;
+            .map(LocalDateSegment::getLocalDateInterval)
+            .findFirst();
+        if (overlappendeYtelsesperiode.isEmpty()) {
+            throw new IllegalArgumentException("Finner ikke ytelsesperiode for måned " + måned + " på sak " + fagsak.getSaksnummer().getVerdi());
+        }
+        return new LocalDateInterval(overlappendeYtelsesperiode.get().getFomDato().withDayOfMonth(1), overlappendeYtelsesperiode.get().getTomDato().withDayOfMonth(overlappendeYtelsesperiode.get().getTomDato().lengthOfMonth()));
     }
 
     @POST

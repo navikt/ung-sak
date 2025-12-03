@@ -204,6 +204,6 @@ class ManglendeKontrollperioderTjenesteTest {
 
 
     private ManglendeKontrollperioderTjeneste lagTjeneste(int dagIMånedForInntektsKontroll) {
-        return new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, dagIMånedForInntektsKontroll, tilkjentYtelseRepository, relevanteKontrollperioderUtleder);
+        return new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, dagIMånedForInntektsKontroll, tilkjentYtelseRepository, relevanteKontrollperioderUtleder);
     }
 }

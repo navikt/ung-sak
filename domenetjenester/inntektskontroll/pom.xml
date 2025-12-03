@@ -67,6 +67,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>arbeidsforhold-domene</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>arbeidsforhold</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
