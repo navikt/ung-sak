@@ -37,21 +37,21 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>9.2.0</felles.version>
-        <swagger.version>2.2.39</swagger.version>
+        <swagger.version>2.2.41</swagger.version>
         <junit.version>5.13.4</junit.version>
         <k9format.version>12.6.2</k9format.version>
-        <jackson.version>2.20.0</jackson.version>
+        <jackson.version>2.20.1</jackson.version>
         <asm.version>9.9</asm.version>
         <kotlin-stdlib.version>2.2.21</kotlin-stdlib.version>
-        <jandex.version>3.5.1</jandex.version>
+        <jandex.version>3.5.2</jandex.version>
         <pdfgen-core.version>1.1.65</pdfgen-core.version>
-        <flyway.version>11.15.0</flyway.version>
+        <flyway.version>11.17.2</flyway.version>
         <confluent.platform.version>8.1.0</confluent.platform.version>
         <mockito.version>5.20.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.6.0</ung-deltakelse-opplyser.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
-        <openhtmltopdf.version>1.1.31</openhtmltopdf.version>
+        <openhtmltopdf.version>1.1.32</openhtmltopdf.version>
         <jsoup.version>1.21.2</jsoup.version>
         <commonmark.version>0.27.0</commonmark.version>
 
@@ -93,7 +93,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>9.0.1.Final</version>
+                <version>9.1.0.Final</version>
             </dependency>
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
@@ -180,7 +180,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.21.0</version>
+                <version>2.22.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -448,7 +448,7 @@
             <dependency>
                 <groupId>org.owasp.encoder</groupId>
                 <artifactId>encoder</artifactId>
-                <version>1.3.1</version>
+                <version>1.4.0</version>
             </dependency>
             <dependency>
                 <groupId>org.junit.jupiter</groupId>
@@ -495,13 +495,13 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.20.0</version>
+                <version>2.21.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.19.0</version>
+                <version>1.20.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -712,7 +712,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -744,7 +744,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -764,7 +764,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
