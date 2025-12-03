@@ -73,6 +73,17 @@ public class UngdomsprogramPeriodeTjeneste {
             .filterValue(v -> v);
     }
 
+    public List<EndretDato> finnEndretStartdatoerFraOriginal(BehandlingReferanse behandlingReferanse) {
+        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId());
+        var originaltGrunnlag = behandlingReferanse.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag);
+        if (originaltGrunnlag.isEmpty() || ungdomsprogramPeriodeGrunnlag.isEmpty()) {
+            return List.of();
+        }
+        return finnEndretStartdatoer(ungdomsprogramPeriodeGrunnlag.get(), originaltGrunnlag.get());
+    }
+
+
+
     public static List<EndretDato> finnEndretStartdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
         // Støtter kun en periode her foreløpig
         var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
