@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -53,6 +54,9 @@ public class AvsluttBehandlingTest {
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
 
     @Mock
+    private InntektAbonnentTjeneste inntektAbonnentTjeneste;
+
+    @Mock
     private BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer;
 
     @Mock
@@ -79,7 +83,7 @@ public class AvsluttBehandlingTest {
         vurderBehandlingerUnderIverksettelse = new VurderBehandlingerUnderIverksettelse(repositoryProvider);
 
         avsluttBehandling = new AvsluttBehandling(repositoryProvider, behandlingskontrollTjeneste,
-            behandlingVedtakEventPubliserer, vurderBehandlingerUnderIverksettelse, prosessTaskRepository);
+            behandlingVedtakEventPubliserer, vurderBehandlingerUnderIverksettelse, prosessTaskRepository, inntektAbonnentTjeneste);
 
         when(behandlingskontrollTjeneste.initBehandlingskontroll(Mockito.anyLong())).thenAnswer(invocation -> {
             Long behId = invocation.getArgument(0);
