@@ -11,6 +11,8 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
@@ -40,8 +42,12 @@ public class RelevanteKontrollperioderUtleder {
                                                                                          Set<BehandlingÅrsakType> årsakerForKontroll) {
 
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(behandlingId);
+        if (relevantForKontrollTidslinje.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
         final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.stream().anyMatch(årsakerForKontroll::contains));
-        return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje);
+        return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje).compress()
+            .splitAtRegular(relevantForKontrollTidslinje.getMinLocalDate().withDayOfMonth(1), relevantForKontrollTidslinje.getMaxLocalDate(), Period.ofMonths(1));
     }
 
     /**
@@ -69,16 +75,16 @@ public class RelevanteKontrollperioderUtleder {
             final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, kontrollSisteMndEnabled);
             perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(it -> true);
         }
-        if (kontrollSisteMndEnabled) {
-            var mappedSegments = perioderForKontroll
-                .toSegments()
-                .stream()
-                .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), it.getValue()))
-                .toList(); // Mapper segmenter til å dekke hele måneder
-            perioderForKontroll = new LocalDateTimeline<>(mappedSegments, StandardCombinators::alwaysTrueForMatch).compress();
-        }
+        return utvidTilHeleMåneder(perioderForKontroll);
+    }
 
-        return perioderForKontroll;
+    private static LocalDateTimeline<Boolean> utvidTilHeleMåneder(LocalDateTimeline<Boolean> perioderForKontroll) {
+        var mappedSegments = perioderForKontroll
+            .toSegments()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), it.getValue()))
+            .toList(); // Mapper segmenter til å dekke hele måneder
+        return new LocalDateTimeline<>(mappedSegments, StandardCombinators::alwaysTrueForMatch).compress();
     }
 
     public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder, boolean kontrollSisteMndEnabled) {
