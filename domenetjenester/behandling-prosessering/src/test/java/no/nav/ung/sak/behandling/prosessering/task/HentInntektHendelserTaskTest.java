@@ -1,9 +1,11 @@
 package no.nav.ung.sak.behandling.prosessering.task;
 
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.db.util.CdiDbAwareTest;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
@@ -16,24 +18,26 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
+@CdiDbAwareTest
 class HentInntektHendelserTaskTest {
 
-    private InntektAbonnentTjeneste inntektAbonnentTjeneste;
+    @Inject
     private FagsakTjeneste fagsakTjeneste;
+
+    @Inject
     private BehandlingRepository behandlingRepository;
-    private ProsessTaskTjeneste prosessTaskTjeneste;
+
+    private final InntektAbonnentTjeneste inntektAbonnentTjeneste = mock(InntektAbonnentTjeneste.class);
+    private final ProsessTaskTjeneste prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
     private HentInntektHendelserTask task;
 
     @BeforeEach
     void setUp() {
-        inntektAbonnentTjeneste = mock(InntektAbonnentTjeneste.class);
-        fagsakTjeneste = mock(FagsakTjeneste.class);
-        behandlingRepository = mock(BehandlingRepository.class);
-        prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
-
         task = new HentInntektHendelserTask(
             inntektAbonnentTjeneste,
             fagsakTjeneste,
@@ -74,7 +78,6 @@ class HentInntektHendelserTaskTest {
 
         when(inntektAbonnentTjeneste.hentNyeInntektHendelser(1000L))
             .thenReturn(List.of(hendelse1, hendelse2, hendelse3));
-        when(fagsakTjeneste.finnFagsakerForAktør(any())).thenReturn(List.of());
 
         task.doTask(prosessTaskData);
 
