@@ -17,6 +17,7 @@ public class MånedsvisTidslinjeUtleder {
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final BehandlingRepository behandlingRepository;
 
+
     @Inject
     public MånedsvisTidslinjeUtleder(UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
@@ -34,8 +35,9 @@ public class MånedsvisTidslinjeUtleder {
         final var ungdomsprogramperioder = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
         final var fagsak = behandlingRepository.hentBehandling(behandlingId).getFagsak();
         final var fagsakPeriode = fagsak.getPeriode();
-        return ungdomsprogramperioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
-            .compress()
+        LocalDateTimeline<Boolean> programOgFagsakTidslinje = ungdomsprogramperioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
+            .compress();
+        return programOgFagsakTidslinje
             .splitAtRegular(ungdomsprogramperioder.getMinLocalDate().withDayOfMonth(1), fagsakPeriode.getTomDato(), Period.ofMonths(1))
             .map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonthValue()))));
     }

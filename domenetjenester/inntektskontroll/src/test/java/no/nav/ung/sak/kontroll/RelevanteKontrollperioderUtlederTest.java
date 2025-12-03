@@ -1,18 +1,167 @@
 package no.nav.ung.sak.kontroll;
 
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
+@ExtendWith(CdiAwareExtension.class)
+@ExtendWith(JpaExtension.class)
 class RelevanteKontrollperioderUtlederTest {
+
+    public static final LocalDate PROGRAMPERIODE_FOM = LocalDate.of(2025, 12, 15);
+    public static final LocalDate PROGRAMPERIODE_TOM = LocalDate.of(2026, 3, 15);
+    @Inject
+    private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    @Inject
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+
+    @Inject
+    private BehandlingRepository behandlingRepository;
+
+    @Inject
+    private FagsakRepository fagsakRepository;
+
+
+    @Inject
+    private ProsessTriggereRepository prosessTriggereRepository;
+
+    @Inject
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
+    private Behandling behandling;
+
+
+    @BeforeEach
+    void setUp() {
+
+        relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
+            prosessTriggerPeriodeUtleder,
+            månedsvisTidslinjeUtleder,
+            false
+        );
+
+        lagFagsakOgBehandling();
+
+        ungdomsprogramPeriodeRepository.lagre(
+            behandling.getId(),
+            List.of(new UngdomsprogramPeriode(PROGRAMPERIODE_FOM, PROGRAMPERIODE_TOM))
+        );
+
+    }
+
+
+    @Test
+    void skal_finne_perioder_for_kontroll_der_deler_av_relevante_perioder_er_markert() {
+        // Programperiode går fra desember til mars
+        // Markerer kun januar for kontroll
+        DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
+            LocalDate.of(2026, 1, 31));
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar)));
+
+        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+
+        assertEquals(new LocalDateTimeline<>(januar.toLocalDateInterval(), true), perioderForKontroll);
+    }
+
+
+    @Test
+    void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode() {
+        relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
+            prosessTriggerPeriodeUtleder,
+            månedsvisTidslinjeUtleder,
+            true
+        );
+
+        // Programperiode går fra desember til mars
+        // Markerer kun januar for kontroll
+        DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
+            LocalDate.of(2026, 1, 31));
+        DatoIntervallEntitet februar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 2, 1),
+            LocalDate.of(2026, 2, 28));
+        DatoIntervallEntitet mars = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1),
+            LocalDate.of(2026, 3, 31));
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar),
+            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, februar),
+            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, mars)
+            ));
+
+        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+
+        LocalDateTimeline<Boolean> expected = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(januar.toLocalDateInterval(), true),
+            new LocalDateSegment<>(februar.toLocalDateInterval(), true),
+            new LocalDateSegment<>(mars.toLocalDateInterval(), true)
+        ));
+
+        assertEquals(expected, perioderForKontroll);
+    }
+
+    @Test
+    void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode_og_annen_trigger() {
+        relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
+            prosessTriggerPeriodeUtleder,
+            månedsvisTidslinjeUtleder,
+            true
+        );
+
+        // Programperiode går fra desember til mars
+        // Markerer kun januar for kontroll
+        DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
+            LocalDate.of(2026, 1, 31));
+        DatoIntervallEntitet februar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 2, 1),
+            LocalDate.of(2026, 2, 28));
+        DatoIntervallEntitet mars = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1),
+            LocalDate.of(2026, 3, 31));
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar),
+            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, februar),
+            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, mars),
+        new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1), PROGRAMPERIODE_TOM))
+        ));
+
+        LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+
+        LocalDateTimeline<Boolean> expected = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(januar.toLocalDateInterval(), true),
+            new LocalDateSegment<>(februar.toLocalDateInterval(), true),
+            new LocalDateSegment<>(mars.toLocalDateInterval(), true)
+        ));
+
+        assertEquals(expected, perioderForKontroll);
+    }
+
 
     @Test
     void skal_finne_første_og_siste_periode_for_sammenhengende_ytelsestidslinje_med_tre_segmenter() {
@@ -26,7 +175,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 3))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(2, result.toSegments().size());
         final var første = result.toSegments().first();
@@ -51,7 +200,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 2))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(2, result.toSegments().size());
         final var første = result.toSegments().first();
@@ -83,7 +232,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 4))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(4, result.toSegments().size());
         final var iterator = result.toSegments().iterator();
@@ -128,7 +277,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 6))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
 
         assertEquals(4, result.toSegments().size());
         final var iterator = result.toSegments().iterator();
@@ -153,4 +302,10 @@ class RelevanteKontrollperioderUtlederTest {
         assertTrue(siste2.getValue().gjelderSistePeriode());
     }
 
+    private void lagFagsakOgBehandling() {
+        final var fagsak = new Fagsak(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), PROGRAMPERIODE_FOM, PROGRAMPERIODE_TOM);
+        fagsakRepository.opprettNy(fagsak);
+        behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+    }
 }

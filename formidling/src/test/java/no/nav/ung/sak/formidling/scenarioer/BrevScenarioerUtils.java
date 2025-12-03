@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
@@ -19,6 +20,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
@@ -30,10 +32,24 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
+import java.util.Map;
 
 public class BrevScenarioerUtils {
 
     public static final String DEFAULT_NAVN = "Ung Testesen";
+    public static final String DEFAULT_SAKSBEHANDLER_NAVN = "Sara Saksbehandler";
+    public static final String SAKSBEHANDLER_2_NAVN = "Siggurd Saksbehandler";
+    public static final String DEFAULT_BESLUTTER_NAVN = "Birger Beslutter";
+
+    public static String SAKSBEHANDLER1_IDENT = "SAKSB1";
+    public static String SAKSBEHANDLER2_IDENT = "SAKSB2";
+    public static String BESLUTTER_IDENT = "BESLUTTER";
+
+    public static final Map<String, String> identNavnMap = Map.of(
+        SAKSBEHANDLER1_IDENT, DEFAULT_SAKSBEHANDLER_NAVN,
+        SAKSBEHANDLER2_IDENT, SAKSBEHANDLER_2_NAVN,
+        BESLUTTER_IDENT, DEFAULT_BESLUTTER_NAVN
+    );
 
     static PersonInformasjon lagBarn(LocalDate barnFødselsdato) {
         return PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).medPersonas().barn(AktørId.dummy(), barnFødselsdato).build();
@@ -52,16 +68,25 @@ public class BrevScenarioerUtils {
         return tilkjentYtelsePerioderMedReduksjon(satser, tilkjentPeriode, LocalDateTimeline.empty());
     }
 
-    static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<BigDecimal> rapportertInntektTimeline) {
+    static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektHolder) {
         LocalDateTimeline<Boolean> ytelseTidslinje = splitPrMåned(new LocalDateTimeline<>(tilkjentPeriode, true));
         LocalDateTimeline<BeregnetSats> beregnetSats = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
-        return beregnetSats.intersection(ytelseTidslinje).combine(rapportertInntektTimeline,
+        return beregnetSats.intersection(ytelseTidslinje).combine(kontrollerInntektHolder,
             (s, lhs, rhs) -> {
-                var rapportertInntekt = rhs == null ? BigDecimal.ZERO : rhs.getValue();
-                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), rapportertInntekt).verdi());
+                var inntekt = rhs != null ? bestemInntekt(rhs.getValue()) : BigDecimal.ZERO;
+                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), inntekt).verdi());
             },
             LocalDateTimeline.JoinStyle.LEFT_JOIN
         );
+    }
+
+    private static BigDecimal bestemInntekt(KontrollerInntektHolder value) {
+        if (value.inntekt != null) {
+            // inntekt er fastsatt
+            return value.inntekt;
+        }
+        // inntekt er ikke fastsatt, bruker register inntekten
+        return value.registerInntekt != null ? value.registerInntekt : BigDecimal.ZERO;
     }
 
 
@@ -134,19 +159,81 @@ public class BrevScenarioerUtils {
         ))).stream().findFirst().orElseThrow().getValue();
     }
 
-    public static Behandling lagBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+    public static Behandling lagAvsluttetBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
+        BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
+        leggTilBeslutter(behandling,behandlingRepository);
+        behandling.avsluttBehandling();
+
+        return behandling;
+    }
+
+    public static Behandling lagÅpenBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
+        var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
+        BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
+
+        return behandling;
+    }
+
+    public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository) {
+        Aksjonspunkt aksjonspunkt = leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling);
+        behandling.setAnsvarligSaksbehandler(ident);
+        aksjonspunkt.setAnsvarligSaksbehandler(ident);
+
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+    }
+
+    private static Aksjonspunkt leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling) {
+        AksjonspunktTestSupport aksjonspunktTestSupport = new AksjonspunktTestSupport();
+        aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, aksjonspunktDefinisjon);
+        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
+        aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "utført");
+        return aksjonspunkt;
+    }
+
+    public static void leggTilBeslutter(Behandling behandling, BehandlingRepository behandlingRepository) {
+        leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling);
+        behandling.setAnsvarligBeslutter(BESLUTTER_IDENT);
+
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+    }
+
+    public static Behandling lagInnvilgetBehandling(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(ungTestscenario);
 
-        scenarioBuilder.leggTilAksjonspunkt(aksjonspunktDefinisjon, aksjonspunktDefinisjon.getBehandlingSteg());
-
         var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories1);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        Aksjonspunkt aksjonspunkt = behandling.getAksjonspunktFor(aksjonspunktDefinisjon);
-        new AksjonspunktTestSupport().setTilUtført(aksjonspunkt, "utført");
-        BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
-        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         return behandling;
+    }
+
+    public record KontrollerInntektHolder(BigDecimal inntekt, BigDecimal rapportertInntekt, BigDecimal registerInntekt, boolean erManueltVurdert) {
+        public static KontrollerInntektHolder forRegisterInntekt(BigDecimal registerInntekt) {
+            return new KontrollerInntektHolder(null, registerInntekt, registerInntekt, false);
+        }
+
+    }
+    public static LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektFraHolder(LocalDateInterval programperiode, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektTimeline) {
+        var kontrollertInntektPerioder = AbstractTestScenario.kontrollerInntektFraTilkjenYtelse(programperiode, tilkjentYtelsePerioder);
+        return new LocalDateTimeline<>(
+            kontrollertInntektPerioder.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).toList()
+        ).combine(kontrollerInntektTimeline, BrevScenarioerUtils::overskrivKontrollerInntektFraHolder, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    }
+
+    private static LocalDateSegment<KontrollertInntektPeriode> overskrivKontrollerInntektFraHolder(LocalDateInterval di, LocalDateSegment<KontrollertInntektPeriode> lhs, LocalDateSegment<KontrollerInntektHolder> rhs) {
+        KontrollerInntektHolder kontrollerInntekt = rhs.getValue();
+        return new LocalDateSegment<>(
+            di.getFomDato(), di.getTomDato(),
+            KontrollertInntektPeriode.ny()
+                .medInntekt(kontrollerInntekt != null && kontrollerInntekt.inntekt() != null ? kontrollerInntekt.inntekt() : lhs.getValue().getInntekt())
+                .medRapportertInntekt(kontrollerInntekt != null && kontrollerInntekt.rapportertInntekt() != null ? kontrollerInntekt.rapportertInntekt() : BigDecimal.ZERO)
+                .medRegisterInntekt(kontrollerInntekt != null && kontrollerInntekt.registerInntekt() != null ? kontrollerInntekt.rapportertInntekt() : BigDecimal.ZERO)
+                .medErManueltVurdert(kontrollerInntekt != null && kontrollerInntekt.erManueltVurdert() || lhs.getValue().getErManueltVurdert())
+                .medKilde(lhs.getValue().getKilde())
+                .medPeriode(DatoIntervallEntitet.fra(di)).build()
+        );
     }
 }

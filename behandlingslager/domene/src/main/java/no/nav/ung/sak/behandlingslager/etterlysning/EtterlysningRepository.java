@@ -28,9 +28,6 @@ public class EtterlysningRepository {
     }
 
     public Etterlysning lagre(Etterlysning etterlysning) {
-        if (etterlysning.getUttalelse().isPresent()) {
-            entityManager.persist(etterlysning.getUttalelse().get());
-        }
         entityManager.persist(etterlysning);
         entityManager.flush();
         return etterlysning;

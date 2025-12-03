@@ -6,6 +6,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -17,6 +19,7 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenDokument;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
+import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import org.slf4j.Logger;
@@ -31,18 +34,23 @@ public class InformasjonsbrevGenerererTjeneste {
     private PdfGenKlient pdfGen;
     private BrevMottakerTjeneste brevMottakerTjeneste;
     private Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere;
+    private MicrosoftGraphTjeneste microsoftGraphTjeneste;
+    private boolean enableBrevAnsvarlig;
 
     @Inject
     public InformasjonsbrevGenerererTjeneste(
         BehandlingRepository behandlingRepository,
         PdfGenKlient pdfGen,
         BrevMottakerTjeneste brevMottakerTjeneste,
-        @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere) {
+        @Any Instance<InformasjonsbrevInnholdBygger<?>> informasjonsbrevInnholdByggere, MicrosoftGraphTjeneste microsoftGraphTjeneste,
+        @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG", defaultVerdi = "true") boolean enableBrevAnsvarlig) {
 
         this.behandlingRepository = behandlingRepository;
         this.pdfGen = pdfGen;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
         this.informasjonsbrevInnholdByggere = informasjonsbrevInnholdByggere;
+        this.microsoftGraphTjeneste = microsoftGraphTjeneste;
+        this.enableBrevAnsvarlig = enableBrevAnsvarlig;
     }
 
     public InformasjonsbrevGenerererTjeneste() {
@@ -56,9 +64,10 @@ public class InformasjonsbrevGenerererTjeneste {
         var bygger = bestemBygger(informasjonsbrevBestillingInput);
         var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
+        BrevAnsvarligDto brevAnsvarlig = lagBrevansvarlig(informasjonsbrevBestillingInput.bestillerIdent());
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), false),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brevAnsvarlig),
                 innhold.templateInnholdDto()
             ));
 
@@ -78,6 +87,17 @@ public class InformasjonsbrevGenerererTjeneste {
             .get();
     }
 
+
+    private BrevAnsvarligDto lagBrevansvarlig(String bestillerIdent) {
+        if (!enableBrevAnsvarlig) {
+            return new BrevAnsvarligDto(false, null, null);
+        }
+        return new BrevAnsvarligDto(
+            false,
+            microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null),
+            null
+        );
+    }
 
 }
 

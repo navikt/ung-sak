@@ -40,7 +40,7 @@ public class EndringBarnetilleggScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))),
                 List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
-            ), null);
+            ), null, null);
     }
 
     /**
@@ -70,7 +70,7 @@ public class EndringBarnetilleggScenarioer {
                 BrevScenarioerUtils.lagBarn(barnFødselsdato.minusYears(5)),
                 BrevScenarioerUtils.lagBarn(barnFødselsdato),
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
-            ), null);
+            ), null, null);
     }
 
     /**
@@ -98,6 +98,6 @@ public class EndringBarnetilleggScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, DatoIntervallEntitet.fra(barnDødsdato, p.getTomDato()))),
                 List.of(
                 BrevScenarioerUtils.lagBarnMedDødsdato(fom.minusYears(1), barnDødsdato)
-            ), null);
+            ), null, null);
     }
 }

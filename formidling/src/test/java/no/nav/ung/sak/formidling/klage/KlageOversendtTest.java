@@ -27,7 +27,7 @@ class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
         var klage = KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuellUtenBeslutter(fnr,
             """
                 Vi har sendt saken til NAV Klageinstans \
                 Vi har vurdert klagen på vedtaket om ungdomsprogramytelse, og kommet fram til at vedtaket ikke \

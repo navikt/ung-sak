@@ -14,7 +14,7 @@ public class InformasjonsbrevVerifikasjon {
         %s\
         Med vennlig hilsen \
         Nav Arbeid og ytelser \
-        side av""";
+        %s side av""";
 
     static String medHeaderOgFooter(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
@@ -24,7 +24,8 @@ public class InformasjonsbrevVerifikasjon {
                 BrevTestUtils.brevDatoString(brevdato),
                 BrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
-                body);
+                body,
+                BrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN);
     }
 
 }

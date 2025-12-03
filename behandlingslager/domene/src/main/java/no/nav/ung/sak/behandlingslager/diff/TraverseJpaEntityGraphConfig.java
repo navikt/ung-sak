@@ -15,6 +15,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.lang.reflect.Modifier;
 
@@ -56,7 +57,9 @@ public class TraverseJpaEntityGraphConfig extends TraverseGraphConfig {
         super.valider(currentPath, targetClass);
 
         boolean ok = targetClass.isAnnotationPresent(Entity.class)
-            || targetClass.isAnnotationPresent(Embeddable.class);
+            || targetClass.isAnnotationPresent(Embeddable.class)
+            || targetClass.equals(AktørId.class);
+            ;
         if (!ok) {
             throw new IllegalArgumentException(
                 "target [" + targetClass + "] er ikke en Entity eller Embeddable (mangler annotation):" + currentPath); //$NON-NLS-1$ //$NON-NLS-2$

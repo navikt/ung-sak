@@ -43,6 +43,8 @@ public class KlagevurderingOppdaterer implements AksjonspunktOppdaterer<KlageVur
 
     @Override
     public OppdateringResultat oppdater(KlageVurderingResultatAksjonspunktDto dto, AksjonspunktOppdaterParameter param) {
+        dto.valider();
+
         Behandling behandling = behandlingRepository.hentBehandling(param.getRef().getBehandlingId());
         AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.fraKode(dto.getKode());
 

@@ -15,6 +15,7 @@ import no.nav.ung.sak.typer.Periode;
     @JsonSubTypes.Type(name = Hendelse.DOEDSFALL, value = DødsfallHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_OPPHOER, value = UngdomsprogramOpphørHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_ENDRET_STARTDATO, value = UngdomsprogramEndretStartdatoHendelse.class),
+    @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_FJERN_PERIODE, value = UngdomsprogramFjernDeltakelseHendelse.class),
 })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public interface Hendelse {
@@ -23,6 +24,7 @@ public interface Hendelse {
     String DOEDSFALL = "DOEDSFALL_V1";
     String UNGDOMSPROGRAM_OPPHOER = "UNGDOMSPROGRAM_OPPHOER";
     String UNGDOMSPROGRAM_ENDRET_STARTDATO = "UNGDOMSPROGRAM_ENDRET_STARTDATO";
+    String UNGDOMSPROGRAM_FJERN_PERIODE = "UNGDOMSPROGRAM_FJERN_PERIODE";
 
 
     HendelseType getHendelseType();

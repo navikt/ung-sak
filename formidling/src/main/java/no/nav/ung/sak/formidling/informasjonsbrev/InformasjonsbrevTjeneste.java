@@ -93,12 +93,12 @@ public class InformasjonsbrevTjeneste {
         return new String(chars);
     }
 
-    public GenerertBrev forhåndsvis(InformasjonsbrevBestillingRequest dto, Boolean kunHtml) {
-        return validerOgGenererBrev(dto, kunHtml);
+    public GenerertBrev forhåndsvis(InformasjonsbrevBestillingRequest dto, String bestillerIdent, Boolean kunHtml) {
+        return validerOgGenererBrev(dto, bestillerIdent, kunHtml);
     }
 
-    public BrevbestillingResultat bestill(InformasjonsbrevBestillingRequest dto) {
-        GenerertBrev generertBrev = validerOgGenererBrev(dto, false);
+    public BrevbestillingResultat bestill(InformasjonsbrevBestillingRequest dto, String bestillerIdent) {
+        GenerertBrev generertBrev = validerOgGenererBrev(dto, bestillerIdent, false);
         var behandling = behandlingRepository.hentBehandling(dto.behandlingId());
 
         BrevbestillingEntitet bestilling = BrevbestillingEntitet.nyBrevbestilling(
@@ -111,7 +111,7 @@ public class InformasjonsbrevTjeneste {
         return journalføringOgDistribusjonsTjeneste.journalførOgDistribuer(behandling, bestilling, generertBrev);
     }
 
-    private GenerertBrev validerOgGenererBrev(InformasjonsbrevBestillingRequest dto, Boolean kunHtml) {
+    private GenerertBrev validerOgGenererBrev(InformasjonsbrevBestillingRequest dto, String bestillerIdent, Boolean kunHtml) {
         var informasjonsbrevValgDtos = informasjonsbrevValg(dto.behandlingId());
         if (informasjonsbrevValgDtos.isEmpty()) {
             throw new IllegalArgumentException("Ingen informasjonsbrevvalg funnet for behandlingen");
@@ -137,7 +137,7 @@ public class InformasjonsbrevTjeneste {
         }
 
         return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(
-            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), Boolean.TRUE.equals(kunHtml)));
+            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), bestillerIdent, Boolean.TRUE.equals(kunHtml)));
     }
 
 }

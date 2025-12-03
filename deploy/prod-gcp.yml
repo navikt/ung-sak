@@ -81,8 +81,7 @@ spec:
         - application: ung-sak
         - application: kabal-api
           namespace: klage
-        #kommenter inn når ung-tilbake er i prod
-        #- application: ung-tilbake
+        - application: ung-tilbake
       external:
         - host: "dokarkiv.prod-fss-pub.nais.io"
         - host: "k9-abakus.prod-fss-pub.nais.io"
@@ -101,8 +100,7 @@ spec:
         - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
-        #kommenter inn når ung-tilbake er i prod
-        #- application: ung-tilbake
+        - application: ung-tilbake
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -230,9 +228,8 @@ spec:
       value: "api://prod-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
-    #kommenter inn når ung-tilbake er i prod
-    #- name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
-    #  value: "/ung/tilbake,api://prod-gcp.k9saksbehandling.ung-tilbake/.default"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+      value: "/ung/tilbake,api://prod-gcp.k9saksbehandling.ung-tilbake/.default"
 
     - name: SENSU_HOST
       value: "sensu.nais"
@@ -249,11 +246,15 @@ spec:
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "false"
     - name: KLAGE_ENABLED
-      value: "false"
+      value: "true"
     - name: INTEGRASJON_KABAL
-      value: "false"
+      value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
+    - name: KONTROLL_SISTE_MND_ENABLED
+      value: "false"
+    - name: ENABLE_BREV_ANSVARLIG
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
@@ -266,6 +267,8 @@ spec:
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P14D"
+    - name: HENT_INNTEKT_HENDElSER_INTERVALL
+      value: "PT1M"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

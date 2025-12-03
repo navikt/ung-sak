@@ -1,28 +1,30 @@
-package no.nav.ung.sak.formidling;
+package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.scenarioer.AvslagScenarioer;
+import no.nav.ung.sak.formidling.scenarioer.BrevScenarioerUtils;
 import no.nav.ung.sak.formidling.scenarioer.EndringInntektScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KombinasjonScenarioer;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -60,6 +62,7 @@ class VedtaksbrevTjenesteTest {
         assertThat(valg.enableRediger()).isTrue();
         assertThat(valg.redigert()).isFalse();
         assertThat(valg.kanOverstyreRediger()).isTrue();
+        assertThat(valg.harTidligereRedigertBrevHtml()).isFalse();
         assertThat(valg.redigertBrevHtml()).isNull();
         assertThat(valg.tidligereRedigertBrevHtml()).isNull();
 
@@ -102,6 +105,12 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterRedigering1.kanOverstyreRediger()).isTrue();
         assertThat(valgEtterRedigering1.redigertBrevHtml()).isEqualTo(redigertHtml);
         assertThat(valgEtterRedigering1.tidligereRedigertBrevHtml()).isNull();
+
+        var editorResponse = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
+        assertThat(editorResponse.original()).isNotNull();
+        String editorHtml = finnRedigertSeksjon(editorResponse.redigert()).innhold();
+        assertThat(editorHtml).isEqualTo(redigertHtml);
+        assertThat(editorResponse.tidligereRedigert()).isNull();
 
         //Forhåndsviser automatisk brev - skal fortsått gå bra
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, false)).contains(automatiskBrevHtmlSnippet);
@@ -194,8 +203,14 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterTilbakehopp.enableRediger()).isTrue();
         assertThat(valgEtterTilbakehopp.redigert()).isFalse();
         assertThat(valgEtterTilbakehopp.kanOverstyreRediger()).isTrue();
+        assertThat(valgEtterTilbakehopp.harTidligereRedigertBrevHtml()).isTrue();
         assertThat(valgEtterTilbakehopp.redigertBrevHtml()).isNull();
         assertThat(valgEtterTilbakehopp.tidligereRedigertBrevHtml()).isEqualTo(redigertHtml);
+
+        var editorResponse1 = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
+        assertThat(editorResponse1.redigert()).isNull();
+        var tidligereRedigertEditor1 = finnRedigertSeksjon(editorResponse1.tidligereRedigert());
+        assertThat(tidligereRedigertEditor1.innhold()).isEqualTo(redigertHtml);
 
         //Brevet behandlingen kommer til å bruke skal være automatisk brev
         assertThat(forhåndsvis(behandling, DokumentMalType.ENDRING_INNTEKT, null)).contains(automatiskBrevHtmlSnippet);
@@ -225,18 +240,28 @@ class VedtaksbrevTjenesteTest {
         assertThat(valgEtterTilbakehopp2.enableRediger()).isTrue();
         assertThat(valgEtterTilbakehopp2.redigert()).isTrue();
         assertThat(valgEtterTilbakehopp2.kanOverstyreRediger()).isTrue();
+        assertThat(valgEtterTilbakehopp2.harTidligereRedigertBrevHtml()).isFalse();
         assertThat(valgEtterTilbakehopp2.redigertBrevHtml()).isEqualTo(nyttRedigertBrev);
         assertThat(valgEtterTilbakehopp2.tidligereRedigertBrevHtml()).isNull();
+
+        var editorResponse2 = vedtaksbrevTjeneste.editor(behandling.getId(), DokumentMalType.ENDRING_INNTEKT);
+        var redigert2 = finnRedigertSeksjon(editorResponse2.redigert());
+        assertThat(redigert2.innhold()).isEqualTo(nyttRedigertBrev);
+        assertThat(editorResponse2.tidligereRedigert()).isNull();
+
+    }
+
+    private static VedtaksbrevSeksjon finnRedigertSeksjon(List<VedtaksbrevSeksjon> response) {
+        return response.stream().filter(it -> it.type() == VedtaksbrevSeksjonType.REDIGERBAR).findFirst().orElseThrow();
     }
 
     @Test
     void skal_ikke_lage_brev_hvis_hindret() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
-        var behandling = TestScenarioBuilder.builderMedSøknad()
-            .medBehandlingType(BehandlingType.FØRSTEGANGSSØKNAD)
-            .medUngTestGrunnlag(ungTestGrunnlag)
-            .buildOgLagreMedUng(ungTestRepositories);
+        var behandling = BrevScenarioerUtils.lagÅpenBehandlingMedAP(
+            ungTestGrunnlag, ungTestRepositories, AksjonspunktDefinisjon.FATTER_VEDTAK
+        );
 
         String automatiskBrevHtmlSnippet = "<h1>";
         String redigertHtml = "<h2>Manuell skrevet brev</h2>";
@@ -333,7 +358,7 @@ class VedtaksbrevTjenesteTest {
 
     private String forhåndsvis(Behandling behandling, DokumentMalType dokumentMalType, Boolean redigertVersjon) {
         return vedtaksbrevTjeneste.forhåndsvis(
-            new VedtaksbrevForhåndsvisRequest(behandling.getId(), redigertVersjon, true, dokumentMalType)
+            new VedtaksbrevForhåndsvisInput(behandling.getId(), dokumentMalType, redigertVersjon, true)
         ).dokument().html();
     }
 

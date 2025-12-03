@@ -1,10 +1,22 @@
 package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.k9.felles.exception.VLException;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
+import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,6 +62,7 @@ public class OppgaveTjeneste {
     private OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository;
     private ProsessTaskTjeneste taskTjeneste;
     private OppgaveRestKlient restKlient;
+
 
     OppgaveTjeneste() {
         // for CDI proxy
@@ -126,6 +139,17 @@ public class OppgaveTjeneste {
         logger.info("GOSYS ferdigstilte oppgave {} svar {}", aktivOppgave.getOppgaveId(), oppgv);
     }
 
+    public void avsluttOppgaveOgStartTask(Behandling behandling, OppgaveÅrsak oppgaveÅrsak, String taskType) {
+        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
+        taskGruppe.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
+        opprettTaskAvsluttOppgave(behandling, oppgaveÅrsak, false).ifPresent(taskGruppe::addNesteSekvensiell);
+        taskGruppe.addNesteSekvensiell(opprettProsessTask(behandling, new TaskType(taskType)));
+
+        taskGruppe.setCallIdFraEksisterende();
+
+        taskTjeneste.lagre(taskGruppe);
+    }
+
     private void ferdigstillOppgaveBehandlingKobling(OppgaveBehandlingKobling aktivOppgave) {
         aktivOppgave.ferdigstillOppgave(SubjectHandler.getSubjectHandler().getUid());
         oppgaveBehandlingKoblingRepository.lagre(aktivOppgave);
@@ -159,12 +183,8 @@ public class OppgaveTjeneste {
         Optional<OppgaveBehandlingKobling> oppgave = OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(oppgaveÅrsak, oppgaveBehandlingKoblinger);
         if (oppgave.isPresent()) {
             OppgaveBehandlingKobling aktivOppgave = oppgave.get();
-            // skal ikke avslutte oppgave av denne typen
-            if (OppgaveÅrsak.BEHANDLE_SAK_IT.equals(aktivOppgave.getOppgaveÅrsak())) {
-                return Optional.empty();
-            }
             ferdigstillOppgaveBehandlingKobling(aktivOppgave);
-            ProsessTaskData avsluttOppgaveTask = opprettProsessTask(behandling);
+            ProsessTaskData avsluttOppgaveTask = opprettProsessTask(behandling, new TaskType(AvsluttOppgaveTask.TASKTYPE));
             avsluttOppgaveTask.setOppgaveId(aktivOppgave.getOppgaveId());
             if (skalLagres) {
                 avsluttOppgaveTask.setCallIdFraEksisterende();
@@ -176,8 +196,8 @@ public class OppgaveTjeneste {
         }
     }
 
-    private ProsessTaskData opprettProsessTask(Behandling behandling) {
-        ProsessTaskData prosessTask = ProsessTaskData.forProsessTask(AvsluttOppgaveTask.class);
+    private ProsessTaskData opprettProsessTask(Behandling behandling, TaskType taskType) {
+        ProsessTaskData prosessTask = ProsessTaskData.forTaskType(taskType);
         prosessTask.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         prosessTask.setPrioritet(50);
         return prosessTask;
@@ -214,7 +234,6 @@ public class OppgaveTjeneste {
 
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), enhetsId, beskrivelse, høyPrioritet ? Prioritet.HOY : Prioritet.NORM, DEFAULT_OPPGAVEFRIST_DAGER,
             mapYtelseTypeTilTema(fagsak.getYtelseType()))
-                .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
                 .medOppgavetype(oppgaveÅrsak.getKode());
         var oppgave = restKlient.opprettetOppgave(orequest.build());
         logger.info("GOSYS opprettet VURDER VL oppgave {}", oppgave);
@@ -232,7 +251,7 @@ public class OppgaveTjeneste {
 
     public String opprettBehandleOppgaveForBehandlingMedPrioritetOgFrist(String behandlingId, String beskrivelse, boolean høyPrioritet, int fristDager) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER_VL : OppgaveÅrsak.BEHANDLE_SAK_VL;
+        OppgaveÅrsak oppgaveÅrsak = behandling.erRevurdering() ? OppgaveÅrsak.REVURDER : OppgaveÅrsak.BEHANDLE_SAK;
         return opprettOppgave(behandling, oppgaveÅrsak, beskrivelse, hentPrioritetKode(høyPrioritet), fristDager);
     }
 
@@ -245,7 +264,6 @@ public class OppgaveTjeneste {
         Fagsak fagsak = behandling.getFagsak();
         var orequest = createRestRequestBuilder(fagsak.getSaksnummer(), fagsak.getAktørId(), behandling.getBehandlendeEnhet(), beskrivelse, prioritet, fristDager,
             mapYtelseTypeTilTema(fagsak.getYtelseType()))
-            .medBehandlingstema(BehandlingTema.finnForFagsakYtelseType(fagsak.getYtelseType()).getOffisiellKode())
             .medOppgavetype(oppgaveÅrsak.getKode());
         var oppgave = restKlient.opprettetOppgave(orequest.build());
         logger.info("Ungsak GOSYS opprettet oppgave med oppgaveid={} for behandling={}, saksnummer={}", oppgave.getId(), behandling.getId(), fagsak.getSaksnummer());

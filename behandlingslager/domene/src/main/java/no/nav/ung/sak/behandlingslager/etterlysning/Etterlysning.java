@@ -1,14 +1,21 @@
 package no.nav.ung.sak.behandlingslager.etterlysning;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.kodeverk.EtterlysningStatusKodeverdiConverter;
+import no.nav.ung.sak.behandlingslager.kodeverk.EtterlysningTypeKodeverdiConverter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.JournalpostId;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Entity(name = "Etterlysning")
@@ -35,19 +42,17 @@ public class Etterlysning extends BaseEntitet {
     private DatoIntervallEntitet periode;
 
     @Column(name = "type", nullable = false)
+    @Convert(converter = EtterlysningTypeKodeverdiConverter.class)
     private EtterlysningType type;
 
     @Column(name = "status", nullable = false)
+    @Convert(converter = EtterlysningStatusKodeverdiConverter.class)
     private EtterlysningStatus status;
 
     @Column(name = "frist")
     private LocalDateTime frist;
 
-    @OneToOne
-    @JoinColumn(name = "uttalelse_id", unique = true)
-    private UttalelseEntitet uttalelse;
-
-    Etterlysning() {
+    public Etterlysning() {
         // Hibernate
     }
 
@@ -108,7 +113,6 @@ public class Etterlysning extends BaseEntitet {
             ", type=" + type +
             ", status=" + status +
             ", frist=" + frist +
-            ", uttalelse=" + uttalelse +
             '}';
     }
 
@@ -179,15 +183,12 @@ public class Etterlysning extends BaseEntitet {
     }
 
 
-    public void mottaSvar(JournalpostId svarJournalpostId, boolean harUttalelse, String uttalelse) {
+    public void mottaSvar() {
         if (status != EtterlysningStatus.VENTER) {
             throw new IllegalStateException("Kan ikke motta svar på etterlysning som ikke er satt til VENTER. Status er " + status);
         }
         this.status = EtterlysningStatus.MOTTATT_SVAR;
-        this.uttalelse = new UttalelseEntitet(harUttalelse, uttalelse, svarJournalpostId);
     }
 
-    public Optional<UttalelseEntitet> getUttalelse() {
-        return Optional.ofNullable(uttalelse);
-    }
+
 }

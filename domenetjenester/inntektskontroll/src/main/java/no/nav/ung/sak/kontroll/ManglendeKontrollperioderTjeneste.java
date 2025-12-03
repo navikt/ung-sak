@@ -4,9 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -15,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.time.YearMonth;
+import java.time.Period;
 import java.time.temporal.TemporalAdjusters;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -31,18 +29,17 @@ public class ManglendeKontrollperioderTjeneste {
 
     private final int dagIMånedForInntektsKontroll;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     @Inject
     public ManglendeKontrollperioderTjeneste(MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
-                                             ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
                                              @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int dagIMånedForInntektsKontroll,
-                                             TilkjentYtelseRepository tilkjentYtelseRepository) {
+                                             TilkjentYtelseRepository tilkjentYtelseRepository, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.dagIMånedForInntektsKontroll = dagIMånedForInntektsKontroll;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     /**
@@ -54,26 +51,29 @@ public class ManglendeKontrollperioderTjeneste {
      */
     public NavigableSet<DatoIntervallEntitet> finnPerioderForManglendeKontroll(Long behandlingId) {
         final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
-        final var påkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
+        final var påkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
         final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
         var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
         final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
-        return splittPåMåneder(manglendeKontrollTidslinje, månedsvisYtelsestidslinje).stream()
+        if (manglendeKontrollTidslinje.isEmpty()) {
+            return new TreeSet<>();
+        }
+        return splittPåMåneder(manglendeKontrollTidslinje).stream()
             .map(DatoIntervallEntitet::fra)
             .collect(Collectors.toCollection(TreeSet::new));
 
     }
 
 
-    private static Set<LocalDateInterval> splittPåMåneder(LocalDateTimeline<Boolean> manglendeKontrollTidslinje, LocalDateTimeline<YearMonth> månedsvisYtelsestidslinje) {
+    private static Set<LocalDateInterval> splittPåMåneder(LocalDateTimeline<Boolean> manglendeKontrollTidslinje) {
         return manglendeKontrollTidslinje.compress()
-            .combine(månedsvisYtelsestidslinje, StandardCombinators::leftOnly, LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .splitAtRegular(manglendeKontrollTidslinje.getMinLocalDate().withDayOfMonth(1), manglendeKontrollTidslinje.getMaxLocalDate(), Period.ofMonths(1))
             .getLocalDateIntervals();
     }
 
-    private LocalDateTimeline<Set<BehandlingÅrsakType>> finnPerioderMarkertForKontroll(Long behandlingId) {
-        return prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.contains(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
+    private LocalDateTimeline<Boolean> finnPerioderMarkertForKontroll(Long behandlingId) {
+        return relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingId);
     }
 
     private LocalDateTimeline<Boolean> finnPerioderSomErKontrollertITidligereBehandlinger(Long behandlingId) {

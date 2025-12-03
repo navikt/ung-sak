@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import org.slf4j.Logger;
@@ -38,6 +39,7 @@ public class FinnSakerForInntektkontroll {
     private VilkårTjeneste vilkårTjeneste;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     FinnSakerForInntektkontroll() {
     }
@@ -48,7 +50,7 @@ public class FinnSakerForInntektkontroll {
                                        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                        ProsessTriggereRepository prosessTriggereRepository,
                                        VilkårTjeneste vilkårTjeneste,
-                                       UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, TilkjentYtelseRepository tilkjentYtelseRepository) {
+                                       UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository, TilkjentYtelseRepository tilkjentYtelseRepository, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
@@ -56,6 +58,7 @@ public class FinnSakerForInntektkontroll {
         this.vilkårTjeneste = vilkårTjeneste;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     List<Fagsak> finnFagsaker(LocalDate fom, LocalDate tom) {
@@ -114,13 +117,9 @@ public class FinnSakerForInntektkontroll {
             return false;
         }
 
-        var perioder = ungdomsprogramPeriodeGrunnlag.get().getUngdomsprogramPerioder().getPerioder();
-        if (perioder.isEmpty()) {
-            return false;
-        }
-        var startdato = perioder.stream().map(p -> p.getPeriode().getFomDato()).min(Comparator.naturalOrder()).orElseThrow();
-        var sluttdato = perioder.stream().map(p -> p.getPeriode().getTomDato()).max(Comparator.naturalOrder()).orElseThrow();
-        return startdato.isBefore(fom) && sluttdato.isAfter(tom);
+        LocalDateTimeline<Boolean> relevantePerioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(behandling.getId());
+
+        return !relevantePerioderForKontroll.intersection(new LocalDateInterval(fom, tom)).isEmpty();
     }
 
     private boolean harIkkeOpprettetTrigger(Behandling behandling, LocalDate fom, LocalDate tom) {
