@@ -6,14 +6,12 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
@@ -31,30 +29,25 @@ public class RapportertInntektMapper {
     private static final Logger LOGGER = LoggerFactory.getLogger(RapportertInntektMapper.class);
 
     private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
     @Inject
-    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste, MånedsvisTidslinjeUtleder ytelsesperiodeutleder) {
+    public RapportertInntektMapper(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
-        this.ytelsesperiodeutleder = ytelsesperiodeutleder;
     }
 
-    public LocalDateTimeline<RapporterteInntekter> mapAlleGjeldendeRegisterOgBrukersInntekter(Long behandlingId) {
+    public LocalDateTimeline<RapporterteInntekter> mapAlleGjeldendeRegisterOgBrukersInntekter(Long behandlingId, LocalDateTimeline<Boolean> relevantTidslinje) {
         // Henter iay-grunnlag (kall til abakus)
         final var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
         if (iayGrunnlag.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
-        final var månedsvisYtelseTidslinje = ytelsesperiodeutleder.periodiserMånedsvis(behandlingId);
-
-
-        final var brukersRapporterteInntekter = finnBrukersRapporterteInntekter(iayGrunnlag.get(), månedsvisYtelseTidslinje);
-        validerBrukersRapporterteInntekterTidslinje(brukersRapporterteInntekter, månedsvisYtelseTidslinje);
+        final var brukersRapporterteInntekter = finnBrukersRapporterteInntekter(iayGrunnlag.get(), relevantTidslinje);
+        validerBrukersRapporterteInntekterTidslinje(brukersRapporterteInntekter, relevantTidslinje);
 
         final var grupperteInntekter = grupperInntekter(iayGrunnlag.get());
 
-        final var registerTidslinje = finnRegisterInntektTidslinje(månedsvisYtelseTidslinje, grupperteInntekter);
+        final var registerTidslinje = finnRegisterInntektTidslinje(relevantTidslinje, grupperteInntekter);
         return kombinerTidslinjer(brukersRapporterteInntekter, registerTidslinje);
 
     }
@@ -113,7 +106,7 @@ public class RapportertInntektMapper {
         return registerinntekter;
     }
 
-    private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje, List<InntekterForKilde> grupperteInntekter) {
+    private static LocalDateTimeline<Set<RapportertInntekt>> finnRegisterInntektTidslinje(LocalDateTimeline<Boolean> månedsvisYtelseTidslinje, List<InntekterForKilde> grupperteInntekter) {
         var registerTidslinje = new LocalDateTimeline<Set<RapportertInntekt>>(Set.of());
 
         for (var intervall : månedsvisYtelseTidslinje.getLocalDateIntervals()) {
@@ -156,7 +149,7 @@ public class RapportertInntektMapper {
         return inntekterForPeriode;
     }
 
-    private static void validerBrukersRapporterteInntekterTidslinje(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<YearMonth> ytelseTidslinje) {
+    private static void validerBrukersRapporterteInntekterTidslinje(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<Boolean> ytelseTidslinje) {
         final var perioderUtenforYtelsesperioder = brukersRapporterteInntekter.getLocalDateIntervals().stream()
             .filter(it -> ytelseTidslinje.getLocalDateIntervals().stream().noneMatch(it::equals))
             .toList();
@@ -212,7 +205,7 @@ public class RapportertInntektMapper {
         throw new IllegalArgumentException("Kunne ikke håndtere inntektsposttype: " + it.getInntektspostType());
     }
 
-    private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje) {
+    private LocalDateTimeline<Set<RapportertInntekt>> finnBrukersRapporterteInntekter(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> månedsvisYtelseTidslinje) {
         // Finner rapporterte inntekter pr journalpost sortert på mottattdato med siste mottatt journalpost først
         final var sorterteInntekttidslinjerPåMottattdato = finnSorterteInntektstidslinjer(iayGrunnlag, månedsvisYtelseTidslinje);
 
@@ -231,7 +224,7 @@ public class RapportertInntektMapper {
         return brukersRapporterteInntekter;
     }
 
-    private List<InntektForMottattidspunkt> finnSorterteInntektstidslinjer(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje) {
+    private List<InntektForMottattidspunkt> finnSorterteInntektstidslinjer(InntektArbeidYtelseGrunnlag iayGrunnlag, LocalDateTimeline<Boolean> månedsvisYtelseTidslinje) {
         return iayGrunnlag.getOppgittOpptjeningAggregat()
             .stream()
             .flatMap(o -> o.getOppgitteOpptjeninger().stream())
@@ -241,7 +234,7 @@ public class RapportertInntektMapper {
             .toList();
     }
 
-    private boolean erRapportertForGyldigPeriode(OppgittOpptjening o, LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje) {
+    private boolean erRapportertForGyldigPeriode(OppgittOpptjening o, LocalDateTimeline<Boolean> månedsvisYtelseTidslinje) {
         return o.getOppgittArbeidsforhold().stream().map(OppgittArbeidsforhold::getPeriode)
             .map(DatoIntervallEntitet::toLocalDateInterval)
             .allMatch(p -> månedsvisYtelseTidslinje.getLocalDateIntervals().stream().anyMatch(p::equals));
