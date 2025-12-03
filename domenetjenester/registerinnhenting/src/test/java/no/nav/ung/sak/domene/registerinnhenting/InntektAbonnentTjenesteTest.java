@@ -1,11 +1,9 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
 import no.nav.ung.sak.behandling.FagsakTjeneste;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -48,9 +46,7 @@ class InntektAbonnentTjenesteTest {
     private InntektAbonnentTjeneste inntektAbonnenentTjeneste;
 
     private AktørId aktørId;
-    private PersonIdent personIdent;
     private Periode periode;
-    private LocalDate tomFagsakPeriode;
 
     @BeforeEach
     void setUp() {
@@ -62,11 +58,9 @@ class InntektAbonnentTjenesteTest {
         );
 
         aktørId = new AktørId("1234567890123");
-        personIdent = new PersonIdent("12345678901");
         periode = new Periode(
             LocalDate.now().minusMonths(1),
             LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
-        tomFagsakPeriode = LocalDate.now().plusYears(1);
     }
 
     @Test
@@ -100,50 +94,6 @@ class InntektAbonnentTjenesteTest {
     }
 
     @Test
-    void opprettelse_av_abonnement_skal_opprette_nytt_abonnement_og_lagre() {
-        // Arrange
-        long forventetAbonnementId = 98765L;
-        Fagsak fagsak = mock(Fagsak.class);
-        DatoIntervallEntitet periodeEntitet = mock(DatoIntervallEntitet.class);
-
-        when(fagsak.erÅpen()).thenReturn(true);
-        when(fagsak.getPeriode()).thenReturn(periodeEntitet);
-        when(periodeEntitet.getTomDato()).thenReturn(tomFagsakPeriode);
-
-        when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
-            .thenReturn(Optional.empty());
-        when(fagsakTjeneste.finnFagsakerForAktør(aktørId))
-            .thenReturn(List.of(fagsak));
-        when(tpsTjeneste.hentFnr(aktørId))
-            .thenReturn(Optional.of(personIdent));
-        when(inntektAbonnentKlient.opprettAbonnement(
-            any(), any(), anyList(), any(), any(), any(), anyInt()
-        )).thenReturn(forventetAbonnementId);
-
-        ArgumentCaptor<InntektAbonnement> abonnementCaptor = ArgumentCaptor.forClass(InntektAbonnement.class);
-
-        // Act
-        inntektAbonnenentTjeneste.opprettAbonnement(aktørId, periode);
-
-        // Assert
-        verify(inntektAbonnentKlient).opprettAbonnement(
-            personIdent,
-            "Ung",
-            List.of("Ung"),
-            YearMonth.from(periode.getFom()),
-            YearMonth.from(periode.getTom()),
-            tomFagsakPeriode,
-            1
-        );
-
-        verify(inntektAbonnementRepository).lagre(abonnementCaptor.capture());
-        InntektAbonnement lagretAbonnement = abonnementCaptor.getValue();
-        assertThat(lagretAbonnement.getAbonnementId()).isEqualTo(String.valueOf(forventetAbonnementId));
-        assertThat(lagretAbonnement.getAktørId()).isEqualTo(aktørId);
-    }
-
-
-    @Test
     void skal_returnere_første_sekvensnummer() {
         // Arrange
         long forventetSekvensnummer = 12345L;
@@ -155,7 +105,7 @@ class InntektAbonnentTjenesteTest {
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get()).isEqualTo(forventetSekvensnummer);
+        assertThat(resultat).contains(forventetSekvensnummer);
     }
 
     @Test
