@@ -46,7 +46,7 @@ jobs:
           openapiVersion: ${{ steps.generate-openapi.outputs.openapiVersion }}
           patchVersion: ${{ needs.build-app.outputs.build-version }}
       # Upload generated typescript package, so it can be downloaded and published by later job
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         id: upload-typescript
         with:
           name: ung-sak-typescript-client-src
