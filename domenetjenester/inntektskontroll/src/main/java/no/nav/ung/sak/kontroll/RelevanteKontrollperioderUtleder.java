@@ -17,6 +17,7 @@ import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Dependent
 public class RelevanteKontrollperioderUtleder {
@@ -42,12 +43,15 @@ public class RelevanteKontrollperioderUtleder {
                                                                                          Set<BehandlingÅrsakType> årsakerForKontroll) {
 
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(behandlingId);
-        if (relevantForKontrollTidslinje.isEmpty()) {
-            return LocalDateTimeline.empty();
+        final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId)
+            .mapValue(it -> it.stream().filter(årsakerForKontroll::contains).collect(Collectors.toSet()))
+            .filterValue(it -> !it.isEmpty());
+        LocalDateTimeline<Set<BehandlingÅrsakType>> markertOgRelevant = markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje).compress();
+        if (markertOgRelevant.isEmpty()) {
+            return  LocalDateTimeline.empty();
         }
-        final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.stream().anyMatch(årsakerForKontroll::contains));
-        return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje).compress()
-            .splitAtRegular(relevantForKontrollTidslinje.getMinLocalDate().withDayOfMonth(1), relevantForKontrollTidslinje.getMaxLocalDate(), Period.ofMonths(1));
+        return markertOgRelevant
+            .splitAtRegular(markertOgRelevant.getMinLocalDate().withDayOfMonth(1), markertOgRelevant.getMaxLocalDate(), Period.ofMonths(1));
     }
 
     /**
