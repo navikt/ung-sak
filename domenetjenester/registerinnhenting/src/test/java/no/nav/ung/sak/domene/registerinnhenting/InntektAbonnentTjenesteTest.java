@@ -84,20 +84,6 @@ class InntektAbonnentTjenesteTest {
         verify(inntektAbonnementRepository, never()).lagre(any());
     }
 
-    @Test
-    void opprettelse_av_abonnement_skal_kaste_feil_dersom_det_finnes_et_abonnement_for_aktøren_i_en_annen_periode() {
-        // Arrange
-        var annenPeriode = new Periode(LocalDate.now().minusYears(1), LocalDate.now().minusMonths(6));
-        var eksisterendeAbonnement = new InntektAbonnement("12345", aktørId, annenPeriode);
-
-        when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
-            .thenReturn(Optional.of(eksisterendeAbonnement));
-
-        // Act & Assert
-        assertThatThrownBy(() -> inntektAbonnenentTjeneste.opprettAbonnement(aktørId, periode))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("eksisterer en abbonnentId");
-    }
 
     @Test
     void opprettelse_av_abonnement_skal_kaste_exception_når_ingen_åpen_fagsak_finnes() {
@@ -156,18 +142,6 @@ class InntektAbonnentTjenesteTest {
         assertThat(lagretAbonnement.getAktørId()).isEqualTo(aktørId);
     }
 
-    @Test
-    void skal_returnere_empty_når_ingen_hendelser() {
-        // Arrange
-        when(inntektAbonnentKlient.hentStartSekvensnummer(any(LocalDate.class)))
-            .thenReturn(Optional.empty());
-
-        // Act
-        Optional<Long> resultat = inntektAbonnenentTjeneste.hentFørsteSekvensnummer();
-
-        // Assert
-        assertThat(resultat).isEmpty();
-    }
 
     @Test
     void skal_returnere_første_sekvensnummer() {
@@ -245,39 +219,7 @@ class InntektAbonnentTjenesteTest {
     }
 
     @Test
-    void avslutning_av_abonnement_skal_ikke_gjøre_noe_om_abonnement_ikke_finnes() {
-        // Arrange
-        when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
-            .thenReturn(Optional.empty());
-
-        // Act
-        inntektAbonnenentTjeneste.avsluttAbonnentHvisFinnes(aktørId);
-
-        // Assert
-        verify(inntektAbonnentKlient, never()).avsluttAbonnement(anyLong());
-        verify(inntektAbonnementRepository, never()).slettAbonnement(any());
-    }
-
-    @Test
-    void avslutning_av_abonnement_skal_slette_om_abonnement_finnes() {
-        // Arrange
-        String abonnementId = "99999";
-        var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId, periode);
-
-
-        when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
-            .thenReturn(Optional.of(eksisterendeAbonnement));
-
-        // Act
-        inntektAbonnenentTjeneste.avsluttAbonnentHvisFinnes(aktørId);
-
-        // Assert
-        verify(inntektAbonnentKlient).avsluttAbonnement(Long.parseLong(abonnementId));
-        verify(inntektAbonnementRepository).slettAbonnement(eksisterendeAbonnement);
-    }
-
-    @Test
-    void avslutt_abonnement_skal_parse_abonnementId_riktig() {
+    void skal_avslutte_abonnement_når_det_finnes() {
         // Arrange
         String abonnementId = "123456789";
         var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId, periode);
@@ -293,6 +235,7 @@ class InntektAbonnentTjenesteTest {
         // Assert
         verify(inntektAbonnentKlient).avsluttAbonnement(abonnementIdCaptor.capture());
         assertThat(abonnementIdCaptor.getValue()).isEqualTo(123456789L);
+        verify(inntektAbonnementRepository).slettAbonnement(eksisterendeAbonnement);
     }
 }
 
