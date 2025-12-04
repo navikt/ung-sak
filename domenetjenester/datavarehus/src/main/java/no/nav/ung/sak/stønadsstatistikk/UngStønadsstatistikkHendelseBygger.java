@@ -182,7 +182,7 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
     private List<StønadsstatistikkTilkjentYtelsePeriode> hentTilkjentYtelsePerioder(Behandling behandling) {
         List<TilkjentYtelsePeriode> tilkjentYtelsePerioder = tilkjentYtelseRepository.hentTilkjentYtelse(behandling.getId())
             .map(TilkjentYtelse::getPerioder)
-            .orElseThrow(); //det gir kanskje mening å returnere tom liste her?
+            .orElse(List.of());
         return tilkjentYtelsePerioder.stream()
             .map(it -> new StønadsstatistikkTilkjentYtelsePeriode(
                 it.getPeriode().getFomDato(),
