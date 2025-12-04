@@ -91,6 +91,7 @@ spec:
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
         - host: "ereg-services.prod-fss-pub.nais.io"
+        - host: "ikomp.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
