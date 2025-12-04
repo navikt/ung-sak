@@ -12,7 +12,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 
-import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -59,7 +58,11 @@ public class ConstraintViolationExceptionMapper implements ExceptionMapper<Const
     }
 
     private String getFeltNavn(Path propertyPath) {
-        return propertyPath instanceof PathImpl ? ((PathImpl) propertyPath).getLeafNode().toString() : null;
+        String pathString = propertyPath.toString();
+        if (pathString.contains(".")) {
+            return pathString.substring(pathString.lastIndexOf('.') + 1);
+        }
+        return pathString;
     }
 
 }

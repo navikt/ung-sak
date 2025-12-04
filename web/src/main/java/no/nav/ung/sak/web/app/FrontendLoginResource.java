@@ -63,15 +63,25 @@ public class FrontendLoginResource {
             relativePath = "/" + relativePath;
         }
         var responseBuilder = Response.status(307);
-        if (originalUri != null && !originalUri.startsWith("/ung/sak") && brukerTokenProvider.getToken().getIssuer() == OpenIDProvider.AZUREAD) {
-            var tuple = findScopeForUrl(originalUri);
-            if (tuple != null) {
-                var requestedDomain = requestDataHelp.requestedHostWithScheme(httpServletRequest);
-                var token = brukerTokenProvider.getToken(tuple.getElement2());
-                String cookieDomain = ServerInfo.instance().getValidCookieDomain(requestedDomain);
-                var secure = !Environment.current().isLocal();
-                responseBuilder.cookie(new NewCookie(ID_TOKEN_COOKIE_NAME, token.getToken(), tuple.getElement1(), cookieDomain, "", DEFAULT_MAX_AGE, secure, true));
-            }
+        if (originalUri != null && brukerTokenProvider.getToken().getIssuer() == OpenIDProvider.AZUREAD) {
+            // Vi har nettopp autentisert. Sett autentiseringscookie for evt /ung/tilbake backend path viss den finnast i
+            // optionalScopes. Unngår med dette ekstra popups/roundtrips for autentisering i frontend.
+            final var extraScopes = optionalScopes.stream().filter(scope -> scope.getElement1().equals("/ung/tilbake"));
+            extraScopes.forEach(scope -> {
+                final var requestedDomain = requestDataHelp.requestedHostWithScheme(httpServletRequest);
+                final var token = brukerTokenProvider.getToken(scope.getElement2());
+                final String cookieDomain = ServerInfo.instance().getValidCookieDomain(requestedDomain);
+                final boolean secure = !Environment.current().isLocal();
+                final var cookie = new NewCookie.Builder(ID_TOKEN_COOKIE_NAME)
+                    .value(token.getToken())
+                    .path(scope.getElement1())
+                    .domain(cookieDomain)
+                    .maxAge(DEFAULT_MAX_AGE)
+                    .secure(secure)
+                    .httpOnly(true)
+                    .build();
+                responseBuilder.cookie(cookie);
+            });
         }
         //  når vi har kommet hit, er brukeren innlogget og har fått ID-token. Kan da gjøre redirect til hovedsiden for VL
         return responseBuilder.header(HttpHeaders.LOCATION, relativePath).build();

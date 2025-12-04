@@ -89,6 +89,7 @@ spec:
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
         - host: "ereg-services-q2.dev-fss-pub.nais.io"
+        - host: "ikomp-q2.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
@@ -200,6 +201,11 @@ spec:
     - name: KABAL_SCOPE
       value: api://dev-gcp.klage.kabal-api/.default
 
+    - name: INNTEKTSKOMPONENTEN_URL
+      value: https://ikomp-q2.dev-fss-pub.nais.io/rest/v2/abonnement
+    - name: INNTEKTSKOMPONENTEN_SCOPE
+      value: api://dev-fss.team-inntekt.ikomp-q2/.default
+
     # Saf
     - name: SAF_BASE_URL
       value: https://saf-q2.dev-fss-pub.nais.io
@@ -239,6 +245,8 @@ spec:
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "true"
+    - name: OPPFRISK_VED_INNKOMMENDE_INNTEKTSHENDELSE_ENABLED
+      value: "false"
     - name: KLAGE_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL
@@ -263,6 +271,8 @@ spec:
       value: "P1D"
     - name: OVERSTYR_REGISTERDATA_DURATION
       value: "PT30M"
+    - name: HENT_INNTEKT_HENDElSER_INTERVALL
+      value: "PT1M"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

@@ -1167,9 +1167,9 @@
         "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingÅrsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.FagsakStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
@@ -3005,6 +3005,7 @@
             "DOEDSFALL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.DødsfallHendelse",
             "FOEDSEL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.FødselHendelse",
             "UNGDOMSPROGRAM_ENDRET_STARTDATO" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramEndretStartdatoHendelse",
+            "UNGDOMSPROGRAM_FJERN_PERIODE" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramFjernDeltakelseHendelse",
             "UNGDOMSPROGRAM_OPPHOER" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse"
           },
           "propertyName" : "type"
@@ -3015,6 +3016,8 @@
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.FødselHendelse"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramEndretStartdatoHendelse"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramFjernDeltakelseHendelse"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse"
         } ],
@@ -3087,6 +3090,18 @@
           }
         },
         "required" : [ "hendelseInfo", "startdato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.hendelser.UngdomsprogramFjernDeltakelseHendelse" : {
+        "properties" : {
+          "hendelseInfo" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.HendelseInfo"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          }
+        },
+        "required" : [ "hendelseInfo", "periode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse" : {
@@ -4283,6 +4298,9 @@
             "type" : "number"
           },
           "reduksjon" : {
+            "type" : "number"
+          },
+          "reduksjonsgrunnlag" : {
             "type" : "number"
           },
           "satsperioder" : {
@@ -6883,6 +6901,30 @@
         "tags" : [ "fagsak" ]
       }
     },
+    "/api/fagsak/fjern-ikkedigital-flagg" : {
+      "post" : {
+        "description" : "Setter en ikke-digital bruker til å være digital",
+        "operationId" : "fjernIkkedigitalFlagg",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Setter en ikke-digital bruker til å være digital",
+        "tags" : [ "fagsak" ]
+      }
+    },
     "/api/fagsak/hendelse/innsending" : {
       "post" : {
         "description" : "Mottak av dokument.",
@@ -8115,7 +8157,7 @@
     },
     "/api/oppgave/forvaltning/fjern-uttalelse" : {
       "post" : {
-        "description" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "description" : "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
         "operationId" : "fjernUttalelser",
         "parameters" : [ {
           "in" : "query",
@@ -8133,7 +8175,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
+        "summary" : "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
         "tags" : [ "oppgave" ]
       }
     },
@@ -8163,7 +8205,7 @@
     },
     "/api/oppgave/forvaltning/opprett-inntektsrapportering" : {
       "post" : {
-        "description" : "Oppretter oppgave for inntektsrapportering for gitt sak",
+        "description" : "KUN FOR TEST: Oppretter oppgave for inntektsrapportering for gitt sak",
         "operationId" : "opprettInntektsrapportering",
         "parameters" : [ {
           "description" : "måned",
@@ -8198,13 +8240,13 @@
             "description" : "default response"
           }
         },
-        "summary" : "Oppretter oppgave for inntektsrapportering",
+        "summary" : "KUN FOR TEST: Oppretter oppgave for inntektsrapportering",
         "tags" : [ "oppgave" ]
       }
     },
     "/api/oppgave/forvaltning/start-inntektskontroll" : {
       "post" : {
-        "description" : "Starter inntektskontroll for sak",
+        "description" : "KUN FOR TEST: Starter inntektskontroll for sak.",
         "operationId" : "startInntektskontroll",
         "parameters" : [ {
           "description" : "måned",
@@ -8239,7 +8281,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Starter inntektskontroll for sak",
+        "summary" : "KUN FOR TEST: Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
       }
     },
