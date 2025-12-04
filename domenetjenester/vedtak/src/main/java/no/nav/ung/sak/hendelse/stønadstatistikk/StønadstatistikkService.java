@@ -35,7 +35,7 @@ public class StønadstatistikkService {
     public StønadstatistikkService(@Any Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger,
                                    BehandlingRepository behandlingRepository,
                                    ProsessTaskTjeneste prosessTaskRepository,
-                                   @KonfigVerdi(value = "PUBLISER_STØNADSSTATISTIKK_ENABLED", defaultVerdi = "false") boolean lansertForUng) {
+                                   @KonfigVerdi(value = "PUBLISER_STOENADSSTATISTIKK_ENABLED", defaultVerdi = "false") boolean lansertForUng) {
         this.stønadstatistikkHendelseBygger = stønadstatistikkHendelseBygger;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
