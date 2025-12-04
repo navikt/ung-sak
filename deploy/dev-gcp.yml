@@ -257,7 +257,7 @@ spec:
       value: "true"
     - name: ENABLE_BREV_ANSVARLIG
       value: "true"
-    - name: PUBLISER_STØNADSSTATISTIKK_ENABLED
+    - name: PUBLISER_STOENADSSTATISTIKK_ENABLED
       value: "true"
 
     # Konfigurasjoner
