@@ -162,7 +162,9 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
                 it.getFom(),
                 it.getTom(),
                 map(it.getValue().satsType()),
-                it.getValue().antallBarn()))
+                it.getValue().antallBarn(),
+                it.getValue().dagsatsBarnetillegg(),
+                it.getValue().grunnbeløpFaktor()))
             .sorted(Comparator.comparing(StønadsstatistikkSatsPeriode::fom))
             .toList();
     }
