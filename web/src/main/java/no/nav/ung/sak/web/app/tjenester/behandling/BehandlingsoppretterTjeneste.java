@@ -86,7 +86,7 @@ public class BehandlingsoppretterTjeneste {
             throw BehandlingsoppretterTjeneste.BehandlingsoppretterTjenesteFeil.FACTORY.kanIkkeOppretteRevurdering(fagsak.getSaksnummer()).toException();
         }
         if (!periodeKanRevurderesForÅrsak(fagsak, behandlingÅrsakType, periode)) {
-            throw new IllegalArgumentException("Perioden er ikke tidligere kontrollert");
+            throw new IllegalArgumentException("Ikke gyldig periode for revurdering med behandlingsårsak : " + behandlingÅrsakType);
         }
 
         var origBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsak.getId())
