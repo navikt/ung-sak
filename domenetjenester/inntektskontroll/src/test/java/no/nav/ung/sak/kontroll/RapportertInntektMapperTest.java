@@ -29,16 +29,16 @@ import static org.mockito.Mockito.when;
 
 class RapportertInntektMapperTest {
 
+    public static final LocalDateTimeline<Boolean> RELEVANT_TIDSLINJE = new LocalDateTimeline<>(List.of(
+        new LocalDateSegment<>(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()), true),
+        new LocalDateSegment<>(LocalDate.now().plusMonths(1).withDayOfMonth(1), LocalDate.now().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()), true)));
+
     private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = mock(InntektArbeidYtelseTjeneste.class);
-    private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder = mock(MånedsvisTidslinjeUtleder.class);
     private RapportertInntektMapper rapportertInntektMapper;
 
     @BeforeEach
     void setUp() {
-        when(ytelsesperiodeutleder.periodiserMånedsvis(anyLong())).thenReturn(new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(LocalDate.now(), LocalDate.now().with(TemporalAdjusters.lastDayOfMonth()), YearMonth.now()),
-            new LocalDateSegment<>(LocalDate.now().plusMonths(1).withDayOfMonth(1), LocalDate.now().plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()), YearMonth.now().plusMonths(1)))));
-        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste, ytelsesperiodeutleder);
+        rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste);
     }
 
     @Test
@@ -50,7 +50,7 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L, RELEVANT_TIDSLINJE);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
@@ -69,7 +69,7 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L, RELEVANT_TIDSLINJE);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),
@@ -97,7 +97,7 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening, oppgittOpptjening2));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L, RELEVANT_TIDSLINJE);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(
@@ -129,7 +129,7 @@ class RapportertInntektMapperTest {
         mockIAY(List.of(oppgittOpptjening, oppgittOpptjening2));
 
         // Act
-        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L);
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L, RELEVANT_TIDSLINJE);
 
         // Assert
         final var forventet = new LocalDateTimeline<>(periode.getFomDato(), periode.getTomDato(),

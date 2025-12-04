@@ -13,6 +13,7 @@ public record UngdomsytelseUtbetaltMånedDto(
     @NotNull List<UngdomsytelseSatsPeriodeDto> satsperioder,
     @NotNull int antallDager,
     BigDecimal rapportertInntekt,
+    BigDecimal reduksjonsgrunnlag,
     BigDecimal reduksjon,
     BigDecimal utbetaling,
     UtbetalingStatus status
