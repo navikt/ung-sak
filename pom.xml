@@ -47,12 +47,12 @@
         <jandex.version>3.5.2</jandex.version>
         <pdfgen-core.version>1.1.67</pdfgen-core.version>
         <flyway.version>11.17.2</flyway.version>
-        <confluent.platform.version>8.1.0</confluent.platform.version>
+        <confluent.platform.version>8.1.1</confluent.platform.version>
         <mockito.version>5.20.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.7.0</ung-deltakelse-opplyser.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
-        <openhtmltopdf.version>1.1.32</openhtmltopdf.version>
+        <openhtmltopdf.version>1.1.33</openhtmltopdf.version>
         <jsoup.version>1.21.2</jsoup.version>
         <commonmark.version>0.27.0</commonmark.version>
 
