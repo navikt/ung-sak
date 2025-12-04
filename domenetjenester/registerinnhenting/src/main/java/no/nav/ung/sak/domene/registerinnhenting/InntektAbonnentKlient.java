@@ -40,7 +40,7 @@ public class InntektAbonnentKlient {
     @Inject
     public InntektAbonnentKlient(
         @KonfigVerdi(value = "inntektskomponenten.url",
-            defaultVerdi = "http://ikomp.team-inntekt/rest/v2/abonnement") String baseUrl,
+            defaultVerdi = "https://ikomp.prod-fss-pub.nais.io//rest/v2/abonnement") String baseUrl,
         OidcRestClient oidcRestClient) {
         this.oidcRestClient = oidcRestClient;
         this.opprettAbonnementURI = tilUri(baseUrl, "administrasjon/opprett");

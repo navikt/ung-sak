@@ -201,7 +201,7 @@ spec:
       value: api://dev-gcp.klage.kabal-api/.default
 
     - name: INNTEKTSKOMPONENTEN_URL
-      value: http://ikomp.team-inntekt/rest/v2/abonnement
+      value: https://ikomp-q2.dev-fss-pub.nais.io/rest/v2/abonnement
     - name: INNTEKTSKOMPONENTEN_SCOPE
       value: api://dev-fss.team-inntekt.ikomp-q2/.default
 
