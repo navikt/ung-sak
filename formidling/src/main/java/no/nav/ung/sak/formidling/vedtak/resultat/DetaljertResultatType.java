@@ -10,6 +10,7 @@ public enum DetaljertResultatType {
     KONTROLLER_INNTEKT_UTEN_TILKJENT_YTELSE("Ingen tilkjent ytelse etter kontroll av inntekt"),
     ENDRING_STARTDATO("Endring startdato"),
     ENDRING_SLUTTDATO("Opphør eller endring sluttdato"),
+    ENDRING_FJERNE_PERIODE("Fjerne periode"),
     IKKE_VURDERT("Ikke vurdert"),
     INNVILGELSE_KUN_VILKÅR("Innvilgelse av vilkår uten utbetaling"),
     INNVILGELSE_UTBETALING("Innvilgelse med utbetaling"),
