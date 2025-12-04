@@ -7,6 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
@@ -14,30 +15,39 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadstatistikkHendelse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
 public class StønadstatistikkService {
 
+    private static final Logger log = LoggerFactory.getLogger(StønadstatistikkService.class);
     private Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger;
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste prosessTaskRepository;
+    private boolean lansertForUng;
 
-    public StønadstatistikkService() {
-
+    StønadstatistikkService() {
+        //for CDI proxy
     }
 
     @Inject
     public StønadstatistikkService(@Any Instance<StønadstatistikkHendelseBygger> stønadstatistikkHendelseBygger,
-                                   BehandlingRepository behandlingRepository, ProsessTaskTjeneste prosessTaskRepository) {
+                                   BehandlingRepository behandlingRepository,
+                                   ProsessTaskTjeneste prosessTaskRepository,
+                                   @KonfigVerdi(value = "PUBLISER_STØNADSSTATISTIKK_ENABLED", defaultVerdi = "false") boolean lansertForUng) {
         this.stønadstatistikkHendelseBygger = stønadstatistikkHendelseBygger;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskRepository = prosessTaskRepository;
+        this.lansertForUng = lansertForUng;
     }
 
     public void publiserHendelse(Behandling behandling) {
-        Set<FagsakYtelseType> aktiverteForYtelsetyper = Set.of(FagsakYtelseType.PSB, FagsakYtelseType.PPN, FagsakYtelseType.OMP);
-
+        Set<FagsakYtelseType> aktiverteForYtelsetyper = lansertForUng
+            ? Set.of(FagsakYtelseType.UNGDOMSYTELSE)
+            : Set.of();
         if (!aktiverteForYtelsetyper.contains(behandling.getFagsakYtelseType())) {
+            log.info("Stønadstatistikk publisering er ikke aktivert for ytelse {}", behandling.getFagsakYtelseType());
             return;
         }
         final ProsessTaskData pd = PubliserStønadstatistikkHendelseTask.createProsessTaskData(behandling);
