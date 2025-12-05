@@ -37,7 +37,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: navikt/sif-gha-workflows/.github/actions/maven/generate-openapi@main
         id: generate-openapi
         with:
@@ -50,7 +50,7 @@ jobs:
           openapiVersion: ${{ steps.generate-openapi.outputs.openapiVersion }}
           patchVersion: ${{ needs.build-app.outputs.build-version }}
       # Upload generated typescript package, so it can be downloaded and published by later job
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         id: upload-typescript
         with:
           name: ung-sak-typescript-client-src
@@ -130,7 +130,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/download-artifact@v5
+      - uses: actions/download-artifact@v6
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client
@@ -155,7 +155,7 @@ jobs:
       contents: read
       packages: write
     steps:
-     - uses: actions/download-artifact@v5
+     - uses: actions/download-artifact@v6
        with:
          name: ung-sak-typescript-client-src
          path: /tmp/ung-sak-typescript-client
