@@ -111,6 +111,7 @@ spec:
         databases:
           - name: ung-sak
             envVarPrefix: DB
+        pointInTimeRecovery: true
     bigQueryDatasets:
       -  name: ung_sak_statistikk_dataset
          description: Inneholder tabeller for ung-sak ment for statistikk
