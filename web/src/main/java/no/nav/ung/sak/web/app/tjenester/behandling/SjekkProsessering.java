@@ -21,7 +21,6 @@ import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi.ProsessTaskFeilmelder;
 import no.nav.ung.sak.web.server.abac.NavAnsatttRestKlient;
-import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -139,7 +138,7 @@ public class SjekkProsessering {
      * @return Prosess Task gruppenavn som kan brukes til å sjekke fremdrift
      */
     String asynkInnhentingAvRegisteropplysningerOgKjørProsess(Behandling behandling, boolean forceInnhent) {
-        ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling, forceInnhent);
+        ProsessTaskGruppe gruppe = behandlingProsesseringTjeneste.lagOppdaterFortsettTasksForPolling(behandling, forceInnhent, true);
         String gruppeNavn = asynkTjeneste.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(behandling.getFagsakId(), String.valueOf(behandling.getId()),
             gruppe);
         return gruppeNavn;
