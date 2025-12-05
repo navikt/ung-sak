@@ -89,6 +89,7 @@ spec:
         - host: "pdl-api.dev-fss-pub.nais.io"
         - host: "saf-q2.dev-fss-pub.nais.io"
         - host: "ereg-services-q2.dev-fss-pub.nais.io"
+        - host: "ikomp-q2.dev-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
@@ -255,6 +256,8 @@ spec:
     - name: KONTROLL_SISTE_MND_ENABLED
       value: "true"
     - name: ENABLE_BREV_ANSVARLIG
+      value: "true"
+    - name: PUBLISER_STOENADSSTATISTIKK_ENABLED
       value: "true"
 
     # Konfigurasjoner
