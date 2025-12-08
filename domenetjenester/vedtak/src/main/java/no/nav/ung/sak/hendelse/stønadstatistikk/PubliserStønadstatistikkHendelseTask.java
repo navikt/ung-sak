@@ -42,7 +42,7 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
 
     @Override
     public void doTask(ProsessTaskData pd) {
-        long t0 = System.currentTimeMillis();
+        long t0 = System.nanoTime();
         final String key = Objects.requireNonNull(pd.getSaksnummer());
         final StønadstatistikkHendelse hendelse = stønadstatistikkService.lagHendelse(Long.parseLong(pd.getBehandlingId()));
         if (hendelse == null) {
@@ -53,15 +53,14 @@ public class PubliserStønadstatistikkHendelseTask implements ProsessTaskHandler
         final String value = StønadstatistikkSerializer.toJson(hendelse);
 
         if (Environment.current().isDev() || Environment.current().isLocal()) {
-            //kan ikke logge innhold i hendelsen i  prod, da verdien inneholder bl.a. aktørId og orgNr
+            //kan ikke logge innhold i hendelsen i  prod, da verdien inneholder bl.a. aktørId
             //logger i test for å enkelt sjekke om innhold er riktig
             logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}' Innhold (base64): {}", key, Base64.getEncoder().encodeToString(value.getBytes(StandardCharsets.UTF_8)));
         } else {
             logger.info("Publiserer hendelse til stønadstatistikk. Key: '{}'", key);
         }
         meldingProducer.send(key, value);
-        logger.info("Publisere hendelse til stønadstatistikk brukte {} ms for {}", System.currentTimeMillis() - t0, hendelse.getYtelseType());
-
+        logger.info("Publisere hendelse til stønadstatistikk brukte {} ms for {}", (System.nanoTime() - t0) / 1_000_000, hendelse.ytelseType());
     }
 
 
