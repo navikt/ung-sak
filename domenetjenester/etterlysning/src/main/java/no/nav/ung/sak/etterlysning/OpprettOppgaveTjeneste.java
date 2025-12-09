@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.etterlysning.kontroll.InntektkontrollOppgaveOppretter;
+import no.nav.ung.sak.etterlysning.programperiode.EndretProgramperiodeOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.sluttdato.EndretSluttdatoOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.startdato.EndretStartdatoOppgaveOppretter;
 
@@ -22,6 +23,7 @@ public class OpprettOppgaveTjeneste {
     private final InntektkontrollOppgaveOppretter inntektkontrollOppgaveOppretter;
     private final EndretSluttdatoOppgaveOppretter endretSluttdatoOppgaveOppretter;
     private final EndretStartdatoOppgaveOppretter endretStartdatoOppgaveOppretter;
+    private final EndretProgramperiodeOppgaveOppretter endretProgramperiodeOppgaveOppretter;
     private final EtterlysningRepository etterlysningRepository;
     private final PersoninfoAdapter personinfoAdapter;
     private final Duration ventePeriode;
@@ -31,6 +33,7 @@ public class OpprettOppgaveTjeneste {
         InntektkontrollOppgaveOppretter inntektkontrollOppgaveOppretter,
         EndretSluttdatoOppgaveOppretter endretSluttdatoOppgaveOppretter,
         EndretStartdatoOppgaveOppretter endretStartdatoOppgaveOppretter,
+        EndretProgramperiodeOppgaveOppretter endretProgramperiodeOppgaveOppretter,
         EtterlysningRepository etterlysningRepository,
         PersoninfoAdapter personinfoAdapter,
         @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode
@@ -38,6 +41,7 @@ public class OpprettOppgaveTjeneste {
         this.inntektkontrollOppgaveOppretter = inntektkontrollOppgaveOppretter;
         this.endretSluttdatoOppgaveOppretter = endretSluttdatoOppgaveOppretter;
         this.endretStartdatoOppgaveOppretter = endretStartdatoOppgaveOppretter;
+        this.endretProgramperiodeOppgaveOppretter = endretProgramperiodeOppgaveOppretter;
         this.etterlysningRepository = etterlysningRepository;
         this.personinfoAdapter = personinfoAdapter;
         this.ventePeriode = Duration.parse(ventePeriode);
@@ -56,6 +60,8 @@ public class OpprettOppgaveTjeneste {
                 endretStartdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
             case UTTALELSE_ENDRET_SLUTTDATO ->
                 endretSluttdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
+            case UTTALELSE_ENDRET_PROGRAMPERIODE ->
+                endretProgramperiodeOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
             default ->
                 throw new IllegalArgumentException("Har ikke implementert oppretting av oppgave for etterlysningstype: " + etterlysningType);
         }

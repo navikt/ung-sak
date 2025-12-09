@@ -66,11 +66,16 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
             return switch (etterlysningType) {
                 case UTTALELSE_ENDRET_STARTDATO -> harEndretStartdato(input);
                 case UTTALELSE_ENDRET_SLUTTDATO -> harEndretSluttdato(input.gjeldendePeriodeGrunnlag());
+                case UTTALELSE_ENDRET_PROGRAMPERIODE -> harEndretProgramperiode(input);
                 default ->
                         throw new IllegalArgumentException("Ugyldig etterlysningstype for endring i programperiode: " + etterlysningType);
             };
         }
         return false;
+    }
+
+    private static boolean harEndretProgramperiode(EndretUngdomsprogramEtterlysningInput input) {
+        return harEndretStartdato(input) && harEndretSluttdato(input.gjeldendePeriodeGrunnlag());
     }
 
     private static boolean harEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag) {
