@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -11,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -34,7 +38,7 @@ public class OpprettRevurderingForInntektskontrollTask implements ProsessTaskHan
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private FinnSakerForInntektkontroll finnRelevanteFagsaker;
-    private int inntektskontrollDagIMåned;
+    private CronExpression inntektskontrollCron;
 
     OpprettRevurderingForInntektskontrollTask() {
     }
@@ -43,18 +47,19 @@ public class OpprettRevurderingForInntektskontrollTask implements ProsessTaskHan
     public OpprettRevurderingForInntektskontrollTask(
         ProsessTaskTjeneste prosessTaskTjeneste,
         FinnSakerForInntektkontroll finnRelevanteFagsaker,
-        @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int inntektskontrollDagIMåned) {
+        @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.finnRelevanteFagsaker = finnRelevanteFagsaker;
-        this.inntektskontrollDagIMåned = inntektskontrollDagIMåned;
+        this.inntektskontrollCron = CronExpression.create(inntetskontrollCronString);
     }
 
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
-        if (LocalDate.now().isBefore(fom.plusMonths(1).withDayOfMonth(inntektskontrollDagIMåned))) {
-            throw new IllegalStateException("Kan ikke kjøre inntektskontroll for periode før den åttende i måneden etter perioden: " + fom);
+        ZonedDateTime starttidspunktForKontroll = inntektskontrollCron.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
+        if (ZonedDateTime.now().isBefore(starttidspunktForKontroll)) {
+            throw new IllegalStateException("Kan ikke kjøre inntektskontroll for periode før " + starttidspunktForKontroll + ". For periode med start " + fom);
         }
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var fagsaker = finnRelevanteFagsaker.finnFagsaker(fom, tom);
