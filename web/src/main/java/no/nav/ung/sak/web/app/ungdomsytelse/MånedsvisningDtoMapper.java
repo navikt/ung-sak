@@ -52,8 +52,8 @@ public class MånedsvisningDtoMapper {
     }
 
     private static Optional<BigDecimal> finnReduksjonsgrunnlag(LocalDateSegment<YearMonth> måned, Optional<BigDecimal> rapportertInntekt, Integer antallYtelsesdagerIMåned) {
-        final var totaltAntallDagerIMåned = måned.getTom().lengthOfMonth();
-        final var reduksjonsgrunnlag = rapportertInntekt.map(it -> BigDecimal.valueOf(antallYtelsesdagerIMåned).divide(BigDecimal.valueOf(totaltAntallDagerIMåned), 10, RoundingMode.HALF_UP)
+        final var totaltAntallVirkedagerDagerIMåned = Virkedager.beregnAntallVirkedager(måned.getFom(), måned.getTom());
+        final var reduksjonsgrunnlag = rapportertInntekt.map(it -> BigDecimal.valueOf(antallYtelsesdagerIMåned).divide(BigDecimal.valueOf(totaltAntallVirkedagerDagerIMåned), 10, RoundingMode.HALF_UP)
             .multiply(it).setScale(0, RoundingMode.HALF_UP));
         return reduksjonsgrunnlag;
     }
