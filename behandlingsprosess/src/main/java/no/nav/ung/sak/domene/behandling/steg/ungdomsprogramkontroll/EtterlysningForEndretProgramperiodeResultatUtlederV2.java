@@ -73,6 +73,8 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         return false;
     }
 
+
+
     private static boolean harEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag) {
         // For å hindre at sluttdato kan endres uten at bruker får varsel oppretter vi alltid en etterlysning for endret sluttdato dersom den er satt i førstegangssøknad.
         var gjeldendeSluttdato = gjeldendePeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato();
