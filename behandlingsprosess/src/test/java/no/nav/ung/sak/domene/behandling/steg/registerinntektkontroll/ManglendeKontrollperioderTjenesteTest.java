@@ -32,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
@@ -204,6 +205,11 @@ class ManglendeKontrollperioderTjenesteTest {
 
 
     private ManglendeKontrollperioderTjeneste lagTjeneste(int dagIMånedForInntektsKontroll) {
-        return new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, prosessTriggerPeriodeUtleder, dagIMånedForInntektsKontroll, tilkjentYtelseRepository, relevanteKontrollperioderUtleder);
+        ZonedDateTime nå = ZonedDateTime.now();
+        ZonedDateTime tiSekunderSiden = nå.minusSeconds(10);
+        // Dersom denne kjøre innenfor 10 sekunder etter midnatt og dagIMånedForInntektsKontroll er lik dagens dato, vil denne generere feil cron-uttrykk
+        String tidspunktCron = nå.toLocalDate().getDayOfMonth() == dagIMånedForInntektsKontroll ? tiSekunderSiden.getSecond() + " " + (tiSekunderSiden.getMinute())  + " " + tiSekunderSiden.getHour(): "0 0 " + nå.getHour();
+        String cron = tidspunktCron +  " " + dagIMånedForInntektsKontroll + " * *";
+        return new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, cron, tilkjentYtelseRepository, relevanteKontrollperioderUtleder);
     }
 }

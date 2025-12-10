@@ -5,14 +5,19 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
+import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Dependent
 public class RelevanteKontrollperioderUtleder {
@@ -38,8 +43,15 @@ public class RelevanteKontrollperioderUtleder {
                                                                                          Set<BehandlingÅrsakType> årsakerForKontroll) {
 
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(behandlingId);
-        final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.stream().anyMatch(årsakerForKontroll::contains));
-        return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje);
+        final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId)
+            .mapValue(it -> it.stream().filter(årsakerForKontroll::contains).collect(Collectors.toSet()))
+            .filterValue(it -> !it.isEmpty());
+        LocalDateTimeline<Set<BehandlingÅrsakType>> markertOgRelevant = markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje).compress();
+        if (markertOgRelevant.isEmpty()) {
+            return  LocalDateTimeline.empty();
+        }
+        return markertOgRelevant
+            .splitAtRegular(markertOgRelevant.getMinLocalDate().withDayOfMonth(1), markertOgRelevant.getMaxLocalDate(), Period.ofMonths(1));
     }
 
     /**
@@ -67,7 +79,16 @@ public class RelevanteKontrollperioderUtleder {
             final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, kontrollSisteMndEnabled);
             perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(it -> true);
         }
-        return perioderForKontroll;
+        return utvidTilHeleMåneder(perioderForKontroll);
+    }
+
+    private static LocalDateTimeline<Boolean> utvidTilHeleMåneder(LocalDateTimeline<Boolean> perioderForKontroll) {
+        var mappedSegments = perioderForKontroll
+            .toSegments()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), it.getValue()))
+            .toList(); // Mapper segmenter til å dekke hele måneder
+        return new LocalDateTimeline<>(mappedSegments, StandardCombinators::alwaysTrueForMatch).compress();
     }
 
     public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder, boolean kontrollSisteMndEnabled) {
