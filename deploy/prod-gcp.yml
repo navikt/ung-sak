@@ -266,6 +266,8 @@ spec:
       value: "PT1H"
     - name: INNTEKTSKONTROLL_DAG_I_MAANED
       value: "8"
+    - name: INNTEKTSKONTROLL_CRON_EXPRESSION
+      value: "0 0 7 8 * *"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE
