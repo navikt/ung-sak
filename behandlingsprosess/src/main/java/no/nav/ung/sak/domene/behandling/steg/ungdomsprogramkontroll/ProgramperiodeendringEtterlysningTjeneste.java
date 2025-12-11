@@ -107,7 +107,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         );
 
         // Utled resultat
-        final var resultatEndretProgramperiode = EtterlysningForEndretProgramperiodeResultatUtleder.finnResultat(input, behandlingReferanse);
+        final var resultatEndretProgramperiode = EtterlysningForEndretProgramperiodeResultatUtlederV2.finnResultat(input, behandlingReferanse);
 
         // Sporing
         lagreSporing(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE, input, resultatEndretProgramperiode);
