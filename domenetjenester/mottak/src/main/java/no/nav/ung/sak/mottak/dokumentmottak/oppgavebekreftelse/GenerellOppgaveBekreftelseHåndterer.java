@@ -91,6 +91,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             case UTTALELSE_KONTROLL_INNTEKT -> EndringType.ENDRET_INNTEKT;
             case UTTALELSE_ENDRET_STARTDATO -> EndringType.ENDRET_STARTDATO;
             case UTTALELSE_ENDRET_SLUTTDATO -> EndringType.ENDRET_SLUTTDATO;
+            case UTTALELSE_ENDRET_PROGRAMPERIODE -> EndringType.ENDRET_PROGRAMPERIODE;
         };
     }
 

@@ -2,9 +2,11 @@ package no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
@@ -38,6 +40,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     private BehandingprosessSporingRepository behandingprosessSporingRepository;
     private EtterlysningForEndretProgramperiodeResultatHåndterer resultatHåndterer;
+    private boolean endretPeriodeEnabled;
 
     @Inject
     public ProgramperiodeendringEtterlysningTjeneste(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
@@ -46,7 +49,8 @@ public class ProgramperiodeendringEtterlysningTjeneste {
                                                      EtterlysningTjeneste EtterlysningTjeneste,
                                                      UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
                                                      BehandingprosessSporingRepository behandingprosessSporingRepository,
-                                                     EtterlysningForEndretProgramperiodeResultatHåndterer resultatHåndterer) {
+                                                     EtterlysningForEndretProgramperiodeResultatHåndterer resultatHåndterer,
+                                                     @KonfigVerdi(value = "PROGRAMPERIODE_ENDRING_ENABLED", defaultVerdi = "false") boolean endretPeriodeEnabled) {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.etterlysningRepository = etterlysningRepository;
@@ -54,11 +58,17 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
         this.behandingprosessSporingRepository = behandingprosessSporingRepository;
         this.resultatHåndterer = resultatHåndterer;
+        this.endretPeriodeEnabled = endretPeriodeEnabled;
     }
 
     public void opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse behandlingReferanse) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
         var initiellPeriodegrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell programperiodegrunnlag for behandling " + behandlingReferanse.getBehandlingId()));
+        if (endretPeriodeEnabled) {
+            opprettEtterlysningNyFlyt(behandlingReferanse, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
+            opprettTaskerForOpprettelseAvEtterlysning(behandlingReferanse);
+            return;
+        }
         opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
         opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
         opprettTaskerForOpprettelseAvEtterlysning(behandlingReferanse);
@@ -83,6 +93,27 @@ public class ProgramperiodeendringEtterlysningTjeneste {
 
         // Håndter resultat, opprett etterlysning dersom det er relevant
         resultatHåndterer.håndterResultat(resultatEndretProgramperiode, behandlingReferanse, etterlysningType, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag());
+    }
+
+    private void opprettEtterlysningNyFlyt(BehandlingReferanse behandlingReferanse, UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag) {
+        var gjeldendeEtterlysning = etterlysningRepository.hentSisteEtterlysning(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE, EtterlysningStatus.VENTER, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
+
+        var input = new EndretUngdomsprogramEtterlysningInput(
+            EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE,
+            gjeldendeEtterlysning.map(it -> new EtterlysningOgGrunnlag(new EtterlysningStatusOgType(it.getStatus(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE), ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(it.getGrunnlagsreferanse()))),
+            ungdomsprogramPeriodeGrunnlag,
+            initiellPeriodegrunnlag,
+            ungdomsytelseStartdatoRepository.hentGrunnlag(behandlingReferanse.getBehandlingId())
+        );
+
+        // Utled resultat
+        final var resultatEndretProgramperiode = EtterlysningForEndretProgramperiodeResultatUtleder.finnResultat(input, behandlingReferanse);
+
+        // Sporing
+        lagreSporing(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE, input, resultatEndretProgramperiode);
+
+        // Håndter resultat, opprett etterlysning dersom det er relevant
+        resultatHåndterer.håndterResultatV2(resultatEndretProgramperiode, behandlingReferanse, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag());
     }
 
     private void lagreSporing(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType, EndretUngdomsprogramEtterlysningInput input, ResultatType resultatEndretProgramperiode) {
@@ -114,7 +145,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             logger.info("Avbryter etterlysning {}", etterlysningerSomSkalAvbrytes);
             prosessTaskGruppe.addNesteSekvensiell(lagTaskForAvbrytelseAvEtterlysning(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId()));
         }
-        var etterlysningerSomSkalOpprettes = etterlysningRepository.hentOpprettetEtterlysninger(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
+        var etterlysningerSomSkalOpprettes = etterlysningRepository.hentOpprettetEtterlysninger(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
 
         if (!etterlysningerSomSkalOpprettes.isEmpty()) {
             logger.info("Oppretter etterlysning {}", etterlysningerSomSkalOpprettes);

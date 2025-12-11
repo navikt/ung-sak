@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Dependent
 public class UngdomsprogramPeriodeTjeneste {
@@ -82,8 +81,6 @@ public class UngdomsprogramPeriodeTjeneste {
         return finnEndretStartdatoer(ungdomsprogramPeriodeGrunnlag.get(), originaltGrunnlag.get());
     }
 
-
-
     public static List<EndretDato> finnEndretStartdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
         // Støtter kun en periode her foreløpig
         var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
@@ -98,18 +95,14 @@ public class UngdomsprogramPeriodeTjeneste {
         return List.of(new EndretDato(andreStartdato, førsteStartdato));
     }
 
-    public static List<EndretDato> finnEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
+    public static boolean harEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
         // Støtter kun en periode her foreløpig
         var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
         var gjeldendeDato = gjelendePeriode.getFomDato();
         var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer).map(UngdomsytelseStartdatoer::getStartdatoer)
             .orElse(Set.of())
             .iterator().next().getStartdato();
-        if (oppgittStartdato.equals(gjeldendeDato)) {
-            return List.of();
-        }
-
-        return List.of(new EndretDato(gjeldendeDato, oppgittStartdato));
+        return !gjeldendeDato.equals(oppgittStartdato);
     }
 
     public static List<EndretDato> finnEndretSluttdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {

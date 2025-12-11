@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -53,6 +54,17 @@ public class EtterlysningRepository {
             .setParameter("type", Arrays.stream(type).toList())
             .getResultList();
         return etterlysninger;
+    }
+
+    public Optional<Etterlysning> hentSisteEtterlysning(Long behandlingId, EtterlysningType type, EtterlysningStatus ...status) {
+        final var etterlysningQuery = entityManager.createQuery("select e from Etterlysning e " +
+                "where e.behandlingId = :behandlingId and e.status in :status and e.type = :type " +
+                "order by opprettetTidspunkt,id ", Etterlysning.class)
+            .setParameter("behandlingId", behandlingId)
+            .setParameter("type", type)
+            .setParameter("status", Arrays.stream(status).toList())
+            .setMaxResults(1);
+        return HibernateVerktøy.hentUniktResultat(etterlysningQuery);
     }
 
 

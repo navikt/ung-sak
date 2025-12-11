@@ -50,6 +50,20 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
         }
     }
 
+    void håndterResultatV2(ResultatType resultat, BehandlingReferanse behandlingReferanse,
+                           Optional<Etterlysning> gjeldendeEtterlysning,
+                         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
+        switch (resultat) {
+            case OPPRETT_ETTERLYSNING ->
+                opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+            case ERSTATT_EKSISTERENDE_ETTERLYSNING ->
+                erstattEksisterende(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE, gjeldendeEtterlysning.orElseThrow(()-> new IllegalStateException("Forventer å ha en gjeldene etterlysning")), gjeldendeGrunnlag);
+            case INGEN_ENDRING -> {
+                // Ingen handling nødvendig, behold eksisterende etterlysning
+            }
+        }
+    }
+
     private static Etterlysning finnEtterlysning(List<Etterlysning> etterlysninger, Optional<EtterlysningData> gjeldendeEtterlysning) {
         EtterlysningData gjeldende = gjeldendeEtterlysning.orElseThrow(() -> new IllegalStateException("Forventer å finne gjeldende etterlysning"));
         return etterlysninger.stream().filter(it -> it.getPeriode().equals(gjeldende.periode()) && it.getGrunnlagsreferanse().equals(gjeldende.grunnlagsreferanse())).findFirst()

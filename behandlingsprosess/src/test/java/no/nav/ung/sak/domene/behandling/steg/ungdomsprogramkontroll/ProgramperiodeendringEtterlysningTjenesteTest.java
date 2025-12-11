@@ -81,7 +81,8 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
             new EtterlysningTjeneste(mottatteDokumentRepository, new EtterlysningOgUttalelseTjeneste(etterlysningRepository, uttalelseRepository)),
             ungdomsytelseStartdatoRepository,
             new BehandingprosessSporingRepository(entityManager),
-            new EtterlysningForEndretProgramperiodeResultatHåndterer(etterlysningRepository)
+            new EtterlysningForEndretProgramperiodeResultatHåndterer(etterlysningRepository),
+            true
         );
     }
 
