@@ -46,7 +46,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class ProgramperiodeendringEtterlysningTjenesteTest {
+class ProgramperiodeendringEtterlysningTjenesteV2Test {
 
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
 
@@ -82,7 +82,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
             ungdomsytelseStartdatoRepository,
             new BehandingprosessSporingRepository(entityManager),
             new EtterlysningForEndretProgramperiodeResultatHåndterer(etterlysningRepository),
-            false
+            true
         );
     }
 
@@ -135,7 +135,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var etterlysning = etterlysninger.get(0);
         assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, tom));
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
-        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
     }
 
@@ -156,7 +156,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var etterlysning = etterlysninger.get(0);
         assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
-        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
     }
 
@@ -176,7 +176,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var etterlysning = etterlysninger.get(0);
         assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
-        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
+        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
     }
 
@@ -203,7 +203,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var etterlysning = etterlysninger.get(0);
         assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
-        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
+        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
     }
 
@@ -228,6 +228,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         final var etterlysning = etterlysninger.get(0);
         assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.VENTER);
+        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         assertThat(etterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag.getGrunnlagsreferanse());
     }
 
@@ -261,6 +262,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         assertThat(etterlysninger.size()).isEqualTo(2);
         final var nyopprettetEtterlysning = etterlysninger.stream().filter(it -> it.getStatus().equals(EtterlysningStatus.OPPRETTET)).findFirst().orElseThrow();
         assertThat(nyopprettetEtterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, tom));
+        assertThat(nyopprettetEtterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         assertThat(nyopprettetEtterlysning.getGrunnlagsreferanse()).isEqualTo(ungdomsprogramPeriodeGrunnlag2.getGrunnlagsreferanse());
 
         final var skalAvbrytesEtterlysning = etterlysninger.stream().filter(it -> it.getStatus().equals(EtterlysningStatus.SKAL_AVBRYTES)).findFirst().orElseThrow();

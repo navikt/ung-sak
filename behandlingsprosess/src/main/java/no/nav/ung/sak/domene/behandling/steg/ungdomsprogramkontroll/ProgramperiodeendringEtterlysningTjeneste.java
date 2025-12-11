@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -64,14 +65,20 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     public void opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse behandlingReferanse) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
         var initiellPeriodegrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell programperiodegrunnlag for behandling " + behandlingReferanse.getBehandlingId()));
-        if (endretPeriodeEnabled) {
+        var etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingReferanse.getBehandlingId());
+        boolean harEtterlyssningerAvGammelType = etterlysninger.stream().anyMatch(e -> e.getType() == EtterlysningType.UTTALELSE_ENDRET_STARTDATO || e.getType() == EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
+
+        //Dersom vi allerede har gammle etterlysningstyper så brukes disse for denne behandlingen, og vi kjører gammel flyt
+        //Når alle behandlinger bruker ny etterlysningstype kjører alle behandlinger med ny flyt, og vi fjerneer gammel logikk
+        if (endretPeriodeEnabled && !harEtterlyssningerAvGammelType) {
             opprettEtterlysningNyFlyt(behandlingReferanse, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
             opprettTaskerForOpprettelseAvEtterlysning(behandlingReferanse);
-            return;
         }
-        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
-        opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
-        opprettTaskerForOpprettelseAvEtterlysning(behandlingReferanse);
+        else {
+            opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
+            opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
+            opprettTaskerForOpprettelseAvEtterlysning(behandlingReferanse);
+        }
     }
 
     private void opprettEtterlysningDersomRelevantEndringForType(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType, UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag) {
