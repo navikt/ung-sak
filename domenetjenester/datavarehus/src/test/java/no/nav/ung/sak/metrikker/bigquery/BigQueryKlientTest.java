@@ -1,9 +1,13 @@
 package no.nav.ung.sak.metrikker.bigquery;
 
-import com.google.cloud.NoCredentials;
 import com.google.cloud.bigquery.BigQuery;
-import com.google.cloud.bigquery.BigQueryOptions;
-import com.google.cloud.bigquery.DatasetInfo;
+import com.google.cloud.bigquery.Dataset;
+import com.google.cloud.bigquery.DatasetId;
+import com.google.cloud.bigquery.Table;
+import com.google.cloud.bigquery.TableId;
+import com.google.cloud.bigquery.TableInfo;
+import com.google.cloud.bigquery.InsertAllRequest;
+import com.google.cloud.bigquery.InsertAllResponse;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -20,33 +24,55 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.etterlysning.EtterlysningRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.typer.Saksnummer;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.testcontainers.containers.BigQueryEmulatorContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.List;
 
-@Testcontainers
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
+
+@ExtendWith(MockitoExtension.class)
 class BigQueryKlientTest {
 
-    @Container
-    private static final BigQueryEmulatorContainer BIG_QUERY_EMULATOR_CONTAINER =
-        new BigQueryEmulatorContainer("ghcr.io/goccy/bigquery-emulator:0.4.3");
+    @Mock
+    private BigQuery bigQuery;
 
-    private static BigQueryKlient bigQueryKlient;
+    @Mock
+    private Dataset dataset;
 
-    @BeforeAll
-    static void setUp() {
-        BigQuery bigQuery = opprettBigQuery();
-        opprettDatasett(bigQuery);
+    @Mock
+    private Table table;
+
+    @Mock
+    private InsertAllResponse insertAllResponse;
+
+    private BigQueryKlient bigQueryKlient;
+
+    @BeforeEach
+    void setUp() {
+        // Setup mock behavior using lenient to avoid strict stubbing issues
+        lenient().when(bigQuery.getDataset(any(DatasetId.class))).thenReturn(dataset);
+        lenient().when(bigQuery.getTable(any(TableId.class))).thenAnswer(invocation -> {
+            TableId tableId = invocation.getArgument(0);
+            lenient().when(table.getTableId()).thenReturn(tableId);
+            return table;
+        });
+        lenient().when(bigQuery.create(any(com.google.cloud.bigquery.DatasetInfo.class))).thenReturn(dataset);
+        lenient().when(bigQuery.create(any(com.google.cloud.bigquery.TableInfo.class))).thenReturn(table);
+        lenient().when(table.exists()).thenReturn(true);
+        lenient().when(bigQuery.insertAll(any(InsertAllRequest.class))).thenReturn(insertAllResponse);
+        lenient().when(insertAllResponse.hasErrors()).thenReturn(false);
 
         bigQueryKlient = new BigQueryKlient(true, bigQuery);
     }
+
 
     @Test
     void publisering_av_FAGSAK_STATUS_V2_fungerer() {
@@ -158,19 +184,5 @@ class BigQueryKlientTest {
                 )
             )
         );
-    }
-
-
-    private static BigQuery opprettBigQuery() {
-        return BigQueryOptions.newBuilder()
-            .setProjectId("test-project")
-            .setHost(BIG_QUERY_EMULATOR_CONTAINER.getEmulatorHttpEndpoint())
-            .setCredentials(NoCredentials.getInstance())
-            .build()
-            .getService();
-    }
-
-    private static void opprettDatasett(BigQuery bigQuery) {
-        bigQuery.create(DatasetInfo.newBuilder(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET.getDatasetNavn()).build());
     }
 }
