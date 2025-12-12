@@ -91,6 +91,7 @@ spec:
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
         - host: "ereg-services.prod-fss-pub.nais.io"
+        - host: "ikomp.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
@@ -248,14 +249,16 @@ spec:
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "false"
     - name: KLAGE_ENABLED
-      value: "false"
+      value: "true"
     - name: INTEGRASJON_KABAL
-      value: "false"
+      value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
     - name: KONTROLL_SISTE_MND_ENABLED
       value: "false"
     - name: ENABLE_BREV_ANSVARLIG
+      value: "false"
+    - name: PUBLISER_STOENADSSTATISTIKK_ENABLED
       value: "false"
 
     # Konfigurasjoner
@@ -265,10 +268,14 @@ spec:
       value: "PT1H"
     - name: INNTEKTSKONTROLL_DAG_I_MAANED
       value: "8"
+    - name: INNTEKTSKONTROLL_CRON_EXPRESSION
+      value: "0 0 7 8 * *"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P14D"
+    - name: HENT_INNTEKT_HENDElSER_INTERVALL
+      value: "PT1M"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

@@ -39,6 +39,9 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements BatchPros
 
     @Override
     public CronExpression getCron() {
+
+
+
         return CronExpression.create("0 0 7 8 * *");
     }
 
