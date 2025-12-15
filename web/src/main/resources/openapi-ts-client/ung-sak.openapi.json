@@ -4290,6 +4290,9 @@
             "format" : "int32",
             "type" : "integer"
           },
+          "gjelderDelerAvMåned" : {
+            "type" : "boolean"
+          },
           "måned" : {
             "format" : "year-month",
             "type" : "string"
@@ -4316,7 +4319,7 @@
             "type" : "number"
           }
         },
-        "required" : [ "antallDager", "måned", "satsperioder" ],
+        "required" : [ "antallDager", "gjelderDelerAvMåned", "måned", "satsperioder" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.ungdomsytelse.ytelse.UtbetalingStatus" : {
