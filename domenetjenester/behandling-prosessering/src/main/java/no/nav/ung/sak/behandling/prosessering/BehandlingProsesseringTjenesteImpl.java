@@ -56,7 +56,6 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     private RegisterdataEndringshåndterer registerdataEndringshåndterer;
     private EndringsresultatSjekker endringsresultatSjekker;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
-    private boolean oppfriskKontrollbehandlingEnabled;
 
     private Instance<InformasjonselementerUtleder> informasjonselementer;
 
@@ -68,15 +67,13 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
                                               @Any Instance<InformasjonselementerUtleder> informasjonselementer,
                                               @Any Instance<EndringStartpunktUtleder> startpunktUtledere,
                                               EndringsresultatSjekker endringsresultatSjekker,
-                                              FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                              @KonfigVerdi(value = "OPPFRISK_KONTROLLBEHANDLING_ENABLED", defaultVerdi = "false") boolean oppfriskKontrollbehandlingEnabled) {
+                                              FagsakProsessTaskRepository fagsakProsessTaskRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.registerdataEndringshåndterer = registerdataEndringshåndterer;
         this.informasjonselementer = informasjonselementer;
         this.startpunktUtledere = startpunktUtledere;
         this.endringsresultatSjekker = endringsresultatSjekker;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
-        this.oppfriskKontrollbehandlingEnabled = oppfriskKontrollbehandlingEnabled;
     }
 
     public BehandlingProsesseringTjenesteImpl() {
