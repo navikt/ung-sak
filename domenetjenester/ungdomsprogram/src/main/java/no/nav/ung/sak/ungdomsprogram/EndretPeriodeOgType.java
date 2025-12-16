@@ -26,5 +26,7 @@ public class EndretPeriodeOgType {
         return endringType;
     }
 
-
+    public List<EndretDato> getEndretDatoer() {
+        return endretDatoer;
+    }
 }

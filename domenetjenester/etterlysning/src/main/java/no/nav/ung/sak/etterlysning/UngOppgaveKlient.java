@@ -6,6 +6,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
@@ -39,7 +40,7 @@ public class UngOppgaveKlient {
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
         this.opprettEndretStartdatoURI = tilUri(url, "oppgave/opprett/endret-startdato");
         this.opprettEndretSluttdatoURI = tilUri(url, "oppgave/opprett/endret-sluttdato");
-        this.opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endret-programperiode");
+        this.opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endret-periode");
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
@@ -106,9 +107,9 @@ public class UngOppgaveKlient {
         }
     }
 
-    public void opprettEndretProgramperiodeOppgave(EndretStartdatoOppgaveDTO endretStartdatoOppgaveDTO) {
+    public void opprettEndretProgramperiodeOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
         try {
-            restClient.post(opprettEndretProgramperiodeURI, endretStartdatoOppgaveDTO);
+            restClient.post(opprettEndretProgramperiodeURI, endretPeriodeOppgaveDTO);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }

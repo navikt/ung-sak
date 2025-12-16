@@ -8,6 +8,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste.EndretDato;
 
 import java.util.List;
+import java.util.Optional;
 
 @Dependent
 public class EndretPeriodeOgTypeTjeneste {
@@ -18,21 +19,24 @@ public class EndretPeriodeOgTypeTjeneste {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
-    public EndretPeriodeOgType finnEndretPeriodeDatoOgEndringType(Etterlysning etterlysning) {
+    public Optional<EndretPeriodeOgType> finnEndretPeriodeDatoOgEndringType(Etterlysning etterlysning) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
         var initiellPeriodegrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(etterlysning.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell programperiodegrunnlag for behandling " + etterlysning.getBehandlingId()));
         List<EndretDato> endretStartDatoer = UngdomsprogramPeriodeTjeneste.finnEndretStartdatoer(ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
         List<EndretDato> endretSluttDatoer = UngdomsprogramPeriodeTjeneste.finnEndretSluttdatoer(ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
 
         if (!endretStartDatoer.isEmpty() && endretSluttDatoer.isEmpty()) {
-            return new EndretPeriodeOgType(EndringType.ENDRET_STARTDATO, endretStartDatoer);
+            return Optional.of(new EndretPeriodeOgType(EndringType.ENDRET_STARTDATO, endretStartDatoer));
         }
-        if (endretStartDatoer.isEmpty() && !endretSluttDatoer.isEmpty()) {
-            return new EndretPeriodeOgType(EndringType.ENDRET_SLUTTDATO, endretSluttDatoer);
+        else if (endretStartDatoer.isEmpty() && !endretSluttDatoer.isEmpty()) {
+            return Optional.of(new EndretPeriodeOgType(EndringType.ENDRET_SLUTTDATO, endretSluttDatoer));
         }
-        if (!endretStartDatoer.isEmpty()) {
-            return new EndretPeriodeOgType(EndringType.ENDRET_PROGRAMPERIODE, endretStartDatoer, endretSluttDatoer);
+        else if (!endretStartDatoer.isEmpty()) {
+            return Optional.of(new EndretPeriodeOgType(EndringType.ENDRET_PROGRAMPERIODE, endretStartDatoer, endretSluttDatoer));
         }
-        return null;
+        else {
+           return Optional.empty();
+        }
+
     }
 }
