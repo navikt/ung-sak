@@ -59,7 +59,7 @@ public class EtterlysningRepository {
     public Optional<Etterlysning> hentSisteEtterlysning(Long behandlingId, EtterlysningType type, EtterlysningStatus ...status) {
         final var etterlysningQuery = entityManager.createQuery("select e from Etterlysning e " +
                 "where e.behandlingId = :behandlingId and e.status in :status and e.type = :type " +
-                "order by opprettetTidspunkt,id ", Etterlysning.class)
+                "order by opprettetTidspunkt desc, id desc ", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("type", type)
             .setParameter("status", Arrays.stream(status).toList())
