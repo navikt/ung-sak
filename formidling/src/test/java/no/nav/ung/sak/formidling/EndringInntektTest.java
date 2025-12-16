@@ -165,6 +165,33 @@ class EndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
             );
     }
 
+    @DisplayName("Endringsbrev for reduksjon av inntekt siste måned")
+    @Test
+    void endring_inntekt_siste_måned() {
+        LocalDate fom = LocalDate.of(2025, 12, 1);
+        var ungTestGrunnlag = EndringInntektScenarioer.endringInntektSisteMåned_10dager_10k(fom);
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret ungdomsprogramytelsen din " +
+                "Du får 2 667 kroner i ungdomsprogramytelse for perioden fra 1. mars 2026 til 10. mars 2026. " +
+                "Pengene får du utbetalt innen fire dager. " +
+                "Du får dette beløpet siden du hadde en inntekt på 3 182 kroner i denne perioden. " +
+                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
+                standardTekstEndringInntekt());
+
+        var behandling = lagScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_INNTEKT);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+            );
+    }
+
     @DisplayName("Endringsbrev med flere perioder med full, redusert og ingen utbetaling")
     @Test
     void inntekt_for_flere_mnd_med_full_redusert_og_ingen_utbetaling() {

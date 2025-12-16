@@ -57,7 +57,6 @@ public class EndringInntektScenarioer {
 
     /**
      * 19 år ungdom med full ungdomsperiode som har inntekt andre og tredje måned på 10 000 kroner.
-     * Se enhetstest i samme klasse for hvordan de ulike tilkjentytelse verdiene blir for måneden det er inntekt.
      */
     public static UngTestScenario endringMedInntektPå10k_utenom_mnd_2(LocalDate fom) {
         LocalDate førsteIMåneden = fom.withDayOfMonth(1);
@@ -119,6 +118,28 @@ public class EndringInntektScenarioer {
             ));
 
         return endringMedInntekt_19år(fom, registerInntektTimeline);
+    }
+
+    /**
+     * 19 år ungdom med
+     * 3. mnd: redusert utbetaling - kun 10 dager - 10 000 kr inntekt hele måneden
+     */
+    public static UngTestScenario endringInntektSisteMåned_10dager_10k(LocalDate fom) {
+        LocalDate førsteI3Måned = fom.plusMonths(3).withDayOfMonth(1);
+        LocalDate tom = førsteI3Måned.plusDays(9);
+        var registerInntektTimeline = new LocalDateTimeline<>(
+            List.of(
+                new LocalDateSegment<>(
+                    førsteI3Måned,
+                    tom,
+                    BigDecimal.valueOf(10000)) // månedsinntekt = 10 000 men får bare delvis.
+
+            ));
+
+        var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
+            BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
+
+        return endringMedInntekt_19år_med_kontroll(fom, tom, kontrollertInntektTidslinje);
     }
 
     /**
