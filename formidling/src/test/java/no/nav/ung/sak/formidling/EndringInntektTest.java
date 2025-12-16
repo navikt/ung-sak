@@ -176,6 +176,8 @@ class EndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
             "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
             "Du får 8 382 kroner i ungdomsprogramytelse for perioden fra 1. mai 2025 til 31. mai 2025. " +
             "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
+            "Du får 2 569 kroner i ungdomsprogramytelse for perioden fra 1. juni 2025 til 10. juni 2025. " +
+            "Du får dette beløpet siden du hadde en inntekt på 3 333 kroner i denne perioden. " +
             "Pengene får du utbetalt innen fire dager. " +
             "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
             "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +

@@ -540,10 +540,9 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     public static List<KontrollertInntektPeriode> kontrollerInntektFraTilkjenYtelse(LocalDateInterval programperiode, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder) {
         final var startdato = programperiode.getFomDato();
-        final var sluttdato = programperiode.getTomDato();
 
         var  kontrollertTilkjentYtelse = tilkjentYtelsePerioder.stream()
-            .filter(p -> !p.getFom().equals(startdato) && !p.getTom().equals(sluttdato))
+            .filter(p -> !p.getFom().equals(startdato))
             .toList();
         return new LocalDateTimeline<>(kontrollertTilkjentYtelse).stream().map(p -> KontrollertInntektPeriode.ny()
             .medInntekt(p.getValue().reduksjon().divide(BigDecimal.valueOf(0.66), 2, RoundingMode.HALF_UP))
