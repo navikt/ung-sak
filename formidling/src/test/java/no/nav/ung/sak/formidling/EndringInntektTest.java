@@ -175,7 +175,7 @@ class EndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
                 "Du får 2 667 kroner i ungdomsprogramytelse for perioden fra 1. mars 2026 til 10. mars 2026. " +
                 "Pengene får du utbetalt innen fire dager. " +
                 "Siden du bare hadde ungdomsprogramytelsen for en del av måneden, " +
-                "brukte vi bare en del av inntekten din på 10 000 kroner til å regne ut hvor mye penger du får for perioden fra 1. mars 2026 til 10. mars 2026. " +
+                "brukte vi bare en del av inntekten din på 10 000 kroner i mars til å regne ut hvor mye penger du får for perioden fra 1. mars 2026 til 10. mars 2026. " +
                 "Se eksempel på nav.no/ungdomsprogrammet#hvor-my på hvordan vi regner ut ungdomsprogramytelsen din for den siste måneden du er i ungdomsprogrammet. " +
                 standardTekstEndringInntekt());
 
@@ -206,7 +206,7 @@ class EndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
             "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
             "Du får 2 569 kroner i ungdomsprogramytelse for perioden fra 1. juni 2025 til 10. juni 2025. " +
             "Siden du bare hadde ungdomsprogramytelsen for en del av måneden, " +
-            "brukte vi bare en del av inntekten din på 10 000 kroner til å regne ut hvor mye penger du får for perioden fra 1. juni 2025 til 10. juni 2025. " +
+            "brukte vi bare en del av inntekten din på 10 000 kroner i juni til å regne ut hvor mye penger du får for perioden fra 1. juni 2025 til 10. juni 2025. " +
             "Se eksempel på nav.no/ungdomsprogrammet#hvor-my på hvordan vi regner ut ungdomsprogramytelsen din for den siste måneden du er i ungdomsprogrammet. " +
             "Pengene får du utbetalt innen fire dager. " +
             "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +

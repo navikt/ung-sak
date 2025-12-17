@@ -90,9 +90,8 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
             .formatted(p.toString(), ty.toString()));
 
 
-        boolean erUfullstendigMåned = p.getFomDato().getMonth() == p.getTomDato().getMonth()
-            && p.getTomDato().isBefore(p.getFomDato().with(TemporalAdjusters.lastDayOfMonth()));
-        var ufullstendigMåned = erUfullstendigMåned ? p.getFomDato().getMonth() : null;
+        boolean erUfullstendigMåned = p.getTomDato().isBefore(p.getTomDato().with(TemporalAdjusters.lastDayOfMonth()));
+        var ufullstendigMåned = erUfullstendigMåned ? p.getTomDato().getMonth() : null;
 
         return new LocalDateSegment<>(p,
             new EndringInntektPeriodeDto(
