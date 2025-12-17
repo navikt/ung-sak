@@ -57,7 +57,7 @@ public class EndretProgramperiodeOppgaveOppretter {
             var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato(), endretStartDato.get().forrigeDato());
             ungOppgaveKlient.opprettEndretStartdatoOppgave(oppgaveDto);
         } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
-            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato(), endretStartDato.get().forrigeDato());
+            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDato(), endretSluttDato.get().forrigeDato());
             ungOppgaveKlient.opprettEndretSluttdatoOppgave(oppgaveDto);
         } else {
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldeneGrunnlag);
