@@ -14,9 +14,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.math.BigDecimal;
-import java.time.Month;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -54,15 +52,8 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
             .map(it -> new PeriodeDto(it.getFom(), it.getTom()))
             .collect(Collectors.toSet());
 
-        var måneder = new HashSet<Month>();
-        fullUtbetalingsperioder.forEach(it -> {
-            måneder.add(it.fom().getMonth());
-            måneder.add(it.tom().getMonth());
-        });
-
-        var aktivMåned = måneder.size() == 1 ? måneder.stream().findFirst().get() : null;
         return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT_UTEN_REDUKSJON,
-            new EndringInntektUtenReduksjonDto(fullUtbetalingsperioder, aktivMåned)
+            new EndringInntektUtenReduksjonDto(fullUtbetalingsperioder)
         );
     }
 
