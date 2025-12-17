@@ -204,26 +204,6 @@ public class EndringInntektScenarioer {
     }
 
     /**
-     * 19 år ungdom med full ungdomsperiode har inntekt men har 0 kr i register og får derfor 0 kr i fastsatt flere måneder
-     */
-    public static UngTestScenario endring10000KrInntekt0KrRegisterInntekt_0krFastsatt_flere_mnd(LocalDate fom) {
-        BigDecimal rapportertInntekt = BigDecimal.valueOf(10000);
-
-        var kontrollerInntektPerioder = new LocalDateTimeline<>(
-            List.of(new LocalDateSegment<>(
-                fom.withDayOfMonth(1).plusMonths(1),
-                fom.withDayOfMonth(1).plusMonths(2).with(TemporalAdjusters.lastDayOfMonth()),
-                new BrevScenarioerUtils.KontrollerInntektHolder(
-                    BigDecimal.ZERO,
-                    rapportertInntekt,
-                    BigDecimal.ZERO,
-                    true)
-            )));
-
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
-    }
-
-    /**
      * 19 år ungdom med full ungdomsperiode har inntekt men har 0 kr i register og får derfor 0 kr i fastsatt
      */
     public static UngTestScenario endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(LocalDate fom) {
