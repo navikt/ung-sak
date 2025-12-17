@@ -75,7 +75,7 @@ public class InntektAbonnentTjeneste {
             tomFagsakPeriode,
             BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER
         );
-        inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId, periode));
+        inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId, periode, tomFagsakPeriode));
     }
 
     public Optional<Long> hentFørsteSekvensnummer() {
