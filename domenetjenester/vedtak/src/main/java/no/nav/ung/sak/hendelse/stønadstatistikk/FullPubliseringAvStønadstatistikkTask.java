@@ -41,7 +41,7 @@ public class FullPubliseringAvStønadstatistikkTask implements ProsessTaskHandle
                 + "  f.id = b.fagsak_id\n"
                 + ")\n"
                 + "WHERE b.behandling_status IN ('AVSLU', 'IVED')\n"
-                + "  AND f.ytelse_type = 'OMP'\n"
+                + "  AND f.ytelse_type = 'UNG'\n"
                 + "ORDER BY b.opprettet_dato ASC");
 
         final int antall = q.executeUpdate();
