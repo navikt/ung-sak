@@ -174,8 +174,9 @@ class EndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får 2 667 kroner i ungdomsprogramytelse for perioden fra 1. mars 2026 til 10. mars 2026. " +
                 "Pengene får du utbetalt innen fire dager. " +
-                "Du får dette beløpet siden du hadde en inntekt på 3 182 kroner i denne perioden. " +
-                "Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer 66 prosent av inntekten din. " +
+                "Siden du bare hadde ungdomsprogramytelsen for en del av måneden, " +
+                "brukte vi bare en del av inntekten din på 10 000 kroner til å regne ut hvor mye penger du får for perioden fra 1. mars 2026 til 10. mars 2026. " +
+                "Se eksempel på nav.no/ungdomsprogrammet#hvor-my på hvordan vi regner ut ungdomsprogramytelsen din for den siste måneden du er i ungdomsprogrammet. " +
                 standardTekstEndringInntekt());
 
         var behandling = lagScenario(ungTestGrunnlag);
@@ -204,7 +205,9 @@ class EndringInntektTest extends AbstractVedtaksbrevInnholdByggerTest {
             "Du får 8 382 kroner i ungdomsprogramytelse for perioden fra 1. mai 2025 til 31. mai 2025. " +
             "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
             "Du får 2 569 kroner i ungdomsprogramytelse for perioden fra 1. juni 2025 til 10. juni 2025. " +
-            "Du får dette beløpet siden du hadde en inntekt på 3 333 kroner i denne perioden. " +
+            "Siden du bare hadde ungdomsprogramytelsen for en del av måneden, " +
+            "brukte vi bare en del av inntekten din på 10 000 kroner til å regne ut hvor mye penger du får for perioden fra 1. juni 2025 til 10. juni 2025. " +
+            "Se eksempel på nav.no/ungdomsprogrammet#hvor-my på hvordan vi regner ut ungdomsprogramytelsen din for den siste måneden du er i ungdomsprogrammet. " +
             "Pengene får du utbetalt innen fire dager. " +
             "Du får ikke utbetalt ungdomsprogramytelse for perioden fra 1. januar 2025 til 31. januar 2025. " +
             "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +

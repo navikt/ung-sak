@@ -4,10 +4,22 @@
         {{#each utbetalingsperioder}}
             <p>Du får {{> felles/beløp utbetalingBeløp}} i ungdomsprogramytelse for perioden {{> felles/periode-inline periode}}.</p>
             {{#unless harFlereUtbetalinger}}<p>Pengene får du utbetalt innen fire dager.</p>{{/unless}}
-            <p>
-                Du får dette beløpet siden du hadde en inntekt på {{> felles/beløp inntekt}} i denne perioden.
-                {{#unless harIngenUtbetalinger}}Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer {{reduksjonssats}} prosent av inntekten din.{{/unless}}
-            </p>
+
+            {{#unless delvisMåned}}
+                <p>
+                    Du får dette beløpet siden du hadde en inntekt på {{> felles/beløp inntekt}} i denne perioden.
+                    {{#unless harIngenUtbetalinger}}Derfor har vi redusert ungdomsprogramytelsen din med et beløp som tilsvarer {{reduksjonssats}} prosent av inntekten din.{{/unless}}
+                </p>
+            {{else}}
+                <p>
+                    Siden du bare hadde ungdomsprogramytelsen for en del av måneden, brukte vi bare en del av inntekten din på {{> felles/beløp inntekt}} til å regne ut hvor mye penger du får for perioden {{> felles/periode-inline periode}}.
+                </p>
+                <p>
+                    Se eksempel på <a title="hvor-mye" href="https://www.nav.no/ungdomsprogrammet#hvor-my">nav.no/ungdomsprogrammet#hvor-my</a> på hvordan vi regner ut ungdomsprogramytelsen din for den siste måneden du er i ungdomsprogrammet.
+                </p>
+            {{/unless}}
+
+
         {{/each}}
 
         {{#if harFlereUtbetalinger}}
