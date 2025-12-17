@@ -111,6 +111,7 @@ spec:
         databases:
           - name: ung-sak
             envVarPrefix: DB
+        pointInTimeRecovery: true
     bigQueryDatasets:
       -  name: ung_sak_statistikk_dataset
          description: Inneholder tabeller for ung-sak ment for statistikk
@@ -245,6 +246,8 @@ spec:
       value: "true"
     - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
       value: "true"
+    - name: HENT_INNTEKT_HENDELSER_ENABLED
+      value: "true"
     - name: OPPFRISK_VED_INNKOMMENDE_INNTEKTSHENDELSE_ENABLED
       value: "false"
     - name: KLAGE_ENABLED
@@ -268,8 +271,8 @@ spec:
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE
       value: "PT1M"
-    - name: INNTEKTSKONTROLL_DAG_I_MAANED
-      value: "8"
+    - name: INNTEKTSKONTROLL_CRON_EXPRESSION
+      value: "0 0 7 8 * *"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE

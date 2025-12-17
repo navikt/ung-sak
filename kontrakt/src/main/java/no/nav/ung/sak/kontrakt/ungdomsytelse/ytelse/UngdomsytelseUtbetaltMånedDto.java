@@ -9,6 +9,7 @@ import java.time.YearMonth;
 import java.util.List;
 
 public record UngdomsytelseUtbetaltMånedDto(
+    @NotNull boolean gjelderDelerAvMåned,
     @NotNull YearMonth måned,
     @NotNull List<UngdomsytelseSatsPeriodeDto> satsperioder,
     @NotNull int antallDager,

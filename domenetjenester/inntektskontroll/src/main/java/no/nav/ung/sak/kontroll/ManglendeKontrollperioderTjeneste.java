@@ -5,15 +5,16 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -27,17 +28,17 @@ public class ManglendeKontrollperioderTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(ManglendeKontrollperioderTjeneste.class);
 
-    private final int dagIMånedForInntektsKontroll;
+    private final CronExpression inntektskontrollCron;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     @Inject
     public ManglendeKontrollperioderTjeneste(MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
-                                             @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int dagIMånedForInntektsKontroll,
+                                             @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntektskontrollCronString,
                                              TilkjentYtelseRepository tilkjentYtelseRepository, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
-        this.dagIMånedForInntektsKontroll = dagIMånedForInntektsKontroll;
+        this.inntektskontrollCron = CronExpression.create(inntektskontrollCronString);
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
@@ -85,8 +86,9 @@ public class ManglendeKontrollperioderTjeneste {
     }
 
     private LocalDate getTomDatoForPassertRapporteringsfrist() {
-        final var dagensDato = LocalDate.now();
-        return dagensDato.getDayOfMonth() < dagIMånedForInntektsKontroll ? dagensDato.minusMonths(2).with(TemporalAdjusters.lastDayOfMonth()) : dagensDato.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        final var nå = ZonedDateTime.now();
+        ZonedDateTime forrigeKontrollTidspunkt = inntektskontrollCron.nextTimeAfter(nå).minusMonths(1);
+        return forrigeKontrollTidspunkt.toLocalDate().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
     }
 
 }
