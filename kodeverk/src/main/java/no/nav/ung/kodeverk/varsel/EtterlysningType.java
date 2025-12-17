@@ -13,7 +13,7 @@ public enum EtterlysningType implements Kodeverdi {
     UTTALELSE_KONTROLL_INNTEKT("UTTALELSE_KONTROLL_INNTEKT", "Svar på varsel: Avvik i registerinntekt"),
     UTTALELSE_ENDRET_STARTDATO("UTTALELSE_ENDRET_STARTDATO", "Svar på varsel: Endret startdato"),
     UTTALELSE_ENDRET_SLUTTDATO("UTTALELSE_ENDRET_SLUTTDATO", "Svar på varsel: Endret sluttdato"),
-    UTTALELSE_ENDRET_PROGRAMPERIODE("UTTALELSE_ENDRET_PROGRAMPERIODE", "Svar på varsel: Endret programperiode"),
+    UTTALELSE_ENDRET_PERIODE("UTTALELSE_ENDRET_PERIODE", "Svar på varsel: Endret programperiode"),
 
     ;
 

@@ -55,9 +55,9 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
                          UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
-                opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+                opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
             case ERSTATT_EKSISTERENDE_ETTERLYSNING ->
-                erstattEksisterende(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE, gjeldendeEtterlysning.orElseThrow(()-> new IllegalStateException("Forventer å ha en gjeldene etterlysning")), gjeldendeGrunnlag);
+                erstattEksisterende(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PERIODE, gjeldendeEtterlysning.orElseThrow(()-> new IllegalStateException("Forventer å ha en gjeldene etterlysning")), gjeldendeGrunnlag);
             case INGEN_ENDRING -> {
                 // Ingen handling nødvendig, behold eksisterende etterlysning
             }

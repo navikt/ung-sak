@@ -29,7 +29,7 @@ public class UngOppgaveKlient {
     private final URI opprettEndretSluttdatoURI;
     private final URI opprettEndretStartdatoURI;
     private final URI løsSøkYtelseURI;
-    private final URI opprettEndretProgramperiodeURI;
+    private final URI opprettEndretPeriodeURI;
 
 
     @Inject
@@ -40,7 +40,7 @@ public class UngOppgaveKlient {
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
         this.opprettEndretStartdatoURI = tilUri(url, "oppgave/opprett/endret-startdato");
         this.opprettEndretSluttdatoURI = tilUri(url, "oppgave/opprett/endret-sluttdato");
-        this.opprettEndretProgramperiodeURI = tilUri(url, "oppgave/opprett/endret-periode");
+        this.opprettEndretPeriodeURI = tilUri(url, "oppgave/opprett/endret-periode");
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
@@ -107,9 +107,9 @@ public class UngOppgaveKlient {
         }
     }
 
-    public void opprettEndretProgramperiodeOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
+    public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
         try {
-            restClient.post(opprettEndretProgramperiodeURI, endretPeriodeOppgaveDTO);
+            restClient.post(opprettEndretPeriodeURI, endretPeriodeOppgaveDTO);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }

@@ -13,7 +13,7 @@ public enum EndringType implements Kodeverdi {
     ENDRET_INNTEKT("ENDRET_INNTEKT", "Endret registerinntekt"),
     ENDRET_STARTDATO("ENDRET_STARTDATO", "Endret startdato"),
     ENDRET_SLUTTDATO("ENDRET_SLUTTDATO", "Endret sluttdato"),
-    ENDRET_PROGRAMPERIODE("ENDRET_PROGRAMPERIODE", "Endret programperiode"),
+    ENDRET_PERIODE("ENDRET_PERIODE", "Endret programperiode"),
 
     ;
 

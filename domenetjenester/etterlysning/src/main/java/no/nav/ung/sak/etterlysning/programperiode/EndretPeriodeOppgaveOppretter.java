@@ -23,15 +23,15 @@ import java.util.Set;
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
 @Dependent
-public class EndretProgramperiodeOppgaveOppretter {
+public class EndretPeriodeOppgaveOppretter {
 
     private final UngOppgaveKlient ungOppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
 
     @Inject
-    public EndretProgramperiodeOppgaveOppretter(UngOppgaveKlient ungOppgaveKlient,
-                                                UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public EndretPeriodeOppgaveOppretter(UngOppgaveKlient ungOppgaveKlient,
+                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.ungOppgaveKlient = ungOppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
@@ -64,7 +64,7 @@ public class EndretProgramperiodeOppgaveOppretter {
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ANDRE_ENDRINGER);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
-            ungOppgaveKlient.opprettEndretProgramperiodeOppgave(oppgaveDto);
+            ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
         }
 
     }

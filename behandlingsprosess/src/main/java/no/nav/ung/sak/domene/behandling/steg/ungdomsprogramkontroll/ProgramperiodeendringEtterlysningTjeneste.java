@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -103,11 +102,11 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
     private void opprettEtterlysningNyFlyt(BehandlingReferanse behandlingReferanse, UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag) {
-        var gjeldendeEtterlysning = etterlysningRepository.hentSisteEtterlysning(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE, EtterlysningStatus.VENTER, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
+        var gjeldendeEtterlysning = etterlysningRepository.hentSisteEtterlysning(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE, EtterlysningStatus.VENTER, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
 
         var input = new EndretUngdomsprogramEtterlysningInput(
-            EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE,
-            gjeldendeEtterlysning.map(it -> new EtterlysningOgGrunnlag(new EtterlysningStatusOgType(it.getStatus(), EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE), ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(it.getGrunnlagsreferanse()))),
+            EtterlysningType.UTTALELSE_ENDRET_PERIODE,
+            gjeldendeEtterlysning.map(it -> new EtterlysningOgGrunnlag(new EtterlysningStatusOgType(it.getStatus(), EtterlysningType.UTTALELSE_ENDRET_PERIODE), ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(it.getGrunnlagsreferanse()))),
             ungdomsprogramPeriodeGrunnlag,
             initiellPeriodegrunnlag,
             ungdomsytelseStartdatoRepository.hentGrunnlag(behandlingReferanse.getBehandlingId())
@@ -117,7 +116,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         final var resultatEndretProgramperiode = EtterlysningForEndretProgramperiodeResultatUtlederV2.finnResultat(input, behandlingReferanse);
 
         // Sporing
-        lagreSporing(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE, input, resultatEndretProgramperiode);
+        lagreSporing(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PERIODE, input, resultatEndretProgramperiode);
 
         // Håndter resultat, opprett etterlysning dersom det er relevant
         resultatHåndterer.håndterResultatV2(resultatEndretProgramperiode, behandlingReferanse, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag());
@@ -152,7 +151,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             logger.info("Avbryter etterlysning {}", etterlysningerSomSkalAvbrytes);
             prosessTaskGruppe.addNesteSekvensiell(lagTaskForAvbrytelseAvEtterlysning(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId()));
         }
-        var etterlysningerSomSkalOpprettes = etterlysningRepository.hentOpprettetEtterlysninger(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningType.UTTALELSE_ENDRET_PROGRAMPERIODE);
+        var etterlysningerSomSkalOpprettes = etterlysningRepository.hentOpprettetEtterlysninger(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO, EtterlysningType.UTTALELSE_ENDRET_PERIODE);
 
         if (!etterlysningerSomSkalOpprettes.isEmpty()) {
             logger.info("Oppretter etterlysning {}", etterlysningerSomSkalOpprettes);
