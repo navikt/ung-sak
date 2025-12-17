@@ -8,5 +8,5 @@ public record EndringInntektPeriodeDto(
     PeriodeDto periode,
     long inntekt,
     long utbetalingBeløp,
-    Month delvisMåned) {
+    Month ufullstendigMåned) {
 }

@@ -90,16 +90,16 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
             .formatted(p.toString(), ty.toString()));
 
 
-        boolean erDelvisMåned = p.getFomDato().getMonth() == p.getTomDato().getMonth()
+        boolean erUfullstendigMåned = p.getFomDato().getMonth() == p.getTomDato().getMonth()
             && p.getTomDato().isBefore(p.getFomDato().with(TemporalAdjusters.lastDayOfMonth()));
-        var delvisMåned = erDelvisMåned ? p.getFomDato().getMonth() : null;
+        var ufullstendigMåned = erUfullstendigMåned ? p.getFomDato().getMonth() : null;
 
         return new LocalDateSegment<>(p,
             new EndringInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
                 tilHeltall(rhs.getValue()),
                 tilHeltall(ty.tilkjentBeløp()),
-                delvisMåned)
+                ufullstendigMåned)
         );
     }
 
