@@ -279,7 +279,7 @@ public class EndringInntektScenarioer {
         var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
         var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, tilkjentPeriode, kontrollertInntektTidslinje);
 
-        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, kontrollertInntektTidslinje);
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, kontrollertInntektTidslinje);
 
         var opptjening = OppgittOpptjeningBuilder.ny();
 

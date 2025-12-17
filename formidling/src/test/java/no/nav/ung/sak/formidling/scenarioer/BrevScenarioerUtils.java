@@ -7,6 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
@@ -20,7 +21,6 @@ import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.test.util.UngTestRepositories;
-import no.nav.ung.sak.test.util.behandling.AbstractTestScenario;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
@@ -212,28 +212,28 @@ public class BrevScenarioerUtils {
 
     public record KontrollerInntektHolder(BigDecimal inntekt, BigDecimal rapportertInntekt, BigDecimal registerInntekt, boolean erManueltVurdert) {
         public static KontrollerInntektHolder forRegisterInntekt(BigDecimal registerInntekt) {
-            return new KontrollerInntektHolder(null, registerInntekt, registerInntekt, false);
+            return new KontrollerInntektHolder(registerInntekt, null, registerInntekt, false);
         }
 
     }
-    public static LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektFraHolder(LocalDateInterval programperiode, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektTimeline) {
-        var kontrollertInntektPerioder = AbstractTestScenario.kontrollerInntektFraTilkjenYtelse(programperiode, tilkjentYtelsePerioder);
-        return new LocalDateTimeline<>(
-            kontrollertInntektPerioder.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), it)).toList()
-        ).combine(kontrollerInntektTimeline, BrevScenarioerUtils::overskrivKontrollerInntektFraHolder, LocalDateTimeline.JoinStyle.LEFT_JOIN);
+    public static LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektFraHolder(LocalDateInterval programperiode, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektTimeline) {
+        var kontrollertInntektPeriodes = kontrollerInntektTimeline.stream()
+            .filter(it -> it.getFom() != programperiode.getFomDato())
+            .map(it ->
+            {
+                KontrollerInntektHolder value = it.getValue();
+                return new LocalDateSegment<>(it.getLocalDateInterval(), KontrollertInntektPeriode.ny()
+                    .medInntekt(value.inntekt())
+                    .medRapportertInntekt(value.rapportertInntekt())
+                    .medRegisterInntekt(value.registerInntekt())
+                    .medErManueltVurdert(value.erManueltVurdert())
+                    .medKilde(KontrollertInntektKilde.REGISTER)
+                    .medPeriode(DatoIntervallEntitet.fra(it.getLocalDateInterval()))
+                    .build());
+            }
+        ).toList();
+
+        return new LocalDateTimeline<>(kontrollertInntektPeriodes);
     }
 
-    private static LocalDateSegment<KontrollertInntektPeriode> overskrivKontrollerInntektFraHolder(LocalDateInterval di, LocalDateSegment<KontrollertInntektPeriode> lhs, LocalDateSegment<KontrollerInntektHolder> rhs) {
-        KontrollerInntektHolder kontrollerInntekt = rhs.getValue();
-        return new LocalDateSegment<>(
-            di.getFomDato(), di.getTomDato(),
-            KontrollertInntektPeriode.ny()
-                .medInntekt(kontrollerInntekt != null && kontrollerInntekt.inntekt() != null ? kontrollerInntekt.inntekt() : lhs.getValue().getInntekt())
-                .medRapportertInntekt(kontrollerInntekt != null && kontrollerInntekt.rapportertInntekt() != null ? kontrollerInntekt.rapportertInntekt() : BigDecimal.ZERO)
-                .medRegisterInntekt(kontrollerInntekt != null && kontrollerInntekt.registerInntekt() != null ? kontrollerInntekt.rapportertInntekt() : BigDecimal.ZERO)
-                .medErManueltVurdert(kontrollerInntekt != null && kontrollerInntekt.erManueltVurdert() || lhs.getValue().getErManueltVurdert())
-                .medKilde(lhs.getValue().getKilde())
-                .medPeriode(DatoIntervallEntitet.fra(di)).build()
-        );
-    }
 }
