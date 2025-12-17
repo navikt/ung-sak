@@ -19,6 +19,7 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,6 +54,7 @@ class VurderKompletthetStegImplTest {
     private Behandling revurdering;
     private AktørId aktørId;
     private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     @BeforeEach
     void setUp() {
@@ -74,6 +76,7 @@ class VurderKompletthetStegImplTest {
             mock(ProgramperiodeendringEtterlysningTjeneste.class),
             mock(InntektAbonnentTjeneste.class),
             rapporteringsfristAutopunktUtleder,
+            relevanteKontrollperioderUtleder,
             "P14D",
             false
         );
