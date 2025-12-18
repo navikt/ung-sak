@@ -72,7 +72,7 @@ public class InntektAbonnentTjeneste {
             List.of(UNG_INNTEKT_FILTER),
             YearMonth.from(periode.getFom()),
             YearMonth.from(periode.getTom()),
-            YearMonth.from(tomFagsakPeriode).atEndOfMonth(),
+            YearMonth.from(tomFagsakPeriode).atEndOfMonth().plusMonths(1), // Lytter på hendelser en måned etter fagsakens tom dato for å fange opp sene inntektsrapporeringer.
             BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER
         );
         inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId, periode, tomFagsakPeriode));
