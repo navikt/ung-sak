@@ -11,6 +11,7 @@ public record StønadsstatistikkSatsPeriode(
     @NotNull LocalDate fom,
     @NotNull LocalDate tom,
     @NotNull StønadstatistikkSatsType satsType,
+    @NotNull @DecimalMin("0") BigDecimal dagsatsUtenBarnetillegg,
     @NotNull @Min(0) int antallBarn,
     @NotNull @Min(0) int dagsatsBarnetillegg,
     @NotNull @DecimalMin("0") BigDecimal grunnbeløpFaktor
