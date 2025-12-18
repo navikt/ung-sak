@@ -62,7 +62,7 @@ public class EndretPeriodeOppgaveOppretter {
         } else {
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldeneGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
-            var endringer = Set.of(PeriodeEndringType.ANDRE_ENDRINGER);
+            var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
             ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
         }
