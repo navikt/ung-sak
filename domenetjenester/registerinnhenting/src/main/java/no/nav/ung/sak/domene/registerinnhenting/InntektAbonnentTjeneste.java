@@ -55,7 +55,7 @@ public class InntektAbonnentTjeneste {
                 log.info("Prøver å opprette abonnement for aktør, men abonnementID = {} eksisterer allerede for denne periode", eksisterendeAbonnement.getAbonnementId());
                 return;
             } else {
-                throw new IllegalStateException("Prøver å opprette at abonnement, men det eksisterer en abbonnentId = {} for aktøren, på en annen periode" + eksisterendeAbonnement.getAbonnementId());
+                throw new IllegalStateException("Prøver å opprette at abonnement, men det eksisterer en abbonnentId = " + eksisterendeAbonnement.getAbonnementId() + " for aktøren, på en annen periode");
             }
         }
 
@@ -72,7 +72,7 @@ public class InntektAbonnentTjeneste {
             List.of(UNG_INNTEKT_FILTER),
             YearMonth.from(periode.getFom()),
             YearMonth.from(periode.getTom()),
-            tomFagsakPeriode,
+            YearMonth.from(tomFagsakPeriode).atEndOfMonth(),
             BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER
         );
         inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId, periode, tomFagsakPeriode));
