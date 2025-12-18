@@ -2,11 +2,8 @@ package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.*;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -41,23 +38,39 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
     @Override
     public LocalDateTimeline<DetaljertResultat> utledDetaljertResultat(Behandling behandling) {
 
-        var triggerPerioder = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId());
+        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
+        var kontrollertePerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId()).compress();
+
+        var perioderTilVurdering = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId())
+            .combine(tilkjentYtelseTidslinje, fjernIkkeRelevanteKontrollårsaker(), JoinStyle.LEFT_JOIN)
+            .combine(kontrollertePerioderTidslinje, fjernIkkeRelevanteKontrollårsaker(), JoinStyle.LEFT_JOIN)
+            .filterValue(it -> !it.isEmpty())
+            .compress();
 
         var vilkårPeriodeResultatMap = hentVilkårTidslinjer(behandling.getId());
         var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårPeriodeResultatMap);
 
-        var vilkårOgBehandlingsårsakerTidslinje = triggerPerioder
+        var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .intersection(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
                     -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue(), behandling.erManueltOpprettet())));
-
-        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::bestemResultatForPeriode, JoinStyle.LEFT_JOIN);
 
         return detaljertResultatTidslinje.compress();
 
+    }
+
+    private  static <T> LocalDateSegmentCombinator<Set<BehandlingÅrsakType>, T, Set<BehandlingÅrsakType>> fjernIkkeRelevanteKontrollårsaker() {
+        return (di, trigger, kontrollEllerYtelseSegment) -> {
+            var årsaker = new HashSet<>(trigger.getValue());
+            // Fjern kontrollårsak hvis det ikke er noen kontroll eller tilkjent ytelse i perioden
+            if (kontrollEllerYtelseSegment == null) {
+                årsaker.remove(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+            }
+            return new LocalDateSegment<>(di, årsaker);
+        };
     }
 
     private static LocalDateSegment<DetaljertResultat> bestemResultatForPeriode(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {
