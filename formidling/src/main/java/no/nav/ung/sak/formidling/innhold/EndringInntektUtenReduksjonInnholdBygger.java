@@ -45,13 +45,12 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
             throw new IllegalStateException("Fant tilkjent ytelse med utbetalingsgrad mindre enn 100%.");
         }
 
-        var fullUtbetalingsperioder = relevantTilkjentYtelse.mapValue(it -> true)
+        var fullUtbetalingsperioder = relevantTilkjentYtelse.mapValue(_ -> true)
             .compress()
             .toSegments().stream()
             .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
             .map(it -> new PeriodeDto(it.getFom(), it.getTom()))
             .collect(Collectors.toSet());
-
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT_UTEN_REDUKSJON,
             new EndringInntektUtenReduksjonDto(fullUtbetalingsperioder)
