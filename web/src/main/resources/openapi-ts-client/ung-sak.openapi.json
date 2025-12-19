@@ -3428,6 +3428,7 @@
       "ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto" : {
         "properties" : {
           "begrunnelse" : {
+            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
             "type" : "string"
           },
           "fastsattInnntekt" : {
