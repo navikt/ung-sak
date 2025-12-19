@@ -50,15 +50,15 @@ public class InntektAbonnentKlient {
     }
 
     public long opprettAbonnement(PersonIdent personIdent, String formaal, List<String> filter,
-                                               YearMonth fomMånedObservasjon, YearMonth tomMånedObservasjon,
+                                               YearMonth månedFom, YearMonth månedTom,
                                                LocalDate sisteBruksdag, int bevaringstid) {
         try {
             var request = new AbonnementAdministrasjonOpprettApiInn(
                 personIdent.getIdent(),
-                formaal,
                 filter,
-                fomMånedObservasjon,
-                tomMånedObservasjon,
+                formaal,
+                månedFom,
+                månedTom,
                 sisteBruksdag,
                 bevaringstid
             );
@@ -130,10 +130,10 @@ public class InntektAbonnentKlient {
 
     private record AbonnementAdministrasjonOpprettApiInn(
         String norskident,
-        String formaal,
         List<String> filter,
-        YearMonth fomMaanedObservasjon,
-        YearMonth tomMaanedObservasjon,
+        String formaal,
+        YearMonth maanedFom,
+        YearMonth maanedTom,
         LocalDate sisteBruksdag,
         int bevaringstid
     ) {}

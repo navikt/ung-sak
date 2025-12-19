@@ -28,7 +28,8 @@ class EndringInntektUtenReduksjonTest extends AbstractVedtaksbrevInnholdByggerTe
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
             "Vi har ikke endret ungdomsprogramytelsen din " +
                 "Du har gitt oss beskjed om at du hadde inntekt i perioden fra 1. september 2025 til 30. september 2025. " +
-                "Vi har kontrollert inntekten din for denne perioden og kommet frem til at du ikke får redusert ungdomsprogramytelsen din. " +
+                "Vi har sjekket inntekten din i A-ordningen, men arbeidsgiveren din har ikke registrert at du hadde inntekt i perioden. " +
+                "Vi har derfor kommet frem til at du får full ungdomsprogramytelse for perioden. " +
                 "Pengene får du utbetalt innen fire dager. " +
                 "Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 11. ");
 

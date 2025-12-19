@@ -18,6 +18,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
 import java.util.Objects;
 
@@ -88,12 +89,16 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         Objects.requireNonNull(rhs, "Mangler kontrollert inntekt for periode %s for tilkjent ytelse %s"
             .formatted(p.toString(), ty.toString()));
 
+
+        boolean erUfullstendigMåned = p.getTomDato().isBefore(p.getTomDato().with(TemporalAdjusters.lastDayOfMonth()));
+        var ufullstendigMåned = erUfullstendigMåned ? p.getTomDato().getMonth() : null;
+
         return new LocalDateSegment<>(p,
             new EndringInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
                 tilHeltall(rhs.getValue()),
-                tilHeltall(ty.tilkjentBeløp())
-            )
+                tilHeltall(ty.tilkjentBeløp()),
+                ufullstendigMåned)
         );
     }
 

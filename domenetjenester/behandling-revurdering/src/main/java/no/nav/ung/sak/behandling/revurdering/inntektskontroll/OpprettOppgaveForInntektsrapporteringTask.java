@@ -9,6 +9,7 @@ import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -25,7 +26,10 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,7 +56,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
-    private int rapporteringsfristDagIMåned;
+    private CronExpression inntektskontrollCronExpression;
 
 
     OpprettOppgaveForInntektsrapporteringTask() {
@@ -64,14 +68,14 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
                                                      FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
-                                                     @KonfigVerdi(value = "INNTEKTSKONTROLL_DAG_I_MAANED", defaultVerdi = "8") int rapporteringsfristDagIMåned) {
+                                                     @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
 
         this.personinfoAdapter = personinfoAdapter;
         this.ungOppgaveKlient = ungOppgaveKlient;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
-        this.rapporteringsfristDagIMåned = rapporteringsfristDagIMåned;
+        this.inntektskontrollCronExpression = CronExpression.create(inntetskontrollCronString);
     }
 
     @Override
@@ -85,10 +89,11 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         }
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(aktørId, fom, tom);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
+        ZonedDateTime nesteKontrollTidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
         ungOppgaveKlient.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
             deltakerIdent.getIdent(),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
-            fom.plusMonths(1).withDayOfMonth(rapporteringsfristDagIMåned).atStartOfDay(),
+            nesteKontrollTidspunkt.toLocalDateTime().toLocalDate().atStartOfDay(),
             fom,
             tom,
             harIkkeYtelseIHelePerioden

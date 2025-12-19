@@ -540,10 +540,9 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
     public static List<KontrollertInntektPeriode> kontrollerInntektFraTilkjenYtelse(LocalDateInterval programperiode, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder) {
         final var startdato = programperiode.getFomDato();
-        final var sluttdato = programperiode.getTomDato();
 
         var  kontrollertTilkjentYtelse = tilkjentYtelsePerioder.stream()
-            .filter(p -> !p.getFom().equals(startdato) && !p.getTom().equals(sluttdato))
+            .filter(p -> !p.getFom().equals(startdato))
             .toList();
         return new LocalDateTimeline<>(kontrollertTilkjentYtelse).stream().map(p -> KontrollertInntektPeriode.ny()
             .medInntekt(p.getValue().reduksjon().divide(BigDecimal.valueOf(0.66), 2, RoundingMode.HALF_UP))
@@ -751,10 +750,21 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         // opprett og lagre fagsak. Må gjøres før kan opprette behandling
         fagsak = fagsakBuilder.build();
-        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12));
+        var periode = utledFagsakPeriode();
         FagsakTestUtil.oppdaterPeriode(fagsak, periode);
         Long fagsakId = fagsakRepo.opprettNy(fagsak); // NOSONAR //$NON-NLS-1$
         fagsak.setId(fagsakId);
+    }
+
+    private  DatoIntervallEntitet utledFagsakPeriode() {
+        if (ungTestscenario != null) {
+            List<LocalDate> søknadStartDato = ungTestscenario.søknadStartDato();
+            if (søknadStartDato != null && !søknadStartDato.isEmpty()) {
+                LocalDate fom = søknadStartDato.getFirst();
+                return DatoIntervallEntitet.fraOgMedTilOgMed(fom, fom.plusMonths(12));
+            }
+        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(12), LocalDate.now().plusMonths(12));
     }
 
     private void lagreVilkårResultat(BehandlingRepositoryProvider repoProvider, BehandlingLås lås, Behandling behandling1) {
