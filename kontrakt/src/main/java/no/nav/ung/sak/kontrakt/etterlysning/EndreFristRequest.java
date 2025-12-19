@@ -17,10 +17,9 @@ public class EndreFristRequest {
     /**
      * Ekstern-referanse for etterlysning og ny frist
      */
-    @Valid
     @NotNull
     @Size(min = 1, max = 20)
-    private List<EndreFristDto> endretFrister;
+    private List<@Valid EndreFristDto> endretFrister;
 
 
     @JsonProperty(value = "behandlingId", required = true)

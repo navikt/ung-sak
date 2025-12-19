@@ -25,9 +25,8 @@ import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 public class FatterVedtakAksjonspunktDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "aksjonspunktGodkjenningDtos")
-    @Valid
     @Size(max = 20)
-    private Collection<AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos = new ArrayList<>();
+    private Collection<@Valid AksjonspunktGodkjenningDto> aksjonspunktGodkjenningDtos = new ArrayList<>();
 
     public FatterVedtakAksjonspunktDto() {
         // For Jackson

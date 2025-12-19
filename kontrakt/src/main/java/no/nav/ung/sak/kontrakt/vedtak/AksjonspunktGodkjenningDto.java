@@ -33,9 +33,8 @@ public class AksjonspunktGodkjenningDto {
 
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "arsaker")
-    @Valid
     @Size(max = 20)
-    private Set<VurderÅrsak> arsaker = Collections.emptySet();
+    private Set<@Valid VurderÅrsak> arsaker = Collections.emptySet();
 
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "begrunnelse")

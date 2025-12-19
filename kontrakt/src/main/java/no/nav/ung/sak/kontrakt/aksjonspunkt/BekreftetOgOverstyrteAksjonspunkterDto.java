@@ -43,15 +43,13 @@ public class BekreftetOgOverstyrteAksjonspunkterDto {
     private Long behandlingVersjon;
 
     @JsonProperty(value = "overstyrteAksjonspunktDtoer")
-    @Valid
     @Size(max = 10)
-    private Collection<OverstyringAksjonspunktDto> overstyrteAksjonspunktDtoer = Collections.emptyList();
+    private Collection<@Valid OverstyringAksjonspunktDto> overstyrteAksjonspunktDtoer = Collections.emptyList();
 
     @JsonProperty(value = "bekreftedeAksjonspunktDtoer")
     @Size(max = 10)
     @NotNull
-    @Valid
-    private Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
+    private Collection<@Valid BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
 
     public static BekreftetOgOverstyrteAksjonspunkterDto lagDto(Long behandlingId, Long behandlingVersjon,
                                                                 Collection<OverstyringAksjonspunktDto> overstyrteAksjonspunktDtoer,

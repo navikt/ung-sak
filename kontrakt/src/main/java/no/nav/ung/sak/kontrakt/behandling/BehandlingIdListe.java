@@ -30,9 +30,8 @@ public class BehandlingIdListe {
 
     @JsonProperty(value = "behandlinger", required = true)
     @NotEmpty
-    @Valid
     @Size(min = 1, max = 1000)
-    private List<BehandlingIdDto> behandlinger = new ArrayList<>();
+    private List<@Valid BehandlingIdDto> behandlinger = new ArrayList<>();
 
     public BehandlingIdListe(@JsonProperty(value = "behandlinger", required = true) @NotEmpty @Valid List<BehandlingIdDto> behandlinger) {
         this.behandlinger = Objects.requireNonNull(behandlinger, "behandlinger");

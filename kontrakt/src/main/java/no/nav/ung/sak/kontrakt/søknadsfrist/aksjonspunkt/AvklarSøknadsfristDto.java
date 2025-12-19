@@ -21,11 +21,10 @@ import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 @JsonTypeName(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE)
 public class AvklarSøknadsfristDto extends BekreftetAksjonspunktDto {
 
-    @Valid
     @NotNull
     @Size(min = 1)
     @JsonProperty(value = "avklarteKrav")
-    private List<AvklartKravDto> avklarteKrav;
+    private List<@Valid AvklartKravDto> avklarteKrav;
 
     public AvklarSøknadsfristDto() {
     }
