@@ -210,26 +210,26 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
         if (field.getAnnotatedType() instanceof AnnotatedParameterizedType annotatedParameterizedType) {
             var annotert = annotatedParameterizedType.getAnnotatedActualTypeArguments();
             for (var ann : annotert) {
-                var kreverAnnoteringer = utledKrav(ann.getType());
-                validerRiktigAnnotert(ann, kreverAnnoteringer);
+                var påkrevdeAnnoteringer = utledPåkrevdeAnnoteringer(ann.getType());
+                validerRiktigAnnotert(ann, påkrevdeAnnoteringer);
             }
             return;
         }
         throw new IllegalArgumentException("Feltet " + field + " har ikke påkrevde annoteringer.");
     }
 
-    private static List<List<Class<? extends Annotation>>> utledKrav(Type type) {
-        var kreverAnnoteringer = new ArrayList<List<Class<? extends Annotation>>>();
+    private static List<List<Class<? extends Annotation>>> utledPåkrevdeAnnoteringer(Type type) {
+        var påkrevdeAnnoteringer = new ArrayList<List<Class<? extends Annotation>>>();
         if (erKodeverk(type)) {
-            //kreverAnnoteringer.add(List.of(ValidKodeverk.class));
+            //påkrevdeAnnoteringer.add(List.of(ValidKodeverk.class));
         } else if (isCollectionOrMap(type)) {
-            kreverAnnoteringer.add(List.of(Size.class));
+            påkrevdeAnnoteringer.add(List.of(Size.class));
         } else if (VALIDERINGSALTERNATIVER.keySet().contains(type)) {
-            kreverAnnoteringer.addAll(VALIDERINGSALTERNATIVER.get(type));
+            påkrevdeAnnoteringer.addAll(VALIDERINGSALTERNATIVER.get(type));
         } else {
-            kreverAnnoteringer.add(List.of(Valid.class));
+            påkrevdeAnnoteringer.add(List.of(Valid.class));
         }
-        return kreverAnnoteringer;
+        return påkrevdeAnnoteringer;
     }
 
     private static void validerRiktigAnnotert(AnnotatedType ann, List<List<Class<? extends Annotation>>> alternativer) {
