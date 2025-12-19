@@ -52,11 +52,11 @@ public class PopulerMetrikkHistoriskeDataTask implements ProsessTaskHandler {
 
         String metrikkVerdi = data.getPropertyValue("METRIKK_IDENTIFIKATOR");
         LocalDateTime førsteKjøreTidspunkt = LocalDateTime.parse(data.getPropertyValue("FORSTE_KJORE_TIDSPUNKT"), DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        if (!bigQueryEnabled) {
+        if (bigQueryEnabled) {
             switch (metrikkVerdi) {
                 case "UTTALELSE_METRIKK":
                     var uttalelseData = statistikkRepository.uttalelseData(TIDENES_ENDE.atStartOfDay(), førsteKjøreTidspunkt);
-                    publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, List.of(new Tuple<>(UttalelseRecord.UTTALELSE_TABELL, uttalelseData)));
+                    bigQueryKlient.publish(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, UttalelseRecord.UTTALELSE_TABELL, uttalelseData);
                     log.info("Publisert {} metrikker til BigQuery", uttalelseData.size());
                     break;
                 default:
@@ -64,12 +64,4 @@ public class PopulerMetrikkHistoriskeDataTask implements ProsessTaskHandler {
         }
     }
 
-    private void publiserMetrikker(BigQueryDataset dataset, List<Tuple<BigQueryTabell<?>, Collection<?>>> metrikker) {
-        metrikker.forEach(tuple -> {
-            BigQueryTabell<BigQueryRecord> tabell = (BigQueryTabell<BigQueryRecord>) tuple.getElement1();
-            Collection<BigQueryRecord> records = (Collection<BigQueryRecord>) tuple.getElement2();
-
-            bigQueryKlient.publish(dataset, tabell, records);
-        });
-    }
 }
