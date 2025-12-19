@@ -38,6 +38,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 import static no.nav.ung.sak.metrikker.MetrikkUtils.UDEFINERT;
 import static no.nav.ung.sak.metrikker.MetrikkUtils.coalesce;
 
@@ -96,7 +97,7 @@ public class BigQueryStatistikkRepository {
         Collection<EtterlysningRecord> etterlysningData = etterlysningData(sistKjørtTidspunkt);
         hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
 
-        Collection<UttalelseRecord> uttalelseData = uttalelseData(sistKjørtTidspunkt);
+        Collection<UttalelseRecord> uttalelseData = uttalelseData(sistKjørtTidspunkt, null);
         hyppigRapporterte.add(new Tuple<>(UttalelseRecord.UTTALELSE_TABELL, uttalelseData));
 
         Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
@@ -430,21 +431,23 @@ public class BigQueryStatistikkRepository {
 
     /* Henter uttalelse-data for fagsaker.
      */
-    Collection<UttalelseRecord> uttalelseData(LocalDateTime sistKjørtTidspunkt) {
+    Collection<UttalelseRecord> uttalelseData(LocalDateTime sistKjørtTidspunkt, LocalDateTime førsteKjørtTidspunkt) {
+        førsteKjørtTidspunkt = førsteKjørtTidspunkt == null ? TIDENES_BEGYNNELSE.atStartOfDay() : førsteKjørtTidspunkt;
         String sql = """
-            select f.saksnummer, u.har_uttalelse, u.endring_type, u.fom, u.tom, m.mottatt_tispunkt
+            select f.saksnummer, u.har_uttalelse, u.endring_type, u.fom, u.tom, m.mottatt_tidspunkt
              from gr_uttalelse gr
              inner join uttalelse_v2 u on u.uttalelser_id = gr.uttalelser_id
              inner join behandling b on b.id = gr.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
              inner join mottatt_dokument m on m.journalpost_id = u.svar_journalpost_id and m.behandling_id = b.id
-             where f.ytelse_type <> :obsoleteKode and m.mottatt_tispunkt > :sistKjørtTidspunkt
+             where f.ytelse_type <> :obsoleteKode and m.mottatt_tidspunkt > :sistKjørtTidspunkt or m.mottatt_tidspunkt < førsteKjørtTidspunkt
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
         Stream<jakarta.persistence.Tuple> stream = query
             .setParameter("obsoleteKode", OBSOLETE_KODE)
             .setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt)
+            .setParameter("førsteKjørtTidspunkt", førsteKjørtTidspunkt)
             .getResultStream();
 
         return stream.map(t -> {
