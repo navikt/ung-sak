@@ -440,7 +440,7 @@ public class BigQueryStatistikkRepository {
              inner join behandling b on b.id = gr.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
              inner join mottatt_dokument m on m.journalpost_id = u.svar_journalpost_id and m.behandling_id = b.id
-             where f.ytelse_type <> :obsoleteKode and m.mottatt_tidspunkt > :sistKjørtTidspunkt or m.mottatt_tidspunkt < førsteKjørtTidspunkt
+             where f.ytelse_type <> :obsoleteKode and (m.mottatt_tidspunkt > :sistKjørtTidspunkt or m.mottatt_tidspunkt < :førsteKjørtTidspunkt)
             """;
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
