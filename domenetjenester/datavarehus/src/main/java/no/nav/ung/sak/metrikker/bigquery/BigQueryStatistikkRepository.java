@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
@@ -24,6 +25,7 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.uttalelse.UttalelseRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
 
@@ -93,6 +95,9 @@ public class BigQueryStatistikkRepository {
 
         Collection<EtterlysningRecord> etterlysningData = etterlysningData(sistKjørtTidspunkt);
         hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
+
+        Collection<UttalelseRecord> uttalelseData = uttalelseData(sistKjørtTidspunkt);
+        hyppigRapporterte.add(new Tuple<>(UttalelseRecord.UTTALELSE_TABELL, uttalelseData));
 
         Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, behandlingÅrsakData));
@@ -421,6 +426,45 @@ public class BigQueryStatistikkRepository {
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+
+    /* Henter uttalelse-data for fagsaker.
+     */
+    Collection<UttalelseRecord> uttalelseData(LocalDateTime sistKjørtTidspunkt) {
+        String sql = """
+            select f.saksnummer, u.har_uttalelse, u.endring_type, u.fom, u.tom, m.mottatt_tispunkt
+             from gr_uttalelse gr
+             inner join uttalelse_v2 u on u.uttalelser_id = gr.uttalelser_id
+             inner join behandling b on b.id = gr.behandling_id
+             inner join fagsak f on f.id = b.fagsak_id
+             inner join mottatt_dokument m on m.journalpost_id = u.svar_journalpost_id and m.behandling_id = b.id
+             where f.ytelse_type <> :obsoleteKode and m.mottatt_tispunkt > :sistKjørtTidspunkt
+            """;
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        Stream<jakarta.persistence.Tuple> stream = query
+            .setParameter("obsoleteKode", OBSOLETE_KODE)
+            .setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt)
+            .getResultStream();
+
+        return stream.map(t -> {
+            String saksnummer = t.get(0, String.class);
+            boolean har_uttalelse = t.get(1, Boolean.class);
+            String endringType = t.get(2, String.class);
+            LocalDate fom = t.get(3, LocalDate.class);
+            LocalDate tom = t.get(4, LocalDate.class);
+            LocalDateTime mottattTidspunkt = t.get(5, LocalDateTime.class);
+
+            return new UttalelseRecord(
+                new Saksnummer(saksnummer),
+                har_uttalelse,
+                EndringType.fraKode(endringType),
+                DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
+                mottattTidspunkt.atZone(ZoneId.systemDefault())
+            );
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
 
     /**
      * Henter statistikk for behandlinger gruppert på årsakstype og ferdigbehandlet-status.
