@@ -22,8 +22,7 @@ public class FastsettInntektDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty(value = "perioder")
     @Size(min = 1, max = 12)
-    @Valid
-    private List<FastsettInntektPeriodeDto> perioder;
+    private List<@Valid FastsettInntektPeriodeDto> perioder;
 
     public FastsettInntektDto() {
         // For Jackson
