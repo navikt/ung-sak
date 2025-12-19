@@ -3,7 +3,6 @@ package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
 import jakarta.enterprise.context.Dependent;
 import no.nav.k9.oppgave.OppgaveBekreftelse;
 import no.nav.k9.søknad.JsonUtils;
-import no.nav.k9.søknad.Søknad;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentValideringException;
 

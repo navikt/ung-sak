@@ -11,6 +11,7 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.Innte
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.FjernetPeriodeOppgaveDTO;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -27,6 +28,7 @@ public class UngOppgaveKlient {
     private final URI utløptURI;
     private final URI opprettEndretSluttdatoURI;
     private final URI opprettEndretStartdatoURI;
+    private final URI opprettFjernetPeriodeURI;
     private final URI løsSøkYtelseURI;
 
 
@@ -38,6 +40,7 @@ public class UngOppgaveKlient {
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
         this.opprettEndretStartdatoURI = tilUri(url, "oppgave/opprett/endret-startdato");
         this.opprettEndretSluttdatoURI = tilUri(url, "oppgave/opprett/endret-sluttdato");
+        this.opprettFjernetPeriodeURI = tilUri(url, "oppgave/opprett/fjernet-periode");
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
@@ -95,6 +98,15 @@ public class UngOppgaveKlient {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
     }
+
+    public void opprettFjernetPeriodeOppgave(FjernetPeriodeOppgaveDTO fjernetPeriodeOppgaveDTO) {
+        try {
+            restClient.post(opprettFjernetPeriodeURI, fjernetPeriodeOppgaveDTO);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
 
     public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO endretStartdatoOppgaveDTO) {
         try {

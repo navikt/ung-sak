@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
  *
  */
 public sealed interface VedtaksbrevInnholdbyggerStrategy
-    permits AvslagInngangsvilkår, EndringBarnDødsfallStrategy, EndringBarnetilleggStrategy, EndringHøySatsStrategy, EndringInntektUtenReduksjonStrategy, EndringInntektReduksjonStrategy, EndringProgramPeriodeStrategy, FørstegangsInnvilgelseStrategy, OpphørStrategy {
+    permits AvslagInngangsvilkår, EndringBarnDødsfallStrategy, EndringBarnetilleggStrategy, EndringFjerneProgramPeriodeStrategy, EndringHøySatsStrategy, EndringInntektReduksjonStrategy, EndringInntektUtenReduksjonStrategy, EndringProgramPeriodeStrategy, FørstegangsInnvilgelseStrategy, OpphørStrategy {
 
     VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
 
