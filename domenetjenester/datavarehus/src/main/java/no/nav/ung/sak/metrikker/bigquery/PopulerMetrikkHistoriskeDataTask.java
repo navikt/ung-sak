@@ -60,6 +60,7 @@ public class PopulerMetrikkHistoriskeDataTask implements ProsessTaskHandler {
                     log.info("Publisert {} metrikker til BigQuery", uttalelseData.size());
                     break;
                 default:
+                    throw new IllegalArgumentException("Ukjent metrikk: " + metrikkVerdi);
             }
         }
     }
