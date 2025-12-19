@@ -20,13 +20,11 @@ import java.util.List;
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 /**
- * Task for publisering av metrikker til BigQuery.
- * Denne tasken henter daglig rapporterte metrikker fra BigQueryStatistikkRepository og publiserer dem til BigQuery.
- * Det er satt opp en cron-jobb som kjører denne tasken kl. 07:00 hver dag.
- * Det er også satt en grense for maksimalt antall mislykkede kjøringer til 20.
+ * Task for publisering av historiske metrikker til BigQuery.
+ * Denne tasken henter rapporterte metrikker fra BigQueryStatistikkRepository og publiserer dem til BigQuery.
  */
 @ApplicationScoped
-@ProsessTask(value = PopulerMetrikkHistoriskeDataTask.TASKTYPE, maxFailedRuns = 20, firstDelay = 60)
+@ProsessTask(value = PopulerMetrikkHistoriskeDataTask.TASKTYPE)
 public class PopulerMetrikkHistoriskeDataTask implements ProsessTaskHandler {
 
     static final String TASKTYPE = "bigquery.historiske.data.task";
@@ -59,6 +57,7 @@ public class PopulerMetrikkHistoriskeDataTask implements ProsessTaskHandler {
                 case "UTTALELSE_METRIKK":
                     var uttalelseData = statistikkRepository.uttalelseData(TIDENES_ENDE.atStartOfDay(), førsteKjøreTidspunkt);
                     publiserMetrikker(BigQueryDataset.UNG_SAK_STATISTIKK_DATASET, List.of(new Tuple<>(UttalelseRecord.UTTALELSE_TABELL, uttalelseData)));
+                    log.info("Publisert {} metrikker til BigQuery", uttalelseData.size());
                     break;
                 default:
             }
