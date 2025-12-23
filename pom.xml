@@ -43,7 +43,7 @@
         <k9format.version>12.7.2</k9format.version>
         <jackson.version>2.20.1</jackson.version>
         <asm.version>9.9.1</asm.version>
-        <kotlin-stdlib.version>2.2.21</kotlin-stdlib.version>
+        <kotlin-stdlib.version>2.3.0</kotlin-stdlib.version>
         <jandex.version>3.5.3</jandex.version>
         <pdfgen-core.version>1.1.67</pdfgen-core.version>
         <flyway.version>11.19.0</flyway.version>
@@ -181,7 +181,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.22.0</version>
+                <version>2.23.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
