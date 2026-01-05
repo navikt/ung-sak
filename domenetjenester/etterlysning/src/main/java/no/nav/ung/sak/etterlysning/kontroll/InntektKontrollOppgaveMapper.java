@@ -4,7 +4,7 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektYtelseDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.YtelseType;
-import no.nav.ung.kodeverk.arbeidsforhold.OverordnetYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.sak.kontroll.InntektType;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.Inntektsperiode;
@@ -30,7 +30,7 @@ public class InntektKontrollOppgaveMapper {
     }
 
 
-    private static YtelseType maptilYtelseType(OverordnetYtelseType ytelseType) {
+    private static YtelseType maptilYtelseType(OverordnetInntektYtelseType ytelseType) {
         switch (ytelseType) {
             case SYKEPENGER -> {
                 return YtelseType.SYKEPENGER;

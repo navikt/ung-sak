@@ -118,7 +118,8 @@ public class KodeverkRestTjeneste {
             new TreeMap<>(avslagårsakerGruppertPåVilkårType),
             sortert(alle.klageMedholdÅrsak()),
             sortert(alle.klageAvvistÅrsaker()),
-            sortert(alle.klageVurderingTyper())
+            sortert(alle.klageVurderingTyper()),
+            sortert(alle.overordnetInntektYtelseTyper())
         );
     }
 
