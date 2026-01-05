@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -38,7 +39,8 @@ public class KodeverkWeb {
         public BehandlingType behandlingType;
         @NotNull
         public RevurderingVarslingÅrsak revurderingVarslingÅrsak;
-
+        @NotNull
+        public OverordnetInntektYtelseType overordnetInntektYtelseType;
 
         @NotNull
         @Valid

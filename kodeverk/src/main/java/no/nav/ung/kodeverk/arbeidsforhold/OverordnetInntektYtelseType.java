@@ -1,5 +1,6 @@
 package no.nav.ung.kodeverk.arbeidsforhold;
 
+import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
 public enum OverordnetInntektYtelseType implements Kodeverdi {
@@ -22,6 +23,7 @@ public enum OverordnetInntektYtelseType implements Kodeverdi {
         this.navn = navn;
     }
 
+    @JsonValue
     @Override
     public String getKode() {
         return kode;
@@ -35,5 +37,10 @@ public enum OverordnetInntektYtelseType implements Kodeverdi {
     @Override
     public String getNavn() {
         return navn;
+    }
+
+    @Override
+    public String toString() {
+        return kode;
     }
 }
