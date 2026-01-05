@@ -50,7 +50,7 @@ jobs:
           openapiVersion: ${{ steps.generate-openapi.outputs.openapiVersion }}
           patchVersion: ${{ needs.build-app.outputs.build-version }}
       # Upload generated typescript package, so it can be downloaded and published by later job
-      - uses: actions/upload-artifact@v5
+      - uses: actions/upload-artifact@v6
         id: upload-typescript
         with:
           name: ung-sak-typescript-client-src
@@ -130,7 +130,7 @@ jobs:
       contents: read
       packages: read
     steps:
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: ung-sak-typescript-client-src
           path: /tmp/ung-sak-typescript-client
@@ -155,7 +155,7 @@ jobs:
       contents: read
       packages: write
     steps:
-     - uses: actions/download-artifact@v6
+     - uses: actions/download-artifact@v7
        with:
          name: ung-sak-typescript-client-src
          path: /tmp/ung-sak-typescript-client
