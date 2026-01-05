@@ -6,56 +6,56 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 public enum InntektYtelseType implements Kodeverdi {
 
     // Ytelse utbetalt til person som er arbeidstaker/frilanser/ytelsesmottaker
-    AAP("Arbeidsavklaringspenger", Kategori.YTELSE, OverordnetYtelseType.ARBEIDSAVKLARINGSPENGER),
-    DAGPENGER("Dagpenger arbeid og hyre", Kategori.YTELSE, OverordnetYtelseType.DAGPENGER),
-    FORELDREPENGER("Foreldrepenger", Kategori.YTELSE, OverordnetYtelseType.FORELDREPENGER),
-    SVANGERSKAPSPENGER("Svangerskapspenger", Kategori.YTELSE, OverordnetYtelseType.SVANGERSKAPSPENGER),
-    SYKEPENGER("Sykepenger", Kategori.YTELSE, OverordnetYtelseType.SYKEPENGER),
-    OMSORGSPENGER("Omsorgspenger", Kategori.YTELSE, OverordnetYtelseType.OMSORGSPENGER),
-    OPPLÆRINGSPENGER("Opplæringspenger", Kategori.YTELSE, OverordnetYtelseType.OPPLÆRINGSPENGER),
-    PLEIEPENGER("Pleiepenger", Kategori.YTELSE, OverordnetYtelseType.PLEIEPENGER),
-    OVERGANGSSTØNAD_ENSLIG("Overgangsstønad til enslig mor eller far", Kategori.YTELSE, OverordnetYtelseType.ENSLIG_FORSØRGER),
-    VENTELØNN("Ventelønn", Kategori.YTELSE, OverordnetYtelseType.UDEFINERT),
+    AAP("Arbeidsavklaringspenger", Kategori.YTELSE, OverordnetInntektYtelseType.ARBEIDSAVKLARINGSPENGER),
+    DAGPENGER("Dagpenger arbeid og hyre", Kategori.YTELSE, OverordnetInntektYtelseType.DAGPENGER),
+    FORELDREPENGER("Foreldrepenger", Kategori.YTELSE, OverordnetInntektYtelseType.FORELDREPENGER),
+    SVANGERSKAPSPENGER("Svangerskapspenger", Kategori.YTELSE, OverordnetInntektYtelseType.SVANGERSKAPSPENGER),
+    SYKEPENGER("Sykepenger", Kategori.YTELSE, OverordnetInntektYtelseType.SYKEPENGER),
+    OMSORGSPENGER("Omsorgspenger", Kategori.YTELSE, OverordnetInntektYtelseType.OMSORGSPENGER),
+    OPPLÆRINGSPENGER("Opplæringspenger", Kategori.YTELSE, OverordnetInntektYtelseType.OPPLÆRINGSPENGER),
+    PLEIEPENGER("Pleiepenger", Kategori.YTELSE, OverordnetInntektYtelseType.PLEIEPENGER),
+    OVERGANGSSTØNAD_ENSLIG("Overgangsstønad til enslig mor eller far", Kategori.YTELSE, OverordnetInntektYtelseType.ENSLIG_FORSØRGER),
+    VENTELØNN("Ventelønn", Kategori.YTELSE, OverordnetInntektYtelseType.UDEFINERT),
 
     // Feriepenger Ytelse utbetalt til person som er arbeidstaker/frilanser/ytelsesmottaker
     // TODO slå sammen til FERIEPENGER_YTELSE - eller ta de med under hver ytelse???
-    FERIEPENGER_FORELDREPENGER("Feriepenger foreldrepenger", Kategori.YTELSE, OverordnetYtelseType.FORELDREPENGER),
-    FERIEPENGER_SVANGERSKAPSPENGER("Feriepenger svangerskapspenger", Kategori.YTELSE, OverordnetYtelseType.SVANGERSKAPSPENGER),
-    FERIEPENGER_OMSORGSPENGER("Feriepenger omsorgspenger", Kategori.YTELSE, OverordnetYtelseType.OMSORGSPENGER),
-    FERIEPENGER_OPPLÆRINGSPENGER("Feriepenger opplæringspenger", Kategori.YTELSE, OverordnetYtelseType.OPPLÆRINGSPENGER),
-    FERIEPENGER_PLEIEPENGER("Feriepenger pleiepenger", Kategori.YTELSE, OverordnetYtelseType.PLEIEPENGER),
-    FERIEPENGER_SYKEPENGER("Feriepenger sykepenger", Kategori.YTELSE, OverordnetYtelseType.SYKEPENGER),
-    FERIETILLEGG_DAGPENGER("Ferietillegg dagpenger ", Kategori.YTELSE, OverordnetYtelseType.DAGPENGER),
+    FERIEPENGER_FORELDREPENGER("Feriepenger foreldrepenger", Kategori.YTELSE, OverordnetInntektYtelseType.FORELDREPENGER),
+    FERIEPENGER_SVANGERSKAPSPENGER("Feriepenger svangerskapspenger", Kategori.YTELSE, OverordnetInntektYtelseType.SVANGERSKAPSPENGER),
+    FERIEPENGER_OMSORGSPENGER("Feriepenger omsorgspenger", Kategori.YTELSE, OverordnetInntektYtelseType.OMSORGSPENGER),
+    FERIEPENGER_OPPLÆRINGSPENGER("Feriepenger opplæringspenger", Kategori.YTELSE, OverordnetInntektYtelseType.OPPLÆRINGSPENGER),
+    FERIEPENGER_PLEIEPENGER("Feriepenger pleiepenger", Kategori.YTELSE, OverordnetInntektYtelseType.PLEIEPENGER),
+    FERIEPENGER_SYKEPENGER("Feriepenger sykepenger", Kategori.YTELSE, OverordnetInntektYtelseType.SYKEPENGER),
+    FERIETILLEGG_DAGPENGER("Ferietillegg dagpenger ", Kategori.YTELSE, OverordnetInntektYtelseType.DAGPENGER),
 
     // Annen ytelse utbetalt til person
-    KVALIFISERINGSSTØNAD("Kvalifiseringsstønad", Kategori.TRYGD, OverordnetYtelseType.UDEFINERT),
+    KVALIFISERINGSSTØNAD("Kvalifiseringsstønad", Kategori.TRYGD, OverordnetInntektYtelseType.UDEFINERT),
 
     // Ytelse utbetalt til person som er næringsdrivende, fisker/lott, dagmamma eller jord/skogbruker
-    FORELDREPENGER_NÆRING("Foreldrepenger næring", Kategori.NÆRING, OverordnetYtelseType.FORELDREPENGER),
-    SVANGERSKAPSPENGER_NÆRING("Svangerskapspenger næring", Kategori.NÆRING, OverordnetYtelseType.SVANGERSKAPSPENGER),
-    SYKEPENGER_NÆRING("Sykepenger næring", Kategori.NÆRING, OverordnetYtelseType.SYKEPENGER),
-    OMSORGSPENGER_NÆRING("Omsorgspenger næring", Kategori.NÆRING, OverordnetYtelseType.OMSORGSPENGER),
-    OPPLÆRINGSPENGER_NÆRING("Opplæringspenger næring", Kategori.NÆRING, OverordnetYtelseType.OPPLÆRINGSPENGER),
-    PLEIEPENGER_NÆRING("Pleiepenger næring", Kategori.NÆRING, OverordnetYtelseType.PLEIEPENGER),
-    DAGPENGER_NÆRING("Dagpenger næring", Kategori.NÆRING, OverordnetYtelseType.DAGPENGER),
+    FORELDREPENGER_NÆRING("Foreldrepenger næring", Kategori.NÆRING, OverordnetInntektYtelseType.FORELDREPENGER),
+    SVANGERSKAPSPENGER_NÆRING("Svangerskapspenger næring", Kategori.NÆRING, OverordnetInntektYtelseType.SVANGERSKAPSPENGER),
+    SYKEPENGER_NÆRING("Sykepenger næring", Kategori.NÆRING, OverordnetInntektYtelseType.SYKEPENGER),
+    OMSORGSPENGER_NÆRING("Omsorgspenger næring", Kategori.NÆRING, OverordnetInntektYtelseType.OMSORGSPENGER),
+    OPPLÆRINGSPENGER_NÆRING("Opplæringspenger næring", Kategori.NÆRING, OverordnetInntektYtelseType.OPPLÆRINGSPENGER),
+    PLEIEPENGER_NÆRING("Pleiepenger næring", Kategori.NÆRING, OverordnetInntektYtelseType.PLEIEPENGER),
+    DAGPENGER_NÆRING("Dagpenger næring", Kategori.NÆRING, OverordnetInntektYtelseType.DAGPENGER),
 
     // Annen ytelse utbetalt til person som er næringsdrivende
-    ANNET("Annet", Kategori.NÆRING, OverordnetYtelseType.UDEFINERT),
-    VEDERLAG("Vederlag", Kategori.NÆRING, OverordnetYtelseType.UDEFINERT),
-    LOTT_KUN_TRYGDEAVGIFT("Lott kun trygdeavgift", Kategori.NÆRING, OverordnetYtelseType.UDEFINERT),
-    KOMPENSASJON_FOR_TAPT_PERSONINNTEKT("Kompensasjon for tapt personinntekt", Kategori.NÆRING, OverordnetYtelseType.UDEFINERT)
+    ANNET("Annet", Kategori.NÆRING, OverordnetInntektYtelseType.UDEFINERT),
+    VEDERLAG("Vederlag", Kategori.NÆRING, OverordnetInntektYtelseType.UDEFINERT),
+    LOTT_KUN_TRYGDEAVGIFT("Lott kun trygdeavgift", Kategori.NÆRING, OverordnetInntektYtelseType.UDEFINERT),
+    KOMPENSASJON_FOR_TAPT_PERSONINNTEKT("Kompensasjon for tapt personinntekt", Kategori.NÆRING, OverordnetInntektYtelseType.UDEFINERT)
     ;
 
     public static final String KODEVERK = "INNTEKT_YTELSE_TYPE";
 
     private final String navn;
-    private final OverordnetYtelseType overordnetYtelseType;
+    private final OverordnetInntektYtelseType overordnetInntektYtelseType;
     private final Kategori kategori;
 
-    InntektYtelseType(String navn, Kategori kategori, OverordnetYtelseType overordnetYtelseType) {
+    InntektYtelseType(String navn, Kategori kategori, OverordnetInntektYtelseType overordnetInntektYtelseType) {
         this.navn = navn;
         this.kategori = kategori;
-        this.overordnetYtelseType = overordnetYtelseType;
+        this.overordnetInntektYtelseType = overordnetInntektYtelseType;
     }
 
     public static InntektYtelseType fraKode(String kode) {
@@ -83,8 +83,8 @@ public enum InntektYtelseType implements Kodeverdi {
         return null;
     }
 
-    public OverordnetYtelseType getOverordnetYtelseType() {
-        return overordnetYtelseType;
+    public OverordnetInntektYtelseType getOverordnetYtelseType() {
+        return overordnetInntektYtelseType;
     }
 
     private boolean erOrdinærYtelse() {
