@@ -70,7 +70,7 @@ public class InntektAbonnentKlient {
             if (Environment.current().isDev()){
                 String requestJson = DefaultJsonMapper.getObjectMapper().writeValueAsString(request);
                 log.info("Oppretter abonnement i Inntektskomponenten med request Base64: {}", Base64.getEncoder().encodeToString(requestJson.getBytes(StandardCharsets.UTF_8)));
-                log.info("Oppretter abonnement i Inntektskomponenten med request: {}", Base64.getEncoder().encodeToString(requestJson.getBytes(StandardCharsets.UTF_8)));
+                log.info("Oppretter abonnement i Inntektskomponenten med request: {}", requestJson);
             }
 
             AbonnementAdministrasjonOpprettApiUt response = oidcRestClient.post(opprettAbonnementURI, request, AbonnementAdministrasjonOpprettApiUt.class);
