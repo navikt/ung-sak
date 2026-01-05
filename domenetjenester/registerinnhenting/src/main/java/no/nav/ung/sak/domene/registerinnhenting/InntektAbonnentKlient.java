@@ -9,8 +9,10 @@ import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.IntegrasjonFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
+import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.slf4j.Logger;
@@ -18,9 +20,11 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,6 +66,13 @@ public class InntektAbonnentKlient {
                 sisteBruksdag,
                 bevaringstid
             );
+
+            if (Environment.current().isDev()){
+                String requestJson = DefaultJsonMapper.getObjectMapper().writeValueAsString(request);
+                log.info("Oppretter abonnement i Inntektskomponenten med request Base64: {}", Base64.getEncoder().encodeToString(requestJson.getBytes(StandardCharsets.UTF_8)));
+                log.info("Oppretter abonnement i Inntektskomponenten med request: {}", Base64.getEncoder().encodeToString(requestJson.getBytes(StandardCharsets.UTF_8)));
+            }
+
             AbonnementAdministrasjonOpprettApiUt response = oidcRestClient.post(opprettAbonnementURI, request, AbonnementAdministrasjonOpprettApiUt.class);
 
             log.info("Opprettet abonnementId: {}", response.abonnementId());
