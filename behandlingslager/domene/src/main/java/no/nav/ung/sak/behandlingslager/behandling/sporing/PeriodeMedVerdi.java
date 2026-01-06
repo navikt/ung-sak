@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.felles.util.InputValideringRegex;
+import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
