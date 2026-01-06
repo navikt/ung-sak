@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static jakarta.ws.rs.core.NewCookie.DEFAULT_MAX_AGE;
 import static no.nav.k9.felles.sikkerhet.Constants.ID_TOKEN_COOKIE_NAME;
+import static no.nav.k9.felles.sikkerhet.Constants.REFRESH_TOKEN_COOKIE_NAME;
 
 @Path("/login")
 @ApplicationScoped
@@ -64,7 +65,31 @@ public class FrontendLoginResource {
         }
         var responseBuilder = Response.status(307);
         if (originalUri != null && brukerTokenProvider.getToken().getIssuer() == OpenIDProvider.AZUREAD) {
-            // Vi har nettopp autentisert. Sett autentiseringscookie for evt /ung/tilbake backend path viss den finnast i
+
+            if (Environment.current().isProd() || Environment.current().isDev()) {
+                String gammelDomene = Environment.current().isProd() ? "intern.nav.no" : "dev.intern.nav.no";
+                final var sletteGammelIdTokenCookie = new NewCookie.Builder(ID_TOKEN_COOKIE_NAME)
+                    .value("")
+                    .path("/ung/sak")
+                    .domain(gammelDomene)
+                    .maxAge(0) // 0 indikerer sletting av cookie
+                    .secure(true)
+                    .httpOnly(true)
+                    .build();
+                responseBuilder.cookie(sletteGammelIdTokenCookie);
+                final var sletteGammelRefreshTokenCookie = new NewCookie.Builder(REFRESH_TOKEN_COOKIE_NAME)
+                    .value("")
+                    .path("/ung/sak")
+                    .domain(gammelDomene)
+                    .maxAge(0) // 0 indikerer sletting av cookie
+                    .secure(true)
+                    .httpOnly(true)
+                    .build();
+                responseBuilder.cookie(sletteGammelRefreshTokenCookie);
+            }
+
+
+                // Vi har nettopp autentisert. Sett autentiseringscookie for evt /ung/tilbake backend path viss den finnast i
             // optionalScopes. Unngår med dette ekstra popups/roundtrips for autentisering i frontend.
             final var extraScopes = optionalScopes.stream().filter(scope -> scope.getElement1().equals("/ung/tilbake"));
             extraScopes.forEach(scope -> {
@@ -81,6 +106,19 @@ public class FrontendLoginResource {
                     .httpOnly(true)
                     .build();
                 responseBuilder.cookie(cookie);
+
+                if (Environment.current().isProd() || Environment.current().isDev()) {
+                    String gammelDomene = Environment.current().isProd() ? "intern.nav.no" : "dev.intern.nav.no";
+                    final var sletteGammelIdTokenCookie = new NewCookie.Builder(ID_TOKEN_COOKIE_NAME)
+                        .value("")
+                        .path(scope.getElement1())
+                        .domain(gammelDomene)
+                        .maxAge(0) // 0 indikerer sletting av cookie
+                        .secure(true)
+                        .httpOnly(true)
+                        .build();
+                    responseBuilder.cookie(sletteGammelIdTokenCookie);
+                }
             });
         }
         //  når vi har kommet hit, er brukeren innlogget og har fått ID-token. Kan da gjøre redirect til hovedsiden for VL
