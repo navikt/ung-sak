@@ -60,7 +60,7 @@ public class FullPubliseringAvKontrollerteInntektperioderMetrikkTask implements 
             "SELECT nextval('seq_prosess_task'), " +
             "  'bigquery.kontrollertinntektmetrikk', " +
             "  nextval('seq_prosess_task_gruppe'), " +
-            "  current_timestamp at time zone 'UTC' + interval '5 minutes', " +
+            "  current_timestamp at time zone 'UTC' + (row_number() OVER (ORDER BY b.opprettet_dato ASC) * interval '2 seconds'), " + // Spre kjøringen for å unngå for mange kall mot bigquery samtidig
             "  'saksnummer=' || f.saksnummer || E'\\n' || " +
             "  'behandlingId=' || b.id " +
             "FROM Behandling b " +

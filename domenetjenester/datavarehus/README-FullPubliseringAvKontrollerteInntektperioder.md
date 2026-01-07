@@ -83,7 +83,7 @@ Tasken respekterer følgende miljøvariabler:
 
 ## Merknader
 
-1. Tasken oppretter én prosesstask per behandling, med 5 minutters forsinkelse for å unngå overbelastning
+1. Tasken oppretter én prosesstask per behandling, med 2 sekunders forsinkelse mellom hver task
 2. Eksisterende `PubliserKontrollerteInntektperioderMetrikkTask` håndterer selve publiseringen
 3. Tasken er idempotent - den kan kjøres flere ganger uten problemer (vil opprette nye tasks hver gang)
 
