@@ -165,7 +165,8 @@ public class KodeverkRestTjeneste {
             o.årsakerTilVurdering(),
             o.klageMedholdÅrsak(),
             o.klageAvvistÅrsaker(),
-            o.klagevurderingType()
+            o.klagevurderingType(),
+            o.overordnetInntektYtelseType()
         );
 
         final Map<String, Object> r = new LinkedHashMap<>();
