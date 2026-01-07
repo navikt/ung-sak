@@ -47,7 +47,7 @@ public class KombinasjonScenarioer {
             BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.valueOf(10000))));
         var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
 
-        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, rapportertInntektTimeline);
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, rapportertInntektTimeline);
 
 
         var opptjening = OppgittOpptjeningBuilder.ny();
@@ -108,7 +108,7 @@ public class KombinasjonScenarioer {
             BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.valueOf(10000))));
         var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, rapportertInntektPeriode, rapportertInntektTimeline);
 
-        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, tilkjentYtelsePerioder, rapportertInntektTimeline);
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(p, rapportertInntektTimeline);
 
         var opptjening = OppgittOpptjeningBuilder.ny();
 

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -25,7 +26,6 @@ public class InntektAbonnentTjeneste {
 
     private static final String UNG_INNTEKT_FORMAAL = "Ung";
     private static final String UNG_INNTEKT_FILTER = "Ung";
-    private static final int BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER = 1;
     private static final Logger log = LoggerFactory.getLogger(InntektAbonnentTjeneste.class);
 
     private InntektAbonnementRepository inntektAbonnementRepository;
@@ -55,7 +55,7 @@ public class InntektAbonnentTjeneste {
                 log.info("Prøver å opprette abonnement for aktør, men abonnementID = {} eksisterer allerede for denne periode", eksisterendeAbonnement.getAbonnementId());
                 return;
             } else {
-                throw new IllegalStateException("Prøver å opprette at abonnement, men det eksisterer en abbonnentId = {} for aktøren, på en annen periode" + eksisterendeAbonnement.getAbonnementId());
+                throw new IllegalStateException("Prøver å opprette at abonnement, men det eksisterer en abbonnentId = " + eksisterendeAbonnement.getAbonnementId() + " for aktøren, på en annen periode");
             }
         }
 
@@ -66,16 +66,19 @@ public class InntektAbonnentTjeneste {
             .orElseThrow(() -> new IllegalStateException("Fant ingen åpen fagsak med gyldig periode"));
 
         var personIdent = tpsTjeneste.hentFnr(aktørId).orElseThrow();
+
+        //pga validering i inntektskomponenten må bevaringstidImåneder være minst differansen mellom fom og nå. Legger på en ekstra måned i tilfelle forsinkelse
+        int bevarlingtidIMåneder = (int) ChronoUnit.MONTHS.between(YearMonth.from(periode.getFom()), YearMonth.now()) + 2;
         long abonnementId = inntektAbonnentKlient.opprettAbonnement(
             personIdent,
             UNG_INNTEKT_FORMAAL,
             List.of(UNG_INNTEKT_FILTER),
             YearMonth.from(periode.getFom()),
             YearMonth.from(periode.getTom()),
-            tomFagsakPeriode,
-            BEVARINGTID_I_INNTEKTSKOMPONENTEN_MAANEDER
+            YearMonth.from(tomFagsakPeriode).atEndOfMonth().plusMonths(1), // Lytter på hendelser en måned etter fagsakens tom dato for å fange opp sene inntektsrapporeringer.
+            bevarlingtidIMåneder
         );
-        inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId, periode));
+        inntektAbonnementRepository.lagre(new InntektAbonnement(String.valueOf(abonnementId), aktørId, periode, tomFagsakPeriode));
     }
 
     public Optional<Long> hentFørsteSekvensnummer() {

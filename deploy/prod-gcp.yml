@@ -255,10 +255,8 @@ spec:
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
     - name: KONTROLL_SISTE_MND_ENABLED
-      value: "false"
+      value: "true"
     - name: ENABLE_BREV_ANSVARLIG
-      value: "false"
-    - name: PUBLISER_STOENADSSTATISTIKK_ENABLED
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"

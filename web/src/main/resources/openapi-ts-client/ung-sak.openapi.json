@@ -758,6 +758,24 @@
         "required" : [ "kilde", "kode", "kodeverk", "navn" ],
         "type" : "object"
       },
+      "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.arbeidsforhold.OverordnetInntektYtelseType" : {
+        "properties" : {
+          "kilde" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType"
+          },
+          "kode" : {
+            "type" : "string"
+          },
+          "kodeverk" : {
+            "type" : "string"
+          },
+          "navn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "kilde", "kode", "kodeverk", "navn" ],
+        "type" : "object"
+      },
       "ung.kodeverk.KodeverdiSomObjektUng.kodeverk.behandling.BehandlingResultatType" : {
         "properties" : {
           "kilde" : {
@@ -1140,6 +1158,11 @@
         "enum" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "NÆRING", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "ETTERLØNN_SLUTTPAKKE", "FORENKLET_OPPGJØRSORDNING", "FRILANSER", "FRILANSER_OPPDRAGSTAKER_MED_MER", "LØNN_UNDER_UTDANNING", "MARITIMT_ARBEIDSFORHOLD", "MILITÆR_ELLER_SIVILTJENESTE", "ORDINÆRT_ARBEIDSFORHOLD", "PENSJON_OG_ANDRE_TYPER_YTELSER_UTEN_ANSETTELSESFORHOLD", "SELVSTENDIG_NÆRINGSDRIVENDE", "UTENLANDSK_ARBEIDSFORHOLD", "VENTELØNN_VARTPENGER", "VANLIG", "UDEFINERT" ]
+      },
+      "ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType" : {
+        "enum" : [ "SYKEPENGER", "PLEIEPENGER", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "DAGPENGER", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UDEFINERT" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "SYKEPENGER", "PLEIEPENGER", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "DAGPENGER", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingResultatType" : {
         "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER", "KLAGE_AVVIST", "KLAGE_MEDHOLD", "KLAGE_YTELSESVEDTAK_OPPHEVET", "KLAGE_YTELSESVEDTAK_STADFESTET", "KLAGE_TRUKKET", "HENLAGT_KLAGE_TRUKKET", "DELVIS_MEDHOLD_I_KLAGE", "HJEMSENDE_UTEN_OPPHEVE", "UGUNST_MEDHOLD_I_KLAGE", "FEILREGISTRERT" ],
@@ -3428,6 +3451,7 @@
       "ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto" : {
         "properties" : {
           "begrunnelse" : {
+            "pattern" : "^[\\p{Pd}\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]*$",
             "type" : "string"
           },
           "fastsattInnntekt" : {
@@ -3459,7 +3483,7 @@
             "type" : "integer"
           },
           "ytelseType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
+            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType"
           }
         },
         "type" : "object"
@@ -4975,11 +4999,14 @@
           "behandlingÅrsakType" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingÅrsakType"
           },
+          "overordnetInntektYtelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType"
+          },
           "revurderingVarslingÅrsak" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.RevurderingVarslingÅrsak"
           }
         },
-        "required" : [ "aksjonspunkt", "behandlingResultatType", "behandlingType", "behandlingÅrsakType", "revurderingVarslingÅrsak" ],
+        "required" : [ "aksjonspunkt", "behandlingResultatType", "behandlingType", "behandlingÅrsakType", "overordnetInntektYtelseType", "revurderingVarslingÅrsak" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.kodeverk.KodeverkWeb.KodeverkBehandling.KodeverkBehandlingAksjonspunkt" : {
@@ -5129,6 +5156,15 @@
             "type" : "array",
             "uniqueItems" : true
           },
+          "overordnetInntektYtelseType" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.arbeidsforhold.OverordnetInntektYtelseType"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array",
+            "uniqueItems" : true
+          },
           "revurderingVarslingÅrsaker" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.kodeverk.KodeverdiSomObjektUng.kodeverk.behandling.RevurderingVarslingÅrsak"
@@ -5211,7 +5247,7 @@
             "uniqueItems" : true
           }
         },
-        "required" : [ "arbeidTyper", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "klageAvvistÅrsaker", "klageMedholdÅrsak", "klagevurderingType", "oppgaveÅrsaker", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderingsÅrsaker", "årsakerTilVurdering" ],
+        "required" : [ "arbeidTyper", "avslagsårsaker", "avslagårsakerPrVilkårTypeKode", "behandlingResultatTyper", "behandlingStatuser", "behandlingTyper", "behandlingÅrsakTyper", "fagsakStatuser", "fagsakYtelseTyper", "fagsystemer", "historikkAktører", "klageAvvistÅrsaker", "klageMedholdÅrsak", "klagevurderingType", "oppgaveÅrsaker", "overordnetInntektYtelseType", "revurderingVarslingÅrsaker", "skjermlenkeTyper", "språkkoder", "tilbakekrevingVidereBehandlinger", "vedtakResultatTyper", "venteårsaker", "vilkårTyper", "vurderingsÅrsaker", "årsakerTilVurdering" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.kodeverk.dto.VenteårsakSomObjekt" : {

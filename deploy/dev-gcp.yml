@@ -260,11 +260,8 @@ spec:
       value: "true"
     - name: ENABLE_BREV_ANSVARLIG
       value: "true"
-    - name: PUBLISER_STOENADSSTATISTIKK_ENABLED
-      value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
-
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

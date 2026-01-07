@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -16,6 +17,8 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
+import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +61,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
     private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     private Duration ventePeriode;
     private boolean hentInntektHendelserEnabled;
 
@@ -71,7 +75,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
                                      KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter,
                                      ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
                                      InntektAbonnentTjeneste inntektAbonnentTjeneste,
-                                     RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder,
+                                     RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder,
                                      @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
                                      @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled) {
         this.etterlysningRepository = etterlysningRepository;
@@ -80,6 +84,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.rapporteringsfristAutopunktUtleder = rapporteringsfristAutopunktUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
         this.ventePeriode = Duration.parse(ventePeriode);
         this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
     }
@@ -97,11 +102,16 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
             programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         } else {
-            log.info("Behandling {} har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.", kontekst.getBehandlingId());
+            log.info("Behandling har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.");
         }
 
         if (hentInntektHendelserEnabled) {
-            inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), behandling.getFagsak().getPeriode().tilPeriode());
+            LocalDateTimeline<Boolean> relevantekontrollperioder = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+            if (relevantekontrollperioder.isEmpty()) {
+                log.info("Behandlingen har ingen relevante kontrollperioder for inntekt, hopper over opprettelse av inntekt abonnement.");
+            } else {
+                inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), new Periode(relevantekontrollperioder.getMinLocalDate(), relevantekontrollperioder.getMaxLocalDate()));
+            }
         }
 
         // Steg 2: Utled aksjonspunkter

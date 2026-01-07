@@ -53,10 +53,11 @@ public class InntektAbonnement extends BaseEntitet {
     public InntektAbonnement() {
     }
 
-    public InntektAbonnement(String abonnementId, AktørId aktørId, Periode periode) {
+    public InntektAbonnement(String abonnementId, AktørId aktørId, Periode periode, LocalDate sisteBruksdag) {
         this.abonnementId = abonnementId;
         this.aktørId = aktørId;
         setPeriode(periode.getFom(), periode.getTom());
+        setSisteBruksdag(sisteBruksdag);
     }
 
     public Long getId() {

@@ -66,7 +66,7 @@ class InntektAbonnentTjenesteTest {
     @Test
     void opprettelse_av_abonnement_skal_returnene_tidlig_dersom_det_finnes_et_abonnement_for_aktøren_i_samme_periode() {
         // Arrange
-        var eksisterendeAbonnement = new InntektAbonnement("12345", aktørId, periode);
+        var eksisterendeAbonnement = new InntektAbonnement("12345", aktørId, periode, LocalDate.now().plusMonths(1));
         when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
             .thenReturn(Optional.of(eksisterendeAbonnement));
 
@@ -172,7 +172,7 @@ class InntektAbonnentTjenesteTest {
     void skal_avslutte_abonnement_når_det_finnes() {
         // Arrange
         String abonnementId = "123456789";
-        var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId, periode);
+        var eksisterendeAbonnement = new InntektAbonnement(abonnementId, aktørId, periode, LocalDate.now().plusMonths(1));
 
         when(inntektAbonnementRepository.hentAbonnementForAktør(aktørId))
             .thenReturn(Optional.of(eksisterendeAbonnement));
@@ -188,4 +188,3 @@ class InntektAbonnentTjenesteTest {
         verify(inntektAbonnementRepository).slettAbonnement(eksisterendeAbonnement);
     }
 }
-

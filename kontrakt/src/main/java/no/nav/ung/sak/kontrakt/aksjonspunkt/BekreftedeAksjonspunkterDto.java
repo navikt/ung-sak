@@ -44,8 +44,7 @@ public class BekreftedeAksjonspunkterDto {
     @JsonProperty(value = "bekreftedeAksjonspunktDtoer", required = true)
     @Size(min = 1, max = 10)
     @NotNull
-    @Valid
-    private Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
+    private Collection<@Valid BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
 
     public BekreftedeAksjonspunkterDto() {
     }
