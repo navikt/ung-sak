@@ -65,12 +65,16 @@ public class FullPubliseringAvKontrollerteInntektperioderMetrikkTask implements 
             "  'behandlingId=' || b.id " +
             "FROM Behandling b " +
             "INNER JOIN Fagsak f ON (f.id = b.fagsak_id) " +
-            "INNER JOIN Behandling_arsak ba ON (ba.behandling_id = b.id) " +
             "INNER JOIN Behandling_vedtak bv ON (bv.behandling_id = b.id) " +
             "WHERE b.behandling_status IN ('AVSLU', 'IVED') " +
             "  AND f.ytelse_type = 'UNG' " +
-            "  AND ba.behandling_arsak_type = 'RE_KONTROLL_REGISTER_INNTEKT' " +
             "  AND bv.iverksetting_status = 'IVERKSATT' " +
+                " AND AND EXISTS (select 1 from prosess_triggere pt " +
+                "                                 inner join public.pt_triggere p on p.id = pt.triggere_id " +
+                "                                 inner join public.pt_trigger t on p.id = t.triggere_id " +
+                "                                 where pt.behandling_id = b.id " +
+                "                                   and pt.aktiv = true " +
+                "                                   and t.arsak = 'RE-KONTROLL-REGISTER-INNTEKT') " +
             "ORDER BY b.opprettet_dato ASC"
         );
 
