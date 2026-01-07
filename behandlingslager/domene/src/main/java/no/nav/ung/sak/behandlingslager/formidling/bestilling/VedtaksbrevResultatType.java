@@ -22,7 +22,7 @@ public enum VedtaksbrevResultatType {
 
 
     /**
-     * Vedtaksbrev er undertrykt manuelt i drift. Se beskrivelse
+     * Vedtaksbrev er undertrykt manuelt i drift. Se beskrivelsesfeltet i tabellen behandling_vedtaksbrev for mer detaljer
      */
     UNDERTRYKT;
 }
