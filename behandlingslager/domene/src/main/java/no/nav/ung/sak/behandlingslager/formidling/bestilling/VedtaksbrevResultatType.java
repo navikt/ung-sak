@@ -18,5 +18,11 @@ public enum VedtaksbrevResultatType {
     /**
      * Vedtaksbrev er hindret av saksbehandler
      */
-    HINDRET_SAKSBEHANDLER;
+    HINDRET_SAKSBEHANDLER,
+
+
+    /**
+     * Vedtaksbrev er undertrykt manuelt i drift. Se beskrivelse
+     */
+    UNDERTRYKT;
 }
