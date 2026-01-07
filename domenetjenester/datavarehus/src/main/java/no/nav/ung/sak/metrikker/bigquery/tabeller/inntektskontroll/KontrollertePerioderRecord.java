@@ -20,18 +20,23 @@ public record KontrollertePerioderRecord(
     BigDecimal fastsattInntekt,
     Boolean fastsattManuelt,
     YearMonth månedOgÅr,
+    LocalDate fom,
+    LocalDate tom,
     ZonedDateTime opprettetTidspunkt
 ) implements BigQueryRecord {
 
     public static final BigQueryTabell<KontrollertePerioderRecord> KONTROLLERTE_PERIODER_TABELL =
         new BigQueryTabell<>(
-            "kontrollerte_inntekt_perioder",
+            "kontrollerte_inntekt_perioder_v2",
             Schema.of(
                 Field.of("saksnummer", StandardSQLTypeName.STRING),
                 Field.of("rapportertInntekt", StandardSQLTypeName.BIGNUMERIC),
                 Field.of("registerInntekt", StandardSQLTypeName.BIGNUMERIC),
                 Field.of("fastsattInntekt", StandardSQLTypeName.BIGNUMERIC),
                 Field.of("månedOgÅr", StandardSQLTypeName.STRING),
+                Field.of("fom", StandardSQLTypeName.DATE),
+                Field.of("tom", StandardSQLTypeName.DATE),
+                Field.of("erManueltFastsatt", StandardSQLTypeName.BOOL),
                 Field.of("opprettetTidspunkt", StandardSQLTypeName.DATETIME)
             ),
             KontrollertePerioderRecord.class,
@@ -41,6 +46,9 @@ public record KontrollertePerioderRecord(
                 "registerInntekt", rec.registerInntekt(),
                 "fastsattInntekt", rec.fastsattInntekt(),
                 "månedOgÅr", rec.månedOgÅr().format(DateTimeFormatter.ofPattern("yyyy-MM")),
+                "fom", rec.fom().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                "tom", rec.tom().format(DateTimeFormatter.ISO_LOCAL_DATE),
+                "erManueltFastsatt", rec.fastsattManuelt(),
                 "opprettetTidspunkt", rec.opprettetTidspunkt().format(DateTimeFormatter.ofPattern(DateTimeUtils.DATE_TIME_FORMAT_PATTERN))
             )
         );
