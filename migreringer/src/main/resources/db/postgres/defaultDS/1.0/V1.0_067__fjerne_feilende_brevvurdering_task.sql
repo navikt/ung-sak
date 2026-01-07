@@ -4,4 +4,4 @@ select nextval('seq_behandling_vedtaksbrev'), 3001901, 2001802, 'UNDERTRYKT', 'T
 from behandling
 where id = 3001901 and fagsak_id = 2001802;
 
-update prosess_task set status = 'FERDIG' where id = 1038154
+update prosess_task set status = 'FERDIG' where id = 1038154 and status = 'FEILET' and task_type = 'formidling.vedtak.brevvurdering'
