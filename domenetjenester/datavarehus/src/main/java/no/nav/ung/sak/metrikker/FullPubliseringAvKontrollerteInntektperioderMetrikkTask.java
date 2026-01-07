@@ -69,7 +69,7 @@ public class FullPubliseringAvKontrollerteInntektperioderMetrikkTask implements 
             "WHERE b.behandling_status IN ('AVSLU', 'IVED') " +
             "  AND f.ytelse_type = 'UNG' " +
             "  AND bv.iverksetting_status = 'IVERKSATT' " +
-                " AND AND EXISTS (select 1 from prosess_triggere pt " +
+                " AND EXISTS (select 1 from prosess_triggere pt " +
                 "                                 inner join public.pt_triggere p on p.id = pt.triggere_id " +
                 "                                 inner join public.pt_trigger t on p.id = t.triggere_id " +
                 "                                 where pt.behandling_id = b.id " +
