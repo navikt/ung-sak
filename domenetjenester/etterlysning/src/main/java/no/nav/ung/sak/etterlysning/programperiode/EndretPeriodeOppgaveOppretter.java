@@ -7,8 +7,11 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.PeriodeEndri
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.PeriodeDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
@@ -19,6 +22,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
@@ -27,13 +31,15 @@ public class EndretPeriodeOppgaveOppretter {
 
     private final UngOppgaveKlient ungOppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-
+    private final EtterlysningRepository etterlysningRepository;
 
     @Inject
     public EndretPeriodeOppgaveOppretter(UngOppgaveKlient ungOppgaveKlient,
-                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                         EtterlysningRepository etterlysningRepository) {
         this.ungOppgaveKlient = ungOppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.etterlysningRepository = etterlysningRepository;
     }
 
 
@@ -48,10 +54,13 @@ public class EndretPeriodeOppgaveOppretter {
             throw new IllegalStateException("Fant flere etterlysninger for behandling " + behandling.getId());
         }
         Etterlysning etterlysning = etterlysninger.getFirst();
-
-        UngdomsprogramPeriodeGrunnlag gjeldeneGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = finnEndretStartDato(etterlysning, initieltPeriodeGrunnlag, gjeldeneGrunnlag);
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = finnEndretSluttDato(etterlysning, initieltPeriodeGrunnlag, gjeldeneGrunnlag);
+        var forrigeEtterlysning = etterlysningRepository.hentSisteEtterlysning(behandling.getId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE, EtterlysningStatus.AVBRUTT, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
+        var forrigeGrunnlag = forrigeEtterlysning.map(Etterlysning::getGrunnlagsreferanse)
+            .map(ungdomsprogramPeriodeRepository::hentGrunnlagFraGrunnlagsReferanse)
+            .orElse(initieltPeriodeGrunnlag);
+        UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
+        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = finnEndretStartDato(etterlysning, forrigeGrunnlag, gjeldendeGrunnlag);
+        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = finnEndretSluttDato(etterlysning, forrigeGrunnlag, gjeldendeGrunnlag);
 
         if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
             var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato(), endretStartDato.get().forrigeDato());
@@ -60,7 +69,7 @@ public class EndretPeriodeOppgaveOppretter {
             var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDato(), endretSluttDato.get().forrigeDato());
             ungOppgaveKlient.opprettEndretSluttdatoOppgave(oppgaveDto);
         } else {
-            PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldeneGrunnlag);
+            PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
@@ -69,8 +78,10 @@ public class EndretPeriodeOppgaveOppretter {
 
     }
 
-    private Optional<UngdomsprogramPeriodeTjeneste.EndretDato> finnEndretStartDato(Etterlysning etterlysning, UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag gjeldeneGrunnlag) {
-        var endretStartdatoer = UngdomsprogramPeriodeTjeneste.finnEndretStartdatoer(gjeldeneGrunnlag, initieltPeriodeGrunnlag);
+    private Optional<UngdomsprogramPeriodeTjeneste.EndretDato> finnEndretStartDato(Etterlysning etterlysning,
+                                                                                   UngdomsprogramPeriodeGrunnlag forrigeGrunnlag,
+                                                                                   UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
+        var endretStartdatoer = UngdomsprogramPeriodeTjeneste.finnEndretStartdatoer(gjeldendeGrunnlag, forrigeGrunnlag);
         if (endretStartdatoer.isEmpty()) {
             return Optional.empty();
         }
