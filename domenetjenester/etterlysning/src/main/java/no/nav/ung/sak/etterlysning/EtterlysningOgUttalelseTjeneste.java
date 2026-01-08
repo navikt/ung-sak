@@ -9,7 +9,6 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -77,6 +76,7 @@ public class EtterlysningOgUttalelseTjeneste {
             case UTTALELSE_KONTROLL_INNTEKT -> EndringType.ENDRET_INNTEKT;
             case UTTALELSE_ENDRET_STARTDATO -> EndringType.ENDRET_STARTDATO;
             case UTTALELSE_ENDRET_SLUTTDATO -> EndringType.ENDRET_SLUTTDATO;
+            case UTTALELSE_ENDRET_PERIODE -> EndringType.ENDRET_PERIODE;
         };
     }
 }

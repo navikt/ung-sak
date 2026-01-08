@@ -47,7 +47,7 @@ public class TilbakekrevingRepository {
 
     private Optional<TilbakekrevingValgEntitet> hentSisteInaktiveEntitet(long behandlingId) {
         List<TilbakekrevingValgEntitet> resultList = entityManager
-            .createQuery("from TilbakekrevingValgEntitet where behandlingId=:behandlingId and aktiv=FALSE ORDER BY opprettetTidspunkt, id desc", TilbakekrevingValgEntitet.class)
+            .createQuery("from TilbakekrevingValgEntitet where behandlingId=:behandlingId and aktiv=FALSE ORDER BY opprettetTidspunkt desc, id desc", TilbakekrevingValgEntitet.class)
             .setParameter("behandlingId", behandlingId)
             .getResultList();
 

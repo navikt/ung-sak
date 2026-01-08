@@ -6,6 +6,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
@@ -28,6 +29,7 @@ public class UngOppgaveKlient {
     private final URI opprettEndretSluttdatoURI;
     private final URI opprettEndretStartdatoURI;
     private final URI løsSøkYtelseURI;
+    private final URI opprettEndretPeriodeURI;
 
 
     @Inject
@@ -38,6 +40,7 @@ public class UngOppgaveKlient {
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
         this.opprettEndretStartdatoURI = tilUri(url, "oppgave/opprett/endret-startdato");
         this.opprettEndretSluttdatoURI = tilUri(url, "oppgave/opprett/endret-sluttdato");
+        this.opprettEndretPeriodeURI = tilUri(url, "oppgave/opprett/endret-periode");
         this.opprettInntektrapporteringURI = tilUri(url, "oppgave/opprett/inntektsrapportering");
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
@@ -99,6 +102,14 @@ public class UngOppgaveKlient {
     public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO endretStartdatoOppgaveDTO) {
         try {
             restClient.post(opprettEndretStartdatoURI, endretStartdatoOppgaveDTO);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
+        try {
+            restClient.post(opprettEndretPeriodeURI, endretPeriodeOppgaveDTO);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
