@@ -196,10 +196,9 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
 
     }
 
-    private BigDecimal normaliser(BigDecimal beløp) {
+    private static BigDecimal normaliser(BigDecimal beløp) {
         //for å få tall til å serialiseres 'normalt', uten ekstra 0-desimaler eller vitenskaplig format (for eksempel '0e9')
-        //vil feile for tall som faktisk har desimaler
-        return beløp.setScale(0, RoundingMode.UNNECESSARY);
+        return beløp.setScale(Math.max(0, beløp.scale()), RoundingMode.UNNECESSARY);
     }
 
     private static LocalDateSegmentCombinator<Map<VilkårType, Utfall>, Map<VilkårType, Utfall>, Map<VilkårType, Utfall>> SEGMENT_KOMBINATOR_VILKÅR_UTFALL = (LocalDateInterval intervall, LocalDateSegment<Map<VilkårType, Utfall>> lhs, LocalDateSegment<Map<VilkårType, Utfall>> rhs) -> new LocalDateSegment<>(intervall, nullSafeUnion(lhs, rhs));

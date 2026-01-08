@@ -39,7 +39,7 @@ public class InntektKontrollOppgaveMapper {
                 return YtelseType.OMSORGSPENGER;
             }
             case PLEIEPENGER -> {
-                return YtelseType.PLEIEPENGER_SYKT_BARN;
+                return YtelseType.PLEIEPENGER;
             }
             case OPPLÆRINGSPENGER -> {
                 return YtelseType.OPPLAERINGSPENGER;
