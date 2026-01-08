@@ -36,10 +36,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>10.0.3</felles.version>
+        <felles.version>10.0.4</felles.version>
         <swagger.version>2.2.41</swagger.version>
         <junit.version>6.0.1</junit.version>
-        <k9format.version>12.7.2</k9format.version>
+        <k9format.version>12.7.3</k9format.version>
         <jackson.version>2.20.1</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.0</kotlin-stdlib.version>
@@ -144,7 +144,7 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>2.3.4</version>
+                <version>2.3.5</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
