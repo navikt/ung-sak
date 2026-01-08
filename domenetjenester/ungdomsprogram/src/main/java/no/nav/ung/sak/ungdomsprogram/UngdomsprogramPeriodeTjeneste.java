@@ -102,11 +102,14 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
     public static List<EndretDato> finnEndretStartdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
-        // Støtter kun en periode her foreløpig
-        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
-        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
-        var andreStartdato = andrePeriode.getFomDato();
-        var førsteStartdato = førstePeriode.getFomDato();
+        // Støtter kun en eller ingen periode her foreløpig
+        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        if (andrePeriode.isEmpty() || førstePeriode.isEmpty()) {
+            return List.of();
+        }
+        var andreStartdato = andrePeriode.get().getFomDato();
+        var førsteStartdato = førstePeriode.get().getFomDato();
 
         if (andreStartdato.equals(førsteStartdato)) {
             return List.of();
@@ -116,9 +119,12 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
     public static boolean harEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
-        // Støtter kun en periode her foreløpig
-        var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
-        var gjeldendeDato = gjelendePeriode.getFomDato();
+        // Støtter kun en eller ingen periode her foreløpig
+        var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        if (gjelendePeriode.isEmpty()) {
+            return true;
+        }
+        var gjeldendeDato = gjelendePeriode.get().getFomDato();
         var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer).map(UngdomsytelseStartdatoer::getStartdatoer)
             .orElse(Set.of())
             .iterator().next().getStartdato();
@@ -126,11 +132,14 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
     public static List<EndretDato> finnEndretSluttdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
-        // Støtter kun en periode her foreløpig
-        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
-        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
-        var andreSluttdato = andrePeriode.getTomDato();
-        var førsteSluttdato = førstePeriode.getTomDato();
+        // Støtter kun en eller ingen periode her foreløpig
+        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        if (andrePeriode.isEmpty() || førstePeriode.isEmpty()) {
+            return List.of();
+        }
+        var andreSluttdato = andrePeriode.get().getTomDato();
+        var førsteSluttdato = førstePeriode.get().getTomDato();
 
         if (andreSluttdato.equals(førsteSluttdato)) {
             return List.of();
