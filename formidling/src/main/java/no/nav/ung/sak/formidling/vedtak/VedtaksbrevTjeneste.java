@@ -98,8 +98,6 @@ public class VedtaksbrevTjeneste {
             valg.map(VedtaksbrevValgEntitet::isRedigert).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreRediger(),
             resultat.forklaring(),
-            redigertBrevHtml,
-            tidligereRedigertTekst,
             redigertBrevHtml == null && deaktivertValg.isPresent());
     }
 
@@ -116,8 +114,6 @@ public class VedtaksbrevTjeneste {
                     false,
                     false,
                     it.forklaring(),
-                    null,
-                    null,
                     false
                 )).toList()
         );
