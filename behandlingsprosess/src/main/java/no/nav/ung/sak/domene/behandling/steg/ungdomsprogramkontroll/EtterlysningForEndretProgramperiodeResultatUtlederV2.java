@@ -21,7 +21,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
      * @return
      */
     static ResultatType finnResultat(EndretUngdomsprogramEtterlysningInput input, BehandlingReferanse behandlingReferanse) {
-        validerNøyaktigEnProgramperiode(input);
+        validerHøystEnProgramperiode(input);
         return utledResultat(input, behandlingReferanse);
     }
 
@@ -79,14 +79,11 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
         return !UngdomsprogramPeriodeTjeneste.finnEndretTidslinje(Optional.of(andreGrunnlag), Optional.of(førsteGrunnlag)).isEmpty();
     }
 
-    private static void validerNøyaktigEnProgramperiode(EndretUngdomsprogramEtterlysningInput input) {
+    private static void validerHøystEnProgramperiode(EndretUngdomsprogramEtterlysningInput input) {
         // Ekstra validering for å sjekke at det kun er én programperiode i grunnlaget.
         final var programperioder = input.gjeldendePeriodeGrunnlag().getUngdomsprogramPerioder().getPerioder();
         if (programperioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke flere programperioder");
-        }
-        if (programperioder.isEmpty()) {
-            throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
         }
     }
 

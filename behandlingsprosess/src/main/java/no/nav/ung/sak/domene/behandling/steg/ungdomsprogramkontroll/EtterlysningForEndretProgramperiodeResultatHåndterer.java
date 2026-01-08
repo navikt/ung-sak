@@ -52,7 +52,7 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
 
     void håndterResultatV2(ResultatType resultat, BehandlingReferanse behandlingReferanse,
                            Optional<Etterlysning> gjeldendeEtterlysning,
-                         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
+                           UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
                 opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
