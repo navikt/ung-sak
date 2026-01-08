@@ -19,10 +19,10 @@ import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
@@ -59,8 +59,8 @@ public class EndretPeriodeOppgaveOppretter {
             .map(ungdomsprogramPeriodeRepository::hentGrunnlagFraGrunnlagsReferanse)
             .orElse(initieltPeriodeGrunnlag);
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = finnEndretStartDato(etterlysning, forrigeGrunnlag, gjeldendeGrunnlag);
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = finnEndretSluttDato(etterlysning, forrigeGrunnlag, gjeldendeGrunnlag);
+        var endretStartDato = finnEndretStartDato(etterlysning, forrigeGrunnlag, gjeldendeGrunnlag);
+        var endretSluttDato = finnEndretSluttDato(etterlysning, forrigeGrunnlag, gjeldendeGrunnlag);
 
         if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
             var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato(), endretStartDato.get().forrigeDato());
@@ -71,11 +71,26 @@ public class EndretPeriodeOppgaveOppretter {
         } else {
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
-            var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
+            var endringer = finnEndringer(endretStartDato, endretSluttDato, gjeldendeGrunnlag);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
             ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
         }
 
+    }
+
+    private static Set<PeriodeEndringType> finnEndringer(Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato, Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato, UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
+        if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
+            return Set.of(PeriodeEndringType.FJERNET_PERIODE);
+        }
+
+        Set<PeriodeEndringType> endringer = new HashSet<>();
+        if (endretStartDato.isPresent()) {
+            endringer.add(PeriodeEndringType.ENDRET_STARTDATO);
+        }
+        if (endretSluttDato.isPresent()) {
+            endringer.add(PeriodeEndringType.ENDRET_SLUTTDATO);
+        }
+        return endringer;
     }
 
     private Optional<UngdomsprogramPeriodeTjeneste.EndretDato> finnEndretStartDato(Etterlysning etterlysning,

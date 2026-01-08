@@ -26,25 +26,22 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
         this.etterlysningRepository = etterlysningRepository;
     }
 
-    /**
-     * Håndterer utledet behov for etterlysning ved å opprette nye etterlysninger og avbryte eksisterende etterlysninger dersom det er aktuelt.
+    /** Håndterer utledet behov for etterlysning ved å opprette nye etterlysninger og avbryte eksisterende etterlysninger dersom det er aktuelt.
      * Etterlysninger settes her til OPPRETTET eller SKAL_AVBRYTES og det opprettes så tasker som håndterer endring av status i andre systemer.
-     *
-     * @param resultat                      Utledet behov for nye etterlysninger
-     * @param behandlingReferanse           Behandlingref
-     * @param etterlysningType              Type etterlysning som skal opprettes eller erstattes
-     * @param gjeldendeEtterlysning         Gjeldende etterlysning som skal erstattes, hvis det er aktuelt
-     * @param gjeldendeGrunnlag             Gjeldende grunnlag for programperioden som etterlysningen gjelder for
-     * @param initieltGrunnlag
+     * @param resultat Utledet behov for nye etterlysninger
+     * @param behandlingReferanse Behandlingref
+     * @param etterlysningType Type etterlysning som skal opprettes eller erstattes
+     * @param gjeldendeEtterlysning Gjeldende etterlysning som skal erstattes, hvis det er aktuelt
+     * @param gjeldendeGrunnlag Gjeldende grunnlag for programperioden som etterlysningen gjelder for
      */
     void håndterResultat(ResultatType resultat, BehandlingReferanse behandlingReferanse,
                          EtterlysningType etterlysningType,
                          Optional<EtterlysningData> gjeldendeEtterlysning,
-                         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag, UngdomsprogramPeriodeGrunnlag initieltGrunnlag) {
+                         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
         List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingReferanse.getBehandlingId(), etterlysningType);
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
-                opprettNyEtterlysning(gjeldendeGrunnlag, initieltGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
+                opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
             case ERSTATT_EKSISTERENDE_ETTERLYSNING ->
                 erstattEksisterende(behandlingReferanse, etterlysningType, finnEtterlysning(etterlysninger, gjeldendeEtterlysning), gjeldendeGrunnlag);
             case INGEN_ENDRING -> {
@@ -55,7 +52,7 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
 
     void håndterResultatV2(ResultatType resultat, BehandlingReferanse behandlingReferanse,
                            Optional<Etterlysning> gjeldendeEtterlysning,
-                         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
+                           UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
                 opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
@@ -90,13 +87,13 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
         etterlysningRepository.lagre(List.of(gjeldendeEtterlysning, nyEtterlysning));
     }
 
-    private void opprettNyEtterlysning(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag initieltGrunnlag, Long behandlingId, EtterlysningType etterlysningType) {
-        var gjeldendePeriode = gjeldendePeriodeGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+    private void opprettNyEtterlysning(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, Long behandlingId, EtterlysningType etterlysningType) {
+        var gjeldendePeriode = gjeldendePeriodeGrunnlag.hentForEksaktEnPeriode();
         final var nyEtterlysning = Etterlysning.opprettForType(
             behandlingId,
             gjeldendePeriodeGrunnlag.getGrunnlagsreferanse(),
             UUID.randomUUID(),
-            gjeldendePeriode.orElse(initieltGrunnlag.hentForEksaktEnPeriode()), // bruker gjeldende periode dersom den finnes, ellers initielt grunnlag
+            gjeldendePeriode,
             etterlysningType
         );
         etterlysningRepository.lagre(nyEtterlysning);
