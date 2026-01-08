@@ -221,6 +221,10 @@ public class JettyServer {
         // Create HTTP Config
         HttpConfiguration httpConfig = new HttpConfiguration();
 
+        // Increase max allowed http headers, since we have many big session cookies.
+        httpConfig.setRequestHeaderSize(32768); // Original is 8192
+        httpConfig.setMaxResponseHeaderSize(32768); // Original is 16384
+
         // Add support for X-Forwarded headers
         httpConfig.addCustomizer(new org.eclipse.jetty.server.ForwardedRequestCustomizer());
 
