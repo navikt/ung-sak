@@ -123,7 +123,10 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
     }
 
     private UngdomsprogramDeltakelsePeriode hentDeltakelsePeriode(Behandling behandling) {
-        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElse(null);
+        if (ungdomsprogramPeriodeGrunnlag == null || ungdomsprogramPeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().isEmpty()){
+            return null;
+        }
         DatoIntervallEntitet ungdomsprogramPeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
         return new UngdomsprogramDeltakelsePeriode(ungdomsprogramPeriode.getFomDato(), ungdomsprogramPeriode.getTomDato());
     }
@@ -156,7 +159,10 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
     }
 
     private List<StønadsstatistikkSatsPeriode> hentSatsPerioder(Behandling behandling) {
-        UngdomsytelseGrunnlag ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+        UngdomsytelseGrunnlag ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId()).orElse(null);
+        if (ungdomsytelseGrunnlag == null) {
+            return List.of();
+        }
         return ungdomsytelseGrunnlag.getSatsTidslinje().toSegments()
             .stream().map(it -> new StønadsstatistikkSatsPeriode(
                 it.getFom(),
