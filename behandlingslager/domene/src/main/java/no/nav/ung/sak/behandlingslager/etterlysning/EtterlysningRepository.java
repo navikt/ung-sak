@@ -47,9 +47,9 @@ public class EtterlysningRepository {
         return etterlysninger;
     }
 
-    public List<Etterlysning> hentEtterlysninger(Long behandlingId, EtterlysningType ...type) {
+    public List<Etterlysning> hentEtterlysningerMedSisteFørst(Long behandlingId, EtterlysningType ...type) {
         final var etterlysninger = entityManager.createQuery("select e from Etterlysning e " +
-                                                             "where e.behandlingId = :behandlingId and e.type in :type", Etterlysning.class)
+                                                             "where e.behandlingId = :behandlingId and e.type in :type order by opprettetTidspunkt desc, id desc", Etterlysning.class)
             .setParameter("behandlingId", behandlingId)
             .setParameter("type", Arrays.stream(type).toList())
             .getResultList();

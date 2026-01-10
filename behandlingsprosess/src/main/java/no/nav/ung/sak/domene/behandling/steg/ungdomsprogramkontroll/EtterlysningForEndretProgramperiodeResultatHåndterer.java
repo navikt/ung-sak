@@ -38,7 +38,7 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
                          EtterlysningType etterlysningType,
                          Optional<EtterlysningData> gjeldendeEtterlysning,
                          UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
-        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingReferanse.getBehandlingId(), etterlysningType);
+        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(behandlingReferanse.getBehandlingId(), etterlysningType);
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
                 opprettNyEtterlysning(gjeldendeGrunnlag, behandlingReferanse.getBehandlingId(), etterlysningType);
