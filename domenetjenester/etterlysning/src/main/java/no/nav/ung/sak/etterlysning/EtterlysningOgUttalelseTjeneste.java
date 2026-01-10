@@ -29,7 +29,7 @@ public class EtterlysningOgUttalelseTjeneste {
 
 
     public List<EtterlysningData> hentEtterlysningerOgUttalelser(Long behandlingId, EtterlysningType... typer) {
-        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingId, typer);
+        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(behandlingId, typer);
         List<UttalelseV2> uttalelser = uttalelseRepository.hentUttalelser(behandlingId, Arrays.stream(typer).map(this::mapTilEndringsType).toArray(EndringType[]::new));
 
         return etterlysninger.stream()

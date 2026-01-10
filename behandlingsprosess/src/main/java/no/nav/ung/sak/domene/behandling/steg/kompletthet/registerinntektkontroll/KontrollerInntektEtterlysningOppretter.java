@@ -81,7 +81,7 @@ public class KontrollerInntektEtterlysningOppretter {
     private void håndterPeriodisertResultat(BehandlingReferanse behandlingReferanse,
                                             LocalDateTimeline<EtterlysningBehov> resultat) {
         var etterlysningOgUttalelse = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
-        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysninger(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        List<Etterlysning> etterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
 
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
