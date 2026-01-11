@@ -9,10 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Dependent
 public class UngdomsprogramPeriodeRepository {
@@ -32,6 +29,18 @@ public class UngdomsprogramPeriodeRepository {
     public UngdomsprogramPeriodeGrunnlag hentGrunnlagFraGrunnlagsReferanse(UUID grunnlagsReferanse) {
         return hentEksisterendeGrunnlag(grunnlagsReferanse).orElseThrow(() -> new IllegalStateException("Fant ikke grunnlag med grunnlagsreferanse: " + grunnlagsReferanse));
     }
+
+    public List<UngdomsprogramPeriodeGrunnlag> hentGrunnlagFraReferanser(List<UUID> grunnlagsReferanser) {
+        var query = entityManager.createQuery(
+            "SELECT gr " +
+                "FROM UngdomsprogramPeriodeGrunnlag gr " +
+                "WHERE gr.grunnlagsreferanse in (:grunnlagsReferanser)", UngdomsprogramPeriodeGrunnlag.class);
+
+        query.setParameter("grunnlagsReferanser", grunnlagsReferanser);
+
+        return query.getResultList().stream().sorted(Comparator.comparing(it -> grunnlagsReferanser.indexOf(it.getGrunnlagsreferanse()))).toList();
+    }
+
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder) {
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
@@ -85,6 +94,9 @@ public class UngdomsprogramPeriodeRepository {
 
         return HibernateVerktøy.hentUniktResultat(query);
     }
+
+
+
 
     public Optional<UngdomsprogramPeriodeGrunnlag> hentGrunnlagBasertPåId(Long id) {
         var query = entityManager.createQuery(

@@ -19,10 +19,8 @@ import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
@@ -61,7 +59,7 @@ public class EndretPeriodeOppgaveOppretter {
             gjeldendeGrunnlag,
             sorterteEtterlysninger,
             initieltPeriodeGrunnlag,
-            EndretPeriodeOppgaveOppretter::getStatdato);
+            EndretPeriodeOppgaveOppretter::getStartdato);
 
         Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = finnEndretDato(
             gjeldendeGrunnlag,
@@ -85,6 +83,16 @@ public class EndretPeriodeOppgaveOppretter {
 
     }
 
+    /** Finner endret dato (start- eller sluttdato) ved å sammenligne gjeldende grunnlag med tidligere etterlysninger og initielt grunnlag.
+     * <p>
+     * Behovet for denne metoden oppstår fordi vi må finne ut om en dato har blitt endret fra det som bruker sist tok stilling til. Dersom vi har flere endringer på perioden der disse er av ulike typer (endring i startdato, endring i sluttdato...),
+     * ønsker vi å kunne gi detaljert informasjon om hva som har blitt endret fra forrige etterlysning som enten ble besvart eller utløpt.
+     * @param gjeldendeGrunnlag Det aktive grunnlaget
+     * @param sorterteEtterlysninger Alle tidligere opprettede etterlysninger for perioden, sortert med nyeste først
+     * @param initieltPeriodeGrunnlag Initielt grunnlag
+     * @param aktuellDatoHenter Funksjon for å hente aktuell dato (start- eller sluttdato)
+     * @return Evt. endret dato informasjon
+     */
     private Optional<UngdomsprogramPeriodeTjeneste.EndretDato> finnEndretDato(UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag,
                                                                               List<Etterlysning> sorterteEtterlysninger,
                                                                               UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag,
@@ -93,23 +101,23 @@ public class EndretPeriodeOppgaveOppretter {
         boolean harEndringIDato = false;
         LocalDate forrigeDato = null;
         Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = Optional.empty();
-        // Her sjekkes ettelysninger med alle statuser, også MOTTATT_SVAR og UTLØPT
-        // Dette betyr endringer fra tidligere varsler også kan svares på
-        for (var e : sorterteEtterlysninger) {
-            UngdomsprogramPeriodeGrunnlag grunnlagFraEtterlysning = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(e.getGrunnlagsreferanse());
-            LocalDate datoIEtterlysning = aktuellDatoHenter.hent(grunnlagFraEtterlysning);
+        // Dersom vi treffer en etterlysning som er mottatt svar eller utløpt, betyr det at bruker har tatt stilling til alle endringer før denne. Det er derfor ikke nødvendig å sjekke flere grunnlag.
+        List<Etterlysning> tidligereEtterlysningerSomBleAvbruttSortert = sorterteEtterlysninger.stream().filter(it -> EtterlysningStatus.OPPRETTET != it.getStatus())
+            .takeWhile(it -> it.getStatus() != EtterlysningStatus.MOTTATT_SVAR && it.getStatus() != EtterlysningStatus.UTLØPT)
+            .filter(it -> it.getStatus() == EtterlysningStatus.AVBRUTT).toList();
+        // Henter alle aktuelle grunnlag
+        List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = new ArrayList<>(ungdomsprogramPeriodeRepository.hentGrunnlagFraReferanser(
+            tidligereEtterlysningerSomBleAvbruttSortert.stream().map(Etterlysning::getGrunnlagsreferanse).toList()
+        ));
+        aktuelleGrunnlagSortert.add(initieltPeriodeGrunnlag); // Legger til initielt grunnlag sist for sjekk
+
+        for (var grunnlag : aktuelleGrunnlagSortert) {
+            LocalDate datoIEtterlysning = aktuellDatoHenter.hent(grunnlag);
             harEndringIDato = !datoIEtterlysning.equals(gjeldendeDato);
             if (harEndringIDato) {
                 forrigeDato = datoIEtterlysning;
                 break;
             }
-        }
-
-        // Dersom vi ikke fant noen endring etter å ha sjekket alle etterlysninger, sjekkes det mot initielt grunnlag
-        if (!harEndringIDato) {
-            LocalDate initiellDato = aktuellDatoHenter.hent(initieltPeriodeGrunnlag);
-            forrigeDato = initiellDato;
-            harEndringIDato = !Objects.equals(initiellDato, gjeldendeDato);
         }
 
         if (harEndringIDato) {
@@ -118,7 +126,7 @@ public class EndretPeriodeOppgaveOppretter {
         return endretStartDato;
     }
 
-    private static LocalDate getStatdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+    private static LocalDate getStartdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
         return grunnlag.hentForEksaktEnPeriode().getFomDato();
     }
 
