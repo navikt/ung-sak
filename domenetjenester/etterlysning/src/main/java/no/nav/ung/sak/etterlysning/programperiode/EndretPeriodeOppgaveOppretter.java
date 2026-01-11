@@ -19,8 +19,10 @@ import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
@@ -53,18 +55,16 @@ public class EndretPeriodeOppgaveOppretter {
         }
         Etterlysning etterlysning = etterlysninger.getFirst();
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
-        List<Etterlysning> sorterteEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(etterlysning.getId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
+        List<UngdomsprogramPeriodeGrunnlag> grunnlagslisteForSammenligning = finnSortertGrunnlagslisteForSammenligning(etterlysning, initieltPeriodeGrunnlag);
 
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = finnEndretDato(
+        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
             gjeldendeGrunnlag,
-            sorterteEtterlysninger,
-            initieltPeriodeGrunnlag,
+            grunnlagslisteForSammenligning,
             EndretPeriodeOppgaveOppretter::getStartdato);
 
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = finnEndretDato(
+        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
             gjeldendeGrunnlag,
-            sorterteEtterlysninger,
-            initieltPeriodeGrunnlag,
+            grunnlagslisteForSammenligning,
             EndretPeriodeOppgaveOppretter::getSluttdato);
 
         if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
@@ -83,47 +83,20 @@ public class EndretPeriodeOppgaveOppretter {
 
     }
 
-    /** Finner endret dato (start- eller sluttdato) ved å sammenligne gjeldende grunnlag med tidligere etterlysninger og initielt grunnlag.
-     * <p>
-     * Behovet for denne metoden oppstår fordi vi må finne ut om en dato har blitt endret fra det som bruker sist tok stilling til. Dersom vi har flere endringer på perioden der disse er av ulike typer (endring i startdato, endring i sluttdato...),
-     * ønsker vi å kunne gi detaljert informasjon om hva som har blitt endret fra forrige etterlysning som enten ble besvart eller utløpt.
-     * @param gjeldendeGrunnlag Det aktive grunnlaget
-     * @param sorterteEtterlysninger Alle tidligere opprettede etterlysninger for perioden, sortert med nyeste først
-     * @param initieltPeriodeGrunnlag Initielt grunnlag
-     * @param aktuellDatoHenter Funksjon for å hente aktuell dato (start- eller sluttdato)
-     * @return Evt. endret dato informasjon
-     */
-    private Optional<UngdomsprogramPeriodeTjeneste.EndretDato> finnEndretDato(UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag,
-                                                                              List<Etterlysning> sorterteEtterlysninger,
-                                                                              UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag,
-                                                                              AktuellDatoHenter aktuellDatoHenter) {
-        LocalDate gjeldendeDato = aktuellDatoHenter.hent(gjeldendeGrunnlag);
-        boolean harEndringIDato = false;
-        LocalDate forrigeDato = null;
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = Optional.empty();
+    private List<UngdomsprogramPeriodeGrunnlag> finnSortertGrunnlagslisteForSammenligning(Etterlysning etterlysning, UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag) {
+        List<Etterlysning> sorterteEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(etterlysning.getId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
+
         // Dersom vi treffer en etterlysning som er mottatt svar eller utløpt, betyr det at bruker har tatt stilling til alle endringer før denne. Det er derfor ikke nødvendig å sjekke flere grunnlag.
         List<Etterlysning> tidligereEtterlysningerSomBleAvbruttSortert = sorterteEtterlysninger.stream().filter(it -> EtterlysningStatus.OPPRETTET != it.getStatus())
             .takeWhile(it -> it.getStatus() != EtterlysningStatus.MOTTATT_SVAR && it.getStatus() != EtterlysningStatus.UTLØPT)
             .filter(it -> it.getStatus() == EtterlysningStatus.AVBRUTT).toList();
-        // Henter alle aktuelle grunnlag
+
+        // Henter alle aktuelle grunnlag. Beholder rekkefølge fra etterlysningene
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = new ArrayList<>(ungdomsprogramPeriodeRepository.hentGrunnlagFraReferanser(
             tidligereEtterlysningerSomBleAvbruttSortert.stream().map(Etterlysning::getGrunnlagsreferanse).toList()
         ));
         aktuelleGrunnlagSortert.add(initieltPeriodeGrunnlag); // Legger til initielt grunnlag sist for sjekk
-
-        for (var grunnlag : aktuelleGrunnlagSortert) {
-            LocalDate datoIEtterlysning = aktuellDatoHenter.hent(grunnlag);
-            harEndringIDato = !datoIEtterlysning.equals(gjeldendeDato);
-            if (harEndringIDato) {
-                forrigeDato = datoIEtterlysning;
-                break;
-            }
-        }
-
-        if (harEndringIDato) {
-            endretStartDato = Optional.of(new UngdomsprogramPeriodeTjeneste.EndretDato(gjeldendeDato, forrigeDato));
-        }
-        return endretStartDato;
+        return aktuelleGrunnlagSortert;
     }
 
     private static LocalDate getStartdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
@@ -132,11 +105,6 @@ public class EndretPeriodeOppgaveOppretter {
 
     private static LocalDate getSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
         return grunnlag.hentForEksaktEnPeriode().getTomDato();
-    }
-
-    @FunctionalInterface
-    private interface AktuellDatoHenter {
-        LocalDate hent(UngdomsprogramPeriodeGrunnlag grunnlag);
     }
 
     private EndretPeriodeOppgaveDTO mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, PersonIdent deltakerIdent, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {
