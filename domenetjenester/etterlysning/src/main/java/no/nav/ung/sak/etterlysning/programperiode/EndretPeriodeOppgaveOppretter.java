@@ -55,6 +55,8 @@ public class EndretPeriodeOppgaveOppretter {
         }
         Etterlysning etterlysning = etterlysninger.getFirst();
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
+
+        // Dette med å finne diff kan potensielt forenkles dersom vi ikkje trenger å vise kva startdato og sluttdato var før endringen.
         List<UngdomsprogramPeriodeGrunnlag> grunnlagslisteForSammenligning = finnSortertGrunnlagslisteForSammenligning(etterlysning, initieltPeriodeGrunnlag);
 
         Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
