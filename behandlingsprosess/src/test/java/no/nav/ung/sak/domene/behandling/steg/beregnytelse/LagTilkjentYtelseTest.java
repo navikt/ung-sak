@@ -63,8 +63,13 @@ class LagTilkjentYtelseTest {
             lagSatsperiode(grunnsats2, barnetilleggSats2, fom2, tom2)
         ));
 
+        LocalDateTimeline<BigDecimal> rapportertInntekt = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom2, tom2, BigDecimal.ZERO)
+        ));
+
+
         // Act
-        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, TOM_TIDSLINJE);
+        LocalDateTimeline<TilkjentYtelseVerdi> resultat = getResultat(godkjentTidslinje, totalsatsTidslinje, rapportertInntekt);
 
         // Assert
         // Forventer ingen reduksjon
@@ -172,7 +177,7 @@ class LagTilkjentYtelseTest {
 
 
     @Test
-    void skal_lage_tilkjent_ytelse_for_siste_periode_når_nest_siste_periode_er_kontrollert() {
+    void skal_ikke_lage_tilkjent_ytelse_for_siste_periode_når_nest_siste_periode_er_kontrollert() {
         // Arrange
         final var fom1 = LocalDate.of(2023, 1, 1);
         final var tom1 = LocalDate.of(2023, 1, 31);
@@ -207,7 +212,7 @@ class LagTilkjentYtelseTest {
         // Assert
         // Forventer ingen reduksjon og tilkjent ytelse for første periode
         assertNotNull(resultat);
-        assertEquals(3, resultat.getLocalDateIntervals().size());
+        assertEquals(2, resultat.getLocalDateIntervals().size());
 
         final var iterator = resultat.toSegments().iterator();
         final var forventetDagsats1 = BigDecimal.valueOf(14);
@@ -219,11 +224,6 @@ class LagTilkjentYtelseTest {
         final var forventetUredusertBeløp2 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
         final var forventetDagsats2 = BigDecimal.valueOf(20);
         assertSegment(segment2, fom2, tom2, forventetUredusertBeløp2, forventetDagsats2, BigDecimal.ZERO, forventetUredusertBeløp2, 100);
-
-        LocalDateSegment<TilkjentYtelseVerdi> segment3 = iterator.next();
-        final var forventetUredusertBeløp3 = grunnsats2.add(BigDecimal.valueOf(barnetilleggSats2));
-        final var forventetDagsats3 = BigDecimal.valueOf(36);
-        assertSegment(segment3, fom3, tom3, forventetUredusertBeløp3, forventetDagsats3, BigDecimal.ZERO, forventetUredusertBeløp3, 100);
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
