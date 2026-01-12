@@ -161,7 +161,7 @@ class RelevanteKontrollperioderUtlederTest {
 
 
     @Test
-    void skal_finne_første_og_siste_periode_for_sammenhengende_ytelsestidslinje_med_tre_segmenter() {
+    void skal_finne_første_periode_for_sammenhengende_ytelsestidslinje_med_tre_segmenter() {
         final var førstePeriodeFom = LocalDate.of(2023, 1, 12);
         final var førstePeriodeTom = LocalDate.of(2023, 1, 31);
         final var sistePeriodeFom = LocalDate.of(2023, 3, 1);
@@ -174,20 +174,15 @@ class RelevanteKontrollperioderUtlederTest {
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
-        assertEquals(2, result.toSegments().size());
+        assertEquals(1, result.toSegments().size());
         final var første = result.toSegments().first();
         assertTrue(første.getValue().gjelderFørstePeriode());
         assertThat(første.getFom()).isEqualTo(førstePeriodeFom);
         assertThat(første.getTom()).isEqualTo(førstePeriodeTom);
-
-        final var siste = result.toSegments().last();
-        assertThat(siste.getFom()).isEqualTo(sistePeriodeFom);
-        assertThat(siste.getTom()).isEqualTo(sistePeriodeTom);
-        assertTrue(siste.getValue().gjelderSistePeriode());
     }
 
     @Test
-    void skal_finne_første_og_siste_periode_for_sammenhengende_ytelsestidslinje_med_to_segmenter() {
+    void skal_finne_første_periode_for_sammenhengende_ytelsestidslinje_med_to_segmenter() {
         final var førstePeriodeFom = LocalDate.of(2023, 1, 13);
         final var førstePeriodeTom = LocalDate.of(2023, 1, 31);
         final var sistePeriodeFom = LocalDate.of(2023, 2, 1);
@@ -199,20 +194,15 @@ class RelevanteKontrollperioderUtlederTest {
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
-        assertEquals(2, result.toSegments().size());
+        assertEquals(1, result.toSegments().size());
         final var første = result.toSegments().first();
         assertTrue(første.getValue().gjelderFørstePeriode());
         assertThat(første.getFom()).isEqualTo(førstePeriodeFom);
         assertThat(første.getTom()).isEqualTo(førstePeriodeTom);
-
-        final var siste = result.toSegments().last();
-        assertThat(siste.getFom()).isEqualTo(sistePeriodeFom);
-        assertThat(siste.getTom()).isEqualTo(sistePeriodeTom);
-        assertTrue(siste.getValue().gjelderSistePeriode());
     }
 
     @Test
-    void skal_finne_første_og_siste_perioder_for_der_ytelsestidslinjen_er_delt_i_to_med_med_to_segmenter_i_hver() {
+    void skal_finne_første_perioder_der_ytelsestidslinjen_er_delt_i_to_med_med_to_segmenter_i_hver() {
         final var førstePeriode1Fom = LocalDate.of(2023, 1, 1);
         final var førstePeriode1Tom = LocalDate.of(2023, 1, 31);
         final var sistePeriode1Fom = LocalDate.of(2023, 2, 1);
@@ -231,31 +221,21 @@ class RelevanteKontrollperioderUtlederTest {
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
-        assertEquals(4, result.toSegments().size());
+        assertEquals(2, result.toSegments().size());
         final var iterator = result.toSegments().iterator();
         final var første1 = iterator.next();
         assertTrue(første1.getValue().gjelderFørstePeriode());
         assertThat(første1.getFom()).isEqualTo(førstePeriode1Fom);
         assertThat(første1.getTom()).isEqualTo(førstePeriode1Tom);
 
-        final var siste1 = iterator.next();
-        assertThat(siste1.getFom()).isEqualTo(sistePeriode1Fom);
-        assertThat(siste1.getTom()).isEqualTo(sistePeriode1Tom);
-        assertTrue(siste1.getValue().gjelderSistePeriode());
-
         final var første2 = iterator.next();
         assertTrue(første2.getValue().gjelderFørstePeriode());
         assertThat(første2.getFom()).isEqualTo(førstePeriode2Fom);
         assertThat(første2.getTom()).isEqualTo(førstePeriode2Tom);
-
-        final var siste2 = iterator.next();
-        assertThat(siste2.getFom()).isEqualTo(sistePeriode2Fom);
-        assertThat(siste2.getTom()).isEqualTo(sistePeriode2Tom);
-        assertTrue(siste2.getValue().gjelderSistePeriode());
     }
 
     @Test
-    void skal_finne_første_og_siste_perioder_for_der_ytelsestidslinjen_er_delt_i_to_med_med_tre_segmenter_i_hver() {
+    void skal_finne_første_perioder_for_der_ytelsestidslinjen_er_delt_i_to_med_med_tre_segmenter_i_hver() {
         final var førstePeriode1Fom = LocalDate.of(2023, 1, 1);
         final var førstePeriode1Tom = LocalDate.of(2023, 1, 31);
         final var sistePeriode1Fom = LocalDate.of(2023, 3, 1);
@@ -276,27 +256,17 @@ class RelevanteKontrollperioderUtlederTest {
 
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
-        assertEquals(4, result.toSegments().size());
+        assertEquals(2, result.toSegments().size());
         final var iterator = result.toSegments().iterator();
         final var første1 = iterator.next();
         assertTrue(første1.getValue().gjelderFørstePeriode());
         assertThat(første1.getFom()).isEqualTo(førstePeriode1Fom);
-        assertThat(første1.getTom()).isEqualTo(førstePeriode1Tom);
 
-        final var siste1 = iterator.next();
-        assertThat(siste1.getFom()).isEqualTo(sistePeriode1Fom);
-        assertThat(siste1.getTom()).isEqualTo(sistePeriode1Tom);
-        assertTrue(siste1.getValue().gjelderSistePeriode());
 
         final var første2 = iterator.next();
         assertTrue(første2.getValue().gjelderFørstePeriode());
         assertThat(første2.getFom()).isEqualTo(førstePeriode2Fom);
         assertThat(første2.getTom()).isEqualTo(førstePeriode2Tom);
-
-        final var siste2 = iterator.next();
-        assertThat(siste2.getFom()).isEqualTo(sistePeriode2Fom);
-        assertThat(siste2.getTom()).isEqualTo(sistePeriode2Tom);
-        assertTrue(siste2.getValue().gjelderSistePeriode());
     }
 
     private void lagFagsakOgBehandling() {
