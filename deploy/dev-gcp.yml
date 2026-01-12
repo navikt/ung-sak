@@ -254,8 +254,6 @@ spec:
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
-    - name: KONTROLL_SISTE_MND_ENABLED
-      value: "true"
     - name: ENABLE_BREV_ANSVARLIG
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED

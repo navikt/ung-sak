@@ -150,7 +150,7 @@ class FinnSakerForInntektkontrollTest {
      * Tester at ingen fagsaker returneres når programperioden slutter i september.
      */
     @Test
-    void skal_ikke_finne_fagsak_for_kontroll_av_siste_måned_i_programperiode() {
+    void skal_finne_fagsak_for_kontroll_av_siste_måned_i_programperiode() {
         // Arrange
         opprettProgramperiode(LANGT_BAK, MIDT_I_SEPTEMBER);
 
@@ -158,7 +158,7 @@ class FinnSakerForInntektkontrollTest {
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
         // Assert
-        assertEquals(0, fagsaker.size());
+        assertEquals(1, fagsaker.size());
     }
 
     /**
