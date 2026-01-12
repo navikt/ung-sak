@@ -24,6 +24,7 @@ public class UngOppgaveKlient {
     private final URI opprettKontrollerRegisterInntektURI;
     private final URI opprettInntektrapporteringURI;
     private final URI utløpForTypeOgPeriodeURI;
+    private final URI avbrytForTypeOgPeriodeURI;
     private final URI avbrytURI;
     private final URI utløptURI;
     private final URI opprettEndretSluttdatoURI;
@@ -45,6 +46,8 @@ public class UngOppgaveKlient {
         this.avbrytURI = tilUri(url, "oppgave/avbryt");
         this.utløptURI = tilUri(url, "oppgave/utlopt");
         this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgave/utlopt/forTypeOgPeriode");
+        this.avbrytForTypeOgPeriodeURI = tilUri(url, "oppgave/avbrutt/forTypeOgPeriode");
+
         this.løsSøkYtelseURI = tilUri(url, "oppgave/los/sokytelse");
     }
 
@@ -85,6 +88,14 @@ public class UngOppgaveKlient {
     public void settOppgaveTilUtløpt(SettTilUtløptDTO dto) {
         try {
             restClient.post(utløpForTypeOgPeriodeURI, dto);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    public void settOppgaveTilAvbrutt(SettTilUtløptDTO dto) {
+        try {
+            restClient.post(avbrytForTypeOgPeriodeURI, dto);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }

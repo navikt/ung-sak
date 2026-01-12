@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandling.revurdering.inntektskontroll;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import org.slf4j.Logger;
@@ -28,21 +29,21 @@ public class OpprettRevurderingForInntektskontrollBatchTask implements BatchPros
     private static final Logger log = LoggerFactory.getLogger(OpprettRevurderingForInntektskontrollBatchTask.class);
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private String inntetskontrollCronString;
 
     OpprettRevurderingForInntektskontrollBatchTask() {
     }
 
     @Inject
-    public OpprettRevurderingForInntektskontrollBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
+    public OpprettRevurderingForInntektskontrollBatchTask(ProsessTaskTjeneste prosessTaskTjeneste,
+                                                          @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.inntetskontrollCronString = inntetskontrollCronString;
     }
 
     @Override
     public CronExpression getCron() {
-
-
-
-        return CronExpression.create("0 0 7 8 * *");
+        return CronExpression.create(inntetskontrollCronString);
     }
 
     @Override

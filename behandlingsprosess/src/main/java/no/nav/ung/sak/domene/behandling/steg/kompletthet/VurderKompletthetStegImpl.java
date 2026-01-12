@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
+import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningTjeneste;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
@@ -57,7 +57,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private static final Logger log = LoggerFactory.getLogger(VurderKompletthetStegImpl.class);
     private EtterlysningRepository etterlysningRepository;
     private BehandlingRepository behandlingRepository;
-    private KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter;
+    private KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste;
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
     private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
@@ -72,7 +72,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     @Inject
     public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository,
                                      BehandlingRepository behandlingRepository,
-                                     KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter,
+                                     KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningOppretter,
                                      ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
                                      InntektAbonnentTjeneste inntektAbonnentTjeneste,
                                      RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder,
@@ -80,7 +80,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
                                      @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
-        this.kontrollerInntektEtterlysningOppretter = kontrollerInntektEtterlysningOppretter;
+        this.kontrollerInntektEtterlysningTjeneste = kontrollerInntektEtterlysningOppretter;
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.rapporteringsfristAutopunktUtleder = rapporteringsfristAutopunktUtleder;
@@ -99,7 +99,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         // Steg 1: Opprett etterlysninger dersom fagsak har digital bruker
         boolean erDigitalBruker = !fagsak.erIkkeDigitalBruker();
         if (erDigitalBruker) {
-            kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
+            kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
             programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         } else {
             log.info("Behandling har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.");

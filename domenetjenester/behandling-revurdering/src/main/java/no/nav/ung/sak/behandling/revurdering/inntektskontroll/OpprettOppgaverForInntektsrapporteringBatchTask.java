@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandling.revurdering.inntektskontroll;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -34,7 +35,7 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements BatchPro
     }
 
     @Inject
-    public OpprettOppgaverForInntektsrapporteringBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
+    public OpprettOppgaverForInntektsrapporteringBatchTask(ProsessTaskTjeneste prosessTaskTjeneste, @KonfigVerdi(value = "INNTEKTSRAPPORTERING_CRON_EXPRESSION", defaultVerdi = "0 0 7 1 * *") String inntektsrapporteringCronString) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 

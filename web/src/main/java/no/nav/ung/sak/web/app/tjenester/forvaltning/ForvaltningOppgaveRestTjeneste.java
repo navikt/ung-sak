@@ -41,7 +41,6 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.time.LocalDate;
-import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
 import java.util.UUID;
@@ -105,7 +104,7 @@ public class ForvaltningOppgaveRestTjeneste {
     private LocalDateInterval finnPeriode(MånedForRapportering måned, Fagsak fagsak) {
         final var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).get();
 
-        final var periodisertMånedvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(sisteBehandling.getId());
+        final var periodisertMånedvis = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
 
         final var overlappendeYtelsesperiode = periodisertMånedvis.stream()
             // Enum ordinal er 0-indeksert og montvalue er 1-indeksert

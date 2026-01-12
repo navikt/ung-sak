@@ -11,7 +11,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
@@ -61,7 +60,7 @@ public class RelevanteKontrollperioderUtleder {
      * @return Perioder som er relevante for kontroll av inntekt
      */
     public LocalDateTimeline<Boolean> utledPerioderRelevantForKontrollAvInntekt(Long behandlingId) {
-        final var periodisertMånedsvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        final var periodisertMånedsvis = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
         return relevantForKontrollTidslinje;
     }

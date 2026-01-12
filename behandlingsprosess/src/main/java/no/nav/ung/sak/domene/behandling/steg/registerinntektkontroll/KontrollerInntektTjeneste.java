@@ -30,7 +30,7 @@ public class KontrollerInntektTjeneste {
         }
 
         var gjeldendeRapporterteInntekter = input.gjeldendeRapporterteInntekter();
-        var relevantTidslinje = input.relevantTidslinje();
+        var relevantTidslinje = input.tidslinjeTilKontroll();
         var resultatTidslinje = new LocalDateTimeline<Kontrollresultat>(List.of());
 
         // Ikke godkjent uttalelse => Aksjonspunkt
