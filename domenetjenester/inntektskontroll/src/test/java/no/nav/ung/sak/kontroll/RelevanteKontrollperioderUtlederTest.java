@@ -67,8 +67,7 @@ class RelevanteKontrollperioderUtlederTest {
 
         relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
             prosessTriggerPeriodeUtleder,
-            månedsvisTidslinjeUtleder,
-            false
+            månedsvisTidslinjeUtleder
         );
 
         lagFagsakOgBehandling();
@@ -99,8 +98,7 @@ class RelevanteKontrollperioderUtlederTest {
     void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode() {
         relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
             prosessTriggerPeriodeUtleder,
-            månedsvisTidslinjeUtleder,
-            true
+            månedsvisTidslinjeUtleder
         );
 
         // Programperiode går fra desember til mars
@@ -132,8 +130,7 @@ class RelevanteKontrollperioderUtlederTest {
     void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode_og_annen_trigger() {
         relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
             prosessTriggerPeriodeUtleder,
-            månedsvisTidslinjeUtleder,
-            true
+            månedsvisTidslinjeUtleder
         );
 
         // Programperiode går fra desember til mars
@@ -175,7 +172,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 3))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
         assertEquals(2, result.toSegments().size());
         final var første = result.toSegments().first();
@@ -200,7 +197,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriodeFom, sistePeriodeTom, YearMonth.of(2023, 2))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
         assertEquals(2, result.toSegments().size());
         final var første = result.toSegments().first();
@@ -232,7 +229,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 4))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
         assertEquals(4, result.toSegments().size());
         final var iterator = result.toSegments().iterator();
@@ -277,7 +274,7 @@ class RelevanteKontrollperioderUtlederTest {
             new LocalDateSegment<>(sistePeriode2Fom, sistePeriode2Tom, YearMonth.of(2023, 6))
         ));
 
-        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, false);
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
         assertEquals(4, result.toSegments().size());
         final var iterator = result.toSegments().iterator();
