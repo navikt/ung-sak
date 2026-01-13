@@ -12,10 +12,10 @@ import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.revurdering.inntektskontroll.SettOppgaveAvbruttForInntektsrapporteringTask;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInputMapper;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -25,7 +25,7 @@ import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
-import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
+import no.nav.ung.sak.kontroll.RyddingAvInntektsrapporteringUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +48,7 @@ public class KontrollerInntektEtterlysningTjeneste {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private KontrollerInntektInputMapper inputMapper;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
+    private RyddingAvInntektsrapporteringUtleder ryddingAvInntektsrapporteringUtleder;
     private final int akseptertDifferanse;
 
     @Inject
@@ -58,7 +58,7 @@ public class KontrollerInntektEtterlysningTjeneste {
                                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
                                                  ProsessTaskTjeneste prosessTaskTjeneste,
                                                  KontrollerInntektInputMapper inputMapper,
-                                                 KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste,
+                                                 RyddingAvInntektsrapporteringUtleder ryddingAvInntektsrapporteringUtleder,
                                                  @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
         this.etterlysningRepository = etterlysningRepository;
         this.sporingRepository = sporingRepository;
@@ -66,7 +66,7 @@ public class KontrollerInntektEtterlysningTjeneste {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.inputMapper = inputMapper;
-        this.kontrollerteInntektperioderTjeneste = kontrollerteInntektperioderTjeneste;
+        this.ryddingAvInntektsrapporteringUtleder = ryddingAvInntektsrapporteringUtleder;
         this.akseptertDifferanse = akseptertDifferanse;
     }
 
@@ -88,7 +88,7 @@ public class KontrollerInntektEtterlysningTjeneste {
     }
 
     private void ryddIkkeRelevanteOppgaver(BehandlingReferanse behandlingReferanse) {
-        Optional<DatoIntervallEntitet> periodeSomSkalAvbrytes = kontrollerteInntektperioderTjeneste.utledPerioderForRyddingAvRapporteringsoppgaver(behandlingReferanse);
+        Optional<DatoIntervallEntitet> periodeSomSkalAvbrytes = ryddingAvInntektsrapporteringUtleder.utledPerioderForRyddingAvRapporteringsoppgaver(behandlingReferanse);
         if (periodeSomSkalAvbrytes.isPresent()) {
             ProsessTaskData avbrytTask = ProsessTaskData.forProsessTask(SettOppgaveAvbruttForInntektsrapporteringTask.class);
             avbrytTask.setAktørId(behandlingReferanse.getAktørId().getAktørId());

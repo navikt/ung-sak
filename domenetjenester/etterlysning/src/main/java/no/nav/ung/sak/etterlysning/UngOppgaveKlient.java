@@ -8,7 +8,6 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;

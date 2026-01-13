@@ -94,8 +94,8 @@ class FastsettInntektOppdatererTest {
         prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosesstriggerRepo,
             new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository), behandlingRepository));
         RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(prosessTriggerPeriodeUtleder, månedsvisTidslinjeUtleder, false);
-        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, månedsvisTidslinjeUtleder,  relevanteKontrollperioderUtleder,
-            "0 0 7 8 * *",  "0 0 7 1 * *");
+        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, relevanteKontrollperioderUtleder
+        );
         final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste);
         oppdaterer = new FastsettInntektOppdaterer(
             kontrollerteInntektperioderTjeneste,

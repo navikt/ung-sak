@@ -17,10 +17,7 @@ import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerI
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
-import no.nav.ung.sak.kontroll.InntektType;
-import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
-import no.nav.ung.sak.kontroll.RapportertInntekt;
-import no.nav.ung.sak.kontroll.RapporterteInntekter;
+import no.nav.ung.sak.kontroll.*;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
@@ -53,7 +50,7 @@ class KontrollerInntektEtterlysningTjenesteTest {
 
     private KontrollerInntektInputMapper kontrollerInntektInputMapper = mock(KontrollerInntektInputMapper.class);
     private InntektArbeidYtelseTjeneste iayTjeneste = mock(InntektArbeidYtelseTjeneste.class);
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste = mock(KontrollerteInntektperioderTjeneste.class);
+    private RyddingAvInntektsrapporteringUtleder ryddingAvInntektsrapporteringUtleder = mock(RyddingAvInntektsrapporteringUtleder.class);
 
     private KontrollerInntektEtterlysningTjeneste oppretter;
     private Behandling behandling;
@@ -68,12 +65,12 @@ class KontrollerInntektEtterlysningTjenesteTest {
             iayTjeneste,
             mock(ProsessTaskTjeneste.class), // ProsessTaskTjeneste er ikke nødvendig for denne testen
             kontrollerInntektInputMapper, // KontrollerInntektInputMapper er ikke nødvendig for denne testen
-            kontrollerteInntektperioderTjeneste,
+            ryddingAvInntektsrapporteringUtleder,
             100 // Akseptert differanse
         );
 
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
-        when(kontrollerteInntektperioderTjeneste.utledPerioderForRyddingAvRapporteringsoppgaver(any())).thenReturn(Optional.empty());
+        when(ryddingAvInntektsrapporteringUtleder.utledPerioderForRyddingAvRapporteringsoppgaver(any())).thenReturn(Optional.empty());
     }
 
 
