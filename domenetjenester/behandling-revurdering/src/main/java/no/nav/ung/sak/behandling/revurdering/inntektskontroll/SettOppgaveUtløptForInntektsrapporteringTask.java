@@ -5,8 +5,8 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.Oppgavetype;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
@@ -50,7 +50,7 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
-        ungOppgaveKlient.settOppgaveTilUtløpt(new SettTilUtløptDTO(
+        ungOppgaveKlient.settOppgaveTilUtløpt(new EndreStatusDTO(
             deltakerIdent.getIdent(),
             Oppgavetype.RAPPORTER_INNTEKT,
             fom,

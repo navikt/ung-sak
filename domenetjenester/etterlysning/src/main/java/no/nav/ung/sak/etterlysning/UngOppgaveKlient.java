@@ -7,6 +7,7 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.SettTilUtløptDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
@@ -85,7 +86,7 @@ public class UngOppgaveKlient {
         }
     }
 
-    public void settOppgaveTilUtløpt(SettTilUtløptDTO dto) {
+    public void settOppgaveTilUtløpt(EndreStatusDTO dto) {
         try {
             restClient.post(utløpForTypeOgPeriodeURI, dto);
         } catch (Exception e) {
@@ -93,7 +94,7 @@ public class UngOppgaveKlient {
         }
     }
 
-    public void settOppgaveTilAvbrutt(SettTilUtløptDTO dto) {
+    public void settOppgaveTilAvbrutt(EndreStatusDTO dto) {
         try {
             restClient.post(avbrytForTypeOgPeriodeURI, dto);
         } catch (Exception e) {
