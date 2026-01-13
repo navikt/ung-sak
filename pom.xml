@@ -52,7 +52,7 @@
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.36</openhtmltopdf.version>
-        <jsoup.version>1.21.2</jsoup.version>
+        <jsoup.version>1.22.1</jsoup.version>
         <commonmark.version>0.27.0</commonmark.version>
 
     </properties>
