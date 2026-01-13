@@ -39,6 +39,14 @@ public class RyddingAvInntektsrapporteringUtleder {
         this.inntektsrapporteringCron = new CronExpression(inntektsrapporteringCronString);
     }
 
+    /** Utleder om det skal ryddes rapporteringsoppgaver for en behandling og hvilken periode
+     * <p>
+     * Dersom deltaker får endret startdato til en annen måned enn opprinnelig, eller får endret sluttdato slik at inntektskontroll ikke lenger er relevant for forrige måned,
+     * sjekker vi om vi er i rapporteringsvinduet og returnerer den aktuelle perioden som i utgangspunktet skulle kontrolleres.
+     * Behovet oppstår fordi oppgaver for rapportering til bruker kan bli stående åpne dersom prosessen ikke rydder disse fortløpende.
+     * @param behandlingReferanse Behandling å utlede perioder for
+     * @return Periode for rydding av rapporteringsoppgaver, hvis det skal ryddes
+     */
     public Optional<DatoIntervallEntitet> utledPerioderForRyddingAvRapporteringsoppgaver(BehandlingReferanse behandlingReferanse) {
         LocalDateTimeline<YearMonth> intiellePerioder = ytelsesperiodeutleder.finnInitielleMånedsvisPeriodisertePerioder(behandlingReferanse.getBehandlingId());
         LocalDateTimeline<Boolean> initielleRelevantePerioder = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(intiellePerioder);
