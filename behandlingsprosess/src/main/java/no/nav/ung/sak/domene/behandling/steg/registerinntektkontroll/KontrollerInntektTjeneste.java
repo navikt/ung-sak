@@ -48,7 +48,7 @@ public class KontrollerInntektTjeneste {
         resultatTidslinje = resultatTidslinje.crossJoin(ingenAvvikUtenRapportertInntektFraBruker, StandardCombinators::coalesceLeftHandSide);
 
         // Bruker inntekt fra bruker eller godkjent inntekt => Ferdig kontrollert
-        final var resultatFraGodkjenteInntekter = finnResultatFraGodkjenteInntekter(relevantTidslinje, gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje);
+        final var resultatFraGodkjenteInntekter = finnResultatFraGodkjenteInntekterEllerUtløptEtterlysning(relevantTidslinje, gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje);
         resultatTidslinje = resultatTidslinje.crossJoin(resultatFraGodkjenteInntekter, StandardCombinators::coalesceLeftHandSide);
 
 
@@ -87,7 +87,7 @@ public class KontrollerInntektTjeneste {
         return etterlysningTidslinje.toSegments().stream().anyMatch(it -> VENTER_STATUSER.contains(it.getValue().etterlysning().etterlysningStatus()));
     }
 
-    private static LocalDateTimeline<Kontrollresultat> finnResultatFraGodkjenteInntekter(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
+    private static LocalDateTimeline<Kontrollresultat> finnResultatFraGodkjenteInntekterEllerUtløptEtterlysning(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
         final var brukersGodkjenteEllerRapporterteInntekter = sammenstillInntekter(
             relevantTidslinje,
             gjeldendeRapporterteInntekter,
@@ -101,7 +101,8 @@ public class KontrollerInntektTjeneste {
     private static LocalDateTimeline<BrukersAvklarteInntekter> sammenstillInntekter(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
         final var ingenUttalelseRegisterinntektTidslinje = etterlysningTidslinje
             .intersection(relevantTidslinje)
-            .filterValue(etterlysning -> etterlysning.etterlysning() != null && Boolean.TRUE.equals(etterlysning.etterlysning().erBesvartOgHarIkkeUttalelse()))
+            .filterValue(etterlysning -> etterlysning.etterlysning() != null
+                && (etterlysning.etterlysning().erBesvartOgHarIkkeUttalelse() || etterlysning.etterlysning().erUtløpt()))
             .mapValue(EtterlysningOgRegisterinntekt::registerInntekt);
 
         final var brukersRapporteInntekter = gjeldendeRapporterteInntekter
