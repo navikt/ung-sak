@@ -46,9 +46,6 @@ public class EtterlysningutlederKontrollerInntekt {
         var avviksvurderingMotRegisterinntekt = finnTidslinjeForEtterlysningFraAvvik(gjeldendeRapporterteInntekter, restTidslinjeÅVurdere);
         resultatTidslinje = resultatTidslinje.crossJoin(avviksvurderingMotRegisterinntekt, StandardCombinators::coalesceLeftHandSide);
 
-
-        resultatTidslinje = resultatTidslinje.crossJoin(tidslinjeTilVurdering.mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING), StandardCombinators::coalesceLeftHandSide);
-
         // Etterlysninger som venter svar skal avbrytes dersom perioden de gjelder for ikke lenger er relevant for kontroll
         resultatTidslinje = resultatTidslinje.crossJoin(input.gjeldendeEtterlysningTidslinje()
                 .filterValue(it -> it.etterlysning().etterlysningStatus() == EtterlysningStatus.VENTER)
