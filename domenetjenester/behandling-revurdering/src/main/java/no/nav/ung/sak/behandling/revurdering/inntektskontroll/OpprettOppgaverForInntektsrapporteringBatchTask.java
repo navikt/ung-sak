@@ -30,6 +30,7 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements BatchPro
     public static final String TASKNAME = "batch.opprettOppgaverForInntektsrapporteringBatch";
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private String inntektsrapporteringCronString;
 
     OpprettOppgaverForInntektsrapporteringBatchTask() {
     }
@@ -37,11 +38,12 @@ public class OpprettOppgaverForInntektsrapporteringBatchTask implements BatchPro
     @Inject
     public OpprettOppgaverForInntektsrapporteringBatchTask(ProsessTaskTjeneste prosessTaskTjeneste, @KonfigVerdi(value = "INNTEKTSRAPPORTERING_CRON_EXPRESSION", defaultVerdi = "0 0 7 1 * *") String inntektsrapporteringCronString) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.inntektsrapporteringCronString = inntektsrapporteringCronString;
     }
 
     @Override
     public CronExpression getCron() {
-        return CronExpression.create("0 0 7 1 * *");
+        return CronExpression.create(inntektsrapporteringCronString);
     }
 
     @Override
