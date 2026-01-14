@@ -35,7 +35,7 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
      * @param etterlysningType        Type etterlysning som skal opprettes eller erstattes
      * @param gjeldendeEtterlysning   Gjeldende etterlysning som skal erstattes, hvis det er aktuelt
      * @param gjeldendeGrunnlag       Gjeldende grunnlag for programperioden som etterlysningen gjelder for
-     * @param initiellPeriodegrunnlag
+     * @param initiellPeriodegrunnlag Det første grunnlaget på behandlingen
      */
     void håndterResultat(ResultatType resultat, BehandlingReferanse behandlingReferanse,
                          EtterlysningType etterlysningType,
