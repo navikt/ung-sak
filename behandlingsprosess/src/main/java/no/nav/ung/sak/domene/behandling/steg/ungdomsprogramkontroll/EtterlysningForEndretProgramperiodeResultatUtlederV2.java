@@ -44,7 +44,8 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
         return switch (gjeldendeEtterlysning.etterlysningData().status()) {
             case VENTER, OPPRETTET -> ResultatType.ERSTATT_EKSISTERENDE_ETTERLYSNING;
             case MOTTATT_SVAR, UTLØPT -> ResultatType.OPPRETT_ETTERLYSNING;
-            default -> throw new IllegalStateException("Ugyldig status for gjeldende etterlysning: " + gjeldendeEtterlysning.etterlysningData().status());
+            default ->
+                throw new IllegalStateException("Ugyldig status for gjeldende etterlysning: " + gjeldendeEtterlysning.etterlysningData().status());
         };
     }
 
@@ -62,9 +63,15 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
 
         if (behandlingReferanse.getBehandlingType() == BehandlingType.FØRSTEGANGSSØKNAD) {
             // Dersom det er førstegangssøknad må vi også sjekke om det er endringer i start dato fra det som ble oppgitt da bruker sendte inn søknaden.
-            return harEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag()) || harSattSluttdato(input.gjeldendePeriodeGrunnlag());
+            return harFjernetPeriode(input) ||
+                harEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag()) ||
+                harSattSluttdato(input.gjeldendePeriodeGrunnlag());
         }
         return false;
+    }
+
+    private static boolean harFjernetPeriode(EndretUngdomsprogramEtterlysningInput input) {
+        return input.gjeldendePeriodeGrunnlag().hentForEksaktEnPeriodeDersomFinnes().isEmpty();
     }
 
 

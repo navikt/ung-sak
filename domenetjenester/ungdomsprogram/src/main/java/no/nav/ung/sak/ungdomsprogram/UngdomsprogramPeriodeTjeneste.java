@@ -166,7 +166,10 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
     public static LocalDateSegment<Boolean> erEndret(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
-        return new LocalDateSegment<>(di, lhs == null || rhs == null || !lhs.getValue().equals(rhs.getValue()));
+        return new LocalDateSegment<>(di,
+            lhs == null && rhs != null ||
+                rhs == null && lhs != null ||
+                rhs != null && !lhs.getValue().equals(rhs.getValue()));
     }
 
 
