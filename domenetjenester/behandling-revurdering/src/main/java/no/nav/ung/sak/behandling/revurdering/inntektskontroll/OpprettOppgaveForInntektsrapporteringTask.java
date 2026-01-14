@@ -29,7 +29,6 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -116,7 +115,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         var fagsak = fagsaker.get(0);
 
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalStateException("Fant ikke behandling"));
-        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(sisteBehandling.getId());
+        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
         LocalDateInterval månedForRapportering = new LocalDateInterval(fom, tom);
         return overlapperPeriodeDelvisMedProgramtidslinje(månedForRapportering, månedsvisTidslinje);
     }

@@ -57,7 +57,7 @@ public class BeregnYtelseSteg implements BehandlingSteg {
         if (ungdomsytelseGrunnlag.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        final var månedsvisYtelseTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(kontekst.getBehandlingId());
+        final var månedsvisYtelseTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(kontekst.getBehandlingId());
 
         final var kontrollertInntektperiodeTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(kontekst.getBehandlingId());
 

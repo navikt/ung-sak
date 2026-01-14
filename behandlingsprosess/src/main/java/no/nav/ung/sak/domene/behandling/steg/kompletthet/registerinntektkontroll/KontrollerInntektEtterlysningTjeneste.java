@@ -11,10 +11,11 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandling.revurdering.inntektskontroll.SettOppgaveAvbruttForInntektsrapporteringTask;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInputMapper;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -24,19 +25,22 @@ import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
+import no.nav.ung.sak.kontroll.RyddingAvInntektsrapporteringUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Dependent
-public class KontrollerInntektEtterlysningOppretter {
+public class KontrollerInntektEtterlysningTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(KontrollerInntektEtterlysningOppretter.class);
+    private static final Logger log = LoggerFactory.getLogger(KontrollerInntektEtterlysningTjeneste.class);
 
     private EtterlysningRepository etterlysningRepository;
     private BehandingprosessSporingRepository sporingRepository;
@@ -44,26 +48,31 @@ public class KontrollerInntektEtterlysningOppretter {
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private KontrollerInntektInputMapper inputMapper;
+    private RyddingAvInntektsrapporteringUtleder ryddingAvInntektsrapporteringUtleder;
     private final int akseptertDifferanse;
 
     @Inject
-    public KontrollerInntektEtterlysningOppretter(EtterlysningRepository etterlysningRepository,
-                                                  BehandingprosessSporingRepository sporingRepository,
-                                                  EtterlysningTjeneste etterlysningTjeneste,
-                                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
-                                                  ProsessTaskTjeneste prosessTaskTjeneste,
-                                                  KontrollerInntektInputMapper inputMapper,
-                                                  @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
+    public KontrollerInntektEtterlysningTjeneste(EtterlysningRepository etterlysningRepository,
+                                                 BehandingprosessSporingRepository sporingRepository,
+                                                 EtterlysningTjeneste etterlysningTjeneste,
+                                                 InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste,
+                                                 ProsessTaskTjeneste prosessTaskTjeneste,
+                                                 KontrollerInntektInputMapper inputMapper,
+                                                 RyddingAvInntektsrapporteringUtleder ryddingAvInntektsrapporteringUtleder,
+                                                 @KonfigVerdi(value = "AKSEPTERT_DIFFERANSE_KONTROLL", defaultVerdi = "15") int akseptertDifferanse) {
         this.etterlysningRepository = etterlysningRepository;
         this.sporingRepository = sporingRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.inputMapper = inputMapper;
+        this.ryddingAvInntektsrapporteringUtleder = ryddingAvInntektsrapporteringUtleder;
         this.akseptertDifferanse = akseptertDifferanse;
     }
 
+
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
+        ryddIkkeRelevanteOppgaver(behandlingReferanse);
         var input = inputMapper.mapInput(behandlingReferanse);
         var opprettEtterlysningResultatTidslinje = new EtterlysningutlederKontrollerInntekt(BigDecimal.valueOf(akseptertDifferanse)).utledBehovForEtterlysninger(input);
         try {
@@ -76,6 +85,17 @@ public class KontrollerInntektEtterlysningOppretter {
             log.warn("Kunne ikke lagre prosessporing for behandling {}: {}", behandlingReferanse.getBehandlingId(), e.getMessage(), e);
         }
         håndterPeriodisertResultat(behandlingReferanse, opprettEtterlysningResultatTidslinje);
+    }
+
+    private void ryddIkkeRelevanteOppgaver(BehandlingReferanse behandlingReferanse) {
+        Optional<DatoIntervallEntitet> periodeSomSkalAvbrytes = ryddingAvInntektsrapporteringUtleder.utledPeriodeForRyddingAvRapporteringsoppgaver(behandlingReferanse);
+        if (periodeSomSkalAvbrytes.isPresent()) {
+            ProsessTaskData avbrytTask = ProsessTaskData.forProsessTask(SettOppgaveAvbruttForInntektsrapporteringTask.class);
+            avbrytTask.setAktørId(behandlingReferanse.getAktørId().getAktørId());
+            avbrytTask.setProperty(SettOppgaveAvbruttForInntektsrapporteringTask.PERIODE_FOM, periodeSomSkalAvbrytes.get().getFomDato().format(DateTimeFormatter.ISO_LOCAL_DATE));
+            avbrytTask.setProperty(SettOppgaveAvbruttForInntektsrapporteringTask.PERIODE_TOM, periodeSomSkalAvbrytes.get().getTomDato().format(DateTimeFormatter.ISO_LOCAL_DATE));
+            prosessTaskTjeneste.lagre(avbrytTask);
+        }
     }
 
     private void håndterPeriodisertResultat(BehandlingReferanse behandlingReferanse,

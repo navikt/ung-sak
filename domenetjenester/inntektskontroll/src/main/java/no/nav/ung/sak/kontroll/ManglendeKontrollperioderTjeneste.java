@@ -51,7 +51,7 @@ public class ManglendeKontrollperioderTjeneste {
      * @return
      */
     public NavigableSet<DatoIntervallEntitet> finnPerioderForManglendeKontroll(Long behandlingId) {
-        final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
         final var påkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
         final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
         final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);

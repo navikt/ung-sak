@@ -44,6 +44,12 @@ public class UngdomsprogramPeriodeTjeneste {
         return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
     }
 
+    public LocalDateTimeline<Boolean> finnInitiellPeriodeTidslinje(Long behandlingId) {
+        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingId);
+        return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
+    }
+
+
     @WithSpan
     public VurderAntallDagerResultat finnVirkedagerTidslinje(Long behandlingId) {
         var tidslinje = finnPeriodeTidslinje(behandlingId);

@@ -38,7 +38,7 @@
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>10.0.4</felles.version>
         <swagger.version>2.2.41</swagger.version>
-        <junit.version>6.0.1</junit.version>
+        <junit.version>6.0.2</junit.version>
         <k9format.version>12.7.3</k9format.version>
         <jackson.version>2.20.1</jackson.version>
         <asm.version>9.9.1</asm.version>
@@ -48,11 +48,11 @@
         <flyway.version>11.20.0</flyway.version>
         <confluent.platform.version>8.1.1</confluent.platform.version>
         <mockito.version>5.21.0</mockito.version>
-        <ung-deltakelse-opplyser.version>2.9.1</ung-deltakelse-opplyser.version>
+        <ung-deltakelse-opplyser.version>2.9.2</ung-deltakelse-opplyser.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.36</openhtmltopdf.version>
-        <jsoup.version>1.21.2</jsoup.version>
+        <jsoup.version>1.22.1</jsoup.version>
         <commonmark.version>0.27.0</commonmark.version>
 
     </properties>
