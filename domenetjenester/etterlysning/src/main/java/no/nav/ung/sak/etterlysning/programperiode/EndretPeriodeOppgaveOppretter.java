@@ -115,7 +115,7 @@ public class EndretPeriodeOppgaveOppretter {
     }
 
     private static Optional<LocalDate> getSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
-        return grunnlag.hentForEksaktEnPeriodeDersomFinnes().filter(it -> !it.getFomDato().equals(TIDENES_ENDE)).map(DatoIntervallEntitet::getTomDato);
+        return grunnlag.hentForEksaktEnPeriodeDersomFinnes().filter(it -> !it.getTomDato().equals(TIDENES_ENDE)).map(DatoIntervallEntitet::getTomDato);
     }
 
     private EndretPeriodeOppgaveDTO mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, PersonIdent deltakerIdent, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {
