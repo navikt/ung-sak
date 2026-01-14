@@ -7,7 +7,6 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
 import java.util.List;
@@ -18,15 +17,13 @@ import java.util.UUID;
 public class EtterlysningForEndretProgramperiodeResultatHåndterer {
 
     private EtterlysningRepository etterlysningRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     public EtterlysningForEndretProgramperiodeResultatHåndterer() {
     }
 
     @Inject
-    public EtterlysningForEndretProgramperiodeResultatHåndterer(EtterlysningRepository etterlysningRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public EtterlysningForEndretProgramperiodeResultatHåndterer(EtterlysningRepository etterlysningRepository) {
         this.etterlysningRepository = etterlysningRepository;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     /**
@@ -59,13 +56,13 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
 
     void håndterResultatV2(ResultatType resultat, BehandlingReferanse behandlingReferanse,
                            Optional<Etterlysning> gjeldendeEtterlysning,
-                         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag,
+                           UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag,
                            UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag) {
         switch (resultat) {
             case OPPRETT_ETTERLYSNING ->
                 opprettNyEtterlysning(gjeldendeGrunnlag, initiellPeriodegrunnlag, behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
             case ERSTATT_EKSISTERENDE_ETTERLYSNING ->
-                erstattEksisterende(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PERIODE, gjeldendeEtterlysning.orElseThrow(()-> new IllegalStateException("Forventer å ha en gjeldene etterlysning")), gjeldendeGrunnlag);
+                erstattEksisterende(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PERIODE, gjeldendeEtterlysning.orElseThrow(() -> new IllegalStateException("Forventer å ha en gjeldene etterlysning")), gjeldendeGrunnlag);
             case INGEN_ENDRING -> {
                 // Ingen handling nødvendig, behold eksisterende etterlysning
             }
