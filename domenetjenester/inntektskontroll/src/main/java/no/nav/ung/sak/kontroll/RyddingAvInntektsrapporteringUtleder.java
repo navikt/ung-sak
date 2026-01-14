@@ -73,6 +73,9 @@ public class RyddingAvInntektsrapporteringUtleder {
             LocalDateTimeline<Boolean> bortfaltNesteKontroll = bortfalteRelevantePerioder.intersection(new LocalDateInterval(fomNesteKontroll, tomNesteKontroll)).compress();
             if (!bortfaltNesteKontroll.isEmpty()) {
                 // Skal kun inneholde en periode
+                if (bortfaltNesteKontroll.getLocalDateIntervals().size() > 1) {
+                    throw new IllegalStateException("Forventet maksimalt en periode for rydding av inntektsrapportering");
+                }
                 LocalDateInterval periode = bortfaltNesteKontroll.getLocalDateIntervals().iterator().next();
                 LOG.info("Utleder rydding av inntektsrapportering for periode {} - {}", periode.getFomDato(), periode.getTomDato());
                 return Optional.of(DatoIntervallEntitet.fra(periode));
