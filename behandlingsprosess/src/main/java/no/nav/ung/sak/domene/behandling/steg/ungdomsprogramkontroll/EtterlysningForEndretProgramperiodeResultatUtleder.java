@@ -6,6 +6,8 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 
+import java.util.List;
+
 import static no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste.*;
 
 public class EtterlysningForEndretProgramperiodeResultatUtleder {
@@ -47,13 +49,13 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
     }
 
     private static boolean harEksisterendeEtterlysningOgRelevantEndringIProgramperiode(EndretUngdomsprogramEtterlysningInput input) {
-        return input.gjeldendeEtterlysningOgGrunnlag().map(it -> erEndring(it.etterlysningData().type(), it.grunnlag(), input.gjeldendePeriodeGrunnlag())).orElse(false);
+        return input.gjeldendeEtterlysningOgGrunnlag().map(it -> erEndringFraEtterlysning(input.gjeldendePeriodeGrunnlag(), it)).orElse(false);
     }
 
     private static boolean harEndretPeriodeSidenInitiell(EndretUngdomsprogramEtterlysningInput input,
                                                          BehandlingReferanse behandlingReferanse,
                                                          EtterlysningType etterlysningType) {
-        var erEndringSidenInitiell = erEndring(etterlysningType, input.initiellPeriodegrunnlag(), input.gjeldendePeriodeGrunnlag());
+        var erEndringSidenInitiell = !finnEndretDatoer(etterlysningType, input.initiellPeriodegrunnlag(), input.gjeldendePeriodeGrunnlag()).isEmpty();
 
         if (erEndringSidenInitiell) {
             return true;
@@ -64,16 +66,11 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
             return switch (etterlysningType) {
                 case UTTALELSE_ENDRET_STARTDATO -> harEndretStartdato(input);
                 case UTTALELSE_ENDRET_SLUTTDATO -> harEndretSluttdato(input.gjeldendePeriodeGrunnlag());
-                case UTTALELSE_FJERNET_PERIODE -> harIngenPerioder(input.gjeldendePeriodeGrunnlag());
                 default ->
                         throw new IllegalArgumentException("Ugyldig etterlysningstype for endring i programperiode: " + etterlysningType);
             };
         }
         return false;
-    }
-
-    private static boolean harIngenPerioder(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag) {
-        return ungdomsprogramPeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().isEmpty();
     }
 
     private static boolean harEndretSluttdato(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag) {
@@ -89,11 +86,22 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         return harEndretStartdato;
     }
 
-    private static boolean erEndring(EtterlysningType etterlysningType, UngdomsprogramPeriodeGrunnlag førsteVersjonAvGrunnlag, UngdomsprogramPeriodeGrunnlag andreVersjonAvGrunnlag) {
+    private static boolean erEndringFraEtterlysning(UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag, EtterlysningOgGrunnlag ventendeEtterlysningOgGrunnlag) {
+        var etterlysningType = ventendeEtterlysningOgGrunnlag.etterlysningData().type();
+        final var endretDatoer = finnEndretDatoer(etterlysningType, ventendeEtterlysningOgGrunnlag.grunnlag(), gjeldendePeriodeGrunnlag);
+        if (!endretDatoer.isEmpty()) {
+            if (endretDatoer.size() > 1) {
+                throw new IllegalStateException("Forventet å finne maksimalt en endring i datoer, fant " + endretDatoer.size());
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private static List<EndretDato> finnEndretDatoer(EtterlysningType etterlysningType, UngdomsprogramPeriodeGrunnlag førsteGrunnlag, UngdomsprogramPeriodeGrunnlag andreGrunnlag) {
         return switch (etterlysningType) {
-            case UTTALELSE_ENDRET_STARTDATO -> !finnEndretStartdatoer(førsteVersjonAvGrunnlag, andreVersjonAvGrunnlag).isEmpty();
-            case UTTALELSE_ENDRET_SLUTTDATO -> !finnEndretSluttdatoer(førsteVersjonAvGrunnlag, andreVersjonAvGrunnlag).isEmpty();
-            case UTTALELSE_FJERNET_PERIODE -> !harIngenPerioder(førsteVersjonAvGrunnlag) && harIngenPerioder(andreVersjonAvGrunnlag);
+            case UTTALELSE_ENDRET_STARTDATO -> finnEndretStartdatoer(førsteGrunnlag, andreGrunnlag);
+            case UTTALELSE_ENDRET_SLUTTDATO -> finnEndretSluttdatoer(førsteGrunnlag, andreGrunnlag);
             default ->
                     throw new IllegalArgumentException("Ikke gyldig etterlysningstype for endring i programperiode: " + etterlysningType);
         };
@@ -104,6 +112,9 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
         final var programperioder = input.gjeldendePeriodeGrunnlag().getUngdomsprogramPerioder().getPerioder();
         if (programperioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke flere programperioder");
+        }
+        if (programperioder.isEmpty()) {
+            throw new IllegalStateException("Kan ikke håndtere endring i ungdomsprogramperiode uten at det finnes programperioder");
         }
     }
 

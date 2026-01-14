@@ -25,7 +25,7 @@ class SisteEndringsdatoUtlederTest {
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
         when(gjeldendeGrunnlag.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = Collections.emptyList();
 
@@ -52,7 +52,7 @@ class SisteEndringsdatoUtlederTest {
         UngdomsprogramPeriodeGrunnlag grunnlag2 = mock(UngdomsprogramPeriodeGrunnlag.class);
         when(grunnlag2.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2);
 
@@ -79,7 +79,7 @@ class SisteEndringsdatoUtlederTest {
         UngdomsprogramPeriodeGrunnlag grunnlag1 = mock(UngdomsprogramPeriodeGrunnlag.class);
         when(grunnlag1.hentForEksaktEnPeriode()).thenReturn(forrigePeriode);
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1);
 
@@ -117,7 +117,7 @@ class SisteEndringsdatoUtlederTest {
         UngdomsprogramPeriodeGrunnlag grunnlag3 = mock(UngdomsprogramPeriodeGrunnlag.class);
         when(grunnlag3.hentForEksaktEnPeriode()).thenReturn(eldstePeriode); // Skal ikke nås
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
 
@@ -154,7 +154,7 @@ class SisteEndringsdatoUtlederTest {
         UngdomsprogramPeriodeGrunnlag grunnlag3 = mock(UngdomsprogramPeriodeGrunnlag.class);
         when(grunnlag3.hentForEksaktEnPeriode()).thenReturn(forrigePeriode); // Tredje som er ulik FOM
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
 
