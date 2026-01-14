@@ -76,7 +76,7 @@ public class RyddingAvInntektsrapporteringUtleder {
                 if (bortfaltNesteKontroll.getLocalDateIntervals().size() > 1) {
                     throw new IllegalStateException("Forventet maksimalt en periode for rydding av inntektsrapportering");
                 }
-                LocalDateInterval periode = bortfaltNesteKontroll.getLocalDateIntervals().iterator().next();
+                LocalDateInterval periode = bortfaltNesteKontroll.getLocalDateIntervals().getFirst();
                 LOG.info("Utleder rydding av inntektsrapportering for periode {} - {}", periode.getFomDato(), periode.getTomDato());
                 return Optional.of(DatoIntervallEntitet.fra(periode));
             }
