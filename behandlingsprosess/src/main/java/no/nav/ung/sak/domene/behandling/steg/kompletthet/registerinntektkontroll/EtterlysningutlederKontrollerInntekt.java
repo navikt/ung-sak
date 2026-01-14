@@ -53,6 +53,7 @@ public class EtterlysningutlederKontrollerInntekt {
             .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING),
         StandardCombinators::coalesceLeftHandSide);
 
+        // Fyller resten av tidslinjen til vurdering med "ingen etterlysning"
         resultatTidslinje = resultatTidslinje.crossJoin(tidslinjeTilVurdering.mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING), StandardCombinators::coalesceLeftHandSide);
 
         return resultatTidslinje;
