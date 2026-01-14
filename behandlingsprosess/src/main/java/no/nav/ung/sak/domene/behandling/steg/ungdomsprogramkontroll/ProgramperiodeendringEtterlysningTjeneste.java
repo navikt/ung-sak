@@ -98,7 +98,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         lagreSporing(behandlingReferanse, etterlysningType, input, resultatEndretProgramperiode);
 
         // Håndter resultat, opprett etterlysning dersom det er relevant
-        resultatHåndterer.håndterResultat(resultatEndretProgramperiode, behandlingReferanse, etterlysningType, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag());
+        resultatHåndterer.håndterResultat(resultatEndretProgramperiode, behandlingReferanse, etterlysningType, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag(), initiellPeriodegrunnlag);
     }
 
     private void opprettEtterlysningNyFlyt(BehandlingReferanse behandlingReferanse, UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag) {
@@ -119,7 +119,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         lagreSporing(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_PERIODE, input, resultatEndretProgramperiode);
 
         // Håndter resultat, opprett etterlysning dersom det er relevant
-        resultatHåndterer.håndterResultatV2(resultatEndretProgramperiode, behandlingReferanse, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag());
+        resultatHåndterer.håndterResultatV2(resultatEndretProgramperiode, behandlingReferanse, gjeldendeEtterlysning, input.gjeldendePeriodeGrunnlag(), initiellPeriodegrunnlag);
     }
 
     private void lagreSporing(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType, EndretUngdomsprogramEtterlysningInput input, ResultatType resultatEndretProgramperiode) {
