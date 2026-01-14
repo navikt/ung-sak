@@ -215,7 +215,7 @@ class KontrollerInntektTjenesteTest {
 
     private LocalDateTimeline<KontrollResultatType> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
         return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(new KontrollerInntektInput(prosessTriggerTidslinje
-                .mapValue(it -> true), gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje))
+                .mapValue(it -> true), prosessTriggerTidslinje.mapValue(it -> true), gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje))
             .mapValue(Kontrollresultat::type);
     }
 

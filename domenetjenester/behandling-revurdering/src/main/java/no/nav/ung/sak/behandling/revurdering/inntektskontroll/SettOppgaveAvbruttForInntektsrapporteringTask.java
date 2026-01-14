@@ -20,10 +20,10 @@ import java.time.format.DateTimeFormatter;
  * Setter oppgave for inntektsrapportering til utløpt.
  */
 @ApplicationScoped
-@ProsessTask(value = SettOppgaveUtløptForInntektsrapporteringTask.TASKNAME)
-public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTaskHandler {
+@ProsessTask(value = SettOppgaveAvbruttForInntektsrapporteringTask.TASKNAME)
+public class SettOppgaveAvbruttForInntektsrapporteringTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "inntektsrapportering.settUtlopt";
+    public static final String TASKNAME = "inntektsrapportering.settAvbrutt";
 
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
@@ -32,12 +32,12 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
     private UngOppgaveKlient ungOppgaveKlient;
 
 
-    SettOppgaveUtløptForInntektsrapporteringTask() {
+    SettOppgaveAvbruttForInntektsrapporteringTask() {
     }
 
     @Inject
-    public SettOppgaveUtløptForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
-                                                        UngOppgaveKlient ungOppgaveKlient) {
+    public SettOppgaveAvbruttForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
+                                                         UngOppgaveKlient ungOppgaveKlient) {
 
         this.personinfoAdapter = personinfoAdapter;
         this.ungOppgaveKlient = ungOppgaveKlient;
@@ -50,7 +50,7 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
-        ungOppgaveKlient.settOppgaveTilUtløpt(new EndreStatusDTO(
+        ungOppgaveKlient.settOppgaveTilAvbrutt(new EndreStatusDTO(
             deltakerIdent.getIdent(),
             Oppgavetype.RAPPORTER_INNTEKT,
             fom,

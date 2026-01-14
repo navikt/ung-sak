@@ -238,8 +238,9 @@ class EtterlysningutlederKontrollerInntektTest {
                                                        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
         return new EtterlysningutlederKontrollerInntekt(AKSEPTERT_DIFFERANSE).utledBehovForEtterlysninger(
             new KontrollerInntektInput(prosessTriggerTidslinje.mapValue(it -> true),
+                prosessTriggerTidslinje.mapValue(it -> true),
                 gjeldendeRapporterteInntekter,
-            ikkeGodkjentUttalelseTidslinje));
+                ikkeGodkjentUttalelseTidslinje));
     }
 
     private static LocalDateTimeline<Set<BehandlingÅrsakType>> lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(LocalDate fom, LocalDate tom) {

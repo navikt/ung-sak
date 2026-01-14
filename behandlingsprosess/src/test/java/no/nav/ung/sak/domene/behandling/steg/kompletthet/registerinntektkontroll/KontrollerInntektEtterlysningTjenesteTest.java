@@ -17,9 +17,7 @@ import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerI
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
-import no.nav.ung.sak.kontroll.InntektType;
-import no.nav.ung.sak.kontroll.RapportertInntekt;
-import no.nav.ung.sak.kontroll.RapporterteInntekter;
+import no.nav.ung.sak.kontroll.*;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +25,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -36,7 +35,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class KontrollerInntektEtterlysningOppretterTest {
+class KontrollerInntektEtterlysningTjenesteTest {
 
     @Inject
     private EntityManager entityManager;
@@ -50,25 +49,27 @@ class KontrollerInntektEtterlysningOppretterTest {
 
     private KontrollerInntektInputMapper kontrollerInntektInputMapper = mock(KontrollerInntektInputMapper.class);
     private InntektArbeidYtelseTjeneste iayTjeneste = mock(InntektArbeidYtelseTjeneste.class);
+    private RyddingAvInntektsrapporteringUtleder ryddingAvInntektsrapporteringUtleder = mock(RyddingAvInntektsrapporteringUtleder.class);
 
-    private KontrollerInntektEtterlysningOppretter oppretter;
+    private KontrollerInntektEtterlysningTjeneste oppretter;
     private Behandling behandling;
 
 
     @BeforeEach
     void setUp() {
-        oppretter = new KontrollerInntektEtterlysningOppretter(
+        oppretter = new KontrollerInntektEtterlysningTjeneste(
             etterlysningRepository,
             sporingRepository,
             new EtterlysningTjeneste(mottatteDokumentRepository, new EtterlysningOgUttalelseTjeneste(etterlysningRepository, new UttalelseRepository(entityManager))),
             iayTjeneste,
             mock(ProsessTaskTjeneste.class), // ProsessTaskTjeneste er ikke nødvendig for denne testen
             kontrollerInntektInputMapper, // KontrollerInntektInputMapper er ikke nødvendig for denne testen
+            ryddingAvInntektsrapporteringUtleder,
             100 // Akseptert differanse
         );
 
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
-
+        when(ryddingAvInntektsrapporteringUtleder.utledPeriodeForRyddingAvRapporteringsoppgaver(any())).thenReturn(Optional.empty());
     }
 
 
@@ -79,6 +80,7 @@ class KontrollerInntektEtterlysningOppretterTest {
         var tom = fom.plusMonths(1).minusDays(1);
         var rapporterteInntekter = Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.TEN));
         when(kontrollerInntektInputMapper.mapInput(any())).thenReturn(new KontrollerInntektInput(
+            new LocalDateTimeline<>(fom, tom, true),
             new LocalDateTimeline<>(fom, tom, true),
             new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(rapporterteInntekter, rapporterteInntekter)),
             LocalDateTimeline.empty()

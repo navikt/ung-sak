@@ -28,13 +28,15 @@ public class KontrollerInntektInputMapper {
     }
 
     public KontrollerInntektInput mapInput(BehandlingReferanse behandlingReferanse) {
-        var årsakTidslinje = kontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingReferanse.getBehandlingId());
-        var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingReferanse.getBehandlingId(), årsakTidslinje);
+        var markertOgRelevantForKontrollTidslinje = kontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandlingReferanse.getBehandlingId());
+        var relevantForKontrollTidslinje = kontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(behandlingReferanse.getBehandlingId());
+        var rapporterteInntekterTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandlingReferanse.getBehandlingId(), markertOgRelevantForKontrollTidslinje);
         var eksisterendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingReferanse.getBehandlingId(), behandlingReferanse.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         var eksisterendeEtterlysningOgGrunnlagTidslinje = finnGjeldendeEtterlysningTidslinje(eksisterendeEtterlysninger, behandlingReferanse);
 
         return new KontrollerInntektInput(
-            årsakTidslinje.mapValue(it -> true),
+            markertOgRelevantForKontrollTidslinje.mapValue(it -> true),
+            relevantForKontrollTidslinje,
             rapporterteInntekterTidslinje,
             eksisterendeEtterlysningOgGrunnlagTidslinje
         );
