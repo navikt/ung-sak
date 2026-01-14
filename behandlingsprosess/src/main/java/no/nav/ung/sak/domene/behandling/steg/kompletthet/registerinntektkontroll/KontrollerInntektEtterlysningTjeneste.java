@@ -88,7 +88,7 @@ public class KontrollerInntektEtterlysningTjeneste {
     }
 
     private void ryddIkkeRelevanteOppgaver(BehandlingReferanse behandlingReferanse) {
-        Optional<DatoIntervallEntitet> periodeSomSkalAvbrytes = ryddingAvInntektsrapporteringUtleder.utledPerioderForRyddingAvRapporteringsoppgaver(behandlingReferanse);
+        Optional<DatoIntervallEntitet> periodeSomSkalAvbrytes = ryddingAvInntektsrapporteringUtleder.utledPeriodeForRyddingAvRapporteringsoppgaver(behandlingReferanse);
         if (periodeSomSkalAvbrytes.isPresent()) {
             ProsessTaskData avbrytTask = ProsessTaskData.forProsessTask(SettOppgaveAvbruttForInntektsrapporteringTask.class);
             avbrytTask.setAktørId(behandlingReferanse.getAktørId().getAktørId());

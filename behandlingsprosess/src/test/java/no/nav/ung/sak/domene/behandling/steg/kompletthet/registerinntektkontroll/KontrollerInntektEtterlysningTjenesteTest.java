@@ -19,7 +19,6 @@ import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.kontroll.*;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,7 +69,7 @@ class KontrollerInntektEtterlysningTjenesteTest {
         );
 
         behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
-        when(ryddingAvInntektsrapporteringUtleder.utledPerioderForRyddingAvRapporteringsoppgaver(any())).thenReturn(Optional.empty());
+        when(ryddingAvInntektsrapporteringUtleder.utledPeriodeForRyddingAvRapporteringsoppgaver(any())).thenReturn(Optional.empty());
     }
 
 

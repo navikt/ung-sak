@@ -47,7 +47,7 @@ public class RyddingAvInntektsrapporteringUtleder {
      * @param behandlingReferanse Behandling å utlede perioder for
      * @return Periode for rydding av rapporteringsoppgaver, hvis det skal ryddes
      */
-    public Optional<DatoIntervallEntitet> utledPerioderForRyddingAvRapporteringsoppgaver(BehandlingReferanse behandlingReferanse) {
+    public Optional<DatoIntervallEntitet> utledPeriodeForRyddingAvRapporteringsoppgaver(BehandlingReferanse behandlingReferanse) {
         LocalDateTimeline<YearMonth> intiellePerioder = ytelsesperiodeutleder.finnInitielleMånedsvisPeriodisertePerioder(behandlingReferanse.getBehandlingId());
         LocalDateTimeline<Boolean> initielleRelevantePerioder = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(intiellePerioder);
         LocalDateTimeline<YearMonth> gjeldendePerioder = ytelsesperiodeutleder.finnMånedsvisPeriodisertePerioder(behandlingReferanse.getBehandlingId());
