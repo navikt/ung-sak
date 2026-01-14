@@ -23,9 +23,9 @@ class SisteEndringsdatoUtlederTest {
         DatoIntervallEntitet gjeldendePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(gjeldendeFom, LocalDate.of(2024, 12, 31));
 
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(gjeldendeGrunnlag.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
+        when(gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = Collections.emptyList();
 
@@ -44,15 +44,15 @@ class SisteEndringsdatoUtlederTest {
         DatoIntervallEntitet gjeldendePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(gjeldendeFom, LocalDate.of(2024, 12, 31));
 
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(gjeldendeGrunnlag.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
+        when(gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
 
         UngdomsprogramPeriodeGrunnlag grunnlag1 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag1.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
+        when(grunnlag1.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
 
         UngdomsprogramPeriodeGrunnlag grunnlag2 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag2.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
+        when(grunnlag2.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2);
 
@@ -74,12 +74,12 @@ class SisteEndringsdatoUtlederTest {
         DatoIntervallEntitet forrigePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(forrigeFom, LocalDate.of(2024, 12, 31));
 
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(gjeldendeGrunnlag.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
+        when(gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
 
         UngdomsprogramPeriodeGrunnlag grunnlag1 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag1.hentForEksaktEnPeriode()).thenReturn(forrigePeriode);
+        when(grunnlag1.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(forrigePeriode));
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1);
 
@@ -106,18 +106,18 @@ class SisteEndringsdatoUtlederTest {
         DatoIntervallEntitet eldstePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(eldsteFom, LocalDate.of(2024, 12, 31));
 
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(gjeldendeGrunnlag.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
+        when(gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
 
         UngdomsprogramPeriodeGrunnlag grunnlag1 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag1.hentForEksaktEnPeriode()).thenReturn(sameSomGjeldendePeriode); // Samme FOM, ulik TOM
+        when(grunnlag1.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(sameSomGjeldendePeriode)); // Samme FOM, ulik TOM
 
         UngdomsprogramPeriodeGrunnlag grunnlag2 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag2.hentForEksaktEnPeriode()).thenReturn(forrigePeriode); // Første som er ulik FOM
+        when(grunnlag2.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(forrigePeriode)); // Første som er ulik FOM
 
         UngdomsprogramPeriodeGrunnlag grunnlag3 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag3.hentForEksaktEnPeriode()).thenReturn(eldstePeriode); // Skal ikke nås
+        when(grunnlag3.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(eldstePeriode)); // Skal ikke nås
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
 
@@ -143,18 +143,18 @@ class SisteEndringsdatoUtlederTest {
         DatoIntervallEntitet forrigePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(forrigeFom, LocalDate.of(2024, 12, 31));
 
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(gjeldendeGrunnlag.hentForEksaktEnPeriode()).thenReturn(gjeldendePeriode);
+        when(gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
 
         UngdomsprogramPeriodeGrunnlag grunnlag1 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag1.hentForEksaktEnPeriode()).thenReturn(sameSomGjeldendePeriode1); // Samme FOM, ulik TOM
+        when(grunnlag1.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(sameSomGjeldendePeriode1)); // Samme FOM, ulik TOM
 
         UngdomsprogramPeriodeGrunnlag grunnlag2 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag2.hentForEksaktEnPeriode()).thenReturn(sameSomGjeldendePeriode2); // Samme FOM, ulik TOM
+        when(grunnlag2.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(sameSomGjeldendePeriode2)); // Samme FOM, ulik TOM
 
         UngdomsprogramPeriodeGrunnlag grunnlag3 = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag3.hentForEksaktEnPeriode()).thenReturn(forrigePeriode); // Tredje som er ulik FOM
+        when(grunnlag3.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(forrigePeriode)); // Tredje som er ulik FOM
 
-        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriode().getFomDato();
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag -> grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
 
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
 
@@ -167,5 +167,59 @@ class SisteEndringsdatoUtlederTest {
         assertThat(resultat.get().nyDato()).isEqualTo(gjeldendeFom);
         assertThat(resultat.get().forrigeDato()).isEqualTo(forrigeFom);
     }
-}
 
+    @Test
+    void skal_ikke_finne_endring_når_det_ikke_finnes_periode_i_gjeldende_grunnlag() {
+        // Arrange
+        UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
+        when(gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.empty());
+
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag ->
+            grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
+
+        List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = Collections.emptyList();
+
+        // Act
+        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
+
+        // Assert
+        assertThat(resultat).isEmpty();
+    }
+
+    @Test
+    void skal_finne_endring_nar_andre_grunnlag_ikke_har_periode() {
+        // Arrange
+        LocalDate gjeldendeFom = LocalDate.of(2024, 1, 1);
+        LocalDate forrigeFom = LocalDate.of(2024, 2, 1);
+
+        DatoIntervallEntitet gjeldendePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(gjeldendeFom, LocalDate.of(2024, 12, 31));
+        DatoIntervallEntitet forrigePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(forrigeFom, LocalDate.of(2024, 12, 31));
+
+        UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
+        when(gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode));
+
+        UngdomsprogramPeriodeGrunnlag grunnlag1 = mock(UngdomsprogramPeriodeGrunnlag.class);
+        when(grunnlag1.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(gjeldendePeriode)); // Samme FOM
+
+        UngdomsprogramPeriodeGrunnlag grunnlag2 = mock(UngdomsprogramPeriodeGrunnlag.class);
+        when(grunnlag2.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.empty()); // Ingen periode
+
+        UngdomsprogramPeriodeGrunnlag grunnlag3 = mock(UngdomsprogramPeriodeGrunnlag.class);
+        when(grunnlag3.hentForEksaktEnPeriodeDersomFinnes()).thenReturn(Optional.of(forrigePeriode)); // Første som er ulik FOM
+
+        SisteEndringsdatoUtleder.AktuellDatoHenter datoHenter = grunnlag ->
+            grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
+
+        List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
+
+        // Act
+        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
+
+        // Assert
+        assertThat(resultat).isPresent();
+        assertThat(resultat.get().nyDato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDato()).isNull();
+    }
+}

@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
@@ -70,11 +71,19 @@ public class EndretPeriodeOppgaveOppretter {
             EndretPeriodeOppgaveOppretter::getSluttdato);
 
         if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
+            // ENDRING AV STARTDATO
             var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato(), endretStartDato.get().forrigeDato());
             ungOppgaveKlient.opprettEndretStartdatoOppgave(oppgaveDto);
         } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
+            // ENDRING AV SLUTTDATO
             var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDato(), endretSluttDato.get().forrigeDato());
             ungOppgaveKlient.opprettEndretSluttdatoOppgave(oppgaveDto);
+        } else if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
+            // FJERNET PERIODE
+            PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
+            var endringer = Set.of(PeriodeEndringType.FJERNET_PERIODE);
+            var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, null, forrigePeriode, endringer);
+            ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
         } else {
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
@@ -101,12 +110,12 @@ public class EndretPeriodeOppgaveOppretter {
         return aktuelleGrunnlagSortert;
     }
 
-    private static LocalDate getStartdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
-        return grunnlag.hentForEksaktEnPeriode().getFomDato();
+    private static Optional<LocalDate> getStartdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        return grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
     }
 
-    private static LocalDate getSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
-        return grunnlag.hentForEksaktEnPeriode().getTomDato();
+    private static Optional<LocalDate> getSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        return grunnlag.hentForEksaktEnPeriodeDersomFinnes().filter(it -> !it.getTomDato().equals(TIDENES_ENDE)).map(DatoIntervallEntitet::getTomDato);
     }
 
     private EndretPeriodeOppgaveDTO mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, PersonIdent deltakerIdent, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {

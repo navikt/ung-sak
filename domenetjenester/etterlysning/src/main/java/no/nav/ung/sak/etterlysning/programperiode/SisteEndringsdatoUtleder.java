@@ -33,20 +33,26 @@ public class SisteEndringsdatoUtleder {
      * @return Evt. endret dato informasjon
      */
     static Optional<UngdomsprogramPeriodeTjeneste.EndretDato> finnSistEndretDato(UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag, List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert, AktuellDatoHenter aktuellDatoHenter) {
-        LocalDate gjeldendeDato = aktuellDatoHenter.hent(gjeldendeGrunnlag);
+        var gjeldendeDato = aktuellDatoHenter.hent(gjeldendeGrunnlag);
+        if (gjeldendeDato.isEmpty()) {
+            return Optional.empty();
+        }
         boolean harEndringIDato = false;
         LocalDate forrigeDato = null;
         for (var grunnlag : aktuelleGrunnlagSortert) {
-            LocalDate datoIEtterlysning = aktuellDatoHenter.hent(grunnlag);
-            harEndringIDato = !datoIEtterlysning.equals(gjeldendeDato);
+            var datoIEtterlysning = aktuellDatoHenter.hent(grunnlag);
+            if (datoIEtterlysning.isEmpty()) {
+
+            }
+            harEndringIDato = datoIEtterlysning.isEmpty() || !datoIEtterlysning.equals(gjeldendeDato);
             if (harEndringIDato) {
-                forrigeDato = datoIEtterlysning;
+                forrigeDato = datoIEtterlysning.orElse(null);
                 break;
             }
         }
 
         if (harEndringIDato) {
-            return Optional.of(new UngdomsprogramPeriodeTjeneste.EndretDato(gjeldendeDato, forrigeDato));
+            return Optional.of(new UngdomsprogramPeriodeTjeneste.EndretDato(gjeldendeDato.get(), forrigeDato));
         }
         return Optional.empty();
     }
@@ -54,7 +60,7 @@ public class SisteEndringsdatoUtleder {
 
     @FunctionalInterface
     interface AktuellDatoHenter {
-        LocalDate hent(UngdomsprogramPeriodeGrunnlag grunnlag);
+        Optional<LocalDate> hent(UngdomsprogramPeriodeGrunnlag grunnlag);
     }
 
 }

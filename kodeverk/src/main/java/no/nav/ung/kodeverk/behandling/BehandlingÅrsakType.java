@@ -116,7 +116,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     }
 
     public static Set<BehandlingÅrsakType> årsakerForInnhentingAvProgramperiode() {
-        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM);
     }
 
     public static Set<BehandlingÅrsakType> årsakerForInnhentingAvPersonopplysninger() {
