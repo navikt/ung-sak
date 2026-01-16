@@ -30,6 +30,8 @@ import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 @Dependent
 public class EndretPeriodeOppgaveOppretter {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EndretPeriodeOppgaveOppretter.class);
+
     private final UngOppgaveKlient ungOppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final EtterlysningRepository etterlysningRepository;
@@ -59,6 +61,10 @@ public class EndretPeriodeOppgaveOppretter {
 
         // Dette med å finne diff kan potensielt forenkles dersom vi ikkje trenger å vise kva startdato og sluttdato var før endringen.
         List<UngdomsprogramPeriodeGrunnlag> grunnlagslisteForSammenligning = finnSortertGrunnlagslisteForSammenligning(etterlysning, initieltPeriodeGrunnlag);
+
+        log.info("Utleder endringer fra grunnlag med referanse {} basert på følgende grunnlag for sammenligning: {}",
+            gjeldendeGrunnlag.getGrunnlagsreferanse(),
+            grunnlagslisteForSammenligning.stream().map(UngdomsprogramPeriodeGrunnlag::getGrunnlagsreferanse).toList());
 
         Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
             gjeldendeGrunnlag,
