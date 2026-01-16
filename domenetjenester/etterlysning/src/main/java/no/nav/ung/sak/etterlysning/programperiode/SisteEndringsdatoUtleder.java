@@ -41,9 +41,6 @@ public class SisteEndringsdatoUtleder {
         LocalDate forrigeDato = null;
         for (var grunnlag : aktuelleGrunnlagSortert) {
             var datoIEtterlysning = aktuellDatoHenter.hent(grunnlag);
-            if (datoIEtterlysning.isEmpty()) {
-
-            }
             harEndringIDato = datoIEtterlysning.isEmpty() || !datoIEtterlysning.equals(gjeldendeDato);
             if (harEndringIDato) {
                 forrigeDato = datoIEtterlysning.orElse(null);
