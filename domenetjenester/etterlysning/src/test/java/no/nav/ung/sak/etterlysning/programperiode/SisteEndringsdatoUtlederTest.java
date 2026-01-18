@@ -2,7 +2,6 @@ package no.nav.ung.sak.etterlysning.programperiode;
 
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -30,7 +29,7 @@ class SisteEndringsdatoUtlederTest {
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = Collections.emptyList();
 
         // Act
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
             SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
 
         // Assert
@@ -57,7 +56,7 @@ class SisteEndringsdatoUtlederTest {
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2);
 
         // Act
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
             SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
 
         // Assert
@@ -84,13 +83,13 @@ class SisteEndringsdatoUtlederTest {
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1);
 
         // Act
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
             SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDato()).isEqualTo(forrigeFom);
+        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isEqualTo(forrigeFom);
     }
 
     @Test
@@ -122,13 +121,13 @@ class SisteEndringsdatoUtlederTest {
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
 
         // Act
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
             SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDato()).isEqualTo(forrigeFom);
+        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isEqualTo(forrigeFom);
     }
 
     @Test
@@ -159,13 +158,13 @@ class SisteEndringsdatoUtlederTest {
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
 
         // Act
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
             SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDato()).isEqualTo(forrigeFom);
+        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isEqualTo(forrigeFom);
     }
 
     @Test
@@ -180,7 +179,7 @@ class SisteEndringsdatoUtlederTest {
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = Collections.emptyList();
 
         // Act
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
             SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
 
         // Assert
@@ -214,12 +213,12 @@ class SisteEndringsdatoUtlederTest {
         List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = List.of(grunnlag1, grunnlag2, grunnlag3);
 
         // Act
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> resultat =
+        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
             SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeGrunnlag, aktuelleGrunnlagSortert, datoHenter);
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDato()).isNull();
+        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isNull();
     }
 }

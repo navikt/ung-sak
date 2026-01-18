@@ -17,7 +17,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,6 +28,8 @@ import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
 
 @Dependent
 public class EndretPeriodeOppgaveOppretter {
+
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EndretPeriodeOppgaveOppretter.class);
 
     private final UngOppgaveKlient ungOppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
@@ -60,23 +61,35 @@ public class EndretPeriodeOppgaveOppretter {
         // Dette med å finne diff kan potensielt forenkles dersom vi ikkje trenger å vise kva startdato og sluttdato var før endringen.
         List<UngdomsprogramPeriodeGrunnlag> grunnlagslisteForSammenligning = finnSortertGrunnlagslisteForSammenligning(etterlysning, initieltPeriodeGrunnlag);
 
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
+        log.info("Utleder endringer fra grunnlag med referanse {} basert på følgende grunnlag for sammenligning: {}",
+            gjeldendeGrunnlag.getGrunnlagsreferanse(),
+            grunnlagslisteForSammenligning.stream().map(UngdomsprogramPeriodeGrunnlag::getGrunnlagsreferanse).toList());
+
+        Optional<SisteEndringsdatoUtleder.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
             gjeldendeGrunnlag,
             grunnlagslisteForSammenligning,
             EndretPeriodeOppgaveOppretter::getStartdato);
 
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
+        Optional<SisteEndringsdatoUtleder.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
             gjeldendeGrunnlag,
             grunnlagslisteForSammenligning,
             EndretPeriodeOppgaveOppretter::getSluttdato);
 
         if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
             // ENDRING AV STARTDATO
-            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato(), endretStartDato.get().forrigeDato());
+            log.info("Fant kun endring i startdato for etterlysning {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}",
+                etterlysning.getEksternReferanse(),
+                endretStartDato.get().nyDatoOgGrunnlag(),
+                endretStartDato.get().forrigeDatoOgGrunnlag());
+            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDatoOgGrunnlag().dato(), endretStartDato.get().forrigeDatoOgGrunnlag().dato());
             ungOppgaveKlient.opprettEndretStartdatoOppgave(oppgaveDto);
         } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
             // ENDRING AV SLUTTDATO
-            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDato(), endretSluttDato.get().forrigeDato());
+            log.info("Fant kun endring i sluttdato for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}",
+                etterlysning.getEksternReferanse(),
+                endretStartDato.get().nyDatoOgGrunnlag(),
+                endretStartDato.get().forrigeDatoOgGrunnlag());
+            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDatoOgGrunnlag().dato(), endretSluttDato.get().forrigeDatoOgGrunnlag().dato());
             ungOppgaveKlient.opprettEndretSluttdatoOppgave(oppgaveDto);
         } else if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
             // FJERNET PERIODE
@@ -84,12 +97,20 @@ public class EndretPeriodeOppgaveOppretter {
             var endringer = Set.of(PeriodeEndringType.FJERNET_PERIODE);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, null, forrigePeriode, endringer);
             ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
-        } else {
+        } else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
+            log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
+                etterlysning.getEksternReferanse(),
+                endretSluttDato.get().nyDatoOgGrunnlag(),
+            endretSluttDato.get().forrigeDatoOgGrunnlag(),
+            endretStartDato.get().nyDatoOgGrunnlag(),
+            endretStartDato.get().forrigeDatoOgGrunnlag());
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
             ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
+        } else {
+            throw new IllegalStateException("Fant ingen endringer som kunne mappes til oppgave for etterlysning " + etterlysning.getEksternReferanse());
         }
 
     }
@@ -98,7 +119,7 @@ public class EndretPeriodeOppgaveOppretter {
         List<Etterlysning> sorterteEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(etterlysning.getId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
 
         // Dersom vi treffer en etterlysning som er mottatt svar eller utløpt, betyr det at bruker har tatt stilling til alle endringer før denne. Det er derfor ikke nødvendig å sjekke flere grunnlag.
-        List<Etterlysning> tidligereEtterlysningerSomBleAvbruttSortert = sorterteEtterlysninger.stream().filter(it -> EtterlysningStatus.OPPRETTET != it.getStatus())
+        List<Etterlysning> tidligereEtterlysningerSomBleAvbruttSortert = sorterteEtterlysninger.stream()
             .takeWhile(it -> it.getStatus() != EtterlysningStatus.MOTTATT_SVAR && it.getStatus() != EtterlysningStatus.UTLØPT)
             .filter(it -> it.getStatus() == EtterlysningStatus.AVBRUTT).toList();
 

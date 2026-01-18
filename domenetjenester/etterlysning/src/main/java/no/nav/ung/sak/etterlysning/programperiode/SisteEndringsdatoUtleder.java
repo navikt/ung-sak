@@ -1,58 +1,44 @@
 package no.nav.ung.sak.etterlysning.programperiode;
 
-import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
-@Dependent
 public class SisteEndringsdatoUtleder {
 
-    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-
-    @Inject
-    public SisteEndringsdatoUtleder(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
-    }
-
-    /** Finner endret dato (start- eller sluttdato) ved å sammenligne gjeldende grunnlag med tidligere etterlysninger og initielt grunnlag.
+    /**
+     * Finner endret dato (start- eller sluttdato) ved å sammenligne gjeldende grunnlag med tidligere etterlysninger og initielt grunnlag.
      * <p>
      * Behovet for denne metoden oppstår fordi vi må finne ut om en dato har blitt endret fra det som bruker sist tok stilling til. Dersom vi har flere endringer på perioden der disse er av ulike typer (endring i startdato, endring i sluttdato...),
      * ønsker vi å kunne gi detaljert informasjon om hva som har blitt endret fra forrige etterlysning som enten ble besvart eller utløpt.
-     * @param gjeldendeGrunnlag Det aktive grunnlaget
+     *
+     * @param gjeldendeGrunnlag       Det aktive grunnlaget
      * @param aktuelleGrunnlagSortert Alle aktuelle grunnlag for sammenligning sortert med nyeste først
-     * @param aktuellDatoHenter Funksjon for å hente aktuell dato (start- eller sluttdato)
+     * @param aktuellDatoHenter       Funksjon for å hente aktuell dato (start- eller sluttdato)
      * @return Evt. endret dato informasjon
      */
-    static Optional<UngdomsprogramPeriodeTjeneste.EndretDato> finnSistEndretDato(UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag, List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert, AktuellDatoHenter aktuellDatoHenter) {
+    static Optional<EndretDato> finnSistEndretDato(UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag, List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert, AktuellDatoHenter aktuellDatoHenter) {
         var gjeldendeDato = aktuellDatoHenter.hent(gjeldendeGrunnlag);
         if (gjeldendeDato.isEmpty()) {
             return Optional.empty();
         }
+        var gjeldendeDatoOgGrunnlag = new DatoOgGrunnlag(gjeldendeDato.get(), gjeldendeGrunnlag.getGrunnlagsreferanse());
         boolean harEndringIDato = false;
-        LocalDate forrigeDato = null;
+        DatoOgGrunnlag forrigeDatoOgGrunnlag = null;
         for (var grunnlag : aktuelleGrunnlagSortert) {
             var datoIEtterlysning = aktuellDatoHenter.hent(grunnlag);
-            if (datoIEtterlysning.isEmpty()) {
-
-            }
-            harEndringIDato = datoIEtterlysning.isEmpty() || !datoIEtterlysning.equals(gjeldendeDato);
+            harEndringIDato = datoIEtterlysning.isEmpty() || !datoIEtterlysning.get().equals(gjeldendeDatoOgGrunnlag.dato);
             if (harEndringIDato) {
-                forrigeDato = datoIEtterlysning.orElse(null);
+                forrigeDatoOgGrunnlag = new DatoOgGrunnlag(datoIEtterlysning.orElse(null), gjeldendeDatoOgGrunnlag.grunnlagsreferanse);
                 break;
             }
         }
 
         if (harEndringIDato) {
-            return Optional.of(new UngdomsprogramPeriodeTjeneste.EndretDato(gjeldendeDato.get(), forrigeDato));
+            return Optional.of(new EndretDato(gjeldendeDatoOgGrunnlag, forrigeDatoOgGrunnlag));
         }
         return Optional.empty();
     }
@@ -61,6 +47,28 @@ public class SisteEndringsdatoUtleder {
     @FunctionalInterface
     interface AktuellDatoHenter {
         Optional<LocalDate> hent(UngdomsprogramPeriodeGrunnlag grunnlag);
+    }
+
+
+    public record EndretDato(DatoOgGrunnlag nyDatoOgGrunnlag, DatoOgGrunnlag forrigeDatoOgGrunnlag) {
+        @Override
+        public String toString() {
+            return "EndretDato{" +
+                "nyDatoOgGrunnlag=" + nyDatoOgGrunnlag +
+                ", forrigeDatoOgGrunnlag=" + forrigeDatoOgGrunnlag +
+                '}';
+        }
+    }
+
+
+    public record DatoOgGrunnlag(LocalDate dato, UUID grunnlagsreferanse) {
+        @Override
+        public String toString() {
+            return "DatoOgGrunnlag{" +
+                "dato=" + dato +
+                ", grunnlagsreferanse=" + grunnlagsreferanse +
+                '}';
+        }
     }
 
 }
