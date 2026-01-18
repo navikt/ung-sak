@@ -17,6 +17,8 @@ public class BarnetilleggSatsTidslinje {
     public static final LocalDateTimeline<BigDecimal> BARNETILLEGG_DAGSATS = new LocalDateTimeline<>(
         List.of(
             new LocalDateSegment<>(TIDENES_BEGYNNELSE, LocalDate.of(2024, 12, 31), BigDecimal.valueOf(36)),
-            new LocalDateSegment<>(LocalDate.of(2025, 1, 1), TIDENES_ENDE, BigDecimal.valueOf(37))
+            new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2026, 1, 13), BigDecimal.valueOf(37)),
+            new LocalDateSegment<>(LocalDate.of(2026, 1, 14), TIDENES_ENDE, BigDecimal.valueOf(38))
+
         ));
 }
