@@ -50,12 +50,12 @@ public class SisteEndringsdatoUtleder {
     }
 
 
-    public record EndretDato(DatoOgGrunnlag nyDato, DatoOgGrunnlag forrigeDato) {
+    public record EndretDato(DatoOgGrunnlag nyDatoOgGrunnlag, DatoOgGrunnlag forrigeDatoOgGrunnlag) {
         @Override
         public String toString() {
             return "EndretDato{" +
-                "nyDato=" + nyDato +
-                ", forrigeDato=" + forrigeDato +
+                "nyDatoOgGrunnlag=" + nyDatoOgGrunnlag +
+                ", forrigeDatoOgGrunnlag=" + forrigeDatoOgGrunnlag +
                 '}';
         }
     }

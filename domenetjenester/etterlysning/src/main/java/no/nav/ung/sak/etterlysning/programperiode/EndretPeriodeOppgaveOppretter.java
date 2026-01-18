@@ -17,7 +17,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -80,17 +79,17 @@ public class EndretPeriodeOppgaveOppretter {
             // ENDRING AV STARTDATO
             log.info("Fant kun endring i startdato for etterlysning {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}",
                 etterlysning.getEksternReferanse(),
-                endretStartDato.get().nyDato(),
-                endretStartDato.get().forrigeDato());
-            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato().dato(), endretStartDato.get().forrigeDato().dato());
+                endretStartDato.get().nyDatoOgGrunnlag(),
+                endretStartDato.get().forrigeDatoOgGrunnlag());
+            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDatoOgGrunnlag().dato(), endretStartDato.get().forrigeDatoOgGrunnlag().dato());
             ungOppgaveKlient.opprettEndretStartdatoOppgave(oppgaveDto);
         } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
             // ENDRING AV SLUTTDATO
             log.info("Fant kun endring i sluttdato for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}",
                 etterlysning.getEksternReferanse(),
-                endretStartDato.get().nyDato(),
-                endretStartDato.get().forrigeDato());
-            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDato().dato(), endretSluttDato.get().forrigeDato().dato());
+                endretStartDato.get().nyDatoOgGrunnlag(),
+                endretStartDato.get().forrigeDatoOgGrunnlag());
+            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDatoOgGrunnlag().dato(), endretSluttDato.get().forrigeDatoOgGrunnlag().dato());
             ungOppgaveKlient.opprettEndretSluttdatoOppgave(oppgaveDto);
         } else if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
             // FJERNET PERIODE
@@ -101,10 +100,10 @@ public class EndretPeriodeOppgaveOppretter {
         } else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
             log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
                 etterlysning.getEksternReferanse(),
-                endretSluttDato.get().nyDato(),
-            endretSluttDato.get().forrigeDato(),
-            endretStartDato.get().nyDato(),
-            endretStartDato.get().forrigeDato());
+                endretSluttDato.get().nyDatoOgGrunnlag(),
+            endretSluttDato.get().forrigeDatoOgGrunnlag(),
+            endretStartDato.get().nyDatoOgGrunnlag(),
+            endretStartDato.get().forrigeDatoOgGrunnlag());
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
