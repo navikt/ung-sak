@@ -19,6 +19,5 @@ public class BarnetilleggSatsTidslinje {
             new LocalDateSegment<>(TIDENES_BEGYNNELSE, LocalDate.of(2024, 12, 31), BigDecimal.valueOf(36)),
             new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2026, 1, 13), BigDecimal.valueOf(37)),
             new LocalDateSegment<>(LocalDate.of(2026, 1, 14), TIDENES_ENDE, BigDecimal.valueOf(38))
-
         ));
 }
