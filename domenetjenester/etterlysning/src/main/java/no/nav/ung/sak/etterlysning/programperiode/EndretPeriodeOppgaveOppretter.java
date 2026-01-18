@@ -66,23 +66,31 @@ public class EndretPeriodeOppgaveOppretter {
             gjeldendeGrunnlag.getGrunnlagsreferanse(),
             grunnlagslisteForSammenligning.stream().map(UngdomsprogramPeriodeGrunnlag::getGrunnlagsreferanse).toList());
 
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
+        Optional<SisteEndringsdatoUtleder.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
             gjeldendeGrunnlag,
             grunnlagslisteForSammenligning,
             EndretPeriodeOppgaveOppretter::getStartdato);
 
-        Optional<UngdomsprogramPeriodeTjeneste.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
+        Optional<SisteEndringsdatoUtleder.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
             gjeldendeGrunnlag,
             grunnlagslisteForSammenligning,
             EndretPeriodeOppgaveOppretter::getSluttdato);
 
         if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
             // ENDRING AV STARTDATO
-            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato(), endretStartDato.get().forrigeDato());
+            log.info("Fant kun endring i startdato for etterlysning {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}",
+                etterlysning.getEksternReferanse(),
+                endretStartDato.get().nyDato(),
+                endretStartDato.get().forrigeDato());
+            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDato().dato(), endretStartDato.get().forrigeDato().dato());
             ungOppgaveKlient.opprettEndretStartdatoOppgave(oppgaveDto);
         } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
             // ENDRING AV SLUTTDATO
-            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDato(), endretSluttDato.get().forrigeDato());
+            log.info("Fant kun endring i sluttdato for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}",
+                etterlysning.getEksternReferanse(),
+                endretStartDato.get().nyDato(),
+                endretStartDato.get().forrigeDato());
+            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDato().dato(), endretSluttDato.get().forrigeDato().dato());
             ungOppgaveKlient.opprettEndretSluttdatoOppgave(oppgaveDto);
         } else if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
             // FJERNET PERIODE
@@ -90,12 +98,20 @@ public class EndretPeriodeOppgaveOppretter {
             var endringer = Set.of(PeriodeEndringType.FJERNET_PERIODE);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, null, forrigePeriode, endringer);
             ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
-        } else {
+        } else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
+            log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
+                etterlysning.getEksternReferanse(),
+                endretSluttDato.get().nyDato(),
+            endretSluttDato.get().forrigeDato(),
+            endretStartDato.get().nyDato(),
+            endretStartDato.get().forrigeDato());
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
             ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
+        } else {
+            throw new IllegalStateException("Fant ingen endringer som kunne mappes til oppgave for etterlysning " + etterlysning.getEksternReferanse());
         }
 
     }
