@@ -42,7 +42,8 @@ class LagBarnetilleggTidslinjeTest {
             new LocalDateSegment<>(fødselsdato1, dødsdato1, new Barnetillegg(BARNETILLEGG_SATS_1, 1)),
             new LocalDateSegment<>(fødselsdato2, dødsdato2, new Barnetillegg(BARNETILLEGG_SATS_1, 1)),
             new LocalDateSegment<>(fødselsdato3, ENDRET_SATS_DATO_1.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS_1, 1)),
-            new LocalDateSegment<>(ENDRET_SATS_DATO_1, TIDENES_ENDE, new Barnetillegg(BARNETILLEGG_SATS_2, 1))));
+            new LocalDateSegment<>(ENDRET_SATS_DATO_1, ENDRET_SATS_DATO_2.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS_2, 1)),
+            new LocalDateSegment<>(ENDRET_SATS_DATO_2, TIDENES_ENDE, new Barnetillegg(BARNETILLEGG_SATS_3, 1))));
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
     }
@@ -127,7 +128,8 @@ class LagBarnetilleggTidslinjeTest {
 
         var forventetResultat = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fødselsdato1, ENDRET_SATS_DATO_1.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS_1, 1)),
-            new LocalDateSegment<>(ENDRET_SATS_DATO_1, TIDENES_ENDE, new Barnetillegg(BARNETILLEGG_SATS_2, 1)))
+            new LocalDateSegment<>(ENDRET_SATS_DATO_1, ENDRET_SATS_DATO_2.minusDays(1), new Barnetillegg(BARNETILLEGG_SATS_2, 1)),
+            new LocalDateSegment<>(ENDRET_SATS_DATO_2, TIDENES_ENDE, new Barnetillegg(BARNETILLEGG_SATS_3, 1)))
         );
 
         assertThat(resultat.barnetilleggTidslinje()).isEqualTo(forventetResultat);
