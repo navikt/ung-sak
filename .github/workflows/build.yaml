@@ -32,7 +32,7 @@ jobs:
     secrets: inherit
 
   run-unit-tests:
-    name: Build
+    name: Enhetstester
     permissions:
       contents: read
       packages: write
