@@ -13,7 +13,7 @@ on:
 
 jobs:
   build-app:
-    name: Build
+    name: Bygg docker image
     permissions:
       contents: read
       packages: write
@@ -22,6 +22,7 @@ jobs:
     with:
       runs-on: ${{ (github.ref_name == github.event.repository.default_branch && 'ubuntu-latest-8-cores' || 'ubuntu-latest-4-cores') }}
       java-version: 25
+      skip-tests: true
       build-image: true
       push-image: ${{ github.ref_name == github.event.repository.default_branch}}
       upload-image: ${{ github.ref_name != github.event.repository.default_branch }}
@@ -30,6 +31,24 @@ jobs:
       t-2c: "-T1C"
     secrets: inherit
 
+  run-unit-tests:
+    name: Enhetstester
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    uses: navikt/sif-gha-workflows/.github/workflows/maven-build-app-db.yml@main
+    with:
+      runs-on: ${{ (github.ref_name == github.event.repository.default_branch && 'ubuntu-latest-8-cores' || 'ubuntu-latest-4-cores') }}
+      java-version: 25
+      skip-tests: false
+      build-image: false
+      push-image: false
+      upload-image: false
+      db_schema: ung_sak_unit
+      pg_version: 16
+      t-2c: "-T1C"
+    secrets: inherit
 
   build-typescript-client:
     name: Build typescript client
@@ -97,7 +116,7 @@ jobs:
       id-token: write
       contents: write
     if: github.ref_name == 'master'
-    needs: [build-app]
+    needs: [build-app, run-unit-tests]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
       gar: true
@@ -112,7 +131,7 @@ jobs:
       id-token: write
       contents: write
     if: github.ref_name == 'master'
-    needs: [build-app, verdikjede-tester, deploy-dev]
+    needs: [build-app, run-unit-tests, verdikjede-tester, deploy-dev]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
       gar: true
