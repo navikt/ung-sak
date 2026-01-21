@@ -19,7 +19,7 @@ import java.time.YearMonth;
  */
 public class LagTilkjentYtelse {
 
-    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
+    public static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
                                                                          LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                          LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
                                                                          LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
