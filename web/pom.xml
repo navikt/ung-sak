@@ -150,6 +150,12 @@
             <artifactId>klage</artifactId>
         </dependency>
 
+        <!-- Ytelsespesifikke moduler -->
+        <dependency>
+            <groupId>no.nav.ung.sak.ytelse</groupId>
+            <artifactId>ytelse-ungdomsprogramytelsen</artifactId>
+        </dependency>
+
 
 
         <!-- integrasjon-->
