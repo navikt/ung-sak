@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
@@ -21,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
+import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.behandling.steg.beregnytelse.BeregnYtelseSteg;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -32,6 +34,7 @@ import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -40,6 +43,8 @@ import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@ExtendWith(JpaExtension.class)
+@ExtendWith(CdiAwareExtension.class)
 class UngBeregnYtelseStegTest {
 
     public static final LocalDate FOM = LocalDate.now();
