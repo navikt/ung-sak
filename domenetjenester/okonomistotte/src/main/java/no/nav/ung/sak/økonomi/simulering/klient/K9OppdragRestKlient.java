@@ -14,9 +14,9 @@ import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringDto;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.sikkerhet.oidc.token.impl.ContextTokenProvider;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.økonomi.simulering.klient.dto.OppdragXmlDto;
 
 import java.net.URI;

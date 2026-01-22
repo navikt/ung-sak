@@ -4,10 +4,10 @@ package no.nav.ung.sak.kontrakt.behandling.part;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Identifikasjon;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Identifikasjon;
 
-import static no.nav.ung.sak.typer.RolleType.BRUKER;
+import static no.nav.ung.sak.felles.typer.RolleType.BRUKER;
 
 public class PartBrukerinfoDto extends PartDto {
 

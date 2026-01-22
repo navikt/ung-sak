@@ -22,8 +22,8 @@ import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 @ApplicationScoped
 @ScopedRestIntegration(scopeKey = "k9fordel.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9fordel/.default")

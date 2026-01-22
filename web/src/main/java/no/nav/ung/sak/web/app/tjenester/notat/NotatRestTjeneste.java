@@ -34,7 +34,7 @@ import no.nav.ung.sak.kontrakt.notat.EndreNotatDto;
 import no.nav.ung.sak.kontrakt.notat.NotatDto;
 import no.nav.ung.sak.kontrakt.notat.OpprettNotatDto;
 import no.nav.ung.sak.kontrakt.notat.SkjulNotatDto;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import org.slf4j.Logger;

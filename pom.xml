@@ -20,6 +20,8 @@
         <module>fordel</module>
         <module>klage</module>
         <module>ytelse-ungdomsprogramytelsen</module>
+        <module>felles</module>
+        <module>brukerdialog-oppgave</module>
 
         <!-- Web klient og server -->
         <module>web</module>
@@ -334,6 +336,18 @@
             <dependency>
                 <groupId>no.nav.ung.sak.ytelse</groupId>
                 <artifactId>ytelse-ungdomsprogramytelsen</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>felles</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>brukerdialog-oppgave</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

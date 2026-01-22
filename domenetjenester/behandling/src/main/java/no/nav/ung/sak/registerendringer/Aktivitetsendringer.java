@@ -1,8 +1,8 @@
 package no.nav.ung.sak.registerendringer;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.typer.Arbeidsgiver;
-import no.nav.ung.sak.typer.InternArbeidsforholdRef;
+import no.nav.ung.sak.felles.typer.Arbeidsgiver;
+import no.nav.ung.sak.felles.typer.InternArbeidsforholdRef;
 
 public class Aktivitetsendringer {
 

@@ -4,12 +4,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
-import no.nav.ung.sak.typer.JournalpostId;
-
-
-import java.time.LocalDate;
-import java.util.UUID;
+import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 public record SendInnPapirsøknadopplysningerRequestDto(
 

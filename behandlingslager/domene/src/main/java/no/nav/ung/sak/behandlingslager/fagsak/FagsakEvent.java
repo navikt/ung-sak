@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingslager.fagsak;
 
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 /**
  * Marker interface for events fyrt på en Fagsak.

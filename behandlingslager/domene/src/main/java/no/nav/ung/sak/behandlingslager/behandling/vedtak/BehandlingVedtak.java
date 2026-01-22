@@ -15,7 +15,7 @@ import jakarta.persistence.Version;
 
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.IverksettingStatusKodeverdiConverter;
 
 @Entity(name = "BehandlingVedtak")

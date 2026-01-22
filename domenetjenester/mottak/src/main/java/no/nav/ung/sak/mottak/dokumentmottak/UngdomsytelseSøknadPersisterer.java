@@ -3,7 +3,6 @@ package no.nav.ung.sak.mottak.dokumentmottak;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
@@ -14,8 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktSt
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

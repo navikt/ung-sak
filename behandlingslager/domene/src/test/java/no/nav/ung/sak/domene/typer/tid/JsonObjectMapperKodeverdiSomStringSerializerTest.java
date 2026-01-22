@@ -5,6 +5,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.Objects;
 
+import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.kodeverk.JsonObjectMapperKodeverdiSomStringSerializer;
 import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

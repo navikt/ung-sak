@@ -17,8 +17,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 @Entity(name = "UngdomsytelseSøktStartdato")
 @Table(name = "UNG_SOEKT_STARTDATO")

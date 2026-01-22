@@ -12,7 +12,7 @@ import no.nav.abakus.iaygrunnlag.request.Dataset;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 /**
  * Kaller kopier grunnlag i abakus i egen task (som gjør at feil som kan oppstå i det kallet håndteres isolert her).
