@@ -16,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporin
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInputMapper;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
