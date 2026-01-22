@@ -492,6 +492,14 @@
                 <version>1.1.10.8</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.lz4</groupId>
+                <artifactId>lz4-java</artifactId>
+                <!-- oppdaterer versjon for å bli kvitt  CVE-2025-12183 -->
+                <version>1.8.1</version>
+            </dependency>
+
+
             <!-- lagt her for å sikre dependencyConvergence -->
             <dependency>
                 <groupId>org.osgi</groupId>
