@@ -37,7 +37,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>10.0.9</felles.version>
+        <felles.version>10.0.10</felles.version>
         <swagger.version>2.2.41</swagger.version>
         <junit.version>6.0.2</junit.version>
         <k9format.version>12.7.4</k9format.version>
@@ -45,7 +45,7 @@
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.0</kotlin-stdlib.version>
         <jandex.version>3.5.3</jandex.version>
-        <pdfgen-core.version>1.1.68</pdfgen-core.version>
+        <pdfgen-core.version>1.1.69</pdfgen-core.version>
         <flyway.version>11.20.0</flyway.version>
         <confluent.platform.version>8.1.1</confluent.platform.version>
         <mockito.version>5.21.0</mockito.version>
@@ -414,7 +414,7 @@
             <dependency>
                 <groupId>no.nav.teamdokumenthandtering</groupId>
                 <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
-                <version>1.1.7</version>
+                <version>1.1.8</version>
             </dependency>
 
             <dependency>
