@@ -46,7 +46,7 @@
         <kotlin-stdlib.version>2.3.0</kotlin-stdlib.version>
         <jandex.version>3.5.3</jandex.version>
         <pdfgen-core.version>1.1.69</pdfgen-core.version>
-        <flyway.version>11.20.0</flyway.version>
+        <flyway.version>11.20.2</flyway.version>
         <confluent.platform.version>8.1.1</confluent.platform.version>
         <mockito.version>5.21.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.9.2</ung-deltakelse-opplyser.version>
@@ -54,7 +54,7 @@
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.36</openhtmltopdf.version>
         <jsoup.version>1.22.1</jsoup.version>
-        <commonmark.version>0.27.0</commonmark.version>
+        <commonmark.version>0.27.1</commonmark.version>
 
     </properties>
 
@@ -590,7 +590,7 @@
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.8</version>
+                <version>42.7.9</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
