@@ -4,6 +4,7 @@
 create table BD_VARSEL
 (
     id                      bigint not null primary key,
+    oppgavereferanse               uuid not null,
     aktoer_id               varchar(50) not null,
     status                  varchar(50) not null,
     type                    varchar(100),
@@ -20,6 +21,7 @@ create table BD_VARSEL
 create table BD_SOKNAD
 (
     id                      bigint not null primary key,
+    oppgavereferanse               uuid not null,
     aktoer_id               varchar(50) not null,
     status                  varchar(50) not null,
     type                    varchar(100),

@@ -5,16 +5,17 @@ import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.felles.typer.AktørId;
 import org.hibernate.annotations.ColumnTransformer;
 
+import java.util.UUID;
+
 @MappedSuperclass
 public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE")
-    protected Long id;
 
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", unique = true, nullable = false, updatable = false)))
     protected AktørId aktørId;
+
+    @Column(name = "oppgavereferanse", nullable = false, updatable = false, unique = true)
+    private UUID oppgavereferanse;
 
     @Column(name = "status", nullable = false, updatable = false)
     protected OppgaveStatus status;
@@ -27,12 +28,12 @@ public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Column(name = "data", nullable = false, updatable = false, columnDefinition = "jsonb")
     private OppgaveData data;
 
-    public Long getId() {
-        return id;
-    }
-
     public AktørId getAktørId() {
         return aktørId;
+    }
+
+    public UUID getOppgavereferanse() {
+        return oppgavereferanse;
     }
 
     public OppgaveStatus getStatus() {
