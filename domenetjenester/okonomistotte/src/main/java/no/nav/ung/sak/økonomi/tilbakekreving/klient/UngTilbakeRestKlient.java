@@ -20,10 +20,10 @@ import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
 
 @Dependent
-@ScopedRestIntegration(scopeKey = "k9.tilbake.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-tilbake/.default")
-public class K9TilbakeRestKlient {
+@ScopedRestIntegration(scopeKey = "ung.tilbake.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-tilbake/.default")
+public class UngTilbakeRestKlient {
 
-    private static final Logger log = LoggerFactory.getLogger(K9TilbakeRestKlient.class);
+    private static final Logger log = LoggerFactory.getLogger(UngTilbakeRestKlient.class);
 
     private OidcRestClient restClient;
     private URI uriHarÅpenTilbakekrevingsbehandling;
@@ -31,19 +31,19 @@ public class K9TilbakeRestKlient {
     private URI uriOppdaterAktørId;
     private boolean k9tilbakeAktivert;
 
-    K9TilbakeRestKlient() {
+    UngTilbakeRestKlient() {
         // for CDI proxy
     }
 
     @Inject
-    public K9TilbakeRestKlient(OidcRestClient restClient,
-                               @KonfigVerdi(value = "k9.tilbake.direkte.url", defaultVerdi = "http://k9-tilbake/k9/tilbake/api") String urlK9Tilbake) {
+    public UngTilbakeRestKlient(OidcRestClient restClient,
+                                @KonfigVerdi(value = "ung.tilbake.url", defaultVerdi = "http://ung-tilbake/ung/tilbake/api") String urlK9Tilbake) {
 
         this.restClient = restClient;
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
         this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
         this.uriOppdaterAktørId = tilUri(urlK9Tilbake, "forvaltning/aktør/oppdaterAktoerId");
-        this.k9tilbakeAktivert = !Environment.current().isLocal(); //i proaksis mocker bort k9-tilbake ved kjøring lokalt og i verdikjedetester.
+        this.k9tilbakeAktivert = !Environment.current().isLocal(); //i praksis mocker bort ung-tilbake ved kjøring lokalt og i verdikjedetester.
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {

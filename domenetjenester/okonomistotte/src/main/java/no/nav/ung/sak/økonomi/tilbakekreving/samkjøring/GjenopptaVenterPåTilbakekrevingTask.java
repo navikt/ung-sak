@@ -19,7 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
     private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
-    private K9TilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient k9TilbakeRestKlient;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder;
 
     public GjenopptaVenterPåTilbakekrevingTask() {
@@ -51,7 +51,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
                                                HistorikkinnslagRepository historikkinnslagRepository,
                                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
-                                               K9TilbakeRestKlient k9TilbakeRestKlient,
+                                               UngTilbakeRestKlient k9TilbakeRestKlient,
                                                SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder) {
         super(behandlingLåsRepository);
         this.behandlingLåsRepository = behandlingLåsRepository;

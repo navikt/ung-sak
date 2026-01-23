@@ -18,7 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 
 
 @Dependent
@@ -28,11 +28,11 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
 
     private SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
-    private K9TilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient k9TilbakeRestKlient;
 
     @Inject
     public SjekkTilbakekrevingAksjonspunktUtleder(SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste,
-                                                  K9TilbakeRestKlient k9TilbakeRestKlient,
+                                                  UngTilbakeRestKlient k9TilbakeRestKlient,
                                                   SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste) {
         this.sjekkEndringUtbetalingTilBrukerTjeneste = sjekkEndringUtbetalingTilBrukerTjeneste;
         this.k9TilbakeRestKlient = k9TilbakeRestKlient;
