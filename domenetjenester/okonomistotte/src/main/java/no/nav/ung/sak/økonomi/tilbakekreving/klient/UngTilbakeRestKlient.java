@@ -29,7 +29,7 @@ public class UngTilbakeRestKlient {
     private URI uriHarÅpenTilbakekrevingsbehandling;
     private URI uriFeilutbetalingerSisteBehandling;
     private URI uriOppdaterAktørId;
-    private boolean k9tilbakeAktivert;
+    private boolean ungTilbakeAktivert;
 
     UngTilbakeRestKlient() {
         // for CDI proxy
@@ -37,18 +37,18 @@ public class UngTilbakeRestKlient {
 
     @Inject
     public UngTilbakeRestKlient(OidcRestClient restClient,
-                                @KonfigVerdi(value = "ung.tilbake.url", defaultVerdi = "http://ung-tilbake/ung/tilbake/api") String urlK9Tilbake) {
+                                @KonfigVerdi(value = "ung.tilbake.url", defaultVerdi = "http://ung-tilbake/ung/tilbake/api") String urlUngTilbake) {
 
         this.restClient = restClient;
-        this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
-        this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
-        this.uriOppdaterAktørId = tilUri(urlK9Tilbake, "forvaltning/aktør/oppdaterAktoerId");
-        this.k9tilbakeAktivert = !Environment.current().isLocal(); //i praksis mocker bort ung-tilbake ved kjøring lokalt og i verdikjedetester.
+        this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlUngTilbake, "behandlinger/tilbakekreving/aapen");
+        this.uriFeilutbetalingerSisteBehandling = tilUri(urlUngTilbake, "feilutbetaling/siste-behandling");
+        this.uriOppdaterAktørId = tilUri(urlUngTilbake, "forvaltning/aktør/oppdaterAktoerId");
+        this.ungTilbakeAktivert = !Environment.current().isLocal(); //i praksis mocker bort ung-tilbake ved kjøring lokalt og i verdikjedetester.
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriHarÅpenTilbakekrevingsbehandling, "saksnummer", saksnummer.getVerdi());
-        if (k9tilbakeAktivert) {
+        if (ungTilbakeAktivert) {
             return restClient.get(uri, Boolean.class);
         } else {
             log.info("integrasjon mot tilbakekrevingsløsningen er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
@@ -58,7 +58,7 @@ public class UngTilbakeRestKlient {
 
     public Optional<BehandlingStatusOgFeilutbetalinger> hentFeilutbetalingerForSisteBehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriFeilutbetalingerSisteBehandling, "saksnummer", saksnummer.getVerdi());
-        if (k9tilbakeAktivert) {
+        if (ungTilbakeAktivert) {
             return restClient.getReturnsOptional(uri, BehandlingStatusOgFeilutbetalinger.class);
         } else {
             log.info("integrasjon mot tilbakekrevingsløsningen er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
@@ -82,7 +82,7 @@ public class UngTilbakeRestKlient {
         try {
             return new URI(baseUrl + "/" + path);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Ugyldig konfigurasjon for URL_K9TILBAKE", e);
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for ung.tilbake.url eller UNG_TILBAKE_URL", e);
         }
     }
 

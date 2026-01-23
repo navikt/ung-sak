@@ -31,7 +31,7 @@ public class AktørIdSplittTjeneste {
     private final K9OppdragRestKlient oppdragRestKlient;
     private final AbakusTjeneste abakusTjeneste;
     private final AktørBytteFordelKlient fordelKlient;
-    private final UngTilbakeRestKlient k9TilbakeRestKlient;
+    private final UngTilbakeRestKlient ungTilbakeRestKlient;
 
     @Inject
     public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste,
@@ -39,13 +39,13 @@ public class AktørIdSplittTjeneste {
                                  K9OppdragRestKlient oppdragRestKlient,
                                  AbakusTjeneste abakusTjeneste,
                                  AktørBytteFordelKlient fordelKlient,
-                                 UngTilbakeRestKlient k9TilbakeRestKlient) {
+                                 UngTilbakeRestKlient ungTilbakeRestKlient) {
         this.aktørTjeneste = aktørTjeneste;
         this.entityManager = entityManager;
         this.oppdragRestKlient = oppdragRestKlient;
         this.abakusTjeneste = abakusTjeneste;
         this.fordelKlient = fordelKlient;
-        this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.ungTilbakeRestKlient = ungTilbakeRestKlient;
     }
 
     public void patchBrukerAktørId(AktørId nyAktørId,
@@ -92,8 +92,8 @@ public class AktørIdSplittTjeneste {
         var antallRaderEndretFordel = fordelKlient.utførAktørbytte(nyAktørId, gammelAktørId);
         logger.info("Oppdaterte {} rader i fordel", antallRaderEndretFordel);
 
-        var antallRaderEndretTilbake = k9TilbakeRestKlient.utførAktørbytte(nyAktørId, gammelAktørId);
-        logger.info("Oppdaterte {} rader i k9-tilbake", antallRaderEndretTilbake);
+        var antallRaderEndretTilbake = ungTilbakeRestKlient.utførAktørbytte(nyAktørId, gammelAktørId);
+        logger.info("Oppdaterte {} rader i ung-tilbake", antallRaderEndretTilbake);
 
         brukerOppdaterteFagsaker.forEach(fagsak -> entityManager.persist(new DiagnostikkFagsakLogg(fagsak.getId(), "Oppdatert aktørid for bruker via " + tjeneste, begrunnelse)));
     }

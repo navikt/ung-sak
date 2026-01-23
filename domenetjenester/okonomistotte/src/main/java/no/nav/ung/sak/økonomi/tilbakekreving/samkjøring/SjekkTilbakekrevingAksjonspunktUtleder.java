@@ -28,14 +28,14 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
 
     private SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
-    private UngTilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient ungTilbakeRestKlient;
 
     @Inject
     public SjekkTilbakekrevingAksjonspunktUtleder(SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste,
-                                                  UngTilbakeRestKlient k9TilbakeRestKlient,
+                                                  UngTilbakeRestKlient ungTilbakeRestKlient,
                                                   SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste) {
         this.sjekkEndringUtbetalingTilBrukerTjeneste = sjekkEndringUtbetalingTilBrukerTjeneste;
-        this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.ungTilbakeRestKlient = ungTilbakeRestKlient;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
     }
 
@@ -64,7 +64,7 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
 
     boolean påvirkerÅpenTilbakekrevingsbehandling(Behandling aktuellBehandling) {
         Fagsak fagsak = aktuellBehandling.getFagsak();
-        Optional<BehandlingStatusOgFeilutbetalinger> feilutbetaling = k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(fagsak.getSaksnummer());
+        Optional<BehandlingStatusOgFeilutbetalinger> feilutbetaling = ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(fagsak.getSaksnummer());
         boolean harÅpenTilbakekrevingsbehandling = feilutbetaling.isPresent() && feilutbetaling.get().getAvsluttetDato() == null;
         if (!harÅpenTilbakekrevingsbehandling) {
             logger.info("Har ingen åpen tilbakekrevingsbehandling");

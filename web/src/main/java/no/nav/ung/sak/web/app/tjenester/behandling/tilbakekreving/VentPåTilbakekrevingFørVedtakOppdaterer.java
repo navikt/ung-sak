@@ -18,7 +18,7 @@ import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 @DtoTilServiceAdapter(dto = SjekkTilbakekrevingFørVedtakDto.class, adapter = AksjonspunktOppdaterer.class)
 class VentPåTilbakekrevingFørVedtakOppdaterer implements AksjonspunktOppdaterer<SjekkTilbakekrevingFørVedtakDto> {
 
-    private UngTilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient ungTilbakeRestKlient;
     private HistorikkinnslagRepository historikkinnslagRepository;
 
     public VentPåTilbakekrevingFørVedtakOppdaterer() {
@@ -26,15 +26,15 @@ class VentPåTilbakekrevingFørVedtakOppdaterer implements AksjonspunktOppdatere
     }
 
     @Inject
-    public VentPåTilbakekrevingFørVedtakOppdaterer(UngTilbakeRestKlient k9TilbakeRestKlient,
+    public VentPåTilbakekrevingFørVedtakOppdaterer(UngTilbakeRestKlient ungTilbakeRestKlient,
                                                    HistorikkinnslagRepository historikkinnslagRepository) {
-        this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.ungTilbakeRestKlient = ungTilbakeRestKlient;
         this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     @Override
     public OppdateringResultat oppdater(SjekkTilbakekrevingFørVedtakDto dto, AksjonspunktOppdaterParameter param) {
-        if (!k9TilbakeRestKlient.harÅpenTilbakekrevingsbehandling(param.getRef().getSaksnummer())) {
+        if (!ungTilbakeRestKlient.harÅpenTilbakekrevingsbehandling(param.getRef().getSaksnummer())) {
             OppdateringResultat oppdateringResultat = OppdateringResultat.nyttResultat();
             oppdateringResultat.setSteg(BehandlingStegType.SIMULER_OPPDRAG);
             oppdateringResultat.rekjørSteg();
