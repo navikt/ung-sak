@@ -43,7 +43,7 @@ public class K9TilbakeRestKlient {
         this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
         this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
         this.uriOppdaterAktørId = tilUri(urlK9Tilbake, "forvaltning/aktør/oppdaterAktoerId");
-        this.k9tilbakeAktivert = false; //FIXME integrer mot tilbakekrevingsløsning
+        this.k9tilbakeAktivert = !Environment.current().isLocal(); //i proaksis mocker bort k9-tilbake ved kjøring lokalt og i verdikjedetester.
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
