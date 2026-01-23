@@ -61,8 +61,7 @@ class ForeslåVedtakTjeneste {
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
-        // TODO: Fiks integrering mot k9-tilbake
-//        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
+        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
         if (BehandlingType.KLAGE.equals(behandling.getType())) {
             if (klageVedtakTjeneste.erKlageResultatHjemsendt(behandling)) {
