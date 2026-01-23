@@ -39,7 +39,7 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.ung.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
@@ -55,7 +55,7 @@ public class SimulerOppdragStegTest {
     private TilbakekrevingRepository tilbakekrevingRepository;
     private BehandlingRepository behandlingRepository;
     private K9OppdragRestKlient k9OppdragRestKlientMock;
-    private K9TilbakeRestKlient k9TilbakeRestKlientMock;
+    private UngTilbakeRestKlient k9TilbakeRestKlientMock;
     private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
@@ -71,7 +71,7 @@ public class SimulerOppdragStegTest {
         tilbakekrevingRepository = new TilbakekrevingRepository(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         k9OppdragRestKlientMock = mock(K9OppdragRestKlient.class);
-        k9TilbakeRestKlientMock = mock(K9TilbakeRestKlient.class);
+        k9TilbakeRestKlientMock = mock(UngTilbakeRestKlient.class);
         tilkjentYtelseTjenesteMock = mock(TilkjentYtelseTjeneste.class);
         behandlingProsesseringTjeneste = mock(BehandlingProsesseringTjeneste.class);
 

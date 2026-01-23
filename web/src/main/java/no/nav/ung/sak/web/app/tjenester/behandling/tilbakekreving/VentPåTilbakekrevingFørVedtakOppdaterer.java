@@ -12,13 +12,13 @@ import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = SjekkTilbakekrevingFørVedtakDto.class, adapter = AksjonspunktOppdaterer.class)
 class VentPåTilbakekrevingFørVedtakOppdaterer implements AksjonspunktOppdaterer<SjekkTilbakekrevingFørVedtakDto> {
 
-    private K9TilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient k9TilbakeRestKlient;
     private HistorikkinnslagRepository historikkinnslagRepository;
 
     public VentPåTilbakekrevingFørVedtakOppdaterer() {
@@ -26,7 +26,7 @@ class VentPåTilbakekrevingFørVedtakOppdaterer implements AksjonspunktOppdatere
     }
 
     @Inject
-    public VentPåTilbakekrevingFørVedtakOppdaterer(K9TilbakeRestKlient k9TilbakeRestKlient,
+    public VentPåTilbakekrevingFørVedtakOppdaterer(UngTilbakeRestKlient k9TilbakeRestKlient,
                                                    HistorikkinnslagRepository historikkinnslagRepository) {
         this.k9TilbakeRestKlient = k9TilbakeRestKlient;
         this.historikkinnslagRepository = historikkinnslagRepository;

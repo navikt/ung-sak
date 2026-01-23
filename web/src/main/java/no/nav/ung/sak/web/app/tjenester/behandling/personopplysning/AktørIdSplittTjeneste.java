@@ -17,7 +17,7 @@ import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 
 @Dependent
 public class AktørIdSplittTjeneste {
@@ -31,7 +31,7 @@ public class AktørIdSplittTjeneste {
     private final K9OppdragRestKlient oppdragRestKlient;
     private final AbakusTjeneste abakusTjeneste;
     private final AktørBytteFordelKlient fordelKlient;
-    private final K9TilbakeRestKlient k9TilbakeRestKlient;
+    private final UngTilbakeRestKlient k9TilbakeRestKlient;
 
     @Inject
     public AktørIdSplittTjeneste(AktørTjeneste aktørTjeneste,
@@ -39,7 +39,7 @@ public class AktørIdSplittTjeneste {
                                  K9OppdragRestKlient oppdragRestKlient,
                                  AbakusTjeneste abakusTjeneste,
                                  AktørBytteFordelKlient fordelKlient,
-                                 K9TilbakeRestKlient k9TilbakeRestKlient) {
+                                 UngTilbakeRestKlient k9TilbakeRestKlient) {
         this.aktørTjeneste = aktørTjeneste;
         this.entityManager = entityManager;
         this.oppdragRestKlient = oppdragRestKlient;
