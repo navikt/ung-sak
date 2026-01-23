@@ -5,6 +5,7 @@ import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.felles.typer.AktørId;
 import org.hibernate.annotations.ColumnTransformer;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @MappedSuperclass
@@ -17,7 +18,7 @@ public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Column(name = "oppgavereferanse", nullable = false, updatable = false, unique = true)
     private UUID oppgavereferanse;
 
-    @Column(name = "status", nullable = false, updatable = false)
+    @Column(name = "status", nullable = false)
     protected OppgaveStatus status;
 
     @Column(name = "type")
@@ -27,6 +28,15 @@ public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @ColumnTransformer(write = "?::jsonb")
     @Column(name = "data", nullable = false, updatable = false, columnDefinition = "jsonb")
     private OppgaveData data;
+
+    @Column(name = "løst_dato")
+    private LocalDateTime løstDato; // NOSONAR
+
+    @Column(name = "åpnet_dato")
+    private LocalDateTime åpnetDato; // NOSONAR
+
+    @Column(name = "lukket_dato")
+    private LocalDateTime lukketDato; // NOSONAR
 
     public AktørId getAktørId() {
         return aktørId;
@@ -52,4 +62,31 @@ public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
         this.data = data;
     }
 
+    protected void setStatus(OppgaveStatus status) {
+        this.status = status;
+    }
+
+    public void setLøstDato(LocalDateTime løstDato) {
+        this.løstDato = løstDato;
+    }
+
+    public void setÅpnetDato(LocalDateTime åpnetDato) {
+        this.åpnetDato = åpnetDato;
+    }
+
+    public void setLukketDato(LocalDateTime lukketDato) {
+        this.lukketDato = lukketDato;
+    }
+
+    public LocalDateTime getLøstDato() {
+        return løstDato;
+    }
+
+    public LocalDateTime getÅpnetDato() {
+        return åpnetDato;
+    }
+
+    public LocalDateTime getLukketDato() {
+        return lukketDato;
+    }
 }

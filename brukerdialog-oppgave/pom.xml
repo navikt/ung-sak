@@ -18,6 +18,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>felles</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
     </dependencies>
 
 </project>

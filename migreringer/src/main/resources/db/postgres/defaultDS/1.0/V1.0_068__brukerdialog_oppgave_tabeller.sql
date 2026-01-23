@@ -10,6 +10,9 @@ create table BD_VARSEL
     type                    varchar(100),
     data                    jsonb not null,
     frist_tid               timestamp,
+    løst_dato               timestamp,
+    åpnet_dato              timestamp,
+    lukket_dato             timestamp,
     opprettet_tid           timestamp default CURRENT_TIMESTAMP not null,
     opprettet_av            varchar(20) not null default 'VL',
     endret_av               varchar(20),
@@ -26,6 +29,9 @@ create table BD_SOKNAD
     status                  varchar(50) not null,
     type                    varchar(100),
     data                    jsonb not null,
+    løst_dato               timestamp,
+    åpnet_dato              timestamp,
+    lukket_dato             timestamp,
     opprettet_tid           timestamp default CURRENT_TIMESTAMP not null,
     opprettet_av            varchar(20) not null default 'VL',
     endret_av               varchar(20),
@@ -34,7 +40,10 @@ create table BD_SOKNAD
 );
 
 -- Indekser for BD_VARSEL
-create unique index idx_bd_varsel_aktoer_id
+create unique index idx_bd_varsel_oppgavereferanse
+    on BD_VARSEL (oppgavereferanse);
+
+create index idx_bd_varsel_aktoer_id
     on BD_VARSEL (aktoer_id);
 
 create index idx_bd_varsel_status
@@ -47,7 +56,10 @@ create index idx_bd_varsel_frist_tid
     on BD_VARSEL (frist_tid) where status = 'ULØST';
 
 -- Indekser for BD_SOKNAD
-create unique index idx_bd_soknad_aktoer_id
+create unique index idx_bd_soknad_oppgavereferanse
+    on BD_SOKNAD (oppgavereferanse);
+
+create index idx_bd_soknad_aktoer_id
     on BD_SOKNAD (aktoer_id);
 
 create index idx_bd_soknad_status
