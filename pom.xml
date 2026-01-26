@@ -347,7 +347,13 @@
 
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>brukerdialog-oppgave</artifactId>
+                <artifactId>brukerdialog-oppgave-api</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

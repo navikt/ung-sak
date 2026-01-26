@@ -10,6 +10,12 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+/**
+ * Tjeneste for å hente og vise brukerdialog-oppgaver.
+ * Brukes primært av REST-tjenester for å hente oppgaver til visning.
+ *
+ * For å opprette og administrere oppgaver, bruk {@link OppgaveForSaksbehandlingGrensesnittImpl}.
+ */
 @ApplicationScoped
 public class BrukerdialogOppgaveTjeneste {
 

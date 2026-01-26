@@ -12,6 +12,7 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.Innte
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
+import no.nav.ung.sak.oppgave.OppgaveForSaksbehandlingGrensesnitt;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -19,7 +20,7 @@ import java.util.UUID;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "ungdomsprogramregister.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default")
-public class UngOppgaveKlient {
+public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     private final OidcRestClient restClient;
     private final URI opprettKontrollerRegisterInntektURI;
     private final URI opprettInntektrapporteringURI;
@@ -51,6 +52,7 @@ public class UngOppgaveKlient {
         this.løsSøkYtelseURI = tilUri(url, "oppgave/los/sokytelse");
     }
 
+    @Override
     public void avbrytOppgave(UUID eksternRef) {
         try {
             restClient.post(avbrytURI, eksternRef);
@@ -60,6 +62,7 @@ public class UngOppgaveKlient {
 
     }
 
+    @Override
     public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgave) {
         try {
             restClient.post(opprettKontrollerRegisterInntektURI, oppgave);
@@ -69,6 +72,7 @@ public class UngOppgaveKlient {
     }
 
 
+    @Override
     public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgave) {
         try {
             restClient.post(opprettInntektrapporteringURI, oppgave);
@@ -77,6 +81,7 @@ public class UngOppgaveKlient {
         }
     }
 
+    @Override
     public void oppgaveUtløpt(UUID eksternRef) {
         try {
             restClient.post(utløptURI, eksternRef);
@@ -85,6 +90,7 @@ public class UngOppgaveKlient {
         }
     }
 
+    @Override
     public void settOppgaveTilUtløpt(EndreStatusDTO dto) {
         try {
             restClient.post(utløpForTypeOgPeriodeURI, dto);
@@ -93,6 +99,7 @@ public class UngOppgaveKlient {
         }
     }
 
+    @Override
     public void settOppgaveTilAvbrutt(EndreStatusDTO dto) {
         try {
             restClient.post(avbrytForTypeOgPeriodeURI, dto);
@@ -102,6 +109,7 @@ public class UngOppgaveKlient {
     }
 
 
+    @Override
     public void opprettEndretSluttdatoOppgave(EndretSluttdatoOppgaveDTO endretSluttdatoOppgaveDTO) {
         try {
             restClient.post(opprettEndretSluttdatoURI, endretSluttdatoOppgaveDTO);
@@ -110,6 +118,7 @@ public class UngOppgaveKlient {
         }
     }
 
+    @Override
     public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO endretStartdatoOppgaveDTO) {
         try {
             restClient.post(opprettEndretStartdatoURI, endretStartdatoOppgaveDTO);
@@ -118,6 +127,7 @@ public class UngOppgaveKlient {
         }
     }
 
+    @Override
     public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO endretPeriodeOppgaveDTO) {
         try {
             restClient.post(opprettEndretPeriodeURI, endretPeriodeOppgaveDTO);
@@ -127,6 +137,7 @@ public class UngOppgaveKlient {
     }
 
 
+    @Override
     public void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO) {
         try {
             restClient.post(løsSøkYtelseURI, deltakerDTO);

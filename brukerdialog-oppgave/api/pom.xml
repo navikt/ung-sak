@@ -5,17 +5,20 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>no.nav.ung.sak</groupId>
-        <artifactId>ung-sak</artifactId>
+        <artifactId>brukerdialog-oppgave-pom</artifactId>
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-    <artifactId>brukerdialog-oppgave-pom</artifactId>
-    <packaging>pom</packaging>
-    <name>UNGSAK :: Brukerdialog oppgave - Pom</name>
+    <artifactId>brukerdialog-oppgave-api</artifactId>
+    <packaging>jar</packaging>
+    <name>UNGSAK :: Brukerdialog oppgave - API</name>
 
-    <modules>
-        <module>api</module>
-        <module>tjeneste</module>
-    </modules>
+    <dependencies>
+        <dependency>
+            <groupId>no.nav.ung.deltakelseopplyser</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
+    </dependencies>
 
 </project>
+

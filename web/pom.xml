@@ -151,7 +151,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave</artifactId>
+            <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
         </dependency>
 
         <!-- Ytelsespesifikke moduler -->
