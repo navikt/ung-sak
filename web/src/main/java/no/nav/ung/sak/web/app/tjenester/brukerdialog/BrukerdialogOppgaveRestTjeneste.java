@@ -42,13 +42,12 @@ public class BrukerdialogOppgaveRestTjeneste {
     @Path("/hent/alle")
     @Operation(summary = "Henter alle oppgaver for en bruker", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public List<no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto> hentAlleOppgaver(
-        @NotNull @QueryParam("aktørId") @Parameter(description = "Aktør-ID for bruker") @Valid AktørIdDto aktørIdDto) {
+    public List<no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto> hentAlleOppgaver() {
         String personIdent = SubjectHandler.getSubjectHandler().getSluttBruker().getUid();
         // TODO: Implementer veksling av personident til aktørid
 
-        AktørId aktørId = aktørIdDto.getAktørId();
-        return oppgaveTjeneste.hentAlleOppgaverForAktør(aktørId);
+        AktørId aktørId;
+        return oppgaveTjeneste.hentAlleOppgaverForAktør(null);
     }
 
     @GET

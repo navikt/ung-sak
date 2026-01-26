@@ -3,8 +3,10 @@ package no.nav.ung.sak.web.server.jetty;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.security.auth.message.config.AuthConfigFactory;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.oidc.OidcApplication;
 import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
 import no.nav.ung.sak.web.app.ApplicationConfig;
+import no.nav.ung.sak.web.app.BrukerdialogApiConfig;
 import no.nav.ung.sak.web.app.FrontendApiConfig;
 import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 import no.nav.ung.sak.web.server.InternalApplicationConfig;
@@ -103,7 +105,9 @@ public class JettyServer {
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
 
         WebAppContext webAppContext = createContext(appKonfigurasjon, server);
-        server.setHandler(new Handler.Sequence(new ClearMdcHandler(), webAppContext));
+        WebAppContext brukerdialogContext = createBrukerdialogContext(appKonfigurasjon, server);
+
+        server.setHandler(new Handler.Sequence(new ClearMdcHandler(), webAppContext, brukerdialogContext));
         server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
         server.join();
@@ -202,6 +206,26 @@ public class JettyServer {
         final ServletContainerInitializerHolder jerseyHolder = webAppContext.addServletContainerInitializer(new JerseyServletContainerInitializer());
         jerseyHolder.addStartupClasses(getJaxRsApplicationClasses());
 
+        webAppContext.setThrowUnavailableOnStartupException(true);
+
+        return webAppContext;
+    }
+
+    protected WebAppContext createBrukerdialogContext(AppKonfigurasjon appKonfigurasjon, Server server) throws IOException {
+        WebAppContext webAppContext = new WebAppContext();
+        webAppContext.setParentLoaderPriority(true);
+        webAppContext.setContextPath(JettyWebKonfigurasjon.COOKIE_PATH + BrukerdialogApiConfig.API_URI);
+
+        String descriptor = ResourceFactory.of(server).newClassLoaderResource("/WEB-INF/web.xml").getURI().toURL().toExternalForm();
+        webAppContext.setDescriptor(descriptor);
+        webAppContext.setBaseResource(createResourceCollection(server));
+        webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
+        webAppContext.setAttribute(MetaInfConfiguration.WEBINF_JAR_PATTERN, "^.*jersey-.*.jar$|^.*felles-sikkerhet.*.jar$");
+        webAppContext.setSecurityHandler(createSecurityHandler());
+
+        final ServletContainerInitializerHolder jerseyHolder =
+            webAppContext.addServletContainerInitializer(new JerseyServletContainerInitializer());
+        jerseyHolder.addStartupClasses(OidcApplication.class, BrukerdialogApiConfig.class);
         webAppContext.setThrowUnavailableOnStartupException(true);
 
         return webAppContext;
