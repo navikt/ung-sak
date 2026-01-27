@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
@@ -18,6 +19,7 @@ import no.nav.ung.sak.kontrakt.person.AktørIdDto;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveTjeneste;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Path(BrukerdialogOppgaveRestTjeneste.BASE_PATH)
@@ -28,14 +30,16 @@ public class BrukerdialogOppgaveRestTjeneste {
     static final String BASE_PATH = "/brukerdialog/oppgave";
 
     private BrukerdialogOppgaveTjeneste oppgaveTjeneste;
+    private Pdl pdl;
 
     public BrukerdialogOppgaveRestTjeneste() {
         // CDI proxy
     }
 
     @Inject
-    public BrukerdialogOppgaveRestTjeneste(BrukerdialogOppgaveTjeneste oppgaveTjeneste) {
+    public BrukerdialogOppgaveRestTjeneste(BrukerdialogOppgaveTjeneste oppgaveTjeneste, Pdl pdl) {
         this.oppgaveTjeneste = oppgaveTjeneste;
+        this.pdl = pdl;
     }
 
     @GET
@@ -43,34 +47,9 @@ public class BrukerdialogOppgaveRestTjeneste {
     @Operation(summary = "Henter alle oppgaver for en bruker", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
     public List<no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto> hentAlleOppgaver() {
-        String personIdent = SubjectHandler.getSubjectHandler().getSluttBruker().getUid();
-        // TODO: Implementer veksling av personident til aktørid
-
-        AktørId aktørId;
-        return oppgaveTjeneste.hentAlleOppgaverForAktør(null);
+        return oppgaveTjeneste.hentAlleOppgaverForAktør(finnAktørId());
     }
 
-    @GET
-    @Path("/hent/varsler")
-    @Operation(summary = "Henter alle varsler for en bruker", tags = "brukerdialog-oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public List<no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto> hentAlleVarsler(
-        @NotNull @QueryParam("aktørId") @Parameter(description = "Aktør-ID for bruker") @Valid AktørIdDto aktørIdDto) {
-
-        AktørId aktørId = aktørIdDto.getAktørId();
-        return oppgaveTjeneste.hentAlleVarslerForAktør(aktørId);
-    }
-
-    @GET
-    @Path("/hent/soknader")
-    @Operation(summary = "Henter alle søknader for en bruker", tags = "brukerdialog-oppgave")
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public List<no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto> hentAlleSøknader(
-        @NotNull @QueryParam("aktørId") @Parameter(description = "Aktør-ID for bruker") @Valid AktørIdDto aktørIdDto) {
-
-        AktørId aktørId = aktørIdDto.getAktørId();
-        return oppgaveTjeneste.hentAlleSøknaderForAktør(aktørId);
-    }
 
     @GET
     @Path("/{oppgavereferanse}")
@@ -79,7 +58,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto hentOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
 
-        return oppgaveTjeneste.hentOppgaveForOppgavereferanse(oppgavereferanse);
+        return oppgaveTjeneste.hentOppgaveForOppgavereferanse(oppgavereferanse, finnAktørId());
     }
 
     @GET
@@ -89,7 +68,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto lukkOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
 
-        return oppgaveTjeneste.lukkOppgave(oppgavereferanse);
+        return oppgaveTjeneste.lukkOppgave(oppgavereferanse,finnAktørId());
     }
 
     @GET
@@ -99,7 +78,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto åpneOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
 
-        return oppgaveTjeneste.åpneOppgave(oppgavereferanse);
+        return oppgaveTjeneste.åpneOppgave(oppgavereferanse, finnAktørId());
     }
 
     @GET
@@ -109,7 +88,14 @@ public class BrukerdialogOppgaveRestTjeneste {
     public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto løsOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
 
-        return oppgaveTjeneste.løsOppgave(oppgavereferanse);
+        return oppgaveTjeneste.løsOppgave(oppgavereferanse, finnAktørId());
+    }
+
+    private AktørId finnAktørId() {
+        String personIdent = SubjectHandler.getSubjectHandler().getSluttBruker().getUid();
+        String aktørIdString = pdl.hentAktørIdForPersonIdent(personIdent, false)
+            .orElseThrow(() -> new IllegalStateException("Finner ikke aktørId for personIdent"));
+        return new AktørId(aktørIdString);
     }
 }
 

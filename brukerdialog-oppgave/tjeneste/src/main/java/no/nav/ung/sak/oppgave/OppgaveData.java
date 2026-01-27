@@ -2,8 +2,7 @@ package no.nav.ung.sak.oppgave;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import no.nav.ung.sak.oppgave.søknad.SøkYtelseOppgaveData;
-import no.nav.ung.sak.oppgave.varsel.oppgavedata.*;
+import no.nav.ung.sak.oppgave.oppgavedata.*;
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,

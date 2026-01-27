@@ -1,9 +1,9 @@
-package no.nav.ung.sak.oppgave.varsel.oppgavedata;
+package no.nav.ung.sak.oppgave.oppgavedata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.ung.sak.oppgave.OppgaveData;
-import no.nav.ung.sak.oppgave.varsel.PeriodeDTO;
-import no.nav.ung.sak.oppgave.varsel.PeriodeEndringType;
+import no.nav.ung.sak.oppgave.PeriodeDTO;
+import no.nav.ung.sak.oppgave.PeriodeEndringType;
 
 import java.util.Objects;
 import java.util.Set;

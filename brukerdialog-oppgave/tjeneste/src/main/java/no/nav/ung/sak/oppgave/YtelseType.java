@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.varsel;
+package no.nav.ung.sak.oppgave;
 
 public enum YtelseType {
     SYKEPENGER,

@@ -38,26 +38,15 @@ public class BrukerdialogOppgaveTjeneste {
             .collect(Collectors.toList());
     }
 
-    public List<BrukerdialogOppgaveDto> hentAlleVarslerForAktør(AktørId aktørId) {
-        return repository.hentAlleVarslerForAktør(aktørId).stream()
-            .map(mapper::tilDto)
-            .collect(Collectors.toList());
-    }
 
-    public List<BrukerdialogOppgaveDto> hentAlleSøknaderForAktør(AktørId aktørId) {
-        return repository.hentAlleSøknaderForAktør(aktørId).stream()
-            .map(mapper::tilDto)
-            .collect(Collectors.toList());
-    }
-
-    public BrukerdialogOppgaveDto hentOppgaveForOppgavereferanse(UUID oppgavereferanse) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse)
+    public BrukerdialogOppgaveDto hentOppgaveForOppgavereferanse(UUID oppgavereferanse, AktørId aktørId) {
+        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
         return mapper.tilDto(oppgave);
     }
 
-    public BrukerdialogOppgaveDto lukkOppgave(UUID oppgavereferanse) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse)
+    public BrukerdialogOppgaveDto lukkOppgave(UUID oppgavereferanse, AktørId aktørId) {
+        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
 
         oppgave.setStatus(OppgaveStatus.LUKKET);
@@ -67,8 +56,8 @@ public class BrukerdialogOppgaveTjeneste {
         return mapper.tilDto(oppdatertOppgave);
     }
 
-    public BrukerdialogOppgaveDto åpneOppgave(UUID oppgavereferanse) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse)
+    public BrukerdialogOppgaveDto åpneOppgave(UUID oppgavereferanse, AktørId aktørId) {
+        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
 
         oppgave.setÅpnetDato(LocalDateTime.now());
@@ -77,8 +66,8 @@ public class BrukerdialogOppgaveTjeneste {
         return mapper.tilDto(oppdatertOppgave);
     }
 
-    public BrukerdialogOppgaveDto løsOppgave(UUID oppgavereferanse) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse)
+    public BrukerdialogOppgaveDto løsOppgave(UUID oppgavereferanse, AktørId aktørId) {
+        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
 
         oppgave.setStatus(OppgaveStatus.LØST);

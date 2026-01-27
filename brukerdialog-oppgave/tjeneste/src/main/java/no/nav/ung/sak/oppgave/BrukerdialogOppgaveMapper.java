@@ -2,7 +2,6 @@ package no.nav.ung.sak.oppgave;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto;
-import no.nav.ung.sak.oppgave.varsel.BrukerdialogVarselEntitet;
 
 @ApplicationScoped
 public class BrukerdialogOppgaveMapper {
@@ -17,9 +16,7 @@ public class BrukerdialogOppgaveMapper {
             oppgave.getStatus() != null ? oppgave.getStatus().name() : null,
             oppgave.getOppgaveType() != null ? oppgave.getOppgaveType().name() : null,
             oppgave.getData(),
-            oppgave instanceof BrukerdialogVarselEntitet
-                ? ((BrukerdialogVarselEntitet) oppgave).getFristTid()
-                : null,
+            oppgave.getFristTid(),
             oppgave.getOpprettetTidspunkt(),
             oppgave.getLøstDato(),
             oppgave.getÅpnetDato(),

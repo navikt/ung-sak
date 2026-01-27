@@ -1,13 +1,12 @@
-package no.nav.ung.sak.oppgave.varsel.oppgavedata;
+package no.nav.ung.sak.oppgave;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.sak.oppgave.OppgaveData;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class InntektsrapporteringOppgaveData extends OppgaveData {
+public class PeriodeDTO {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonProperty("fomDato")
@@ -17,16 +16,12 @@ public class InntektsrapporteringOppgaveData extends OppgaveData {
     @JsonProperty("tomDato")
     private LocalDate tomDato;
 
-    @JsonProperty("gjelderDelerAvMåned")
-    private boolean gjelderDelerAvMåned;
-
-    public InntektsrapporteringOppgaveData() {
+    public PeriodeDTO() {
     }
 
-    public InntektsrapporteringOppgaveData(LocalDate fomDato, LocalDate tomDato, boolean gjelderDelerAvMåned) {
+    public PeriodeDTO(LocalDate fomDato, LocalDate tomDato) {
         this.fomDato = fomDato;
         this.tomDato = tomDato;
-        this.gjelderDelerAvMåned = gjelderDelerAvMåned;
     }
 
     public LocalDate getFomDato() {
@@ -45,27 +40,18 @@ public class InntektsrapporteringOppgaveData extends OppgaveData {
         this.tomDato = tomDato;
     }
 
-    public boolean isGjelderDelerAvMåned() {
-        return gjelderDelerAvMåned;
-    }
-
-    public void setGjelderDelerAvMåned(boolean gjelderDelerAvMåned) {
-        this.gjelderDelerAvMåned = gjelderDelerAvMåned;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        InntektsrapporteringOppgaveData that = (InntektsrapporteringOppgaveData) o;
-        return gjelderDelerAvMåned == that.gjelderDelerAvMåned &&
-               Objects.equals(fomDato, that.fomDato) &&
+        PeriodeDTO that = (PeriodeDTO) o;
+        return Objects.equals(fomDato, that.fomDato) &&
                Objects.equals(tomDato, that.tomDato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fomDato, tomDato, gjelderDelerAvMåned);
+        return Objects.hash(fomDato, tomDato);
     }
 }
 

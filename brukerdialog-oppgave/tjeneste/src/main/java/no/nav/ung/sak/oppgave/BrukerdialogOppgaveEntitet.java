@@ -8,26 +8,34 @@ import org.hibernate.annotations.ColumnTransformer;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@MappedSuperclass
-public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
+@Entity(name = "BrukerdialogOppgave")
+@Table(name = "BD_OPPGAVE")
+public class BrukerdialogOppgaveEntitet extends BaseEntitet {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE")
+    private Long id;
 
     @Embedded
-    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", unique = true, nullable = false, updatable = false)))
-    protected AktørId aktørId;
+    @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "aktoer_id", nullable = false, updatable = false)))
+    private AktørId aktørId;
 
     @Column(name = "oppgavereferanse", nullable = false, updatable = false, unique = true)
     private UUID oppgavereferanse;
 
     @Column(name = "status", nullable = false)
-    protected OppgaveStatus status;
+    private OppgaveStatus status;
 
     @Column(name = "type")
-    protected OppgaveType oppgaveType;
+    private OppgaveType oppgaveType;
 
     @Convert(converter = OppgaveDataConverter.class)
     @ColumnTransformer(write = "?::jsonb")
     @Column(name = "data", nullable = false, updatable = false, columnDefinition = "jsonb")
     private OppgaveData data;
+
+    @Column(name = "frist_tid")
+    private LocalDateTime fristTid;
 
     @Column(name = "løst_dato")
     private LocalDateTime løstDato; // NOSONAR
@@ -37,6 +45,7 @@ public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
 
     @Column(name = "lukket_dato")
     private LocalDateTime lukketDato; // NOSONAR
+
 
     public AktørId getAktørId() {
         return aktørId;
@@ -62,6 +71,14 @@ public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
         this.data = data;
     }
 
+    public LocalDateTime getFristTid() {
+        return fristTid;
+    }
+
+    public void setFristTid(LocalDateTime fristTid) {
+        this.fristTid = fristTid;
+    }
+
     protected void setStatus(OppgaveStatus status) {
         this.status = status;
     }
@@ -70,20 +87,20 @@ public abstract class BrukerdialogOppgaveEntitet extends BaseEntitet {
         this.løstDato = løstDato;
     }
 
-    public void setÅpnetDato(LocalDateTime åpnetDato) {
-        this.åpnetDato = åpnetDato;
-    }
-
-    public void setLukketDato(LocalDateTime lukketDato) {
-        this.lukketDato = lukketDato;
-    }
-
     public LocalDateTime getLøstDato() {
         return løstDato;
     }
 
+    public void setÅpnetDato(LocalDateTime åpnetDato) {
+        this.åpnetDato = åpnetDato;
+    }
+
     public LocalDateTime getÅpnetDato() {
         return åpnetDato;
+    }
+
+    public void setLukketDato(LocalDateTime lukketDato) {
+        this.lukketDato = lukketDato;
     }
 
     public LocalDateTime getLukketDato() {

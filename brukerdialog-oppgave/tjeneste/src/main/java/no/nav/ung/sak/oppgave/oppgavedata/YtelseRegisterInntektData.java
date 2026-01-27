@@ -1,7 +1,7 @@
-package no.nav.ung.sak.oppgave.varsel.oppgavedata;
+package no.nav.ung.sak.oppgave.oppgavedata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import no.nav.ung.sak.oppgave.varsel.YtelseType;
+import no.nav.ung.sak.oppgave.YtelseType;
 
 import java.util.Objects;
 

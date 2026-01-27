@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.varsel.oppgavedata;
+package no.nav.ung.sak.oppgave.oppgavedata;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,10 +7,7 @@ import no.nav.ung.sak.oppgave.OppgaveData;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class KontrollerRegisterInntektOppgaveData extends OppgaveData {
-
-    @JsonProperty("registerinntekt")
-    private RegisterinntektData registerinntekt;
+public class InntektsrapporteringOppgaveData extends OppgaveData {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @JsonProperty("fomDato")
@@ -23,22 +20,13 @@ public class KontrollerRegisterInntektOppgaveData extends OppgaveData {
     @JsonProperty("gjelderDelerAvMåned")
     private boolean gjelderDelerAvMåned;
 
-    public KontrollerRegisterInntektOppgaveData() {
+    public InntektsrapporteringOppgaveData() {
     }
 
-    public KontrollerRegisterInntektOppgaveData(RegisterinntektData registerinntekt, LocalDate fomDato, LocalDate tomDato, boolean gjelderDelerAvMåned) {
-        this.registerinntekt = registerinntekt;
+    public InntektsrapporteringOppgaveData(LocalDate fomDato, LocalDate tomDato, boolean gjelderDelerAvMåned) {
         this.fomDato = fomDato;
         this.tomDato = tomDato;
         this.gjelderDelerAvMåned = gjelderDelerAvMåned;
-    }
-
-    public RegisterinntektData getRegisterinntekt() {
-        return registerinntekt;
-    }
-
-    public void setRegisterinntekt(RegisterinntektData registerinntekt) {
-        this.registerinntekt = registerinntekt;
     }
 
     public LocalDate getFomDato() {
@@ -69,16 +57,15 @@ public class KontrollerRegisterInntektOppgaveData extends OppgaveData {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        KontrollerRegisterInntektOppgaveData that = (KontrollerRegisterInntektOppgaveData) o;
+        InntektsrapporteringOppgaveData that = (InntektsrapporteringOppgaveData) o;
         return gjelderDelerAvMåned == that.gjelderDelerAvMåned &&
-               Objects.equals(registerinntekt, that.registerinntekt) &&
                Objects.equals(fomDato, that.fomDato) &&
                Objects.equals(tomDato, that.tomDato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(registerinntekt, fomDato, tomDato, gjelderDelerAvMåned);
+        return Objects.hash(fomDato, tomDato, gjelderDelerAvMåned);
     }
 }
 

@@ -1,10 +1,10 @@
--- Migration for Brukerdialog Oppgave tabeller (Varsel og Søknad)
+-- Migration for Brukerdialog Oppgave tabell
 
--- Opprett tabell for brukerdialog varsel
-create table BD_VARSEL
+-- Opprett tabell for brukerdialog oppgaver
+create table BD_OPPGAVE
 (
     id                      bigint not null primary key,
-    oppgavereferanse               uuid not null,
+    oppgavereferanse        uuid not null,
     aktoer_id               varchar(50) not null,
     status                  varchar(50) not null,
     type                    varchar(100),
@@ -20,61 +20,37 @@ create table BD_VARSEL
     versjon                 bigint default 0 not null
 );
 
--- Opprett tabell for brukerdialog søknad
-create table BD_SOKNAD
-(
-    id                      bigint not null primary key,
-    oppgavereferanse               uuid not null,
-    aktoer_id               varchar(50) not null,
-    status                  varchar(50) not null,
-    type                    varchar(100),
-    data                    jsonb not null,
-    løst_dato               timestamp,
-    åpnet_dato              timestamp,
-    lukket_dato             timestamp,
-    opprettet_tid           timestamp default CURRENT_TIMESTAMP not null,
-    opprettet_av            varchar(20) not null default 'VL',
-    endret_av               varchar(20),
-    endret_tid              timestamp,
-    versjon                 bigint default 0 not null
-);
+-- Indekser for BD_OPPGAVE
+create unique index idx_bd_oppgave_oppgavereferanse
+    on BD_OPPGAVE (oppgavereferanse);
 
--- Indekser for BD_VARSEL
-create unique index idx_bd_varsel_oppgavereferanse
-    on BD_VARSEL (oppgavereferanse);
+create index idx_bd_oppgave_aktoer_id
+    on BD_OPPGAVE (aktoer_id);
 
-create index idx_bd_varsel_aktoer_id
-    on BD_VARSEL (aktoer_id);
+create index idx_bd_oppgave_status
+    on BD_OPPGAVE (status);
 
-create index idx_bd_varsel_status
-    on BD_VARSEL (status);
+create index idx_bd_oppgave_type
+    on BD_OPPGAVE (type);
 
-create index idx_bd_varsel_type
-    on BD_VARSEL (type);
+create index idx_bd_oppgave_frist_tid
+    on BD_OPPGAVE (frist_tid) where status = 'ULØST';
 
-create index idx_bd_varsel_frist_tid
-    on BD_VARSEL (frist_tid) where status = 'ULØST';
-
--- Indekser for BD_SOKNAD
-create unique index idx_bd_soknad_oppgavereferanse
-    on BD_SOKNAD (oppgavereferanse);
-
-create index idx_bd_soknad_aktoer_id
-    on BD_SOKNAD (aktoer_id);
-
-create index idx_bd_soknad_status
-    on BD_SOKNAD (status);
-
-create index idx_bd_soknad_type
-    on BD_SOKNAD (type);
-
--- Sekvenser
+-- Sekvens
 create sequence if not exists SEQ_BD_OPPGAVE increment by 50 minvalue 1000000;
 
--- Kommentarer for BD_VARSEL
-comment on table BD_VARSEL is 'Inneholder brukerdialog varsler som sendes til bruker.';
-comment on column BD_VARSEL.id is 'Primary Key. Unik identifikator for varsel.';
-comment on column BD_VARSEL.aktoer_id is 'Aktør-ID for bruker som varslet gjelder.';
+-- Kommentarer for BD_OPPGAVE
+comment on table BD_OPPGAVE is 'Inneholder brukerdialog-oppgaver som sendes til bruker.';
+comment on column BD_OPPGAVE.id is 'Primary Key. Unik identifikator for oppgave.';
+comment on column BD_OPPGAVE.aktoer_id is 'Aktør-ID for bruker som oppgaven gjelder.';
+comment on column BD_OPPGAVE.oppgavereferanse is 'Unik ekstern referanse til oppgaven.';
+comment on column BD_OPPGAVE.status is 'Status for oppgaven (ULØST, LØST, LUKKET, AVBRUTT, UTLØPT).';
+comment on column BD_OPPGAVE.type is 'Type oppgave.';
+comment on column BD_OPPGAVE.data is 'JSON-data med oppgavedetaljer.';
+comment on column BD_OPPGAVE.frist_tid is 'Frist for når oppgaven må være løst.';
+comment on column BD_OPPGAVE.løst_dato is 'Tidspunkt når oppgaven ble løst.';
+comment on column BD_OPPGAVE.åpnet_dato is 'Tidspunkt når oppgaven ble åpnet av bruker.';
+comment on column BD_OPPGAVE.lukket_dato is 'Tidspunkt når oppgaven ble lukket.';
 comment on column BD_VARSEL.status is 'Status på varsel (LØST, ULØST, AVBRUTT, UTLØPT, LUKKET).';
 comment on column BD_VARSEL.type is 'Type varsel (BEKREFT_ENDRET_STARTDATO, BEKREFT_ENDRET_SLUTTDATO, etc).';
 comment on column BD_VARSEL.data is 'JSON-data for varsel, inneholder polymorf oppgavedata avhengig av type.';
