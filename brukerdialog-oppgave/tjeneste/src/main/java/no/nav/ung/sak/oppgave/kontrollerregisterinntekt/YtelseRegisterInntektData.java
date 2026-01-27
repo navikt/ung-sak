@@ -1,8 +1,7 @@
-package no.nav.ung.sak.oppgave.oppgavedata;
+package no.nav.ung.sak.oppgave.kontrollerregisterinntekt;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
-import no.nav.ung.sak.oppgave.YtelseType;
 
 import java.util.Objects;
 

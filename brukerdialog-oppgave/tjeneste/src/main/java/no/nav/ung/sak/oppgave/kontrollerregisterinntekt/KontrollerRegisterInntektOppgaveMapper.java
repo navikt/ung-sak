@@ -9,14 +9,8 @@ import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveData;
 import no.nav.ung.sak.oppgave.OppgaveType;
-import no.nav.ung.sak.oppgave.oppgavedata.ArbeidOgFrilansRegisterInntektData;
-import no.nav.ung.sak.oppgave.oppgavedata.KontrollerRegisterInntektOppgaveData;
-import no.nav.ung.sak.oppgave.oppgavedata.RegisterinntektData;
-import no.nav.ung.sak.oppgave.oppgavedata.YtelseRegisterInntektData;
 
-import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class KontrollerRegisterInntektOppgaveMapper {
