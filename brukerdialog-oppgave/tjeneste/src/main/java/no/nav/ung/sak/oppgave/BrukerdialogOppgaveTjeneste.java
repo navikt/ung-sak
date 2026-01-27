@@ -1,77 +1,61 @@
 package no.nav.ung.sak.oppgave;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
- * Tjeneste for å hente og vise brukerdialog-oppgaver.
- * Brukes primært av REST-tjenester for å hente oppgaver til visning.
- *
- * For å opprette og administrere oppgaver, bruk {@link OppgaveForSaksbehandlingGrensesnittImpl}.
+ * Interface som definerer handlinger på oppgaver som er tilgjengelig for bruker.
  */
-@ApplicationScoped
-public class BrukerdialogOppgaveTjeneste {
+public interface BrukerdialogOppgaveTjeneste {
 
-    private BrukerdialogOppgaveRepository repository;
-    private BrukerdialogOppgaveMapper mapper;
+    /**
+     * Henter alle oppgaver for en gitt aktør.
+     *
+     * @param aktørId aktørId for bruker
+     * @return liste med oppgaver
+     */
+    List<BrukerdialogOppgaveDto> hentAlleOppgaverForAktør(AktørId aktørId);
 
-    public BrukerdialogOppgaveTjeneste() {
-        // CDI proxy
-    }
+    /**
+     * Henter en spesifikk oppgave basert på oppgavereferanse og aktørId.
+     *
+     * @param oppgavereferanse unik referanse til oppgaven
+     * @param aktørId aktørId for bruker
+     * @return oppgaven som DTO
+     * @throws IllegalArgumentException hvis oppgaven ikke finnes
+     */
+    BrukerdialogOppgaveDto hentOppgaveForOppgavereferanse(UUID oppgavereferanse, AktørId aktørId);
 
-    @Inject
-    public BrukerdialogOppgaveTjeneste(BrukerdialogOppgaveRepository repository, BrukerdialogOppgaveMapper mapper) {
-        this.repository = repository;
-        this.mapper = mapper;
-    }
+    /**
+     * Lukker en oppgave basert på oppgavereferanse.
+     *
+     * @param oppgavereferanse unik referanse til oppgaven
+     * @param aktørId aktørId for bruker
+     * @return den lukkede oppgaven som DTO
+     * @throws IllegalArgumentException hvis oppgaven ikke finnes
+     */
+    BrukerdialogOppgaveDto lukkOppgave(UUID oppgavereferanse, AktørId aktørId);
 
-    public List<BrukerdialogOppgaveDto> hentAlleOppgaverForAktør(AktørId aktørId) {
-        return repository.hentAlleOppgaverForAktør(aktørId).stream()
-            .map(mapper::tilDto)
-            .collect(Collectors.toList());
-    }
+    /**
+     * Åpner en oppgave basert på oppgavereferanse.
+     *
+     * @param oppgavereferanse unik referanse til oppgaven
+     * @param aktørId aktørId for bruker
+     * @return den åpnede oppgaven som DTO
+     * @throws IllegalArgumentException hvis oppgaven ikke finnes
+     */
+    BrukerdialogOppgaveDto åpneOppgave(UUID oppgavereferanse, AktørId aktørId);
 
-
-    public BrukerdialogOppgaveDto hentOppgaveForOppgavereferanse(UUID oppgavereferanse, AktørId aktørId) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
-        return mapper.tilDto(oppgave);
-    }
-
-    public BrukerdialogOppgaveDto lukkOppgave(UUID oppgavereferanse, AktørId aktørId) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
-
-        oppgave.setStatus(OppgaveStatus.LUKKET);
-        oppgave.setLukketDato(LocalDateTime.now());
-
-        var oppdatertOppgave = repository.oppdater(oppgave);
-        return mapper.tilDto(oppdatertOppgave);
-    }
-
-    public BrukerdialogOppgaveDto åpneOppgave(UUID oppgavereferanse, AktørId aktørId) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
-
-        oppgave.setÅpnetDato(LocalDateTime.now());
-
-        var oppdatertOppgave = repository.oppdater(oppgave);
-        return mapper.tilDto(oppdatertOppgave);
-    }
-
-    public BrukerdialogOppgaveDto løsOppgave(UUID oppgavereferanse, AktørId aktørId) {
-        var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
-
-        var oppdatertOppgave = repository.løsOppgave(oppgave);
-        return mapper.tilDto(oppdatertOppgave);
-    }
+    /**
+     * Løser en oppgave basert på oppgavereferanse.
+     *
+     * @param oppgavereferanse unik referanse til oppgaven
+     * @param aktørId aktørId for bruker
+     * @return den løste oppgaven som DTO
+     * @throws IllegalArgumentException hvis oppgaven ikke finnes
+     */
+    BrukerdialogOppgaveDto løsOppgave(UUID oppgavereferanse, AktørId aktørId);
 }
-

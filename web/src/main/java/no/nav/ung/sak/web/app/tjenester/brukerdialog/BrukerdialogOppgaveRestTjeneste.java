@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -15,11 +14,9 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.kontrakt.person.AktørIdDto;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveTjeneste;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Path(BrukerdialogOppgaveRestTjeneste.BASE_PATH)
