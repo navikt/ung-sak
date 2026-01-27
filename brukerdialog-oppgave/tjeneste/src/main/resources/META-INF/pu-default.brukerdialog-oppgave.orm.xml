@@ -8,8 +8,7 @@
 	<sequence-generator name="SEQ_BD_OPPGAVE" allocation-size="50" sequence-name="SEQ_BD_OPPGAVE" />
 
 	<!-- Entity mappings -->
-	<entity class="no.nav.ung.sak.oppgave.varsel.BrukerdialogVarselEntitet" />
-	<entity class="no.nav.ung.sak.oppgave.søknad.BrukerdialogSøknadEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet" />
 
 </entity-mappings>
 

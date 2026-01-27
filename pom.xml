@@ -358,6 +358,12 @@
             </dependency>
 
             <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>brukerdialog-oppgave-kontrakt</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>no.nav.sif.abac</groupId>
                 <artifactId>kontrakt</artifactId>
                 <version>1.6.0</version>

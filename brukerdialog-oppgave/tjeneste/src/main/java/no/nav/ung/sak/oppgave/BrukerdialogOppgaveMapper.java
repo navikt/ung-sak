@@ -1,7 +1,7 @@
 package no.nav.ung.sak.oppgave;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto;
+import no.nav.ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto;
 
 @ApplicationScoped
 public class BrukerdialogOppgaveMapper {

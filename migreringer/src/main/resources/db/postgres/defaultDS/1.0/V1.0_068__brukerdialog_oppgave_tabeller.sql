@@ -51,26 +51,9 @@ comment on column BD_OPPGAVE.frist_tid is 'Frist for når oppgaven må være lø
 comment on column BD_OPPGAVE.løst_dato is 'Tidspunkt når oppgaven ble løst.';
 comment on column BD_OPPGAVE.åpnet_dato is 'Tidspunkt når oppgaven ble åpnet av bruker.';
 comment on column BD_OPPGAVE.lukket_dato is 'Tidspunkt når oppgaven ble lukket.';
-comment on column BD_VARSEL.status is 'Status på varsel (LØST, ULØST, AVBRUTT, UTLØPT, LUKKET).';
-comment on column BD_VARSEL.type is 'Type varsel (BEKREFT_ENDRET_STARTDATO, BEKREFT_ENDRET_SLUTTDATO, etc).';
-comment on column BD_VARSEL.data is 'JSON-data for varsel, inneholder polymorf oppgavedata avhengig av type.';
-comment on column BD_VARSEL.frist_tid is 'Frist for å besvare varslet.';
-comment on column BD_VARSEL.opprettet_tid is 'Tidspunkt for når varslet ble opprettet.';
-comment on column BD_VARSEL.opprettet_av is 'Bruker/system som opprettet varslet.';
-comment on column BD_VARSEL.endret_tid is 'Tidspunkt for når varslet sist ble endret.';
-comment on column BD_VARSEL.endret_av is 'Bruker/system som sist endret varslet.';
-comment on column BD_VARSEL.versjon is 'Versjonsnummer for optimistisk låsing.';
-
--- Kommentarer for BD_SOKNAD
-comment on table BD_SOKNAD is 'Inneholder brukerdialog søknadsvarsler som sendes til bruker.';
-comment on column BD_SOKNAD.id is 'Primary Key. Unik identifikator for søknad.';
-comment on column BD_SOKNAD.aktoer_id is 'Aktør-ID for bruker som søknaden gjelder.';
-comment on column BD_SOKNAD.status is 'Status på søknad (LØST, ULØST, AVBRUTT, UTLØPT, LUKKET).';
-comment on column BD_SOKNAD.type is 'Type søknad (SØK_YTELSE, etc).';
-comment on column BD_SOKNAD.data is 'JSON-data for søknad, inneholder polymorf oppgavedata avhengig av type.';
-comment on column BD_SOKNAD.opprettet_tid is 'Tidspunkt for når søknaden ble opprettet.';
-comment on column BD_SOKNAD.opprettet_av is 'Bruker/system som opprettet søknaden.';
-comment on column BD_SOKNAD.endret_tid is 'Tidspunkt for når søknaden sist ble endret.';
-comment on column BD_SOKNAD.endret_av is 'Bruker/system som sist endret søknaden.';
-comment on column BD_SOKNAD.versjon is 'Versjonsnummer for optimistisk låsing.';
-
+comment on column BD_OPPGAVE.frist_tid is 'Frist for å besvare oppgaven.';
+comment on column BD_OPPGAVE.opprettet_tid is 'Tidspunkt for når varslet ble opprettet.';
+comment on column BD_OPPGAVE.opprettet_av is 'Bruker/system som opprettet varslet.';
+comment on column BD_OPPGAVE.endret_tid is 'Tidspunkt for når varslet sist ble endret.';
+comment on column BD_OPPGAVE.endret_av is 'Bruker/system som sist endret varslet.';
+comment on column BD_OPPGAVE.versjon is 'Versjonsnummer for optimistisk låsing.';

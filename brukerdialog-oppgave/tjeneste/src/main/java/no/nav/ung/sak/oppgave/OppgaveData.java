@@ -2,13 +2,13 @@ package no.nav.ung.sak.oppgave;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import no.nav.ung.sak.oppgave.endretsluttdato.EndretSluttdatoOppgaveData;
-import no.nav.ung.sak.oppgave.endretstartdato.EndretStartdatoOppgaveData;
-import no.nav.ung.sak.oppgave.fjernperiode.FjernetPeriodeOppgaveData;
-import no.nav.ung.sak.oppgave.inntektsrapportering.InntektsrapporteringOppgaveData;
-import no.nav.ung.sak.oppgave.kontrollerregisterinntekt.KontrollerRegisterInntektOppgaveData;
-import no.nav.ung.sak.oppgave.endretperiode.EndretPeriodeOppgaveData;
-import no.nav.ung.sak.oppgave.søkytelse.SøkYtelseOppgaveData;
+import no.nav.ung.sak.oppgave.typer.endretsluttdato.EndretSluttdatoOppgaveData;
+import no.nav.ung.sak.oppgave.typer.endretstartdato.EndretStartdatoOppgaveData;
+import no.nav.ung.sak.oppgave.typer.fjernperiode.FjernetPeriodeOppgaveData;
+import no.nav.ung.sak.oppgave.typer.inntektsrapportering.InntektsrapporteringOppgaveData;
+import no.nav.ung.sak.oppgave.typer.kontrollerregisterinntekt.KontrollerRegisterInntektOppgaveData;
+import no.nav.ung.sak.oppgave.typer.endretperiode.EndretPeriodeOppgaveData;
+import no.nav.ung.sak.oppgave.typer.søkytelse.SøkYtelseOppgaveData;
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,

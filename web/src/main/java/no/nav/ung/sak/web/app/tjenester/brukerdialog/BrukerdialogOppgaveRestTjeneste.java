@@ -14,7 +14,8 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.oppgave.BrukerdialogOppgaveTjeneste;
+import no.nav.ung.sak.oppgave.brukerdialog.BrukerdialogOppgaveTjeneste;
+import no.nav.ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto;
 
 import java.util.List;
 import java.util.UUID;
@@ -43,7 +44,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     @Path("/hent/alle")
     @Operation(summary = "Henter alle oppgaver for en bruker", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public List<no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto> hentAlleOppgaver() {
+    public List<BrukerdialogOppgaveDto> hentAlleOppgaver() {
         return oppgaveTjeneste.hentAlleOppgaverForAktør(finnAktørId());
     }
 
@@ -52,7 +53,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     @Path("/{oppgavereferanse}")
     @Operation(summary = "Henter en spesifikk oppgave basert på oppgavereferanse", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto hentOppgave(
+    public BrukerdialogOppgaveDto hentOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
 
         return oppgaveTjeneste.hentOppgaveForOppgavereferanse(oppgavereferanse, finnAktørId());
@@ -62,7 +63,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     @Path("/{oppgavereferanse}/lukk")
     @Operation(summary = "Lukker en oppgave", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto lukkOppgave(
+    public BrukerdialogOppgaveDto lukkOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
         return oppgaveTjeneste.lukkOppgave(oppgavereferanse,finnAktørId());
     }
@@ -71,7 +72,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     @Path("/{oppgavereferanse}/apnet")
     @Operation(summary = "Åpner en oppgave", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto åpneOppgave(
+    public BrukerdialogOppgaveDto åpneOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
         return oppgaveTjeneste.åpneOppgave(oppgavereferanse, finnAktørId());
     }
@@ -80,7 +81,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     @Path("/{oppgavereferanse}/løst")
     @Operation(summary = "Markerer en oppgave som løst", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
-    public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto løsOppgave(
+    public BrukerdialogOppgaveDto løsOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
         return oppgaveTjeneste.løsOppgave(oppgavereferanse, finnAktørId());
     }

@@ -60,13 +60,34 @@ public class BrukerdialogOppgaveRepository {
         return query.getResultList().stream().findFirst();
     }
 
+    public BrukerdialogOppgaveEntitet settUtløpt(BrukerdialogOppgaveEntitet oppgave) {
+        oppgave.setStatus(OppgaveStatus.UTLØPT);
+        return oppdater(oppgave);
+    }
+
+    public BrukerdialogOppgaveEntitet settAvbrutt(BrukerdialogOppgaveEntitet oppgave) {
+        oppgave.setStatus(OppgaveStatus.AVBRUTT);
+        return oppdater(oppgave);
+    }
+
     public BrukerdialogOppgaveEntitet løsOppgave(BrukerdialogOppgaveEntitet oppgave) {
         oppgave.setStatus(OppgaveStatus.LØST);
         oppgave.setLøstDato(LocalDateTime.now());
 
-        var oppdatertOppgave = oppdater(oppgave);
-        return oppdatertOppgave;
+        return oppdater(oppgave);
     }
+
+    public BrukerdialogOppgaveEntitet lukkOppgave(BrukerdialogOppgaveEntitet oppgave) {
+        oppgave.setStatus(OppgaveStatus.LUKKET);
+        oppgave.setLukketDato(LocalDateTime.now());
+        return oppdater(oppgave);
+    }
+
+    public BrukerdialogOppgaveEntitet åpneOppgave(BrukerdialogOppgaveEntitet oppgave) {
+        oppgave.setÅpnetDato(LocalDateTime.now());
+        return oppdater(oppgave);
+    }
+
 
     public void persister(BrukerdialogOppgaveEntitet oppgave) {
         entityManager.persist(oppgave);

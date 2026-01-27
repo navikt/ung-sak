@@ -9,35 +9,24 @@
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-    <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
+    <artifactId>brukerdialog-oppgave-kontrakt</artifactId>
     <packaging>jar</packaging>
-    <name>UNGSAK :: Brukerdialog oppgave - Tjeneste</name>
+    <name>UNGSAK :: Brukerdialog oppgave - Kontrakt</name>
 
     <dependencies>
         <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave-api</artifactId>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
         </dependency>
         <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave-kontrakt</artifactId>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>felles</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>kontrakt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.ung.deltakelseopplyser</groupId>
-            <artifactId>kontrakt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.felles.integrasjon</groupId>
-            <artifactId>k9-pdl-klient</artifactId>
-        </dependency>
     </dependencies>
 
 </project>
+
