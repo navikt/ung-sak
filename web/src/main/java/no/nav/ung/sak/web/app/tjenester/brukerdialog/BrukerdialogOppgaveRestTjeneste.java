@@ -67,7 +67,6 @@ public class BrukerdialogOppgaveRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
     public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto lukkOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
-
         return oppgaveTjeneste.lukkOppgave(oppgavereferanse,finnAktørId());
     }
 
@@ -77,7 +76,6 @@ public class BrukerdialogOppgaveRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
     public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto åpneOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
-
         return oppgaveTjeneste.åpneOppgave(oppgavereferanse, finnAktørId());
     }
 
@@ -87,10 +85,12 @@ public class BrukerdialogOppgaveRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
     public no.nav.ung.sak.kontrakt.oppgave.BrukerdialogOppgaveDto løsOppgave(
         @NotNull @PathParam("oppgavereferanse") @Parameter(description = "Unik referanse til oppgaven") UUID oppgavereferanse) {
-
         return oppgaveTjeneste.løsOppgave(oppgavereferanse, finnAktørId());
     }
 
+    /** Veksler fra personIdent i token til aktørId ved hjelp av PDL.
+     * @return AktørId til innlogget bruker
+     */
     private AktørId finnAktørId() {
         String personIdent = SubjectHandler.getSubjectHandler().getSluttBruker().getUid();
         String aktørIdString = pdl.hentAktørIdForPersonIdent(personIdent, false)
