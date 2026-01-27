@@ -105,9 +105,8 @@ public class JettyServer {
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
 
         WebAppContext webAppContext = createContext(appKonfigurasjon, server);
-        WebAppContext brukerdialogContext = createBrukerdialogContext(appKonfigurasjon, server);
 
-        server.setHandler(new Handler.Sequence(new ClearMdcHandler(), webAppContext, brukerdialogContext));
+        server.setHandler(new Handler.Sequence(new ClearMdcHandler(), webAppContext));
         server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
         server.join();
@@ -211,30 +210,11 @@ public class JettyServer {
         return webAppContext;
     }
 
-    protected WebAppContext createBrukerdialogContext(AppKonfigurasjon appKonfigurasjon, Server server) throws IOException {
-        WebAppContext webAppContext = new WebAppContext();
-        webAppContext.setParentLoaderPriority(true);
-        webAppContext.setContextPath(JettyWebKonfigurasjon.COOKIE_PATH + BrukerdialogApiConfig.API_URI);
-
-        String descriptor = ResourceFactory.of(server).newClassLoaderResource("/WEB-INF/web.xml").getURI().toURL().toExternalForm();
-        webAppContext.setDescriptor(descriptor);
-        webAppContext.setBaseResource(createResourceCollection(server));
-        webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
-        webAppContext.setAttribute(MetaInfConfiguration.WEBINF_JAR_PATTERN, "^.*jersey-.*.jar$|^.*felles-sikkerhet.*.jar$");
-        webAppContext.setSecurityHandler(createSecurityHandler());
-
-        final ServletContainerInitializerHolder jerseyHolder =
-            webAppContext.addServletContainerInitializer(new JerseyServletContainerInitializer());
-        jerseyHolder.addStartupClasses(OidcApplication.class, BrukerdialogApiConfig.class);
-        webAppContext.setThrowUnavailableOnStartupException(true);
-
-        return webAppContext;
-    }
-
     protected Class<?>[] getJaxRsApplicationClasses() {
         return new Class<?>[]{
             no.nav.k9.felles.oidc.OidcApplication.class,
             ApplicationConfig.class,
+            BrukerdialogApiConfig.class,
             InternalApplicationConfig.class,
             OppgaveRedirectApplication.class,
             FrontendApiConfig.class
