@@ -1,6 +1,7 @@
 package no.nav.ung.sak.oppgave.oppgavedata;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.sak.oppgave.YtelseType;
 
 import java.util.Objects;
@@ -11,12 +12,12 @@ public class YtelseRegisterInntektData {
     private int inntekt;
 
     @JsonProperty("ytelsetype")
-    private YtelseType ytelsetype;
+    private OverordnetInntektYtelseType ytelsetype;
 
     public YtelseRegisterInntektData() {
     }
 
-    public YtelseRegisterInntektData(int inntekt, YtelseType ytelsetype) {
+    public YtelseRegisterInntektData(int inntekt, OverordnetInntektYtelseType ytelsetype) {
         this.inntekt = inntekt;
         this.ytelsetype = ytelsetype;
     }
@@ -29,11 +30,11 @@ public class YtelseRegisterInntektData {
         this.inntekt = inntekt;
     }
 
-    public YtelseType getYtelsetype() {
+    public OverordnetInntektYtelseType getYtelsetype() {
         return ytelsetype;
     }
 
-    public void setYtelsetype(YtelseType ytelsetype) {
+    public void setYtelsetype(OverordnetInntektYtelseType ytelsetype) {
         this.ytelsetype = ytelsetype;
     }
 

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.oppgavedata;
+package no.nav.ung.sak.oppgave.endretperiode;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import no.nav.ung.sak.oppgave.OppgaveData;

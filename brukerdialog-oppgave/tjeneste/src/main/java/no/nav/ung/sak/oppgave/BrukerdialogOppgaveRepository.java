@@ -6,6 +6,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import no.nav.ung.sak.felles.typer.AktørId;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,6 +40,17 @@ public class BrukerdialogOppgaveRepository {
         return query.getResultList().stream().findFirst();
     }
 
+    public List<BrukerdialogOppgaveEntitet> hentOppgaveForType(OppgaveType type, OppgaveStatus status, AktørId aktørId) {
+        TypedQuery<BrukerdialogOppgaveEntitet> query = entityManager.createQuery(
+            "SELECT o FROM BrukerdialogOppgave o WHERE o.oppgaveType = :type AND o.status = :status AND o.aktørId = :aktørId",
+            BrukerdialogOppgaveEntitet.class
+        );
+        query.setParameter("type", type);
+        query.setParameter("status", status);
+        query.setParameter("aktørId", aktørId);
+        return query.getResultList();
+    }
+
     public Optional<BrukerdialogOppgaveEntitet> hentOppgaveForOppgavereferanse(UUID oppgavereferanse) {
         TypedQuery<BrukerdialogOppgaveEntitet> query = entityManager.createQuery(
             "SELECT o FROM BrukerdialogOppgave o WHERE o.oppgavereferanse = :oppgavereferanse",
@@ -48,13 +60,23 @@ public class BrukerdialogOppgaveRepository {
         return query.getResultList().stream().findFirst();
     }
 
+    public BrukerdialogOppgaveEntitet løsOppgave(BrukerdialogOppgaveEntitet oppgave) {
+        oppgave.setStatus(OppgaveStatus.LØST);
+        oppgave.setLøstDato(LocalDateTime.now());
+
+        var oppdatertOppgave = oppdater(oppgave);
+        return oppdatertOppgave;
+    }
+
     public void persister(BrukerdialogOppgaveEntitet oppgave) {
         entityManager.persist(oppgave);
         entityManager.flush();
     }
 
     public BrukerdialogOppgaveEntitet oppdater(BrukerdialogOppgaveEntitet oppgave) {
-        return entityManager.merge(oppgave);
+        BrukerdialogOppgaveEntitet merged = entityManager.merge(oppgave);
+        persister(merged);
+        return merged;
     }
 }
 

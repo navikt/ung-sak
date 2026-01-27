@@ -2,25 +2,31 @@ package no.nav.ung.sak.oppgave;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
+import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.oppgave.oppgavedata.InntektsrapporteringOppgaveData;
+import no.nav.ung.sak.oppgave.endretperiode.EndretPeriodeOppgaveMapper;
+import no.nav.ung.sak.oppgave.endretsluttdato.EndretSluttdatoOppgaveMapper;
+import no.nav.ung.sak.oppgave.endretstartdato.EndretStartdatoOppgaveMapper;
+import no.nav.ung.sak.oppgave.inntektsrapportering.InntektsrapporteringOppgaveData;
+import no.nav.ung.sak.oppgave.inntektsrapportering.InntektsrapporteringOppgaveMapper;
+import no.nav.ung.sak.oppgave.kontrollerregisterinntekt.KontrollerRegisterInntektOppgaveMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
  * Tjeneste for å opprette og administrere brukerdialog-oppgaver.
  * Implementerer BrukerdialogOppgaveService interfacet.
- *
+ * <p>
  * Denne tjenesten brukes av etterlysning-modulen og andre moduler
  * som trenger å opprette oppgaver internt i applikasjonen.
  */
@@ -38,39 +44,34 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
 
     @Inject
     public OppgaveForSaksbehandlingGrensesnittImpl(BrukerdialogOppgaveRepository repository,
-                                                     Pdl pdl) {
+                                                   Pdl pdl) {
         this.repository = repository;
         this.pdl = pdl;
     }
 
     @Override
     public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgave) {
-        // TODO: Implementer opprettelse av kontroller registerinntekt oppgave
-        throw new UnsupportedOperationException("Ikke implementert ennå");
+        repository.persister(KontrollerRegisterInntektOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
     public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgave) {
-        // TODO: Implementer opprettelse av inntektsrapportering oppgave
-        throw new UnsupportedOperationException("Ikke implementert ennå");
+        repository.persister(InntektsrapporteringOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
     public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO oppgave) {
-        // TODO: Implementer opprettelse av endret startdato oppgave
-        throw new UnsupportedOperationException("Ikke implementert ennå");
+        repository.persister(EndretStartdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
     public void opprettEndretSluttdatoOppgave(EndretSluttdatoOppgaveDTO oppgave) {
-        // TODO: Implementer opprettelse av endret sluttdato oppgave
-        throw new UnsupportedOperationException("Ikke implementert ennå");
+        repository.persister(EndretSluttdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
-    public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO oppgave) {
-        // TODO: Implementer opprettelse av endret periode oppgave
-        throw new UnsupportedOperationException("Ikke implementert ennå");
+    public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO oppgaveDto) {
+        repository.persister(EndretPeriodeOppgaveMapper.map(oppgaveDto, finnAktørId(oppgaveDto.getDeltakerIdent())));
     }
 
     @Override
@@ -95,9 +96,7 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     public void settOppgaveTilUtløpt(EndreStatusDTO dto) {
         logger.info("Utløper oppgave av type: {} med periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
 
-        String aktørIdString = pdl.hentAktørIdForPersonIdent(dto.getDeltakerIdent(), false)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke aktørId for personIdent"));
-        AktørId aktørId = new AktørId(aktørIdString);
+        AktørId aktørId = finnAktørId(dto.getDeltakerIdent());
 
         // Hent alle oppgaver for aktøren
         var oppgaver = repository.hentAlleOppgaverForAktør(aktørId);
@@ -123,9 +122,7 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     public void settOppgaveTilAvbrutt(EndreStatusDTO dto) {
         logger.info("Avbryter oppgave av type: {} med periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
 
-        String aktørIdString = pdl.hentAktørIdForPersonIdent(dto.getDeltakerIdent(), false)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke aktørId for personIdent"));
-        AktørId aktørId = new AktørId(aktørIdString);
+        AktørId aktørId = finnAktørId(dto.getDeltakerIdent());
 
         // Hent alle oppgaver for aktøren
         var oppgaver = repository.hentAlleOppgaverForAktør(aktørId);
@@ -147,6 +144,25 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
         }
     }
 
+    @Override
+    public void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO) {
+        List<BrukerdialogOppgaveEntitet> søkYtelseOppgaver = repository.hentOppgaveForType(
+            OppgaveType.SØK_YTELSE,
+            OppgaveStatus.ULØST,
+            finnAktørId(deltakerDTO.getDeltakerIdent()));
+        if (søkYtelseOppgaver.size() > 1) {
+            logger.warn("Fant flere enn én uløst søk-ytelse-oppgave. Antall: {}", søkYtelseOppgaver.size());
+        }
+        søkYtelseOppgaver.forEach(repository::løsOppgave);
+    }
+
+    private AktørId finnAktørId(String deltakerIdent) {
+        String aktørIdString = pdl.hentAktørIdForPersonIdent(deltakerIdent, false)
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke aktørId for personIdent"));
+        AktørId aktørId = new AktørId(aktørIdString);
+        return aktørId;
+    }
+
     private boolean matcherOppgaveType(BrukerdialogOppgaveEntitet oppgave, no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.Oppgavetype oppgavetype) {
         if (oppgave.getOppgaveType() == null) {
             return false;
@@ -155,18 +171,12 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     }
 
     private boolean gjelderSammePeriodeForInntektsrapportering(BrukerdialogOppgaveEntitet oppgave,
-                                                                java.time.LocalDate fomDato,
-                                                                java.time.LocalDate tomDato) {
+                                                               java.time.LocalDate fomDato,
+                                                               java.time.LocalDate tomDato) {
         if (oppgave.getData() instanceof InntektsrapporteringOppgaveData data) {
             return data.getFomDato().equals(fomDato) && data.getTomDato().equals(tomDato);
         }
         return false;
-    }
-
-    @Override
-    public void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO) {
-        // TODO: Implementer løsning av søk-ytelse-oppgave
-        throw new UnsupportedOperationException("Ikke implementert ennå");
     }
 }
 

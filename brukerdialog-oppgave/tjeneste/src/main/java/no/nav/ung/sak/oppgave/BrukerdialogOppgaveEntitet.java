@@ -24,7 +24,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     private UUID oppgavereferanse;
 
     @Column(name = "status", nullable = false)
-    private OppgaveStatus status;
+    private OppgaveStatus status = OppgaveStatus.ULØST;
 
     @Column(name = "type")
     private OppgaveType oppgaveType;
@@ -46,6 +46,17 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Column(name = "lukket_dato")
     private LocalDateTime lukketDato; // NOSONAR
 
+    public BrukerdialogOppgaveEntitet(UUID oppgavereferanse,
+                                      OppgaveType oppgaveType,
+                                      AktørId aktørId,
+                                      OppgaveData data,
+                                      LocalDateTime fristTid) {
+        this.oppgavereferanse = oppgavereferanse;
+        this.oppgaveType = oppgaveType;
+        this.aktørId = aktørId;
+        this.data = data;
+        this.fristTid = fristTid;
+    }
 
     public AktørId getAktørId() {
         return aktørId;

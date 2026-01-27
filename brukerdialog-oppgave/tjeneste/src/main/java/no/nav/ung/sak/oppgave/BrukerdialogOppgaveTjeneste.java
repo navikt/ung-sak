@@ -70,10 +70,7 @@ public class BrukerdialogOppgaveTjeneste {
         var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
 
-        oppgave.setStatus(OppgaveStatus.LØST);
-        oppgave.setLøstDato(LocalDateTime.now());
-
-        var oppdatertOppgave = repository.oppdater(oppgave);
+        var oppdatertOppgave = repository.løsOppgave(oppgave);
         return mapper.tilDto(oppdatertOppgave);
     }
 }

@@ -2,7 +2,11 @@ package no.nav.ung.sak.oppgave;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import no.nav.ung.sak.oppgave.endretsluttdato.EndretSluttdatoOppgaveData;
+import no.nav.ung.sak.oppgave.endretstartdato.EndretStartdatoOppgaveData;
+import no.nav.ung.sak.oppgave.inntektsrapportering.InntektsrapporteringOppgaveData;
 import no.nav.ung.sak.oppgave.oppgavedata.*;
+import no.nav.ung.sak.oppgave.endretperiode.EndretPeriodeOppgaveData;
 
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,

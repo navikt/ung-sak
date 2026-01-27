@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.oppgavedata;
+package no.nav.ung.sak.oppgave.inntektsrapportering;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
