@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandling;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakEvent;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 /**
  * Event publiseres når Fagsak endrer status

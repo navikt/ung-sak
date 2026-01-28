@@ -10,9 +10,9 @@ import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.domene.iay.modell.*;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.Virkedager;
+import no.nav.ung.sak.felles.typer.Beløp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

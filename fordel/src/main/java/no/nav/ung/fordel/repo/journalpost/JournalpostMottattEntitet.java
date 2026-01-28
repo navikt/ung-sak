@@ -10,8 +10,8 @@ import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 @Entity(name = "JournalpostMottattEntitet")
 @Table(name = "FORDEL_JOURNALPOST_MOTTATT")

@@ -11,8 +11,8 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kontrakt.person.PersonopplysningDto;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersonopplysningDtoPersonIdentTjeneste {

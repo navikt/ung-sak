@@ -11,9 +11,9 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 public class DokumentmottakTestUtil {
 

@@ -18,7 +18,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 @Dependent
 public class SaksbehandlingDokumentmottakTjeneste {

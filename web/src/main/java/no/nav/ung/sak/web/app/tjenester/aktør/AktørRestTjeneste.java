@@ -29,7 +29,7 @@ import no.nav.ung.sak.kontrakt.fagsak.FagsakDto;
 import no.nav.ung.sak.kontrakt.person.AktørIdDto;
 import no.nav.ung.sak.kontrakt.person.AktørInfoDto;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.ArrayList;

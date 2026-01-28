@@ -16,7 +16,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 import java.util.LinkedHashSet;

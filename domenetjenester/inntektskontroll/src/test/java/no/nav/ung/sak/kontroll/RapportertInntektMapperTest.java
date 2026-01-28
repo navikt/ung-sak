@@ -7,16 +7,14 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlagBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjening;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Optional;

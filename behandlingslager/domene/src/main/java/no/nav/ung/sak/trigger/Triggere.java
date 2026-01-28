@@ -15,8 +15,8 @@ import jakarta.persistence.Version;
 
 import org.hibernate.annotations.BatchSize;
 
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
 
 @Entity(name = "Triggere")
 @Table(name = "PT_TRIGGERE")

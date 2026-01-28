@@ -7,7 +7,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagDto;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 import java.util.ArrayList;
 import java.util.Collections;

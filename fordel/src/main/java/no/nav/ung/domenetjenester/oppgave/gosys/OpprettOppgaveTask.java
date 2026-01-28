@@ -11,8 +11,8 @@ import no.nav.ung.fordel.repo.MeldingRepository;
 import no.nav.ung.fordel.repo.ProduksjonsstyringOppgaveEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

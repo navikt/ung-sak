@@ -3,7 +3,7 @@ package no.nav.ung.domenetjenester.arkiv;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 

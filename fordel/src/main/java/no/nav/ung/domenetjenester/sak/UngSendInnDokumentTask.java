@@ -1,8 +1,6 @@
 package no.nav.ung.domenetjenester.sak;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +16,9 @@ import no.nav.ung.fordel.repo.journalpost.JournalpostInnsendingEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 @ApplicationScoped
 @ProsessTask(value = UngSendInnDokumentTask.TASKTYPE, maxFailedRuns = 1)

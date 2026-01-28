@@ -12,13 +12,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.sak.felles.IndexKey;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
+import no.nav.ung.sak.felles.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.KjønnKodeverdiConverter;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 

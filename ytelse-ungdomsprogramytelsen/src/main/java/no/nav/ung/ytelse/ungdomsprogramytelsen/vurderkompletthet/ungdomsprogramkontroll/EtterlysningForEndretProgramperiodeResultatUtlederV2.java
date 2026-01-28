@@ -3,7 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogram
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.ung.sak.felles.tid.AbstractLocalDateInterval;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.util.Optional;

@@ -3,7 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.dokument;
 import static no.nav.k9.felles.feil.LogLevel.ERROR;
 import static no.nav.k9.felles.feil.LogLevel.WARN;
 
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.TekniskException;
 import no.nav.k9.felles.feil.Feil;

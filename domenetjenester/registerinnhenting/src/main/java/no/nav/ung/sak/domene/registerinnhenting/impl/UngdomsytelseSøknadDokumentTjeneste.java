@@ -8,7 +8,7 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
+import no.nav.ung.sak.felles.diff.DiffResult;
 import no.nav.ung.sak.domene.registerinnhenting.SøknadDokumentTjeneste;
 
 @ApplicationScoped

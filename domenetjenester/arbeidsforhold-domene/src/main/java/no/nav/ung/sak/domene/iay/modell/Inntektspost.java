@@ -3,15 +3,15 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.sak.felles.IndexKey;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.ung.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
+import no.nav.ung.sak.felles.diff.IndexKeyComposer;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.typer.Beløp;
 
 public class Inntektspost implements IndexKey {
 

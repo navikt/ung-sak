@@ -9,6 +9,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.TidslinjeUtil;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 

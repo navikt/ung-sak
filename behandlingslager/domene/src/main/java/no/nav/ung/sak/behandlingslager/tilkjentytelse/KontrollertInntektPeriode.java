@@ -5,10 +5,10 @@ import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.kodeverk.KontrollertInntektKildeKodeverdiConverter;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.ung.sak.behandlingslager.Range;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.felles.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.felles.tid.Range;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;

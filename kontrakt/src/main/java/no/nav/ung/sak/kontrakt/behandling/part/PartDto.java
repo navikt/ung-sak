@@ -2,8 +2,8 @@ package no.nav.ung.sak.kontrakt.behandling.part;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.validation.Valid;
-import no.nav.ung.sak.typer.Identifikasjon;
-import no.nav.ung.sak.typer.RolleType;
+import no.nav.ung.sak.felles.typer.Identifikasjon;
+import no.nav.ung.sak.felles.typer.RolleType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

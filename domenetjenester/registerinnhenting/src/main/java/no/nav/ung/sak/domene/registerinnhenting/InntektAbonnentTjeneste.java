@@ -1,6 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
@@ -8,9 +7,8 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnement;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +17,6 @@ import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Dependent
 public class InntektAbonnentTjeneste {

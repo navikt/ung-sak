@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg;
 
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 class LagBarnetilleggTidslinjeTest {
 

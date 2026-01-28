@@ -27,6 +27,7 @@ import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
+import no.nav.ung.sak.felles.typer.*;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientImpl;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
@@ -35,7 +36,6 @@ import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.ung.sak.typer.*;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramRegisterKlient;
 
 import java.time.LocalDate;

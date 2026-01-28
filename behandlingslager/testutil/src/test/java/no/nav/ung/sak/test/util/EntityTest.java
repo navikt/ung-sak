@@ -35,7 +35,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.db.util.Databaseskjemainitialisering;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;

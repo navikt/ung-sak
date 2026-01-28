@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandling.hendelse;
 
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingEvent;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 public class BehandlingEnhetEvent implements BehandlingEvent {
     private Long fagsakId;

@@ -3,8 +3,10 @@ package no.nav.ung.sak.web.server.jetty;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.security.auth.message.config.AuthConfigFactory;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.oidc.OidcApplication;
 import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
 import no.nav.ung.sak.web.app.ApplicationConfig;
+import no.nav.ung.sak.web.app.BrukerdialogApiConfig;
 import no.nav.ung.sak.web.app.FrontendApiConfig;
 import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 import no.nav.ung.sak.web.server.InternalApplicationConfig;
@@ -103,6 +105,7 @@ public class JettyServer {
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
 
         WebAppContext webAppContext = createContext(appKonfigurasjon, server);
+
         server.setHandler(new Handler.Sequence(new ClearMdcHandler(), webAppContext));
         server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
@@ -211,6 +214,7 @@ public class JettyServer {
         return new Class<?>[]{
             no.nav.k9.felles.oidc.OidcApplication.class,
             ApplicationConfig.class,
+            BrukerdialogApiConfig.class,
             InternalApplicationConfig.class,
             OppgaveRedirectApplication.class,
             FrontendApiConfig.class

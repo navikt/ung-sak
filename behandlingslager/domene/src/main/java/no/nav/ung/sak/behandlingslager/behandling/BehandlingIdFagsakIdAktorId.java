@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.behandling;
 import java.util.Objects;
 import java.util.UUID;
 
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 public class BehandlingIdFagsakIdAktorId {
 

@@ -14,7 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttak;

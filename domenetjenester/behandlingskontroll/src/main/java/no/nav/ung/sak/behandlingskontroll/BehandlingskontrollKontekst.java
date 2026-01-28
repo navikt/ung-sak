@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingskontroll;
 import java.util.Objects;
 
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 /**
  * Container som holder kontekst under prosessering av {@link BehandlingSteg}.

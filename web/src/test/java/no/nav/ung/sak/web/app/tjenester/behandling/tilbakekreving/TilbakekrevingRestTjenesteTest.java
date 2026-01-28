@@ -19,8 +19,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.økonomi.tilbakekreving.TilbakekrevingValgDto;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 

@@ -27,6 +27,10 @@
             <groupId>no.nav.k9.felles.sikkerhet</groupId>
             <artifactId>k9-felles-sikkerhet</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>felles</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>

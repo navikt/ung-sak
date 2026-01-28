@@ -31,7 +31,7 @@ import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
 import no.nav.ung.sak.kontrakt.etterlysning.Etterlysning;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;

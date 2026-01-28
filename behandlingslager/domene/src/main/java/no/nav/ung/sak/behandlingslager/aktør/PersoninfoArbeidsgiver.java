@@ -5,8 +5,8 @@ import static java.util.Objects.requireNonNull;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 public class PersoninfoArbeidsgiver {
 

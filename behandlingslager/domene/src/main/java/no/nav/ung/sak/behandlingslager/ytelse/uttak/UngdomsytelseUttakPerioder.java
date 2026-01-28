@@ -16,9 +16,9 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.ung.sak.felles.diff.DiffIgnore;
 
 @Entity(name = "UngdomsytelseUttakPerioder")
 @Table(name = "UNG_UTTAK_PERIODER")

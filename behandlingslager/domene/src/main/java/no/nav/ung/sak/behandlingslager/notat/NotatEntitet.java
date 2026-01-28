@@ -9,7 +9,7 @@ import org.hibernate.annotations.NaturalId;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Version;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 
 /**
  * Reprensenterer notat.

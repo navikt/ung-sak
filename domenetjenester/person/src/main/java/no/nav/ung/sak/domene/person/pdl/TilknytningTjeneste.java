@@ -15,7 +15,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 @ApplicationScoped
 public class TilknytningTjeneste {

@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
+import no.nav.ung.sak.felles.diff.DiffResult;
 
 @Dependent
 public class PersonopplysningTjeneste extends AbstractPersonopplysningTjenesteImpl {

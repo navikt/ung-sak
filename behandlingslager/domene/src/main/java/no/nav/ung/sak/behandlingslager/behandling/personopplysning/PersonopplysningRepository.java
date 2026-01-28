@@ -3,7 +3,10 @@ package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 import java.util.Objects;
 import java.util.Optional;
 
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
+import no.nav.ung.sak.felles.diff.DiffEntity;
+import no.nav.ung.sak.felles.diff.DiffResult;
+import no.nav.ung.sak.felles.diff.TraverseGraph;
 import org.hibernate.jpa.QueryHints;
 
 import jakarta.enterprise.context.Dependent;
@@ -13,10 +16,6 @@ import jakarta.persistence.TypedQuery;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
-import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
 
 /**
  * Dette er et Repository for håndtering av alle persistente endringer i en Personopplysning graf.

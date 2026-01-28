@@ -149,6 +149,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>klage</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
+        </dependency>
 
         <!-- Ytelsespesifikke moduler -->
         <dependency>

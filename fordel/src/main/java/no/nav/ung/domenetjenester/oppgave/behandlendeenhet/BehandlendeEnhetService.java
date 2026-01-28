@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 import java.util.List;
 

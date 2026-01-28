@@ -1,22 +1,12 @@
 package no.nav.ung.sak.produksjonsstyring.oppgavebehandling;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-import no.nav.k9.felles.exception.VLException;
-import no.nav.k9.felles.integrasjon.rest.OidcRestClientResponseHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +16,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OpprettOppgave;
 import no.nav.k9.felles.integrasjon.oppgave.v1.Prioritet;
-import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -39,8 +28,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped

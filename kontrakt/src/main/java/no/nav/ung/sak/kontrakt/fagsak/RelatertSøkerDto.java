@@ -14,8 +14,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 @JsonInclude(value = Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)

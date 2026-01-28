@@ -11,7 +11,6 @@ import jakarta.validation.ValidatorFactory;
 import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.k9.felles.integrasjon.kafka.GenerellKafkaProducer;
 import no.nav.k9.felles.integrasjon.kafka.KafkaPropertiesBuilder;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -24,7 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.felles.tid.JsonObjectMapper;
 import no.nav.ung.sak.hendelse.vedtak.VurderOmVedtakPåvirkerAndreSakerTask;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;

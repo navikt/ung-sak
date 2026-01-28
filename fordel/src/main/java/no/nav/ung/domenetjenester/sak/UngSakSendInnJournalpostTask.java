@@ -13,8 +13,8 @@ import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.mottak.dokumentmottak.InngåendeSaksdokument;
 import no.nav.ung.sak.mottak.dokumentmottak.SaksbehandlingDokumentmottakTjeneste;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

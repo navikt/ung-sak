@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.iay.modell;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.sak.typer.InternArbeidsforholdRef;
+import no.nav.ung.sak.felles.typer.InternArbeidsforholdRef;
 
 public class OpptjeningsnøkkelTest {
 

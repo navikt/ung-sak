@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.aktør;
 import java.time.LocalDate;
 import java.util.Optional;
 
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 public class FødtBarnInfo {
     public static final String UTEN_NAVN = "UTEN NAVN";

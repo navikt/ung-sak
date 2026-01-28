@@ -8,8 +8,8 @@ import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

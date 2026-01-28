@@ -23,7 +23,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.felles.tid.JsonObjectMapper;
 
 @ApplicationScoped
 @ProsessTask(SendØkonomiOppdragTask.TASKTYPE)

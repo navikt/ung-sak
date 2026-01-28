@@ -2,8 +2,8 @@ package no.nav.ung.sak.behandlingslager.perioder;
 
 import java.util.*;
 
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.Column;
@@ -14,7 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 
 @Entity(name = "UngdomsprogramPeriodeGrunnlag")
 @Table(name = "UNG_GR_UNGDOMSPROGRAMPERIODE")

@@ -14,8 +14,8 @@ import no.nav.ung.kodeverk.dokument.FordelBehandlingType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveFeilmeldinger;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.VirkedagUtil;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

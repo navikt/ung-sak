@@ -14,8 +14,7 @@ import java.util.stream.Collectors;
 import org.threeten.extra.Interval;
 
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 public class PersonopplysningerAggregat {
 

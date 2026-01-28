@@ -4,7 +4,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NavigableSet;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
@@ -13,7 +12,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentType;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedÅrsaker;
@@ -23,7 +21,7 @@ import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
 import no.nav.ung.sak.trigger.Trigger;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 
 class UtledStatusForPerioderPåBehandling {
 

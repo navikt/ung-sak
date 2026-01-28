@@ -13,8 +13,8 @@ import no.nav.ung.sak.kontrakt.hendelser.DødsfallHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

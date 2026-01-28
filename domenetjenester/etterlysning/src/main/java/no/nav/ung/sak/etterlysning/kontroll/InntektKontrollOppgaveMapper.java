@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.sak.kontroll.InntektType;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.Inntektsperiode;
-import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.felles.typer.Beløp;
 
 import java.math.BigDecimal;
 import java.util.List;

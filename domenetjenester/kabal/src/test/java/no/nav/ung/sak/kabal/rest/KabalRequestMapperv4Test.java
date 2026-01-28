@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.kabal.kontrakt.KabalRequestv4;
 import no.nav.ung.sak.kabal.task.KabalRequestMapperV4;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;

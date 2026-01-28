@@ -5,8 +5,8 @@ import java.util.Objects;
 
 import org.hibernate.annotations.Type;
 
-import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.ung.sak.behandlingslager.Range;
+import no.nav.ung.sak.felles.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.felles.tid.Range;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -17,10 +17,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingÅrsakKodeverdiConverter;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 
 @Entity(name = "Trigger")
 @Table(name = "PT_TRIGGER")

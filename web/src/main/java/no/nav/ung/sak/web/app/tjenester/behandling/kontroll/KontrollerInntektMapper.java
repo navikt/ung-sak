@@ -9,7 +9,7 @@ import no.nav.ung.sak.kontrakt.kontroll.*;
 import no.nav.ung.sak.kontroll.InntektType;
 import no.nav.ung.sak.kontroll.RapportertInntekt;
 import no.nav.ung.sak.kontroll.RapporterteInntekter;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 
 import java.util.*;
 

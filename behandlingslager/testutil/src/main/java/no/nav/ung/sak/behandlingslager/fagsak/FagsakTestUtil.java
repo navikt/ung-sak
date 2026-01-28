@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingslager.fagsak;
 
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 
 public class FagsakTestUtil {
 

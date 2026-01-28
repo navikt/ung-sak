@@ -4,8 +4,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.ung.sak.behandlingslager.virksomhet.Virksomhet;
-import no.nav.ung.sak.typer.Arbeidsgiver;
-import no.nav.ung.sak.typer.InternArbeidsforholdRef;
+import no.nav.ung.sak.felles.typer.Arbeidsgiver;
+import no.nav.ung.sak.felles.typer.InternArbeidsforholdRef;
 
 public class Opptjeningsnøkkel {
 

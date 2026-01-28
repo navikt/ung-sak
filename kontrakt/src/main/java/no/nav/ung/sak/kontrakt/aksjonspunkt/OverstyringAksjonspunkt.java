@@ -1,6 +1,6 @@
 package no.nav.ung.sak.kontrakt.aksjonspunkt;
 
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 
 public interface OverstyringAksjonspunkt {
     String getAvslagskode();

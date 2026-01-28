@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import no.nav.ung.sak.kontrakt.klage.TekstValideringRegex;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 
 public record FastsettInntektPeriodeDto(
     @JsonProperty(value = "periode", required = true)

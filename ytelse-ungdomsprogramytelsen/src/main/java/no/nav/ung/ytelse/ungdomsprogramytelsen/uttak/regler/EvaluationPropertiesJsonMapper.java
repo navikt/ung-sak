@@ -6,7 +6,7 @@ import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.felles.tid.JsonObjectMapper;
 
 import java.util.Map;
 

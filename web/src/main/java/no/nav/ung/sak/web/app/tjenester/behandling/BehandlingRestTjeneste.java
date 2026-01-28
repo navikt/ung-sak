@@ -45,7 +45,7 @@ import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjene
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
@@ -59,14 +59,12 @@ import no.nav.ung.sak.kontrakt.behandling.NyBehandlingDto;
 import no.nav.ung.sak.kontrakt.behandling.ReåpneBehandlingDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.behandling.SettBehandlingPaVentDto;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;

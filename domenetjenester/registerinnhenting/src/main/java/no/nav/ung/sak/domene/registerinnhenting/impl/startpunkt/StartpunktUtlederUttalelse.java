@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.behandlingslager.uttalelse.Uttalelser;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

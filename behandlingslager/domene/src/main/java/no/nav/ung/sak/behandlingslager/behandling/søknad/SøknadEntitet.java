@@ -2,10 +2,9 @@ package no.nav.ung.sak.behandlingslager.behandling.søknad;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.SpråkKodeverdiConverter;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 

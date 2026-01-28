@@ -51,6 +51,8 @@ public class ApplicationConfig extends ResourceConfig {
         final var resolvedOpenAPI = resolveOpenAPI();
         register(new no.nav.openapi.spec.utils.openapi.OpenApiResource(resolvedOpenAPI));
 
+        register(IkkeAksepterTokenX.class);
+
         property(ServerProperties.BV_SEND_ERROR_IN_RESPONSE, true);
 
         registerClasses(new LinkedHashSet<>(new RestImplementationClasses().getImplementationClasses()));

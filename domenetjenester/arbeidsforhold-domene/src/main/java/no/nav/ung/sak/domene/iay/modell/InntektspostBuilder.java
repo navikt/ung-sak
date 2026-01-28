@@ -7,7 +7,7 @@ import no.nav.ung.kodeverk.arbeidsforhold.InntektYtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.kodeverk.arbeidsforhold.LønnsinntektBeskrivelse;
 import no.nav.ung.kodeverk.arbeidsforhold.SkatteOgAvgiftsregelType;
-import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.felles.typer.Beløp;
 
 public class InntektspostBuilder {
     private Inntektspost inntektspost;

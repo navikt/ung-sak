@@ -14,7 +14,7 @@ import no.nav.ung.fordel.repo.hendelser.HendelseRepository;
 import no.nav.ung.fordel.repo.hendelser.InngåendeHendelseEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

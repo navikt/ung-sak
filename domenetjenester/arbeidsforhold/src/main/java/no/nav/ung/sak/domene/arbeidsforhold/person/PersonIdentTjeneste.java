@@ -3,8 +3,8 @@ package no.nav.ung.sak.domene.arbeidsforhold.person;
 import java.util.Optional;
 
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 public interface PersonIdentTjeneste {
 

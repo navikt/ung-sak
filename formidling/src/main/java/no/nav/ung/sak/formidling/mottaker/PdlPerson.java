@@ -1,6 +1,6 @@
 package no.nav.ung.sak.formidling.mottaker;
 
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 import java.time.LocalDate;
 

@@ -14,8 +14,8 @@ import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 @ApplicationScoped
 public class PersoninfoAdapter {

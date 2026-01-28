@@ -13,8 +13,8 @@ import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Periode;
 
 import java.util.Optional;
 
