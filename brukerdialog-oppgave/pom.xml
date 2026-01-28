@@ -14,7 +14,7 @@
     <name>UNGSAK :: Brukerdialog oppgave - Pom</name>
 
     <modules>
-        <module>api</module>
+        <module>saksbehandling-api</module>
         <module>kontrakt</module>
         <module>tjeneste</module>
     </modules>

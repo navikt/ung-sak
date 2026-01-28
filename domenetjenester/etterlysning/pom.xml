@@ -27,7 +27,7 @@
 
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave-api</artifactId>
+            <artifactId>brukerdialog-oppgave-saksbehandling-api</artifactId>
         </dependency>
 
         <dependency>

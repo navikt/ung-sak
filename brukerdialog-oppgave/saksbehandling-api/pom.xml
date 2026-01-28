@@ -9,7 +9,7 @@
         <version>${revision}${sha1}${changelist}</version>
     </parent>
 
-    <artifactId>brukerdialog-oppgave-api</artifactId>
+    <artifactId>brukerdialog-oppgave-saksbehandling-api</artifactId>
     <packaging>jar</packaging>
     <name>UNGSAK :: Brukerdialog oppgave - API</name>
 
