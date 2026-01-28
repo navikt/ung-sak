@@ -50,32 +50,18 @@ jobs:
       t-2c: "-T1C"
     secrets: inherit
 
+  # Ved merge til master skal ny typecript klient pakke publiserast (viss merge fører til endringer i den)
   build-typescript-client:
-    name: Build typescript client
-    runs-on: ubuntu-latest
+    name: Bygg og publiser openapi typescript klient
+    if: "${{ github.ref_name == github.event.repository.default_branch }}"
     needs: build-app
     permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-      - uses: navikt/sif-gha-workflows/.github/actions/maven/generate-openapi@main
-        id: generate-openapi
-        with:
-          readerToken: ${{ secrets.READER_TOKEN }}
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-          openapiFileName: ung-sak.openapi.json
-      - uses: ./.github/actions/generate-typescript-client
-        id: generate-typescript
-        with:
-          openapiVersion: ${{ steps.generate-openapi.outputs.openapiVersion }}
-          patchVersion: ${{ needs.build-app.outputs.build-version }}
-      # Upload generated typescript package, so it can be downloaded and published by later job
-      - uses: actions/upload-artifact@v6
-        id: upload-typescript
-        with:
-          name: ung-sak-typescript-client-src
-          path: "${{ steps.generate-typescript.outputs.resultDir }}"
-          if-no-files-found: error
+      contents: read
+      packages: write
+    uses: navikt/sif-gha-workflows/.github/workflows/typescript-client-publish.yml@openapi-next
+    with:
+      openapiFilePath: web/src/main/resources/openapi-ts-client/ung-sak.openapi.json
+    secrets: inherit
 
   verdikjede-tester:
     name: Verdikjedetester
@@ -125,13 +111,36 @@ jobs:
       naiserator_file: deploy/dev-gcp.yml
     secrets: inherit
 
+  # Sjekker at ny typescript klient kode for kode som blir rulla ut til prod er kompatibel med k9-sak-web prod versjon.
+  # Viss denne feiler er det fare for at frontend vil feile med backend som blir forsøkt rulla ut.
+  prod-typescript-check:
+    name: Kompileringssjekk k9-sak-web latest_prod
+    runs-on: ubuntu-latest
+    needs: [ build-typescript-client, deploy-dev ]
+    # concurrency og environment er satt til samme verdier som deploy-prod har (inne i workflows/maven-deploy.yml)
+    concurrency: prod-gcp:k9saksbehandling
+    environment: prod-gcp:k9saksbehandling
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: typescript-client-src
+          path: /tmp/ung-sak-typescript-client
+      - uses: navikt/k9-sak-web/.github/actions/check-compat-typescript-client@master
+        with:
+          readerToken: ${{ secrets.READER_TOKEN }}
+          gitRef: latest_prod
+          newClientPath: /tmp/ung-sak-typescript-client
+
+
   deploy-prod:
     name: Deploy prod
     permissions:
       id-token: write
       contents: write
     if: github.ref_name == 'master'
-    needs: [build-app, run-unit-tests, verdikjede-tester, deploy-dev]
+    needs: [build-app, run-unit-tests, verdikjede-tester, deploy-dev, prod-typescript-check]
     uses: navikt/sif-gha-workflows/.github/workflows/maven-deploy.yml@main
     with:
       gar: true
@@ -139,47 +148,3 @@ jobs:
       cluster: prod-gcp
       naiserator_file: deploy/prod-gcp.yml
     secrets: inherit
-
-  check-change-compat-typescript-client:
-    name: Change and compatibility check typescript client
-    runs-on: ubuntu-latest
-    needs: [build-typescript-client, deploy-dev]
-    outputs:
-      hasChanged: ${{ steps.compare-with-published.outputs.hasChanged }}
-    permissions:
-      contents: read
-      packages: read
-    steps:
-      - uses: actions/download-artifact@v7
-        with:
-          name: ung-sak-typescript-client-src
-          path: /tmp/ung-sak-typescript-client
-      - uses: navikt/openapi-ts-clientmaker/extra/actions/compare-with-published@v1
-        id: compare-with-published
-        with:
-          localPath: /tmp/ung-sak-typescript-client
-          npmPackageName: ung-sak-typescript-client
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
-      - uses: navikt/k9-sak-web/.github/actions/check-compat-typescript-client@master
-        if: steps.compare-with-published.outputs.hasChanged == 'true'
-        with:
-          readerToken: ${{ secrets.READER_TOKEN }}
-          newClientPath: /tmp/ung-sak-typescript-client
-
-  publish-typescript-client:
-    name: Publish typescript client
-    runs-on: ubuntu-latest
-    needs: [check-change-compat-typescript-client]
-    if: needs.check-change-compat-typescript-client.outputs.hasChanged == 'true'
-    permissions:
-      contents: read
-      packages: write
-    steps:
-     - uses: actions/download-artifact@v7
-       with:
-         name: ung-sak-typescript-client-src
-         path: /tmp/ung-sak-typescript-client
-     - uses: navikt/openapi-ts-clientmaker/extra/actions/publish-typescript-client@v1
-       with:
-         contentPath: /tmp/ung-sak-typescript-client
-         githubToken: ${{ secrets.GITHUB_TOKEN }}
