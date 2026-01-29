@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveMapper;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
+import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
 import no.nav.ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto;
 import no.nav.ung.sak.oppgave.saksbehandling.OppgaveForSaksbehandlingGrensesnittImpl;
 
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class BrukerdialogOppgaveTjenesteImpl implements BrukerdialogOppgaveTjeneste {
 
+    private OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste;
     private BrukerdialogOppgaveRepository repository;
     private BrukerdialogOppgaveMapper mapper;
 
@@ -29,7 +31,8 @@ public class BrukerdialogOppgaveTjenesteImpl implements BrukerdialogOppgaveTjene
     }
 
     @Inject
-    public BrukerdialogOppgaveTjenesteImpl(BrukerdialogOppgaveRepository repository, BrukerdialogOppgaveMapper mapper) {
+    public BrukerdialogOppgaveTjenesteImpl(OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste, BrukerdialogOppgaveRepository repository, BrukerdialogOppgaveMapper mapper) {
+        this.oppgaveLivssyklusTjeneste = oppgaveLivssyklusTjeneste;
         this.repository = repository;
         this.mapper = mapper;
     }
@@ -69,7 +72,7 @@ public class BrukerdialogOppgaveTjenesteImpl implements BrukerdialogOppgaveTjene
     public BrukerdialogOppgaveDto løsOppgave(UUID oppgavereferanse, AktørId aktørId) {
         var oppgave = repository.hentOppgaveForOppgavereferanse(oppgavereferanse, aktørId)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + oppgavereferanse));
-        var oppdatertOppgave = repository.løsOppgave(oppgave);
+        var oppdatertOppgave = oppgaveLivssyklusTjeneste.løsOppgave(oppgave);
         return mapper.tilDto(oppdatertOppgave);
     }
 }

@@ -60,16 +60,6 @@ public class BrukerdialogOppgaveRepository {
         return query.getResultList().stream().findFirst();
     }
 
-    public BrukerdialogOppgaveEntitet settUtløpt(BrukerdialogOppgaveEntitet oppgave) {
-        oppgave.setStatus(OppgaveStatus.UTLØPT);
-        return oppdater(oppgave);
-    }
-
-    public BrukerdialogOppgaveEntitet settAvbrutt(BrukerdialogOppgaveEntitet oppgave) {
-        oppgave.setStatus(OppgaveStatus.AVBRUTT);
-        return oppdater(oppgave);
-    }
-
     public BrukerdialogOppgaveEntitet løsOppgave(BrukerdialogOppgaveEntitet oppgave) {
         oppgave.setStatus(OppgaveStatus.LØST);
         oppgave.setLøstDato(LocalDateTime.now());

@@ -37,6 +37,7 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     private static final Logger logger = LoggerFactory.getLogger(OppgaveForSaksbehandlingGrensesnittImpl.class);
 
     private BrukerdialogOppgaveRepository repository;
+    private OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste;
     private Pdl pdl;
 
     public OppgaveForSaksbehandlingGrensesnittImpl() {
@@ -44,49 +45,50 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     }
 
     @Inject
-    public OppgaveForSaksbehandlingGrensesnittImpl(BrukerdialogOppgaveRepository repository,
+    public OppgaveForSaksbehandlingGrensesnittImpl(BrukerdialogOppgaveRepository repository, OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste,
                                                    Pdl pdl) {
         this.repository = repository;
+        this.oppgaveLivssyklusTjeneste = oppgaveLivssyklusTjeneste;
         this.pdl = pdl;
     }
 
     @Override
     public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgave) {
-        repository.persister(KontrollerRegisterInntektOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
+        oppgaveLivssyklusTjeneste.opprettOppgave(KontrollerRegisterInntektOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
     public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgave) {
-        repository.persister(InntektsrapporteringOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
+        oppgaveLivssyklusTjeneste.opprettOppgave(InntektsrapporteringOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
     public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO oppgave) {
-        repository.persister(EndretStartdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
+        oppgaveLivssyklusTjeneste.opprettOppgave(EndretStartdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
     public void opprettEndretSluttdatoOppgave(EndretSluttdatoOppgaveDTO oppgave) {
-        repository.persister(EndretSluttdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
+        oppgaveLivssyklusTjeneste.opprettOppgave(EndretSluttdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
     }
 
     @Override
     public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO oppgaveDto) {
-        repository.persister(EndretPeriodeOppgaveMapper.map(oppgaveDto, finnAktørId(oppgaveDto.getDeltakerIdent())));
+        oppgaveLivssyklusTjeneste.opprettOppgave(EndretPeriodeOppgaveMapper.map(oppgaveDto, finnAktørId(oppgaveDto.getDeltakerIdent())));
     }
 
     @Override
     public void avbrytOppgave(UUID eksternRef) {
         var oppgave = repository.hentOppgaveForOppgavereferanse(eksternRef)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + eksternRef));
-        repository.settAvbrutt(oppgave);
+        oppgaveLivssyklusTjeneste.avbrytOppgave(oppgave);
     }
 
     @Override
     public void oppgaveUtløpt(UUID eksternRef) {
         var oppgave = repository.hentOppgaveForOppgavereferanse(eksternRef)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke oppgave med oppgavereferanse: " + eksternRef));
-        repository.settUtløpt(oppgave);
+        oppgaveLivssyklusTjeneste.utløpOppgave(oppgave);
     }
 
     @Override
@@ -108,7 +110,7 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
         if (uløstOppgaveISammePeriode.isPresent()) {
             var oppgave = uløstOppgaveISammePeriode.get();
             logger.info("Setter oppgave {} til utløpt", oppgave.getOppgavereferanse());
-            repository.settUtløpt(oppgave);
+            oppgaveLivssyklusTjeneste.utløpOppgave(oppgave);
         } else {
             logger.info("Fant ingen uløst oppgave av type {} for periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
         }
@@ -133,7 +135,7 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
         if (uløstOppgaveISammePeriode.isPresent()) {
             var oppgave = uløstOppgaveISammePeriode.get();
             logger.info("Setter oppgave {} til avbrutt", oppgave.getOppgavereferanse());
-            repository.settAvbrutt(oppgave);
+            oppgaveLivssyklusTjeneste.avbrytOppgave(oppgave);
         } else {
             logger.info("Fant ingen uløst oppgave av type {} for periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
         }
@@ -148,7 +150,7 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
         if (søkYtelseOppgaver.size() > 1) {
             logger.warn("Fant flere enn én uløst søk-ytelse-oppgave. Antall: {}", søkYtelseOppgaver.size());
         }
-        søkYtelseOppgaver.forEach(repository::løsOppgave);
+        søkYtelseOppgaver.forEach(oppgaveLivssyklusTjeneste::løsOppgave);
     }
 
     private AktørId finnAktørId(String deltakerIdent) {

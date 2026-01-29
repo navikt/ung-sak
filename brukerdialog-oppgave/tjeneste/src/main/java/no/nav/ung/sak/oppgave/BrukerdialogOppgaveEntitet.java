@@ -78,16 +78,8 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         return data;
     }
 
-    protected void setData(OppgaveData data) {
-        this.data = data;
-    }
-
     public LocalDateTime getFristTid() {
         return fristTid;
-    }
-
-    public void setFristTid(LocalDateTime fristTid) {
-        this.fristTid = fristTid;
     }
 
     protected void setStatus(OppgaveStatus status) {
@@ -116,5 +108,9 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
 
     public LocalDateTime getLukketDato() {
         return lukketDato;
+    }
+
+    Long getId() {
+        return id;
     }
 }

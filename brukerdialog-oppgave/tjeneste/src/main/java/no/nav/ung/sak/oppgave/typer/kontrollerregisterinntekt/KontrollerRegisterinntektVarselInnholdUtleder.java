@@ -1,0 +1,59 @@
+package no.nav.ung.sak.oppgave.typer.kontrollerregisterinntekt;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
+import no.nav.ung.sak.oppgave.OppgaveType;
+import no.nav.ung.sak.oppgave.OppgaveTypeRef;
+import no.nav.ung.sak.oppgave.VarselInnholdUtleder;
+import no.nav.ung.sak.oppgave.typer.inntektsrapportering.InntektsrapporteringOppgaveData;
+
+import java.time.Month;
+
+@OppgaveTypeRef(OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT)
+@ApplicationScoped
+public class KontrollerRegisterinntektVarselInnholdUtleder implements VarselInnholdUtleder {
+
+    private String ungdomsprogramytelsenDeltakerBaseUrl;
+
+    @Inject
+    public KontrollerRegisterinntektVarselInnholdUtleder(
+        @KonfigVerdi(value = "UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL") String ungdomsprogramytelsenDeltakerBaseUrl
+    ) {
+        this.ungdomsprogramytelsenDeltakerBaseUrl = ungdomsprogramytelsenDeltakerBaseUrl;
+    }
+
+    public KontrollerRegisterinntektVarselInnholdUtleder() {
+    }
+
+    @Override
+    public String utledVarselTekst(BrukerdialogOppgaveEntitet oppgave) {
+        KontrollerRegisterInntektOppgaveData oppgaveData = (KontrollerRegisterInntektOppgaveData) oppgave.getData();
+        String norskMånedNavn = finnNorskMånedNavn(oppgaveData.getFomDato().getMonth());
+        return String.format("Du har fått en oppgave om å bekrefte inntekten din for %s", norskMånedNavn);
+    }
+
+    @Override
+    public String utledVarselLenke(BrukerdialogOppgaveEntitet oppgave) {
+        return ungdomsprogramytelsenDeltakerBaseUrl + "/oppgave" + oppgave.getOppgavereferanse();
+    }
+
+    public String finnNorskMånedNavn(Month måned) {
+        return switch (måned) {
+            case Month.JANUARY -> "januar";
+            case Month.FEBRUARY -> "februar";
+            case Month.MARCH -> "mars";
+            case Month.APRIL -> "april";
+            case Month.MAY -> "mai";
+            case Month.JUNE -> "juni";
+            case Month.JULY -> "juli";
+            case Month.AUGUST -> "august";
+            case Month.SEPTEMBER -> "september";
+            case Month.OCTOBER -> "oktober";
+            case Month.NOVEMBER -> "november";
+            case Month.DECEMBER -> "desember";
+        };
+    }
+
+}

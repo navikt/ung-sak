@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
+import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
 import no.nav.ung.sak.oppgave.OppgaveType;
 import no.nav.ung.sak.oppgave.kontrakt.OpprettSøkYtelseOppgaveDto;
 import no.nav.ung.sak.oppgave.typer.søkytelse.SøkYtelseOppgaveData;
@@ -22,15 +22,14 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(VeilederOppgaveTjenesteImpl.class);
 
-    private BrukerdialogOppgaveRepository repository;
-
+    private OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste;
     public VeilederOppgaveTjenesteImpl() {
         // CDI proxy
     }
 
     @Inject
-    public VeilederOppgaveTjenesteImpl(BrukerdialogOppgaveRepository repository) {
-        this.repository = repository;
+    public VeilederOppgaveTjenesteImpl(OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste) {
+        this.oppgaveLivssyklusTjeneste = oppgaveLivssyklusTjeneste;
     }
 
     @Override
@@ -51,7 +50,7 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
             null // Ingen frist for søk ytelse oppgave
         );
 
-        repository.persister(oppgave);
+        oppgaveLivssyklusTjeneste.opprettOppgave(oppgave);
     }
 }
 

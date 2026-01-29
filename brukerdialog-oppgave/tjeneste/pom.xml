@@ -38,6 +38,14 @@
             <groupId>no.nav.k9.felles.integrasjon</groupId>
             <artifactId>k9-pdl-klient</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.k9.prosesstask</groupId>
+            <artifactId>prosesstask</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>brukerdialog-oppgave-min-side-varsel</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
