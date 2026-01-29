@@ -7024,144 +7024,6 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/api/brukerdialog/oppgave/hent/alle" : {
-      "get" : {
-        "operationId" : "hentAlleOppgaver",
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Henter alle oppgaver for en bruker",
-        "tags" : [ "brukerdialog-oppgave" ]
-      }
-    },
-    "/api/brukerdialog/oppgave/{oppgavereferanse}" : {
-      "get" : {
-        "operationId" : "hentOppgave",
-        "parameters" : [ {
-          "description" : "Unik referanse til oppgaven",
-          "in" : "path",
-          "name" : "oppgavereferanse",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Henter en spesifikk oppgave basert på oppgavereferanse",
-        "tags" : [ "brukerdialog-oppgave" ]
-      }
-    },
-    "/api/brukerdialog/oppgave/{oppgavereferanse}/apnet" : {
-      "get" : {
-        "operationId" : "åpneOppgave",
-        "parameters" : [ {
-          "description" : "Unik referanse til oppgaven",
-          "in" : "path",
-          "name" : "oppgavereferanse",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Åpner en oppgave",
-        "tags" : [ "brukerdialog-oppgave" ]
-      }
-    },
-    "/api/brukerdialog/oppgave/{oppgavereferanse}/lukk" : {
-      "get" : {
-        "operationId" : "lukkOppgave",
-        "parameters" : [ {
-          "description" : "Unik referanse til oppgaven",
-          "in" : "path",
-          "name" : "oppgavereferanse",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Lukker en oppgave",
-        "tags" : [ "brukerdialog-oppgave" ]
-      }
-    },
-    "/api/brukerdialog/oppgave/{oppgavereferanse}/løst" : {
-      "get" : {
-        "operationId" : "løsOppgave",
-        "parameters" : [ {
-          "description" : "Unik referanse til oppgaven",
-          "in" : "path",
-          "name" : "oppgavereferanse",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Markerer en oppgave som løst",
-        "tags" : [ "brukerdialog-oppgave" ]
-      }
-    },
     "/api/diagnostikk/sak" : {
       "post" : {
         "description" : "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak",
@@ -8747,6 +8609,144 @@
         },
         "summary" : "KUN FOR TEST: Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
+      }
+    },
+    "/api/oppgave/hent/alle" : {
+      "get" : {
+        "operationId" : "hentAlleOppgaver",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter alle oppgaver for en bruker",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}" : {
+      "get" : {
+        "operationId" : "hentOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter en spesifikk oppgave basert på oppgavereferanse",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}/apnet" : {
+      "get" : {
+        "operationId" : "åpneOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Åpner en oppgave",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}/lukk" : {
+      "get" : {
+        "operationId" : "lukkOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Lukker en oppgave",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}/løst" : {
+      "get" : {
+        "operationId" : "løsOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Markerer en oppgave som løst",
+        "tags" : [ "brukerdialog-oppgave" ]
       }
     },
     "/api/papir/steg-1/hent-søknad-pdf" : {
