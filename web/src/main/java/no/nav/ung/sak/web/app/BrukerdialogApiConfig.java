@@ -39,8 +39,6 @@ public class BrukerdialogApiConfig extends ResourceConfig {
         final var resolvedOpenAPI = resolveOpenAPI();
         register(new no.nav.openapi.spec.utils.openapi.OpenApiResource(resolvedOpenAPI));
 
-        register(AksepterKunTokenX.class);
-
         setApplicationName(BrukerdialogApiConfig.class.getSimpleName());
         // REST
         registerClasses(getEksternalApplicationClasses());
