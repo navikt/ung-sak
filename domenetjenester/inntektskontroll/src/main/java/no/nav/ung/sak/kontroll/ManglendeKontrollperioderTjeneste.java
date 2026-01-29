@@ -87,8 +87,17 @@ public class ManglendeKontrollperioderTjeneste {
 
     private LocalDate getTomDatoForPassertRapporteringsfrist() {
         final var nå = ZonedDateTime.now();
-        ZonedDateTime forrigeKontrollTidspunkt = inntektskontrollCron.nextTimeAfter(nå).minusMonths(1);
-        return forrigeKontrollTidspunkt.toLocalDate().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        // Må gå bakover en dag om gangen for å håndtere måneder av ulike lengder
+        // Det er gjort slik for å håndtere eit hypotetisk scenario i enhetstesting, og vil ikke være nødvendig i praksis så lenge cron-uttrykket er satt til "0 0 7 8 * *"
+        ZonedDateTime nesteFraNå = inntektskontrollCron.nextTimeAfter(nå);
+        ZonedDateTime forrige = nesteFraNå;
+        var tidspunkt = nå;
+        while (forrige.equals(nesteFraNå)) {
+            tidspunkt = tidspunkt.minusDays(1);
+            forrige = inntektskontrollCron.nextTimeAfter(tidspunkt);
+        }
+
+        return forrige.toLocalDate().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
     }
 
 }
