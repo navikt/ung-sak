@@ -24,9 +24,11 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     private UUID oppgavereferanse;
 
     @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
     private OppgaveStatus status = OppgaveStatus.ULØST;
 
     @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private OppgaveType oppgaveType;
 
     @Convert(converter = OppgaveDataConverter.class)
