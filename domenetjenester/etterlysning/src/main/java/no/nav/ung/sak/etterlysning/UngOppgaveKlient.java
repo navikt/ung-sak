@@ -7,6 +7,7 @@ import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
+import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreFristDto;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
@@ -17,6 +18,7 @@ import no.nav.ung.sak.oppgave.OppgaveForSaksbehandlingGrensesnitt;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @Dependent
@@ -152,8 +154,7 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     @Override
     public void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist) {
         try {
-            // TODO: Bruk kontrakt fra ung-deltakelse-opplyser når den er tilgjengelig
-            restClient.post(endreFristURI, null);
+            restClient.post(endreFristURI, new EndreFristDto(eksternReferanse, frist.atZone(ZoneId.systemDefault())));
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
