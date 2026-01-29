@@ -13,8 +13,8 @@ import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.OrgNummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.OrgNummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = Shape.OBJECT)

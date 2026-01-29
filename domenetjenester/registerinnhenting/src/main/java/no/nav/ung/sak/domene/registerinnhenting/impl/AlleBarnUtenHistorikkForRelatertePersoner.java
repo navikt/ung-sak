@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.domene.registerinnhenting.YtelsesspesifikkRelasjonsFilter;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @ApplicationScoped

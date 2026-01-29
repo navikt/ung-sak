@@ -12,10 +12,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.time.LocalDate;
@@ -24,7 +22,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -32,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,7 +41,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonRawValue;
-import com.fasterxml.jackson.annotation.JsonTypeName;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
@@ -60,8 +55,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.web.app.jackson.IndexClasses;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class RestApiInputValideringDtoTest extends RestApiTester {

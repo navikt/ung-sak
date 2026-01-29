@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.formidling.bestilling;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import org.hibernate.annotations.Immutable;
 

@@ -4,7 +4,7 @@ import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon;
 import no.nav.ung.domenetjenester.personhendelser.AvroJsonUtils;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

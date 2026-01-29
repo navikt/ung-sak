@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.perioder;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.AttributeOverride;
@@ -15,8 +15,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 
 
 @Entity(name = "UngdomsprogramPeriode")

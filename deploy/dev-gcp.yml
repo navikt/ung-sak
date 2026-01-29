@@ -147,6 +147,8 @@ spec:
       value: teamdokumenthandtering.aapen-dok-journalfoering
     - name: KAFKA_KABAL_TOPIC
       value: klage.behandling-events.v1
+    - name: KAFKA_MINSIDE_VARSEL_TOPIC
+      value: min-side.aapen-brukervarsel-v1
 
 
     # Loadbalancerconfig
@@ -196,16 +198,16 @@ spec:
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
-
     - name: KABAL_URL
       value: http://kabal-api.klage
     - name: KABAL_SCOPE
       value: api://dev-gcp.klage.kabal-api/.default
-
     - name: INNTEKTSKOMPONENTEN_URL
       value: https://ikomp-q2.dev-fss-pub.nais.io/rest/v2/abonnement
     - name: INNTEKTSKOMPONENTEN_SCOPE
       value: api://dev-fss.team-inntekt.ikomp-q2/.default
+    - name: UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL
+      value: https://ungdomsytelse-deltaker.intern.dev.nav.no/ungdomsprogrammet/ytelsen
 
     # Saf
     - name: SAF_BASE_URL

@@ -11,15 +11,15 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingResultatKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsystemKodeverkConverter;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 import org.hibernate.annotations.*;
 
 import java.time.LocalDate;

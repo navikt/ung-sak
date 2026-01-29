@@ -4,7 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.JournalpostResponseProjection;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;

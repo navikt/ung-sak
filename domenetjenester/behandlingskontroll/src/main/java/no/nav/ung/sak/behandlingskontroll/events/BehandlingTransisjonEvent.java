@@ -8,7 +8,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingEvent;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingStegTilstand;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 public class BehandlingTransisjonEvent implements BehandlingEvent {
 

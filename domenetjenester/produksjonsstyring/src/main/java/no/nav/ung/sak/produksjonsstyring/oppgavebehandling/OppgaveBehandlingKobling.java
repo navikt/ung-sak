@@ -20,9 +20,9 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 @Entity(name = "OppgaveBehandlingKobling")
 @Table(name = "OPPGAVE_BEHANDLING_KOBLING")

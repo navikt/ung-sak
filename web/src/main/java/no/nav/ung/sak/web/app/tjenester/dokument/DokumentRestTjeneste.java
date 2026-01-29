@@ -36,8 +36,8 @@ import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.dokument.DokumentDto;
 import no.nav.ung.sak.kontrakt.dokument.DokumentIdDto;
 import no.nav.ung.sak.kontrakt.dokument.JournalpostIdDto;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingDtoUtil;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 

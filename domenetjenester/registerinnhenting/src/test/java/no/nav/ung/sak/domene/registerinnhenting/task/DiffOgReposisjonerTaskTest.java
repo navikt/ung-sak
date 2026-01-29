@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.felles.tid.JsonObjectMapper;
 
 public class DiffOgReposisjonerTaskTest {
 

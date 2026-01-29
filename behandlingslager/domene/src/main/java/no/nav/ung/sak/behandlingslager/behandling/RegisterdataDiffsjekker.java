@@ -1,16 +1,14 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
+import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
+import no.nav.ung.sak.felles.diff.*;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
-import no.nav.ung.sak.behandlingslager.diff.Node;
-import no.nav.ung.sak.behandlingslager.diff.Pair;
-import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
+
 
 public class RegisterdataDiffsjekker {
     private DiffEntity diffEntity;

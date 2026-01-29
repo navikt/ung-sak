@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.inngangsvilkår.RegelOrkestrerer;
 import no.nav.ung.sak.inngangsvilkår.RegelResultat;
 import no.nav.ung.sak.perioder.ForlengelseTjeneste;

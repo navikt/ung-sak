@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.behandlingslager.uttalelse.Uttalelser;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 import java.util.ArrayList;
 import java.util.Collection;

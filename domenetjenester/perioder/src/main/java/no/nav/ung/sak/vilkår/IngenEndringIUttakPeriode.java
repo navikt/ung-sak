@@ -4,7 +4,7 @@ import java.util.NavigableSet;
 import java.util.TreeSet;
 
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 
 class IngenEndringIUttakPeriode implements EndringIUttakPeriodeUtleder {
 

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.etterlysning;
 
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

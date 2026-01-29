@@ -6,7 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
+import no.nav.ung.sak.felles.tid.Hjelpetidslinjer;
 
 public class FinnForbrukteDager {
 

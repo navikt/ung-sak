@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.felles.typer.Beløp;
 
 public class BeløpTest {
 

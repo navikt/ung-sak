@@ -12,8 +12,8 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 import no.nav.k9.felles.integrasjon.pdl.HentIdenterBolkResult;
 import no.nav.k9.felles.integrasjon.pdl.IdentGruppe;
 import no.nav.k9.felles.integrasjon.pdl.IdentInformasjon;

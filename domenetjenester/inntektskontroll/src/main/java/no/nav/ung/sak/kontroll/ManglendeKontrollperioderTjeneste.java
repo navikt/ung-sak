@@ -7,7 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
+import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 @Dependent
 public class ManglendeKontrollperioderTjeneste {
@@ -87,8 +87,17 @@ public class ManglendeKontrollperioderTjeneste {
 
     private LocalDate getTomDatoForPassertRapporteringsfrist() {
         final var nå = ZonedDateTime.now();
-        ZonedDateTime forrigeKontrollTidspunkt = inntektskontrollCron.nextTimeAfter(nå).minusMonths(1);
-        return forrigeKontrollTidspunkt.toLocalDate().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        // Må gå bakover en dag om gangen for å håndtere måneder av ulike lengder
+        // Det er gjort slik for å håndtere eit hypotetisk scenario i enhetstesting, og vil ikke være nødvendig i praksis så lenge cron-uttrykket er satt til "0 0 7 8 * *"
+        ZonedDateTime nesteFraNå = inntektskontrollCron.nextTimeAfter(nå);
+        ZonedDateTime forrige = nesteFraNå;
+        var tidspunkt = nå;
+        while (forrige.equals(nesteFraNå)) {
+            tidspunkt = tidspunkt.minusDays(1);
+            forrige = inntektskontrollCron.nextTimeAfter(tidspunkt);
+        }
+
+        return forrige.toLocalDate().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
     }
 
 }

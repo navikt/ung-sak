@@ -13,7 +13,7 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
+import no.nav.ung.sak.felles.diff.DiffResult;
 
 @Dependent
 public class ProsessTriggereRepository {

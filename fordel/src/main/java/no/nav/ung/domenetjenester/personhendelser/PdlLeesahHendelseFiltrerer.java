@@ -7,7 +7,7 @@ import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseUtils;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelsemottakTjeneste;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 import java.util.List;
 import java.util.Optional;
