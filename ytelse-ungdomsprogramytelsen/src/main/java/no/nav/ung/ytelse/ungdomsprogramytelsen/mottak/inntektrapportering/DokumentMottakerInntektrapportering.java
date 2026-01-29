@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak.inntektrapportering;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak.inntektrapportering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,6 +20,7 @@ import no.nav.ung.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
 import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.mottak.AsyncAbakusLagreOpptjeningTask;
 
 import java.io.IOException;
 import java.util.Collection;

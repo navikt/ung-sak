@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak.oppgavebekreftelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -12,6 +12,10 @@ import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
+import no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse.BekreftelseHåndterer;
+import no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse.OppgaveBekreftelseInnhold;
+import no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse.OppgaveBekreftelseParser;
+import no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse.OppgaveTypeRef;
 
 import java.util.ArrayList;
 import java.util.Collection;

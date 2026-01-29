@@ -13,4 +13,9 @@ public interface SøknadMottakTjeneste<V extends InnsendingInnhold> {
                                   AktørId søkerAktørId);
 
     Fagsak finnEllerOpprettFagsak(FagsakYtelseType ytelseType, AktørId søkerAktørId, LocalDate startDato, LocalDate sluttDato);
+
+    Fagsak finnEllerOpprettFagsakForIkkeDigitalBruker(FagsakYtelseType ytelseType,
+                                                             AktørId søkerAktørId,
+                                                             LocalDate startDato,
+                                                             LocalDate sluttDato);
 }

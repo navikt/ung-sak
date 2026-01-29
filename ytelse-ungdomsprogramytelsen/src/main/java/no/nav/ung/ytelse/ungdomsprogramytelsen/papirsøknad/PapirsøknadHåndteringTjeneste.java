@@ -1,6 +1,7 @@
-package no.nav.ung.domenetjenester.papirsøknad;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.papirsøknad;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.Tema;
@@ -27,14 +28,18 @@ import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
-import no.nav.ung.sak.felles.typer.*;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientImpl;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
-import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
+import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramRegisterKlient;
 
@@ -50,13 +55,14 @@ public class PapirsøknadHåndteringTjeneste {
     private DokArkivKlientImpl dokArkivKlientImpl;
     private TpsTjeneste tpsTjeneste;
     private FagsakTjeneste fagsakTjeneste;
-    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private ArkivTjeneste arkivTjeneste;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private TilJournalføringTjeneste journalføringTjeneste;
-    private UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker;
+
+    private SøknadMottakTjeneste ungdomsytelseSøknadMottaker;
+    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
     private UngOppgaveKlient ungOppgaveKlient;
 
     public PapirsøknadHåndteringTjeneste() {
@@ -69,26 +75,26 @@ public class PapirsøknadHåndteringTjeneste {
         DokArkivKlientImpl dokArkivKlientImpl,
         TpsTjeneste tpsTjeneste,
         FagsakTjeneste fagsakTjeneste,
-        UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient,
         BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
         ArkivTjeneste arkivTjeneste,
         DokumentArkivTjeneste dokumentArkivTjeneste,
         PersoninfoAdapter personinfoAdapter,
         TilJournalføringTjeneste journalføringTjeneste,
-        @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) UngdomsytelseSøknadMottaker ungdomsytelseSøknadMottaker,
+        @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) Instance<SøknadMottakTjeneste> ungdomsytelseSøknadMottaker,
+        UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient,
         UngOppgaveKlient ungOppgaveKlient
     ) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlientImpl = dokArkivKlientImpl;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
-        this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.arkivTjeneste = arkivTjeneste;
         this.dokumentArkivTjeneste = dokumentArkivTjeneste;
         this.personinfoAdapter = personinfoAdapter;
         this.journalføringTjeneste = journalføringTjeneste;
-        this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker;
+        this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker.get();
+        this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
         this.ungOppgaveKlient = ungOppgaveKlient;
     }
 
@@ -184,7 +190,7 @@ public class PapirsøknadHåndteringTjeneste {
         return pdfGenKlient.lagDokument(
             "punsjet_papirsøknad",
             "soknad",
-            new PapirsøknadDto(
+            new no.nav.ung.ytelse.ungdomsprogramytelsen.papirsøknad.PapirsøknadDto(
                 deltakerNavn,
                 deltakerIdent.getIdent(),
                 startdato,

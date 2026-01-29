@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak.inntektrapportering;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak.inntektrapportering;
 
 import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
 import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;

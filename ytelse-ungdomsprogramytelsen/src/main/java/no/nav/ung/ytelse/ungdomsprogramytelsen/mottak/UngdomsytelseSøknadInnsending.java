@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;

@@ -1,4 +1,4 @@
-package no.nav.ung.domenetjenester.papirsøknad;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.papirsøknad;
 
 import java.time.LocalDate;
 
