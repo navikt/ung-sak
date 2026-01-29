@@ -88,6 +88,14 @@ public interface OppgaveForSaksbehandlingGrensesnitt {
      */
     void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO);
 
-    void endreFrist(UUID eksternReferanse, LocalDateTime frist);
+
+    /**
+     * Endrer frist for en oppgave.
+     *
+     * @param personIdent Personident for den oppgaven gjelder
+     * @param eksternReferanse Oppgavereferanse
+     * @param frist            Ny frist for oppgaven
+     */
+    void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist);
 }
 

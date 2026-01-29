@@ -18,6 +18,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -59,6 +60,7 @@ public class EtterlysningRestTjeneste {
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private UngOppgaveKlient oppgaveRestKlient;
+    private Pdl pdl;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
@@ -66,12 +68,13 @@ public class EtterlysningRestTjeneste {
 
     @Inject
     public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository,
-                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste, UngOppgaveKlient oppgaveRestKlient) {
+                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste, UngOppgaveKlient oppgaveRestKlient, Pdl pdl) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.oppgaveRestKlient = oppgaveRestKlient;
+        this.pdl = pdl;
     }
 
     @GET
@@ -117,7 +120,8 @@ public class EtterlysningRestTjeneste {
             // Det vil mest sannsynlig bare være en etterlysning her, så vi anser det som ok å lagre inne i loopen for lesbarhet
             etterlysningRepository.lagre(etterlysning);
             opprettNySettUtløptTask(behandling, frist);
-            oppgaveRestKlient.endreFrist(etterlysning.getEksternReferanse(), frist);
+            String personIdent = pdl.hentPersonIdentForAktørId(behandling.getAktørId().getAktørId()).orElseThrow(() -> new IllegalStateException("Finner ikke personident for aktørId for behandling " + behandling.getId()));
+            oppgaveRestKlient.endreFrist(personIdent, etterlysning.getEksternReferanse(), frist);
         });
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }

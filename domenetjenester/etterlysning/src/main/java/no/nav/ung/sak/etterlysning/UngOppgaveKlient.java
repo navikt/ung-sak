@@ -150,7 +150,7 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void endreFrist(UUID eksternReferanse, LocalDateTime frist) {
+    public void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist) {
         try {
             // TODO: Bruk kontrakt fra ung-deltakelse-opplyser når den er tilgjengelig
             restClient.post(endreFristURI, null);
