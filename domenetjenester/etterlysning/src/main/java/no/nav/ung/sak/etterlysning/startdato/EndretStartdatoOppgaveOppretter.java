@@ -23,15 +23,16 @@ import java.util.Set;
 @Dependent
 public class EndretStartdatoOppgaveOppretter {
 
-    private UngOppgaveKlient ungOppgaveKlient;
+    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
 
     @Inject
     public EndretStartdatoOppgaveOppretter(UngOppgaveKlient ungOppgaveKlient,
+                                           MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
                                            UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                            UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
-        this.ungOppgaveKlient = ungOppgaveKlient;
+        this.delegeringTjeneste = delegeringTjeneste;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
     }
@@ -40,7 +41,7 @@ public class EndretStartdatoOppgaveOppretter {
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
         var originalPeriode = finnOriginalPeriode(behandling);
         var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode)).toList();
-        oppgaveDtoer.forEach(ungOppgaveKlient::opprettEndretStartdatoOppgave);
+        oppgaveDtoer.forEach(delegeringTjeneste::opprettEndretStartdatoOppgave);
     }
 
     private DatoIntervallEntitet finnOriginalPeriode(Behandling behandling) {

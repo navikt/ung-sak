@@ -51,7 +51,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     public static final String OPPGAVE_REF = "oppgave_ref";
 
     private PersoninfoAdapter personinfoAdapter;
-    private UngOppgaveKlient ungOppgaveKlient;
+    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
@@ -63,14 +63,14 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
 
     @Inject
     public OpprettOppgaveForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
-                                                     UngOppgaveKlient ungOppgaveKlient,
+                                                     MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
                                                      FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                                      @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
 
         this.personinfoAdapter = personinfoAdapter;
-        this.ungOppgaveKlient = ungOppgaveKlient;
+        this.delegeringTjeneste = delegeringTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
@@ -89,7 +89,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(aktørId, fom, tom);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         ZonedDateTime nesteKontrollTidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
-        ungOppgaveKlient.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
+        delegeringTjeneste.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
             deltakerIdent.getIdent(),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
             nesteKontrollTidspunkt.toLocalDateTime().toLocalDate().atStartOfDay(),

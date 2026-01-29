@@ -3,6 +3,7 @@ package no.nav.ung.sak.oppgave.saksbehandling;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
@@ -42,17 +43,26 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     private BrukerdialogOppgaveRepository repository;
     private OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste;
     private Pdl pdl;
+    private boolean isEnabled;
 
     public OppgaveForSaksbehandlingGrensesnittImpl() {
         // CDI proxy
     }
 
     @Inject
-    public OppgaveForSaksbehandlingGrensesnittImpl(BrukerdialogOppgaveRepository repository, OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste,
-                                                   Pdl pdl) {
+    public OppgaveForSaksbehandlingGrensesnittImpl(BrukerdialogOppgaveRepository repository,
+                                                   OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste,
+                                                   Pdl pdl,
+                                                   @KonfigVerdi(value = "OPPGAVER_I_UNGSAK_ENABLED", defaultVerdi = "true") boolean oppgaverIUngsakEnabled) {
         this.repository = repository;
         this.oppgaveLivssyklusTjeneste = oppgaveLivssyklusTjeneste;
         this.pdl = pdl;
+        this.isEnabled = oppgaverIUngsakEnabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     @Override

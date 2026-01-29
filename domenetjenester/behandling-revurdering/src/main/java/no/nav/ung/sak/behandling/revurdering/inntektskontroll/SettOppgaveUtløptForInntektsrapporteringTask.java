@@ -8,9 +8,9 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.Oppgavetype;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -29,7 +29,7 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
     public static final String PERIODE_TOM = "tom";
 
     private PersoninfoAdapter personinfoAdapter;
-    private UngOppgaveKlient ungOppgaveKlient;
+    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
 
 
     SettOppgaveUtløptForInntektsrapporteringTask() {
@@ -37,10 +37,10 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
 
     @Inject
     public SettOppgaveUtløptForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
-                                                        UngOppgaveKlient ungOppgaveKlient) {
+                                                        MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste) {
 
         this.personinfoAdapter = personinfoAdapter;
-        this.ungOppgaveKlient = ungOppgaveKlient;
+        this.delegeringTjeneste = delegeringTjeneste;
     }
 
 
@@ -50,7 +50,7 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
-        ungOppgaveKlient.settOppgaveTilUtløpt(new EndreStatusDTO(
+        delegeringTjeneste.settOppgaveTilUtløpt(new EndreStatusDTO(
             deltakerIdent.getIdent(),
             Oppgavetype.RAPPORTER_INNTEKT,
             fom,

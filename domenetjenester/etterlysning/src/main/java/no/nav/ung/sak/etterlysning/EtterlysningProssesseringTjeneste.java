@@ -16,8 +16,7 @@ public class EtterlysningProssesseringTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private OpprettOppgaveTjeneste opprettOppgaveTjeneste;
-
-    private UngOppgaveKlient oppgaveKlient;
+    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public EtterlysningProssesseringTjeneste() {
@@ -27,10 +26,11 @@ public class EtterlysningProssesseringTjeneste {
     @Inject
     public EtterlysningProssesseringTjeneste(EtterlysningRepository etterlysningRepository,
                                              OpprettOppgaveTjeneste opprettOppgaveTjeneste,
-                                             UngOppgaveKlient oppgaveKlient, ProsessTaskTjeneste prosessTaskTjeneste) {
+                                             MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+                                             ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.opprettOppgaveTjeneste = opprettOppgaveTjeneste;
-        this.oppgaveKlient = oppgaveKlient;
+        this.delegeringTjeneste = delegeringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
@@ -42,7 +42,7 @@ public class EtterlysningProssesseringTjeneste {
 
     public void settEttelysningerUtløpt(List<Etterlysning> etterlysninger) {
         etterlysninger.forEach(e -> {
-            oppgaveKlient.oppgaveUtløpt(e.getEksternReferanse());
+            delegeringTjeneste.oppgaveUtløpt(e.getEksternReferanse());
             e.utløpt();
         });
 
@@ -53,7 +53,7 @@ public class EtterlysningProssesseringTjeneste {
         final var etterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandlingId);
 
         etterlysninger.forEach(e -> {
-            oppgaveKlient.avbrytOppgave(e.getEksternReferanse());
+            delegeringTjeneste.avbrytOppgave(e.getEksternReferanse());
             e.avbryt();
         });
 
