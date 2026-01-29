@@ -25,7 +25,7 @@ import java.util.UUID;
 @Transactional
 @Produces(MediaType.APPLICATION_JSON)
 public class BrukerdialogOppgaveRestTjeneste {
-    static final String BASE_PATH = "/brukerdialog/oppgave";
+    static final String BASE_PATH = "/oppgave";
 
     private BrukerdialogOppgaveTjeneste oppgaveTjeneste;
     private Pdl pdl;
