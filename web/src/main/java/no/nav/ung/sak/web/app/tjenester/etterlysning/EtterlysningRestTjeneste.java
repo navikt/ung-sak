@@ -17,7 +17,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
@@ -25,7 +24,6 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -131,7 +129,7 @@ public class EtterlysningRestTjeneste {
             // Endrer frist på autopunkt dersom nødvendig
             behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, etterlysning.getType());
 
-            opprettHistorikkinnslag(behandlingId, etterlysning, frist);
+            opprettHistorikkinnslag(behandlingId, behandling.getFagsakId(), etterlysning, frist);
 
             String personIdent = pdl.hentPersonIdentForAktørId(behandling.getAktørId().getAktørId()).orElseThrow(() -> new IllegalStateException("Finner ikke personident for aktørId for behandling " + behandling.getId()));
             oppgaveRestKlient.endreFrist(personIdent, etterlysning.getEksternReferanse(), frist);
@@ -139,10 +137,11 @@ public class EtterlysningRestTjeneste {
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }
 
-    private void opprettHistorikkinnslag(Long behandlingId, no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning etterlysning, LocalDateTime frist) {
+    private void opprettHistorikkinnslag(Long behandlingId, Long fagsakId, no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning etterlysning, LocalDateTime frist) {
         Historikkinnslag.Builder builder = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.SAKSBEHANDLER)
             .medBehandlingId(behandlingId)
+            .medFagsakId(fagsakId)
             .medTittel("Frist er endret")
             .addLinje("Frist for å motta " + etterlysning.getType().getNavn() + " er endret til " + frist.toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) + ".");
         historikkinnslagRepository.lagre(builder.build());
