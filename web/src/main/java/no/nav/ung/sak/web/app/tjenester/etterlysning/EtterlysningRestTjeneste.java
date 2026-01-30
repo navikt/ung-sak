@@ -25,6 +25,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -126,6 +127,9 @@ public class EtterlysningRestTjeneste {
             // Det vil mest sannsynlig bare være en etterlysning her, så vi anser det som ok å lagre inne i loopen for lesbarhet
             etterlysningRepository.lagre(etterlysning);
             opprettNySettUtløptTask(behandling, frist);
+
+            // Endrer frist på autopunkt dersom nødvendig
+            behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, etterlysning.getType());
 
             opprettHistorikkinnslag(behandlingId, etterlysning, frist);
 

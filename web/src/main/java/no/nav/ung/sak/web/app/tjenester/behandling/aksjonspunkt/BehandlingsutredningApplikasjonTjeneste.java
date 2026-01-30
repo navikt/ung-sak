@@ -1,15 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
-import static no.nav.k9.felles.feil.LogLevel.ERROR;
-import static no.nav.k9.felles.feil.LogLevel.INFO;
-import static no.nav.k9.felles.feil.LogLevel.WARN;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.Period;
-import java.util.List;
-import java.util.Objects;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.feil.Feil;
@@ -24,17 +14,30 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.behandling.SjekkProsessering;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+import static no.nav.k9.felles.feil.LogLevel.*;
 
 @Dependent
 public class BehandlingsutredningApplikasjonTjeneste {
@@ -42,9 +45,11 @@ public class BehandlingsutredningApplikasjonTjeneste {
     private Period defaultVenteFrist;
     private BehandlingRepository behandlingRepository;
     private OppgaveTjeneste oppgaveTjeneste;
+    private EtterlysningRepository etterlysningRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private SjekkProsessering sjekkProsessering;
+
     BehandlingsutredningApplikasjonTjeneste() {
         // for CDI proxy
     }
@@ -53,6 +58,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
     public BehandlingsutredningApplikasjonTjeneste(@KonfigVerdi(value = "behandling.default.ventefrist.periode", defaultVerdi = "P4W") Period defaultVenteFrist,
                                                    BehandlingRepositoryProvider behandlingRepositoryProvider,
                                                    OppgaveTjeneste oppgaveTjeneste,
+                                                   EtterlysningRepository etterlysningRepository,
                                                    BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                                    SjekkProsessering sjekkProsessering,
                                                    BehandlingskontrollTjeneste behandlingskontrollTjeneste) {
@@ -63,6 +69,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
+        this.etterlysningRepository = etterlysningRepository;
     }
 
     /**
@@ -105,6 +112,23 @@ public class BehandlingsutredningApplikasjonTjeneste {
         doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, frist, venteårsak, venteårsakVariant);
     }
 
+    public void endreBehandlingPaVent(Long behandlingsId, EtterlysningType etterlysningType) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
+        if (!behandling.isBehandlingPåVent()) {
+            throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.kanIkkeEndreVentefristForBehandlingIkkePaVent(behandlingsId)
+                .toException();
+        }
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = etterlysningType.tilAutopunktDefinisjon();
+
+        Optional<LocalDateTime> sisteFristForType = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(behandlingsId).stream()
+            .filter(it -> it.getType() == etterlysningType)
+            .map(Etterlysning::getFrist)
+            .max(Comparator.naturalOrder());
+
+        doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, sisteFristForType.map(LocalDateTime::toLocalDate).orElse(null), etterlysningType.mapTilVenteårsak(), null);
+    }
+
+
     private LocalDateTime bestemFristForBehandlingVent(LocalDate frist) {
         return frist != null
             ? LocalDateTime.of(frist, LocalDateTime.now().toLocalTime())
@@ -127,7 +151,7 @@ public class BehandlingsutredningApplikasjonTjeneste {
 
     private void validerIngenPågåendeProsess(Behandling behandling) {
         var res = sjekkProsessering.sjekkProsessTaskPågårForBehandling(behandling, null);
-        if(res.isPresent()) {
+        if (res.isPresent()) {
             Fagsak fagsak = behandling.getFagsak();
             throw BehandlingsutredningApplikasjonTjenesteFeil.FACTORY.prosessUnderveisKanIkkeEndreTilKlart(fagsak.getYtelseType(), behandling.getId(), fagsak.getSaksnummer(), res.get()).toException();
         }
