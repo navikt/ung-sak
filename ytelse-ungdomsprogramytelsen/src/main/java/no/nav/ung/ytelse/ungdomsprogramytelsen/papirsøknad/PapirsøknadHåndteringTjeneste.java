@@ -27,6 +27,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;

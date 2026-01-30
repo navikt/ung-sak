@@ -1,12 +1,12 @@
 package no.nav.ung.sak.oppgave;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.typer.AktørId;
 import org.hibernate.annotations.ColumnTransformer;
 
 import java.time.LocalDateTime;

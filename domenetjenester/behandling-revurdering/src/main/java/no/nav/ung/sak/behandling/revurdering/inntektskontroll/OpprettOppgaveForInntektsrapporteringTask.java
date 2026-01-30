@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;

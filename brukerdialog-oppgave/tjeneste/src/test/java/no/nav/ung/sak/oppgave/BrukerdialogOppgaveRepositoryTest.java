@@ -4,16 +4,15 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
+import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;

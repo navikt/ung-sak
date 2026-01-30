@@ -9,8 +9,8 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.Oppgavetype;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

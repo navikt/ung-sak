@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.PersonIdent;
