@@ -1,10 +1,13 @@
-package no.nav.ung.sak.mottak.dokumentmottak;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.ytelse.ung.v1.UngdomsytelseSøknadValidator;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
+import no.nav.ung.sak.mottak.dokumentmottak.DokumentValidator;
+import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 
 import java.util.Collection;
 import java.util.Objects;

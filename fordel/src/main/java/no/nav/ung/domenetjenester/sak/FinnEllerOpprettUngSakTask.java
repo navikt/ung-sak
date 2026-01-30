@@ -1,10 +1,8 @@
 package no.nav.ung.domenetjenester.sak;
 
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.ung.fordel.handler.FordelProsessTaskTjeneste;
@@ -12,9 +10,12 @@ import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.mottak.dokumentmottak.UngdomsytelseSøknadMottaker;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
@@ -24,13 +25,13 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
 
     public static final String TASKTYPE = "ung.finnEllerOpprettSak";
     private static final Logger log = LoggerFactory.getLogger(FinnEllerOpprettUngSakTask.class);
-    private final UngdomsytelseSøknadMottaker søknadMottakTjenester;
+    private final SøknadMottakTjeneste søknadMottakTjenester;
 
     @Inject
     public FinnEllerOpprettUngSakTask(FordelProsessTaskTjeneste fordelProsessTaskTjeneste,
-                                      @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) UngdomsytelseSøknadMottaker søknadMottakTjenester) {
+                                      @Any Instance<SøknadMottakTjeneste> søknadMottakTjenester) {
         super(fordelProsessTaskTjeneste);
-        this.søknadMottakTjenester = søknadMottakTjenester;
+        this.søknadMottakTjenester = SøknadMottakTjeneste.finnTjeneste(søknadMottakTjenester, FagsakYtelseType.UNGDOMSYTELSE);
     }
 
     @Override

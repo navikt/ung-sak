@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak.oppgavebekreftelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentValidator;
+import no.nav.ung.sak.mottak.dokumentmottak.oppgavebekreftelse.OppgaveBekreftelseParser;
 
 import java.util.Collection;
 import java.util.Objects;

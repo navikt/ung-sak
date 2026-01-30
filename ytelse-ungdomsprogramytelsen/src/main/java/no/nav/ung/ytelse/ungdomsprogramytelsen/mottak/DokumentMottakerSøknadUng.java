@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
@@ -16,6 +16,11 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
+import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
+import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
+import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 
 
 @ApplicationScoped

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

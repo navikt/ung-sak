@@ -55,10 +55,6 @@ public class Behandlingsoppretter {
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
     }
 
-    public Optional<Behandling> hentForrigeBehandling(Fagsak fagsak) {
-        return behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
-    }
-
     /**
      * Opprett og Oppdater under vil opprette behandling og kopiere grunnlag, men ikke opprette start/fortsett tasks.
      */

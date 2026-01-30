@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
@@ -19,7 +19,7 @@ import no.nav.ung.sak.felles.typer.Saksnummer;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @ApplicationScoped
-public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<UngdomsytelseSøknadInnsending> {
+public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste {
 
     private SaksnummerRepository saksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;

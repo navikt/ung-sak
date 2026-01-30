@@ -17,6 +17,15 @@
     <dependencies>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
+            <artifactId>mottak</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>fordel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingsprosess-steg</artifactId>
         </dependency>
 
