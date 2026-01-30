@@ -32,10 +32,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.SjekkProsessering;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static no.nav.k9.felles.feil.LogLevel.*;
 
@@ -112,6 +109,13 @@ public class BehandlingsutredningApplikasjonTjeneste {
         doSetBehandlingPåVent(behandlingsId, aksjonspunktDefinisjon, frist, venteårsak, venteårsakVariant);
     }
 
+    /** Endrer frist for behandling basert på endring i frist for gitt etterlysningstype.
+     *
+     *  Finner siste frist for etterlysning av gitt type, og oppdaterer autopunktets ventefrist til denne datoen.
+     *
+     * @param behandlingsId BehandlingId
+     * @param etterlysningType Etterlysningstype som er endret
+     */
     public void endreBehandlingPaVent(Long behandlingsId, EtterlysningType etterlysningType) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingsId);
         if (!behandling.isBehandlingPåVent()) {
@@ -120,8 +124,11 @@ public class BehandlingsutredningApplikasjonTjeneste {
         }
         AksjonspunktDefinisjon aksjonspunktDefinisjon = etterlysningType.tilAutopunktDefinisjon();
 
+        List<EtterlysningType> typerMedSammeAutopunktDefinisjon = Arrays.stream(EtterlysningType.values()).filter(it -> it.tilAutopunktDefinisjon() == aksjonspunktDefinisjon).toList();
+
+
         Optional<LocalDateTime> sisteFristForType = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(behandlingsId).stream()
-            .filter(it -> it.getType() == etterlysningType)
+            .filter(it -> typerMedSammeAutopunktDefinisjon.contains(it.getType()))
             .map(Etterlysning::getFrist)
             .max(Comparator.naturalOrder());
 
