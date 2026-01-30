@@ -5,9 +5,9 @@ import jakarta.inject.Inject;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
-import no.nav.ung.sak.oppgave.kontrakt.OpprettSøkYtelseOppgaveDto;
-import no.nav.ung.sak.oppgave.kontrakt.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

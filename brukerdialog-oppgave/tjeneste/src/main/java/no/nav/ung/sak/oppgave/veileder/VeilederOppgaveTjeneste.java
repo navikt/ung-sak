@@ -1,6 +1,6 @@
 package no.nav.ung.sak.oppgave.veileder;
 
-import no.nav.ung.sak.oppgave.kontrakt.OpprettSøkYtelseOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto;
 
 /**
  * Interface for veileder-tjeneste som kan opprette oppgaver for brukere.

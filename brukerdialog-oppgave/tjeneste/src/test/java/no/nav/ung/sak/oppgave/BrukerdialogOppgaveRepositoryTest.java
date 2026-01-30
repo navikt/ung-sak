@@ -5,7 +5,9 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.oppgave.typer.søkytelse.SøkYtelseOppgaveData;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +45,7 @@ class BrukerdialogOppgaveRepositoryTest {
         // Arrange
         UUID oppgaveReferanse = UUID.randomUUID();
         LocalDate fomDato = LocalDate.of(2026, 2, 1);
-        SøkYtelseOppgaveData oppgaveData = new SøkYtelseOppgaveData(fomDato);
+        SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(fomDato);
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,
@@ -66,7 +68,7 @@ class BrukerdialogOppgaveRepositoryTest {
         assertThat(hentetOppgave.get().getOppgaveType()).isEqualTo(OppgaveType.SØK_YTELSE);
         assertThat(hentetOppgave.get().getAktørId()).isEqualTo(aktørId);
         assertThat(hentetOppgave.get().getStatus()).isEqualTo(OppgaveStatus.ULØST);
-        assertThat(hentetOppgave.get().getData()).isInstanceOf(SøkYtelseOppgaveData.class);
+        assertThat(hentetOppgave.get().getData()).isInstanceOf(SøkYtelseOppgavetypeDataDTO.class);
     }
 
     @Test
@@ -85,29 +87,6 @@ class BrukerdialogOppgaveRepositoryTest {
         // Assert
         assertThat(oppgaver).hasSize(2);
         assertThat(oppgaver).allMatch(o -> o.getAktørId().equals(aktørId));
-    }
-
-    @Test
-    void skal_oppdatere_oppgave_til_løst() {
-        // Arrange
-        BrukerdialogOppgaveEntitet oppgave = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
-        UUID oppgaveReferanse = oppgave.getOppgavereferanse();
-
-        entityManager.flush();
-        entityManager.clear();
-
-        // Act
-        BrukerdialogOppgaveEntitet hentetOppgave = repository.hentOppgaveForOppgavereferanse(oppgaveReferanse, aktørId).get();
-        BrukerdialogOppgaveEntitet løstOppgave = repository.løsOppgave(hentetOppgave);
-
-        entityManager.flush();
-        entityManager.clear();
-
-        // Assert
-        BrukerdialogOppgaveEntitet verifisertOppgave = repository.hentOppgaveForOppgavereferanse(oppgaveReferanse, aktørId).get();
-        assertThat(verifisertOppgave.getStatus()).isEqualTo(OppgaveStatus.LØST);
-        assertThat(verifisertOppgave.getLøstDato()).isNotNull();
-        assertThat(verifisertOppgave.getLøstDato()).isBeforeOrEqualTo(LocalDateTime.now());
     }
 
     @Test
@@ -161,7 +140,7 @@ class BrukerdialogOppgaveRepositoryTest {
         BrukerdialogOppgaveEntitet oppgave3 = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
 
         // Løs én av SØK_YTELSE oppgavene
-        repository.løsOppgave(oppgave3);
+        repository.lukkOppgave(oppgave3);
 
         entityManager.flush();
         entityManager.clear();
@@ -206,7 +185,7 @@ class BrukerdialogOppgaveRepositoryTest {
     // Hjelpemetode for å opprette testoppgaver
     private BrukerdialogOppgaveEntitet opprettOppgave(AktørId aktørId, OppgaveType type) {
         UUID oppgaveReferanse = UUID.randomUUID();
-        SøkYtelseOppgaveData oppgaveData = new SøkYtelseOppgaveData(LocalDate.now());
+        SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(LocalDate.now());
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,

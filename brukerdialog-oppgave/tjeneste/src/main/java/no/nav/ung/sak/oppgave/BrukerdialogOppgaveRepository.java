@@ -4,9 +4,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 
 import java.time.LocalDateTime;
 import java.util.List;

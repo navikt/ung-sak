@@ -15,7 +15,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.brukerdialog.BrukerdialogOppgaveTjeneste;
-import no.nav.ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
 
 import java.util.List;
 import java.util.UUID;
