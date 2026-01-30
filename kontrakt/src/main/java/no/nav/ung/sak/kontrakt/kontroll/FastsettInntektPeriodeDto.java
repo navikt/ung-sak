@@ -6,7 +6,9 @@ import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.sak.typer.Periode;
+import jakarta.validation.constraints.Pattern;
+import no.nav.ung.sak.kontrakt.klage.TekstValideringRegex;
+import no.nav.ung.sak.felles.typer.Periode;
 
 public record FastsettInntektPeriodeDto(
     @JsonProperty(value = "periode", required = true)
@@ -27,6 +29,7 @@ public record FastsettInntektPeriodeDto(
     @JsonProperty(value = "begrunnelse", required = true)
     @NotNull
     @Valid
+    @Pattern(regexp = TekstValideringRegex.FRITEKST)
     String begrunnelse
 ) {
 

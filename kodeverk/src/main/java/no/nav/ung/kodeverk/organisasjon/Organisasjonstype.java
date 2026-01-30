@@ -2,7 +2,7 @@ package no.nav.ung.kodeverk.organisasjon;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.sak.typer.OrgNummer;
+import no.nav.ung.sak.felles.typer.OrgNummer;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;

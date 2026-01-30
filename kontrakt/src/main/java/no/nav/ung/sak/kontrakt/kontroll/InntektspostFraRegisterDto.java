@@ -1,10 +1,10 @@
 package no.nav.ung.sak.kontrakt.kontroll;
 
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 
 public record InntektspostFraRegisterDto(
     String arbeidsgiverIdentifikator,
-    FagsakYtelseType ytelseType,
+    OverordnetInntektYtelseType ytelseType,
     Integer inntekt
 ) {
 }

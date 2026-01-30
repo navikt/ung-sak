@@ -33,7 +33,7 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepos
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BehandlingAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 
 import java.time.LocalDateTime;

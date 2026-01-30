@@ -16,10 +16,10 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +29,6 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -116,7 +115,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         var fagsak = fagsaker.get(0);
 
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalStateException("Fant ikke behandling"));
-        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(sisteBehandling.getId());
+        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
         LocalDateInterval månedForRapportering = new LocalDateInterval(fom, tom);
         return overlapperPeriodeDelvisMedProgramtidslinje(månedForRapportering, månedsvisTidslinje);
     }

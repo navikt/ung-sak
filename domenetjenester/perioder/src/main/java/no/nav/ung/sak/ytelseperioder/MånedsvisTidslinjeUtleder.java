@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.Period;
@@ -31,12 +32,31 @@ public class MånedsvisTidslinjeUtleder {
      * @return Oppstykket tidslinje for ytelse
      */
     // Det er litt rart med en tidslinje av periodedata, men det gjøres for å gjøre det veldig tydelig at dette er en tidslinje som ikke skal kunne slås sammen på tvers av måneder
-    public LocalDateTimeline<YearMonth> periodiserMånedsvis(Long behandlingId) {
+    public LocalDateTimeline<YearMonth> finnMånedsvisPeriodisertePerioder(Long behandlingId) {
         final var ungdomsprogramperioder = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
         final var fagsak = behandlingRepository.hentBehandling(behandlingId).getFagsak();
+        return finnMånedsvisPeriodisertePerioder(fagsak, ungdomsprogramperioder);
+    }
+
+    /** Utleder initielle oppstykkede ytelseperioder pr måned
+     * Ytelseperioder brukes til generering av tilkjent ytelse, rapporteringsperioder for inntekt og eventuelle kontrollperioder for inntekt
+     * @param behandlingId Id for behandling
+     * @return Oppstykket tidslinje for ytelse
+     */
+    // Det er litt rart med en tidslinje av periodedata, men det gjøres for å gjøre det veldig tydelig at dette er en tidslinje som ikke skal kunne slås sammen på tvers av måneder
+    public LocalDateTimeline<YearMonth> finnInitielleMånedsvisPeriodisertePerioder(Long behandlingId) {
+        final var ungdomsprogramperioder = ungdomsprogramPeriodeTjeneste.finnInitiellPeriodeTidslinje(behandlingId);
+        final var fagsak = behandlingRepository.hentBehandling(behandlingId).getFagsak();
+        return finnMånedsvisPeriodisertePerioder(fagsak, ungdomsprogramperioder);
+    }
+
+    public static LocalDateTimeline<YearMonth> finnMånedsvisPeriodisertePerioder(Fagsak fagsak, LocalDateTimeline<Boolean> ungdomsprogramperioder) {
         final var fagsakPeriode = fagsak.getPeriode();
         LocalDateTimeline<Boolean> programOgFagsakTidslinje = ungdomsprogramperioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
             .compress();
+        if (programOgFagsakTidslinje.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
         return programOgFagsakTidslinje
             .splitAtRegular(ungdomsprogramperioder.getMinLocalDate().withDayOfMonth(1), fagsakPeriode.getTomDato(), Period.ofMonths(1))
             .map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonthValue()))));

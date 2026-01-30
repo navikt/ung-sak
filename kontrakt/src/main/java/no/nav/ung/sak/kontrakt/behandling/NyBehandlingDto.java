@@ -10,11 +10,11 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

@@ -7,7 +7,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 import java.util.Objects;
 

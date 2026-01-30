@@ -4,11 +4,11 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektYtelseDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.YtelseType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.sak.kontroll.InntektType;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.Inntektsperiode;
-import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.felles.typer.Beløp;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -26,23 +26,20 @@ public class InntektKontrollOppgaveMapper {
         return registerinntekter
             .stream()
             .filter(it -> it.inntektType() == InntektType.YTELSE)
-            .map(it -> new RegisterInntektYtelseDTO(summerInntekter(it), maptilYtelseType(it.ytelseType().getYtelseType()))).toList();
+            .map(it -> new RegisterInntektYtelseDTO(summerInntekter(it), maptilYtelseType(it.ytelseType().getOverordnetYtelseType()))).toList();
     }
 
 
-    private static YtelseType maptilYtelseType(FagsakYtelseType ytelseType) {
+    private static YtelseType maptilYtelseType(OverordnetInntektYtelseType ytelseType) {
         switch (ytelseType) {
             case SYKEPENGER -> {
                 return YtelseType.SYKEPENGER;
             }
-            case OMSORGSPENGER, OMSORGSPENGER_AO, OMSORGSPENGER_KS, OMSORGSPENGER_MA -> {
+            case OMSORGSPENGER-> {
                 return YtelseType.OMSORGSPENGER;
             }
-            case PLEIEPENGER_SYKT_BARN -> {
-                return YtelseType.PLEIEPENGER_SYKT_BARN;
-            }
-            case PLEIEPENGER_NÆRSTÅENDE -> {
-                return YtelseType.PLEIEPENGER_LIVETS_SLUTTFASE;
+            case PLEIEPENGER -> {
+                return YtelseType.PLEIEPENGER;
             }
             case OPPLÆRINGSPENGER -> {
                 return YtelseType.OPPLAERINGSPENGER;

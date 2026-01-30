@@ -20,7 +20,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -30,9 +30,8 @@ public class BehandlingIdListe {
 
     @JsonProperty(value = "behandlinger", required = true)
     @NotEmpty
-    @Valid
     @Size(min = 1, max = 1000)
-    private List<BehandlingIdDto> behandlinger = new ArrayList<>();
+    private List<@Valid BehandlingIdDto> behandlinger = new ArrayList<>();
 
     public BehandlingIdListe(@JsonProperty(value = "behandlinger", required = true) @NotEmpty @Valid List<BehandlingIdDto> behandlinger) {
         this.behandlinger = Objects.requireNonNull(behandlinger, "behandlinger");

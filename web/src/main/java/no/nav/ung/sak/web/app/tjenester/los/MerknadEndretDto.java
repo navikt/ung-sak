@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.merknad.BehandlingMerknadType;
 import no.nav.ung.sak.kontrakt.Patterns;
 

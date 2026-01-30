@@ -21,7 +21,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -44,8 +44,7 @@ public class BekreftedeAksjonspunkterDto {
     @JsonProperty(value = "bekreftedeAksjonspunktDtoer", required = true)
     @Size(min = 1, max = 10)
     @NotNull
-    @Valid
-    private Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
+    private Collection<@Valid BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer = Collections.emptyList();
 
     public BekreftedeAksjonspunkterDto() {
     }

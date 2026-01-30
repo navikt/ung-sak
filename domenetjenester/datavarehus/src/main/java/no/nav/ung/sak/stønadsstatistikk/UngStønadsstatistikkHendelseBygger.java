@@ -27,7 +27,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadsstatistikkSatsPeriode;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadsstatistikkTilkjentYtelsePeriode;
@@ -51,8 +51,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
+import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -123,7 +123,10 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
     }
 
     private UngdomsprogramDeltakelsePeriode hentDeltakelsePeriode(Behandling behandling) {
-        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElse(null);
+        if (ungdomsprogramPeriodeGrunnlag == null || ungdomsprogramPeriodeGrunnlag.getUngdomsprogramPerioder().getPerioder().isEmpty()){
+            return null;
+        }
         DatoIntervallEntitet ungdomsprogramPeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
         return new UngdomsprogramDeltakelsePeriode(ungdomsprogramPeriode.getFomDato(), ungdomsprogramPeriode.getTomDato());
     }
@@ -156,7 +159,10 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
     }
 
     private List<StønadsstatistikkSatsPeriode> hentSatsPerioder(Behandling behandling) {
-        UngdomsytelseGrunnlag ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+        UngdomsytelseGrunnlag ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId()).orElse(null);
+        if (ungdomsytelseGrunnlag == null) {
+            return List.of();
+        }
         return ungdomsytelseGrunnlag.getSatsTidslinje().toSegments()
             .stream().map(it -> new StønadsstatistikkSatsPeriode(
                 it.getFom(),
@@ -196,10 +202,9 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
 
     }
 
-    private BigDecimal normaliser(BigDecimal beløp) {
+    private static BigDecimal normaliser(BigDecimal beløp) {
         //for å få tall til å serialiseres 'normalt', uten ekstra 0-desimaler eller vitenskaplig format (for eksempel '0e9')
-        //vil feile for tall som faktisk har desimaler
-        return beløp.setScale(0, RoundingMode.UNNECESSARY);
+        return beløp.setScale(Math.max(0, beløp.scale()), RoundingMode.UNNECESSARY);
     }
 
     private static LocalDateSegmentCombinator<Map<VilkårType, Utfall>, Map<VilkårType, Utfall>, Map<VilkårType, Utfall>> SEGMENT_KOMBINATOR_VILKÅR_UTFALL = (LocalDateInterval intervall, LocalDateSegment<Map<VilkårType, Utfall>> lhs, LocalDateSegment<Map<VilkårType, Utfall>> rhs) -> new LocalDateSegment<>(intervall, nullSafeUnion(lhs, rhs));

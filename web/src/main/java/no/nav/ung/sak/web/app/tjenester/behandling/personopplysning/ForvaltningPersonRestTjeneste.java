@@ -34,15 +34,15 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.felles.util.InputValideringRegex;
+import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kontrakt.person.AktørIdDto;
 import no.nav.ung.sak.kontrakt.person.AktørIdOgFnrDto;
 import no.nav.ung.sak.kontrakt.person.AktørInfoDto;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.io.BufferedReader;

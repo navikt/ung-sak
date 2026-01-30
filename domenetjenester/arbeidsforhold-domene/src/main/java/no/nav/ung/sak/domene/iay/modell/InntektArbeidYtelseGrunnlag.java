@@ -1,7 +1,7 @@
 package no.nav.ung.sak.domene.iay.modell;
 
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.ung.sak.felles.diff.ChangeTracked;
+import no.nav.ung.sak.felles.diff.DiffIgnore;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

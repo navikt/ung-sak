@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 
 import java.util.List;
@@ -17,10 +17,9 @@ public class EndreFristRequest {
     /**
      * Ekstern-referanse for etterlysning og ny frist
      */
-    @Valid
     @NotNull
     @Size(min = 1, max = 20)
-    private List<EndreFristDto> endretFrister;
+    private List<@Valid EndreFristDto> endretFrister;
 
 
     @JsonProperty(value = "behandlingId", required = true)

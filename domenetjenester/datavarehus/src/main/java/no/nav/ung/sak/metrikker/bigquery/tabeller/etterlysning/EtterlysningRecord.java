@@ -5,11 +5,11 @@ import com.google.cloud.bigquery.Schema;
 import com.google.cloud.bigquery.StandardSQLTypeName;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.metrikker.bigquery.BigQueryRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.BigQueryTabell;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.DateTimeUtils;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

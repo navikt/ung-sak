@@ -10,7 +10,7 @@ import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.k9.søknad.ytelse.ung.v1.UngSøknadstype;
 import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;

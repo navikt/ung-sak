@@ -9,7 +9,7 @@ import no.nav.ung.sak.kontrakt.kontroll.*;
 import no.nav.ung.sak.kontroll.InntektType;
 import no.nav.ung.sak.kontroll.RapportertInntekt;
 import no.nav.ung.sak.kontroll.RapporterteInntekter;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 
 import java.util.*;
 
@@ -164,7 +164,7 @@ public class KontrollerInntektMapper {
                 .filter(ip -> ip.getPeriode().toLocalDateInterval().overlaps(periode))
                 .map(ip -> new InntektspostFraRegisterDto(
                     inntekt.getArbeidsgiver() != null ? inntekt.getArbeidsgiver().getIdentifikator() : null,
-                    ip.getInntektYtelseType() != null ? ip.getInntektYtelseType().getYtelseType() : null,
+                    ip.getInntektYtelseType() != null ? ip.getInntektYtelseType().getOverordnetYtelseType() : null,
                     ip.getBeløp().getVerdi().intValue()))
                 .forEach(inntektsposterFraRegister::add);
         }

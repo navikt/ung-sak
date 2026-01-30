@@ -2,8 +2,8 @@ package no.nav.ung.sak.behandlingslager.aktør;
 
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.PersonIdent;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

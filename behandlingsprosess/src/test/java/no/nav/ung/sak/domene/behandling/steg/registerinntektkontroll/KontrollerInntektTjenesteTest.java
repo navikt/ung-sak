@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.kontroll.*;
 import org.junit.jupiter.api.Test;
@@ -136,6 +137,31 @@ class KontrollerInntektTjenesteTest {
     }
 
     @Test
+    void skal_bruke_registerinntekt_dersom_bruker_tidligere_har_rapportert_inntekt_og_ikke_har_svart_på_varsel() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 2000, 0, 500);
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
+            fom, tom,
+            new EtterlysningOgRegisterinntekt(
+                Set.of(
+                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000))
+                ),
+                new InntektskontrollEtterlysningInfo(EtterlysningStatus.UTLØPT, null))
+        );
+
+        // Act
+        var resultat = utførMedResultat(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
+
+        // Assert
+        Kontrollresultat kontrollresultat = new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, new Inntektsresultat(BigDecimal.valueOf(2000), KontrollertInntektKilde.REGISTER));
+        LocalDateTimeline<Kontrollresultat> forventet = new LocalDateTimeline<>(fom, tom, kontrollresultat);
+        assertEquals(forventet, resultat);
+    }
+
+    @Test
     void skal_opprette_aksjonspunkt_dersom_ingen_inntekt_i_register_og_rapportert_inntekt_fra_bruker() {
         // Arrange
         final var fom = LocalDate.now().minusDays(10);
@@ -188,9 +214,22 @@ class KontrollerInntektTjenesteTest {
 
 
     private LocalDateTimeline<KontrollResultatType> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
-        return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(new KontrollerInntektInput(prosessTriggerTidslinje
-                .mapValue(it -> true), gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje))
+        KontrollerInntektInput input = new KontrollerInntektInput(
+            prosessTriggerTidslinje.mapValue(it -> true),
+            prosessTriggerTidslinje.mapValue(it -> true),
+            gjeldendeRapporterteInntekter,
+            ikkeGodkjentUttalelseTidslinje);
+        return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(input)
             .mapValue(Kontrollresultat::type);
+    }
+
+    private LocalDateTimeline<Kontrollresultat> utførMedResultat(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
+        KontrollerInntektInput input = new KontrollerInntektInput(
+            prosessTriggerTidslinje.mapValue(it -> true),
+            prosessTriggerTidslinje.mapValue(it -> true),
+            gjeldendeRapporterteInntekter,
+            ikkeGodkjentUttalelseTidslinje);
+        return new KontrollerInntektTjeneste(AKSEPTERT_DIFFERANSE).utførKontroll(input);
     }
 
 

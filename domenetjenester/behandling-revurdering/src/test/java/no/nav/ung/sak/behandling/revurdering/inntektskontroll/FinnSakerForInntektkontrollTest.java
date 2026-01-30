@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -18,10 +17,8 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
@@ -36,7 +33,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
 
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -150,7 +147,7 @@ class FinnSakerForInntektkontrollTest {
      * Tester at ingen fagsaker returneres når programperioden slutter i september.
      */
     @Test
-    void skal_ikke_finne_fagsak_for_kontroll_av_siste_måned_i_programperiode() {
+    void skal_finne_fagsak_for_kontroll_av_siste_måned_i_programperiode() {
         // Arrange
         opprettProgramperiode(LANGT_BAK, MIDT_I_SEPTEMBER);
 
@@ -158,7 +155,7 @@ class FinnSakerForInntektkontrollTest {
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
 
         // Assert
-        assertEquals(0, fagsaker.size());
+        assertEquals(1, fagsaker.size());
     }
 
     /**

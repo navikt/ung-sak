@@ -11,8 +11,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 @Entity(name = "Journalpost")
 @Table(name = "JOURNALPOST")

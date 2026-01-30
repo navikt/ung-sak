@@ -15,15 +15,12 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,8 +40,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class ManglendeKontrollperioderTjenesteTest {
 
     @Inject
-    private ProsessTriggereRepository prosessTriggereRepository;
-    @Inject
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     @Inject
     private TilkjentYtelseRepository tilkjentYtelseRepository;
@@ -57,15 +52,12 @@ class ManglendeKontrollperioderTjenesteTest {
     @Inject
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     private Behandling behandling;
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
 
 
     @BeforeEach
     void setUp() {
         final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository);
-        final var ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, ungdomsprogramPeriodeTjeneste, behandlingRepository);
-        prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, ungdomsytelseSøknadsperiodeTjeneste);
         ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
     }
@@ -87,12 +79,12 @@ class ManglendeKontrollperioderTjenesteTest {
     }
 
     @Test
-    void skal_ikke_ulede_manglende_kontroll_dersom_programdeltakelse_over_to_måneder() {
+    void skal_ikke_ulede_manglende_kontroll_dersom_programdeltakelse_over_en_måned() {
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(6);
 
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(3).withDayOfMonth(1);
-        final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
+        final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(3).with(TemporalAdjusters.lastDayOfMonth());
 
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
@@ -174,8 +166,6 @@ class ManglendeKontrollperioderTjenesteTest {
         assertThat(perioder.iterator().next()).isEqualTo(månedNrTre);
     }
 
-
-
     @Test
     void skal_ikke_ulede_manglende_kontroll_dersom_allerede_kontrollert() {
 
@@ -184,16 +174,19 @@ class ManglendeKontrollperioderTjenesteTest {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(4).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(3).withDayOfMonth(1), LocalDate.now().minusMonths(3).with(TemporalAdjusters.lastDayOfMonth()));
+        final var sisteMåned = DatoIntervallEntitet.fraOgMedTilOgMed(sluttdatoUngdomsprogram.withDayOfMonth(1), sluttdatoUngdomsprogram);
 
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
-        tilkjentYtelseRepository.lagre(behandling.getId(), List.of(KontrollertInntektPeriode.ny().medPeriode(månedNrTre).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.BRUKER).medErManueltVurdert(false).build()));
+        tilkjentYtelseRepository.lagre(behandling.getId(), List.of(
+            KontrollertInntektPeriode.ny().medPeriode(månedNrTre).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.BRUKER).medErManueltVurdert(false).build(),
+            KontrollertInntektPeriode.ny().medPeriode(sisteMåned).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.BRUKER).medErManueltVurdert(false).build()
+            ));
 
         var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
 
         assertThat(perioder.isEmpty()).isTrue();
     }
-
 
     private Long lagFagsakOgBehandling(LocalDate fom) {
         final var fagsak = new Fagsak(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy(), new Saksnummer("SAKEN"), fom, fom.plusWeeks(52));
@@ -202,7 +195,6 @@ class ManglendeKontrollperioderTjenesteTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         return behandling.getId();
     }
-
 
     private ManglendeKontrollperioderTjeneste lagTjeneste(int dagIMånedForInntektsKontroll) {
         ZonedDateTime nå = ZonedDateTime.now();

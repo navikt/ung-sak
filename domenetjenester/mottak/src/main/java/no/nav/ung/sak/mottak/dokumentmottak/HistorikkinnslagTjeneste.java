@@ -5,19 +5,15 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.saf.*;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.varsel.EndringType;
-import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.behandlingslager.uttalelse.Uttalelser;
-import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -108,6 +104,7 @@ public class HistorikkinnslagTjeneste {
             case ENDRET_INNTEKT -> "Svar på varsel: Avvik i registerinntekt";
             case ENDRET_STARTDATO -> "Svar på varsel: Endret startdato";
             case ENDRET_SLUTTDATO -> "Svar på varsel: Endret sluttdato";
+            case ENDRET_PERIODE -> "Svar på varsel: Endret programperiode";
         };
     }
 

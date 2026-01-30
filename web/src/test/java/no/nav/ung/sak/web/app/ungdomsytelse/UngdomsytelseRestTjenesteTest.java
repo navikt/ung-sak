@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
@@ -72,7 +72,7 @@ class UngdomsytelseRestTjenesteTest {
     @Test
     void skal_utlede_maksdato_uten_opphørsdato() {
         // arrange
-        final var fom = LocalDate.now().withDayOfYear(1);
+        final var fom = LocalDate.of(2025, 1,1);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
             List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
 
@@ -89,7 +89,7 @@ class UngdomsytelseRestTjenesteTest {
     @Test
     void skal_utlede_maksdato_og_opphørsdato() {
         // arrange
-        final var fom = LocalDate.now().withDayOfYear(1);
+        final var fom = LocalDate.of(2025, 1,1);
         final var opphørsdato = fom.plusDays(20);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
             List.of(new UngdomsprogramPeriode(fom, opphørsdato)));
@@ -107,7 +107,7 @@ class UngdomsytelseRestTjenesteTest {
     @Test
     void skal_utlede_antall_dager_brukt_fra_original_behandling() {
         // arrange
-        final var fom = LocalDate.now().withDayOfYear(1);
+        final var fom = LocalDate.of(2025, 1,1);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
             List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
         tilkjentYtelseRepository.lagre(behandling.getId(), List.of(

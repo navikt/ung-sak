@@ -5,9 +5,9 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 
 import java.util.Objects;
 import java.util.Optional;

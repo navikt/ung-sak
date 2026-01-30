@@ -17,6 +17,8 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.felles.integrasjon.oppgave.v1.OppgaveRestKlient;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -28,10 +30,11 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
+import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
 import no.nav.ung.sak.kontrakt.etterlysning.Etterlysning;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.BehandlingsutredningApplikasjonTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
@@ -56,17 +59,22 @@ public class EtterlysningRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private UngOppgaveKlient oppgaveRestKlient;
+    private Pdl pdl;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository,
+                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste, UngOppgaveKlient oppgaveRestKlient, Pdl pdl) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.oppgaveRestKlient = oppgaveRestKlient;
+        this.pdl = pdl;
     }
 
     @GET
@@ -112,6 +120,8 @@ public class EtterlysningRestTjeneste {
             // Det vil mest sannsynlig bare være en etterlysning her, så vi anser det som ok å lagre inne i loopen for lesbarhet
             etterlysningRepository.lagre(etterlysning);
             opprettNySettUtløptTask(behandling, frist);
+            String personIdent = pdl.hentPersonIdentForAktørId(behandling.getAktørId().getAktørId()).orElseThrow(() -> new IllegalStateException("Finner ikke personident for aktørId for behandling " + behandling.getId()));
+            oppgaveRestKlient.endreFrist(personIdent, etterlysning.getEksternReferanse(), frist);
         });
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }

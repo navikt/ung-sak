@@ -12,7 +12,7 @@ public record StønadstatistikkPeriode(
     @NotNull LocalDate fom,
     @NotNull LocalDate tom,
     @NotNull StønadstatistikkUtfall utfall,
-    @NotNull @Valid @Size(max = 100) List<@Valid StønadstatistikkInngangsvilkår> inngangsvilkår
+    @NotNull @Size(max = 100) List<@Valid StønadstatistikkInngangsvilkår> inngangsvilkår
 ) {
 }
 

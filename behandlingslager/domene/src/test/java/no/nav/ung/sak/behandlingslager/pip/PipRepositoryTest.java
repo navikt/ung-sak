@@ -10,7 +10,7 @@ import java.util.Set;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
-import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.felles.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,8 +25,8 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Journalpost;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.Repository;
 

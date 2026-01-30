@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import org.junit.jupiter.api.Test;
 

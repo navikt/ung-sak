@@ -5,7 +5,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
 import no.nav.ung.sak.kontroll.*;
 import org.junit.jupiter.api.Test;
@@ -238,8 +237,9 @@ class EtterlysningutlederKontrollerInntektTest {
                                                        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
         return new EtterlysningutlederKontrollerInntekt(AKSEPTERT_DIFFERANSE).utledBehovForEtterlysninger(
             new KontrollerInntektInput(prosessTriggerTidslinje.mapValue(it -> true),
+                prosessTriggerTidslinje.mapValue(it -> true),
                 gjeldendeRapporterteInntekter,
-            ikkeGodkjentUttalelseTidslinje));
+                ikkeGodkjentUttalelseTidslinje));
     }
 
     private static LocalDateTimeline<Set<BehandlingÅrsakType>> lagProsesstriggerTidslinjeForInntektRapporteringOgKontroll(LocalDate fom, LocalDate tom) {

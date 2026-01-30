@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -48,7 +49,8 @@ public record StatiskeKodeverdier(
     @NotNull Set<ÅrsakTilVurdering> årsakerTilVurdering,
     @NotNull Set<KlageMedholdÅrsak> klageMedholdÅrsak,
     @NotNull Set<KlageAvvistÅrsak> klageAvvistÅrsaker,
-    @NotNull Set<KlageVurderingType> klageVurderingTyper
+    @NotNull Set<KlageVurderingType> klageVurderingTyper,
+    @NotNull Set<OverordnetInntektYtelseType> overordnetInntektYtelseTyper
 ) {
 
     // Eigentleg ikkje så nødvendig, men signaliserer tydleg at dei fleste verdier er enums som implementerer Kodeverdi.
@@ -82,7 +84,8 @@ public record StatiskeKodeverdier(
             alleEnumVerdier(ÅrsakTilVurdering.class),
             alleEnumVerdier(KlageMedholdÅrsak.class),
             alleEnumVerdier(KlageAvvistÅrsak.class),
-            alleEnumVerdier(KlageVurderingType.class)
+            alleEnumVerdier(KlageVurderingType.class),
+            alleEnumVerdier(OverordnetInntektYtelseType.class)
         );
     }
 }

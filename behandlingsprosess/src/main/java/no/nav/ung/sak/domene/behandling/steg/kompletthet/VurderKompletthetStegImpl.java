@@ -1,6 +1,8 @@
 package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -13,12 +15,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
-import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,11 +57,10 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private static final Logger log = LoggerFactory.getLogger(VurderKompletthetStegImpl.class);
     private EtterlysningRepository etterlysningRepository;
     private BehandlingRepository behandlingRepository;
-    private KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter;
-    private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
     private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
+    private Instance<EtterlysningOppretter> etterlysningOppretter;
     private Duration ventePeriode;
     private boolean hentInntektHendelserEnabled;
 
@@ -72,19 +71,18 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     @Inject
     public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository,
                                      BehandlingRepository behandlingRepository,
-                                     KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter,
-                                     ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
                                      InntektAbonnentTjeneste inntektAbonnentTjeneste,
-                                     RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder,
+                                     RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder,
+                                     RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder,
+                                     @Any Instance<EtterlysningOppretter> etterlysningOppretter,
                                      @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
                                      @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
-        this.kontrollerInntektEtterlysningOppretter = kontrollerInntektEtterlysningOppretter;
-        this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.rapporteringsfristAutopunktUtleder = rapporteringsfristAutopunktUtleder;
         this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
+        this.etterlysningOppretter = etterlysningOppretter;
         this.ventePeriode = Duration.parse(ventePeriode);
         this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
     }
@@ -99,8 +97,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         // Steg 1: Opprett etterlysninger dersom fagsak har digital bruker
         boolean erDigitalBruker = !fagsak.erIkkeDigitalBruker();
         if (erDigitalBruker) {
-            kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
-            programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+            EtterlysningOppretter.finnTjeneste(etterlysningOppretter, behandlingReferanse).opprettEtterlysninger(behandlingReferanse);
         } else {
             log.info("Behandling har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.");
         }
@@ -125,7 +122,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
 
-        if(etterlysningerSomVenterPåSvar.isEmpty()) {
+        if (etterlysningerSomVenterPåSvar.isEmpty()) {
             inntektAbonnentTjeneste.avsluttAbonnentHvisFinnes(behandlingReferanse.getAktørId());
         }
 
@@ -154,7 +151,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
             }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
                 return AUTO_SATT_PÅ_VENT_REVURDERING;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);
@@ -166,7 +163,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE;
             }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
                 return Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);

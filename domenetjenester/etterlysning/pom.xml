@@ -26,6 +26,11 @@
         </dependency>
 
         <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>brukerdialog-oppgave-saksbehandling-api</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>no.nav.k9.felles</groupId>
             <artifactId>k9-felles-db</artifactId>
         </dependency>

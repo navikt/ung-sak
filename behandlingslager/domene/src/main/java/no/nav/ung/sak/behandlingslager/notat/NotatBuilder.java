@@ -5,7 +5,6 @@ import java.util.UUID;
 
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.typer.AktørId;
 
 public class NotatBuilder {
     private UUID uuid;

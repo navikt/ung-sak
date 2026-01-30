@@ -40,6 +40,8 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+      time: "06:00"
+      timezone: "Europe/Oslo"
     cooldown:
       default-days: 7
       exclude:
@@ -71,6 +73,8 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+      time: "06:00"
+      timezone: "Europe/Oslo"
     cooldown:
       default-days: 7
     open-pull-requests-limit: 15
@@ -79,5 +83,7 @@ updates:
     directory: "/"
     schedule:
       interval: daily
+      time: "06:00"
+      timezone: "Europe/Oslo"
     registries:
       - ghcr

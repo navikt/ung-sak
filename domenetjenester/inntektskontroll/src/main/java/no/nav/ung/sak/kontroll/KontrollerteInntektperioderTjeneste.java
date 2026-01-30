@@ -8,8 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +27,13 @@ public class KontrollerteInntektperioderTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(KontrollerteInntektperioderTjeneste.class);
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
-    private final MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
     private final RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
 
     @Inject
-    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder ytelsesperiodeutleder, RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
+    public KontrollerteInntektperioderTjeneste(TilkjentYtelseRepository tilkjentYtelseRepository,
+                                               RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
-        this.ytelsesperiodeutleder = ytelsesperiodeutleder;
         this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 

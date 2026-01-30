@@ -7,7 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 @Table(name = "TILBAKEKREVING_INNTREKK")

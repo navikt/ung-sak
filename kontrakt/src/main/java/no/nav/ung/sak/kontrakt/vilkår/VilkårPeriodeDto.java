@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -18,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.ung.sak.kontrakt.Patterns;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

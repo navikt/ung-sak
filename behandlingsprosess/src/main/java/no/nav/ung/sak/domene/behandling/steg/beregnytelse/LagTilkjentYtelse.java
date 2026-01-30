@@ -19,15 +19,15 @@ import java.time.YearMonth;
  */
 public class LagTilkjentYtelse {
 
-    static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
+    public static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
                                                                          LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                          LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
-                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje, boolean kontrollSisteMndEnabled) {
+                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
 
-        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje, kontrollSisteMndEnabled);
+        final var ikkePåkrevdKontrollTidslinje = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(månedsvisYtelseTidslinje);
 
 
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.test.util.behandling.personopplysning;
 
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 import java.time.LocalDate;
 import java.util.HashSet;

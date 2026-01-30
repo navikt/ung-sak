@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.uttak.Tid;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.UngTestScenario;

@@ -6,7 +6,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.felles.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.behandling.GyldigePerioderForRevurderingPrÅrsakUtleder;
 import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 

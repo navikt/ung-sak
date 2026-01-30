@@ -19,7 +19,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.mottak.FinnSak;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.function.Function;

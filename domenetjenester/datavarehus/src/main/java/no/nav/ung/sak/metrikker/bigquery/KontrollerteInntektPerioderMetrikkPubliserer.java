@@ -46,6 +46,8 @@ public class KontrollerteInntektPerioderMetrikkPubliserer {
             it.getInntekt(),
             it.getErManueltVurdert(),
             YearMonth.of(it.getPeriode().getFomDato().getYear(), it.getPeriode().getFomDato().getMonth()),
+            it.getPeriode().getFomDato(),
+            it.getPeriode().getTomDato(),
             behandlingVedtak.getVedtakstidspunkt().atZone(ZoneId.systemDefault())
         )).toList();
 

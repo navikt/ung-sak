@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinj
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.historikk.HistorikkInnslagDokumentLinkDto;
 import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagDto;
-import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.felles.typer.JournalpostId;
 
 import java.util.Comparator;
 import java.util.List;

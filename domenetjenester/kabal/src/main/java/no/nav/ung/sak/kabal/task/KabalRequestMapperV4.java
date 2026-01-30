@@ -10,8 +10,8 @@ import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.Vurderingresultat;
 import no.nav.ung.sak.kabal.kontrakt.KabalRequestv4;
-import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.typer.RolleType;
+import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.felles.typer.RolleType;
 
 import java.util.Collections;
 import java.util.List;

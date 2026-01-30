@@ -157,6 +157,8 @@ spec:
       value: teamdokumenthandtering.aapen-dok-journalfoering
     - name: KAFKA_KABAL_TOPIC
       value: klage.behandling-events.v1
+    - name: KAFKA_MINSIDE_VARSEL_TOPIC
+      value: min-side.aapen-brukervarsel-v1
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -209,6 +211,8 @@ spec:
       value: http://kabal-api.klage
     - name: KABAL_SCOPE
       value: api://prod-gcp.klage.kabal-api/.default
+    - name: UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL
+      value: https://www.nav.no/ungdomsprogrammet/ytelsen
 
     # Saf
     - name: SAF_BASE_URL
@@ -246,19 +250,15 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
-      value: "false"
     - name: KLAGE_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL
       value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
-    - name: KONTROLL_SISTE_MND_ENABLED
-      value: "false"
     - name: ENABLE_BREV_ANSVARLIG
       value: "false"
-    - name: PUBLISER_STOENADSSTATISTIKK_ENABLED
+    - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
 
     # Konfigurasjoner
@@ -270,6 +270,8 @@ spec:
       value: "8"
     - name: INNTEKTSKONTROLL_CRON_EXPRESSION
       value: "0 0 7 8 * *"
+    - name: INNTEKTSRAPPORTERING_CRON_EXPRESSION
+      value: "0 0 7 1 * *"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE

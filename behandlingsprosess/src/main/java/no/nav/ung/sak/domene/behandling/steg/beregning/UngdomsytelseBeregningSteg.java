@@ -20,7 +20,7 @@ import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BeregnDagsat
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 
 import java.util.List;

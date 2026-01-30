@@ -14,7 +14,7 @@ import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
-import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.felles.typer.AktørId;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
