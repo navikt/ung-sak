@@ -70,13 +70,11 @@ public class BigQueryStatistikkRepository {
         Collection<DagerIProgrammetRecord> dagerIProgrammet = antallDagerStatistikk.dagerIProgrammet();
         dagligRapporterte.add(new Tuple<>(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, dagerIProgrammet));
 
-
-
         return dagligRapporterte;
     }
 
 
-        public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
+    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
         Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
@@ -432,7 +430,6 @@ public class BigQueryStatistikkRepository {
     /* Henter uttalelse-data for fagsaker.
      */
     Collection<UttalelseRecord> uttalelseData(LocalDateTime sistKjørtTidspunkt, LocalDateTime førsteKjørtTidspunkt) {
-        førsteKjørtTidspunkt = førsteKjørtTidspunkt == null ? TIDENES_BEGYNNELSE.atStartOfDay() : førsteKjørtTidspunkt;
         String sql = """
             select f.saksnummer, u.har_uttalelse, u.endring_type, u.fom, u.tom, m.mottatt_tidspunkt
              from gr_uttalelse gr
@@ -440,15 +437,20 @@ public class BigQueryStatistikkRepository {
              inner join behandling b on b.id = gr.behandling_id
              inner join fagsak f on f.id = b.fagsak_id
              inner join mottatt_dokument m on m.journalpost_id = u.svar_journalpost_id and m.behandling_id = b.id
-             where f.ytelse_type <> :obsoleteKode and (m.mottatt_tidspunkt > :sistKjørtTidspunkt or m.mottatt_tidspunkt < :førsteKjørtTidspunkt)
+             where f.ytelse_type <> :obsoleteKode and
             """;
+        sql += førsteKjørtTidspunkt == null
+            ? "(m.mottatt_tidspunkt > :sistKjørtTidspunkt)"
+            : "(m.mottatt_tidspunkt > :sistKjørtTidspunkt or m.mottatt_tidspunkt < :førsteKjørtTidspunkt)";
 
         NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
-        Stream<jakarta.persistence.Tuple> stream = query
-            .setParameter("obsoleteKode", OBSOLETE_KODE)
-            .setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt)
-            .setParameter("førsteKjørtTidspunkt", førsteKjørtTidspunkt)
-            .getResultStream();
+        query.setParameter("obsoleteKode", OBSOLETE_KODE);
+        query.setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt);
+        if (førsteKjørtTidspunkt != null) {
+            query.setParameter("førsteKjørtTidspunkt", førsteKjørtTidspunkt);
+        }
+
+        Stream<jakarta.persistence.Tuple> stream = query.getResultStream();
 
         return stream.map(t -> {
             String saksnummer = t.get(0, String.class);
@@ -471,7 +473,7 @@ public class BigQueryStatistikkRepository {
 
     /**
      * Henter statistikk for behandlinger gruppert på årsakstype og ferdigbehandlet-status.
-     *
+     * <p>
      * Denne metoden henter antall behandlinger for hver kombinasjon av relevante årsakstyper og om behandlingen er ferdigbehandlet eller ikke.
      * Resultatet inkluderer alle relevante årsaker, også de med 0 forekomster, for både ferdigbehandlet og ikke-ferdigbehandlet status.
      *
@@ -548,9 +550,6 @@ public class BigQueryStatistikkRepository {
             return new AlderOgKjønnRecord(BigDecimal.valueOf(antall), alder.intValue(), kjønn, ZonedDateTime.now());
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
-
-
-
 
 
 }
