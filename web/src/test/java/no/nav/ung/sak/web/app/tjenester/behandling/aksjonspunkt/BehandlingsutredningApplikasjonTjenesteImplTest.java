@@ -9,6 +9,7 @@ import java.time.Period;
 
 import jakarta.inject.Inject;
 
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,6 +83,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
             Period.parse("P4W"),
             repositoryProvider,
             oppgaveTjenesteMock,
+            new EtterlysningRepository(repositoryProvider.getEntityManager()),
             behandlendeEnhetTjeneste,
             sjekkProsessering,
             behandlingskontrollTjenesteImpl);
