@@ -8,6 +8,7 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -86,5 +87,15 @@ public interface OppgaveForSaksbehandlingGrensesnitt {
      * @param deltakerDTO informasjon om deltakeren
      */
     void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO);
+
+
+    /**
+     * Endrer frist for en oppgave.
+     *
+     * @param personIdent Personident for den oppgaven gjelder
+     * @param eksternReferanse Oppgavereferanse
+     * @param frist            Ny frist for oppgaven
+     */
+    void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist);
 }
 

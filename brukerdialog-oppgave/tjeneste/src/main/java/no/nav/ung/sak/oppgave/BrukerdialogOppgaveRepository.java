@@ -60,11 +60,12 @@ public class BrukerdialogOppgaveRepository {
         return query.getResultList().stream().findFirst();
     }
 
-    public BrukerdialogOppgaveEntitet løsOppgave(BrukerdialogOppgaveEntitet oppgave) {
-        oppgave.setStatus(OppgaveStatus.LØST);
-        oppgave.setLøstDato(LocalDateTime.now());
-
-        return oppdater(oppgave);
+    public BrukerdialogOppgaveEntitet endreFrist(UUID oppgaveReferanse, AktørId aktørId, LocalDateTime nyFrist) {
+        var brukerdialogOppgaveEntitet = hentOppgaveForOppgavereferanse(oppgaveReferanse, aktørId).orElseThrow(() ->
+            new IllegalArgumentException("Fant ingen oppgave for oppgavereferanse " + oppgaveReferanse)
+        );
+        brukerdialogOppgaveEntitet.setFristTid(nyFrist);
+        return oppdater(brukerdialogOppgaveEntitet);
     }
 
     public BrukerdialogOppgaveEntitet lukkOppgave(BrukerdialogOppgaveEntitet oppgave) {

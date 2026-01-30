@@ -84,6 +84,10 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         return fristTid;
     }
 
+    public void setFristTid(LocalDateTime fristTid) {
+        this.fristTid = fristTid;
+    }
+
     protected void setStatus(OppgaveStatus status) {
         this.status = status;
     }

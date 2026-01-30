@@ -89,7 +89,6 @@ public class OppgaveLivssyklusTjeneste {
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(PubliserMinSideVarselTask.class);
         prosessTaskData.setProperty(PubliserMinSideVarselTask.OPPGAVE_REFERANSE, oppgaveEntitet.getOppgavereferanse().toString());
         prosessTaskData.setProperty(ProsessTaskData.AKTØR_ID, oppgaveEntitet.getAktørId().getId());
-        prosessTaskData.setProperty(PubliserMinSideVarselTask.FRIST, oppgaveEntitet.getFristTid().format(DateTimeFormatter.ISO_DATE_TIME));
         prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_TEKST, varselInnholdUtleder.utledVarselTekst(oppgaveEntitet));
         prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_LENKE, varselInnholdUtleder.utledVarselLenke(oppgaveEntitet));
         prosessTaskTjeneste.lagre(prosessTaskData);

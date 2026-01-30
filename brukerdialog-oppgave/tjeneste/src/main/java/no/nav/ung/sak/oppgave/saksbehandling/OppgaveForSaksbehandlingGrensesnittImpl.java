@@ -21,6 +21,7 @@ import no.nav.ung.sak.oppgave.typer.kontrollerregisterinntekt.KontrollerRegister
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -151,6 +152,12 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
             logger.warn("Fant flere enn én uløst søk-ytelse-oppgave. Antall: {}", søkYtelseOppgaver.size());
         }
         søkYtelseOppgaver.forEach(oppgaveLivssyklusTjeneste::løsOppgave);
+    }
+
+    @Override
+    public void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist) {
+        AktørId aktørId = finnAktørId(personIdent);
+        repository.endreFrist(eksternReferanse, aktørId, frist);
     }
 
     private AktørId finnAktørId(String deltakerIdent) {

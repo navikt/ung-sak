@@ -30,7 +30,6 @@ public class PubliserMinSideVarselTask implements ProsessTaskHandler {
 
     public static final String TASKTYPE = "minside.publiservarsel";
     public static final String OPPGAVE_REFERANSE = "oppgaveReferanse";
-    public static final String FRIST = "frist";
     public static final String VARSEL_TEKST = "varsel_tekst";
     public static final String VARSEL_LENKE = "varsel_lenke";
 
@@ -87,7 +86,6 @@ public class PubliserMinSideVarselTask implements ProsessTaskHandler {
             .withIdent(personIdent)
             .withTekst("nb", prosessTaskData.getPropertyValue(VARSEL_TEKST))
             .withLink(prosessTaskData.getPropertyValue(VARSEL_LENKE))
-            .withAktivFremTil(finnFrist(prosessTaskData))
             .withEksternVarsling(
                 OpprettVarselBuilder.eksternVarsling()
                     .withPreferertKanal(EksternKanal.SMS)
@@ -96,14 +94,6 @@ public class PubliserMinSideVarselTask implements ProsessTaskHandler {
             .build();
         RecordMetadata recordMetadata = producer.sendJsonMedNøkkel(oppgaveReferanse, kafkaValueJson);
         log.info("Sendte melding til  {} partition {} offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
-    }
-
-    private static ZonedDateTime finnFrist(ProsessTaskData prosessTaskData) {
-        String fristProperty = prosessTaskData.getPropertyValue(FRIST);
-        if (fristProperty == null) {
-            return null;
-        }
-        return LocalDateTime.parse(fristProperty).atZone(TimeZone.getDefault().toZoneId());
     }
 
     @Override
