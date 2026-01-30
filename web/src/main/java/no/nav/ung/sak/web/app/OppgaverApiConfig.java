@@ -10,9 +10,7 @@ import no.nav.openapi.spec.utils.jackson.DynamicJacksonJsonProvider;
 import no.nav.openapi.spec.utils.openapi.OpenApiSetupHelper;
 import no.nav.openapi.spec.utils.openapi.PrefixStrippingFQNTypeNameResolver;
 import no.nav.ung.sak.web.app.exceptions.KnownExceptionMappers;
-import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
-import no.nav.ung.sak.web.app.tjenester.RestImplementationClasses;
 import no.nav.ung.sak.web.app.tjenester.brukerdialog.BrukerdialogOppgaveRestTjeneste;
 import no.nav.ung.sak.web.server.caching.CacheControlFeature;
 import no.nav.ung.sak.web.server.typedresponse.TypedResponseFeature;
@@ -26,20 +24,20 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
-@ApplicationPath(BrukerdialogApiConfig.API_URI)
-public class BrukerdialogApiConfig extends ResourceConfig {
+@ApplicationPath(OppgaverApiConfig.API_URI)
+public class OppgaverApiConfig extends ResourceConfig {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BrukerdialogApiConfig.class);
-    public static final String API_URI = "/brukerdialog/api";
+    private static final Logger LOG = LoggerFactory.getLogger(OppgaverApiConfig.class);
+    public static final String API_URI = "/brukerdialog-oppgaver/api";
 
-    public BrukerdialogApiConfig() {
+    public OppgaverApiConfig() {
         LOG.info("Initialiserer: {}", API_URI);
 
         register(DynamicJacksonJsonProvider.class); // Denne må registrerast før anna OpenAPI oppsett for å fungere.
         final var resolvedOpenAPI = resolveOpenAPI();
         register(new no.nav.openapi.spec.utils.openapi.OpenApiResource(resolvedOpenAPI));
 
-        setApplicationName(BrukerdialogApiConfig.class.getSimpleName());
+        setApplicationName(OppgaverApiConfig.class.getSimpleName());
         // REST
         registerClasses(getEksternalApplicationClasses());
 
