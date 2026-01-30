@@ -133,7 +133,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         final var lengsteFristPrType = etterlysningerSomVenterPåSvar.stream().collect(Collectors.toMap(Etterlysning::getType, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Etterlysning::getFrist, Comparator.nullsLast(Comparator.naturalOrder())))));
         final var aksjonspunktresultater = lengsteFristPrType.entrySet()
             .stream()
-            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
+            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(e.getKey().tilAutopunktDefinisjon(), e.getKey().mapTilVenteårsak(), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
         log.info("Aksjonspunktresultatfrist={}, etterlysningfrister={}, harPassertFrist={}, now={}",
             aksjonspunktresultater.stream().map(AksjonspunktResultat::getFrist).toList(),
             etterlysningerSomVenterPåSvar.stream().map(Etterlysning::getFrist).toList(),
@@ -146,28 +146,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         return frist != null && frist.isBefore(LocalDateTime.now());
     }
 
-    private static AksjonspunktDefinisjon mapTilDefinisjon(EtterlysningType type) {
-        switch (type) {
-            case UTTALELSE_KONTROLL_INNTEKT -> {
-                return AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
-            }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
-                return AUTO_SATT_PÅ_VENT_REVURDERING;
-            }
-            default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);
-        }
-    }
 
-    private Venteårsak mapTilVenteårsak(EtterlysningType type) {
-        switch (type) {
-            case UTTALELSE_KONTROLL_INNTEKT -> {
-                return Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE;
-            }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
-                return Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
-            }
-            default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);
-        }
-    }
 
 }
