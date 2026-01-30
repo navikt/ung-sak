@@ -15,9 +15,9 @@ import jakarta.persistence.Version;
 
 import org.hibernate.annotations.Immutable;
 
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "AvklartSøknadsfristResultat")
 @Table(name = "RS_SOKNADSFRIST")

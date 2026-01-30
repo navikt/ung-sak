@@ -3,7 +3,7 @@ package no.nav.ung.sak.kontrakt.dokument;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 
 class DokumentDtoTest {
     @Test

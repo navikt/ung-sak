@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import java.util.Optional;
 
 @Dependent

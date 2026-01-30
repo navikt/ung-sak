@@ -1,15 +1,15 @@
 package no.nav.ung.sak.diff;
 
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.sak.felles.tid.Range;
+import no.nav.ung.sak.tid.Range;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.tid.ÅpenDatoIntervallEntitet;
-import no.nav.ung.sak.felles.diff.TraverseGraph;
-import no.nav.ung.sak.felles.diff.TraverseGraphConfig;
-import no.nav.ung.sak.felles.diff.TraverseJpaEntityGraphConfig;
-import no.nav.ung.sak.felles.typer.*;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.ÅpenDatoIntervallEntitet;
+import no.nav.ung.sak.diff.TraverseGraph;
+import no.nav.ung.sak.diff.TraverseGraphConfig;
+import no.nav.ung.sak.diff.TraverseJpaEntityGraphConfig;
+import no.nav.ung.sak.typer.*;
 
 import java.util.function.Function;
 

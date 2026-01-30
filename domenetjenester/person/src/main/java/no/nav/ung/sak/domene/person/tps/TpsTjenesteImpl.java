@@ -9,8 +9,8 @@ import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 @Dependent
 public class TpsTjenesteImpl implements TpsTjeneste {

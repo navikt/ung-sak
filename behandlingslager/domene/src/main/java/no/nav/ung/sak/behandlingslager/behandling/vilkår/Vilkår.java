@@ -22,11 +22,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import no.nav.ung.sak.felles.IndexKey;
+import no.nav.ung.sak.IndexKey;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.felles.diff.IndexKeyComposer;
+import no.nav.ung.sak.diff.IndexKeyComposer;
 
 @Entity(name = "Vilkar")
 @Table(name = "VR_VILKAR")

@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.felles.typer.Periode;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.PersonIdent;
 
 @JsonInclude(value = Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)

@@ -24,8 +24,8 @@ import no.nav.k9.prosesstask.impl.ProsessTaskRepositoryImpl;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
 import no.nav.k9.prosesstask.impl.TaskManager;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 
 @CdiDbAwareTest
 class FagsakProsessTaskRepositoryTest {

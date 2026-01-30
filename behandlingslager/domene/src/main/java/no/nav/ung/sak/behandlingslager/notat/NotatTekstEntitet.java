@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.notat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 
 
 /**

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.felles.diff.*;
+import no.nav.ung.sak.diff.*;
 
 import java.util.Collections;
 import java.util.List;

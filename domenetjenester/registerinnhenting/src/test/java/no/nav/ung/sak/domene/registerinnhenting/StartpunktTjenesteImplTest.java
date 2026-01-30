@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.felles.diff.DiffResult;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;

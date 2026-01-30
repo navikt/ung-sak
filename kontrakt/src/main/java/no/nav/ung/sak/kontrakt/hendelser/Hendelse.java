@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import jakarta.validation.Valid;
 import no.nav.ung.kodeverk.hendelser.HendelseType;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 @Valid
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")

@@ -14,8 +14,8 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 @Dependent
 public class FinnUnikeAktører {

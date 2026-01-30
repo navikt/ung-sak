@@ -342,7 +342,12 @@
 
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>felles</artifactId>
+                <artifactId>felles-util</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>felles-behandlingslager</artifactId>
                 <version>${project.version}</version>
             </dependency>
 

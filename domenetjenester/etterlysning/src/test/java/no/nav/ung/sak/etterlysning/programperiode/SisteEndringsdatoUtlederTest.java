@@ -1,7 +1,7 @@
 package no.nav.ung.sak.etterlysning.programperiode;
 
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

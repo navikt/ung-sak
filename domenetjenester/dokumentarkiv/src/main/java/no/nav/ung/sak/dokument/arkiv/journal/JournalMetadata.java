@@ -6,7 +6,7 @@ import java.util.List;
 
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
 import no.nav.ung.kodeverk.dokument.VariantFormat;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 
 public class JournalMetadata {
 

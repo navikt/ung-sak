@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.vilkår;
 
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.tid.KantIKantVurderer;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.KantIKantVurderer;
 
 public class DefaultKantIKantVurderer implements KantIKantVurderer {
     public DefaultKantIKantVurderer() {

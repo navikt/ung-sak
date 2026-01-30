@@ -11,7 +11,7 @@ import no.nav.k9.felles.sikkerhet.abac.Pep;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
 import no.nav.k9.sikkerhet.oidc.token.context.ContextAwareTokenProvider;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.Saksnummer;
 
 /**
  * Brukes for å manuelt sjekke om kaller har tilgang til en sak, typisk ved rapportgenerering

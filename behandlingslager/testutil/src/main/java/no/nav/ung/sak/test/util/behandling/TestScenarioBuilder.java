@@ -3,7 +3,7 @@ package no.nav.ung.sak.test.util.behandling;
 import java.time.LocalDate;
 
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 /**
  * Default test scenario builder.

@@ -21,7 +21,7 @@ import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
 import no.nav.ung.sak.trigger.Trigger;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 class UtledStatusForPerioderPåBehandling {
 

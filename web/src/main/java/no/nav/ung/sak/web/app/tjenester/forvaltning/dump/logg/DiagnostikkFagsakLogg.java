@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PreRemove;
 import jakarta.persistence.Table;
 
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 
 @Entity(name = "DiagnostikkFagsakLogg")
 @Table(name = "DIAGNOSTIKK_FAGSAK_LOGG")

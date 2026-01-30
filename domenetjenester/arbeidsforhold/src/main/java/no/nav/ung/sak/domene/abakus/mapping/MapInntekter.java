@@ -8,9 +8,9 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder.InntekterBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektBuilder;
 import no.nav.ung.sak.domene.iay.modell.InntektspostBuilder;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
-import no.nav.ung.sak.felles.typer.OrgNummer;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.OrgNummer;
 
 import java.util.Collection;
 import java.util.Collections;

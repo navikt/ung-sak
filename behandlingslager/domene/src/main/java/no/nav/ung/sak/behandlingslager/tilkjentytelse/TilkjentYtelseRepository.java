@@ -10,10 +10,10 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.felles.diff.DiffEntity;
-import no.nav.ung.sak.felles.diff.TraverseGraph;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.tid.Virkedager;
+import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.TraverseGraph;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.Virkedager;
 
 import java.math.BigDecimal;
 import java.util.List;

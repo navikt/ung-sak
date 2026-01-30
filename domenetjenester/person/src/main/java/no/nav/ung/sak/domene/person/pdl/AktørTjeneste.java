@@ -38,8 +38,8 @@ import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.felles.util.Tuple;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 @ApplicationScoped
 public class AktørTjeneste {

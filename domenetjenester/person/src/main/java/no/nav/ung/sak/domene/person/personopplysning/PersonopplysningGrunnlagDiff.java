@@ -15,7 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInforma
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 public class PersonopplysningGrunnlagDiff {
     private AktørId søkerAktørId;

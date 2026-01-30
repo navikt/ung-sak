@@ -1,8 +1,8 @@
 package no.nav.ung.sak.oppgave;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.kontrakt.BekreftelseDTO;
 import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
 import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;

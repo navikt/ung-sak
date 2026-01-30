@@ -23,7 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
-import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.hendelse.vedtak.VurderOmVedtakPåvirkerAndreSakerTask;
 import org.apache.kafka.clients.producer.RecordMetadata;
 import org.slf4j.Logger;

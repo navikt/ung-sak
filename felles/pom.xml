@@ -10,48 +10,14 @@
     </parent>
 
 
-    <artifactId>felles</artifactId>
-    <packaging>jar</packaging>
+    <artifactId>felles-pom</artifactId>
+    <packaging>pom</packaging>
     <name>UNGSAK :: Fellestjenester</name>
+    <modules>
+        <module>felles-util</module>
+        <module>felles-behandlingslager</module>
+    </modules>
 
-    <properties>
-        <maven.deploy.skip>false</maven.deploy.skip>
-    </properties>
 
-    <dependencies>
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.felles.oidc-token</groupId>
-            <artifactId>k9-sikkerhet-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate.orm</groupId>
-            <artifactId>hibernate-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.threeten</groupId>
-            <artifactId>threeten-extra</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.validation</groupId>
-            <artifactId>jakarta.validation-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.k9.felles.sikkerhet</groupId>
-            <artifactId>k9-felles-sikkerhet-kontrakt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.fpsak.tidsserie</groupId>
-            <artifactId>fpsak-tidsserie</artifactId>
-        </dependency>
-
-    </dependencies>
 
 </project>

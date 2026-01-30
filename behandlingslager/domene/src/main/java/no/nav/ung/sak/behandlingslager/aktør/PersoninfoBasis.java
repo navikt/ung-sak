@@ -7,8 +7,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 
 public class PersoninfoBasis {

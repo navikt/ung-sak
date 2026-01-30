@@ -6,7 +6,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårMedPerioderDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeDto;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 import java.util.Collections;
 import java.util.List;

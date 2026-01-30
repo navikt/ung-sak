@@ -19,8 +19,8 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.papirsøknad.PapirsøknadPdf;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.kontrakt.søknad.JournalførPapirSøknadDto;
 import no.nav.ung.sak.kontrakt.søknad.SendInnPapirsøknadopplysningerRequestDto;
-import no.nav.ung.sak.felles.typer.JournalpostId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.io.ByteArrayInputStream;

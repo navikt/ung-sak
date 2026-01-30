@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 /**
  * Task for publisering av historiske metrikker til BigQuery.

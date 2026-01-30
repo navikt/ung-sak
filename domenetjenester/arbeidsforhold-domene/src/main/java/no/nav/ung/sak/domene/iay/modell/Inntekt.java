@@ -7,11 +7,11 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.ung.sak.felles.IndexKey;
+import no.nav.ung.sak.IndexKey;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
-import no.nav.ung.sak.felles.diff.IndexKeyComposer;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.diff.IndexKeyComposer;
+import no.nav.ung.sak.typer.Arbeidsgiver;
 
 public class Inntekt implements IndexKey {
 

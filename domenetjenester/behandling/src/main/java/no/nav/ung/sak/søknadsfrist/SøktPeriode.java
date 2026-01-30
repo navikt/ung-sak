@@ -2,7 +2,7 @@ package no.nav.ung.sak.søknadsfrist;
 
 import java.util.Objects;
 
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public class SøktPeriode<T> {
 

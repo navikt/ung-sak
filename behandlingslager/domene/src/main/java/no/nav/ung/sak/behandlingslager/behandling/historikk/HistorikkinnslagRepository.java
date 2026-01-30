@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.behandling.historikk;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.Saksnummer;
 
 import java.util.List;
 
