@@ -1,6 +1,7 @@
 package no.nav.ung.domenetjenester.sak;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
@@ -28,9 +29,9 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
 
     @Inject
     public FinnEllerOpprettUngSakTask(FordelProsessTaskTjeneste fordelProsessTaskTjeneste,
-                                      @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) Instance<SøknadMottakTjeneste> søknadMottakTjenester) {
+                                      @Any Instance<SøknadMottakTjeneste> søknadMottakTjenester) {
         super(fordelProsessTaskTjeneste);
-        this.søknadMottakTjenester = søknadMottakTjenester.get();
+        this.søknadMottakTjenester = SøknadMottakTjeneste.finnTjeneste(søknadMottakTjenester, FagsakYtelseType.UNGDOMSYTELSE);
     }
 
     @Override

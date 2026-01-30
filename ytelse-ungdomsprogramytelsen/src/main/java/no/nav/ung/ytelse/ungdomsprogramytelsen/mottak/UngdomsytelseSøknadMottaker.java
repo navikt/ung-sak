@@ -19,7 +19,7 @@ import no.nav.ung.sak.felles.typer.Saksnummer;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @ApplicationScoped
-public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste<UngdomsytelseSøknadInnsending> {
+public class UngdomsytelseSøknadMottaker implements SøknadMottakTjeneste {
 
     private SaksnummerRepository saksnummerRepository;
     private FagsakTjeneste fagsakTjeneste;
