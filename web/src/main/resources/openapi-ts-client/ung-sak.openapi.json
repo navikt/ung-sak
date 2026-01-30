@@ -3953,6 +3953,23 @@
         "required" : [ "type" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto" : {
+        "properties" : {
+          "aktørId" : {
+            "type" : "string"
+          },
+          "fomDato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "oppgaveReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "required" : [ "aktørId", "fomDato" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO" : {
         "properties" : {
           "endringer" : {
@@ -8630,6 +8647,36 @@
           }
         },
         "summary" : "Henter alle oppgaver for en bruker",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/opprett/sok-ytelse" : {
+      "post" : {
+        "operationId" : "opprettSøkYtelseOppgave",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto"
+              }
+            }
+          },
+          "description" : "Data om hvem og hva det søkes om",
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Oppretter oppgave for å søke ytelse",
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
