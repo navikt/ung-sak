@@ -14,8 +14,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.felles.typer.JournalpostId;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
 
 @Dependent
 public class JournalpostRepository {

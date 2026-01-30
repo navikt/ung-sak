@@ -16,7 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.util.*;
 import java.util.stream.Collectors;

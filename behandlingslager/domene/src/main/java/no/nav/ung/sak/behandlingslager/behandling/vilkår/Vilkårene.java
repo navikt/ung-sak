@@ -32,9 +32,9 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 @Entity(name = "Vilkårene")
 @Table(name = "VR_VILKAR_RESULTAT")

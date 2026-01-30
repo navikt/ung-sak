@@ -17,7 +17,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @Transactional
 @ActivateRequestContext

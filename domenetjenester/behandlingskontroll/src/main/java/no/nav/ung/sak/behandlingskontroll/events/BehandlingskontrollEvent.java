@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingEvent;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 /**
  * Event som fyres når Behandlingskontroll STARTER å prosessere en behandling, STOPPER (eks. fordi den er avsluttet,

@@ -23,7 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepos
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 public class GjenopptaBehandlingTaskTest {
 

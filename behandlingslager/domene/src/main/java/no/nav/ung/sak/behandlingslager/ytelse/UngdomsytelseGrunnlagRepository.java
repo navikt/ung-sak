@@ -11,8 +11,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.sak.felles.diff.DiffEntity;
-import no.nav.ung.sak.felles.diff.TraverseGraph;
+import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 

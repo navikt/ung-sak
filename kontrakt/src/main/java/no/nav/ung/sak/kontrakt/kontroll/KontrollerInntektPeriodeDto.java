@@ -1,6 +1,6 @@
 package no.nav.ung.sak.kontrakt.kontroll;
 
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 public record KontrollerInntektPeriodeDto(
     Periode periode,

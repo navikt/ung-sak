@@ -17,7 +17,7 @@ import no.nav.ung.sak.formidling.bestilling.JournalføringOgDistribusjonsTjenest
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerValgResponse;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevValgDto;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.util.List;
 import java.util.Locale;

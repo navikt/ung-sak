@@ -12,10 +12,10 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
+import no.nav.ung.sak.abac.StandardAbacAttributt;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.Saksnummer;
 
 
 @JsonIgnoreProperties(ignoreUnknown = true)

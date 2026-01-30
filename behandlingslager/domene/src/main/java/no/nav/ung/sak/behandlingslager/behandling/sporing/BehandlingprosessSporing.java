@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.sporing;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 
 @Entity(name = "BehandlingprosessSporing")
 @Table(name = "BEHANDLINGPROSESS_SPORING")

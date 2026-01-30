@@ -2,14 +2,14 @@ package no.nav.ung.sak.domene.iay.modell;
 
 import java.util.Objects;
 
-import no.nav.ung.sak.felles.IndexKey;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
-import no.nav.ung.sak.felles.diff.IndexKeyComposer;
-import no.nav.ung.sak.felles.diff.TraverseValue;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
-import no.nav.ung.sak.felles.typer.EksternArbeidsforholdRef;
-import no.nav.ung.sak.felles.typer.InternArbeidsforholdRef;
+import no.nav.ung.sak.IndexKey;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.diff.IndexKeyComposer;
+import no.nav.ung.sak.diff.TraverseValue;
+import no.nav.ung.sak.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.EksternArbeidsforholdRef;
+import no.nav.ung.sak.typer.InternArbeidsforholdRef;
 
 public class ArbeidsforholdReferanse extends BaseEntitet implements IndexKey, TraverseValue {
 

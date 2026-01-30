@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 public class PersonInformasjonBuilder {
 

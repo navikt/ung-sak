@@ -6,7 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 public class BehandlingStatusOgFeilutbetalinger {
 

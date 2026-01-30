@@ -7,7 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegTilstandSnapshot;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingEvent;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 /**
  * Event publiseres av {@link BehandlingskontrollTjeneste} når en {@link Behandling} endrer steg.

@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonRawValue;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.ung.sak.kontrakt.Patterns;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

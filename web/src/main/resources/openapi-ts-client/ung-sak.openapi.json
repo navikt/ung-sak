@@ -1377,45 +1377,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "UDEFINIERT", "OPPRETT_TILBAKEKREVING", "IGNORER_TILBAKEKREVING", "INNTREKK", "TILBAKEKR_OPPDATER" ]
       },
-      "ung.sak.felles.typer.IdType" : {
-        "enum" : [ "ORGNR", "AKTØRID", "FNR" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ORGNR", "AKTØRID", "FNR" ]
-      },
-      "ung.sak.felles.typer.Identifikasjon" : {
-        "properties" : {
-          "id" : {
-            "maxLength" : 20,
-            "minLength" : 0,
-            "pattern" : "^\\d+$",
-            "type" : "string"
-          },
-          "type" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.IdType"
-          }
-        },
-        "required" : [ "id", "type" ],
-        "type" : "object"
-      },
-      "ung.sak.felles.typer.Periode" : {
-        "properties" : {
-          "fom" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "tom" : {
-            "format" : "date",
-            "type" : "string"
-          }
-        },
-        "required" : [ "fom", "tom" ],
-        "type" : "object"
-      },
-      "ung.sak.felles.typer.RolleType" : {
-        "enum" : [ "ARBEIDSGIVER", "BRUKER" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "ARBEIDSGIVER", "BRUKER" ]
-      },
       "ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse" : {
         "properties" : {
           "dokumenter" : {
@@ -1923,7 +1884,7 @@
             "type" : "string"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
         "required" : [ "periode" ],
@@ -2380,7 +2341,7 @@
             "type" : "boolean"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "saksnummer" : {
             "type" : "string"
@@ -2474,10 +2435,10 @@
       "ung.sak.kontrakt.behandling.part.PartDto" : {
         "properties" : {
           "identifikasjon" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Identifikasjon"
+            "$ref" : "#/components/schemas/ung.sak.typer.Identifikasjon"
           },
           "rolleType" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.RolleType"
+            "$ref" : "#/components/schemas/ung.sak.typer.RolleType"
           }
         },
         "type" : "object"
@@ -2536,7 +2497,7 @@
         "properties" : {
           "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
             },
             "type" : "array"
           },
@@ -2678,7 +2639,7 @@
             "type" : "string"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "status" : {
             "$ref" : "#/components/schemas/ung.kodeverk.varsel.EtterlysningStatus"
@@ -2699,7 +2660,7 @@
             "type" : "boolean"
           },
           "gyldigPeriode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "kanRevurderingOpprettes" : {
             "type" : "boolean"
@@ -2727,7 +2688,7 @@
       "ung.sak.kontrakt.fagsak.FagsakInfoDto" : {
         "properties" : {
           "gyldigPeriode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "person" : {
             "type" : "string"
@@ -2753,7 +2714,7 @@
             "type" : "string"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "ytelseType" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
@@ -3154,7 +3115,7 @@
             "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.HendelseInfo"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
         "required" : [ "hendelseInfo", "periode" ],
@@ -3497,7 +3458,7 @@
             "type" : "boolean"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "valg" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg"
@@ -3545,7 +3506,7 @@
             "type" : "integer"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "rapporterteInntekter" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.kontroll.RapporterteInntekterDto"
@@ -3643,7 +3604,7 @@
       "ung.sak.kontrakt.krav.PeriodeMedUtfall" : {
         "properties" : {
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "utfall" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
@@ -3655,7 +3616,7 @@
       "ung.sak.kontrakt.krav.PeriodeMedÅrsaker" : {
         "properties" : {
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "årsaker" : {
             "items" : {
@@ -3690,7 +3651,7 @@
           },
           "perioderTilVurdering" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
             },
             "maxItems" : 2147483647,
             "minItems" : 0,
@@ -3736,7 +3697,7 @@
       "ung.sak.kontrakt.krav.SøktPeriode" : {
         "properties" : {
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
         "required" : [ "periode" ],
@@ -3746,7 +3707,7 @@
         "properties" : {
           "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
             },
             "maxItems" : 2147483647,
             "minItems" : 0,
@@ -3770,7 +3731,7 @@
             "type" : "string"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "ytelseType" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
@@ -4174,7 +4135,7 @@
       "ung.sak.kontrakt.søknadsfrist.SøknadsfristPeriodeDto" : {
         "properties" : {
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "status" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
@@ -4259,7 +4220,7 @@
             "type" : "string"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
         "required" : [ "avklarteKrav", "periode" ],
@@ -4665,7 +4626,7 @@
             "type" : "object"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "vilkarStatus" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
@@ -4683,7 +4644,7 @@
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avslagsårsak"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
           "utfall" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
@@ -5064,6 +5025,45 @@
         },
         "required" : [ "fomDato" ],
         "type" : "object"
+      },
+      "ung.sak.typer.IdType" : {
+        "enum" : [ "ORGNR", "AKTØRID", "FNR" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "ORGNR", "AKTØRID", "FNR" ]
+      },
+      "ung.sak.typer.Identifikasjon" : {
+        "properties" : {
+          "id" : {
+            "maxLength" : 20,
+            "minLength" : 0,
+            "pattern" : "^\\d+$",
+            "type" : "string"
+          },
+          "type" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.IdType"
+          }
+        },
+        "required" : [ "id", "type" ],
+        "type" : "object"
+      },
+      "ung.sak.typer.Periode" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.typer.RolleType" : {
+        "enum" : [ "ARBEIDSGIVER", "BRUKER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "ARBEIDSGIVER", "BRUKER" ]
       },
       "ung.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste.HentFnr" : {
         "properties" : {
@@ -5639,7 +5639,7 @@
           "name" : "opprettetPeriode",
           "required" : true,
           "schema" : {
-            "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         }, {
           "description" : "Valgfritt å inkludere utførte aksjonspunkt. Default er false.",
@@ -6301,7 +6301,7 @@
               "application/json" : {
                 "schema" : {
                   "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+                    "$ref" : "#/components/schemas/ung.sak.typer.Periode"
                   },
                   "type" : "array"
                 }
@@ -6332,7 +6332,7 @@
               "application/json" : {
                 "schema" : {
                   "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+                    "$ref" : "#/components/schemas/ung.sak.typer.Periode"
                   },
                   "type" : "array"
                 }
@@ -9228,7 +9228,7 @@
               "schema" : {
                 "properties" : {
                   "periode" : {
-                    "$ref" : "#/components/schemas/ung.sak.felles.typer.Periode"
+                    "$ref" : "#/components/schemas/ung.sak.typer.Periode"
                   },
                   "rapport" : {
                     "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.rapportering.RapportType"

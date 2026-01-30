@@ -9,9 +9,9 @@ import jakarta.persistence.Table;
 
 import org.hibernate.annotations.NaturalId;
 
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 @Entity(name = "TmpAktoerId")
 @Table(name = "TMP_AKTOER_ID")

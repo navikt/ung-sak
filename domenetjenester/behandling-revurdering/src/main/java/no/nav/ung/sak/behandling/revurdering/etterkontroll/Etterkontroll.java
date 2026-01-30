@@ -11,9 +11,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.felles.diff.DiffIgnore;
+import no.nav.ung.sak.diff.DiffIgnore;
 
 @Entity(name = "Etterkontroll")
 @Table(name = "ETTERKONTROLL")

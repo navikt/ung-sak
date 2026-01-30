@@ -7,8 +7,8 @@ import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
-import no.nav.ung.sak.felles.tid.JsonObjectMapper;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.sak.typer.Periode;
 
 import java.util.ArrayList;
 import java.util.HashMap;

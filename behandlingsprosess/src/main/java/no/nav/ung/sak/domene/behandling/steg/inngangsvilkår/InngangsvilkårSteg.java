@@ -5,7 +5,7 @@ import java.util.NavigableSet;
 
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public interface InngangsvilkårSteg extends BehandlingSteg {
 

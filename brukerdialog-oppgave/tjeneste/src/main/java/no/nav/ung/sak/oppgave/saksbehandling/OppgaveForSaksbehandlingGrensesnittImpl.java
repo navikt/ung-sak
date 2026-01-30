@@ -10,7 +10,7 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.Innte
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.*;
 import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
 import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;

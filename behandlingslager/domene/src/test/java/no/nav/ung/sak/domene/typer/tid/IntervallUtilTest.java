@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
-import no.nav.ung.sak.felles.tid.IntervallUtil;
+import no.nav.ung.sak.tid.IntervallUtil;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;

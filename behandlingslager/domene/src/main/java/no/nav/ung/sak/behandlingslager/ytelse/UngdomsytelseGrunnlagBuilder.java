@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.ytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.felles.diff.DiffEntity;
+import no.nav.ung.sak.diff.DiffEntity;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;

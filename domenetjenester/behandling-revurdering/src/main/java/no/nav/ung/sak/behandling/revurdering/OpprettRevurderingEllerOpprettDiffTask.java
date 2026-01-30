@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,10 +25,10 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.task.FagsakProsessTask;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.

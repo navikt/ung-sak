@@ -9,8 +9,8 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
-import no.nav.ung.sak.felles.typer.Periode;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.Saksnummer;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

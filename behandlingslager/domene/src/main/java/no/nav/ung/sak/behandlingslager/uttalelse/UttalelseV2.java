@@ -2,10 +2,10 @@ package no.nav.ung.sak.behandlingslager.uttalelse;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.varsel.EndringType;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.EndringTypeKodeverdiConverter;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.JournalpostId;
 import org.hibernate.annotations.Immutable;
 
 import java.util.Objects;

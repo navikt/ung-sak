@@ -10,10 +10,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.EtterlysningStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.EtterlysningTypeKodeverdiConverter;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

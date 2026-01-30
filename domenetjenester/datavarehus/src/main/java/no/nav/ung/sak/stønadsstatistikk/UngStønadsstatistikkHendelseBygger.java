@@ -27,7 +27,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkHendelseBygger;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadsstatistikkSatsPeriode;
 import no.nav.ung.sak.kontrakt.stønadstatistikk.dto.StønadsstatistikkTilkjentYtelsePeriode;
@@ -51,8 +51,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)

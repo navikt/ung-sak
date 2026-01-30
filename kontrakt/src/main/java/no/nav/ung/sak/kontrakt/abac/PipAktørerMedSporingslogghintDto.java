@@ -1,6 +1,6 @@
 package no.nav.ung.sak.kontrakt.abac;
 
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.util.Set;
 

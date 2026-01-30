@@ -10,11 +10,11 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.felles.diff.DiffEntity;
-import no.nav.ung.sak.felles.diff.TraverseGraph;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.tid.KantIKantVurderer;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.TraverseGraph;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.KantIKantVurderer;
+import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

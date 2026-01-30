@@ -32,12 +32,12 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.JournalpostId;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
 
 @CdiDbAwareTest
 @ExtendWith(MockitoExtension.class)

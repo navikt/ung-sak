@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.sak.felles.tid.Range;
+import no.nav.ung.sak.tid.Range;
 
 public class DatoIntervallEntitetTest {
 

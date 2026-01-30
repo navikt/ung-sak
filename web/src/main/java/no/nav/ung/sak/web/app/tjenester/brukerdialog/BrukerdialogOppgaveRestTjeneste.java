@@ -13,7 +13,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.brukerdialog.BrukerdialogOppgaveTjeneste;
 import no.nav.ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto;
 

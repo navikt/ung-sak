@@ -8,10 +8,10 @@ import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
-import no.nav.ung.sak.felles.diff.*;
-import no.nav.ung.sak.felles.diff.TraverseGraph.TraverseResult;
+import no.nav.ung.sak.diff.*;
+import no.nav.ung.sak.diff.TraverseGraph.TraverseResult;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.aktør;
 
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.PersonIdent;
 
 public class Familierelasjon {
     private final PersonIdent personIdent;

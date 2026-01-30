@@ -1,7 +1,7 @@
 package no.nav.ung.sak.mottak.dokumentmottak;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public record Trigger(DatoIntervallEntitet periode, BehandlingÅrsakType behandlingÅrsak) {
 }

@@ -15,8 +15,8 @@ import jakarta.persistence.Version;
 
 import org.hibernate.annotations.DynamicUpdate;
 
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
 
 @Entity(name = "PersonopplysningGrunnlagEntitet")
 @Table(name = "GR_PERSONOPPLYSNING")

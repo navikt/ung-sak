@@ -36,7 +36,7 @@ import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.k9.felles.exception.FunksjonellException;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 @ExtendWith(CdiAwareExtension.class)
 public class AksjonspunktRestTjenesteTest {

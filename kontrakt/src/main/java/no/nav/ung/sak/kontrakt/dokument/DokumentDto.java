@@ -9,7 +9,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 
 public class DokumentDto {
     private List<Long> behandlinger;

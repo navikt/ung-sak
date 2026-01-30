@@ -23,10 +23,10 @@ import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.fagsak.FagsakInfoDto;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.Periode;
-import no.nav.ung.sak.felles.typer.PersonIdent;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.VurderProsessTaskStatusForPollingApi;
 
 @ApplicationScoped

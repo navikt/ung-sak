@@ -2,7 +2,7 @@ package no.nav.ung.sak.test.util.behandling.personopplysning;
 
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.HarAktørId;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 public final class PersonRelasjon implements HarAktørId {
 

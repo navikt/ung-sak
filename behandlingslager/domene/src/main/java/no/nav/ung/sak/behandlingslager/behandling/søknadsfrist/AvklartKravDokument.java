@@ -14,14 +14,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
-import no.nav.ung.sak.felles.diff.IndexKeyComposer;
+import no.nav.ung.sak.diff.IndexKeyComposer;
 import org.hibernate.annotations.Immutable;
 
-import no.nav.ung.sak.felles.IndexKey;
+import no.nav.ung.sak.IndexKey;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "AvklartSøknadsfristDokument")
 @Table(name = "SF_AVKLART_DOKUMENT")

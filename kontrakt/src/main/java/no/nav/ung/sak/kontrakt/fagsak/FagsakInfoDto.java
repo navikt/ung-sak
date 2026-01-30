@@ -17,9 +17,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.felles.typer.Periode;
-import no.nav.ung.sak.felles.typer.PersonIdent;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonInclude(value = Include.NON_ABSENT)
 @JsonIgnoreProperties(ignoreUnknown = true)

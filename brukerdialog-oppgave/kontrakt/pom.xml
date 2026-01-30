@@ -24,7 +24,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>felles</artifactId>
+            <artifactId>felles-util</artifactId>
         </dependency>
     </dependencies>
 

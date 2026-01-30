@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.iay.modell;
 
 
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
+import no.nav.ung.sak.diff.ChangeTracked;
 
 import java.util.*;
 import java.util.stream.Collectors;

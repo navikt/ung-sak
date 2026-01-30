@@ -7,7 +7,7 @@ import no.nav.ung.sak.domene.iay.modell.*;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittArbeidsforholdBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansBuilder;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder.OppgittFrilansOppdragBuilder;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
@@ -169,7 +169,7 @@ class MapOppgittOpptjening {
 
             var oppgittOpptjeningEksternReferanse = UUID.fromString(dto.getEksternReferanse().getReferanse());
             var builder = OppgittOpptjeningBuilder.ny(oppgittOpptjeningEksternReferanse, dto.getOpprettetTidspunkt());
-            Optional.ofNullable(dto.getJournalpostId()).ifPresent(jp -> builder.medJournalpostId(new no.nav.ung.sak.felles.typer.JournalpostId(jp.getId())));
+            Optional.ofNullable(dto.getJournalpostId()).ifPresent(jp -> builder.medJournalpostId(new no.nav.ung.sak.typer.JournalpostId(jp.getId())));
             Optional.ofNullable(dto.getInnsendingstidspunkt()).ifPresent(tidspunkt -> builder.medInnsendingstidspunkt(tidspunkt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()));
 
             var annenAktivitet = mapEach(dto.getAnnenAktivitet(), MapFraDto::mapAnnenAktivitet);

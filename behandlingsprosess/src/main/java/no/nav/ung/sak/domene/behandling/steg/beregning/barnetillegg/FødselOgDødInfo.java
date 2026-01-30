@@ -2,7 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg;
 
 import java.time.LocalDate;
 
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 public record FødselOgDødInfo(
     AktørId aktørId,

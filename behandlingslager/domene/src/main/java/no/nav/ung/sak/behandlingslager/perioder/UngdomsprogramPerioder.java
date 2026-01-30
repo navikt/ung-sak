@@ -1,8 +1,8 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
 import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.Immutable;
 

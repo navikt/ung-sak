@@ -1,20 +1,20 @@
 package no.nav.ung.sak.domene.arbeidsforhold;
 
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.sak.felles.diff.DiffEntity;
-import no.nav.ung.sak.felles.diff.TraverseGraph;
-import no.nav.ung.sak.felles.diff.TraverseGraphConfig;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
-import no.nav.ung.sak.felles.typer.Beløp;
-import no.nav.ung.sak.felles.typer.EksternArbeidsforholdRef;
-import no.nav.ung.sak.felles.typer.InternArbeidsforholdRef;
-import no.nav.ung.sak.felles.typer.JournalpostId;
-import no.nav.ung.sak.felles.typer.OrgNummer;
-import no.nav.ung.sak.felles.typer.PersonIdent;
-import no.nav.ung.sak.felles.typer.Saksnummer;
-import no.nav.ung.sak.felles.typer.Stillingsprosent;
+import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.TraverseGraph;
+import no.nav.ung.sak.diff.TraverseGraphConfig;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.typer.EksternArbeidsforholdRef;
+import no.nav.ung.sak.typer.InternArbeidsforholdRef;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.OrgNummer;
+import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.typer.Stillingsprosent;
 
 public class IAYDiffsjekker {
     private DiffEntity diffEntity;

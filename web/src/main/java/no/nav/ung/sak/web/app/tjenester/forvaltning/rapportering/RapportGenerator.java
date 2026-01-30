@@ -3,7 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering;
 import java.util.List;
 
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.DumpOutput;
 
 public interface RapportGenerator {

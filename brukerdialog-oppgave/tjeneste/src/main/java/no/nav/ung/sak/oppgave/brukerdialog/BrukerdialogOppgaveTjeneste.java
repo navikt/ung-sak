@@ -1,6 +1,6 @@
 package no.nav.ung.sak.oppgave.brukerdialog;
 
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto;
 
 import java.util.List;

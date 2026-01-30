@@ -2,7 +2,7 @@ package no.nav.ung.sak.oppgave.brukerdialog;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveMapper;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;

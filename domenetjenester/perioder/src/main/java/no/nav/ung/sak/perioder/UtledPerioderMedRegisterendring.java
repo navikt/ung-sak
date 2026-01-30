@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedRegisterendring;
 import no.nav.ung.sak.registerendringer.Aktivitetsendringer;
 import no.nav.ung.sak.registerendringer.RelevanteIAYRegisterendringerUtleder;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 @ApplicationScoped
 public class UtledPerioderMedRegisterendring {

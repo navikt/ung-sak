@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import no.nav.k9.søknad.felles.Kildesystem;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 
 public class KravDokument implements Comparable<KravDokument> {
 

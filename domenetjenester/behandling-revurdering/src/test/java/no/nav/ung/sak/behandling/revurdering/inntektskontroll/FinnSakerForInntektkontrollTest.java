@@ -17,7 +17,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -33,7 +33,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
 
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**

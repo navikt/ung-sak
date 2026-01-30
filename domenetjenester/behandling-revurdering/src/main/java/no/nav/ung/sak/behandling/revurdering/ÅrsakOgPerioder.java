@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandling.revurdering;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 import java.util.Set;
 

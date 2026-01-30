@@ -3,7 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.oppdrag.iverksett;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;

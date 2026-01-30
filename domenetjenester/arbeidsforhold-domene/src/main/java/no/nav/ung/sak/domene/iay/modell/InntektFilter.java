@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.iay.modell;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.Arbeidsgiver;
 
 import java.util.*;
 import java.util.function.BiConsumer;

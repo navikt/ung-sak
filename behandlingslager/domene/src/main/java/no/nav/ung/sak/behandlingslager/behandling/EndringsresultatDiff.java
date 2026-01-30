@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
-import no.nav.ung.sak.felles.diff.DiffResult;
+import no.nav.ung.sak.diff.DiffResult;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;

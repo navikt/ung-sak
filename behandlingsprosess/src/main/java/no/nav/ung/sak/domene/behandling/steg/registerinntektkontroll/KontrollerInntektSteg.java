@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import org.slf4j.Logger;
