@@ -2,6 +2,8 @@ package no.nav.ung.sak.oppgave.veileder;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
+import no.nav.ung.sak.oppgave.BrukerdialogOppgaveMapper;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
@@ -23,17 +25,20 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
     private static final Logger logger = LoggerFactory.getLogger(VeilederOppgaveTjenesteImpl.class);
 
     private OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste;
+    private BrukerdialogOppgaveMapper brukerdialogOppgaveMapper;
+
     public VeilederOppgaveTjenesteImpl() {
         // CDI proxy
     }
 
     @Inject
-    public VeilederOppgaveTjenesteImpl(OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste) {
+    public VeilederOppgaveTjenesteImpl(OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste, BrukerdialogOppgaveMapper brukerdialogOppgaveMapper) {
         this.oppgaveLivssyklusTjeneste = oppgaveLivssyklusTjeneste;
+        this.brukerdialogOppgaveMapper = brukerdialogOppgaveMapper;
     }
 
     @Override
-    public void opprettSøkYtelseOppgave(OpprettSøkYtelseOppgaveDto oppgaveDto) {
+    public BrukerdialogOppgaveDto opprettSøkYtelseOppgave(OpprettSøkYtelseOppgaveDto oppgaveDto) {
         AktørId aktørId = new AktørId(oppgaveDto.aktørId());
         SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(oppgaveDto.fomDato());
 
@@ -51,6 +56,9 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
         );
 
         oppgaveLivssyklusTjeneste.opprettOppgave(oppgave);
+
+        return brukerdialogOppgaveMapper.tilDto(oppgave);
+
     }
 }
 
