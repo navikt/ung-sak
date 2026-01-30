@@ -53,6 +53,13 @@ public enum FagsakYtelseType implements Kodeverdi {
         }
     },
 
+    AKTIVITETSPENGER("AKT", "Aktivitetspenger", null, "AKT"){
+        @Override
+        public boolean vurderÅpneOppgaverFørVedtak() {
+            return false;
+        }
+    },
+
 
 
     OBSOLETE("OBSOLETE", "Kun brukt for å markere noen som utgått - ikke en gyldig type i seg selv", null, null),

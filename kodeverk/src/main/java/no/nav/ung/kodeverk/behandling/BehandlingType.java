@@ -23,10 +23,13 @@ public enum BehandlingType implements Kodeverdi {
     TILBAKEKREVING("BT-007", "Tilbakekreving", "BT-007", 10, false),
     REVURDERING_TILBAKEKREVING("BT-009", "Tilbakekreving revurdering", "BT-009", 10, false),
 
+    AKTIVITETSPENGER_DEL_1("BT-011", "Aktivitetspenger del 1", "N/A", 6, true),
+    AKTIVITETSPENGER_DEL_2("BT-012", "Aktivitetspenger del 2", "N/A", 6, true),
+
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;
 
-    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING);
+    private static final Set<BehandlingType> YTELSE_BEHANDLING_TYPER = Set.of(FØRSTEGANGSSØKNAD, REVURDERING, AKTIVITETSPENGER_DEL_1, AKTIVITETSPENGER_DEL_2);
 
     public static final String KODEVERK = "BEHANDLING_TYPE";
     private static final Map<String, BehandlingType> KODER = new LinkedHashMap<>();
