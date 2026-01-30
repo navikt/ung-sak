@@ -4,10 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.OppgaveType;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.VarselInnholdUtleder;
-import no.nav.ung.sak.oppgave.typer.inntektsrapportering.InntektsrapporteringOppgaveData;
+import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO;
 
 import java.time.Month;
 
@@ -29,8 +29,8 @@ public class KontrollerRegisterinntektVarselInnholdUtleder implements VarselInnh
 
     @Override
     public String utledVarselTekst(BrukerdialogOppgaveEntitet oppgave) {
-        KontrollerRegisterInntektOppgaveData oppgaveData = (KontrollerRegisterInntektOppgaveData) oppgave.getData();
-        String norskMånedNavn = finnNorskMånedNavn(oppgaveData.getFomDato().getMonth());
+        KontrollerRegisterinntektOppgavetypeDataDTO oppgaveData = (KontrollerRegisterinntektOppgavetypeDataDTO) oppgave.getData();
+        String norskMånedNavn = finnNorskMånedNavn(oppgaveData.fraOgMed().getMonth());
         return String.format("Du har fått en oppgave om å bekrefte inntekten din for %s", norskMånedNavn);
     }
 

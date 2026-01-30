@@ -4,11 +4,14 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektYtelseDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.YtelseType;
-import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.OppgaveData;
-import no.nav.ung.sak.oppgave.OppgaveType;
+import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
+import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO;
+import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO;
+import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.RegisterinntektDTO;
+import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,13 +23,13 @@ public class KontrollerRegisterInntektOppgaveMapper {
         var arbeidOgFrilansInntekter = mapArbeidOgFrilans(oppgaveDto.getRegisterInntekter().getRegisterinntekterForArbeidOgFrilans());
         var ytelseInntekter = mapYtelse(oppgaveDto.getRegisterInntekter().getRegisterinntekterForYtelse());
 
-        RegisterinntektData registerinntektData = new RegisterinntektData(arbeidOgFrilansInntekter, ytelseInntekter);
+        RegisterinntektDTO registerinntektData = new RegisterinntektDTO(arbeidOgFrilansInntekter, ytelseInntekter);
 
         // Opprett oppgavedata
-        OppgaveData kontrollerRegisterInntektOppgaveData = new KontrollerRegisterInntektOppgaveData(
-            registerinntektData,
+        OppgavetypeDataDTO kontrollerRegisterInntektOppgaveData = new KontrollerRegisterinntektOppgavetypeDataDTO(
             oppgaveDto.getFomDato(),
             oppgaveDto.getTomDato(),
+            registerinntektData,
             oppgaveDto.getGjelderDelerAvMåned()
         );
 
@@ -39,42 +42,34 @@ public class KontrollerRegisterInntektOppgaveMapper {
         );
     }
 
-    private static List<YtelseRegisterInntektData> mapYtelse(List<RegisterInntektYtelseDTO> registerinntekterForYtelse) {
+    private static List<YtelseRegisterInntektDTO> mapYtelse(List<RegisterInntektYtelseDTO> registerinntekterForYtelse) {
        if (registerinntekterForYtelse == null) {
            return null;
        }
         return registerinntekterForYtelse
             .stream()
-            .map(dto -> new YtelseRegisterInntektData(dto.getBeløp(), mapYtelseType(dto.getYtelseType())))
+            .map(dto -> new YtelseRegisterInntektDTO(dto.getBeløp(), mapYtelseType(dto.getYtelseType())))
             .collect(Collectors.toList());
     }
 
-    private static List<ArbeidOgFrilansRegisterInntektData> mapArbeidOgFrilans(List<RegisterInntektArbeidOgFrilansDTO> registerinntekterForArbeidOgFrilans) {
+    private static List<ArbeidOgFrilansRegisterInntektDTO> mapArbeidOgFrilans(List<RegisterInntektArbeidOgFrilansDTO> registerinntekterForArbeidOgFrilans) {
         if (registerinntekterForArbeidOgFrilans == null) {
             return null;
         }
         return registerinntekterForArbeidOgFrilans
             .stream()
-            .map(dto -> new ArbeidOgFrilansRegisterInntektData(dto.getBeløp(), dto.getArbeidsgiverIdent()))
+            .map(dto -> new ArbeidOgFrilansRegisterInntektDTO(dto.getBeløp(), dto.getArbeidsgiverIdent(), null))
             .collect(Collectors.toList());
     }
 
-    private static OverordnetInntektYtelseType mapYtelseType(YtelseType ytelseType) {
-        switch (ytelseType) {
-            case SYKEPENGER -> {
-                return OverordnetInntektYtelseType.SYKEPENGER;
-            }
-            case OMSORGSPENGER -> {
-                return OverordnetInntektYtelseType.OMSORGSPENGER;
-            }
-            case PLEIEPENGER -> {
-                return OverordnetInntektYtelseType.PLEIEPENGER;
-            }
-            case OPPLAERINGSPENGER -> {
-                return OverordnetInntektYtelseType.OPPLÆRINGSPENGER;
-            }
-            default -> throw new IllegalStateException("Ikke støttet ytelsetype: " + ytelseType);
-        }
+    private static no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType mapYtelseType(YtelseType ytelseType) {
+        return switch (ytelseType) {
+            case SYKEPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.SYKEPENGER;
+            case OMSORGSPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.OMSORGSPENGER;
+            case PLEIEPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.PLEIEPENGER;
+            case OPPLAERINGSPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.OPPLÆRINGSPENGER;
+            default -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.ANNET;
+        };
     }
 }
 

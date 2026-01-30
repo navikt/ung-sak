@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave;
+package no.nav.ung.sak.oppgave.kontrakt;
 
 public enum OppgaveType {
     BEKREFT_ENDRET_STARTDATO,

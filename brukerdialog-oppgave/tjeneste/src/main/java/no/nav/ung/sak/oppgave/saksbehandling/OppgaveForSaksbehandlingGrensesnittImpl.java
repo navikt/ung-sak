@@ -12,10 +12,12 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoO
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.oppgave.*;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
+import no.nav.ung.sak.oppgave.kontrakt.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
 import no.nav.ung.sak.oppgave.typer.endretperiode.EndretPeriodeOppgaveMapper;
 import no.nav.ung.sak.oppgave.typer.endretsluttdato.EndretSluttdatoOppgaveMapper;
 import no.nav.ung.sak.oppgave.typer.endretstartdato.EndretStartdatoOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.inntektsrapportering.InntektsrapporteringOppgaveData;
 import no.nav.ung.sak.oppgave.typer.inntektsrapportering.InntektsrapporteringOppgaveMapper;
 import no.nav.ung.sak.oppgave.typer.kontrollerregisterinntekt.KontrollerRegisterInntektOppgaveMapper;
 import org.slf4j.Logger;
@@ -177,8 +179,8 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     private boolean gjelderSammePeriodeForInntektsrapportering(BrukerdialogOppgaveEntitet oppgave,
                                                                java.time.LocalDate fomDato,
                                                                java.time.LocalDate tomDato) {
-        if (oppgave.getData() instanceof InntektsrapporteringOppgaveData data) {
-            return data.getFomDato().equals(fomDato) && data.getTomDato().equals(tomDato);
+        if (oppgave.getData() instanceof InntektsrapporteringOppgavetypeDataDTO data) {
+            return data.fraOgMed().equals(fomDato) && data.tilOgMed().equals(tomDato);
         }
         return false;
     }

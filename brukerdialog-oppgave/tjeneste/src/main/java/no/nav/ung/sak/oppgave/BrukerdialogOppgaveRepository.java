@@ -5,6 +5,8 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
 import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
 
 import java.time.LocalDateTime;
 import java.util.List;

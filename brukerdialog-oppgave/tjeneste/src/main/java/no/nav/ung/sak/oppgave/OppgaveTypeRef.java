@@ -6,6 +6,7 @@ import jakarta.enterprise.inject.Stereotype;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.enterprise.util.AnnotationLiteral;
 import jakarta.inject.Qualifier;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
 
 import java.lang.annotation.*;
 import java.util.*;
