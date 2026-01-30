@@ -11,7 +11,7 @@ import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
-import no.nav.ung.domenetjenester.a<>rkiv.journal.TilJournalføringTjeneste;
+import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
