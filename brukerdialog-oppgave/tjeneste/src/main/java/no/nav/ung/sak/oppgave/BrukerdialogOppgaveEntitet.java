@@ -3,6 +3,10 @@ package no.nav.ung.sak.oppgave;
 import jakarta.persistence.*;
 import no.nav.ung.sak.felles.BaseEntitet;
 import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.oppgave.kontrakt.BekreftelseDTO;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
+import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
 import org.hibernate.annotations.ColumnTransformer;
 
 import java.time.LocalDateTime;
@@ -34,7 +38,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Convert(converter = OppgaveDataConverter.class)
     @ColumnTransformer(write = "?::jsonb")
     @Column(name = "data", nullable = false, updatable = false, columnDefinition = "jsonb")
-    private OppgaveData data;
+    private OppgavetypeDataDTO data;
 
     @Column(name = "frist_tid")
     private LocalDateTime fristTid;
@@ -48,10 +52,19 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Column(name = "lukket_dato")
     private LocalDateTime lukketDato; // NOSONAR
 
+    @Convert(converter = OppgaveBekreftelseConverter.class)
+    @ColumnTransformer(write = "?::jsonb")
+    @Column(name = "bekreftelse", columnDefinition = "jsonb")
+    private BekreftelseDTO bekreftelse;
+
+    protected BrukerdialogOppgaveEntitet() {
+        // For JPA
+    }
+
     public BrukerdialogOppgaveEntitet(UUID oppgavereferanse,
                                       OppgaveType oppgaveType,
                                       AktørId aktørId,
-                                      OppgaveData data,
+                                      OppgavetypeDataDTO data,
                                       LocalDateTime fristTid) {
         this.oppgavereferanse = oppgavereferanse;
         this.oppgaveType = oppgaveType;
@@ -76,7 +89,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         return oppgaveType;
     }
 
-    public OppgaveData getData() {
+    public OppgavetypeDataDTO getData() {
         return data;
     }
 
@@ -114,6 +127,14 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
 
     public LocalDateTime getLukketDato() {
         return lukketDato;
+    }
+
+    public BekreftelseDTO getBekreftelse() {
+        return bekreftelse;
+    }
+
+    public void setBekreftelse(BekreftelseDTO bekreftelse) {
+        this.bekreftelse = bekreftelse;
     }
 
     Long getId() {

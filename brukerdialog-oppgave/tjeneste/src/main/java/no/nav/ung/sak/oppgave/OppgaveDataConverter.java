@@ -5,33 +5,34 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
 
 @Converter
-public class OppgaveDataConverter implements AttributeConverter<OppgaveData, String> {
+public class OppgaveDataConverter implements AttributeConverter<OppgavetypeDataDTO, String> {
 
     private static final ObjectMapper OBJECT_MAPPER = JsonObjectMapper.OM;
 
     @Override
-    public String convertToDatabaseColumn(OppgaveData attribute) {
+    public String convertToDatabaseColumn(OppgavetypeDataDTO attribute) {
         if (attribute == null) {
             return null;
         }
         try {
             return OBJECT_MAPPER.writeValueAsString(attribute);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Kunne ikke serialisere OppgaveData til JSON", e);
+            throw new IllegalArgumentException("Kunne ikke serialisere OppgavetypeDataDTO til JSON", e);
         }
     }
 
     @Override
-    public OppgaveData convertToEntityAttribute(String dbData) {
+    public OppgavetypeDataDTO convertToEntityAttribute(String dbData) {
         if (dbData == null || dbData.trim().isEmpty()) {
             return null;
         }
         try {
-            return OBJECT_MAPPER.readValue(dbData, OppgaveData.class);
+            return OBJECT_MAPPER.readValue(dbData, OppgavetypeDataDTO.class);
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Kunne ikke deserialisere JSON til OppgaveData", e);
+            throw new IllegalArgumentException("Kunne ikke deserialisere JSON til OppgavetypeDataDTO", e);
         }
     }
 }

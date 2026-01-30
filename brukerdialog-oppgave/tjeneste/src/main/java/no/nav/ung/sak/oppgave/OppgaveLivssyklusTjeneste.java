@@ -8,8 +8,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.DeaktiverMinSideVarselTask;
 import no.nav.ung.sak.PubliserMinSideVarselTask;
-
-import java.time.format.DateTimeFormatter;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
 
 @ApplicationScoped
 public class OppgaveLivssyklusTjeneste {

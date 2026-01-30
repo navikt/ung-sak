@@ -12,6 +12,8 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoO
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.oppgave.*;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
 import no.nav.ung.sak.oppgave.typer.endretperiode.EndretPeriodeOppgaveMapper;
 import no.nav.ung.sak.oppgave.typer.endretsluttdato.EndretSluttdatoOppgaveMapper;
 import no.nav.ung.sak.oppgave.typer.endretstartdato.EndretStartdatoOppgaveMapper;

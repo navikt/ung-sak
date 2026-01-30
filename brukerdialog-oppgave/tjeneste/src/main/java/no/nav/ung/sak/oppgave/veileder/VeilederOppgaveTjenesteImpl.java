@@ -5,9 +5,9 @@ import jakarta.inject.Inject;
 import no.nav.ung.sak.felles.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
-import no.nav.ung.sak.oppgave.OppgaveType;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
 import no.nav.ung.sak.oppgave.kontrakt.OpprettSøkYtelseOppgaveDto;
-import no.nav.ung.sak.oppgave.typer.søkytelse.SøkYtelseOppgaveData;
+import no.nav.ung.sak.oppgave.kontrakt.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
     @Override
     public void opprettSøkYtelseOppgave(OpprettSøkYtelseOppgaveDto oppgaveDto) {
         AktørId aktørId = new AktørId(oppgaveDto.aktørId());
-        SøkYtelseOppgaveData oppgaveData = new SøkYtelseOppgaveData(oppgaveDto.fomDato());
+        SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(oppgaveDto.fomDato());
 
         // Generer UUID hvis ikke oppgitt
         UUID oppgaveReferanse = oppgaveDto.oppgaveReferanse() != null

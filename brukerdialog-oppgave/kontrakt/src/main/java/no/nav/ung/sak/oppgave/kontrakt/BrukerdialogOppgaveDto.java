@@ -4,144 +4,64 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import java.time.LocalDateTime;
+
+import java.time.ZonedDateTime;
 import java.util.UUID;
 
+/**
+ * DTO for oppgave med all nødvendig informasjon for visning og håndtering.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-public class BrukerdialogOppgaveDto {
-
-    @JsonProperty(value = "oppgavereferanse", required = true)
+@JsonAutoDetect(
+    fieldVisibility = JsonAutoDetect.Visibility.NONE,
+    getterVisibility = JsonAutoDetect.Visibility.NONE,
+    setterVisibility = JsonAutoDetect.Visibility.NONE,
+    isGetterVisibility = JsonAutoDetect.Visibility.NONE,
+    creatorVisibility = JsonAutoDetect.Visibility.NONE
+)
+public record BrukerdialogOppgaveDto(
+    @JsonProperty(value = "oppgaveReferanse", required = true)
     @NotNull
     @Valid
-    private UUID oppgavereferanse;
+    UUID oppgaveReferanse,
+
+    @JsonProperty(value = "oppgavetype", required = true)
+    @NotNull
+    OppgaveType oppgavetype,
+
+    @JsonProperty(value = "oppgavetypeData", required = true)
+    @NotNull
+    OppgavetypeDataDTO oppgavetypeData,
+
+    @JsonProperty(value = "bekreftelse")
+    BekreftelseDTO bekreftelse,
 
     @JsonProperty(value = "status", required = true)
     @NotNull
-    @Valid
-    private String status;
+    OppgaveStatus status,
 
-    @JsonProperty(value = "type")
-    @Valid
-    private String type;
-
-    @JsonProperty(value = "data", required = true)
+    @JsonProperty(value = "opprettetDato", required = true)
     @NotNull
-    @Valid
-    private Object data;
-
-    @JsonProperty(value = "fristTid")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime fristTid;
-
-    @JsonProperty(value = "opprettetTidspunkt", required = true)
-    @NotNull
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime opprettetTidspunkt;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    ZonedDateTime opprettetDato,
 
     @JsonProperty(value = "løstDato")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime løstDato;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    ZonedDateTime løstDato,
 
     @JsonProperty(value = "åpnetDato")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime åpnetDato;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    ZonedDateTime åpnetDato,
 
     @JsonProperty(value = "lukketDato")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime lukketDato;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    ZonedDateTime lukketDato,
 
-    public BrukerdialogOppgaveDto() {
-        // Jackson
-    }
-
-    public BrukerdialogOppgaveDto(UUID oppgavereferanse, String status, String type, Object data,
-                                   LocalDateTime fristTid, LocalDateTime opprettetTidspunkt,
-                                   LocalDateTime løstDato, LocalDateTime åpnetDato, LocalDateTime lukketDato) {
-        this.oppgavereferanse = oppgavereferanse;
-        this.status = status;
-        this.type = type;
-        this.data = data;
-        this.fristTid = fristTid;
-        this.opprettetTidspunkt = opprettetTidspunkt;
-        this.løstDato = løstDato;
-        this.åpnetDato = åpnetDato;
-        this.lukketDato = lukketDato;
-    }
-
-    public UUID getOppgavereferanse() {
-        return oppgavereferanse;
-    }
-
-    public void setOppgavereferanse(UUID oppgavereferanse) {
-        this.oppgavereferanse = oppgavereferanse;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Object getData() {
-        return data;
-    }
-
-    public void setData(Object data) {
-        this.data = data;
-    }
-
-    public LocalDateTime getFristTid() {
-        return fristTid;
-    }
-
-    public void setFristTid(LocalDateTime fristTid) {
-        this.fristTid = fristTid;
-    }
-
-    public LocalDateTime getOpprettetTidspunkt() {
-        return opprettetTidspunkt;
-    }
-
-    public void setOpprettetTidspunkt(LocalDateTime opprettetTidspunkt) {
-        this.opprettetTidspunkt = opprettetTidspunkt;
-    }
-
-    public LocalDateTime getLøstDato() {
-        return løstDato;
-    }
-
-    public void setLøstDato(LocalDateTime løstDato) {
-        this.løstDato = løstDato;
-    }
-
-    public LocalDateTime getÅpnetDato() {
-        return åpnetDato;
-    }
-
-    public void setÅpnetDato(LocalDateTime åpnetDato) {
-        this.åpnetDato = åpnetDato;
-    }
-
-    public LocalDateTime getLukketDato() {
-        return lukketDato;
-    }
-
-    public void setLukketDato(LocalDateTime lukketDato) {
-        this.lukketDato = lukketDato;
-    }
+    @JsonProperty(value = "frist")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    ZonedDateTime frist
+) {
 }
 

@@ -4,10 +4,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.OppgaveType;
+import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.VarselInnholdUtleder;
-import no.nav.ung.sak.oppgave.typer.inntektsrapportering.InntektsrapporteringOppgaveData;
 
 import java.time.Month;
 
