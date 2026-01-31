@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.ung.sak.abac.StandardAbacAttributt;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -16,11 +17,12 @@ import java.util.UUID;
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record OpprettSøkYtelseOppgaveDto(
+
     @JsonProperty(value = "aktørId", required = true)
     @StandardAbacAttributt(value = StandardAbacAttributtType.AKTØR_ID)
     @NotNull
     @Valid
-    String aktørId,
+    AktørId aktørId,
 
     @JsonProperty(value = "fomDato", required = true)
     @NotNull
