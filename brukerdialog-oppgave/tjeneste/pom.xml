@@ -20,10 +20,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave-kontrakt</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
             <artifactId>brukerdialog-oppgave-min-side-varsel</artifactId>
         </dependency>
 
@@ -55,6 +51,23 @@
         <dependency>
             <groupId>jakarta.persistence</groupId>
             <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
+
+        <!-- Test dependencies -->
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.k9.felles</groupId>
+            <artifactId>k9-felles-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingslager-testutilities</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 

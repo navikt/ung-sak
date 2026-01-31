@@ -6,12 +6,12 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.YtelseType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
-import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO;
-import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO;
-import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.RegisterinntektDTO;
-import no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.RegisterinntektDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -62,13 +62,13 @@ public class KontrollerRegisterInntektOppgaveMapper {
             .collect(Collectors.toList());
     }
 
-    private static no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType mapYtelseType(YtelseType ytelseType) {
+    private static no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType mapYtelseType(YtelseType ytelseType) {
         return switch (ytelseType) {
-            case SYKEPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.SYKEPENGER;
-            case OMSORGSPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.OMSORGSPENGER;
-            case PLEIEPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.PLEIEPENGER;
-            case OPPLAERINGSPENGER -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.OPPLÆRINGSPENGER;
-            default -> no.nav.ung.sak.oppgave.kontrakt.typer.kontrollerregisterinntekt.YtelseType.ANNET;
+            case SYKEPENGER -> no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType.SYKEPENGER;
+            case OMSORGSPENGER -> no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType.OMSORGSPENGER;
+            case PLEIEPENGER -> no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType.PLEIEPENGER;
+            case OPPLAERINGSPENGER -> no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType.OPPLÆRINGSPENGER;
+            default -> no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType.ANNET;
         };
     }
 }

@@ -18,6 +18,11 @@ import java.util.UUID;
  */
 public interface OppgaveForSaksbehandlingGrensesnitt {
 
+
+    default boolean isEnabled() {
+        return true;
+    }
+
     /**
      * Oppretter en oppgave for å kontrollere registerinntekt.
      *

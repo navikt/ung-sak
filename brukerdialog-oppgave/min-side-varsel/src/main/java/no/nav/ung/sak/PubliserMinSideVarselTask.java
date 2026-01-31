@@ -22,8 +22,6 @@ import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.*;
 
-// ung-tilbake lytter på denne for å opprette tilbakekrevingsbehandlinger ved behov
-
 @ApplicationScoped
 @ProsessTask(PubliserMinSideVarselTask.TASKTYPE)
 public class PubliserMinSideVarselTask implements ProsessTaskHandler {

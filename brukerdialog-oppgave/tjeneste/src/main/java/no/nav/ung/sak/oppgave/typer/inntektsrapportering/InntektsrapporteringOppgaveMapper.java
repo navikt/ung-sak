@@ -3,9 +3,9 @@ package no.nav.ung.sak.oppgave.typer.inntektsrapportering;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
-import no.nav.ung.sak.oppgave.kontrakt.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
 
 public class InntektsrapporteringOppgaveMapper {
 

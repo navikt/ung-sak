@@ -3,9 +3,9 @@ package no.nav.ung.sak.oppgave.typer.endretsluttdato;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
-import no.nav.ung.sak.oppgave.kontrakt.typer.endretsluttdato.EndretSluttdatoDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDTO;
 
 public class EndretSluttdatoOppgaveMapper {
     public static BrukerdialogOppgaveEntitet map(EndretSluttdatoOppgaveDTO oppgaveDto, AktørId aktørId) {

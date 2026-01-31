@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
-import no.nav.ung.sak.oppgave.kontrakt.BekreftelseDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 
 /**
  * Converter for å serialisere BekreftelseDTO til/fra JSONB.

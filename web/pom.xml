@@ -153,6 +153,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>brukerdialog-oppgave-min-side-varsel</artifactId>
+        </dependency>
 
         <!-- Ytelsespesifikke moduler -->
         <dependency>

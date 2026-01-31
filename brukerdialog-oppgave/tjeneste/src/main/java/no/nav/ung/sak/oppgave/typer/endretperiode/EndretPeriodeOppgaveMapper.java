@@ -4,10 +4,10 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriod
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.PeriodeEndringType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
-import no.nav.ung.sak.oppgave.kontrakt.typer.endretperiode.EndretPeriodeDataDTO;
-import no.nav.ung.sak.oppgave.kontrakt.typer.endretperiode.PeriodeDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
 
 import java.util.stream.Collectors;
 
@@ -29,12 +29,12 @@ public class EndretPeriodeOppgaveMapper {
         );
     }
 
-    private static no.nav.ung.sak.oppgave.kontrakt.typer.endretperiode.PeriodeEndringType mapEndringType(PeriodeEndringType it) {
+    private static no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType mapEndringType(PeriodeEndringType it) {
         return switch (it) {
-            case ENDRET_STARTDATO -> no.nav.ung.sak.oppgave.kontrakt.typer.endretperiode.PeriodeEndringType.ENDRET_STARTDATO;
-            case ENDRET_SLUTTDATO -> no.nav.ung.sak.oppgave.kontrakt.typer.endretperiode.PeriodeEndringType.ENDRET_SLUTTDATO;
-            case FJERNET_PERIODE -> no.nav.ung.sak.oppgave.kontrakt.typer.endretperiode.PeriodeEndringType.FJERNET_PERIODE;
-            case ANDRE_ENDRINGER -> no.nav.ung.sak.oppgave.kontrakt.typer.endretperiode.PeriodeEndringType.ANDRE_ENDRINGER;
+            case ENDRET_STARTDATO -> no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType.ENDRET_STARTDATO;
+            case ENDRET_SLUTTDATO -> no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType.ENDRET_SLUTTDATO;
+            case FJERNET_PERIODE -> no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType.FJERNET_PERIODE;
+            case ANDRE_ENDRINGER -> no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType.ANDRE_ENDRINGER;
         };
     }
 
