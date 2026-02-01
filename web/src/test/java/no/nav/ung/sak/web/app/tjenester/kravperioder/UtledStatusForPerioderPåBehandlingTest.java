@@ -1,6 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester.kravperioder;
 
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
@@ -13,14 +13,14 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.KravDokumentType;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
 import no.nav.ung.sak.trigger.Trigger;
-import no.nav.ung.sak.felles.typer.JournalpostId;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Periode;
 
 class UtledStatusForPerioderPåBehandlingTest {
 

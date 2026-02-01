@@ -37,8 +37,8 @@ import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
 import no.nav.ung.kodeverk.dokument.Kommunikasjonsretning;
 import no.nav.ung.kodeverk.dokument.VariantFormat;
-import no.nav.ung.sak.felles.typer.JournalpostId;
-import no.nav.ung.sak.felles.typer.Saksnummer;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
 
 @ApplicationScoped
 public class DokumentArkivTjeneste {

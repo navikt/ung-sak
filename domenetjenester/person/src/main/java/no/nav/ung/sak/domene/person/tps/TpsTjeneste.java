@@ -4,8 +4,8 @@ import java.util.Optional;
 
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.PersonIdent;
 public interface TpsTjeneste {
 
     Optional<Personinfo> hentBrukerForAktør(AktørId aktørId);

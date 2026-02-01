@@ -55,7 +55,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.api.Kodeverdi;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.PersonIdent;
 
 @Execution(ExecutionMode.CONCURRENT)
 public class RestApiInputValideringDtoTest extends RestApiTester {

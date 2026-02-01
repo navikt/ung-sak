@@ -23,7 +23,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.ung.domenetjenester.arkiv.dok.model.FerdigstillJournalpostRequest;
 import no.nav.ung.domenetjenester.arkiv.dok.model.OppdaterJournalpostRequest;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "DOKARKIV_SCOPE", defaultScope = "api://prod-fss.teamdokumenthandtering.dokarkiv/.default")

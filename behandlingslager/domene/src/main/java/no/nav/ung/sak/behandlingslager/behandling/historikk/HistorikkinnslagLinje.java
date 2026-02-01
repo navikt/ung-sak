@@ -1,9 +1,9 @@
 package no.nav.ung.sak.behandlingslager.behandling.historikk;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.felles.IndexKey;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.diff.IndexKeyComposer;
+import no.nav.ung.sak.IndexKey;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.IndexKeyComposer;
 
 import java.util.Objects;
 

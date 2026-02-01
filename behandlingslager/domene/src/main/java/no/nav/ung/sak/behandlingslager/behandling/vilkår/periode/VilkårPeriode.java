@@ -9,7 +9,7 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
-import no.nav.ung.sak.felles.diff.DiffIgnore;
+import no.nav.ung.sak.diff.DiffIgnore;
 import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -29,16 +29,16 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
-import no.nav.ung.sak.felles.IndexKey;
+import no.nav.ung.sak.IndexKey;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.diff.IndexKeyComposer;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 @Entity
 @Table(name = "VR_VILKAR_PERIODE")

@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.domene.abakus.async.AsyncInntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.abakus.mapping.IAYFraDtoMapper;
 import no.nav.ung.sak.domene.iay.modell.*;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.io.IOException;
 import java.time.LocalDateTime;

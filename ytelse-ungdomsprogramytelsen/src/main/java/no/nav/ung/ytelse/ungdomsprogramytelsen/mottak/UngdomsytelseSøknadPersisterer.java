@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktSt
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 
 import java.time.LocalDate;
 import java.util.ArrayList;

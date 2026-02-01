@@ -13,8 +13,8 @@ import no.nav.ung.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.ung.sak.behandlingslager.virksomhet.Virksomhet;
 import no.nav.ung.sak.domene.arbeidsforhold.person.PersonIdentTjeneste;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
-import no.nav.ung.sak.felles.typer.OrgNummer;
+import no.nav.ung.sak.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.OrgNummer;
 
 @ApplicationScoped
 public class ArbeidsgiverTjeneste {

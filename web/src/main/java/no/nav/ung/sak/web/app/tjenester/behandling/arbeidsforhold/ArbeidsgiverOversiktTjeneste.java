@@ -11,7 +11,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.Inntekter;
 import no.nav.ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto;
 import no.nav.ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOversiktDto;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.Arbeidsgiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -7,8 +7,8 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.uttak.regler.*;
 import java.time.LocalDate;
 import java.util.*;
 
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 class VurderUttakTjeneste {
 

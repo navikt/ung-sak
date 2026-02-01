@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import no.nav.k9.felles.integrasjon.saf.Journalstatus;
 import no.nav.k9.felles.integrasjon.saf.Tema;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 public class JournalpostInfo {
 

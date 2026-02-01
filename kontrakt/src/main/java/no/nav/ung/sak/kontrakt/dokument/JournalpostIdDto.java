@@ -12,8 +12,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.sak.felles.abac.StandardAbacAttributt;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.abac.StandardAbacAttributt;
+import no.nav.ung.sak.typer.JournalpostId;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY)

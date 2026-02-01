@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.util.Optional;
 
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
-import no.nav.ung.sak.felles.typer.Arbeidsgiver;
+import no.nav.ung.sak.typer.Arbeidsgiver;
 
 public class InntektBuilder {
     private final boolean oppdaterer;

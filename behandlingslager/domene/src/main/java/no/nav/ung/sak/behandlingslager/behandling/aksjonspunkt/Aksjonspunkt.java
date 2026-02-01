@@ -5,14 +5,14 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.InternalUtil;
 import no.nav.ung.sak.behandlingslager.kodeverk.AksjonspunktDefinisjonKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.AksjonspunktStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.VenteårsakKodeverdiConverter;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 

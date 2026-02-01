@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandlingslager.kodeverk.SkjermlenkeTypeKodeverdiConverter;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import org.hibernate.annotations.NaturalId;
 
 import java.util.ArrayList;

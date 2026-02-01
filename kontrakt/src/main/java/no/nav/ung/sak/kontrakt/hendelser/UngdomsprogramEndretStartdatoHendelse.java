@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.hendelser.HendelseType;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 

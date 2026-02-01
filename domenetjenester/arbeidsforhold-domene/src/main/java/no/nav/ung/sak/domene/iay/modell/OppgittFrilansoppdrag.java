@@ -3,10 +3,10 @@ package no.nav.ung.sak.domene.iay.modell;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-import no.nav.ung.sak.felles.IndexKey;
-import no.nav.ung.sak.felles.diff.ChangeTracked;
-import no.nav.ung.sak.felles.diff.IndexKeyComposer;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.IndexKey;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.diff.IndexKeyComposer;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public class OppgittFrilansoppdrag implements IndexKey {
 

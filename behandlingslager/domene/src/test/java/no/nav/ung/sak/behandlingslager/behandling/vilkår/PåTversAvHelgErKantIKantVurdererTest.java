@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
-import no.nav.ung.sak.felles.tid.KantIKantVurderer;
+import no.nav.ung.sak.tid.KantIKantVurderer;
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public class PåTversAvHelgErKantIKantVurdererTest {
 

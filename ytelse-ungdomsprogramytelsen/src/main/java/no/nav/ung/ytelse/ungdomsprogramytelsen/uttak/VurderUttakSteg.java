@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_UTTAK;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-import static no.nav.ung.sak.felles.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
 @BehandlingStegRef(value = VURDER_UTTAK)

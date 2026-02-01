@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.vedtak;
 
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingEvent;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 
 public class BehandlingVedtakEvent implements BehandlingEvent {
     private BehandlingVedtak vedtak;

@@ -2,8 +2,8 @@ package no.nav.ung.sak.typer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import no.nav.ung.sak.felles.typer.OrgNummer;
-import no.nav.ung.sak.felles.typer.OrganisasjonsNummerValidator;
+import no.nav.ung.sak.typer.OrgNummer;
+import no.nav.ung.sak.typer.OrganisasjonsNummerValidator;
 import org.junit.jupiter.api.Test;
 
 public class OrganisasjonsNummerValidatorTest {

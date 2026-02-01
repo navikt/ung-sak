@@ -2,7 +2,7 @@ package no.nav.ung.sak.oppgave.veileder;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
 import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;

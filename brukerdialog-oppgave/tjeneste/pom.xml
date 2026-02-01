@@ -26,10 +26,16 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>brukerdialog-oppgave-min-side-varsel</artifactId>
         </dependency>
+
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>felles</artifactId>
+            <artifactId>felles-behandlingslager</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>felles-util</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>kontrakt</artifactId>
@@ -46,6 +52,11 @@
             <groupId>no.nav.k9.prosesstask</groupId>
             <artifactId>prosesstask</artifactId>
         </dependency>
+        <dependency>
+            <groupId>jakarta.persistence</groupId>
+            <artifactId>jakarta.persistence-api</artifactId>
+        </dependency>
     </dependencies>
+
 
 </project>

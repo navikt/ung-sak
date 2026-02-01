@@ -10,7 +10,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.felles.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.hendelsemottak.tjenester.kabal.kontrakt.KabalBehandlingEvent;
 import no.nav.ung.sak.hendelsemottak.tjenester.kabal.kontrakt.KabalBehandlingEvent.Eventtyper;
 import no.nav.ung.sak.hendelsemottak.tjenester.kabal.task.MottaVedtakKlageinstansTask;

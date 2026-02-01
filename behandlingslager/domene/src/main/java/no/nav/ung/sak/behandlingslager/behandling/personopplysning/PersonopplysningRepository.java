@@ -4,9 +4,9 @@ import java.util.Objects;
 import java.util.Optional;
 
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.felles.diff.DiffEntity;
-import no.nav.ung.sak.felles.diff.DiffResult;
-import no.nav.ung.sak.felles.diff.TraverseGraph;
+import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.DiffResult;
+import no.nav.ung.sak.diff.TraverseGraph;
 import org.hibernate.jpa.QueryHints;
 
 import jakarta.enterprise.context.Dependent;

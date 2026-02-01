@@ -13,11 +13,11 @@ import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.Barnetillegg
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BeregnDagsatsInput;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
-import no.nav.ung.sak.felles.tid.JsonObjectMapper;
-import no.nav.ung.sak.felles.tid.TidslinjeUtil;
+import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.sak.tid.TidslinjeUtil;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.util.List;

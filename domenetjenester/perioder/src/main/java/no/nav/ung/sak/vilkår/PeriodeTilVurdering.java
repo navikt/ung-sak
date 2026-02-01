@@ -3,7 +3,7 @@ package no.nav.ung.sak.vilkår;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public class PeriodeTilVurdering implements Comparable<PeriodeTilVurdering> {
 

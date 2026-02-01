@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.UUID;
 
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.JournalpostId;
 
 public class OppgittOpptjeningBuilder {
 

@@ -24,7 +24,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.domene.abakus.AbakusTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.registerinnhenting.impl.SaksopplysningerFeil;
-import no.nav.ung.sak.felles.typer.AktørId;
+import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,7 +111,7 @@ public class RegisterdataInnhenter {
         return informasjonBuilder;
     }
 
-    private void leggTilSøkersBarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.ung.sak.felles.typer.Periode opplysningsperioden) {
+    private void leggTilSøkersBarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.ung.sak.typer.Periode opplysningsperioden) {
         List<Personinfo> barna = hentBarnRelatertTil(søkerPersonInfo, behandling, opplysningsperioden);
         barna.forEach(barn -> {
             if (hentHistorikkForRelatertePersoner(behandling)) {
@@ -134,7 +134,7 @@ public class RegisterdataInnhenter {
             .toList();
     }
 
-    private void leggTilFosterbarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.ung.sak.felles.typer.Periode opplysningsperioden) {
+    private void leggTilFosterbarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, no.nav.ung.sak.typer.Periode opplysningsperioden) {
         List<Personinfo> barna = hentFosterbarn(behandling);
         barna.forEach(barn -> {
             if (hentHistorikkForRelatertePersoner(behandling)) {
@@ -187,7 +187,7 @@ public class RegisterdataInnhenter {
         informasjonBuilder.leggTil(builder);
     }
 
-    private void leggTilEktefelle(PersonInformasjonBuilder informasjonBuilder, Behandling behandling, no.nav.ung.sak.felles.typer.Periode opplysningsperioden, Personinfo søkerPersonInfo) {
+    private void leggTilEktefelle(PersonInformasjonBuilder informasjonBuilder, Behandling behandling, no.nav.ung.sak.typer.Periode opplysningsperioden, Personinfo søkerPersonInfo) {
         // Ektefelle
         final List<Familierelasjon> familierelasjoner = søkerPersonInfo.getFamilierelasjoner()
             .stream()
@@ -214,7 +214,7 @@ public class RegisterdataInnhenter {
         }
     }
 
-    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, no.nav.ung.sak.felles.typer.Periode opplysningsperioden) {
+    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, no.nav.ung.sak.typer.Periode opplysningsperioden) {
         List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
         var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
 

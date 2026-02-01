@@ -17,9 +17,9 @@ import no.nav.k9.felles.integrasjon.saf.JournalpostQueryRequest;
 import no.nav.k9.felles.integrasjon.saf.SafTjeneste;
 import no.nav.k9.felles.integrasjon.saf.Variantformat;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.JournalpostId;
-import no.nav.ung.sak.felles.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.PersonIdent;
 
 @Dependent
 public class ArkivTjeneste {

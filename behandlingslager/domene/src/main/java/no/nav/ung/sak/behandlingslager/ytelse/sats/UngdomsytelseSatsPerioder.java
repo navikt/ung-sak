@@ -4,7 +4,7 @@ import java.sql.Clob;
 import java.util.ArrayList;
 import java.util.List;
 
-import no.nav.ung.sak.felles.diff.DiffIgnore;
+import no.nav.ung.sak.diff.DiffIgnore;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.CascadeType;
@@ -17,7 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import no.nav.ung.sak.felles.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
 
 @Entity(name = "UngdomsytelseSatsPerioder")

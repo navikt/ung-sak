@@ -11,12 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.ung.sak.felles.BaseEntitet;
-import no.nav.ung.sak.felles.tid.PostgreSQLRangeType;
-import no.nav.ung.sak.felles.tid.Range;
-import no.nav.ung.sak.felles.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.felles.typer.AktørId;
-import no.nav.ung.sak.felles.typer.Periode;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.tid.Range;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Periode;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;

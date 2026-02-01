@@ -6,7 +6,7 @@ import com.kobylynskyi.graphql.codegen.model.graphql.GraphQLResult;
 import no.nav.k9.felles.integrasjon.saf.*;
 import no.nav.ung.kodeverk.dokument.ArkivFilType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.felles.typer.JournalpostId;
+import no.nav.ung.sak.typer.JournalpostId;
 import org.apache.commons.lang3.NotImplementedException;
 
 import java.time.LocalDateTime;
