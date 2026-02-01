@@ -39,7 +39,6 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
 
     @Override
     public BrukerdialogOppgaveDto opprettSøkYtelseOppgave(OpprettSøkYtelseOppgaveDto oppgaveDto) {
-        AktørId aktørId = new AktørId(oppgaveDto.aktørId());
         SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(oppgaveDto.fomDato());
 
         // Generer UUID hvis ikke oppgitt
@@ -50,7 +49,7 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,
             OppgaveType.SØK_YTELSE,
-            aktørId,
+            oppgaveDto.aktørId(),
             oppgaveData,
             null // Ingen frist for søk ytelse oppgave
         );
