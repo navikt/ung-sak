@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -9,6 +9,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import no.nav.ung.sak.mottak.dokumentmottak.DokumentValidator;
+import no.nav.ung.sak.mottak.dokumentmottak.DokumentValidatorProvider;
+import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.ung.sak.mottak.dokumentmottak.HåndterMottattDokumentTask;
+import no.nav.ung.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
+import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +50,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 class HåndterMottattDokumentTaskTest {
 
 
-    private InnhentDokumentTjeneste innhentDokumentTjeneste;
+    private UngdomsytelseInnhentDokumentTjeneste innhentDokumentTjeneste;
     @Inject
     private Behandlingsoppretter behandlingsoppretter;
     @Inject
@@ -95,7 +101,7 @@ class HåndterMottattDokumentTaskTest {
 
         when(dokumentmottaker.getTriggere(ArgumentMatchers.anyList())).thenReturn(List.of(new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), NY_SØKT_PROGRAM_PERIODE)));
 
-        innhentDokumentTjeneste = new InnhentDokumentTjeneste(
+        innhentDokumentTjeneste = new UngdomsytelseInnhentDokumentTjeneste(
             new UnitTestLookupInstanceImpl<>(dokumentmottaker),
             behandlingsoppretter,
             behandlingRepositoryProvider,
@@ -114,7 +120,7 @@ class HåndterMottattDokumentTaskTest {
 
         var prosessTaskData = ProsessTaskData.forProsessTask(HåndterMottattDokumentTask.class);
         prosessTaskData.setFagsakId(fagsak.getId());
-        var håndterMottattDokumentTask = new HåndterMottattDokumentTask(behandlingRepositoryProvider, innhentDokumentTjeneste, mottatteDokumentTjeneste, dokumentValidatorProvider);
+        var håndterMottattDokumentTask = new HåndterMottattDokumentTask(behandlingRepositoryProvider, new UnitTestLookupInstanceImpl<>(innhentDokumentTjeneste), mottatteDokumentTjeneste, dokumentValidatorProvider);
 
         var e = assertThrows(TekniskException.class, () -> håndterMottattDokumentTask.prosesser(prosessTaskData));
         assertThat(e.getMessage()).isEqualTo("K9-653311:Behandling [" + behandling.getId() + "] pågår, avventer å håndtere mottatt dokument til det er prosessert");

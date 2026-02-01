@@ -26,7 +26,7 @@ public class MottatteDokumentTjeneste {
     }
 
 
-    Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
+    public Long lagreMottattDokumentPåFagsak(MottattDokument dokument) {
         var eksisterende = mottatteDokumentRepository.hentMottatteDokument(dokument.getFagsakId(), dokument.getJournalpostId() != null ? List.of(dokument.getJournalpostId()) : List.of())
             .stream()
             .filter(it -> Objects.equals(it.getType(), dokument.getType()))

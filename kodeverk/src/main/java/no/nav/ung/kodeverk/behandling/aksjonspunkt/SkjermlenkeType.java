@@ -11,6 +11,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll av inntekt"),
     FAKTA_OM_SIMULERING("FAKTA_OM_SIMULERING", "Simulering"),
     SOEKNADSFRIST("SOEKNADSFRIST", "Søknadsfrist"),
+    FAKTA_14A_VEDTAK("FAKTA_14A_VEDTAK", "14a vedtak"),
     UDEFINERT("-", "Ikke definert"),
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),

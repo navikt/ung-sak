@@ -15,7 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.tid.TidslinjeUtil;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.vilkår.InngangsvilkårUtleder;
+import no.nav.ung.sak.vilkår.UngdomsprogramytelseInngangsvilkårUtleder;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
 
 import java.util.*;
@@ -28,7 +28,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 @ApplicationScoped
 public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
-    private InngangsvilkårUtleder inngangsvilkårUtleder;
+    private UngdomsprogramytelseInngangsvilkårUtleder inngangsvilkårUtleder;
 
     private UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
@@ -43,7 +43,7 @@ public class UngdomsytelseVilkårsperioderTilVurderingTjeneste implements Vilkå
 
     @Inject
     public UngdomsytelseVilkårsperioderTilVurderingTjeneste(
-        @FagsakYtelseTypeRef(UNGDOMSYTELSE) InngangsvilkårUtleder inngangsvilkårUtleder,
+        @FagsakYtelseTypeRef(UNGDOMSYTELSE) UngdomsprogramytelseInngangsvilkårUtleder inngangsvilkårUtleder,
         UngdomsytelseSøknadsperiodeTjeneste ungdomsytelseSøknadsperiodeTjeneste,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
         ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,

@@ -163,6 +163,10 @@
             <groupId>no.nav.ung.sak.ytelse</groupId>
             <artifactId>ytelse-ungdomsprogramytelsen</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak.ytelse</groupId>
+            <artifactId>ytelse-aktivitetspenger</artifactId>
+        </dependency>
 
 
 

@@ -34,6 +34,9 @@ public enum BehandlingStegType implements Kodeverdi {
     UNGDOMSYTELSE_BEREGNING("UNGDOMSYTELSE_BEREGNING", "Beregner sats for ungdomsytelsen", UTREDES),
     KONTROLLER_REGISTER_INNTEKT("KONTROLLER_REGISTER_INNTEKT", "Kontroller brukers rapporterte inntekt mot registerinntekt", UTREDES),
 
+    VURDER_BOSTED("VURDER_BOSTED", "Vurderer om bruker bor et sted ytelsen gjelder", UTREDES),
+    FAKTA_14A_VEDTAK("FAKTA_14A", "Registrer fakta om brukers 14a vedtak", UTREDES),
+
     // Utgåtte steg: Lagres på behandling og aksjonspunkt og kan ikke fjernes med mindre man håndterer dette i BehandlingStegTypeKodeverdiConverter
     @Deprecated
     KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Utgått steg: Kontroller endring i ungdomsprogram", UTREDES),
