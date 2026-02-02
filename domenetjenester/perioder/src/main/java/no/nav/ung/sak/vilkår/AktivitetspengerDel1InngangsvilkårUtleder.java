@@ -20,7 +20,7 @@ import static no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR;
 public class AktivitetspengerDel1InngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
-        ALDERSVILKÅR,
+        ALDERSVILKÅR, //TODO AKT denne skal kanskje flyttes til del2
         BOSTEDSVILKÅR
     );
 

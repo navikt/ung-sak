@@ -45,8 +45,7 @@ public class VurderBosattSteg implements BehandlingSteg {
     @Inject
     public VurderBosattSteg(@Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                             BehandlingRepository behandlingRepository,
-                            VilkårResultatRepository vilkårResultatRepository,
-                            BasisPersonopplysningTjeneste personopplysningTjeneste) {
+                            VilkårResultatRepository vilkårResultatRepository) {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -58,10 +57,9 @@ public class VurderBosattSteg implements BehandlingSteg {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
 
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ALDERSVILKÅR);
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
 
-        //TODO ved avslag på aldersvilkåret for alle perioder kan perioder settes til ikke vurdert
-
+        //TODO om det er tidligere vilkår, og disse har endt med avslag, så trener vi ikke å vurdere her også
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR);

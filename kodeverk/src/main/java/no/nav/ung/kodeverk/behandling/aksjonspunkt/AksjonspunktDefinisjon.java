@@ -64,9 +64,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST,
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
-    FAKTA_14A_VEDTAK(AksjonspunktKodeDefinisjon.FAKTA_14A_VEDTAK,
-        AksjonspunktType.MANUELL, "Fakta om 14a vedtak", BehandlingStatus.UTREDES, BehandlingStegType.FAKTA_14A_VEDTAK,
-        VilkårType.FAKTA_14A_VEDTAK, SkjermlenkeType.FAKTA_14A_VEDTAK, ENTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
+    VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
+        AksjonspunktType.MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
+        VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, ENTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 60xx
     OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE,

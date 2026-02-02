@@ -30,7 +30,7 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
 
     public static final String TASKTYPE = "ung.finnEllerOpprettSak";
     private static final Logger log = LoggerFactory.getLogger(FinnEllerOpprettUngSakTask.class);
-    private final Map<FagsakYtelseType, SøknadMottakTjeneste> søknadMottakTjenester;
+    private final Instance<SøknadMottakTjeneste> søknadMottakTjenester;
     private final boolean aktivitetspengerEnabled;
 
     @Inject
@@ -38,10 +38,8 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
                                       @Any Instance<SøknadMottakTjeneste> søknadMottakTjenester,
                                       @KonfigVerdi(value = "aktivitetspenger.enabled", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled) {
         super(fordelProsessTaskTjeneste);
+        this.søknadMottakTjenester = søknadMottakTjenester;
         this.aktivitetspengerEnabled = aktivitetspengerEnabled;
-        this.søknadMottakTjenester = new EnumMap<>(FagsakYtelseType.class);
-        this.søknadMottakTjenester.put(FagsakYtelseType.UNGDOMSYTELSE, SøknadMottakTjeneste.finnTjeneste(søknadMottakTjenester, FagsakYtelseType.UNGDOMSYTELSE));
-        this.søknadMottakTjenester.put(FagsakYtelseType.AKTIVITETSPENGER, SøknadMottakTjeneste.finnTjeneste(søknadMottakTjenester, FagsakYtelseType.AKTIVITETSPENGER));
     }
 
     @Override
@@ -86,7 +84,7 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
 
 
     void håndterStrukturertMelding(MottattMelding dataWrapper, FagsakYtelseType ytelseType, Optional<Periode> innsendtPeriode) {
-        SøknadMottakTjeneste søknadMottakTjeneste = søknadMottakTjenester.get(ytelseType);
+        SøknadMottakTjeneste søknadMottakTjeneste = SøknadMottakTjeneste.finnTjeneste(søknadMottakTjenester, ytelseType);
         Fagsak fagsak;
         if (innsendtPeriode.isEmpty()) {
             // TODO: Må sende med periode dersom vi skal støtte flere fagsaker for samme aktør

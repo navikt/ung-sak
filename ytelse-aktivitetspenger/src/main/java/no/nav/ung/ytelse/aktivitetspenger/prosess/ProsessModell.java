@@ -28,7 +28,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.VURDER_BOSTED)
-            .medSteg(BehandlingStegType.FAKTA_14A_VEDTAK)
+            .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);

@@ -77,6 +77,7 @@ public class AktivitetspengerDel1VilkårsPerioderTilVurderingTjeneste implements
 
     @Override
     public Set<VilkårType> definerendeVilkår() {
+        //FIXME AKT. Dette er sannsynligvis ikke riktig vilkår (spesielt ikke dersom vilkåret flyttes til del2)
         return Set.of(VilkårType.ALDERSVILKÅR);
     }
 

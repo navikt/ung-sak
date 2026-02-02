@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.del1.steg.vedtak14a;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.del1.steg.bistandsvilkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -12,18 +12,18 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 
 import java.util.List;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.FAKTA_14A_VEDTAK;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BISTANDSVILKÅR;
 
 @ApplicationScoped
-@BehandlingStegRef(value = FAKTA_14A_VEDTAK)
+@BehandlingStegRef(value = VURDER_BISTANDSVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class Fakta14ASteg implements BehandlingSteg {
+public class BistandsvilkårSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         //TODO ved avslag på foregående vilkår for alle perioder kan perioder settes til ikke vurdert
-        return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FAKTA_14A_VEDTAK));
+        return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR));
     }
 
 }
