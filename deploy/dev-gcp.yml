@@ -260,8 +260,11 @@ spec:
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "true"
+    - name: OPPGAVER_I_UNGSAK_ENABLED
+      value: "true"
 
-    # Konfigurasjoner
+
+      # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
       value: "false"
     - name: INNSENDING_HENDELSER_FORSINKELSE

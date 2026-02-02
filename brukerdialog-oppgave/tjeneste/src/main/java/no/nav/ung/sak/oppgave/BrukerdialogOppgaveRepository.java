@@ -1,12 +1,12 @@
 package no.nav.ung.sak.oppgave;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.TypedQuery;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,11 +16,15 @@ import java.util.UUID;
 @ApplicationScoped
 public class BrukerdialogOppgaveRepository {
 
-    @PersistenceContext
     private EntityManager entityManager;
 
     public BrukerdialogOppgaveRepository() {
         // CDI proxy
+    }
+
+    @Inject
+    public BrukerdialogOppgaveRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
     }
 
     public List<BrukerdialogOppgaveEntitet> hentAlleOppgaverForAktør(AktørId aktørId) {

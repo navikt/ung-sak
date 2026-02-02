@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -31,15 +32,15 @@ public class EndretPeriodeOppgaveOppretter {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EndretPeriodeOppgaveOppretter.class);
 
-    private final UngOppgaveKlient ungOppgaveKlient;
+    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final EtterlysningRepository etterlysningRepository;
 
     @Inject
-    public EndretPeriodeOppgaveOppretter(UngOppgaveKlient ungOppgaveKlient,
+    public EndretPeriodeOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
                                          UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                          EtterlysningRepository etterlysningRepository) {
-        this.ungOppgaveKlient = ungOppgaveKlient;
+        this.delegeringTjeneste = delegeringTjeneste;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.etterlysningRepository = etterlysningRepository;
     }
@@ -82,7 +83,7 @@ public class EndretPeriodeOppgaveOppretter {
                 endretStartDato.get().nyDatoOgGrunnlag(),
                 endretStartDato.get().forrigeDatoOgGrunnlag());
             var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDatoOgGrunnlag().dato(), endretStartDato.get().forrigeDatoOgGrunnlag().dato());
-            ungOppgaveKlient.opprettEndretStartdatoOppgave(oppgaveDto);
+            delegeringTjeneste.opprettEndretStartdatoOppgave(oppgaveDto);
         } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
             // ENDRING AV SLUTTDATO
             log.info("Fant kun endring i sluttdato for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}",
@@ -90,13 +91,13 @@ public class EndretPeriodeOppgaveOppretter {
                 endretStartDato.get().nyDatoOgGrunnlag(),
                 endretStartDato.get().forrigeDatoOgGrunnlag());
             var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDatoOgGrunnlag().dato(), endretSluttDato.get().forrigeDatoOgGrunnlag().dato());
-            ungOppgaveKlient.opprettEndretSluttdatoOppgave(oppgaveDto);
+            delegeringTjeneste.opprettEndretSluttdatoOppgave(oppgaveDto);
         } else if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
             // FJERNET PERIODE
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.FJERNET_PERIODE);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, null, forrigePeriode, endringer);
-            ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
+            delegeringTjeneste.opprettEndretPeriodeOppgave(oppgaveDto);
         } else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
             log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
                 etterlysning.getEksternReferanse(),
@@ -108,7 +109,7 @@ public class EndretPeriodeOppgaveOppretter {
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
             var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
-            ungOppgaveKlient.opprettEndretPeriodeOppgave(oppgaveDto);
+            delegeringTjeneste.opprettEndretPeriodeOppgave(oppgaveDto);
         } else {
             throw new IllegalStateException("Fant ingen endringer som kunne mappes til oppgave for etterlysning " + etterlysning.getEksternReferanse());
         }

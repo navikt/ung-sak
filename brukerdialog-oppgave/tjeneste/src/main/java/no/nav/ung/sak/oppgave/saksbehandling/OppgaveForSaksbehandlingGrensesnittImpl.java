@@ -3,6 +3,7 @@ package no.nav.ung.sak.oppgave.saksbehandling;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
@@ -12,9 +13,9 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoO
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.*;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveStatus;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
-import no.nav.ung.sak.oppgave.kontrakt.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
 import no.nav.ung.sak.oppgave.typer.endretperiode.EndretPeriodeOppgaveMapper;
 import no.nav.ung.sak.oppgave.typer.endretsluttdato.EndretSluttdatoOppgaveMapper;
 import no.nav.ung.sak.oppgave.typer.endretstartdato.EndretStartdatoOppgaveMapper;
@@ -42,17 +43,26 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     private BrukerdialogOppgaveRepository repository;
     private OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste;
     private Pdl pdl;
+    private boolean isEnabled;
 
     public OppgaveForSaksbehandlingGrensesnittImpl() {
         // CDI proxy
     }
 
     @Inject
-    public OppgaveForSaksbehandlingGrensesnittImpl(BrukerdialogOppgaveRepository repository, OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste,
-                                                   Pdl pdl) {
+    public OppgaveForSaksbehandlingGrensesnittImpl(BrukerdialogOppgaveRepository repository,
+                                                   OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste,
+                                                   Pdl pdl,
+                                                   @KonfigVerdi(value = "OPPGAVER_I_UNGSAK_ENABLED", defaultVerdi = "true") boolean oppgaverIUngsakEnabled) {
         this.repository = repository;
         this.oppgaveLivssyklusTjeneste = oppgaveLivssyklusTjeneste;
         this.pdl = pdl;
+        this.isEnabled = oppgaverIUngsakEnabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
     }
 
     @Override
