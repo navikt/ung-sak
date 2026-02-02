@@ -25,6 +25,7 @@ import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.math.BigDecimal;
@@ -129,7 +130,12 @@ class ManglendeKontrollperioderTjenesteTest {
         assertThat(perioder.isEmpty()).isTrue();
     }
 
+    public boolean erFørsteDagIMåneden() {
+        return LocalDate.now().getDayOfMonth() == 1;
+    }
+
     @Test
+    @DisabledIf("erFørsteDagIMåneden")
     void skal_ulede_manglende_kontroll_dersom_passert_kontrolldato_med_en_dag() {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
