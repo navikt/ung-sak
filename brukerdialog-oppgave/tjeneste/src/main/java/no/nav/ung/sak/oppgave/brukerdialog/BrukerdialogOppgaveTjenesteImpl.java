@@ -6,7 +6,7 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveMapper;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
-import no.nav.ung.sak.oppgave.kontrakt.BrukerdialogOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
 import no.nav.ung.sak.oppgave.saksbehandling.OppgaveForSaksbehandlingGrensesnittImpl;
 
 import java.util.List;

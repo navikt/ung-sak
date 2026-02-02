@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 import no.nav.ung.sak.JsonObjectMapper;
-import no.nav.ung.sak.oppgave.kontrakt.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
 
 @Converter
 public class OppgaveDataConverter implements AttributeConverter<OppgavetypeDataDTO, String> {

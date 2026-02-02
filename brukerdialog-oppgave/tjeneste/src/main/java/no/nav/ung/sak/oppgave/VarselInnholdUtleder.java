@@ -1,7 +1,7 @@
 package no.nav.ung.sak.oppgave;
 
 import jakarta.enterprise.inject.Instance;
-import no.nav.ung.sak.oppgave.kontrakt.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 
 public interface VarselInnholdUtleder {
 
