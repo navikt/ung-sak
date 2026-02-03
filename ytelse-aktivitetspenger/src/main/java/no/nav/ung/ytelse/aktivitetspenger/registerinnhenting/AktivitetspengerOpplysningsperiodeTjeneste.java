@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinnhenting;
+package no.nav.ung.ytelse.aktivitetspenger.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

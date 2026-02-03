@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.del1.steg.aldersvilkår;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.aldersvilkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -28,7 +28,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.ALDERSVILKÅRET;
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class VurderAldersvilkåretSteg implements BehandlingSteg {
 
-    private final VurderAldersVilkårTjeneste vurderAldersVilkårTjeneste = new VurderAldersVilkårTjeneste();
+    private final no.nav.ung.ytelse.aktivitetspenger.del1.steg.aldersvilkår.VurderAldersVilkårTjeneste vurderAldersVilkårTjeneste = new no.nav.ung.ytelse.aktivitetspenger.del1.steg.aldersvilkår.VurderAldersVilkårTjeneste();
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;

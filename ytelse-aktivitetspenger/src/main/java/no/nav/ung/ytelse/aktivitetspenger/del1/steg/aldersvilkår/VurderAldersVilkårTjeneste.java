@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.del1.steg.aldersvilkår;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.aldersvilkår;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;

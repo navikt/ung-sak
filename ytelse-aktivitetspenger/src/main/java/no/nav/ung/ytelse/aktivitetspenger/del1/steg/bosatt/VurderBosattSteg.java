@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.del1.steg.bosatt;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
@@ -18,14 +17,9 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.del1.steg.aldersvilkår.VurderAldersVilkårTjeneste;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.ALDERSVILKÅRET;
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTED;
 
 @ApplicationScoped

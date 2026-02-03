@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.del1;
+package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;

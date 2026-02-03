@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.del1.steg.bistandsvilkår;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
