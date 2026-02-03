@@ -14,7 +14,8 @@ import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.Aktivitetspeng
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
+import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.ytelse.aktivitetspenger.AktivitetspengerFagsakperiodeUtleder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,13 +25,13 @@ public class AktivitetspengerSøknadPersisterer {
 
     private final SøknadRepository søknadRepository;
     private final FagsakRepository fagsakRepository;
-    private final FagsakperiodeUtleder fagsakperiodeUtleder;
+    private final AktivitetspengerFagsakperiodeUtleder fagsakperiodeUtleder;
     private final AktivitetspengerSøktPeriodeRepository søktPeriodeRepository;
 
 
     @Inject
     public AktivitetspengerSøknadPersisterer(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository,
-                                             FagsakperiodeUtleder fagsakperiodeUtleder,
+                                             AktivitetspengerFagsakperiodeUtleder fagsakperiodeUtleder,
                                              AktivitetspengerSøktPeriodeRepository søktPeriodeRepository) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = fagsakRepository;
@@ -56,13 +57,8 @@ public class AktivitetspengerSøknadPersisterer {
         søktPeriodeRepository.lagreNyPeriode(søktPeriodeEntity);
     }
 
-
-    /** Utvider fagsakperiode i en eller begge ender fra fom og tom i oppgitt perioder dersom denne medfører en større periode.
-     * @param fom Fom-dato fra søknad
-     * @param behandling Ny behandling
-     */
-    public void oppdaterFagsakperiode(LocalDate fom, Behandling behandling) {
-        var nyPeriodeForFagsak = fagsakperiodeUtleder.utledNyPeriodeForFagsak(behandling, fom);
+    public void oppdaterFagsakperiode(Periode søknadsperiode, Behandling behandling) {
+        var nyPeriodeForFagsak = fagsakperiodeUtleder.utledNyPeriodeForFagsak(behandling, søknadsperiode);
         fagsakRepository.utvidPeriode(behandling.getFagsakId(), nyPeriodeForFagsak.getFomDato(), nyPeriodeForFagsak.getTomDato());
     }
 

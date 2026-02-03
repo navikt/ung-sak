@@ -3,7 +3,6 @@ package no.nav.ung.ytelse.aktivitetspenger.mottak;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Aktivitetspenger;
-import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
@@ -17,6 +16,7 @@ import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -61,7 +61,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             //TODO mulig søknad entitet bør utvides med tom dersom det blir fom/tom i søknaden
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
             søknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiode(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId);
-            søknadPersisterer.oppdaterFagsakperiode(ytelse.getSøknadsperiode().getFraOgMed(), behandling);
+            søknadPersisterer.oppdaterFagsakperiode(new Periode(ytelse.getSøknadsperiode().getFraOgMed(), ytelse.getSøknadsperiode().getTilOgMed()), behandling);
 
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandlingId, dokument.getJournalpostId());
         }

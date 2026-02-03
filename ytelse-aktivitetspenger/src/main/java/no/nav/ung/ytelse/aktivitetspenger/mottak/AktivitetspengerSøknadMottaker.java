@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @FagsakYtelseTypeRef(AKTIVITETSPENGER)
 @ApplicationScoped

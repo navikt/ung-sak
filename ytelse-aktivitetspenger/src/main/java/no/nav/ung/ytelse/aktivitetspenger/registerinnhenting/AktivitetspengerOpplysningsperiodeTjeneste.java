@@ -9,7 +9,6 @@ import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 @FagsakYtelseTypeRef(AKTIVITETSPENGER)
 @ApplicationScoped
