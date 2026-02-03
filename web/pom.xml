@@ -16,7 +16,7 @@
     <properties>
         <swagger-ui.version>5.31.0</swagger-ui.version>
         <jetty.version>12.1.5</jetty.version>
-        <metrics.version>4.2.37</metrics.version>
+        <metrics.version>4.2.38</metrics.version>
     </properties>
 
 
@@ -39,7 +39,7 @@
             <dependency>
                 <groupId>org.glassfish.jersey</groupId>
                 <artifactId>jersey-bom</artifactId>
-                <version>4.0.0</version>
+                <version>4.0.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
