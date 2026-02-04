@@ -106,7 +106,7 @@ class ForeslåVedtakTjeneste {
     }
 
     private void vurderBrev(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
-        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getType());
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getFagsakYtelseType(), behandling.getType());
         var totalResultat = vedtaksbrevRegler.kjør(behandling.getId());
 
         feilHvisIkkeImplementertBrev(aksjonspunktDefinisjoner, totalResultat);
