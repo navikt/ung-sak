@@ -192,6 +192,10 @@ spec:
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
+    - name: UNG_TILBAKE_SCOPE
+      value: api://dev-gcp.k9saksbehandling.ung-tilbake/.default
+    - name: UNG_TILBAKE_URL
+      value: http://ung-tilbake/ung/tilbake/api
     - name: SIF_ABAC_PDP_SCOPE
       value: api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
     - name: SIF_ABAC_PDP_URL

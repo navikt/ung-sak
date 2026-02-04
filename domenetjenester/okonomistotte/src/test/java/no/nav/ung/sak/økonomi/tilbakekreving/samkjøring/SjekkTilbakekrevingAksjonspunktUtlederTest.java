@@ -17,12 +17,12 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 
 class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     private SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste;
-    private K9TilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient ungTilbakeRestKlient;
     private SjekkTilbakekrevingAksjonspunktUtleder utleder;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private LocalDate _2022_jan_01 = LocalDate.of(2022, 1, 1);
@@ -34,14 +34,14 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     public SjekkTilbakekrevingAksjonspunktUtlederTest() {
         sjekkEndringUtbetalingTilBrukerTjeneste = Mockito.mock(SjekkEndringUtbetalingTilBrukerTjeneste.class);
-        k9TilbakeRestKlient = Mockito.mock(K9TilbakeRestKlient.class);
+        ungTilbakeRestKlient = Mockito.mock(UngTilbakeRestKlient.class);
         simuleringIntegrasjonTjeneste = Mockito.mock(SimuleringIntegrasjonTjeneste.class);
-        utleder = new SjekkTilbakekrevingAksjonspunktUtleder(sjekkEndringUtbetalingTilBrukerTjeneste, k9TilbakeRestKlient, simuleringIntegrasjonTjeneste);
+        utleder = new SjekkTilbakekrevingAksjonspunktUtleder(sjekkEndringUtbetalingTilBrukerTjeneste, ungTilbakeRestKlient, simuleringIntegrasjonTjeneste);
     }
 
     @Test
     void skal_ha_aksjonspunkt_når_det_er_endring_til_bruker_og_åpen_tilbakekreving_som_overlapper_med_endringene() {
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2023_jan_01, _2023_jan_01))))
         );
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
@@ -53,7 +53,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     @Test
     void skal_ha_aksjonspunkt_når_det_er_endring_til_bruker_og_åpen_tilbakekreving_i_intilliggende_måned() {
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2023_feb_15, _2023_feb_15))))
         );
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
@@ -66,7 +66,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
     @Test
     void skal_ikke_ha_aksjonspunkt_når_det_er_endring_til_bruker_og_åpen_tilbakekreving_ikke_overlapper_med_endringene() {
 
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2022_jan_01, _2022_jan_12))))
         );
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
@@ -78,7 +78,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     @Test
     void skal_ikke_ha_aksjonspunkt_når_det_er_endring_til_bruker_og_lukket_tilbakekreving() {
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(LocalDate.now(), List.of(new Periode(_2022_jan_01, _2022_jan_12))))
         );
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
@@ -90,7 +90,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     @Test
     void skal_ikke_ha_aksjonspunkt_når_det_ikke_er_endring_til_bruker() {
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(LocalDate.now(), List.of(new Periode(LocalDate.of(2022, 1, 1), LocalDate.of(2022, 1, 12)))))
         );
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(
@@ -102,7 +102,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     @Test
     void skal_ha_aksjonspunkt_når_det_er_tilbakekrevingsbehandling_og_økning_av_feilutbetalt_beløp() {
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2023_feb_15, _2023_feb_15))))
         );
         boolean slåttAvInntrekk = false;
@@ -121,7 +121,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     @Test
     void skal_ha_aksjonspunkt_når_det_er_tilbakekrevingsbehandling_og_inntrekk() {
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.of(new BehandlingStatusOgFeilutbetalinger(null, List.of(new Periode(_2023_feb_15, _2023_feb_15))))
         );
         boolean slåttAvInntrekk = false;
@@ -140,7 +140,7 @@ class SjekkTilbakekrevingAksjonspunktUtlederTest {
 
     @Test
     void skal_ikke_ha_aksjonspunkt_når_det_ikke_er_tilbakekrevingsbehandling() {
-        Mockito.when(k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
+        Mockito.when(ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(behandling.getFagsak().getSaksnummer())).thenReturn(
             Optional.empty()
         );
         Mockito.when(sjekkEndringUtbetalingTilBrukerTjeneste.endringerUtbetalingTilBruker(behandling)).thenReturn(

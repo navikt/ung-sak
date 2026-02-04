@@ -4,6 +4,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import org.apache.http.client.utils.URIBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,35 +21,35 @@ import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
 
 @Dependent
-@ScopedRestIntegration(scopeKey = "k9.tilbake.scope", defaultScope = "api://prod-fss.k9saksbehandling.k9-tilbake/.default")
-public class K9TilbakeRestKlient {
+@ScopedRestIntegration(scopeKey = "ung.tilbake.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-tilbake/.default")
+public class UngTilbakeRestKlient {
 
-    private static final Logger log = LoggerFactory.getLogger(K9TilbakeRestKlient.class);
+    private static final Logger log = LoggerFactory.getLogger(UngTilbakeRestKlient.class);
 
     private OidcRestClient restClient;
     private URI uriHarÅpenTilbakekrevingsbehandling;
     private URI uriFeilutbetalingerSisteBehandling;
     private URI uriOppdaterAktørId;
-    private boolean k9tilbakeAktivert;
+    private boolean ungTilbakeAktivert;
 
-    K9TilbakeRestKlient() {
+    UngTilbakeRestKlient() {
         // for CDI proxy
     }
 
     @Inject
-    public K9TilbakeRestKlient(OidcRestClient restClient,
-                               @KonfigVerdi(value = "k9.tilbake.direkte.url", defaultVerdi = "http://k9-tilbake/k9/tilbake/api") String urlK9Tilbake) {
+    public UngTilbakeRestKlient(OidcRestClient restClient,
+                                @KonfigVerdi(value = "ung.tilbake.url", defaultVerdi = "http://ung-tilbake/ung/tilbake/api") String urlUngTilbake) {
 
         this.restClient = restClient;
-        this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlK9Tilbake, "behandlinger/tilbakekreving/aapen");
-        this.uriFeilutbetalingerSisteBehandling = tilUri(urlK9Tilbake, "feilutbetaling/siste-behandling");
-        this.uriOppdaterAktørId = tilUri(urlK9Tilbake, "forvaltning/aktør/oppdaterAktoerId");
-        this.k9tilbakeAktivert = false; //FIXME integrer mot tilbakekrevingsløsning
+        this.uriHarÅpenTilbakekrevingsbehandling = tilUri(urlUngTilbake, "behandlinger/tilbakekreving/aapen");
+        this.uriFeilutbetalingerSisteBehandling = tilUri(urlUngTilbake, "feilutbetaling/siste-behandling");
+        this.uriOppdaterAktørId = tilUri(urlUngTilbake, "forvaltning/aktør/oppdaterAktoerId");
+        this.ungTilbakeAktivert = !Environment.current().isLocal(); //i praksis mocker bort ung-tilbake ved kjøring lokalt og i verdikjedetester.
     }
 
     public boolean harÅpenTilbakekrevingsbehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriHarÅpenTilbakekrevingsbehandling, "saksnummer", saksnummer.getVerdi());
-        if (k9tilbakeAktivert) {
+        if (ungTilbakeAktivert) {
             return restClient.get(uri, Boolean.class);
         } else {
             log.info("integrasjon mot tilbakekrevingsløsningen er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
@@ -58,7 +59,7 @@ public class K9TilbakeRestKlient {
 
     public Optional<BehandlingStatusOgFeilutbetalinger> hentFeilutbetalingerForSisteBehandling(Saksnummer saksnummer) {
         URI uri = leggTilParameter(uriFeilutbetalingerSisteBehandling, "saksnummer", saksnummer.getVerdi());
-        if (k9tilbakeAktivert) {
+        if (ungTilbakeAktivert) {
             return restClient.getReturnsOptional(uri, BehandlingStatusOgFeilutbetalinger.class);
         } else {
             log.info("integrasjon mot tilbakekrevingsløsningen er ikke aktivert - antar at sak {} ikke har tilbakekrevingsbehandling", saksnummer);
@@ -82,7 +83,7 @@ public class K9TilbakeRestKlient {
         try {
             return new URI(baseUrl + "/" + path);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Ugyldig konfigurasjon for URL_K9TILBAKE", e);
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for ung.tilbake.url eller UNG_TILBAKE_URL", e);
         }
     }
 
