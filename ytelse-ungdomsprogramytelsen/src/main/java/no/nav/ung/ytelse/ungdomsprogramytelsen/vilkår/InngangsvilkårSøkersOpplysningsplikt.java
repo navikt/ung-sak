@@ -1,4 +1,4 @@
-package no.nav.ung.sak.inngangsvilkår.søknad;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår;
 
 import java.util.Collection;
 import java.util.Collections;

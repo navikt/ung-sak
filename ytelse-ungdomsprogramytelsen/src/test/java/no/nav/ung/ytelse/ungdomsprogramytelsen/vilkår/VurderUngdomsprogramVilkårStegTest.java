@@ -1,4 +1,4 @@
-package no.nav.ung.sak.inngangsvilkår.ungdomsprogram;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -26,6 +26,7 @@ import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.ungdomsprogram.VurderUngdomsprogramVilkårSteg;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

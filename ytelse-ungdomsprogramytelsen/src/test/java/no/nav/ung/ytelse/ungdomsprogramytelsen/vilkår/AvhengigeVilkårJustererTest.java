@@ -1,4 +1,4 @@
-package no.nav.ung.sak.inngangsvilkår.ungdomsprogram;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.*;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.ungdomsprogram.AvhengigeVilkårJusterer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

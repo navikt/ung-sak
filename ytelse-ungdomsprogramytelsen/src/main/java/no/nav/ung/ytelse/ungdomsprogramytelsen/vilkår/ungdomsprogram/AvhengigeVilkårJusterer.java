@@ -1,4 +1,4 @@
-package no.nav.ung.sak.inngangsvilkår.ungdomsprogram;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.ungdomsprogram;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;

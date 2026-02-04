@@ -1,4 +1,4 @@
-package no.nav.ung.sak.inngangsvilkår.alder;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.alder;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
