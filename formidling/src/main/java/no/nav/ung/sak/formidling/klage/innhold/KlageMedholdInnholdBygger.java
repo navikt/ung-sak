@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.MarkdownParser;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.template.dto.KlageMedholdDto;
@@ -39,7 +40,7 @@ public class KlageMedholdInnholdBygger implements VedtaksbrevInnholdBygger {
         return new TemplateInnholdResultat(TemplateType.KLAGE_MEDHOLD,
             new KlageMedholdDto(
                 harDelvisMedhold,
-                fritekst,
+                MarkdownParser.markdownTilHtml(fritekst),
                 true
             )
         );
