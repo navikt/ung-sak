@@ -6,8 +6,8 @@ import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.VedtaksbrevVerifikasjon;
 import no.nav.ung.sak.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.formidling.scenarioer.KlageScenarioer;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.UngKlageTestScenario;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngKlageTestScenario;
 import org.junit.jupiter.api.Test;
 
 import static no.nav.ung.sak.formidling.HtmlAssert.assertThatHtml;

@@ -1,12 +1,16 @@
-package no.nav.ung.sak.hendelsemottak.tjenester;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.hendelsehåndtering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
+import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
+import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
@@ -49,7 +53,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         var fagsaker = new HashMap<Fagsak, List<ÅrsakOgPerioder>>();
 
         for (AktørId aktør : aktører) {
-            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, opphørsdatoFraHendelse);
+            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, opphørsdatoFraHendelse);
             if (relevantFagsak.isEmpty()) {
                 continue;
             }

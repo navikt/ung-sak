@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.*;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.ungdomsprogram.AvhengigeVilkårJusterer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

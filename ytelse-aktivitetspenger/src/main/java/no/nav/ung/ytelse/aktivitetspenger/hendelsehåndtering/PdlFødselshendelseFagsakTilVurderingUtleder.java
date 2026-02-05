@@ -1,9 +1,17 @@
-package no.nav.ung.sak.hendelsemottak.tjenester;
+package no.nav.ung.ytelse.aktivitetspenger.hendelsehåndtering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.*;
+import no.nav.k9.felles.integrasjon.pdl.Behandlingsnummer;
+import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
+import no.nav.k9.felles.integrasjon.pdl.FoedselsdatoResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
+import no.nav.k9.felles.integrasjon.pdl.Person;
+import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
@@ -11,10 +19,12 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
+import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
+import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.slf4j.Logger;
@@ -22,7 +32,12 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @ApplicationScoped
 @HendelseTypeRef("PDL_FORELDERBARNRELASJON")
@@ -30,7 +45,6 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
 
     private static final Logger logger = LoggerFactory.getLogger(PdlFødselshendelseFagsakTilVurderingUtleder.class);
     private BehandlingRepository behandlingRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
     private PersonopplysningRepository personopplysningRepository;
     private Pdl pdlKlient;
@@ -41,12 +55,10 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
 
     @Inject
     public PdlFødselshendelseFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
-                                                       UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                                        FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
                                                        PersonopplysningRepository personopplysningRepository,
                                                        Pdl pdlKlient) {
         this.behandlingRepository = behandlingRepository;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
         this.personopplysningRepository = personopplysningRepository;
         this.pdlKlient = pdlKlient;
@@ -83,11 +95,10 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
         var fagsakÅrsakMap = new HashMap<Fagsak, List<ÅrsakOgPerioder>>();
 
         for (AktørId aktør : forelderAktørIder) {
-            Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
+            Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.AKTIVITETSPENGER, aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
-                //FIXME AKT. Er man på aktivitetspenger vil man ikke også være i ungdomsprogrammet, så dette fungerer ikke for AKT
-                    if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktørIdBarn.get(), aktuellDato, hendelseId)) {
+                    if (erNyInformasjonIHendelsen(f, aktørIdBarn.get(), aktuellDato, hendelseId)) {
                         ÅrsakOgPerioder årsakOgPerioder = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato()));
                         fagsakÅrsakMap.put(f,
                             List.of(årsakOgPerioder));
@@ -138,25 +149,6 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
                     .minRolleForPerson()
             );
         return pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
-    }
-
-    private boolean deltarIProgramPåHendelsedato(Fagsak fagsak, LocalDate relevantDato, String hendelseId) {
-        Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
-        if (behandlingOpt.isEmpty()) {
-            logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
-            return false;
-        }
-
-        Behandling behandling = behandlingOpt.get();
-        var periodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
-        if (periodeGrunnlag.isPresent()) {
-            var harIngenPerioderEtterHendelseDato = periodeGrunnlag.get().getUngdomsprogramPerioder().getPerioder().stream().noneMatch(p -> p.getPeriode().getTomDato().isAfter(relevantDato));
-            if (harIngenPerioderEtterHendelseDato) {
-                logger.info("Datagrunnlag på behandling {} for {} hadde ingen perioder med ungdomsprogram etter hendelsedato. Trigget av hendelse {}.", behandling.getUuid(), fagsak.getSaksnummer(), hendelseId);
-                return false;
-            }
-        }
-        return true;
     }
 
     private LocalDate finnAktuellDato(Person personFraPdl) {

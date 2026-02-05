@@ -7,7 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.test.util.behandling.UngTestScenario;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
 
 import java.time.LocalDate;
