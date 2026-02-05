@@ -22,6 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.Set;
 
 import static no.nav.k9.felles.sikkerhet.abac.PepImpl.ENV;
 
@@ -34,7 +35,7 @@ public class JournalHendelseStream implements KafkaIntegration {
     private static final Logger LOG = LoggerFactory.getLogger(JournalHendelseStream.class);
     private static final String HENDELSE_MOTTATT = "JournalpostMottatt";
     private static final String HENDELSE_ENDRET = "TemaEndret";
-    private static final String TEMA_UNG = OmrådeTema.UNG.getOffisiellKode();
+
     private final boolean isDeployment = ENV.isProd() || ENV.isDev();
 
     private KafkaStreams stream;
@@ -45,21 +46,26 @@ public class JournalHendelseStream implements KafkaIntegration {
 
     @Inject
     public JournalHendelseStream(@KonfigVerdi(value = "kafka.journal.topic") String topicName,
+                                 @KonfigVerdi(value = "aktivitetspenger.enabled", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled,
                                  JournalføringHendelseHåndterer journalføringHendelseHåndterer,
                                  AivenKafkaSettings kafkaSettings) {
         Serde<JournalfoeringHendelseRecord> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new VtpJournalføringshendelserKafkaAvroSerde<>();
         this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), valueSerde);
-        this.stream = createKafkaStreams(topic, journalføringHendelseHåndterer, kafkaSettings);
+        this.stream = createKafkaStreams(topic, journalføringHendelseHåndterer, kafkaSettings, aktivitetspengerEnabled);
     }
 
 
     @SuppressWarnings("resource")
     private static KafkaStreams createKafkaStreams(Topic<String, JournalfoeringHendelseRecord> topic,
                                                    JournalføringHendelseHåndterer journalføringHendelseHåndterer,
-                                                   AivenKafkaSettings kafkaSettings) {
+                                                   AivenKafkaSettings kafkaSettings, boolean aktivitetspengerEnabled) {
 
         Serde<String> serdeKey = topic.getSerdeKey();
         Serde<JournalfoeringHendelseRecord> serdeValue = topic.getSerdeValue();
+
+
+        //FIXME AKT legge til tema for aktivitetspenger
+        Set<String> aktuelleTemaOffisielleKoder = Set.of(OmrådeTema.UNG.getOffisiellKode());
 
         final Consumed<String, JournalfoeringHendelseRecord> consumed = Consumed
             // Ved tap av offset spilles på nytt, 7 dager retention - anses som akseptabelt
@@ -69,13 +75,15 @@ public class JournalHendelseStream implements KafkaIntegration {
 
         final StreamsBuilder builder = new StreamsBuilder();
         builder.stream(topic.getTopic(), consumed)
-            .filter((key, value) -> TEMA_UNG.equals(value.getTemaNytt()))
+            .filter((key, value) -> aktuelleTemaOffisielleKoder.contains(value.getTemaNytt()))
             .filter((key, value) -> hendelseSkalHåndteres(value))
             .foreach(journalføringHendelseHåndterer::handleMessage);
 
         var kafkaProperties = kafkaSettings.toStreamPropertiesWith(topic.getConsumerClientId(), serdeKey, serdeValue);
         return new KafkaStreams(builder.build(), kafkaProperties);
     }
+
+
 
     private static boolean hendelseSkalHåndteres(JournalfoeringHendelseRecord payload) {
         var hendelse = payload.getHendelsesType();

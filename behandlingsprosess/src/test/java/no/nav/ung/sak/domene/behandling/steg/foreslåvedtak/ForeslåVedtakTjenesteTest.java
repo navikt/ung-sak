@@ -86,7 +86,7 @@ public class ForeslåVedtakTjenesteTest {
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     @Mock
-    private VedtaksbrevReglerUng vedtaksbrevRegler;
+    private VedtaksbrevRegel vedtaksbrevRegler;
 
     private Behandling behandling;
 

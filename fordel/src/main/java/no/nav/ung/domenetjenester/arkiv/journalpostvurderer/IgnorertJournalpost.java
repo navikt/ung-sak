@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.StrukturertJournalpost.GODKJENTE_KODER;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
 import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
 
@@ -56,10 +55,5 @@ public class IgnorertJournalpost implements Journalpostvurderer {
         boolean hendelsetypeErMottatt = hendelsetype.isPresent() && hendelsetype.get() == JournalføringHendelsetype.MOTTATT;
         boolean erJournalførtEllerFerdigstilt = Journalstatus.JOURNALFOERT.equals(journalstatus ) || Journalstatus.FERDIGSTILT.equals(journalstatus);
         return hendelsetypeErMottatt && erJournalførtEllerFerdigstilt;
-    }
-
-    private boolean ignorer(Vurderingsgrunnlag vurderingsgrunnlag) {
-        var brevkode = vurderingsgrunnlag.journalpostInfo().getBrevkode();
-        return brevkode == null || !GODKJENTE_KODER.contains(brevkode);
     }
 }
