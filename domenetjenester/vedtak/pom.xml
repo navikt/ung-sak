@@ -35,7 +35,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>formidling-felles</artifactId>
+            <artifactId>formidling</artifactId>
         </dependency>
 
 		<!-- Prosjektinterne avhengigheter -->

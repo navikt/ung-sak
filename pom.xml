@@ -16,7 +16,7 @@
         <module>behandlingslager</module>
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
-        <module>formidling-felles</module>
+        <module>formidling</module>
         <module>fordel</module>
         <module>klage</module>
         <module>ytelse-ungdomsprogramytelsen</module>
@@ -397,7 +397,7 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>formidling-felles</artifactId>
+                <artifactId>formidling</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

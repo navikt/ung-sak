@@ -21,7 +21,7 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>formidling-felles</artifactId>
+            <artifactId>formidling</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
@@ -85,7 +85,7 @@
                             <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>../formidling-felles/src/main/resources/pdfgen</directory>
+                                    <directory>../formidling/src/main/resources/pdfgen</directory>
                                     <includes>
                                         <include>**/*</include>
                                     </includes>
