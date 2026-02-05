@@ -1,8 +1,6 @@
 package no.nav.ung.domenetjenester.sak;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

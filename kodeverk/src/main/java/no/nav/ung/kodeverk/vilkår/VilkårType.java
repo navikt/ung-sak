@@ -9,16 +9,21 @@ import java.util.*;
 public enum VilkårType implements Kodeverdi {
     ALDERSVILKÅR("UNG_VK_1",
         "Aldersvilkåret",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jamfør 3 bokstav a"),
+        Map.of(
+            FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jamfør 3 bokstav a",
+            FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER,
         Avslagsårsak.SØKER_UNDER_MINSTE_ALDER),
     SØKNADSFRIST("UNG_VK_3",
         "Søknadsfristvilkåret",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, ""), // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
+        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "", // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
+            FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
         Avslagsårsak.SØKT_FOR_SENT),
     SØKERSOPPLYSNINGSPLIKT("UNG_VK_4",
         "Søkers opplysningsplikt",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 4"),
+        Map.of(
+            FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 4",
+            FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
         Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     UNGDOMSPROGRAMVILKÅRET(
         "UNG_VK_2",
@@ -27,12 +32,23 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.ENDRET_STARTDATO_UNGDOMSPROGRAM,
         Avslagsårsak.OPPHØRT_UNGDOMSPROGRAM
     ),
+    BOSTEDSVILKÅR(
+        "AKT_VK_1",
+        "Bostedsvilkåret",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED
+    ),
+    BISTANDSVILKÅR(
+        "AKT_VK_2",
+        "Bistandsvilkåret",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Avslagsårsak.IKKE_14A_VEDTAK
+    ),
+
     /**
      * Brukes i stedet for null der det er optional.
      */
-    UDEFINERT("-", "Ikke definert", Map.of()),
-
-    ;
+    UDEFINERT("-","Ikke definert",Map.of()),;
 
     public static final String KODEVERK = "VILKAR_TYPE";
     private static final Map<String, VilkårType> KODER = new LinkedHashMap<>();
@@ -134,4 +150,4 @@ public enum VilkårType implements Kodeverdi {
         return getKode();
     }
 
-}
+    }

@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
@@ -29,7 +30,6 @@ import java.time.YearMonth;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,7 +52,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     public static final String OPPGAVE_REF = "oppgave_ref";
 
     private PersoninfoAdapter personinfoAdapter;
-    private UngOppgaveKlient ungOppgaveKlient;
+    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
@@ -64,14 +64,14 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
 
     @Inject
     public OpprettOppgaveForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
-                                                     UngOppgaveKlient ungOppgaveKlient,
+                                                     MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
                                                      FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                                      @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
 
         this.personinfoAdapter = personinfoAdapter;
-        this.ungOppgaveKlient = ungOppgaveKlient;
+        this.delegeringTjeneste = delegeringTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
@@ -90,7 +90,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(aktørId, fom, tom);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         ZonedDateTime nesteKontrollTidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
-        ungOppgaveKlient.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
+        delegeringTjeneste.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
             deltakerIdent.getIdent(),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
             nesteKontrollTidspunkt.toLocalDateTime().toLocalDate().atStartOfDay(),
@@ -116,7 +116,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         var fagsak = fagsaker.get(0);
 
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalStateException("Fant ikke behandling"));
-        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.periodiserMånedsvis(sisteBehandling.getId());
+        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
         LocalDateInterval månedForRapportering = new LocalDateInterval(fom, tom);
         return overlapperPeriodeDelvisMedProgramtidslinje(månedForRapportering, månedsvisTidslinje);
     }

@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.formidling.bestilling;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 
 import java.util.Objects;
 import java.util.UUID;

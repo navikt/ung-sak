@@ -5,10 +5,20 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.temporal.TemporalAdjusters;
+import java.util.UUID;
 
 import jakarta.inject.Inject;
 
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +77,7 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
 
     private Long behandlingId;
+    private EtterlysningRepository etterlysningRepository;
 
     @BeforeEach
     public void setUp() {
@@ -78,10 +89,12 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
 
         BehandlingskontrollTjenesteImpl behandlingskontrollTjenesteImpl = new BehandlingskontrollTjenesteImpl(behandlingskontrollServiceProvider);
 
+        etterlysningRepository = new EtterlysningRepository(repositoryProvider.getEntityManager());
         behandlingsutredningApplikasjonTjeneste = new BehandlingsutredningApplikasjonTjeneste(
             Period.parse("P4W"),
             repositoryProvider,
             oppgaveTjenesteMock,
+            etterlysningRepository,
             behandlendeEnhetTjeneste,
             sjekkProsessering,
             behandlingskontrollTjenesteImpl);
@@ -112,6 +125,30 @@ public class BehandlingsutredningApplikasjonTjenesteImplTest {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         assertThat(behandling.getFristDatoBehandlingPåVent()).isEqualTo(toUkerFrem);
         assertThat(behandling.getVenteårsak()).isEqualTo(Venteårsak.VENTER_SVAR_TEAMS);
+    }
+
+    @Test
+    public void skal_oppdatere_ventefrist_ved_endring_av_etterlysning() {
+        // Arrange
+        var gammelFrist = LocalDateTime.now();
+        var nyFrist = gammelFrist.plusWeeks(2);
+        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(gammelFrist.toLocalDate().minusMonths(1).withDayOfMonth(1), gammelFrist.toLocalDate().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
+        Etterlysning etterlysning = new Etterlysning(behandlingId, UUID.randomUUID(), UUID.randomUUID(), periode, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT, EtterlysningStatus.OPPRETTET);
+        etterlysning.vent(nyFrist);
+        etterlysningRepository.lagre(etterlysning);
+
+        AksjonspunktKontrollRepository aksjonspunktKontrollRepository = behandlingskontrollServiceProvider.getAksjonspunktKontrollRepository();
+        aksjonspunktKontrollRepository.settBehandlingPåVent(behandlingRepository.hentBehandling(behandlingId), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT.tilAutopunktDefinisjon(),
+            BehandlingStegType.VURDER_KOMPLETTHET, gammelFrist, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT.mapTilVenteårsak(), null);
+
+
+        // Act
+        behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+
+        // Assert
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        assertThat(behandling.getFristDatoBehandlingPåVent()).isEqualTo(nyFrist.toLocalDate());
+        assertThat(behandling.getVenteårsak()).isEqualTo(EtterlysningType.UTTALELSE_KONTROLL_INNTEKT.mapTilVenteårsak());
     }
 
     @Test

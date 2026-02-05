@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
 
 public class VurdertSøktPeriode<T extends SøktPeriodeData> {

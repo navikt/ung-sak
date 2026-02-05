@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -14,11 +15,9 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
-import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -71,12 +70,12 @@ class VurderKompletthetStegImplTest {
 
         rapporteringsfristAutopunktUtleder = mock(RapporteringsfristAutopunktUtleder.class);
         when(rapporteringsfristAutopunktUtleder.utledAutopunktForRapporteringsfrist(any())).thenReturn(Optional.empty());
-        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository, behandlingRepository,
-            mock(KontrollerInntektEtterlysningOppretter.class),
-            mock(ProgramperiodeendringEtterlysningTjeneste.class),
+        vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository,
+            behandlingRepository,
             mock(InntektAbonnentTjeneste.class),
             rapporteringsfristAutopunktUtleder,
             relevanteKontrollperioderUtleder,
+            new UnitTestLookupInstanceImpl<>(mock(EtterlysningOppretter.class)),
             "P14D",
             false
         );

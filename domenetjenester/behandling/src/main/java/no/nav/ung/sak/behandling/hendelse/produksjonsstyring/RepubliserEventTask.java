@@ -24,8 +24,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapperKodeverdiSomStringSerializer;
+import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.kodeverk.JsonObjectMapperKodeverdiSomStringSerializer;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingProsessHendelse;
 
 /**

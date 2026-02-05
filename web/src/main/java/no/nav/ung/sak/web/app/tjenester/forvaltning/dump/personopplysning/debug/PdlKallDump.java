@@ -27,7 +27,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInforma
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.domene.registerinnhenting.OpplysningsperiodeTjeneste;
 import no.nav.ung.sak.domene.registerinnhenting.YtelsesspesifikkRelasjonsFilter;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.ContainerContextRunner;

@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.part.PartEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;

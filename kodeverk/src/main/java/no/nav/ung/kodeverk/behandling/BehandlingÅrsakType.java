@@ -11,6 +11,7 @@ import java.util.Set;
 public enum BehandlingÅrsakType implements Kodeverdi {
 
     NY_SØKT_PROGRAM_PERIODE("RE-END-FRA-BRUKER", "Endring fra deltaker"),
+    NY_SØKT_AKTIVITETSPENGER_PERIODE("RE-END-FRA-BRUKER-AKT", "Endring fra søker"),
     RE_ANNET("RE-ANNET", "Annet"),
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),
     RE_SATS_ENDRING("RE-SATS-ENDRING", "Generelle endringer som påvirker sats og barnetillegg"),
@@ -116,7 +117,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     }
 
     public static Set<BehandlingÅrsakType> årsakerForInnhentingAvProgramperiode() {
-        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM);
     }
 
     public static Set<BehandlingÅrsakType> årsakerForInnhentingAvPersonopplysninger() {

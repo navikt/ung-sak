@@ -21,7 +21,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.DumpOutput;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;

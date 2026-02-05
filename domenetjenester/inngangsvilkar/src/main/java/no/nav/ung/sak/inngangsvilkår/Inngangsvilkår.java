@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.NavigableMap;
 
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public interface Inngangsvilkår {
 

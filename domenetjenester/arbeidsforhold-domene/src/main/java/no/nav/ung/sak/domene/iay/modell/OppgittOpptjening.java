@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.typer.JournalpostId;
 
 public class OppgittOpptjening {

@@ -12,11 +12,11 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
+import no.nav.ung.sak.tid.KantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.ungdomsprogram.forbruktedager.VurderAntallDagerResultat;
 
@@ -24,7 +24,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 @Dependent
 public class UngdomsprogramPeriodeTjeneste {
@@ -44,6 +43,12 @@ public class UngdomsprogramPeriodeTjeneste {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
         return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
     }
+
+    public LocalDateTimeline<Boolean> finnInitiellPeriodeTidslinje(Long behandlingId) {
+        var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingId);
+        return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
+    }
+
 
     @WithSpan
     public VurderAntallDagerResultat finnVirkedagerTidslinje(Long behandlingId) {
@@ -82,22 +87,6 @@ public class UngdomsprogramPeriodeTjeneste {
         return finnEndretStartdatoer(ungdomsprogramPeriodeGrunnlag.get(), originaltGrunnlag.get());
     }
 
-
-
-    public static List<EndretDato> finnEndretStartdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
-        // Støtter kun en periode her foreløpig
-        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
-        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
-        var andreStartdato = andrePeriode.getFomDato();
-        var førsteStartdato = førstePeriode.getFomDato();
-
-        if (andreStartdato.equals(førsteStartdato)) {
-            return List.of();
-        }
-
-        return List.of(new EndretDato(andreStartdato, førsteStartdato));
-    }
-
     public static List<EndretDato> finnEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
         // Støtter kun en periode her foreløpig
         var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
@@ -112,12 +101,45 @@ public class UngdomsprogramPeriodeTjeneste {
         return List.of(new EndretDato(gjeldendeDato, oppgittStartdato));
     }
 
+    public static List<EndretDato> finnEndretStartdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
+        // Støtter kun en eller ingen periode her foreløpig
+        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        if (andrePeriode.isEmpty() || førstePeriode.isEmpty()) {
+            return List.of();
+        }
+        var andreStartdato = andrePeriode.get().getFomDato();
+        var førsteStartdato = førstePeriode.get().getFomDato();
+
+        if (andreStartdato.equals(førsteStartdato)) {
+            return List.of();
+        }
+
+        return List.of(new EndretDato(andreStartdato, førsteStartdato));
+    }
+
+    public static boolean harEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
+        // Støtter kun en eller ingen periode her foreløpig
+        var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        if (gjelendePeriode.isEmpty()) {
+            return true;
+        }
+        var gjeldendeDato = gjelendePeriode.get().getFomDato();
+        var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer).map(UngdomsytelseStartdatoer::getStartdatoer)
+            .orElse(Set.of())
+            .iterator().next().getStartdato();
+        return !gjeldendeDato.equals(oppgittStartdato);
+    }
+
     public static List<EndretDato> finnEndretSluttdatoer(UngdomsprogramPeriodeGrunnlag andreGrunnlag, UngdomsprogramPeriodeGrunnlag førsteGrunnlag) {
-        // Støtter kun en periode her foreløpig
-        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriode();
-        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriode();
-        var andreSluttdato = andrePeriode.getTomDato();
-        var førsteSluttdato = førstePeriode.getTomDato();
+        // Støtter kun en eller ingen periode her foreløpig
+        var andrePeriode = andreGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        var førstePeriode = førsteGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
+        if (andrePeriode.isEmpty() || førstePeriode.isEmpty()) {
+            return List.of();
+        }
+        var andreSluttdato = andrePeriode.get().getTomDato();
+        var førsteSluttdato = førstePeriode.get().getTomDato();
 
         if (andreSluttdato.equals(førsteSluttdato)) {
             return List.of();
@@ -144,7 +166,10 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
     public static LocalDateSegment<Boolean> erEndret(LocalDateInterval di, LocalDateSegment<Boolean> lhs, LocalDateSegment<Boolean> rhs) {
-        return new LocalDateSegment<>(di, lhs == null || rhs == null || !lhs.getValue().equals(rhs.getValue()));
+        return new LocalDateSegment<>(di,
+            lhs == null && rhs != null ||
+                rhs == null && lhs != null ||
+                rhs != null && !lhs.getValue().equals(rhs.getValue()));
     }
 
 

@@ -14,8 +14,8 @@ import jakarta.persistence.Table;
 
 import org.hibernate.annotations.Immutable;
 
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
 
 @Entity(name = "ProsessTriggere")
 @Table(name = "PROSESS_TRIGGERE")

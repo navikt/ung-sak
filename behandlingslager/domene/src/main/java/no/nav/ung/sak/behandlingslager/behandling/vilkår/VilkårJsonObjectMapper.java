@@ -8,7 +8,7 @@ import java.net.URL;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 
 /**
  * Håndterer serialisering/deserialisering av data strukturre til json for vilkår.

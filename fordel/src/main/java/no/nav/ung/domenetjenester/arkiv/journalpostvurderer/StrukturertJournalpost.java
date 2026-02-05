@@ -24,11 +24,7 @@ import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJourna
 public class StrukturertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(StrukturertJournalpost.class);
-    public static final Set<String> GODKJENTE_KODER = Set.of(
-        Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
-        Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
-        Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode()
-    );
+    private Set<String> godkjenteKoder;
 
     private Boolean dumpPayload;
 
@@ -37,8 +33,23 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Inject
     public StrukturertJournalpost(
-        @KonfigVerdi(value = "DUMP_PAYLOAD_VED_FEIL", defaultVerdi = "false") Boolean dumpPayload) {
+        @KonfigVerdi(value = "DUMP_PAYLOAD_VED_FEIL", defaultVerdi = "false") Boolean dumpPayload,
+        @KonfigVerdi(value = "aktivitetspenger.enabled", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled
+        ) {
         this.dumpPayload = dumpPayload;
+
+        this.godkjenteKoder = aktivitetspengerEnabled ?
+            Set.of(
+                Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(),
+                Brevkode.AKTIVITETSPENGER_SOKNAD.getOffisiellKode()
+            ) :
+            Set.of(
+                Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode()
+            );
     }
 
     @Override
@@ -65,7 +76,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Override
     public boolean skalVurdere(Vurderingsgrunnlag vurderingsgrunnlag) {
-        return GODKJENTE_KODER.contains(vurderingsgrunnlag.journalpostInfo().getBrevkode());
+        return godkjenteKoder.contains(vurderingsgrunnlag.journalpostInfo().getBrevkode());
     }
 
     private void mapBrevkodeInformasjon(MottattMelding dataWrapper, JournalpostInfo journalpostInfo) {

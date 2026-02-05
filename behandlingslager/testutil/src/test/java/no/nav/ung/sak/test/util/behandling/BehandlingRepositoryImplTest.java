@@ -3,12 +3,10 @@ package no.nav.ung.sak.test.util.behandling;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;

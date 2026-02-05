@@ -2,7 +2,7 @@ package no.nav.ung.sak.perioder;
 
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingskontroll.VilkårTypeRef;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 @FagsakYtelseTypeRef
 @VilkårTypeRef

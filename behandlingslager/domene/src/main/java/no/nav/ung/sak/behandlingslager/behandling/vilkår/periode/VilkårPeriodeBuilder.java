@@ -7,7 +7,7 @@ import java.util.Properties;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 public class VilkårPeriodeBuilder {
     private final VilkårPeriode entitet;

@@ -2,11 +2,11 @@ package no.nav.ung.sak.domene.iay.modell;
 
 import java.util.Objects;
 
-import no.nav.ung.kodeverk.api.IndexKey;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
-import no.nav.ung.sak.behandlingslager.diff.TraverseValue;
+import no.nav.ung.sak.IndexKey;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.diff.IndexKeyComposer;
+import no.nav.ung.sak.diff.TraverseValue;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.EksternArbeidsforholdRef;
 import no.nav.ung.sak.typer.InternArbeidsforholdRef;

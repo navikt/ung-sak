@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.ung.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 
 @ApplicationScoped
 @ProsessTask(DiffOgReposisjonerTask.TASKTYPE)

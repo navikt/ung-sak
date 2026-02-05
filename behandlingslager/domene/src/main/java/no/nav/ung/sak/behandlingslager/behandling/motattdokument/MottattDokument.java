@@ -29,7 +29,7 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.BrevkodeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.DokumentStatusKodeverdiConverter;
 import no.nav.ung.sak.typer.JournalpostId;

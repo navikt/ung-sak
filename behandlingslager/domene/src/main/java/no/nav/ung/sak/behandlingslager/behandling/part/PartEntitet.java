@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.part;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.typer.IdType;
 import no.nav.ung.sak.typer.Identifikasjon;
 import no.nav.ung.sak.typer.RolleType;

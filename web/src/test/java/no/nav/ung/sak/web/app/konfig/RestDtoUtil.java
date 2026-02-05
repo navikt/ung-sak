@@ -101,6 +101,13 @@ public class RestDtoUtil {
         for (ClassInfo subklasse : sr.getSubclasses(klasse.loadClass())) {
             nye.put(subklasse, "Subklasse av " + klasse.getName());
         }
+        for (ClassInfo superklasse : sr.getSuperclasses(klasse.loadClass())) {
+            if (superklasse.getName().startsWith("java") || superklasse.getName().startsWith("jakarta")) {
+                //ikke relevant å ha validering på java/jakarta klasser
+                continue;
+            }
+            nye.put(superklasse, "Superklasse av " + klasse.getName());
+        }
         for (FieldInfo field : klasse.getDeclaredFieldInfo()) {
             if (field.isStatic()) {
                 continue;

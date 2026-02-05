@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.AppAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.sak.abac.AppAbacAttributt;
+import no.nav.ung.sak.abac.AppAbacAttributtType;
+import no.nav.ung.sak.abac.StandardAbacAttributt;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

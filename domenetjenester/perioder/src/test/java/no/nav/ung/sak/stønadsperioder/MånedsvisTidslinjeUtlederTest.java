@@ -23,7 +23,7 @@ import java.time.YearMonth;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
-import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -56,7 +56,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, TIDENES_ENDE, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        var result = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        var result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
         List<LocalDateSegment<YearMonth>> expectedSegments = List.of(
             new LocalDateSegment<>(startDate, startDate.with(TemporalAdjusters.lastDayOfMonth()), tilMåned(startDate)),
@@ -75,7 +75,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        var result = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        var result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
         List<LocalDateSegment<YearMonth>> expectedSegments = List.of(new LocalDateSegment<>(startDate, endDate, tilMåned(startDate)));
         LocalDateTimeline<YearMonth> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
@@ -92,7 +92,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        LocalDateTimeline<YearMonth> result = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        LocalDateTimeline<YearMonth> result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
         List<LocalDateSegment<YearMonth>> expectedSegments = List.of(new LocalDateSegment<>(startDate, endDate, tilMåned(startDate)));
         LocalDateTimeline<YearMonth> expectedTimeline = new LocalDateTimeline<>(expectedSegments);
@@ -108,7 +108,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        LocalDateTimeline<YearMonth> result = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        LocalDateTimeline<YearMonth> result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
         List<LocalDateSegment<YearMonth>> expectedSegments = List.of(
             new LocalDateSegment<>(startDate, LocalDate.of(2023, 1, 31), YearMonth.of(2023, 1)),
@@ -127,7 +127,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
-        var result = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        var result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
         List<LocalDateSegment<YearMonth>> expectedSegments = List.of(
             new LocalDateSegment<>(startDate, LocalDate.of(2023, 1, 31), YearMonth.of(2023, 1)),

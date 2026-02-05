@@ -1,7 +1,6 @@
 package no.nav.ung.sak.domene.iay.modell;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -9,11 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import no.nav.abakus.iaygrunnlag.kodeverk.VirksomhetType;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.OrgNummer;
 
 public class OppgittOpptjeningBuilder {
 

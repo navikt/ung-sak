@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 import java.util.Collection;
 import java.util.HashSet;

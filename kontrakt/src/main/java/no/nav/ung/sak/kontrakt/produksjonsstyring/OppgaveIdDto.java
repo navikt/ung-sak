@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.AppAbacAttributtType;
+import no.nav.ung.sak.abac.AppAbacAttributt;
+import no.nav.ung.sak.abac.AppAbacAttributtType;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)

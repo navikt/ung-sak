@@ -1180,19 +1180,19 @@
         "x-enum-varnames" : [ "STARTET", "INNGANG", "UTGANG", "VENTER", "AVBRUTT", "UTFØRT", "FREMOVERFØRT", "TILBAKEFØRT", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingStegType" : {
-        "enum" : [ "BERYT", "FVEDSTEG", "FORBRES", "FORVEDSTEG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INREG", "IVEDSTEG", "VURDEROP", "SIMOPP", "START", "VURDERKOMPLETT", "VURDER_ALDER", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FK_UI", "KLAGEUI", "OVERFØRT_NK" ],
+        "enum" : [ "BERYT", "FVEDSTEG", "FORBRES", "FORVEDSTEG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INREG", "IVEDSTEG", "VURDEROP", "SIMOPP", "START", "VURDERKOMPLETT", "VURDER_ALDER", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "VURDER_BOSTED", "VURDER_BISTANDSVILKÅR", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FK_UI", "KLAGEUI", "OVERFØRT_NK" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS", "VURDER_KLAGE_FØRSTEINSTANS", "OVERFØRT_NK" ]
+        "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "VURDER_BOSTED", "VURDER_BISTANDSVILKÅR", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS", "VURDER_KLAGE_FØRSTEINSTANS", "OVERFØRT_NK" ]
       },
       "ung.kodeverk.behandling.BehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-003", "BT-008", "BT-007", "BT-009", "-" ],
+        "enum" : [ "BT-002", "BT-004", "BT-003", "BT-008", "BT-007", "BT-009", "BT-011", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "UDEFINERT" ]
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "AKTIVITETSPENGER_DEL_1", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingÅrsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-END-FRA-BRUKER-AKT", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "NY_SØKT_AKTIVITETSPENGER_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.FagsakStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
@@ -1200,9 +1200,9 @@
         "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
       "ung.kodeverk.behandling.FagsakYtelseType" : {
-        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
+        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AKT", "OBSOLETE", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "AKTIVITETSPENGER", "OBSOLETE", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.RevurderingVarslingÅrsak" : {
         "enum" : [ "BARNIKKEREG", "JOBBFULLTID", "IKKEOPPTJENT", "UTVANDRET", "JOBBUTLAND", "IKKEOPPHOLD", "JOBB6MND", "AKTIVITET", "ANNET" ],
@@ -1210,9 +1210,9 @@
         "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon" : {
-        "enum" : [ "5015", "5016", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "6006", "6100", "7001", "7003", "7005", "7014", "7040", "8000", "5082", "5035", "7100", "UNDEFINED" ],
+        "enum" : [ "5015", "5016", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "5141", "6006", "6100", "7001", "7003", "7005", "7014", "7040", "8000", "5082", "5035", "7100", "UNDEFINED" ],
         "type" : "string",
-        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
+        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "VURDER_BISTANDSVILKÅR", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus" : {
         "enum" : [ "AVBR", "OPPR", "UTFO" ],
@@ -1225,9 +1225,9 @@
         "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
-        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
+        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BISTANDSVILKÅR", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
         "type" : "string",
-        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
+        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BISTANDSVILKÅR", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.Venteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "OVERSENDT_KABAL" ],
@@ -1343,9 +1343,9 @@
         "x-enum-varnames" : [ "OPPRETTET", "VENTER", "MOTTATT_SVAR", "SKAL_AVBRYTES", "AVBRUTT", "UTLØPT" ]
       },
       "ung.kodeverk.varsel.EtterlysningType" : {
-        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ],
+        "enum" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO", "UTTALELSE_ENDRET_PERIODE" ],
         "type" : "string",
-        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO" ]
+        "x-enum-varnames" : [ "UTTALELSE_KONTROLL_INNTEKT", "UTTALELSE_ENDRET_STARTDATO", "UTTALELSE_ENDRET_SLUTTDATO", "UTTALELSE_ENDRET_PERIODE" ]
       },
       "ung.kodeverk.vedtak.VedtakResultatType" : {
         "enum" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "-" ],
@@ -1353,9 +1353,9 @@
         "x-enum-varnames" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Avslagsårsak" : {
-        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "-" ],
+        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "3001", "3002", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ]
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED", "IKKE_14A_VEDTAK", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Utfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
@@ -1363,9 +1363,9 @@
         "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.VilkårType" : {
-        "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "-" ],
+        "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "AKT_VK_1", "AKT_VK_2", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.VilkårUtfallMerknad" : {
         "enum" : [ "1001", "1002", "1003", "1004", "1005", "1006", "1007", "1019", "1020", "1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029", "1099", "1035", "1041", "1042", "1043", "1051", "1067", "1068", "1069", "1071", "1080", "1081", "1101", "1102", "5007", "7001", "7002", "7003", "7004", "7006", "7847A", "7847B", "8000", "8001", "8002", "9002", "9013", "9015", "-" ],
@@ -2899,12 +2899,6 @@
           },
           "redigert" : {
             "type" : "boolean"
-          },
-          "redigertBrevHtml" : {
-            "type" : "string"
-          },
-          "tidligereRedigertBrevHtml" : {
-            "type" : "string"
           }
         },
         "type" : "object"
@@ -3857,6 +3851,316 @@
           }
         },
         "required" : [ "notatId", "saksnummer", "skjul", "versjon" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.BekreftelseDTO" : {
+        "properties" : {
+          "harUttalelse" : {
+            "type" : "boolean"
+          },
+          "uttalelseFraBruker" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "harUttalelse" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto" : {
+        "properties" : {
+          "bekreftelse" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BekreftelseDTO"
+          },
+          "frist" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "lukketDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "løstDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "oppgaveReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "oppgavetype" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgaveType"
+          },
+          "oppgavetypeData" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO"
+          },
+          "opprettetDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgaveStatus"
+          },
+          "åpnetDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "oppgaveReferanse", "oppgavetype", "oppgavetypeData", "opprettetDato", "status" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.OppgaveStatus" : {
+        "enum" : [ "LØST", "ULØST", "AVBRUTT", "UTLØPT", "LUKKET" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "LØST", "ULØST", "AVBRUTT", "UTLØPT", "LUKKET" ]
+      },
+      "ung.sak.kontrakt.oppgaver.OppgaveType" : {
+        "enum" : [ "BEKREFT_ENDRET_STARTDATO", "BEKREFT_ENDRET_SLUTTDATO", "BEKREFT_ENDRET_PERIODE", "BEKREFT_FJERNET_PERIODE", "BEKREFT_AVVIK_REGISTERINNTEKT", "RAPPORTER_INNTEKT", "SØK_YTELSE" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "BEKREFT_ENDRET_STARTDATO", "BEKREFT_ENDRET_SLUTTDATO", "BEKREFT_ENDRET_PERIODE", "BEKREFT_FJERNET_PERIODE", "BEKREFT_AVVIK_REGISTERINNTEKT", "RAPPORTER_INNTEKT", "SØK_YTELSE" ]
+      },
+      "ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO" : {
+        "discriminator" : {
+          "mapping" : {
+            "ENDRET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO",
+            "ENDRET_SLUTTDATO" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDTO",
+            "ENDRET_STARTDATO" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDTO",
+            "FJERNET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDTO",
+            "INNTEKTSRAPPORTERING" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO",
+            "KONTROLLER_REGISTERINNTEKT" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO",
+            "SØK_YTELSE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO"
+          },
+          "propertyName" : "type"
+        },
+        "oneOf" : [ {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO"
+        } ],
+        "properties" : {
+          "type" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "type" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto" : {
+        "properties" : {
+          "aktørId" : {
+            "type" : "string"
+          },
+          "fomDato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "oppgaveReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        },
+        "required" : [ "aktørId", "fomDato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO" : {
+        "properties" : {
+          "endringer" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "forrigePeriode" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO"
+          },
+          "nyPeriode" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO"
+          }
+        },
+        "required" : [ "endringer" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO" : {
+        "properties" : {
+          "fomDato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tomDato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType" : {
+        "enum" : [ "ENDRET_STARTDATO", "ENDRET_SLUTTDATO", "FJERNET_PERIODE", "ANDRE_ENDRINGER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "ENDRET_STARTDATO", "ENDRET_SLUTTDATO", "FJERNET_PERIODE", "ANDRE_ENDRINGER" ]
+      },
+      "ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDTO" : {
+        "properties" : {
+          "forrigeSluttdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "nySluttdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "nySluttdato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDTO" : {
+        "properties" : {
+          "forrigeStartdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "nyStartdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "forrigeStartdato", "nyStartdato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDTO" : {
+        "properties" : {
+          "forrigeSluttdato" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "forrigeStartdato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "forrigeStartdato" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO" : {
+        "properties" : {
+          "fraOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "gjelderDelerAvMåned" : {
+            "type" : "boolean"
+          },
+          "rapportertInntekt" : {
+            "type" : "object"
+          },
+          "tilOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fraOgMed", "gjelderDelerAvMåned", "tilOgMed" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO" : {
+        "properties" : {
+          "arbeidsgiver" : {
+            "type" : "string"
+          },
+          "arbeidsgiverNavn" : {
+            "type" : "string"
+          },
+          "inntekt" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "arbeidsgiver", "inntekt" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO" : {
+        "properties" : {
+          "fraOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "gjelderDelerAvMåned" : {
+            "type" : "boolean"
+          },
+          "registerinntekt" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.RegisterinntektDTO"
+          },
+          "tilOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fraOgMed", "gjelderDelerAvMåned", "registerinntekt", "tilOgMed" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.RegisterinntektDTO" : {
+        "properties" : {
+          "arbeidOgFrilansInntekter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO"
+            },
+            "type" : "array"
+          },
+          "totalInntekt" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalInntektArbeidOgFrilans" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "totalInntektYtelse" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "ytelseInntekter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "arbeidOgFrilansInntekter", "totalInntekt", "totalInntektArbeidOgFrilans", "totalInntektYtelse", "ytelseInntekter" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO" : {
+        "properties" : {
+          "inntekt" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "ytelsetype" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType"
+          }
+        },
+        "required" : [ "inntekt", "ytelsetype" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType" : {
+        "enum" : [ "DAGPENGER", "SYKEPENGER", "FORELDREPENGER", "PLEIEPENGER", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "AAP", "ANNET" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FORELDREPENGER", "PLEIEPENGER", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "AAP", "ANNET" ]
+      },
+      "ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO" : {
+        "properties" : {
+          "fomDato" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fomDato" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.person.AktørIdDto" : {
@@ -8322,6 +8626,174 @@
         },
         "summary" : "KUN FOR TEST: Starter inntektskontroll for sak",
         "tags" : [ "oppgave" ]
+      }
+    },
+    "/api/oppgave/hent/alle" : {
+      "get" : {
+        "operationId" : "hentAlleOppgaver",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter alle oppgaver for en bruker",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/opprett/sok-ytelse" : {
+      "post" : {
+        "operationId" : "opprettSøkYtelseOppgave",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto"
+              }
+            }
+          },
+          "description" : "Data om hvem og hva det søkes om",
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Oppretter oppgave for å søke ytelse",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}" : {
+      "get" : {
+        "operationId" : "hentOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henter en spesifikk oppgave basert på oppgavereferanse",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}/apnet" : {
+      "get" : {
+        "operationId" : "åpneOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Åpner en oppgave",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}/lukk" : {
+      "get" : {
+        "operationId" : "lukkOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Lukker en oppgave",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/api/oppgave/{oppgavereferanse}/løst" : {
+      "get" : {
+        "operationId" : "løsOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Markerer en oppgave som løst",
+        "tags" : [ "brukerdialog-oppgave" ]
       }
     },
     "/api/papir/steg-1/hent-søknad-pdf" : {

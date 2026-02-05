@@ -5,7 +5,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -30,7 +29,7 @@ import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.ung.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
 import no.nav.ung.sak.domene.registerinnhenting.task.*;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import no.nav.ung.sak.JsonObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

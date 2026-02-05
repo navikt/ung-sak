@@ -55,10 +55,6 @@ public class Behandlingsoppretter {
         this.søknadRepository = behandlingRepositoryProvider.getSøknadRepository();
     }
 
-    public Optional<Behandling> hentForrigeBehandling(Fagsak fagsak) {
-        return behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
-    }
-
     /**
      * Opprett og Oppdater under vil opprette behandling og kopiere grunnlag, men ikke opprette start/fortsett tasks.
      */
@@ -72,6 +68,22 @@ public class Behandlingsoppretter {
                 BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
             }
             beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
+            OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+            beh.setBehandlendeEnhet(enhet);
+        }); // NOSONAR
+    }
+
+    public Behandling opprettAktivitetspengerDel1Behandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<Behandling> tidligereBehandling) {
+        BehandlingType behandlingType = BehandlingType.AKTIVITETSPENGER_DEL_1;
+        if (!tidligereBehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(true)) {
+            throw new IllegalStateException("Utviklerfeil: Prøver opprette ny behandling når det finnes åpen av samme type: " + fagsak.getId());
+        }
+        return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
+            if (!BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
+                BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
+            }
+            beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
+            //FIXME AKT denne må antagelig tilpasses til å ha med behandlingstype
             OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
             beh.setBehandlendeEnhet(enhet);
         }); // NOSONAR
@@ -104,7 +116,7 @@ public class Behandlingsoppretter {
             new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
                 .map(BehandlingÅrsak::getBehandlingÅrsakType)
                 .collect(toList()))
-                    .buildFor(revurdering);
+                .buildFor(revurdering);
 
             BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
             behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());

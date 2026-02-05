@@ -12,7 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
@@ -75,6 +75,7 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
         // Sjekker om det gjelder dødshendelse for søker
         var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
         if (fagsakForAktør.isPresent()) {
+            //FIXME AKT. Er man på aktivitetspenger vil man ikke også være i ungdomsprogrammet, så dette fungerer ikke for AKT
             if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
                 fagsakÅrsakMap.put(fagsakForAktør.get(),
                     List.of(

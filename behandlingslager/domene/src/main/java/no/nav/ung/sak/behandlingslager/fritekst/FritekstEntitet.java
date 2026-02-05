@@ -1,7 +1,7 @@
 package no.nav.ung.sak.behandlingslager.fritekst;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 

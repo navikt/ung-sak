@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagDokumentLink;
-import no.nav.ung.sak.dokument.arkiv.ArkivJournalPost;
 import no.nav.ung.sak.historikk.HistorikkInnslagKonverter;
 import no.nav.ung.sak.kontrakt.historikk.HistorikkinnslagDto;
 import no.nav.ung.sak.typer.JournalpostId;

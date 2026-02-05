@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.formidling;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.DokumentMalTypeKodeverdiConverter;
 import org.slf4j.Logger;
 

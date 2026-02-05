@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.ung.sak.diff.DiffIgnore;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 
 public class AbakusInntektArbeidYtelseGrunnlag extends InntektArbeidYtelseGrunnlag {

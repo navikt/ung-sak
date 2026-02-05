@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.sak.IndexKey;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.diff.IndexKeyComposer;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 /**
  * Entitetsklasse for oppgitte arbeidsforhold.

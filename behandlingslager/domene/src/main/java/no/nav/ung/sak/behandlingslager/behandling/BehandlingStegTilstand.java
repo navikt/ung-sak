@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling;
 
 import java.util.Objects;
 
+import no.nav.ung.sak.diff.IndexKeyComposer;
 import org.hibernate.annotations.FilterDef;
 
 import jakarta.persistence.Column;
@@ -12,11 +13,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.sak.IndexKey;
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStegStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConverter;
 

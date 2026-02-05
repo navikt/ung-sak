@@ -7,7 +7,7 @@ import jakarta.persistence.Query;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.ung.sak.tid.AbstractLocalDateInterval;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;

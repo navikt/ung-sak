@@ -6,7 +6,6 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepositor
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

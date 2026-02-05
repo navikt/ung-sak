@@ -2,6 +2,7 @@ package no.nav.ung.sak.typer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import no.nav.ung.sak.typer.Periode;
 import org.junit.jupiter.api.Test;
 
 public class PeriodeTest {

@@ -19,8 +19,6 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
  * @param redigert                     true hvis det det brevet har blitt redigert - blir nullstilt ved tilbakehopp
  * @param kanOverstyreRediger          true hvis det er mulig å redigere et automatisk brev.
  * @param forklaring                   en forklaring av resultatet
- * @param redigertBrevHtml
- * @param tidligereRedigertBrevHtml    redigert tekst før tilbakehopp
  * @param harTidligereRedigertBrevHtml true hvis har redigert tekst før tilbakehopp
  */
 public record VedtaksbrevValg(
@@ -32,10 +30,6 @@ public record VedtaksbrevValg(
     boolean redigert,
     boolean kanOverstyreRediger,
     String forklaring,
-    @Deprecated //Bruk eget rest kall
-    String redigertBrevHtml,
-    @Deprecated //Bruk eget rest kall
-    String tidligereRedigertBrevHtml,
     boolean harTidligereRedigertBrevHtml
 ) {
 

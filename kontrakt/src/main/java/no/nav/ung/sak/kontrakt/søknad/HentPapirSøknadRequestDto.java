@@ -6,10 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.AppAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
-import no.nav.ung.sak.typer.DokumentId;
+import no.nav.ung.sak.abac.StandardAbacAttributt;
 import no.nav.ung.sak.typer.JournalpostId;
 
 public record HentPapirSøknadRequestDto(

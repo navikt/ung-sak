@@ -39,7 +39,7 @@ import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingValg;
 import no.nav.ung.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
@@ -55,7 +55,7 @@ public class SimulerOppdragStegTest {
     private TilbakekrevingRepository tilbakekrevingRepository;
     private BehandlingRepository behandlingRepository;
     private K9OppdragRestKlient k9OppdragRestKlientMock;
-    private K9TilbakeRestKlient k9TilbakeRestKlientMock;
+    private UngTilbakeRestKlient ungTilbakeRestKlientMock;
     private TilkjentYtelseTjeneste tilkjentYtelseTjenesteMock;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
@@ -71,7 +71,7 @@ public class SimulerOppdragStegTest {
         tilbakekrevingRepository = new TilbakekrevingRepository(entityManager);
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         k9OppdragRestKlientMock = mock(K9OppdragRestKlient.class);
-        k9TilbakeRestKlientMock = mock(K9TilbakeRestKlient.class);
+        ungTilbakeRestKlientMock = mock(UngTilbakeRestKlient.class);
         tilkjentYtelseTjenesteMock = mock(TilkjentYtelseTjeneste.class);
         behandlingProsesseringTjeneste = mock(BehandlingProsesseringTjeneste.class);
 
@@ -108,7 +108,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal_kalle_kanseller_oppdrag_ved_tilbakehopp() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, ungTilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, null, null);
@@ -120,7 +120,7 @@ public class SimulerOppdragStegTest {
     @Test
     public void skal__ikke_kalle_kanseller_oppdrag_ved_tilbakehopp_tilSimulerOppdragSteget() {
         // Arrange
-        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
+        steg = new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, ungTilbakeRestKlientMock);
 
         // Act
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
@@ -131,7 +131,7 @@ public class SimulerOppdragStegTest {
 
     @Test
     public void utførSteg_lagrer_tilbakekrevingoppdater_hvis_det_er_en_åpen_tilbakekreving() {
-        when(k9TilbakeRestKlientMock.harÅpenTilbakekrevingsbehandling(any(Saksnummer.class))).thenReturn(true);
+        when(ungTilbakeRestKlientMock.harÅpenTilbakekrevingsbehandling(any(Saksnummer.class))).thenReturn(true);
 
         steg = opprettSteg();
 
@@ -149,7 +149,7 @@ public class SimulerOppdragStegTest {
 
     @Test
     public void skal_reaktivere_inaktiv_svar_ved_aksjonspunkt() {
-        when(k9TilbakeRestKlientMock.harÅpenTilbakekrevingsbehandling(any(Saksnummer.class))).thenReturn(false);
+        when(ungTilbakeRestKlientMock.harÅpenTilbakekrevingsbehandling(any(Saksnummer.class))).thenReturn(false);
         var varseltekst = "Her er en fin varseltekst";
         tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, varseltekst));
         tilbakekrevingRepository.deaktiverEksisterendeTilbakekrevingValg(behandling);
@@ -173,6 +173,6 @@ public class SimulerOppdragStegTest {
 
 
     private SimulerOppdragSteg opprettSteg() {
-        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, k9TilbakeRestKlientMock);
+        return new SimulerOppdragSteg(repositoryProvider, behandlingProsesseringTjeneste, simuleringIntegrasjonTjeneste, tilbakekrevingRepository, ungTilbakeRestKlientMock);
     }
 }

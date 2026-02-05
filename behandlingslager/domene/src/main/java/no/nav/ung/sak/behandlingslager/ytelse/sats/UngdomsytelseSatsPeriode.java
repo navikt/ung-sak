@@ -17,10 +17,10 @@ import jakarta.persistence.Table;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.sak.behandlingslager.kodeverk.UngdomsytelseSatsTypeKodeverdiConverter;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.ung.sak.behandlingslager.Range;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.tid.Range;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 @Entity(name = "UngdomsytelseSatsPeriode")
 @Table(name = "UNG_SATS_PERIODE")

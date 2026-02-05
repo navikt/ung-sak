@@ -1,7 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.vilkår;
 
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 
 class VilkårForlengelseDto {
 

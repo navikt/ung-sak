@@ -1,8 +1,8 @@
 package no.nav.ung.sak.behandlingslager.uttalelse;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
 
 import java.util.Collection;

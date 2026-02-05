@@ -9,8 +9,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
-import no.nav.ung.sak.domene.typer.tid.Virkedager;
-import org.jetbrains.annotations.NotNull;
+import no.nav.ung.sak.tid.Virkedager;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

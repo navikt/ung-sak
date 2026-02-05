@@ -1,8 +1,8 @@
 package no.nav.ung.sak.kontrakt.dokument;
 
 import jakarta.validation.constraints.Digits;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.AppAbacAttributtType;
+import no.nav.ung.sak.abac.AppAbacAttributt;
+import no.nav.ung.sak.abac.AppAbacAttributtType;
 
 public class DokumentIdDto {
     @Digits(integer = 18, fraction = 0)

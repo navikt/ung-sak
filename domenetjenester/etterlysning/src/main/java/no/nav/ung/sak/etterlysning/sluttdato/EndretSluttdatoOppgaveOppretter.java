@@ -7,7 +7,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.typer.PersonIdent;
 
@@ -16,26 +17,26 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static no.nav.ung.kodeverk.uttak.Tid.TIDENES_ENDE;
+import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @Dependent
 public class EndretSluttdatoOppgaveOppretter {
 
-    private final UngOppgaveKlient ungOppgaveKlient;
+    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
     public EndretSluttdatoOppgaveOppretter(
-                                           UngOppgaveKlient ungOppgaveKlient,
-                                           UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        this.ungOppgaveKlient = ungOppgaveKlient;
+        MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        this.delegeringTjeneste = delegeringTjeneste;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
         var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode)).toList();
-        oppgaveDtoer.forEach(ungOppgaveKlient::opprettEndretSluttdatoOppgave);
+        oppgaveDtoer.forEach(delegeringTjeneste::opprettEndretSluttdatoOppgave);
     }
 
     private EndretSluttdatoOppgaveDTO mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, Optional<DatoIntervallEntitet> originalPeriode) {
