@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.*;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.perioder.UngdomsytelseVilkårsperioderTilVurderingTjeneste;
 
 import java.util.List;
 import java.util.NavigableSet;
@@ -29,7 +30,7 @@ public class AvhengigeVilkårJusterer {
 
     /** Fjerner perioder fra avhengige vilkår der et definerende vilkår vurderes som avslått. Definerende vilkår er et vilkår som bestemmer hvilke perioder andre vilkår skal vurderes i. Det er kun innvilgede perioder for definerende vilkår som skal vurderes for avhengige vilkår.
      * <p>
-     * For ungdomsytelsen er definerende vilkår ungdomsprogramvilkåret og avhengige vilkår er aldersvilkåret. Se også VilkårsPerioderTilVurde* For ungdomsytelsen er definerende vilkår ungdomsprogramvilkåret og avhengige vilkår er aldersvilkåret. Se også {@link no.nav.ung.sak.perioder.UngdomsytelseVilkårsperioderTilVurderingTjeneste#definerendeVilkår()}
+     * For ungdomsytelsen er definerende vilkår ungdomsprogramvilkåret og avhengige vilkår er aldersvilkåret. Se også VilkårsPerioderTilVurde* For ungdomsytelsen er definerende vilkår ungdomsprogramvilkåret og avhengige vilkår er aldersvilkåret. Se også {@link UngdomsytelseVilkårsperioderTilVurderingTjeneste#definerendeVilkår()}
      *
      * @param behandlingId Behandling ID for den behandlingen som skal justeres.
      * @param perioderTilVurdering Perioder som vurderes for definerende vilkår

@@ -75,6 +75,7 @@ public class PdlDødsfallFagsakTilVurderingUtleder implements FagsakerTilVurderi
         // Sjekker om det gjelder dødshendelse for søker
         var fagsakForAktør = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
         if (fagsakForAktør.isPresent()) {
+            //FIXME AKT. Er man på aktivitetspenger vil man ikke også være i ungdomsprogrammet, så dette fungerer ikke for AKT
             if (deltarIProgramPåHendelsedato(fagsakForAktør.get(), aktuellDato, hendelseId) && erNyInformasjonIHendelsen(fagsakForAktør.get(), aktør, aktuellDato, hendelseId)) {
                 fagsakÅrsakMap.put(fagsakForAktør.get(),
                     List.of(

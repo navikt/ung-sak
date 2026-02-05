@@ -1,6 +1,8 @@
 package no.nav.ung.sak.domene.behandling.steg.foreslåresultat;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -19,28 +21,29 @@ import java.util.List;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
-@FagsakYtelseTypeRef(UNGDOMSYTELSE)
+@FagsakYtelseTypeRef
 @ApplicationScoped
-public class UngdomsytelseForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
+public class DefaultForeslåBehandlingsresultatTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
-    UngdomsytelseForeslåBehandlingsresultatTjeneste() {
+    DefaultForeslåBehandlingsresultatTjeneste() {
         // for proxy
     }
 
     @Inject
-    public UngdomsytelseForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                                           @FagsakYtelseTypeRef(UNGDOMSYTELSE) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
+    public DefaultForeslåBehandlingsresultatTjeneste(BehandlingRepositoryProvider repositoryProvider,
+                                                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         super(repositoryProvider);
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
         var timeline = new LocalDateTimeline<Boolean>(List.of());
 

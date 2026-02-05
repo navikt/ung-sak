@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinntektkontroll;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -38,7 +38,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class ManglendeKontrollperioderTjenesteTest {
+class UngdomsytelseManglendeKontrollperioderTjenesteTest {
 
     @Inject
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;

@@ -12,12 +12,12 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -25,24 +25,25 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.abakus.AbakusInMemoryInntektArbeidYtelseTjeneste;
-import no.nav.ung.sak.domene.iay.modell.*;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregatBuilder;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektBuilder;
+import no.nav.ung.sak.domene.iay.modell.InntektspostBuilder;
+import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.ung.sak.domene.iay.modell.VersjonType;
 import no.nav.ung.sak.kontrakt.kontroll.BrukKontrollertInntektValg;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektDto;
 import no.nav.ung.sak.kontrakt.kontroll.FastsettInntektPeriodeDto;
+import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
-import no.nav.ung.sak.perioder.UngdomsytelseSøknadsperiodeTjeneste;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-
-import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,43 +60,42 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class FastsettInntektOppdatererTest {
-
+class UngdomsytelseFastsettInntektOppdatererTest {
 
     public static final LocalDate FOM = LocalDate.now();
-    @Inject
-    private EntityManager entityManager;
-    private FastsettInntektOppdaterer oppdaterer;
-    private TilkjentYtelseRepository tilkjentYtelseRepository;
-    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private BehandlingRepository behandlingRepository;
-    private FagsakRepository fagsakRepository;
-    private Behandling behandling;
-    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-    private ProsessTriggereRepository prosesstriggerRepo;
 
     @Inject
+    private EntityManager entityManager;
+    @Inject
+    private FagsakRepository fagsakRepository;
+    @Inject
+    private BehandlingRepository behandlingRepository;
+    @Inject
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
+    @Inject
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
+    @Inject
+    private ProsessTriggereRepository prosesstriggerRepo;
+    @Inject
+    private KontrollerteInntektperioderTjeneste kontrollerteInntektperioderTjeneste;
+    @Inject
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
+
+    @Inject
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    @Inject
+    @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private FastsettInntektOppdaterer oppdaterer;
+
+    private Behandling behandling;
     private Aksjonspunkt aksjonspunkt;
 
     @BeforeEach
     void setUp() {
-        tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
         inntektArbeidYtelseTjeneste = new AbakusInMemoryInntektArbeidYtelseTjeneste();
-        ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
-        behandlingRepository = new BehandlingRepository(entityManager);
-        prosesstriggerRepo = new ProsessTriggereRepository(entityManager);
-        var ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
-        final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository),
-            behandlingRepository);
-        prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosesstriggerRepo,
-            new UngdomsytelseSøknadsperiodeTjeneste(ungdomsytelseStartdatoRepository, new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository), behandlingRepository));
-        RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(prosessTriggerPeriodeUtleder, månedsvisTidslinjeUtleder);
-        kontrollerteInntektperioderTjeneste = new KontrollerteInntektperioderTjeneste(tilkjentYtelseRepository, relevanteKontrollperioderUtleder
-        );
         final var rapportertInntektMapper = new RapportertInntektMapper(inntektArbeidYtelseTjeneste);
         oppdaterer = new FastsettInntektOppdaterer(
             kontrollerteInntektperioderTjeneste,

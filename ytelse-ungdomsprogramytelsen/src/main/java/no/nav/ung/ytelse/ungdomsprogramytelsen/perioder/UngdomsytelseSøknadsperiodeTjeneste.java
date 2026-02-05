@@ -1,4 +1,4 @@
-package no.nav.ung.sak.perioder;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.perioder;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -26,7 +26,6 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
 
     @Inject
     public UngdomsytelseSøknadsperiodeTjeneste(UngdomsytelseStartdatoRepository startdatoRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
-
         this.startdatoRepository = startdatoRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.behandlingRepository = behandlingRepository;

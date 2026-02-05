@@ -40,15 +40,11 @@ public class VedtaksbrevTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
 
-    public VedtaksbrevTjeneste() {
-    }
-
     @Inject
-    public VedtaksbrevTjeneste(
-        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler,
-        VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        BehandlingRepository behandlingRepository) {
+    public VedtaksbrevTjeneste(VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
+                               @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler,
+                               VedtaksbrevValgRepository vedtaksbrevValgRepository,
+                               BehandlingRepository behandlingRepository) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;

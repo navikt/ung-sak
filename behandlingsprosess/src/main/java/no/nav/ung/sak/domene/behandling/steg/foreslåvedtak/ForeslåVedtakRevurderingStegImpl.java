@@ -27,7 +27,8 @@ public class ForeslåVedtakRevurderingStegImpl implements ForeslåVedtakSteg {
 
     @Inject
     ForeslåVedtakRevurderingStegImpl(ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                                     BehandlingRepositoryProvider repositoryProvider, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
+                                     BehandlingRepositoryProvider repositoryProvider,
+                                     VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;

@@ -2,10 +2,16 @@ package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.*;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -14,7 +20,11 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -26,7 +36,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     @Inject
     public DetaljertResultatUtlederImpl(
-        ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
+        @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
         TilkjentYtelseRepository tilkjentYtelseRepository,
         VilkårResultatRepository vilkårResultatRepository) {
 
@@ -62,7 +72,7 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     }
 
-    private  static <T> LocalDateSegmentCombinator<Set<BehandlingÅrsakType>, T, Set<BehandlingÅrsakType>> fjernIkkeRelevanteKontrollårsaker() {
+    private static <T> LocalDateSegmentCombinator<Set<BehandlingÅrsakType>, T, Set<BehandlingÅrsakType>> fjernIkkeRelevanteKontrollårsaker() {
         return (di, trigger, kontrollEllerYtelseSegment) -> {
             var årsaker = new HashSet<>(trigger.getValue());
             // Fjern kontrollårsak hvis det ikke er noen kontroll eller tilkjent ytelse i perioden

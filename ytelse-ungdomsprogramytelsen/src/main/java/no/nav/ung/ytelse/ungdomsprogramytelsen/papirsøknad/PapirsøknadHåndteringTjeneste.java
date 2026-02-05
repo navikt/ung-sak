@@ -29,6 +29,7 @@ import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
+import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -53,7 +54,7 @@ import java.util.UUID;
 public class PapirsøknadHåndteringTjeneste {
 
     private PdfGenKlient pdfGenKlient;
-    private DokArkivKlientImpl dokArkivKlientImpl;
+    private DokArkivKlient dokArkivKlient;
     private TpsTjeneste tpsTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
@@ -72,7 +73,7 @@ public class PapirsøknadHåndteringTjeneste {
     @Inject
     public PapirsøknadHåndteringTjeneste(
         PdfGenKlient pdfGenKlient,
-        DokArkivKlientImpl dokArkivKlientImpl,
+        DokArkivKlient dokArkivKlient,
         TpsTjeneste tpsTjeneste,
         FagsakTjeneste fagsakTjeneste,
         BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
@@ -85,7 +86,7 @@ public class PapirsøknadHåndteringTjeneste {
         MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste
     ) {
         this.pdfGenKlient = pdfGenKlient;
-        this.dokArkivKlientImpl = dokArkivKlientImpl;
+        this.dokArkivKlient = dokArkivKlient;
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
@@ -204,7 +205,7 @@ public class PapirsøknadHåndteringTjeneste {
         String ungdomsytelseSoknadOffisiellKode = Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode();
         String journalpostTittel = "Punsjet søknad om ungdomsprogramytelse - " + ungdomsytelseSoknadOffisiellKode;
 
-        return dokArkivKlientImpl.opprettJournalpost(new OpprettJournalpostRequestBuilder()
+        return dokArkivKlient.opprettJournalpost(new OpprettJournalpostRequestBuilder()
             .bruker(new OpprettJournalpostRequest.Bruker(deltakerIdent.getIdent(), OpprettJournalpostRequest.Bruker.BrukerIdType.FNR))
             .tema(Tema.UNG.name())
             .tittel(journalpostTittel)
