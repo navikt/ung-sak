@@ -64,7 +64,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
     @Override
-    protected void prosesser(ProsessTaskData prosessTaskData) {
+    public void prosesser(ProsessTaskData prosessTaskData) {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
