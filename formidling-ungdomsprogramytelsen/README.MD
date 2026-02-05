@@ -1,3 +1,0 @@
-
-* BrevGenerererTjeneste - lager pdf
-* 

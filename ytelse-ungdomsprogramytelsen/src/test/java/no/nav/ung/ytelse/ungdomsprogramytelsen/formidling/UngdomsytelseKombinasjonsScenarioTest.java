@@ -10,12 +10,12 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.KombinasjonScenarioer;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

@@ -17,7 +17,6 @@
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
         <module>formidling-felles</module>
-        <module>formidling-ungdomsprogramytelsen</module>
         <module>fordel</module>
         <module>klage</module>
         <module>ytelse-ungdomsprogramytelsen</module>
@@ -395,11 +394,6 @@
                 <groupId>no.nav.k9</groupId>
                 <artifactId>oppgave-ungdomsytelse</artifactId>
                 <version>${k9format.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>formidling-ungdomsprogramytelsen</artifactId>
-                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>

@@ -22,7 +22,7 @@ COPY --link web/target/classes/logback.xml /app/conf/
 
 #fonter, templates
 COPY --link formidling-felles/target/pdfgen /app/pdfgen
-COPY --link formidling-ungdomsprogramytelsen/target/pdfgen/templates /app/pdfgen/templates
+COPY --link ytelse-ungdomsprogramytelsen/target/pdfgen/templates /app/pdfgen/templates
 
 ##kopier prosjektets moduler
 COPY --link web/target/lib/no.nav.ung.sak* /app/lib/
