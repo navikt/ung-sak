@@ -9,7 +9,7 @@ import no.nav.ung.sak.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.PdlKlientFake;
 import no.nav.ung.sak.formidling.klage.vedtak.VedtaksbrevTjenesteKlage;
-import no.nav.ung.sak.test.util.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;

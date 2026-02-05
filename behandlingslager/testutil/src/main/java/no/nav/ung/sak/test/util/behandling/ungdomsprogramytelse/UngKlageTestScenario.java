@@ -1,4 +1,4 @@
-package no.nav.ung.sak.test.util.behandling;
+package no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse;
 
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
