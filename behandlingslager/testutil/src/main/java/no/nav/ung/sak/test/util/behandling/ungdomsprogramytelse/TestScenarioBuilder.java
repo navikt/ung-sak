@@ -1,4 +1,4 @@
-package no.nav.ung.sak.test.util.behandling;
+package no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse;
 
 import java.time.LocalDate;
 

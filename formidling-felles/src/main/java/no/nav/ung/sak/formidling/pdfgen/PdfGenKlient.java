@@ -35,8 +35,8 @@ public class PdfGenKlient {
         System.setProperty("sun2d.cmm", "sun2d.cmm.kcms.KcmsServiceProvider");
         VeraGreenfieldFoundryProvider.initialise();
         XRLog.setLoggerImpl(new Slf4jLogger());
-        boolean kjørerEnhetstester = Files.exists(Path.of("target"));
-        String plassering = kjørerEnhetstester ? "target/pdfgen/" : "pdfgen/";
+        boolean kjørerEnhetstesterEllerFraIDE = Files.exists(Path.of("target"));
+        String plassering = kjørerEnhetstesterEllerFraIDE ? "target/pdfgen/" : "pdfgen/";
         Environment initialEnvironment = new Environment(
             Collections.emptyMap(),
             new PDFGenResource(getResource(plassering + "templates/")),

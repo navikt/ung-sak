@@ -92,6 +92,19 @@ public class FagsakRepository {
         return query.getResultList();
     }
 
+    public List<Fagsak> hentForBruker(AktørId aktørId, FagsakYtelseType fagsakYtelseType) {
+        TypedQuery<Fagsak> query = entityManager
+            .createQuery("""
+                    from Fagsak f
+                      where f.brukerAktørId=:aktørId
+                       and f.ytelseType = :ytelseType
+                    """,
+                Fagsak.class);
+        query.setParameter("aktørId", aktørId);
+        query.setParameter("ytelseType", fagsakYtelseType);
+        return query.getResultList();
+    }
+
     public Optional<Journalpost> hentJournalpost(JournalpostId journalpostId) {
         TypedQuery<Journalpost> query = entityManager.createQuery("from Journalpost where journalpostId=:journalpost",
             Journalpost.class);
