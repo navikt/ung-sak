@@ -1,23 +1,23 @@
-package no.nav.ung.sak.domene.behandling.steg.beregning;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.beregning;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.Barnetillegg;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BeregnDagsatsInput;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.LagBarnetilleggTidslinje;
-import no.nav.ung.sak.JsonObjectMapper;
-import no.nav.ung.sak.tid.TidslinjeUtil;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
+import no.nav.ung.sak.tid.TidslinjeUtil;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.Barnetillegg;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.BeregnDagsatsInput;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.FødselOgDødInfo;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.LagBarnetilleggTidslinje;
 
 import java.time.LocalDate;
 import java.util.List;

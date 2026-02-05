@@ -1,4 +1,4 @@
-package no.nav.ung.sak.perioder;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.perioder;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -6,6 +6,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,12 +27,13 @@ import no.nav.ung.sak.trigger.Trigger;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class ProsessTriggerPeriodeUtlederTest {
+class UngdsomsytelseProsessTriggerPeriodeUtlederTest {
 
     @Inject
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     @Inject
     private ProsessTriggereRepository prosessTriggereRepository;
+    @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private Long behandlingId;
 
@@ -38,7 +42,7 @@ class ProsessTriggerPeriodeUtlederTest {
     void setUp() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandlingId = scenario.lagre(behandlingRepositoryProvider).getId();
-        prosessTriggerPeriodeUtleder = new ProsessTriggerPeriodeUtleder(prosessTriggereRepository, null);
+        prosessTriggerPeriodeUtleder = new UngdomsytelseProsessTriggerPeriodeUtleder(prosessTriggereRepository, null);
     }
 
     @Test

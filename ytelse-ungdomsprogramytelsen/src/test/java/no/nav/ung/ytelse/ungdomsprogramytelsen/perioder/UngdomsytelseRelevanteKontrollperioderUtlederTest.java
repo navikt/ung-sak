@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontroll;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.perioder;
 
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -13,8 +13,8 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.AktørId;
@@ -32,11 +32,10 @@ import java.util.Set;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class RelevanteKontrollperioderUtlederTest {
+class UngdomsytelseRelevanteKontrollperioderUtlederTest {
 
     public static final LocalDate PROGRAMPERIODE_FOM = LocalDate.of(2025, 12, 15);
     public static final LocalDate PROGRAMPERIODE_TOM = LocalDate.of(2026, 3, 15);
@@ -51,24 +50,16 @@ class RelevanteKontrollperioderUtlederTest {
     @Inject
     private FagsakRepository fagsakRepository;
 
-
     @Inject
     private ProsessTriggereRepository prosessTriggereRepository;
 
     @Inject
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
-
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     private Behandling behandling;
 
 
     @BeforeEach
     void setUp() {
-
-        relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
-            prosessTriggerPeriodeUtleder,
-            månedsvisTidslinjeUtleder
-        );
 
         lagFagsakOgBehandling();
 
@@ -96,11 +87,6 @@ class RelevanteKontrollperioderUtlederTest {
 
     @Test
     void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode() {
-        relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
-            prosessTriggerPeriodeUtleder,
-            månedsvisTidslinjeUtleder
-        );
-
         // Programperiode går fra desember til mars
         // Markerer kun januar for kontroll
         DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
@@ -113,7 +99,7 @@ class RelevanteKontrollperioderUtlederTest {
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, februar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, mars)
-            ));
+        ));
 
         LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
 
@@ -128,11 +114,6 @@ class RelevanteKontrollperioderUtlederTest {
 
     @Test
     void skal_finne_perioder_for_kontroll_der_alle_relevante_perioder_er_markert_med_kontroll_av_siste_periode_og_annen_trigger() {
-        relevanteKontrollperioderUtleder = new RelevanteKontrollperioderUtleder(
-            prosessTriggerPeriodeUtleder,
-            månedsvisTidslinjeUtleder
-        );
-
         // Programperiode går fra desember til mars
         // Markerer kun januar for kontroll
         DatoIntervallEntitet januar = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 1),
@@ -145,7 +126,7 @@ class RelevanteKontrollperioderUtlederTest {
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, januar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, februar),
             new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, mars),
-        new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1), PROGRAMPERIODE_TOM))
+            new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 3, 1), PROGRAMPERIODE_TOM))
         ));
 
         LocalDateTimeline<Boolean> perioderForKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());

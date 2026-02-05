@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.beregning;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.beregning;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;

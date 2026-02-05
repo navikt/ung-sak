@@ -86,6 +86,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
             Optional<Fagsak> fagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(aktør, aktuellDato);
 
             fagsak.ifPresent(f -> {
+                //FIXME AKT. Er man på aktivitetspenger vil man ikke også være i ungdomsprogrammet, så dette fungerer ikke for AKT
                     if (deltarIProgramPåHendelsedato(f, aktuellDato, hendelseId) && erNyInformasjonIHendelsen(f, aktørIdBarn.get(), aktuellDato, hendelseId)) {
                         ÅrsakOgPerioder årsakOgPerioder = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(aktuellDato, fagsak.get().getPeriode().getTomDato()));
                         fagsakÅrsakMap.put(f,

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.beregning;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.beregning;
 
 import java.time.LocalDate;
 

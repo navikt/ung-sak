@@ -23,8 +23,7 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public EndringInntektUtenReduksjonInnholdBygger(
-        TilkjentYtelseRepository tilkjentYtelseRepository) {
+    public EndringInntektUtenReduksjonInnholdBygger(TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 

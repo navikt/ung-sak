@@ -1,4 +1,4 @@
-package no.nav.ung.sak.perioder;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.perioder;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -29,7 +29,7 @@ class UngdomsytelseVilkårsperioderTilVurderingTjenesteTest {
     private VilkårResultatRepository vilkårResultatRepository;
 
     @Mock
-    private ProsessTriggerPeriodeUtleder fraProsesstriggere;
+    private UngdomsytelseProsessTriggerPeriodeUtleder fraProsesstriggere;
 
     @InjectMocks
     private UngdomsytelseVilkårsperioderTilVurderingTjeneste tjeneste;

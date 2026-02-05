@@ -1,4 +1,4 @@
-package no.nav.ung.sak.perioder;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.perioder;
 
 import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;

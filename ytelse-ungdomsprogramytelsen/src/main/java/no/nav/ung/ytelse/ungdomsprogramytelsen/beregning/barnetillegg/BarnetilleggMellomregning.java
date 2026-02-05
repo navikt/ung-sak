@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg;
 
 import java.util.List;
 

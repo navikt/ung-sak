@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;

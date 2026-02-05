@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.behandling.steg.beregning;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.beregning;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,18 +10,23 @@ import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.BeregnDagsatsInput;
-import no.nav.ung.sak.domene.behandling.steg.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.BeregnDagsatsInput;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.FødselOgDødInfo;
 
 import java.util.List;
 import java.util.function.Function;
