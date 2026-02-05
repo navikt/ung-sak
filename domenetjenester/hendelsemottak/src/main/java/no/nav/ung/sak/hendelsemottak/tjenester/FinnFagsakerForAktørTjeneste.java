@@ -41,7 +41,7 @@ public class FinnFagsakerForAktørTjeneste {
                 Fagsak.class)
             .setParameter("relasjonsrolle", RelasjonsRolleType.BARN.getKode())
             .setParameter("aktoer_id", aktørId.getId())
-            .setParameter("ytelse_type", fagsakYtelseType)
+            .setParameter("ytelse_type", fagsakYtelseType.getKode())
             .setParameter("dato", relevantDato); // NOSONAR //$NON-NLS-1$
         return query.getResultList();
     }
