@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>no.nav.ung.sak</groupId>
+        <artifactId>ung-sak</artifactId>
+        <version>${revision}${sha1}${changelist}</version>
+    </parent>
+
+    <groupId>no.nav.ung.sak.ytelse</groupId>
+    <artifactId>ytelse-aktivitetspenger</artifactId>
+    <packaging>jar</packaging>
+    <name>UNGSAK :: Ytelse - Aktivitetspenger</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>mottak</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>fordel</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingsprosess-steg</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.k9.felles.integrasjon</groupId>
+            <artifactId>k9-sensu-klient</artifactId>
+        </dependency>
+
+        <!-- Test avhengigheter -->
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingslager-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-migrationsupport</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+</project>
