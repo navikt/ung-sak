@@ -31,7 +31,7 @@
 
     <properties>
         <java.version>25</java.version>
-        <kontrakt.java.version>21</kontrakt.java.version>
+        <kontrakt.java.version>25</kontrakt.java.version>
 
         <argLine>-Xms256m -Dfile.encoding=UTF-8 -Dlog.level.no.nav=WARN -Duser.timezone='Europe/Oslo'</argLine>
 
