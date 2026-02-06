@@ -4,7 +4,7 @@ import no.nav.k9.felles.sikkerhet.ContextPathHolder;
 
 public class JettyWebKonfigurasjon implements AppKonfigurasjon {
     public static final String COOKIE_PATH = "/ung";
-    public static final String CONTEXT_PATH = COOKIE_PATH + "/sak";
+    public static final String CONTEXT_PATH = COOKIE_PATH;
 
     private Integer serverPort;
 

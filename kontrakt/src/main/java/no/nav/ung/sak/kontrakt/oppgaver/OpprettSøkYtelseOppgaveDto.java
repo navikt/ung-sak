@@ -19,7 +19,6 @@ import java.util.UUID;
 public record OpprettSøkYtelseOppgaveDto(
 
     @JsonProperty(value = "aktørId", required = true)
-    @StandardAbacAttributt(value = StandardAbacAttributtType.AKTØR_ID)
     @NotNull
     @Valid
     AktørId aktørId,
@@ -32,5 +31,11 @@ public record OpprettSøkYtelseOppgaveDto(
     @Valid
     UUID oppgaveReferanse
 ) {
+
+    @StandardAbacAttributt(value = StandardAbacAttributtType.AKTØR_ID)
+    public String getAktørIdAsString() {
+        return aktørId.getId();
+    }
+
 }
 

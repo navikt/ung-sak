@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.oppgave.kafka.model.UngdomsytelseOppgavebekreftelseTopicEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,8 +19,6 @@ import org.slf4j.LoggerFactory;
 public class OppgaveBekreftelseHendelseHåndterer {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveBekreftelseHendelseHåndterer.class);
-
-    private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private ProsessTaskTjeneste taskRepository;
 
@@ -35,7 +34,7 @@ public class OppgaveBekreftelseHendelseHåndterer {
         log.info("Mottatt bekreftelse på oppgave med key='{}', payload={}", key, payload);
 
         try {
-            var topicEntry = MAPPER.readValue(payload, UngdomsytelseOppgavebekreftelseTopicEntry.class);
+            var topicEntry = JsonObjectMapper.fromJson(payload, UngdomsytelseOppgavebekreftelseTopicEntry.class);
             var oppgavebekreftelse = topicEntry.data().journalførtMelding();
             var journalpostId = oppgavebekreftelse.journalpostId();
 
