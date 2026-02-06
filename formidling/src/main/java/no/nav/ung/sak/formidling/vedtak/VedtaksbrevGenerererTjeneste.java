@@ -10,4 +10,6 @@ public interface VedtaksbrevGenerererTjeneste {
 
     @WithSpan
     GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml);
+
+
 }

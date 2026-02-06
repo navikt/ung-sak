@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.template.dto;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import no.nav.ung.sak.formidling.innhold.TemplateInnholdDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 
 /**

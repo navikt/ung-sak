@@ -21,6 +21,10 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
+            <artifactId>formidling</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
             <artifactId>fordel</artifactId>
         </dependency>
 
@@ -47,5 +51,51 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-pdfgen-resources</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-felles-pdfgen-resources</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../formidling/src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

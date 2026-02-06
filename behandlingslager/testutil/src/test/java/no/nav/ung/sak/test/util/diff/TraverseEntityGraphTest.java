@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInforma
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.diff.*;
 import no.nav.ung.sak.diff.TraverseGraph.TraverseResult;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.Test;
 

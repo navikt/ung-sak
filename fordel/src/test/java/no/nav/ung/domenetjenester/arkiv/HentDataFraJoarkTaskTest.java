@@ -53,7 +53,7 @@ public class HentDataFraJoarkTaskTest {
     @Spy
     private AlleredeMottattJournalpost alleredeMottattJournalpost = new AlleredeMottattJournalpost(journalpostRepository);
     @Spy
-    private StrukturertJournalpost strukturertJournalpost = new StrukturertJournalpost(true);
+    private StrukturertJournalpost strukturertJournalpost = new StrukturertJournalpost(true, false);
     @Spy
     private UhåndtertJournalpost uhåndtertJournalpost = new UhåndtertJournalpost();
 

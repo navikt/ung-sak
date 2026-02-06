@@ -21,7 +21,8 @@ USER apprunner
 COPY --link web/target/classes/logback.xml /app/conf/
 
 #fonter, templates
-COPY formidling/target/pdfgen /app/pdfgen
+COPY --link formidling/src/main/resources/pdfgen /app/pdfgen
+COPY --link ytelse-ungdomsprogramytelsen/src/main/resources/pdfgen/templates /app/pdfgen/templates
 
 ##kopier prosjektets moduler
 COPY --link web/target/lib/no.nav.ung.sak* /app/lib/

@@ -33,7 +33,7 @@ import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.registerinnhenting.BehandlingÅrsakTjeneste;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

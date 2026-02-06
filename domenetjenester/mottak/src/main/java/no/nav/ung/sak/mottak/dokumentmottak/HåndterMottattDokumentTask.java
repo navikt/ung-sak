@@ -4,6 +4,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +33,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     public static final String MOTTATT_DOKUMENT_ID_KEY = "mottattDokumentId";
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess");
     private static final Logger log = LoggerFactory.getLogger(HåndterMottattDokumentTask.class);
-    private InnhentDokumentTjeneste innhentDokumentTjeneste;
+    private Instance<InnhentDokumentTjeneste> innhentDokumentTjenester;
     private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
@@ -43,11 +45,11 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
     @Inject
     public HåndterMottattDokumentTask(BehandlingRepositoryProvider repositoryProvider,
-                                      InnhentDokumentTjeneste innhentDokumentTjeneste,
+                                      @Any Instance<InnhentDokumentTjeneste> innhentDokumentTjenester,
                                       MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                       DokumentValidatorProvider dokumentValidatorProvider) {
         super(repositoryProvider.getFagsakLåsRepository(), repositoryProvider.getBehandlingLåsRepository());
-        this.innhentDokumentTjeneste = innhentDokumentTjeneste;
+        this.innhentDokumentTjenester = innhentDokumentTjenester;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
@@ -55,7 +57,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
     }
 
     @Override
-    protected void prosesser(ProsessTaskData prosessTaskData) {
+    public void prosesser(ProsessTaskData prosessTaskData) {
         var fagsakId = prosessTaskData.getFagsakId();
         var behandlingId = prosessTaskData.getBehandlingId() != null ? Long.valueOf(prosessTaskData.getBehandlingId()) : null;
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
@@ -82,6 +84,7 @@ public class HåndterMottattDokumentTask extends FagsakProsessTask {
 
         mottatteDokumentTjeneste.oppdaterStatus(mottatteDokumenter, DokumentStatus.BEHANDLER);
 
+        InnhentDokumentTjeneste innhentDokumentTjeneste = InnhentDokumentTjeneste.finnTjeneste(innhentDokumentTjenester, fagsak.getYtelseType());
         innhentDokumentTjeneste.mottaDokument(fagsak, mottatteDokumenter);
     }
 

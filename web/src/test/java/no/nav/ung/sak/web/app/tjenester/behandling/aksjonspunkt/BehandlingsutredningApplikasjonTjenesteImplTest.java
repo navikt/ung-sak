@@ -44,7 +44,7 @@ import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjenest
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKobling;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveBehandlingKoblingRepository;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.web.app.tjenester.behandling.SjekkProsessering;
 
 @ExtendWith(CdiAwareExtension.class)
