@@ -62,7 +62,6 @@ public class OppgaveBekreftelseConsumer implements AppServiceHandler {
         stream.setUncaughtExceptionHandler(throwable -> {
             log.error("{} :: Stream died with exception", topic, throwable);
             try {
-                // Vedtak fra Kabal er ikke tidskritiske så her kan vi vente en stund før vi prøver på nytt.
                 // Her kan vi hamne når f.eks. brokers er nede, node-oppgraderinger, credentials som ikke roteres i tid etc.
                 TimeUnit.SECONDS.sleep(10);
             } catch (InterruptedException e) {
