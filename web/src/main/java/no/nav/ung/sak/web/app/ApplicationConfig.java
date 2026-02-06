@@ -24,7 +24,7 @@ import java.util.LinkedHashSet;
 @ApplicationPath(ApplicationConfig.API_URI)
 public class ApplicationConfig extends ResourceConfig {
 
-    public static final String API_URI = "/api";
+    public static final String API_URI = "/sak/api";
 
     public OpenAPI resolveOpenAPI() {
         final var info = new Info()

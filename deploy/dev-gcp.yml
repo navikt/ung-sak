@@ -149,7 +149,8 @@ spec:
       value: klage.behandling-events.v1
     - name: KAFKA_MINSIDE_VARSEL_TOPIC
       value: min-side.aapen-brukervarsel-v1
-
+    - name: KAFKA_OPPGAVEBEKREFTELSE_TOPIC
+      value: dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
