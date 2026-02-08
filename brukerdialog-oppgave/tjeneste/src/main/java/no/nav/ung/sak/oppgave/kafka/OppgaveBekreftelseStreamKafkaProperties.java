@@ -60,7 +60,7 @@ public class OppgaveBekreftelseStreamKafkaProperties {
 
         // Polling
         props.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, "200");
-        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "100000");
+        props.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, "60000");
 
         log.info("Configuring topic='{}' with applicationId='{} & SSL-auth enabled",
             topic, props.getProperty(StreamsConfig.APPLICATION_ID_CONFIG));

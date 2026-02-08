@@ -54,13 +54,13 @@ public class OppgaveBekreftelseConsumer implements AppServiceHandler {
 
             if (newState == KafkaStreams.State.ERROR) {
                 // if the stream has died there is no reason to keep spinning
-                log.error("{} :: No reason to keep living, closing stream", topic);
+                log.warn("{} :: No reason to keep living, closing stream", topic);
                 stop();
             }
         });
-
-        stream.setUncaughtExceptionHandler(throwable -> {
-            log.error("{} :: Stream died with exception", topic, throwable);
+        stream.setUncaughtExceptionHandler(e -> {
+            log.error("{} :: Caught exception in stream, exiting", topic, e);
+            stop();
             return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
         });
     }
