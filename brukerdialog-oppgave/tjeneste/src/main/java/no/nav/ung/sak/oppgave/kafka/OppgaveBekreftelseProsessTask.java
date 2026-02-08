@@ -1,5 +1,6 @@
 package no.nav.ung.sak.oppgave.kafka;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -43,32 +44,32 @@ public class OppgaveBekreftelseProsessTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData prosessTaskData) {
         var payload = prosessTaskData.getPayloadAsString();
 
+        UngdomsytelseOppgavebekreftelseTopicEntry topicEntry = null;
         try {
-            var topicEntry = MAPPER.readValue(payload, UngdomsytelseOppgavebekreftelseTopicEntry.class);
-            var oppgavebekreftelse = topicEntry.data().journalførtMelding();
-            var journalpostId = oppgavebekreftelse.journalpostId();
-            var oppgavereferanse = UUID.fromString(oppgavebekreftelse.oppgaveBekreftelse().getSøknadId().getId());
-            var bekreftelse = oppgavebekreftelse.oppgaveBekreftelse().getBekreftelse();
-
-            log.info("Behandler oppgavebekreftelse for journalpostId='{}', oppgavereferanse='{}'",
-                journalpostId, oppgavereferanse);
-
-            // Finn oppgaven basert på oppgavereferanse
-            var oppgave = oppgaveRepository.hentOppgaveForOppgavereferanse(oppgavereferanse)
-                .orElseThrow(() -> new IllegalStateException(
-                    "Fant ingen oppgave for oppgavereferanse=" + oppgavereferanse));
-
-            // Oppdater oppgaven med bekreftelse
-            oppgave.setBekreftelse(new BekreftelseDTO(bekreftelse.harUttalelse(), bekreftelse.getUttalelseFraBruker()));
-            oppgaveLivssyklusTjeneste.løsOppgave(oppgave);
-
-            log.info("Oppgavebekreftelse behandlet for oppgave med referanse='{}'",
-                oppgave.getOppgavereferanse());
-
-        } catch (Exception e) {
-            log.error("Feil ved behandling av oppgavebekreftelse: payload={}", payload, e);
-            throw new RuntimeException("Feil ved behandling av oppgavebekreftelse", e);
+            topicEntry = MAPPER.readValue(payload, UngdomsytelseOppgavebekreftelseTopicEntry.class);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("Ugyldig payload", e);
         }
+        var oppgavebekreftelse = topicEntry.data().journalførtMelding();
+        var journalpostId = oppgavebekreftelse.journalpostId();
+        var oppgavereferanse = UUID.fromString(oppgavebekreftelse.oppgaveBekreftelse().getSøknadId().getId());
+        var bekreftelse = oppgavebekreftelse.oppgaveBekreftelse().getBekreftelse();
+
+        log.info("Behandler oppgavebekreftelse for journalpostId='{}', oppgavereferanse='{}'",
+            journalpostId, oppgavereferanse);
+
+        // Finn oppgaven basert på oppgavereferanse
+        var oppgave = oppgaveRepository.hentOppgaveForOppgavereferanse(oppgavereferanse)
+            .orElseThrow(() -> new IllegalStateException(
+                "Fant ingen oppgave for oppgavereferanse=" + oppgavereferanse));
+
+        // Oppdater oppgaven med bekreftelse
+        oppgave.setBekreftelse(new BekreftelseDTO(bekreftelse.harUttalelse(), bekreftelse.getUttalelseFraBruker()));
+        oppgaveLivssyklusTjeneste.løsOppgave(oppgave);
+
+        log.info("Oppgavebekreftelse behandlet for oppgave med referanse='{}'",
+            oppgave.getOppgavereferanse());
+
     }
 }
 

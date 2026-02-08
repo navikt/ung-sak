@@ -42,7 +42,7 @@ public class OppgaveBekreftelseConsumer implements AppServiceHandler {
 
         var builder = new StreamsBuilder();
         builder.stream(this.topic, consumed)
-            .foreach(oppgaveBekreftelseHendelseHåndterer::handleMessage);
+            .foreach((key, payload) -> oppgaveBekreftelseHendelseHåndterer.handleMessage(payload));
         var topology = builder.build();
 
         this.stream = new KafkaStreams(topology, streamKafkaProperties.setupProperties());

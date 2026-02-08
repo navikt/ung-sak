@@ -29,9 +29,7 @@ public class OppgaveBekreftelseHendelseHåndterer {
         this.taskRepository = taskRepository;
     }
 
-    void handleMessage(String key, String payload) {
-        log.info("Mottatt bekreftelse på oppgave med key='{}', payload={}", key, payload);
-
+    void handleMessage(String payload) {
         try {
             var topicEntry = JsonObjectMapper.fromJson(payload, UngdomsytelseOppgavebekreftelseTopicEntry.class);
             var oppgavebekreftelse = topicEntry.data().journalførtMelding();
@@ -50,8 +48,7 @@ public class OppgaveBekreftelseHendelseHåndterer {
             log.info("Opprettet prosesstask for oppgavebekreftelse med journalpostId='{}'", journalpostId);
 
         } catch (Exception e) {
-            log.error("Feil ved håndtering av oppgavebekreftelse med key='{}', payload={}", key, payload, e);
-            throw new RuntimeException("Feil ved håndtering av oppgavebekreftelse", e);
+            throw new IllegalStateException("Feil ved håndtering av oppgavebekreftelse", e);
         }
     }
 
