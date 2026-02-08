@@ -61,13 +61,7 @@ public class OppgaveBekreftelseConsumer implements AppServiceHandler {
 
         stream.setUncaughtExceptionHandler(throwable -> {
             log.error("{} :: Stream died with exception", topic, throwable);
-            try {
-                // Her kan vi hamne når f.eks. brokers er nede, node-oppgraderinger, credentials som ikke roteres i tid etc.
-                TimeUnit.SECONDS.sleep(1);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
-            return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.REPLACE_THREAD;
+            return StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
         });
     }
 
