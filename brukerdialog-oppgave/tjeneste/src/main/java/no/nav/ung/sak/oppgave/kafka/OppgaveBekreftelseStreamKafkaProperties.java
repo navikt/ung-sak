@@ -27,7 +27,7 @@ public class OppgaveBekreftelseStreamKafkaProperties {
     @SuppressWarnings("resource")
     @Inject
     OppgaveBekreftelseStreamKafkaProperties(@KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServers,
-                                            @KonfigVerdi(value = "KAFKA_OPPGAVEBEKREFTELSE_TOPIC") String topicName,
+                                            @KonfigVerdi(value = "KAFKA_OPPGAVEBEKREFTELSE_TOPIC", defaultVerdi = "dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup") String topicName,
                                             @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
                                             @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
                                             @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
