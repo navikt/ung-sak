@@ -5599,7 +5599,7 @@
   },
   "openapi" : "3.0.1",
   "paths" : {
-    "/sak/api" : {
+    "/api" : {
       "get" : {
         "description" : "redirect til oppgave",
         "operationId" : "doRedirect",
@@ -5627,7 +5627,7 @@
         "tags" : [ "redirect" ]
       }
     },
-    "/sak/api/aksjonspunkt" : {
+    "/api/aksjonspunkt" : {
       "get" : {
         "description" : "Hent aksjonspunter for saker",
         "operationId" : "getAksjonspunkter_2",
@@ -5649,7 +5649,7 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/sak/api/aksjonspunkt/sammendrag_periode" : {
+    "/api/aksjonspunkt/sammendrag_periode" : {
       "get" : {
         "description" : "Hent aksjonspunter for saker",
         "operationId" : "getAksjonspunkterSammendrag",
@@ -5680,7 +5680,7 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/sak/api/aktoer-info" : {
+    "/api/aktoer-info" : {
       "get" : {
         "description" : "Henter informasjon om en aktøer",
         "operationId" : "getAktoerInfo",
@@ -5725,7 +5725,7 @@
         "tags" : [ "aktoer" ]
       }
     },
-    "/sak/api/behandling" : {
+    "/api/behandling" : {
       "get" : {
         "description" : "Hent behandling gitt id",
         "operationId" : "hentBehandlingData_1",
@@ -5755,7 +5755,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandling/aksjonspunkt" : {
+    "/api/behandling/aksjonspunkt" : {
       "get" : {
         "description" : "Hent aksjonspunter for en behandling",
         "operationId" : "getAksjonspunkter",
@@ -5808,7 +5808,7 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/sak/api/behandling/aksjonspunkt-v2" : {
+    "/api/behandling/aksjonspunkt-v2" : {
       "get" : {
         "description" : "Hent aksjonspunter for en behandling",
         "operationId" : "getAksjonspunkter_1",
@@ -5840,7 +5840,7 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/sak/api/behandling/aksjonspunkt/kontroller-revurdering" : {
+    "/api/behandling/aksjonspunkt/kontroller-revurdering" : {
       "get" : {
         "description" : "Har behandling åpent kontroller revurdering aksjonspunkt",
         "operationId" : "erKontrollerRevurderingAksjonspunktÅpent",
@@ -5868,7 +5868,7 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/sak/api/behandling/aksjonspunkt/overstyr" : {
+    "/api/behandling/aksjonspunkt/overstyr" : {
       "post" : {
         "description" : "Overstyrer stegene",
         "operationId" : "overstyr",
@@ -5893,7 +5893,7 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/sak/api/behandling/aksjonspunkt/risiko" : {
+    "/api/behandling/aksjonspunkt/risiko" : {
       "get" : {
         "deprecated" : true,
         "description" : "Hent risikoaksjonspunkt for en behandling",
@@ -5922,7 +5922,7 @@
         "tags" : [ "aksjonspunkt" ]
       }
     },
-    "/sak/api/behandling/arbeidsgiver" : {
+    "/api/behandling/arbeidsgiver" : {
       "get" : {
         "description" : "Henter informasjon om alle arbeidsgivere knyttet til bruker",
         "operationId" : "getArbeidsgiverOpplysninger",
@@ -5952,7 +5952,7 @@
         "tags" : [ "arbeidsgiver" ]
       }
     },
-    "/sak/api/behandling/backend-root" : {
+    "/api/behandling/backend-root" : {
       "get" : {
         "description" : "Hent behandling gitt id for backend",
         "operationId" : "hentBehandlingResultatForBackend",
@@ -5982,7 +5982,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandling/backend-root/refresh" : {
+    "/api/behandling/backend-root/refresh" : {
       "post" : {
         "description" : "Init hent behandling",
         "operationId" : "oppfriskSaker",
@@ -6009,7 +6009,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandling/beregningsresultat" : {
+    "/api/behandling/beregningsresultat" : {
       "get" : {
         "description" : "Hent beregningsresultat med uttaksplan fra behandling",
         "operationId" : "hentBeregningsresultat",
@@ -6039,7 +6039,7 @@
         "tags" : [ "beregningsresultat" ]
       }
     },
-    "/sak/api/behandling/beregningsresultat/har-samme-resultat" : {
+    "/api/behandling/beregningsresultat/har-samme-resultat" : {
       "get" : {
         "description" : "Har revurdering samme resultat som original behandling",
         "operationId" : "harRevurderingSammeResultatSomOriginalBehandling",
@@ -6068,7 +6068,7 @@
         "tags" : [ "beregningsresultat" ]
       }
     },
-    "/sak/api/behandling/etterlysninger" : {
+    "/api/behandling/etterlysninger" : {
       "get" : {
         "operationId" : "hentEtterlysninger",
         "parameters" : [ {
@@ -6098,7 +6098,7 @@
         }
       }
     },
-    "/sak/api/behandling/etterlysninger/endre-frist" : {
+    "/api/behandling/etterlysninger/endre-frist" : {
       "post" : {
         "description" : "Endrer frist for etterlysning",
         "operationId" : "endreFrist",
@@ -6123,7 +6123,7 @@
         "tags" : [ "etterlysning" ]
       }
     },
-    "/sak/api/behandling/kontrollerinntekt" : {
+    "/api/behandling/kontrollerinntekt" : {
       "get" : {
         "description" : "Henter perioder for kontroll av inntekt",
         "operationId" : "hentKontrollerInntekt",
@@ -6153,7 +6153,7 @@
         "tags" : [ "kontroll" ]
       }
     },
-    "/sak/api/behandling/perioder" : {
+    "/api/behandling/perioder" : {
       "get" : {
         "description" : "Hent perioder til behandling og kilden til disse",
         "operationId" : "hentPerioderTilBehandling",
@@ -6183,7 +6183,7 @@
         "tags" : [ "perioder" ]
       }
     },
-    "/sak/api/behandling/perioder-med-vilkar" : {
+    "/api/behandling/perioder-med-vilkar" : {
       "get" : {
         "description" : "Hent perioder til behandling og kilden til disse",
         "operationId" : "hentPerioderMedVilkårForBehandling",
@@ -6213,7 +6213,7 @@
         "tags" : [ "perioder" ]
       }
     },
-    "/sak/api/behandling/person/personopplysninger" : {
+    "/api/behandling/person/personopplysninger" : {
       "get" : {
         "description" : "Hent informasjon om personopplysninger søker i behandling",
         "operationId" : "getPersonopplysninger",
@@ -6242,7 +6242,7 @@
         "tags" : [ "behandling - person" ]
       }
     },
-    "/sak/api/behandling/revurdering-original" : {
+    "/api/behandling/revurdering-original" : {
       "get" : {
         "description" : "Hent avsluttet førstegangsbehandling gitt id",
         "operationId" : "hentRevurderingensOriginalBehandling_1",
@@ -6272,7 +6272,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandling/soknad" : {
+    "/api/behandling/soknad" : {
       "get" : {
         "description" : "Hent informasjon om søknad",
         "operationId" : "getSøknad",
@@ -6301,7 +6301,7 @@
         "tags" : [ "søknad" ]
       }
     },
-    "/sak/api/behandling/soknad/perioder" : {
+    "/api/behandling/soknad/perioder" : {
       "post" : {
         "description" : "Henter søknadsperioder på siste fagsak for deltaker",
         "operationId" : "hentSøknadPerioder",
@@ -6334,7 +6334,7 @@
         "tags" : [ "søknad" ]
       }
     },
-    "/sak/api/behandling/soknad/perioder/saksnummer" : {
+    "/api/behandling/soknad/perioder/saksnummer" : {
       "post" : {
         "description" : "Henter søknadsperioder med saksnummer",
         "operationId" : "hentSøknadPerioderMedSaksnummer",
@@ -6365,7 +6365,7 @@
         "tags" : [ "søknad" ]
       }
     },
-    "/sak/api/behandling/status" : {
+    "/api/behandling/status" : {
       "get" : {
         "description" : "Url for å polle på behandling mens behandlingprosessen pågår i bakgrunnen(asynkront)",
         "operationId" : "hentBehandlingMidlertidigStatus_1",
@@ -6424,7 +6424,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandling/søknadsfrist/status" : {
+    "/api/behandling/søknadsfrist/status" : {
       "get" : {
         "description" : "Hent status på søknadsfrist",
         "operationId" : "utledStatus",
@@ -6454,7 +6454,7 @@
         "tags" : [ "søknadsfrist" ]
       }
     },
-    "/sak/api/behandling/tilbakekreving/valg" : {
+    "/api/behandling/tilbakekreving/valg" : {
       "get" : {
         "description" : "Hent tilbakekrevingsvalg for behandlingen",
         "operationId" : "hentTilbakekrevingValg",
@@ -6483,7 +6483,7 @@
         "tags" : [ "tilbakekrevingsvalg" ]
       }
     },
-    "/sak/api/behandling/tilbakekreving/varseltekst" : {
+    "/api/behandling/tilbakekreving/varseltekst" : {
       "get" : {
         "description" : "Henter varseltekst for tilbakekreving",
         "operationId" : "hentVarseltekst",
@@ -6512,7 +6512,7 @@
         "tags" : [ "tilbakekrevingsvalg" ]
       }
     },
-    "/sak/api/behandling/totrinnskontroll/arsaker" : {
+    "/api/behandling/totrinnskontroll/arsaker" : {
       "get" : {
         "description" : "Hent aksjonspunkter som skal til totrinnskontroll.",
         "operationId" : "hentTotrinnskontrollSkjermlenkeContext",
@@ -6543,7 +6543,7 @@
         "tags" : [ "totrinnskontroll" ]
       }
     },
-    "/sak/api/behandling/totrinnskontroll/arsaker_read_only" : {
+    "/api/behandling/totrinnskontroll/arsaker_read_only" : {
       "get" : {
         "description" : "Hent aksjonspunkter som skal til totrinnskontroll.",
         "operationId" : "hentTotrinnskontrollvurderingSkjermlenkeContext",
@@ -6574,7 +6574,7 @@
         "tags" : [ "totrinnskontroll" ]
       }
     },
-    "/sak/api/behandling/vilkar-v3" : {
+    "/api/behandling/vilkar-v3" : {
       "get" : {
         "description" : "Hent informasjon om vilkår for en behandling",
         "operationId" : "getVilkårV3",
@@ -6606,7 +6606,7 @@
         "tags" : [ "vilkår" ]
       }
     },
-    "/sak/api/behandling/vilkar/full-v3" : {
+    "/api/behandling/vilkar/full-v3" : {
       "get" : {
         "description" : "Forvaltning : Hent informasjon om vilkår for en behandling",
         "operationId" : "getVilkårFullV3",
@@ -6629,7 +6629,7 @@
         "tags" : [ "vilkår", "forvaltning" ]
       }
     },
-    "/sak/api/behandling/vilkar/samlet" : {
+    "/api/behandling/vilkar/samlet" : {
       "get" : {
         "description" : "Hent informasjon om vilkår samlet for en behandling",
         "operationId" : "getVilkårSamlet",
@@ -6658,7 +6658,7 @@
         "tags" : [ "vilkår" ]
       }
     },
-    "/sak/api/behandlinger" : {
+    "/api/behandlinger" : {
       "get" : {
         "description" : "Hent behandling gitt id",
         "operationId" : "hentBehandlingData",
@@ -6744,7 +6744,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/alle" : {
+    "/api/behandlinger/alle" : {
       "get" : {
         "description" : "Henter alle behandlinger basert på saksnummer",
         "operationId" : "hentBehandlinger",
@@ -6776,7 +6776,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/bytt-enhet" : {
+    "/api/behandlinger/bytt-enhet" : {
       "post" : {
         "description" : "Bytte behandlende enhet",
         "operationId" : "byttBehandlendeEnhet",
@@ -6801,7 +6801,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/endre-pa-vent" : {
+    "/api/behandlinger/endre-pa-vent" : {
       "post" : {
         "description" : "Endrer ventefrist for behandling på vent",
         "operationId" : "endreFristForBehandlingPaVent",
@@ -6826,7 +6826,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/gjenoppta" : {
+    "/api/behandlinger/gjenoppta" : {
       "post" : {
         "description" : "Gjenopptar behandling som er satt på vent",
         "operationId" : "gjenopptaBehandling",
@@ -6853,7 +6853,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/henlegg" : {
+    "/api/behandlinger/henlegg" : {
       "post" : {
         "description" : "Henlegger behandling",
         "operationId" : "henleggBehandling",
@@ -6878,7 +6878,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/opne-for-endringer" : {
+    "/api/behandlinger/opne-for-endringer" : {
       "post" : {
         "description" : "Åpner behandling for endringer",
         "operationId" : "åpneBehandlingForEndringer",
@@ -6905,7 +6905,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/rettigheter" : {
+    "/api/behandlinger/rettigheter" : {
       "get" : {
         "description" : "Henter lovlige operasjoner på behandling for menyvalg",
         "operationId" : "hentLovligeBehandlingsoperasjoner",
@@ -6934,7 +6934,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/revurdering-original" : {
+    "/api/behandlinger/revurdering-original" : {
       "get" : {
         "description" : "Hent avsluttet førstegangsbehandling gitt id",
         "operationId" : "hentRevurderingensOriginalBehandling",
@@ -6962,7 +6962,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/sett-pa-vent" : {
+    "/api/behandlinger/sett-pa-vent" : {
       "post" : {
         "description" : "Setter behandling på vent",
         "operationId" : "settBehandlingPaVent",
@@ -6987,7 +6987,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/behandlinger/status" : {
+    "/api/behandlinger/status" : {
       "get" : {
         "description" : "Url for å polle på behandling mens behandlingprosessen pågår i bakgrunnen(asynkront)",
         "operationId" : "hentBehandlingMidlertidigStatus",
@@ -7044,7 +7044,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/diagnostikk/sak" : {
+    "/api/diagnostikk/sak" : {
       "post" : {
         "description" : "Henter en dump av info for debugging og analyse av en sak. Logger hvem som har hatt innsyn i sak",
         "operationId" : "dumpSak",
@@ -7082,7 +7082,7 @@
         "tags" : [ "forvaltning" ]
       }
     },
-    "/sak/api/dokument/hent-dokument" : {
+    "/api/dokument/hent-dokument" : {
       "get" : {
         "description" : "Søk etter dokument på JOARK-identifikatorene journalpostId og dokumentId",
         "operationId" : "hentDokument",
@@ -7123,7 +7123,7 @@
         "tags" : [ "dokument" ]
       }
     },
-    "/sak/api/dokument/hent-dokumentliste" : {
+    "/api/dokument/hent-dokumentliste" : {
       "get" : {
         "description" : "Henter dokumentlisten knyttet til en sak",
         "operationId" : "hentAlleDokumenterForSak",
@@ -7155,7 +7155,7 @@
         "tags" : [ "dokument" ]
       }
     },
-    "/sak/api/fagsak" : {
+    "/api/fagsak" : {
       "get" : {
         "description" : "Hent fagsak for saksnummer",
         "operationId" : "hentFagsak",
@@ -7185,7 +7185,7 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/sak/api/fagsak/behandling" : {
+    "/api/fagsak/behandling" : {
       "get" : {
         "description" : "Henter alle behandlinger basert på saksnummer",
         "operationId" : "hentAlleBehandlinger",
@@ -7217,7 +7217,7 @@
         "tags" : [ "behandlinger" ]
       }
     },
-    "/sak/api/fagsak/bruker" : {
+    "/api/fagsak/bruker" : {
       "get" : {
         "description" : "Hent brukerdata for aktørId",
         "operationId" : "hentBrukerForFagsak",
@@ -7247,7 +7247,7 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/sak/api/fagsak/fjern-ikkedigital-flagg" : {
+    "/api/fagsak/fjern-ikkedigital-flagg" : {
       "post" : {
         "description" : "Setter en ikke-digital bruker til å være digital",
         "operationId" : "fjernIkkedigitalFlagg",
@@ -7271,7 +7271,7 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/sak/api/fagsak/hendelse/innsending" : {
+    "/api/fagsak/hendelse/innsending" : {
       "post" : {
         "description" : "Mottak av dokument.",
         "operationId" : "innsending",
@@ -7300,7 +7300,7 @@
         "tags" : [ "fordel" ]
       }
     },
-    "/sak/api/fagsak/hendelse/sok" : {
+    "/api/fagsak/hendelse/sok" : {
       "post" : {
         "description" : "Finn saker påvirket av hendelse",
         "operationId" : "finnPåvirkedeFagsaker",
@@ -7330,7 +7330,7 @@
         "tags" : [ "fordel" ]
       }
     },
-    "/sak/api/fagsak/match" : {
+    "/api/fagsak/match" : {
       "post" : {
         "description" : "Søk etter saker på ytelse og deltaker",
         "operationId" : "matchFagsaker",
@@ -7363,7 +7363,7 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/sak/api/fagsak/rettigheter" : {
+    "/api/fagsak/rettigheter" : {
       "get" : {
         "description" : "Hent rettigheter for saksnummer",
         "operationId" : "hentRettigheter",
@@ -7393,7 +7393,7 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/sak/api/fagsak/siste" : {
+    "/api/fagsak/siste" : {
       "post" : {
         "description" : "Finn siste eksisterende fagsak.",
         "operationId" : "finnSisteFagsak",
@@ -7419,7 +7419,7 @@
         "tags" : [ "fordel" ]
       }
     },
-    "/sak/api/fagsak/sok" : {
+    "/api/fagsak/sok" : {
       "post" : {
         "description" : "Søk etter saker på saksnummer eller fødselsnummer",
         "operationId" : "søkFagsaker",
@@ -7452,7 +7452,7 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/sak/api/fagsak/status" : {
+    "/api/fagsak/status" : {
       "get" : {
         "description" : "Url for å polle på fagsak mens behandlingprosessen pågår i bakgrunnen(asynkront)",
         "operationId" : "hentFagsakMidlertidigStatus",
@@ -7509,7 +7509,7 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/sak/api/fordel/fagsak/sok" : {
+    "/api/fordel/fagsak/sok" : {
       "post" : {
         "description" : "Finn eksisterende sak.",
         "operationId" : "finnEksisterendeFagsak",
@@ -7539,7 +7539,7 @@
         "tags" : [ "fordel" ]
       }
     },
-    "/sak/api/fordel/relatertSak" : {
+    "/api/fordel/relatertSak" : {
       "post" : {
         "description" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
         "operationId" : "finnesEksisterendeFagsakMedEnAvAktørene",
@@ -7569,7 +7569,7 @@
         "tags" : [ "fordel" ]
       }
     },
-    "/sak/api/formidling/informasjonsbrev" : {
+    "/api/formidling/informasjonsbrev" : {
       "get" : {
         "description" : "Maler for informasjon og støttebrev",
         "operationId" : "informasjonsbrevValg",
@@ -7596,7 +7596,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/sak/api/formidling/informasjonsbrev/bestill" : {
+    "/api/formidling/informasjonsbrev/bestill" : {
       "post" : {
         "description" : "Bestill informasjonsbrev for en behandling. ",
         "operationId" : "bestillInformasjonsbrev",
@@ -7621,7 +7621,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/sak/api/formidling/informasjonsbrev/forhaandsvis" : {
+    "/api/formidling/informasjonsbrev/forhaandsvis" : {
       "post" : {
         "description" : "Forhåndsvise inforasjonsbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
         "operationId" : "forhåndsvisInformasjonsbrev",
@@ -7669,7 +7669,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/sak/api/formidling/vedtaksbrev" : {
+    "/api/formidling/vedtaksbrev" : {
       "get" : {
         "description" : "Operasjoner som er mulig for vedtaksbrev",
         "operationId" : "vedtaksbrevValg",
@@ -7716,7 +7716,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/sak/api/formidling/vedtaksbrev/editor" : {
+    "/api/formidling/vedtaksbrev/editor" : {
       "get" : {
         "description" : "Html versjoner av original, redigert og evt. tidligere redigert vedtaksbrev",
         "operationId" : "editor",
@@ -7750,7 +7750,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/sak/api/formidling/vedtaksbrev/forhaandsvis" : {
+    "/api/formidling/vedtaksbrev/forhaandsvis" : {
       "post" : {
         "description" : "Forhåndsvise vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
         "operationId" : "forhåndsvisVedtaksbrev",
@@ -7791,7 +7791,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/sak/api/formidling/vedtaksbrev/klage/forhaandsvis" : {
+    "/api/formidling/vedtaksbrev/klage/forhaandsvis" : {
       "post" : {
         "description" : "Forhåndsvise klage vedtaksbrev for en behandling. Bruk application/octet-stream fra swagger for å laste ned pdf ",
         "operationId" : "forhåndsvisKlageVedtaksbrev",
@@ -7832,7 +7832,7 @@
         "tags" : [ "formidling" ]
       }
     },
-    "/sak/api/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
+    "/api/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
       "post" : {
         "description" : "Henter aktører pr sak relatert til oppgitt aktørid",
         "operationId" : "finnAktørerKobletTilSammeSakSomAktør",
@@ -7857,7 +7857,7 @@
         "tags" : [ "forvaltning - person" ]
       }
     },
-    "/sak/api/forvaltning/person/hentFnr" : {
+    "/api/forvaltning/person/hentFnr" : {
       "post" : {
         "description" : "Hent fnr for aktørid",
         "operationId" : "getFnrForAktørId",
@@ -7882,7 +7882,7 @@
         "tags" : [ "forvaltning - person" ]
       }
     },
-    "/sak/api/forvaltning/person/oppdater-aktoer-bruker" : {
+    "/api/forvaltning/person/oppdater-aktoer-bruker" : {
       "post" : {
         "description" : "Oppdater aktørId for bruker på sak med ugyldig aktørId pga aktørSplitt/merge",
         "operationId" : "oppdaterAktørIdBruker",
@@ -7907,7 +7907,7 @@
         "tags" : [ "forvaltning - person" ]
       }
     },
-    "/sak/api/forvaltning/person/saksnumre-for-person" : {
+    "/api/forvaltning/person/saksnumre-for-person" : {
       "get" : {
         "description" : "Henter saksnumre for en person. Kan for eksempel brukes for å finne ut om k9 er påvirket av 'aktør-splitt'",
         "operationId" : "getAktoerInfo_1",
@@ -7934,7 +7934,7 @@
         "tags" : [ "aktoer" ]
       }
     },
-    "/sak/api/forvaltning/saksbehandler/saksbehandlernavn" : {
+    "/api/forvaltning/saksbehandler/saksbehandlernavn" : {
       "post" : {
         "operationId" : "finnNavnPåSakbehandler",
         "requestBody" : {
@@ -7957,7 +7957,7 @@
         }
       }
     },
-    "/sak/api/health/isAlive" : {
+    "/api/health/isAlive" : {
       "get" : {
         "operationId" : "isAlive",
         "responses" : {
@@ -7970,7 +7970,7 @@
         }
       }
     },
-    "/sak/api/health/isReady" : {
+    "/api/health/isReady" : {
       "get" : {
         "operationId" : "isReady",
         "responses" : {
@@ -7983,7 +7983,7 @@
         }
       }
     },
-    "/sak/api/health/preStop" : {
+    "/api/health/preStop" : {
       "get" : {
         "operationId" : "preStop",
         "responses" : {
@@ -7996,7 +7996,7 @@
         }
       }
     },
-    "/sak/api/historikk" : {
+    "/api/historikk" : {
       "get" : {
         "description" : "Henter alle historikkinnslag for en gitt sak.",
         "operationId" : "hentAlleInnslag",
@@ -8027,7 +8027,7 @@
         "tags" : [ "historikk" ]
       }
     },
-    "/sak/api/init-fetch" : {
+    "/api/init-fetch" : {
       "get" : {
         "description" : "Returnerer ",
         "operationId" : "hentInitielleRessurser",
@@ -8046,7 +8046,7 @@
         "tags" : [ "init-fetch" ]
       }
     },
-    "/sak/api/integrasjon/status" : {
+    "/api/integrasjon/status" : {
       "get" : {
         "description" : "Gir en oversikt over systemer som er nede",
         "operationId" : "finnSystemerSomErNede",
@@ -8069,7 +8069,7 @@
         "tags" : [ "integrasjon" ]
       }
     },
-    "/sak/api/integrasjon/status/vises" : {
+    "/api/integrasjon/status/vises" : {
       "get" : {
         "description" : "Returnerer en boolean som angir om detaljerte feilmeldinger skal vises av GUI",
         "operationId" : "skalViseDetaljerteFeilmeldinger",
@@ -8088,7 +8088,7 @@
         "tags" : [ "integrasjon" ]
       }
     },
-    "/sak/api/klage-v2" : {
+    "/api/klage-v2" : {
       "get" : {
         "description" : "Hent informasjon om klagevurdering for en klagebehandling",
         "operationId" : "getKlageVurdering",
@@ -8117,7 +8117,7 @@
         "tags" : [ "no/nav/k9/klage" ]
       }
     },
-    "/sak/api/klage-v2/hjemler" : {
+    "/api/klage-v2/hjemler" : {
       "get" : {
         "description" : "Henter hjemler aktuelle for bruk i klagevurdering",
         "operationId" : "hentValgbareKlagehjemler",
@@ -8139,7 +8139,7 @@
         "tags" : [ "no/nav/k9/klage" ]
       }
     },
-    "/sak/api/klage-v2/mellomlagre-gjennapne-klage" : {
+    "/api/klage-v2/mellomlagre-gjennapne-klage" : {
       "post" : {
         "description" : "Mellomlagring av vurderingstekst for klagebehandling",
         "operationId" : "mellomlagreKlageOgGjenåpneAp",
@@ -8164,7 +8164,7 @@
         "tags" : [ "no/nav/k9/klage" ]
       }
     },
-    "/sak/api/klage-v2/mellomlagre-klage" : {
+    "/api/klage-v2/mellomlagre-klage" : {
       "post" : {
         "description" : "Mellomlagring av vurderingstekst for klagebehandling",
         "operationId" : "mellomlagreKlage",
@@ -8189,7 +8189,7 @@
         "tags" : [ "no/nav/k9/klage" ]
       }
     },
-    "/sak/api/kodeverk" : {
+    "/api/kodeverk" : {
       "get" : {
         "deprecated" : true,
         "description" : "Henter kodeliste",
@@ -8205,7 +8205,7 @@
         "tags" : [ "kodeverk" ]
       }
     },
-    "/sak/api/kodeverk/alle/objekt" : {
+    "/api/kodeverk/alle/objekt" : {
       "get" : {
         "description" : "Alle statisk kodeverdier som objekt",
         "operationId" : "alleKodeverdierSomObjekt",
@@ -8224,7 +8224,7 @@
         "tags" : [ "kodeverk" ]
       }
     },
-    "/sak/api/kodeverk/behandlende-enheter" : {
+    "/api/kodeverk/behandlende-enheter" : {
       "get" : {
         "description" : "Henter liste over behandlende enheter",
         "operationId" : "hentBehandlendeEnheter",
@@ -8254,7 +8254,7 @@
         "tags" : [ "kodeverk" ]
       }
     },
-    "/sak/api/kodeverk/ung-sak/kodeverk/typer" : {
+    "/api/kodeverk/ung-sak/kodeverk/typer" : {
       "get" : {
         "description" : "Ikkje reell implementasjon for bruk. Kun for openapi type generering av ung-sak kodeverkstyper",
         "operationId" : "getUngSakKodeverkTyper",
@@ -8273,7 +8273,7 @@
         "tags" : [ "kodeverk" ]
       }
     },
-    "/sak/api/login" : {
+    "/api/login" : {
       "get" : {
         "operationId" : "login",
         "parameters" : [ {
@@ -8301,7 +8301,7 @@
         }
       }
     },
-    "/sak/api/nav-ansatt" : {
+    "/api/nav-ansatt" : {
       "get" : {
         "description" : "Returnerer fullt navn for ident",
         "operationId" : "innloggetBruker",
@@ -8321,7 +8321,7 @@
         "tags" : [ "nav-ansatt" ]
       }
     },
-    "/sak/api/notat" : {
+    "/api/notat" : {
       "get" : {
         "description" : "Henter alle notater for fagsak",
         "operationId" : "hent",
@@ -8388,7 +8388,7 @@
         "tags" : [ "notat" ]
       }
     },
-    "/sak/api/notat/endre" : {
+    "/api/notat/endre" : {
       "post" : {
         "description" : "Endre eksistrende notat",
         "operationId" : "endre",
@@ -8418,7 +8418,7 @@
         "tags" : [ "notat" ]
       }
     },
-    "/sak/api/notat/skjul" : {
+    "/api/notat/skjul" : {
       "post" : {
         "description" : "Skjul notat",
         "operationId" : "skjul",
@@ -8448,7 +8448,7 @@
         "tags" : [ "notat" ]
       }
     },
-    "/sak/api/oppdrag/forvaltning/hent-iverksetting-data" : {
+    "/api/oppdrag/forvaltning/hent-iverksetting-data" : {
       "get" : {
         "description" : "Henter data som ung-sak sender til k9-oppdrag ved iverksetting",
         "operationId" : "hentIverksettingData",
@@ -8476,7 +8476,7 @@
         "tags" : [ "oppdrag" ]
       }
     },
-    "/sak/api/oppgave/forvaltning/avbryt-etterlysning" : {
+    "/api/oppgave/forvaltning/avbryt-etterlysning" : {
       "post" : {
         "description" : "Avbryter feilopprettet etterlysning.",
         "operationId" : "avbrytEtterlysning",
@@ -8501,7 +8501,7 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/sak/api/oppgave/forvaltning/fjern-uttalelse" : {
+    "/api/oppgave/forvaltning/fjern-uttalelse" : {
       "post" : {
         "description" : "KUN FOR TEST: Fjerner alle uttalelser om register inntekt og avbryter alle eksisterende etterlysninger for behandling",
         "operationId" : "fjernUttalelser",
@@ -8525,7 +8525,7 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/sak/api/oppgave/forvaltning/hent-etterlysninger" : {
+    "/api/oppgave/forvaltning/hent-etterlysninger" : {
       "post" : {
         "description" : "Henter etterlysninger for behandling",
         "operationId" : "hentEtterlysninger_1",
@@ -8549,7 +8549,7 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/sak/api/oppgave/forvaltning/opprett-inntektsrapportering" : {
+    "/api/oppgave/forvaltning/opprett-inntektsrapportering" : {
       "post" : {
         "description" : "KUN FOR TEST: Oppretter oppgave for inntektsrapportering for gitt sak",
         "operationId" : "opprettInntektsrapportering",
@@ -8590,7 +8590,7 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/sak/api/oppgave/forvaltning/start-inntektskontroll" : {
+    "/api/oppgave/forvaltning/start-inntektskontroll" : {
       "post" : {
         "description" : "KUN FOR TEST: Starter inntektskontroll for sak.",
         "operationId" : "startInntektskontroll",
@@ -8631,7 +8631,7 @@
         "tags" : [ "oppgave" ]
       }
     },
-    "/sak/api/oppgave/hent/alle" : {
+    "/api/oppgave/hent/alle" : {
       "get" : {
         "operationId" : "hentAlleOppgaver",
         "responses" : {
@@ -8653,7 +8653,7 @@
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
-    "/sak/api/oppgave/opprett/sok-ytelse" : {
+    "/api/oppgave/opprett/sok-ytelse" : {
       "post" : {
         "operationId" : "opprettSøkYtelseOppgave",
         "requestBody" : {
@@ -8683,7 +8683,7 @@
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
-    "/sak/api/oppgave/{oppgavereferanse}" : {
+    "/api/oppgave/{oppgavereferanse}" : {
       "get" : {
         "operationId" : "hentOppgave",
         "parameters" : [ {
@@ -8712,7 +8712,7 @@
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
-    "/sak/api/oppgave/{oppgavereferanse}/apnet" : {
+    "/api/oppgave/{oppgavereferanse}/apnet" : {
       "get" : {
         "operationId" : "åpneOppgave",
         "parameters" : [ {
@@ -8741,7 +8741,7 @@
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
-    "/sak/api/oppgave/{oppgavereferanse}/lukk" : {
+    "/api/oppgave/{oppgavereferanse}/lukk" : {
       "get" : {
         "operationId" : "lukkOppgave",
         "parameters" : [ {
@@ -8770,7 +8770,7 @@
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
-    "/sak/api/oppgave/{oppgavereferanse}/løst" : {
+    "/api/oppgave/{oppgavereferanse}/løst" : {
       "get" : {
         "operationId" : "løsOppgave",
         "parameters" : [ {
@@ -8799,7 +8799,7 @@
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
-    "/sak/api/papir/steg-1/hent-søknad-pdf" : {
+    "/api/papir/steg-1/hent-søknad-pdf" : {
       "post" : {
         "description" : "Henter og viser papirsøknad. Husk å slette dokumentet lokalt etter at du er ferdig.",
         "operationId" : "hentPapirSøknad",
@@ -8823,7 +8823,7 @@
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/sak/api/papir/steg-2/journalfør-papir-søknad-mot-fagsak" : {
+    "/api/papir/steg-2/journalfør-papir-søknad-mot-fagsak" : {
       "post" : {
         "description" : "Oppretter fagsak hvis det ikke allerede finnes en, og gjøre en endelig journalføring av papirsøknaden med fagsakstilknytning.",
         "operationId" : "journalførPapirSøknad",
@@ -8849,7 +8849,7 @@
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/sak/api/papir/steg-3/send-inn-papirsøknadopplysninger" : {
+    "/api/papir/steg-3/send-inn-papirsøknadopplysninger" : {
       "post" : {
         "description" : "Mapper til strukturert søknadsopplysninger og oppretter journalpost.",
         "operationId" : "sendInnPapirsøknadopplysninger",
@@ -8879,7 +8879,7 @@
         "tags" : [ "papirsøknad" ]
       }
     },
-    "/sak/api/pip/aktoer-for-sak" : {
+    "/api/pip/aktoer-for-sak" : {
       "get" : {
         "description" : "Henter aktørId'er tilknyttet en fagsak",
         "operationId" : "hentAktørIdListeTilknyttetSak",
@@ -8910,7 +8910,7 @@
         "tags" : [ "pip" ]
       }
     },
-    "/sak/api/pip/aktoer-for-sak-med-sporingslogghint" : {
+    "/api/pip/aktoer-for-sak-med-sporingslogghint" : {
       "get" : {
         "description" : "Henter aktørId'er tilknyttet en fagsak",
         "operationId" : "hentAktørIdListeTilknyttetSakMedSporingslogghint",
@@ -8937,7 +8937,7 @@
         "tags" : [ "pip" ]
       }
     },
-    "/sak/api/pip/pipdata-for-behandling-v3" : {
+    "/api/pip/pipdata-for-behandling-v3" : {
       "get" : {
         "description" : "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
         "operationId" : "hentPipDataTilknyttetBehandlingV3",
@@ -8967,7 +8967,7 @@
         "tags" : [ "pip" ]
       }
     },
-    "/sak/api/pip/pipdata-for-behandling-v4" : {
+    "/api/pip/pipdata-for-behandling-v4" : {
       "get" : {
         "description" : "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
         "operationId" : "hentPipDataTilknyttetBehandlingV4",
@@ -8997,7 +8997,7 @@
         "tags" : [ "pip" ]
       }
     },
-    "/sak/api/produksjonsstyring/forvaltning/saker-med-aksjonspunkt" : {
+    "/api/produksjonsstyring/forvaltning/saker-med-aksjonspunkt" : {
       "get" : {
         "description" : "Henter alle saker som venter på aksjonspunkt, sortert etter eldste behandling først",
         "operationId" : "sakerPåAksjonspunkt",
@@ -9020,7 +9020,7 @@
         "tags" : [ "produksjonsstyring" ]
       }
     },
-    "/sak/api/produksjonsstyring/forvaltning/saker-med-etterlysninger-av-type" : {
+    "/api/produksjonsstyring/forvaltning/saker-med-etterlysninger-av-type" : {
       "get" : {
         "description" : "Henter alle saker som har en etterlysning av type",
         "operationId" : "sakerMedEtterlysningerAvType",
@@ -9050,7 +9050,7 @@
         "tags" : [ "produksjonsstyring" ]
       }
     },
-    "/sak/api/prosesstask/create" : {
+    "/api/prosesstask/create" : {
       "post" : {
         "description" : "Oppretter en prosess task i henhold til request",
         "operationId" : "createProsessTask",
@@ -9083,7 +9083,7 @@
         "tags" : [ "prosesstask" ]
       }
     },
-    "/sak/api/prosesstask/launch" : {
+    "/api/prosesstask/launch" : {
       "post" : {
         "description" : "Restarter en eksisterende prosesstask.",
         "operationId" : "restartProsessTask",
@@ -9116,7 +9116,7 @@
         "tags" : [ "prosesstask" ]
       }
     },
-    "/sak/api/prosesstask/list" : {
+    "/api/prosesstask/list" : {
       "post" : {
         "description" : "Lister prosesstasker med angitt status.",
         "operationId" : "finnProsessTasks",
@@ -9145,7 +9145,7 @@
         "tags" : [ "prosesstask" ]
       }
     },
-    "/sak/api/prosesstask/retryall" : {
+    "/api/prosesstask/retryall" : {
       "post" : {
         "description" : "Restarter alle prosesstask med status FEILET.",
         "operationId" : "retryAllProsessTask",
@@ -9168,7 +9168,7 @@
         "tags" : [ "prosesstask" ]
       }
     },
-    "/sak/api/prosesstask/setferdig" : {
+    "/api/prosesstask/setferdig" : {
       "post" : {
         "description" : "Setter feilet prosesstask med angitt prosesstask-id til FERDIG (kjøres ikke)",
         "operationId" : "setFeiletProsessTaskFerdig",
@@ -9194,7 +9194,7 @@
         "tags" : [ "prosesstask" ]
       }
     },
-    "/sak/api/proxy/oppdrag/oppsummering/v2/oppsummering" : {
+    "/api/proxy/oppdrag/oppsummering/v2/oppsummering" : {
       "get" : {
         "description" : "Viser oppsummering av hva som sendes til OS. Både totalt opp til og med behandlingen, og differanse mot hva som fantes før behandlingen",
         "operationId" : "hentOppdragOppsummering",
@@ -9223,7 +9223,7 @@
         "tags" : [ "oppsummering" ]
       }
     },
-    "/sak/api/proxy/oppdrag/simulering/detaljert-resultat" : {
+    "/api/proxy/oppdrag/simulering/detaljert-resultat" : {
       "get" : {
         "description" : "Hent detaljert resultat av simulering mot økonomi med og uten inntrekk",
         "operationId" : "hentSimuleringResultat",
@@ -9252,7 +9252,7 @@
         "tags" : [ "simulering" ]
       }
     },
-    "/sak/api/rapportering/dump-fnr" : {
+    "/api/rapportering/dump-fnr" : {
       "post" : {
         "description" : "Dump Cache fnr ",
         "operationId" : "dumpFnrCache",
@@ -9268,7 +9268,7 @@
         "tags" : [ "forvaltning" ]
       }
     },
-    "/sak/api/rapportering/generer" : {
+    "/api/rapportering/generer" : {
       "post" : {
         "description" : "Dumper en rapport av data",
         "operationId" : "genererRapportForYtelse",
@@ -9305,7 +9305,7 @@
         "tags" : [ "rapportering" ]
       }
     },
-    "/sak/api/rapportering/innhent-fnr" : {
+    "/api/rapportering/innhent-fnr" : {
       "post" : {
         "description" : "Cache fnr for aktørid for rapporteringsformål",
         "operationId" : "innhentFnr",
@@ -9337,7 +9337,7 @@
         "tags" : [ "forvaltning" ]
       }
     },
-    "/sak/api/register/redirect-to/a-inntekt" : {
+    "/api/register/redirect-to/a-inntekt" : {
       "get" : {
         "description" : "Redirecter til a-inntekt for arbeidstakeren",
         "operationId" : "getAInntektUrl",
@@ -9358,7 +9358,7 @@
         "tags" : [ "aktoer" ]
       }
     },
-    "/sak/api/register/redirect-to/aa-reg" : {
+    "/api/register/redirect-to/aa-reg" : {
       "get" : {
         "description" : "Redirecter til aa-reg for arbeidstakeren",
         "operationId" : "getAktoerInfo_2",
@@ -9378,7 +9378,7 @@
         "tags" : [ "aktoer" ]
       }
     },
-    "/sak/api/registerdata/iay/callback" : {
+    "/api/registerdata/iay/callback" : {
       "post" : {
         "description" : "Callback når registerinnhenting av IAY har blitt fullført i Abakus",
         "operationId" : "callback",
@@ -9403,7 +9403,7 @@
         "tags" : [ "registerdata" ]
       }
     },
-    "/sak/api/saksbehandler" : {
+    "/api/saksbehandler" : {
       "get" : {
         "description" : "Returnerer fullt navn for identer som har berørt en fagsak",
         "operationId" : "getSaksbehandlere",
@@ -9433,7 +9433,7 @@
         "tags" : [ "nav-ansatt" ]
       }
     },
-    "/sak/api/statistikk/forvaltning/antall-deltakere" : {
+    "/api/statistikk/forvaltning/antall-deltakere" : {
       "post" : {
         "description" : "Lister ut antall deltakere med ulike sats-typer for en dato",
         "operationId" : "antallDeltakere",
@@ -9464,7 +9464,7 @@
         "tags" : [ "statistikk" ]
       }
     },
-    "/sak/api/statistikk/forvaltning/utbetaling" : {
+    "/api/statistikk/forvaltning/utbetaling" : {
       "post" : {
         "description" : "Utbetaling for en gitt måned og antall saker",
         "operationId" : "utbetaling",
@@ -9502,7 +9502,7 @@
         "tags" : [ "statistikk" ]
       }
     },
-    "/sak/api/statistikk/forvaltning/utmeldt-prosentandel" : {
+    "/api/statistikk/forvaltning/utmeldt-prosentandel" : {
       "post" : {
         "description" : "Lister ut prosentandel av deltaker som meldes ut før det har gått ett år",
         "operationId" : "utmeldtProsentandel",
@@ -9522,7 +9522,7 @@
         "tags" : [ "statistikk" ]
       }
     },
-    "/sak/api/statistikk/forvaltning/vedtak" : {
+    "/api/statistikk/forvaltning/vedtak" : {
       "post" : {
         "description" : "Lister ut antall vedtak for en måned",
         "operationId" : "vedtak",
@@ -9552,7 +9552,7 @@
         "tags" : [ "statistikk" ]
       }
     },
-    "/sak/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
+    "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
       "get" : {
         "description" : "Henter månedsvis satser og utbetaling",
         "operationId" : "getSatsOgUtbetalingPerioder",
@@ -9584,7 +9584,7 @@
         "tags" : [ "ung" ]
       }
     },
-    "/sak/api/ungdomsytelse/satser" : {
+    "/api/ungdomsytelse/satser" : {
       "get" : {
         "description" : "Henter innvilgede satser for en ungdomsytelsebehandling",
         "operationId" : "getUngdomsytelseInnvilgetSats",
@@ -9616,7 +9616,7 @@
         "tags" : [ "ung" ]
       }
     },
-    "/sak/api/ungdomsytelse/ungdomsprogram-informasjon" : {
+    "/api/ungdomsytelse/ungdomsprogram-informasjon" : {
       "get" : {
         "description" : "Henter informasjon om deltakelse i ungdomsprogram",
         "operationId" : "getUngdomsprogramInformasjon",
@@ -9645,7 +9645,7 @@
         "tags" : [ "ung" ]
       }
     },
-    "/sak/api/ungdomsytelse/uttak" : {
+    "/api/ungdomsytelse/uttak" : {
       "get" : {
         "description" : "Henter uttaksperioder for en ungdomsytelsebehandling",
         "operationId" : "getUngdomsytelseUttak",
