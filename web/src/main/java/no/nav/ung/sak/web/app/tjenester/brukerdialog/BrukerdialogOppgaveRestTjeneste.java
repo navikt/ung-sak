@@ -87,7 +87,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     }
 
     @GET
-    @Path("/{oppgavereferanse}/lost")
+    @Path("/{oppgavereferanse}/løst")
     @Operation(summary = "Markerer en oppgave som løst", tags = "brukerdialog-oppgave")
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.TOKENX_RESOURCE)
     public BrukerdialogOppgaveDto løsOppgave(
