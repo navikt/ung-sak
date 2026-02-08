@@ -8741,35 +8741,6 @@
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
-    "/sak/api/oppgave/{oppgavereferanse}/lost" : {
-      "get" : {
-        "operationId" : "løsOppgave",
-        "parameters" : [ {
-          "description" : "Unik referanse til oppgaven",
-          "in" : "path",
-          "name" : "oppgavereferanse",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Markerer en oppgave som løst",
-        "tags" : [ "brukerdialog-oppgave" ]
-      }
-    },
     "/sak/api/oppgave/{oppgavereferanse}/lukk" : {
       "get" : {
         "operationId" : "lukkOppgave",
@@ -8796,6 +8767,35 @@
           }
         },
         "summary" : "Lukker en oppgave",
+        "tags" : [ "brukerdialog-oppgave" ]
+      }
+    },
+    "/sak/api/oppgave/{oppgavereferanse}/løst" : {
+      "get" : {
+        "operationId" : "løsOppgave",
+        "parameters" : [ {
+          "description" : "Unik referanse til oppgaven",
+          "in" : "path",
+          "name" : "oppgavereferanse",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Markerer en oppgave som løst",
         "tags" : [ "brukerdialog-oppgave" ]
       }
     },
