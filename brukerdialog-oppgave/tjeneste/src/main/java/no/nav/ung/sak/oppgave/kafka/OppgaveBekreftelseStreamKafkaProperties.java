@@ -11,7 +11,10 @@ import org.apache.kafka.streams.errors.LogAndFailExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Properties;
+import java.util.UUID;
 
 @Dependent
 public class OppgaveBekreftelseStreamKafkaProperties {
@@ -43,9 +46,12 @@ public class OppgaveBekreftelseStreamKafkaProperties {
     Properties setupProperties() {
         var builder = new KafkaPropertiesBuilder();
 
+        var streamNavn = "KC-" + topic;
+        var streamId = String.format("stream-%s-ung-sak", streamNavn);
+        var clientId = String.format("%s-%s", streamId, clientId());
         Properties props = builder
-            .clientId("ung-sak")
-            .applicationId("ung-sak")
+            .clientId(clientId)
+            .applicationId(streamId)
             .bootstrapServers(bootstrapServers)
             .truststorePath(trustStorePath)
             .truststorePassword(trustStorePassword)
@@ -71,4 +77,18 @@ public class OppgaveBekreftelseStreamKafkaProperties {
     String getTopic() {
         return topic;
     }
+
+
+    private String clientId() {
+        if (System.getenv().containsKey("NAIS_APP_NAME")) {
+            try {
+                return InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                throw new IllegalStateException("Feil ved henting av hostname", e);
+            }
+        } else {
+            return UUID.randomUUID().toString();
+        }
+    }
+
 }
