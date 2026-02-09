@@ -18,6 +18,7 @@ import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -85,6 +86,7 @@ public class RestApiInputValideringDtoTest extends RestApiTester {
             // LocalDate og LocalDateTime har egne deserializers
             put(LocalDate.class, singletonList(emptyList()));
             put(LocalDateTime.class, singletonList(emptyList()));
+            put(ZonedDateTime.class, singletonList(emptyList()));
 
             // Enforces av UUID selv
             put(UUID.class, singletonList(emptyList()));

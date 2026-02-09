@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 
@@ -22,8 +23,8 @@ import java.util.List;
 public record MigreringsRequest(
     @JsonProperty(value = "oppgaver", required = true)
     @NotNull
-    @Valid
-    List<MigrerOppgaveDto> oppgaver
+    @Size(min = 1, max = 1000)
+    List<@NotNull @Valid MigrerOppgaveDto> oppgaver
 ) {
 }
 
