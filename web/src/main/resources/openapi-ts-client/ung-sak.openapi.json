@@ -3859,6 +3859,9 @@
             "type" : "boolean"
           },
           "uttalelseFraBruker" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
             "type" : "string"
           }
         },
@@ -3958,6 +3961,8 @@
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.MigrerOppgaveDto"
             },
+            "maxItems" : 1000,
+            "minItems" : 1,
             "type" : "array"
           }
         },
