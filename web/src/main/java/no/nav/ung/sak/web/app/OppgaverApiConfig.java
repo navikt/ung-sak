@@ -28,7 +28,7 @@ import java.util.Set;
 public class OppgaverApiConfig extends ResourceConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(OppgaverApiConfig.class);
-    public static final String API_URI = "/brukerdialog-oppgaver/api";
+    public static final String API_URI = "/brukerdialog/api";
 
     public OppgaverApiConfig() {
         LOG.info("Initialiserer: {}", API_URI);
