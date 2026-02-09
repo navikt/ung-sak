@@ -3958,6 +3958,9 @@
           "aktørId" : {
             "type" : "string"
           },
+          "aktørIdAsString" : {
+            "type" : "string"
+          },
           "fomDato" : {
             "format" : "date",
             "type" : "string"
