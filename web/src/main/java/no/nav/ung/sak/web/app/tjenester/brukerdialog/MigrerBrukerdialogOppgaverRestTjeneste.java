@@ -16,6 +16,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.oppgaver.MigrerOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.MigreringsRequest;
 import no.nav.ung.sak.kontrakt.oppgaver.MigreringsResultat;
@@ -39,7 +40,7 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
 
     private BrukerdialogOppgaveRepository repository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = JsonObjectMapper.getMapper();
 
     public MigrerBrukerdialogOppgaverRestTjeneste() {
         // CDI proxy
@@ -51,8 +52,6 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
         ProsessTaskTjeneste prosessTaskTjeneste) {
         this.repository = repository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.findAndRegisterModules();
     }
 
     /**

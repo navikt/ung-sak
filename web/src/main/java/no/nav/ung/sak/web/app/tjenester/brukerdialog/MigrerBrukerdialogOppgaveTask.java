@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.oppgaver.MigrerOppgaveDto;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
@@ -30,7 +31,7 @@ public class MigrerBrukerdialogOppgaveTask implements ProsessTaskHandler {
     private static final Logger log = LoggerFactory.getLogger(MigrerBrukerdialogOppgaveTask.class);
 
     private BrukerdialogOppgaveRepository repository;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = JsonObjectMapper.getMapper();
 
     MigrerBrukerdialogOppgaveTask() {
         // for CDI proxy
@@ -39,8 +40,6 @@ public class MigrerBrukerdialogOppgaveTask implements ProsessTaskHandler {
     @Inject
     public MigrerBrukerdialogOppgaveTask(BrukerdialogOppgaveRepository repository) {
         this.repository = repository;
-        this.objectMapper = new ObjectMapper();
-        this.objectMapper.findAndRegisterModules();
     }
 
     @Override
