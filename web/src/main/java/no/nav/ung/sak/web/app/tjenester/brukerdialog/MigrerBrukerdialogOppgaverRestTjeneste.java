@@ -1,6 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.brukerdialog;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,9 +16,6 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.oppgaver.MigrerOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.MigreringsRequest;
 import no.nav.ung.sak.kontrakt.oppgaver.MigreringsResultat;
@@ -33,7 +29,7 @@ import java.time.ZoneId;
 
 /**
  * REST-tjeneste for migrering av brukerdialogoppgaver fra annen applikasjon.
- * Tilgjengelig kun for systemtoken.
+ * Tilgjengelig kun for driftstilgang.
  */
 @Path("/forvaltning/oppgave/migrer")
 @ApplicationScoped
@@ -46,8 +42,6 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(MigrerBrukerdialogOppgaverRestTjeneste.class);
 
     private BrukerdialogOppgaveRepository repository;
-    private ProsessTaskTjeneste prosessTaskTjeneste;
-    private final ObjectMapper objectMapper = JsonObjectMapper.getMapper();
 
     public MigrerBrukerdialogOppgaverRestTjeneste() {
         // CDI proxy
@@ -55,14 +49,12 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
 
     @Inject
     public MigrerBrukerdialogOppgaverRestTjeneste(
-        BrukerdialogOppgaveRepository repository,
-        ProsessTaskTjeneste prosessTaskTjeneste) {
+        BrukerdialogOppgaveRepository repository) {
         this.repository = repository;
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     /**
-     * Migrerer oppgaver fra annen applikasjon.
+     * Migrerer oppgaver fra en annen app.
      * Idempotent - oppgaver som allerede eksisterer hoppes over.
      *
      * @param request Liste med oppgaver som skal migreres
@@ -74,7 +66,7 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
         description = "Oppretter en prosess-task per oppgave for migrering. " +
             "Idempotent - gjør ingenting hvis oppgave med samme referanse allerede eksisterer."
     )
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.APPLIKASJON)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response migrerOppgaver(@Valid @NotNull MigreringsRequest request) {
         log.info("Mottatt forespørsel om å migrere {} oppgaver", request.oppgaver().size());
 
