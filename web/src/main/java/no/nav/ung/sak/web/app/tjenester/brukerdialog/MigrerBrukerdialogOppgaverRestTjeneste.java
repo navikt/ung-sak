@@ -8,7 +8,10 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.*;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -20,9 +23,13 @@ import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.oppgaver.MigrerOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.MigreringsRequest;
 import no.nav.ung.sak.kontrakt.oppgaver.MigreringsResultat;
+import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 /**
  * REST-tjeneste for migrering av brukerdialogoppgaver fra annen applikasjon.
@@ -74,16 +81,45 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
         int antallOpprettet = 0;
         int antallHoppetOver = 0;
 
-        for (MigrerOppgaveDto oppgave : request.oppgaver()) {
+        for (MigrerOppgaveDto oppgaveDto : request.oppgaver()) {
             // Sjekk om oppgave allerede eksisterer
-            var eksisterende = repository.hentOppgaveForOppgavereferanse(oppgave.oppgaveReferanse());
+            var eksisterende = repository.hentOppgaveForOppgavereferanse(oppgaveDto.oppgaveReferanse());
 
             if (eksisterende.isPresent()) {
-                log.debug("Oppgave med referanse {} eksisterer allerede, hopper over", oppgave.oppgaveReferanse());
+                log.debug("Oppgave med referanse {} eksisterer allerede, hopper over", oppgaveDto.oppgaveReferanse());
                 antallHoppetOver++;
             } else {
-                // Opprett task for opprettelse
-                opprettMigreringsTask(oppgave);
+
+                // Opprett ny oppgave med alle felter fra migrering
+                LocalDateTime frist = oppgaveDto.frist() != null
+                    ? oppgaveDto.frist().withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+                    : null;
+
+                LocalDateTime løstDato = oppgaveDto.løstDato() != null
+                    ? oppgaveDto.løstDato().withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+                    : null;
+
+                LocalDateTime åpnetDato = oppgaveDto.åpnetDato() != null
+                    ? oppgaveDto.åpnetDato().withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+                    : null;
+
+                LocalDateTime lukketDato = oppgaveDto.lukketDato() != null
+                    ? oppgaveDto.lukketDato().withZoneSameInstant(ZoneId.systemDefault()).toLocalDateTime()
+                    : null;
+
+                var nyOppgave = new BrukerdialogOppgaveEntitet(
+                    oppgaveDto.oppgaveReferanse(),
+                    oppgaveDto.oppgavetype(),
+                    oppgaveDto.aktørId(),
+                    oppgaveDto.oppgavetypeData(),
+                    oppgaveDto.bekreftelse(),
+                    oppgaveDto.status(),
+                    frist,
+                    løstDato,
+                    åpnetDato,
+                    lukketDato
+                );
+                repository.persister(nyOppgave);
                 antallOpprettet++;
             }
         }
@@ -95,18 +131,5 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
         return Response.ok(resultat).build();
     }
 
-    private void opprettMigreringsTask(MigrerOppgaveDto oppgave) {
-        try {
-            ProsessTaskData task = ProsessTaskData.forProsessTask(MigrerBrukerdialogOppgaveTask.class);
-            task.setProperty(MigrerBrukerdialogOppgaveTask.OPPGAVE_DATA,
-                objectMapper.writeValueAsString(oppgave));
-            task.setCallIdFraEksisterende();
-            prosessTaskTjeneste.lagre(task);
-            log.debug("Opprettet migreringstask for oppgave {}", oppgave.oppgaveReferanse());
-        } catch (Exception e) {
-            log.error("Feil ved opprettelse av migreringstask for oppgave {}", oppgave.oppgaveReferanse(), e);
-            throw new RuntimeException("Feil ved opprettelse av migreringstask", e);
-        }
-    }
 }
 
