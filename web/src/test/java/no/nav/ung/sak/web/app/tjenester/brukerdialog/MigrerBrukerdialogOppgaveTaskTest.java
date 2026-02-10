@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.oppgaver.MigrerOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
@@ -30,14 +31,12 @@ class MigrerBrukerdialogOppgaveTaskTest {
 
     private BrukerdialogOppgaveRepository repository;
     private MigrerBrukerdialogOppgaveTask task;
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = JsonObjectMapper.getMapper();
 
     @BeforeEach
     void setup() {
         repository = new BrukerdialogOppgaveRepository(entityManager);
         task = new MigrerBrukerdialogOppgaveTask(repository);
-        objectMapper = new ObjectMapper();
-        objectMapper.findAndRegisterModules();
     }
 
     @Test
