@@ -1786,11 +1786,14 @@
             "5084" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto",
             "5085" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto",
             "5090" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto",
+            "5141" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.VurderBehovForBistandDto",
             "8000" : "#/components/schemas/ung.sak.kontrakt.kontroll.FastsettInntektDto"
           },
           "propertyName" : "@type"
         },
         "oneOf" : [ {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.VurderBehovForBistandDto"
+        }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollAvManueltOpprettetRevurderingsbehandlingDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollerRevurderingsBehandlingDto"
@@ -1888,6 +1891,17 @@
           }
         },
         "required" : [ "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.VurderBehovForBistandDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          }
+        },
         "type" : "object"
       },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
