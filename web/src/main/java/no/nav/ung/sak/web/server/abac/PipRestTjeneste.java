@@ -16,11 +16,13 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDto;
-import no.nav.ung.sak.kontrakt.abac.PipDtoV3;
+import no.nav.ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDtoV2;
 import no.nav.ung.sak.kontrakt.abac.PipDtoV4;
+import no.nav.ung.sak.kontrakt.abac.PipDtoV5;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.typer.AktørId;
@@ -74,23 +76,15 @@ public class PipRestTjeneste {
     }
 
     @GET
-    @Path("/pipdata-for-behandling-v3")
-    @Operation(description = "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling", tags = "pip")
+    @Path("/aktoer-for-sak-med-sporingslogghint-v2")
+    @Operation(description = "Henter aktørId'er tilknyttet en fagsak", tags = "pip")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Optional<PipDtoV3> hentPipDataTilknyttetBehandlingV3(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
-        Optional<PipBehandlingsData> pipDataOpt = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());
-        if (pipDataOpt.isPresent()) {
-            PipBehandlingsData pipData = pipDataOpt.get();
-            Set<AktørId> personer = hentAktørIder(pipData);
-            BehandlingStatus behandlingStatus = pipData.behandligStatus();
-            FagsakStatus fagsakStatus = pipData.fagsakStatus();
-            String ansvarligSaksbehandler = pipData.ansvarligSaksbehandler();
-            Saksnummer saksnummer = pipData.saksnummer();
-            return Optional.of(new PipDtoV3(saksnummer, personer, behandlingStatus, fagsakStatus, ansvarligSaksbehandler));
-        } else {
-            return Optional.empty();
-        }
+    public PipAktørerMedSporingslogghintDtoV2 hentAktørIdListeTilknyttetSakMedSporingslogghintV2(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
+        Set<AktørId> aktørerTilTilgangskontroll = pipRepository.hentAktørIdKnyttetTilFagsaker(Set.of(saksnummerDto.getVerdi()));
+        Set<AktørId> aktørerTilSporingslogg = pipRepository.hentAktørIdForSporingslogg(Set.of(saksnummerDto.getVerdi()));
+        FagsakYtelseType ytelseType = pipRepository.hentYtelseTypeForFagsak(saksnummerDto.getVerdi());
+        return new PipAktørerMedSporingslogghintDtoV2(aktørerTilTilgangskontroll, aktørerTilSporingslogg, ytelseType);
     }
 
     @GET
@@ -109,6 +103,27 @@ public class PipRestTjeneste {
             String ansvarligSaksbehandler = pipData.ansvarligSaksbehandler();
             Saksnummer saksnummer = pipData.saksnummer();
             return Optional.of(new PipDtoV4(saksnummer, personer, personerForSporingslogg, behandlingStatus, fagsakStatus, ansvarligSaksbehandler));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @GET
+    @Path("/pipdata-for-behandling-v5")
+    @Operation(description = "Henter ytelsetype, saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling", tags = "pip")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Optional<PipDtoV5> hentPipDataTilknyttetBehandlingV5(@NotNull @QueryParam("behandlingUuid") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingIdDto behandlingIdDto) {
+        Optional<PipBehandlingsData> pipDataOpt = pipRepository.hentDataForBehandlingUuid(behandlingIdDto.getBehandlingUuid());
+        if (pipDataOpt.isPresent()) {
+            PipBehandlingsData pipData = pipDataOpt.get();
+            Set<AktørId> personer = hentAktørIder(pipData);
+            Set<AktørId> personerForSporingslogg = hentAktørIderForSporingslogg(pipData);
+            BehandlingStatus behandlingStatus = pipData.behandligStatus();
+            FagsakStatus fagsakStatus = pipData.fagsakStatus();
+            String ansvarligSaksbehandler = pipData.ansvarligSaksbehandler();
+            Saksnummer saksnummer = pipData.saksnummer();
+            return Optional.of(new PipDtoV5(pipData.fagsakYtelseType(), saksnummer, personer, personerForSporingslogg, behandlingStatus, fagsakStatus, ansvarligSaksbehandler));
         } else {
             return Optional.empty();
         }

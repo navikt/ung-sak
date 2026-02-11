@@ -104,6 +104,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             if (behandlingData.ansvarligSaksbehandler() != null) {
                 pdpRequest.setAnsvarligSaksbehandler(behandlingData.ansvarligSaksbehandler());
             }
+            pdpRequest.setFagsakYtelseTyper(Set.of(behandlingData.fagsakYtelseType().getKode()));
         }
         return pdpRequest;
     }

@@ -69,6 +69,14 @@ spec:
           - id: dfb43624-edba-45de-9e91-68ec8e74b5d9
           # 0000-CA-ung-drift
           - id: 0d0da462-c300-43d9-8364-38a0a8cf2401
+          # 0000-CA-aktivitetspenger-saksbehandler-del1
+          - id: e1bd0c68-0c47-4dd0-ba77-c6e1e46f9d30
+          # 0000-CA-aktivitetspenger-saksbehandler-del2
+          - id: 4b3f571a-44c7-4d2b-9811-c6a1ea2cc9f4
+          # 0000-CA-aktivitetspenger-veileder
+          - id: 6add4432-bfd1-4952-a8b4-28e746e9592c
+          # 0000-CA-aktivitetspenger-drift
+          - id: 91b518bd-04ce-4eed-8d93-6fb134e93598
         extra:
           - "NAVident"
           - "azp_name"

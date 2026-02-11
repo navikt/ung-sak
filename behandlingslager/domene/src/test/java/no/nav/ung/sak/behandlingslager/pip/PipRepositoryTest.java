@@ -10,6 +10,7 @@ import java.util.Set;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -114,10 +115,10 @@ public class PipRepositoryTest {
     @Test
     public void skal_finne_aksjonspunktTyper_for_aksjonspunktKoder() {
         Set<String> resultat1 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(Collections.singletonList(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT.getKode()));
-        assertThat(resultat1).containsOnly("Overstyring");
+        assertThat(resultat1).containsOnly("OVST");
 
         Set<String> resultat2 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(List.of(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT.getKode(), AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode()));
-        assertThat(resultat2).containsOnly("Overstyring", "Manuell");
+        assertThat(resultat2).containsOnly("OVST", "MANU");
     }
 }
 
