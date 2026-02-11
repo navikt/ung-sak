@@ -4169,10 +4169,8 @@
       "ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.RapportertInntektDto" : {
         "properties" : {
           "arbeidstakerOgFrilansInntekt" : {
-            "exclusiveMaximum" : false,
-            "exclusiveMinimum" : false,
-            "maximum" : 10000000.00,
-            "minimum" : 0.00,
+            "maximum" : 999999,
+            "minimum" : 0,
             "type" : "number"
           },
           "fraOgMed" : {
