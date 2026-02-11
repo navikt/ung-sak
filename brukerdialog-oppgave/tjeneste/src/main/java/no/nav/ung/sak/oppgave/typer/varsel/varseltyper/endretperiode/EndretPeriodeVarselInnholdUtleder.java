@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.endretperiode;
+package no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretperiode;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;

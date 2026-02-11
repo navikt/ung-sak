@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.endretsluttdato;
+package no.nav.ung.sak.oppgave.typer.oppgave.søkytelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -8,30 +8,30 @@ import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.VarselInnholdUtleder;
 
-@OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_SLUTTDATO)
+@OppgaveTypeRef(OppgaveType.SØK_YTELSE)
 @ApplicationScoped
-public class EndretSluttdatoVarselInnholdUtleder implements VarselInnholdUtleder {
+public class SøkYtelseVarselInnholdUtleder implements VarselInnholdUtleder {
 
     private String ungdomsprogramytelsenDeltakerBaseUrl;
 
     @Inject
-    public EndretSluttdatoVarselInnholdUtleder(
+    public SøkYtelseVarselInnholdUtleder(
         @KonfigVerdi(value = "UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL") String ungdomsprogramytelsenDeltakerBaseUrl
     ) {
         this.ungdomsprogramytelsenDeltakerBaseUrl = ungdomsprogramytelsenDeltakerBaseUrl;
     }
 
-    public EndretSluttdatoVarselInnholdUtleder() {
+    public SøkYtelseVarselInnholdUtleder() {
     }
 
     @Override
     public String utledVarselTekst(BrukerdialogOppgaveEntitet oppgave) {
-        return "Se og gi tilbakemelding på endret sluttdato i ungdomsprogrammet";
+        return "Søk om ungdomsprogramytelsen";
     }
 
     @Override
     public String utledVarselLenke(BrukerdialogOppgaveEntitet oppgave) {
-        return ungdomsprogramytelsenDeltakerBaseUrl + "/oppgave" + oppgave.getOppgavereferanse();
+        return ungdomsprogramytelsenDeltakerBaseUrl;
     }
 
 }
