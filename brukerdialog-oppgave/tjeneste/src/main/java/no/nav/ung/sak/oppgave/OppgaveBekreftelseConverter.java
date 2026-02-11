@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 
 /**
@@ -12,7 +13,7 @@ import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 @Converter
 public class OppgaveBekreftelseConverter implements AttributeConverter<BekreftelseDTO, String> {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonObjectMapper.getMapper();
 
     @Override
     public String convertToDatabaseColumn(BekreftelseDTO attribute) {

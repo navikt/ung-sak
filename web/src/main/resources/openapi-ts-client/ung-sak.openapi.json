@@ -3859,6 +3859,9 @@
             "type" : "boolean"
           },
           "uttalelseFraBruker" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
             "type" : "string"
           }
         },
@@ -3905,6 +3908,65 @@
           }
         },
         "required" : [ "oppgaveReferanse", "oppgavetype", "oppgavetypeData", "opprettetDato", "status" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.MigrerOppgaveDto" : {
+        "properties" : {
+          "aktørId" : {
+            "type" : "string"
+          },
+          "bekreftelse" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.BekreftelseDTO"
+          },
+          "frist" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "lukketDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "løstDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "oppgaveReferanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "oppgavetype" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgaveType"
+          },
+          "oppgavetypeData" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO"
+          },
+          "opprettetDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgaveStatus"
+          },
+          "åpnetDato" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "aktørId", "oppgaveReferanse", "oppgavetype", "oppgavetypeData", "opprettetDato", "status" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.MigreringsRequest" : {
+        "properties" : {
+          "oppgaver" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.MigrerOppgaveDto"
+            },
+            "maxItems" : 1000,
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "oppgaver" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.OppgaveStatus" : {
@@ -4062,7 +4124,8 @@
             "type" : "boolean"
           },
           "rapportertInntekt" : {
-            "type" : "object"
+            "format" : "int32",
+            "type" : "integer"
           },
           "tilOgMed" : {
             "format" : "date",
@@ -7832,6 +7895,32 @@
         "tags" : [ "formidling" ]
       }
     },
+    "/api/forvaltning/oppgave/migrer" : {
+      "post" : {
+        "description" : "Oppretter en prosess-task per oppgave for migrering. Idempotent - gjør ingenting hvis oppgave med samme referanse allerede eksisterer.",
+        "operationId" : "migrerOppgaver",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.MigreringsRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Migrer brukerdialogoppgaver fra annen applikasjon",
+        "tags" : [ "Forvaltning" ]
+      }
+    },
     "/api/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
       "post" : {
         "description" : "Henter aktører pr sak relatert til oppgitt aktørid",
@@ -9687,5 +9776,8 @@
   }, {
     "description" : "Oppgave redirect",
     "name" : "redirect"
+  }, {
+    "description" : "API for forvaltning av brukerdialog oppgaver",
+    "name" : "Forvaltning"
   } ]
 }

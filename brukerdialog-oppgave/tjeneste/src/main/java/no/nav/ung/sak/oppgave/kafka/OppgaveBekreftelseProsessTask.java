@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
@@ -24,7 +25,7 @@ import java.util.UUID;
 public class OppgaveBekreftelseProsessTask implements ProsessTaskHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OppgaveBekreftelseProsessTask.class);
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    private static final ObjectMapper MAPPER = JsonObjectMapper.getMapper();
     public static final String TASK_NAVN = "handle.oppgave.bekreftelse";
 
     private BrukerdialogOppgaveRepository oppgaveRepository;

@@ -74,6 +74,7 @@ public class PdpRequestMapper {
             case FAGSAK -> ResourceType.FAGSAK;
             case DRIFT -> ResourceType.DRIFT;
             case VENTEFRIST -> ResourceType.VENTEFRIST;
+            case UNGDOMSPROGRAM ->  ResourceType.UNGDOMSPROGRAM;
             default -> throw new IllegalArgumentException("Ikke-støttet verdi: " + kode);
         };
     }

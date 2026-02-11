@@ -73,6 +73,32 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         this.fristTid = fristTid;
     }
 
+    /**
+     * Konstruktør for migrering av oppgave fra annen applikasjon.
+     * Brukes når alle felter inkludert status og datoer skal settes.
+     */
+    public BrukerdialogOppgaveEntitet(UUID oppgavereferanse,
+                                      OppgaveType oppgaveType,
+                                      AktørId aktørId,
+                                      OppgavetypeDataDTO data,
+                                      BekreftelseDTO bekreftelse,
+                                      OppgaveStatus status,
+                                      LocalDateTime fristTid,
+                                      LocalDateTime løstDato,
+                                      LocalDateTime åpnetDato,
+                                      LocalDateTime lukketDato) {
+        this.oppgavereferanse = oppgavereferanse;
+        this.oppgaveType = oppgaveType;
+        this.aktørId = aktørId;
+        this.data = data;
+        this.bekreftelse = bekreftelse;
+        this.status = status;
+        this.fristTid = fristTid;
+        this.løstDato = løstDato;
+        this.åpnetDato = åpnetDato;
+        this.lukketDato = lukketDato;
+    }
+
     public AktørId getAktørId() {
         return aktørId;
     }
