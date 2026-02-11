@@ -4124,7 +4124,8 @@
             "type" : "boolean"
           },
           "rapportertInntekt" : {
-            "type" : "object"
+            "format" : "int32",
+            "type" : "integer"
           },
           "tilOgMed" : {
             "format" : "date",
