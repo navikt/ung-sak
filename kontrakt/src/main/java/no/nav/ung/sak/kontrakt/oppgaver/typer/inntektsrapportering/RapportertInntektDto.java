@@ -2,9 +2,7 @@ package no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.DecimalMax;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 
 import java.math.BigDecimal;
@@ -24,8 +22,9 @@ public class RapportertInntektDto extends BekreftelseDTO {
 
     @JsonProperty(value = "arbeidstakerOgFrilansInntekt", required = true)
     @NotNull
-    @DecimalMin("0.00")
-    @DecimalMax("10000000.00")
+    @Digits(integer = 6, fraction = 0)
+    @Min(0)
+    @Max(999999)
     private BigDecimal arbeidstakerOgFrilansInntekt;
 
     public RapportertInntektDto(LocalDate fraOgMed, LocalDate tilOgMed, BigDecimal arbeidstakerOgFrilansInntekt) {
