@@ -16,7 +16,7 @@ import java.util.UUID;
 public class KafkaProperties {
 
     private static final Environment ENV = Environment.current();
-    private static final String APPLICATION_NAME = ENV.getRequiredProperty("NAIS_APP_NAME");
+    private static final String APPLICATION_NAME = ENV.getProperty("NAIS_APP_NAME", "ung-sak");
 
     private KafkaProperties() {
     }
