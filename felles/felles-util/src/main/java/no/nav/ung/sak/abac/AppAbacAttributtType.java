@@ -13,7 +13,9 @@ public enum AppAbacAttributtType implements AbacAttributtType {
      * egen-definert oppgaveId i Gsak.
      */
     OPPGAVE_ID,
-    SAKER_MED_FNR(true);
+    SAKER_MED_FNR(true),
+
+    YTELSETYPE;
 
     private final boolean maskerOutput;
 

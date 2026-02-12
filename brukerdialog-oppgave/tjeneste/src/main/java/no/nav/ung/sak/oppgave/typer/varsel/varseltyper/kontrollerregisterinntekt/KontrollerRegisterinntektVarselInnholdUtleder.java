@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.inntektsrapportering;
+package no.nav.ung.sak.oppgave.typer.varsel.varseltyper.kontrollerregisterinntekt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -7,31 +7,31 @@ import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.VarselInnholdUtleder;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO;
 
 import java.time.Month;
 
-@OppgaveTypeRef(OppgaveType.RAPPORTER_INNTEKT)
+@OppgaveTypeRef(OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT)
 @ApplicationScoped
-public class InntektsrapporteringVarselInnholdUtleder implements VarselInnholdUtleder {
+public class KontrollerRegisterinntektVarselInnholdUtleder implements VarselInnholdUtleder {
 
     private String ungdomsprogramytelsenDeltakerBaseUrl;
 
     @Inject
-    public InntektsrapporteringVarselInnholdUtleder(
+    public KontrollerRegisterinntektVarselInnholdUtleder(
         @KonfigVerdi(value = "UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL") String ungdomsprogramytelsenDeltakerBaseUrl
     ) {
         this.ungdomsprogramytelsenDeltakerBaseUrl = ungdomsprogramytelsenDeltakerBaseUrl;
     }
 
-    public InntektsrapporteringVarselInnholdUtleder() {
+    public KontrollerRegisterinntektVarselInnholdUtleder() {
     }
 
     @Override
     public String utledVarselTekst(BrukerdialogOppgaveEntitet oppgave) {
-        InntektsrapporteringOppgavetypeDataDTO oppgaveData = (InntektsrapporteringOppgavetypeDataDTO) oppgave.getData();
+        KontrollerRegisterinntektOppgavetypeDataDTO oppgaveData = (KontrollerRegisterinntektOppgavetypeDataDTO) oppgave.getData();
         String norskMånedNavn = finnNorskMånedNavn(oppgaveData.fraOgMed().getMonth());
-        return String.format("Du har fått en oppgave om å registrere inntekten din for %s dersom du har det.", norskMånedNavn);
+        return String.format("Du har fått en oppgave om å bekrefte inntekten din for %s", norskMånedNavn);
     }
 
     @Override

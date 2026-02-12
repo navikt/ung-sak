@@ -3868,18 +3868,24 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.BekreftelseDTO" : {
-        "properties" : {
-          "harUttalelse" : {
-            "type" : "boolean"
+        "discriminator" : {
+          "mapping" : {
+            "RAPPORTERT_INNTEKT" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.RapportertInntektDto",
+            "VARSEL_SVAR" : "#/components/schemas/ung.sak.kontrakt.oppgaver.SvarPåVarselDTO"
           },
-          "uttalelseFraBruker" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
+          "propertyName" : "type"
+        },
+        "oneOf" : [ {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.SvarPåVarselDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.RapportertInntektDto"
+        } ],
+        "properties" : {
+          "type" : {
             "type" : "string"
           }
         },
-        "required" : [ "harUttalelse" ],
+        "required" : [ "type" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto" : {
@@ -4049,6 +4055,21 @@
         "required" : [ "aktørId", "fomDato" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.oppgaver.SvarPåVarselDTO" : {
+        "properties" : {
+          "harUttalelse" : {
+            "type" : "boolean"
+          },
+          "uttalelseFraBruker" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "harUttalelse" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO" : {
         "properties" : {
           "endringer" : {
@@ -4137,16 +4158,31 @@
           "gjelderDelerAvMåned" : {
             "type" : "boolean"
           },
-          "rapportertInntekt" : {
-            "format" : "int32",
-            "type" : "integer"
-          },
           "tilOgMed" : {
             "format" : "date",
             "type" : "string"
           }
         },
         "required" : [ "fraOgMed", "gjelderDelerAvMåned", "tilOgMed" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.RapportertInntektDto" : {
+        "properties" : {
+          "arbeidstakerOgFrilansInntekt" : {
+            "maximum" : 999999,
+            "minimum" : 0,
+            "type" : "number"
+          },
+          "fraOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tilOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "arbeidstakerOgFrilansInntekt", "fraOgMed", "tilOgMed" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO" : {
@@ -4378,6 +4414,9 @@
           "searchString" : {
             "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
+          },
+          "ytelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           }
         },
         "required" : [ "searchString" ],

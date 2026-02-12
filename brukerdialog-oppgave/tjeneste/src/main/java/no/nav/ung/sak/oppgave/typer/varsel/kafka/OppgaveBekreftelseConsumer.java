@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.kafka;
+package no.nav.ung.sak.oppgave.typer.varsel.kafka;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
 public class OppgaveBekreftelseConsumer implements AppServiceHandler {
@@ -28,8 +27,8 @@ public class OppgaveBekreftelseConsumer implements AppServiceHandler {
     }
 
     @Inject
-    public OppgaveBekreftelseConsumer(OppgaveBekreftelseHendelseHåndterer oppgaveBekreftelseHendelseHåndterer,
-                                      OppgaveBekreftelseStreamKafkaProperties streamKafkaProperties,
+    public OppgaveBekreftelseConsumer(SvarPåVarselHendelseHåndterer oppgaveBekreftelseHendelseHåndterer,
+                                      SvarPåVarselStreamKafkaProperties streamKafkaProperties,
                                       @KonfigVerdi(value = "OPPGAVER_I_UNGSAK_ENABLED", defaultVerdi = "true") boolean consumerEnabled) {
         this.topic = streamKafkaProperties.getTopic();
         this.consumerEnabled = consumerEnabled;

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.kontrollerregisterinntekt;
+package no.nav.ung.sak.oppgave.typer.varsel.varseltyper.kontrollerregisterinntekt;
 
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektArbeidOgFrilansDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;

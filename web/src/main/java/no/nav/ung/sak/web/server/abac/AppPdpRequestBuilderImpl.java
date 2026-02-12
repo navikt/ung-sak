@@ -139,6 +139,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             AppAbacAttributtType.SAKER_MED_FNR,
             AppAbacAttributtType.DOKUMENT_ID,
             AppAbacAttributtType.OPPGAVE_ID,
+            AppAbacAttributtType.YTELSETYPE,
             StandardAbacAttributtType.SAKSNUMMER,
             StandardAbacAttributtType.BEHANDLING_ID,
             StandardAbacAttributtType.BEHANDLING_UUID,
