@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.endretstartdato;
+package no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretsluttdato;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -8,25 +8,25 @@ import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.VarselInnholdUtleder;
 
-@OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_STARTDATO)
+@OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_SLUTTDATO)
 @ApplicationScoped
-public class EndretStartdatoVarselInnholdUtleder implements VarselInnholdUtleder {
+public class EndretSluttdatoVarselInnholdUtleder implements VarselInnholdUtleder {
 
     private String ungdomsprogramytelsenDeltakerBaseUrl;
 
     @Inject
-    public EndretStartdatoVarselInnholdUtleder(
+    public EndretSluttdatoVarselInnholdUtleder(
         @KonfigVerdi(value = "UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL") String ungdomsprogramytelsenDeltakerBaseUrl
     ) {
         this.ungdomsprogramytelsenDeltakerBaseUrl = ungdomsprogramytelsenDeltakerBaseUrl;
     }
 
-    public EndretStartdatoVarselInnholdUtleder() {
+    public EndretSluttdatoVarselInnholdUtleder() {
     }
 
     @Override
     public String utledVarselTekst(BrukerdialogOppgaveEntitet oppgave) {
-        return "Se og gi tilbakemelding på endret startdato i ungdomsprogrammet";
+        return "Se og gi tilbakemelding på endret sluttdato i ungdomsprogrammet";
     }
 
     @Override
