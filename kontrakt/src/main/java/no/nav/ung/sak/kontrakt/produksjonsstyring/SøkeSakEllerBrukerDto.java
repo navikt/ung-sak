@@ -6,11 +6,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonFormat.Shape;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.abac.AppAbacAttributt;
 import no.nav.ung.sak.abac.AppAbacAttributtType;
@@ -23,7 +23,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 public class SøkeSakEllerBrukerDto {
 
     @JsonProperty(value = "ytelseType")
-    @Pattern(regexp = InputValideringRegex.KODEVERK)
+    @Valid
     private FagsakYtelseType ytelseType = FagsakYtelseType.UNGDOMSYTELSE; //TODO fjern default verdi og sett @NotNull når frontend sender inn verdien
 
     @JsonProperty(value = "searchString", required = true)
