@@ -2,12 +2,8 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.resultat;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.*;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -17,20 +13,11 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultat
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatUtleder;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.SamletVilkårResultatOgBehandlingÅrsaker;
+import no.nav.ung.sak.formidling.vedtak.resultat.*;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -84,6 +71,8 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
             // Fjern kontrollårsak hvis det ikke er noen kontroll eller tilkjent ytelse i perioden
             if (kontrollEllerYtelseSegment == null) {
                 årsaker.remove(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+                årsaker.remove(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT);
+                årsaker.remove(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
             }
             return new LocalDateSegment<>(di, årsaker);
         };
