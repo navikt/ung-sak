@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -94,7 +95,7 @@ public class FagsakRepository {
                     """,
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
-        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values());
+        query.setParameter("ytelseTyper", ytelsetyper.stream().map(FagsakYtelseType::getKode).collect(Collectors.toSet()));
         return query.getResultList();
     }
 
