@@ -69,6 +69,8 @@ updates:
           - "*"
         exclude-patterns:
           - "*no.nav*"
+          - "*jersey-bom*"
+          - "*jetty-bom*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
