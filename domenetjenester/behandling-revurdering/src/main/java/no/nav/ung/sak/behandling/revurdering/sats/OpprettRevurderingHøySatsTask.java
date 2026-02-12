@@ -71,7 +71,7 @@ public class OpprettRevurderingHøySatsTask implements ProsessTaskHandler {
             .stream()
             .map(fagsakerTilVurdering -> {
                 Fagsak fagsak = fagsakerTilVurdering.getKey();
-                var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true, null, null);
+                var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true);
                 if (prosesstaskerForFagsak.stream().anyMatch(task -> task.getTaskType().equals(OpprettRevurderingEllerOpprettDiffTask.TASKNAME))) {
                     log.info("Revurderingtask for fagsak med id {} eksisterer allerede, hopper over.", fagsak.getId());
                     return null; // Hopp over hvis vi allerede har en revurderingtask for denne fagsaken. Ellers går de i beina på hverandre.
