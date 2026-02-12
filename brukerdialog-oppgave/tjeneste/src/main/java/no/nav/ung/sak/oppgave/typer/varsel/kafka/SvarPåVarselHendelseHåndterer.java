@@ -4,9 +4,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.sak.oppgave.kafka.KafkaMessageHandler;
 import no.nav.ung.sak.oppgave.typer.varsel.kafka.model.SvarPåVarselTopicEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,41 +17,58 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 @ActivateRequestContext
 @Transactional
-public class SvarPåVarselHendelseHåndterer {
+public class SvarPåVarselHendelseHåndterer implements KafkaMessageHandler.KafkaStringMessageHandler {
 
     private static final Logger log = LoggerFactory.getLogger(SvarPåVarselHendelseHåndterer.class);
 
-    private ProsessTaskTjeneste taskRepository;
+    private static final String GROUP_ID = "ung-sak"; // Hold konstant pga offset commit
+    private String topicName;
+    private ProsessTaskTjeneste taskTjeneste;
 
     SvarPåVarselHendelseHåndterer() {
     }
 
     @Inject
-    public SvarPåVarselHendelseHåndterer(ProsessTaskTjeneste taskRepository) {
-        this.taskRepository = taskRepository;
+    public SvarPåVarselHendelseHåndterer(
+        @KonfigVerdi(value = "KAFKA_OPPGAVEBEKREFTELSE_TOPIC", defaultVerdi = "dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup") String topicName,
+        ProsessTaskTjeneste taskTjeneste) {
+        this.topicName = topicName;
+        this.taskTjeneste = taskTjeneste;
     }
 
-    void handleMessage(String payload) {
+
+    @Override
+    public void handleRecord(String key, String value) {
         try {
-            var topicEntry = JsonObjectMapper.fromJson(payload, SvarPåVarselTopicEntry.class);
+            var topicEntry = JsonObjectMapper.fromJson(value, SvarPåVarselTopicEntry.class);
             var oppgavebekreftelse = topicEntry.data().journalførtMelding();
             var journalpostId = oppgavebekreftelse.journalpostId();
 
-            log.info("Behandler oppgavebekreftelse for journalpostId='{}'",
+            log.info("Behandler svar på varsel for journalpostId='{}'",
                 journalpostId);
 
             // Opprett prosesstask for å håndtere svaret
             var prosessTaskData = ProsessTaskData.forProsessTask(SvarPåVarselProsessTask.class);
-            prosessTaskData.setPayload(payload);
+            prosessTaskData.setPayload(value);
             prosessTaskData.setCallIdFraEksisterende();
 
-            taskRepository.lagre(prosessTaskData);
+            taskTjeneste.lagre(prosessTaskData);
 
             log.info("Opprettet prosesstask for svar på varsel med journalpostId='{}'", journalpostId);
 
         } catch (Exception e) {
-            throw new IllegalStateException("Feil ved håndtering av svar p varsel", e);
+            throw new IllegalStateException("Feil ved håndtering av svar på varsel", e);
         }
+    }
+
+    @Override
+    public String topic() {
+        return topicName;
+    }
+
+    @Override
+    public String groupId() {
+        return GROUP_ID;
     }
 
 }
