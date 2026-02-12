@@ -28,11 +28,11 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.sak.abac.AppAbacAttributtType;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
 import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
@@ -43,7 +43,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingOpprettingDto;
@@ -55,6 +54,7 @@ import no.nav.ung.sak.kontrakt.fagsak.MatchFagsak;
 import no.nav.ung.sak.kontrakt.mottak.FinnSak;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
 import no.nav.ung.sak.kontrakt.produksjonsstyring.SøkeSakEllerBrukerDto;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -64,7 +64,11 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -335,17 +339,16 @@ public class FagsakRestTjeneste {
     }
 
     public static class MatchFagsakAttributter implements Function<Object, AbacDataAttributter> {
-        private static final StandardAbacAttributtType AKTØR_ID_TYPE = StandardAbacAttributtType.AKTØR_ID;
-        private static final StandardAbacAttributtType FNR_TYPE = StandardAbacAttributtType.FNR;
 
         @Override
         public AbacDataAttributter apply(Object obj) {
             var m = (MatchFagsak) obj;
             var abac = AbacDataAttributter.opprett();
-            Optional.ofNullable(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(FNR_TYPE, v));
-            Optional.ofNullable(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(AKTØR_ID_TYPE, v));
-            // må ha minst en aktørid
-            if (abac.getVerdier(FNR_TYPE).isEmpty() && abac.getVerdier(AKTØR_ID_TYPE).isEmpty()) {
+            abac.leggTil(AppAbacAttributtType.YTELSETYPE, m.getYtelseType());
+            Optional.ofNullable(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(AppAbacAttributtType.SAKER_MED_FNR, v));
+            Optional.ofNullable(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(AppAbacAttributtType.SAKER_MED_AKTØR_ID, v));
+            // må ha minst en aktørid eller fnr
+            if (abac.getVerdier(AppAbacAttributtType.SAKER_MED_FNR).isEmpty() && abac.getVerdier(AppAbacAttributtType.SAKER_MED_AKTØR_ID).isEmpty()) {
                 throw new IllegalArgumentException("Må ha minst en aktørid eller fnr oppgitt");
             }
             return abac;

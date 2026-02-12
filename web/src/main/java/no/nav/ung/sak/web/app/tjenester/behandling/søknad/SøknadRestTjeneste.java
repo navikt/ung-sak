@@ -99,12 +99,18 @@ public class SøknadRestTjeneste {
         public AbacDataAttributter apply(Object obj) {
             var m = (HentSøknadPerioderDto) obj;
             String fødselsnummer = m.getBruker().getIdent();
-            if (fødselsnummer == null){
-                throw new IllegalArgumentException("Krever fødselsnummer her, aktørId er ikke støttet");
+            String aktørId = m.getBruker().getAktørId();
+            if (fødselsnummer == null && aktørId == null) {
+                throw new IllegalArgumentException("Krever fødselsnummer eller aktørId her, mangler begge");
             }
-            return AbacDataAttributter.opprett()
-                .leggTil(AppAbacAttributtType.SAKER_MED_FNR, fødselsnummer)
-                .leggTil(AppAbacAttributtType.YTELSETYPE, m.getYtelseType().getKode());
+            AbacDataAttributter abacAttributter = AbacDataAttributter.opprett();
+            abacAttributter.leggTil(AppAbacAttributtType.YTELSETYPE, m.getYtelseType().getKode());
+            if (fødselsnummer != null) {
+                abacAttributter.leggTil(AppAbacAttributtType.SAKER_MED_FNR, fødselsnummer);
+            } else {
+                abacAttributter.leggTil(AppAbacAttributtType.SAKER_MED_AKTØR_ID, aktørId);
+            }
+            return abacAttributter;
         }
     }
 }

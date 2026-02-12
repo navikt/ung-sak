@@ -51,8 +51,8 @@ public class HentSøknadPerioderDto {
     }
 
     @AssertTrue
-    public boolean isNorskIdent() {
-        return brukerIdent.erNorskIdent();
+    public boolean isNorskIdentEllerAktørId() {
+        return brukerIdent.erNorskIdent() || brukerIdent.erAktørId();
     }
 
 }

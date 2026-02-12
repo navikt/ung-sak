@@ -130,7 +130,10 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     }
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Set<AktørId> aktørIderForSporingslogg, Set<String> aksjonspunktType) {
-        Set<String> aktører = aktørIder.stream().map(AktørId::getId).collect(Collectors.toCollection(TreeSet::new));
+        Set<String> aktører = new TreeSet<>();
+        aktører.addAll(aktørIder.stream().map(AktørId::getId).toList());
+        aktører.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_AKTØR_ID));
+
         Set<String> fnrs = new HashSet<>();
         fnrs.addAll(attributter.getVerdier(StandardAbacAttributtType.FNR));
         fnrs.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR));
@@ -150,6 +153,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
     private static void validerAttributter(AbacAttributtSamling attributter) {
         Set<AbacAttributtType> tillatteTyper = Set.of(
             AppAbacAttributtType.SAKER_MED_FNR,
+            AppAbacAttributtType.SAKER_MED_AKTØR_ID,
             AppAbacAttributtType.DOKUMENT_ID,
             AppAbacAttributtType.OPPGAVE_ID,
             AppAbacAttributtType.YTELSETYPE,
@@ -231,6 +235,11 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         }
         Set<Saksnummer> saksnumre = new LinkedHashSet<>();
         saksnumre.addAll(attributter.getVerdier(StandardAbacAttributtType.SAKSNUMMER));
+
+        Set<AktørId> aktørIdForSaksnummerSøk = new HashSet<>();
+        aktørIdForSaksnummerSøk.addAll(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR)));
+        aktørIdForSaksnummerSøk.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_AKTØR_ID).stream().map(it -> new AktørId((String)it)).collect(Collectors.toSet()));
+
         saksnumre.addAll(pipRepository.saksnumreForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
         saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(StandardAbacAttributtType.JOURNALPOST_ID)));
         return saksnumre;
