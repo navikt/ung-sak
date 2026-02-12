@@ -138,7 +138,7 @@ public class PipRepository {
     public FagsakYtelseType hentYtelseTypeForFagsak(Saksnummer saksnummer) {
         Objects.requireNonNull(saksnummer, "saksnummer");
 
-        String sql = "SELECT ytelse_type ytelseType FROM FAGSAK where f.saksnumemr = :saksnummer";
+        String sql = "SELECT ytelse_type ytelseType FROM FAGSAK where f.saksnummer = :saksnummer";
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("saksnummer", saksnummer.getVerdi());
