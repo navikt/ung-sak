@@ -1,5 +1,6 @@
 package no.nav.ung.sak.oppgave.kafka;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.apptjeneste.AppServiceHandler;
 import no.nav.ung.sak.oppgave.typer.varsel.kafka.SvarPåVarselHendelseHåndterer;
@@ -8,13 +9,15 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+@ApplicationScoped
 public class BrukerdialogKafkaServiceHandler implements AppServiceHandler {
-
 
     private static final Logger LOG = LoggerFactory.getLogger(BrukerdialogKafkaServiceHandler.class);
 
     private KafkaConsumerManager<String, String> kcm;
 
+    public BrukerdialogKafkaServiceHandler() {
+    }
 
     @Inject
     public BrukerdialogKafkaServiceHandler(SvarPåVarselHendelseHåndterer svarPåVarselHendelseHåndterer) {
