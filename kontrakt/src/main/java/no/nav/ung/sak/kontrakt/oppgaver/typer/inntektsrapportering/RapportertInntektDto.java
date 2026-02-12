@@ -27,6 +27,9 @@ public class RapportertInntektDto extends BekreftelseDTO {
     @Max(999999)
     private BigDecimal arbeidstakerOgFrilansInntekt;
 
+    public RapportertInntektDto() {
+    }
+
     public RapportertInntektDto(LocalDate fraOgMed, LocalDate tilOgMed, BigDecimal arbeidstakerOgFrilansInntekt) {
         this.fraOgMed = fraOgMed;
         this.tilOgMed = tilOgMed;

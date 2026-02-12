@@ -18,6 +18,9 @@ public class SvarPåVarselDTO extends BekreftelseDTO {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$")
     String uttalelseFraBruker;
 
+    public SvarPåVarselDTO() {
+    }
+
     public SvarPåVarselDTO(Boolean harUttalelse, String uttalelseFraBruker) {
         this.harUttalelse = harUttalelse;
         this.uttalelseFraBruker = uttalelseFraBruker;
