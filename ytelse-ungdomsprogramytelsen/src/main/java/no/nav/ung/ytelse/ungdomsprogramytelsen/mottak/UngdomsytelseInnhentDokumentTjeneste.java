@@ -226,7 +226,7 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
         final LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
         final LocalDateTime tom = Tid.TIDENES_ENDE.plusDays(1).atStartOfDay();
         //merk at denne bare finner tasks med gruppesekvensnummer != null (hindrer at den finner seg selv eller andre av typen innhentsaksopplysninger.håndterMottattDokument)
-        final List<ProsessTaskData> åpneTasks = fagsakProsessTaskRepository.finnAlleForAngittSøk(behandling.getFagsakId(), behandling.getId().toString(), null, aktuelleStatuser, true, fom, tom);
+        final List<ProsessTaskData> åpneTasks = fagsakProsessTaskRepository.finnAlleForAngittSøk(behandling.getFagsakId(), behandling.getId().toString(), null, aktuelleStatuser, true);
         if (!åpneTasks.isEmpty()) {
             //behandlingen har åpne tasks og mottak av dokument kan føre til parallelle prosesser som går i beina på hverandre
             log.info("Fant følgende åpne tasks: [" + åpneTasks.stream().map(Object::toString).collect(Collectors.joining(", ")) + "]");
