@@ -95,7 +95,7 @@ public class FagsakRepository {
                     """,
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
-        query.setParameter("ytelseTyper", ytelsetyper.stream().map(FagsakYtelseType::getKode).collect(Collectors.toSet()));
+        query.setParameter("ytelseTyper", ytelsetyper);
         return query.getResultList();
     }
 
