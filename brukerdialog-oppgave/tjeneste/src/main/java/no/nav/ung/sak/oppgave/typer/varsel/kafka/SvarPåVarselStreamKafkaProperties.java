@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.kafka;
+package no.nav.ung.sak.oppgave.typer.varsel.kafka;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -17,9 +17,9 @@ import java.util.Properties;
 import java.util.UUID;
 
 @Dependent
-public class OppgaveBekreftelseStreamKafkaProperties {
+public class SvarPåVarselStreamKafkaProperties {
 
-    private static final Logger log = LoggerFactory.getLogger(OppgaveBekreftelseStreamKafkaProperties.class);
+    private static final Logger log = LoggerFactory.getLogger(SvarPåVarselStreamKafkaProperties.class);
     private final String bootstrapServers;
     private final String topic;
     private final String trustStorePath;
@@ -29,12 +29,12 @@ public class OppgaveBekreftelseStreamKafkaProperties {
 
     @SuppressWarnings("resource")
     @Inject
-    OppgaveBekreftelseStreamKafkaProperties(@KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServers,
-                                            @KonfigVerdi(value = "KAFKA_OPPGAVEBEKREFTELSE_TOPIC", defaultVerdi = "dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup") String topicName,
-                                            @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
-                                            @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
-                                            @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
-                                            @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword) {
+    SvarPåVarselStreamKafkaProperties(@KonfigVerdi(value = "KAFKA_BROKERS") String bootstrapServers,
+                                      @KonfigVerdi(value = "KAFKA_OPPGAVEBEKREFTELSE_TOPIC", defaultVerdi = "dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup") String topicName,
+                                      @KonfigVerdi(value = "KAFKA_TRUSTSTORE_PATH", required = false) String trustStorePath,
+                                      @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String trustStorePassword,
+                                      @KonfigVerdi(value = "KAFKA_KEYSTORE_PATH", required = false) String keyStoreLocation,
+                                      @KonfigVerdi(value = "KAFKA_CREDSTORE_PASSWORD", required = false) String keyStorePassword) {
         this.trustStorePath = trustStorePath;
         this.trustStorePassword = trustStorePassword;
         this.keyStoreLocation = keyStoreLocation;
