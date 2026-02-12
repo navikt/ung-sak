@@ -11,9 +11,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
+import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import org.junit.jupiter.api.Test;
 
@@ -139,7 +139,7 @@ public class EndringInntektScenarioer {
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
 
-        return endringMedInntekt_19år_med_kontroll(fom, tom, kontrollertInntektTidslinje);
+        return endringMedInntekt_19år_med_kontroll(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
     }
 
     /**
@@ -186,7 +186,7 @@ public class EndringInntektScenarioer {
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
 
-        return endringMedInntekt_19år_med_kontroll(fom, tom, kontrollertInntektTidslinje);
+        return endringMedInntekt_19år_med_kontroll(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
     }
 
     /**
@@ -270,10 +270,13 @@ public class EndringInntektScenarioer {
             ));
 
         var triggere = HashSet.<Trigger>newHashSet(2);
-        triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode)));
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode))); // Ikke helt korret. Triggerperiode er egentlig til slutten av måneden. Men tar en snarvei her.
         kontrollerInntektPerioder.filterValue(it -> it.getInntekt().compareTo(BigDecimal.ZERO) > 0)
             .forEach(it -> triggere.add(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(it.getLocalDateInterval()))));
 
+        List<LocalDateSegment<Utfall>> ungVilkår = List.of(
+            new LocalDateSegment<>(p.getFomDato(), tilkjentPeriode.getTomDato(), Utfall.OPPFYLT),
+            new LocalDateSegment<>(tilkjentPeriode.getTomDato().plusDays(1), p.getTomDato(), Utfall.IKKE_OPPFYLT));
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
             programPerioder,
@@ -281,7 +284,7 @@ public class EndringInntektScenarioer {
             BrevScenarioerUtils.uttaksPerioder(p),
             tilkjentYtelsePerioder,
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(ungVilkår),
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             triggere,
