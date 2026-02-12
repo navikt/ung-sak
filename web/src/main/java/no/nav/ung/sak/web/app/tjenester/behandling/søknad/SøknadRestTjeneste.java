@@ -21,8 +21,8 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.sak.abac.AppAbacAttributtType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -30,11 +30,9 @@ import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.kontrakt.søknad.HentSøknadPerioderDto;
 import no.nav.ung.sak.kontrakt.søknad.SøknadDto;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -96,22 +94,17 @@ public class SøknadRestTjeneste {
     }
 
     public static class MatchHentSøknadAttributter implements Function<Object, AbacDataAttributter> {
-        private static final StandardAbacAttributtType AKTØR_ID_TYPE = StandardAbacAttributtType.AKTØR_ID;
-        private static final StandardAbacAttributtType FNR_TYPE = StandardAbacAttributtType.FNR;
 
         @Override
         public AbacDataAttributter apply(Object obj) {
             var m = (HentSøknadPerioderDto) obj;
-            var abac = AbacDataAttributter.opprett();
-
-            Optional.ofNullable(m.getBruker()).map(PersonIdent::getIdent).ifPresent(v -> abac.leggTil(FNR_TYPE, v));
-            Optional.ofNullable(m.getBruker()).map(PersonIdent::getAktørId).ifPresent(v -> abac.leggTil(AKTØR_ID_TYPE, v));
-
-            // må ha minst en aktørid
-            if (abac.getVerdier(FNR_TYPE).isEmpty() && abac.getVerdier(AKTØR_ID_TYPE).isEmpty()) {
-                throw new IllegalArgumentException("Må ha minst en aktørid eller fnr oppgitt");
+            String fødselsnummer = m.getBruker().getIdent();
+            if (fødselsnummer == null){
+                throw new IllegalArgumentException("Krever fødselsnummer her, aktørId er ikke støttet");
             }
-            return abac;
+            return AbacDataAttributter.opprett()
+                .leggTil(AppAbacAttributtType.SAKER_MED_FNR, fødselsnummer)
+                .leggTil(AppAbacAttributtType.YTELSETYPE, m.getYtelseType().getKode());
         }
     }
 }

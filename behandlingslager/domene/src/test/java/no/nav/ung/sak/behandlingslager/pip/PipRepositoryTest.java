@@ -1,21 +1,8 @@
 package no.nav.ung.sak.behandlingslager.pip;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
-import no.nav.ung.sak.typer.Saksnummer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingslager.behandling.BasicBehandlingBuilder;
@@ -26,10 +13,20 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Journalpost;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.db.util.Repository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.sak.db.util.Repository;
+import no.nav.ung.sak.typer.Saksnummer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)

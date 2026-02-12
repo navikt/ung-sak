@@ -71,6 +71,10 @@ public class SøkeSakEllerBrukerDto {
     }
 
     @AppAbacAttributt(AppAbacAttributtType.YTELSETYPE)
+    public String getYtelseTypeKode() {
+        return ytelseType.getKode();
+    }
+
     public FagsakYtelseType getYtelseType() {
         return ytelseType;
     }

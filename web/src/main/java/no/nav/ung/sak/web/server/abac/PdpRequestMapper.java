@@ -48,14 +48,18 @@ public class PdpRequestMapper {
             Arrays.stream(AbacFagsakStatus.values())
                 .filter(v1 -> v1.getEksternKode().equals(pdpRequest.getFagsakStatusEksternKode()))
                 .findFirst().orElse(null),
-            map(pdpRequest.getFagsakYtelseTyper())
+            map(pdpRequest.getFagsakYtelseTyper(), pdpRequest.getResourceType())
         );
     }
 
-    private static AbacFagsakYtelseType map(Set<String> fagsakYtelseTyper) {
+    private static AbacFagsakYtelseType map(Set<String> fagsakYtelseTyper, BeskyttetRessursResourceType ressursResourceType) {
         List<FagsakYtelseType> ytelsetyper = fagsakYtelseTyper.stream()
             .map(FagsakYtelseType::fraKode)
             .toList();
+        boolean kreverYtelsetype = ressursResourceType == BeskyttetRessursResourceType.FAGSAK || ressursResourceType == BeskyttetRessursResourceType.VENTEFRIST;
+        if (ytelsetyper.isEmpty() && !kreverYtelsetype) {
+            return null;
+        }
         if (ytelsetyper.size() != 1) {
             throw new IllegalArgumentException("Forventet nøyaktig én fagsakYtelseType, men har: " + ytelsetyper);
         }
@@ -79,7 +83,7 @@ public class PdpRequestMapper {
 
     private static AksjonspunktType aksjonspunktTypeFraKode(String kode) {
         no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType internAksjonspunktType = no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType.fraKode(kode);
-        
+
         return switch (internAksjonspunktType) {
             case AUTOPUNKT -> AksjonspunktType.AUTOPUNKT;
             case MANUELL -> AksjonspunktType.MANUELL;

@@ -72,8 +72,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             // 3. å lage en ekte PDP-request tar tid siden det gjør oppslag mot databasen for å hente ut data
             return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
         }
-
-
         validerAttributter(attributter);
 
         Long behandlingId = utledBehandlingIder(attributter).orElse(null);
@@ -81,7 +79,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
         if (behandlingId != null) {
             LOG_CONTEXT.add("behandling", behandlingId);
-            behandlingData = pipRepository.hentDataForBehandling(behandlingId).orElseThrow(() -> new UkjentBehandlingException(behandlingId));;
+            behandlingData = pipRepository.hentDataForBehandling(behandlingId).orElseThrow(() -> new UkjentBehandlingException(behandlingId));
             LOG_CONTEXT.add("behandlingUuid", behandlingData.behandlingUuid());
         }
 
@@ -104,9 +102,21 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             if (behandlingData.ansvarligSaksbehandler() != null) {
                 pdpRequest.setAnsvarligSaksbehandler(behandlingData.ansvarligSaksbehandler());
             }
-            pdpRequest.setFagsakYtelseTyper(Set.of(behandlingData.fagsakYtelseType().getKode()));
         }
+        pdpRequest.setFagsakYtelseTyper(utledYtelsetyper(attributter, saksnumre, behandlingData));
         return pdpRequest;
+    }
+
+    private Set<String> utledYtelsetyper(AbacAttributtSamling attributter, Set<Saksnummer> saksnumre, PipBehandlingsData behandlingData) {
+        Set<String> ytelsetypeKoder = new HashSet<>();
+        if (behandlingData != null) {
+            ytelsetypeKoder.add(behandlingData.fagsakYtelseType().getKode());
+        }
+        if (attributter.getVerdier(AppAbacAttributtType.YTELSETYPE) != null) {
+            ytelsetypeKoder.addAll(attributter.getVerdier(AppAbacAttributtType.YTELSETYPE));
+        }
+        ytelsetypeKoder.addAll(pipRepository.hentYtelseTyperForFagsaker(saksnumre).stream().map(it -> it.getKode()).toList());
+        return ytelsetypeKoder;
     }
 
 
@@ -121,7 +131,9 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Set<AktørId> aktørIderForSporingslogg, Set<String> aksjonspunktType) {
         Set<String> aktører = aktørIder.stream().map(AktørId::getId).collect(Collectors.toCollection(TreeSet::new));
-        Set<String> fnrs = attributter.getVerdier(StandardAbacAttributtType.FNR);
+        Set<String> fnrs = new HashSet<>();
+        fnrs.addAll(attributter.getVerdier(StandardAbacAttributtType.FNR));
+        fnrs.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR));
 
         PdpRequestMedBerørtePersonerForAuditlogg pdpRequest = new PdpRequestMedBerørtePersonerForAuditlogg();
         pdpRequest.setActionType(attributter.getActionType());
@@ -157,7 +169,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
                 "Fikk abac-attributt-typer som ikke er støttet, endre DTO eller lag støtte for typene: " + ulovligeTyper);
         }
 
-        if (attributter.keySet().contains(AppAbacAttributtType.DOKUMENT_ID) && ! attributter.keySet().contains(StandardAbacAttributtType.JOURNALPOST_ID)) {
+        if (attributter.keySet().contains(AppAbacAttributtType.DOKUMENT_ID) && !attributter.keySet().contains(StandardAbacAttributtType.JOURNALPOST_ID)) {
             //det er journalpostId som brukes for tilgangskontroll, dokumentId er bare med for å kunne havne i auditlogg
             throw new IllegalArgumentException("Ikke støttet å ha dokumentId som abac-attributt uten å samtidig ha journalpostId.");
         }

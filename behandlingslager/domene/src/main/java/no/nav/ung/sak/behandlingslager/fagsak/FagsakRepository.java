@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.fagsak;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -78,8 +79,13 @@ public class FagsakRepository {
         return query.getResultList();
     }
 
-    // TODO: Burde kanskje ekskludere OBSOLETE her?
     public List<Fagsak> hentForBruker(AktørId aktørId) {
+        // TODO: Burde kanskje ekskludere OBSOLETE her?
+        return hentForBruker(aktørId, FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
+    }
+
+
+    public List<Fagsak> hentForBruker(AktørId aktørId, Collection<FagsakYtelseType> ytelsetyper) {
         TypedQuery<Fagsak> query = entityManager
             .createQuery("""
                     from Fagsak f
@@ -88,7 +94,7 @@ public class FagsakRepository {
                     """,
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
-        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
+        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values());
         return query.getResultList();
     }
 
@@ -213,7 +219,7 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
-    public void fjernIkkedigitalFlagg(Long fagsakId){
+    public void fjernIkkedigitalFlagg(Long fagsakId) {
         Fagsak fagsak = finnEksaktFagsak(fagsakId);
         // fjern flagg om det er en digital sak
         fagsak.setIkkeDigitalBruker(false);

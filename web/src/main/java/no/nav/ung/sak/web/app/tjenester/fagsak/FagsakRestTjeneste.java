@@ -237,7 +237,7 @@ public class FagsakRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SøkeSakEllerBrukerDto søkestreng) {
-        FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentSaker(søkestreng.getSearchString());
+        FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentSaker(søkestreng.getYtelseType(), søkestreng.getSearchString());
         return tilDtoer(view);
     }
 

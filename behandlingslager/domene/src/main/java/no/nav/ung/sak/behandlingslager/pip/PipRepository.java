@@ -155,6 +155,22 @@ public class PipRepository {
         }
     }
 
+    public Set<FagsakYtelseType> hentYtelseTyperForFagsaker(Collection<Saksnummer> saksnummer) {
+        Objects.requireNonNull(saksnummer, "saksnummer");
+        saksnummer.forEach(it -> Objects.requireNonNull(it, "saksnummer kan ikke være null"));
+
+        String sql = "SELECT distinct ytelse_type ytelseType FROM FAGSAK where saksnummer in :saksnumre";
+
+        Query query = entityManager.createNativeQuery(sql, Tuple.class);
+        query.setParameter("saksnumre", saksnummer.stream().map(Saksnummer::getVerdi).collect(Collectors.toSet()));
+
+        @SuppressWarnings("rawtypes")
+        List<Tuple> resultater = query.getResultList();
+        return resultater.stream()
+            .map(tuple -> FagsakYtelseType.fraKode(tuple.get("ytelseType", String.class)))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
     public Set<AktørId> hentAktørIdForSporingslogg(Saksnummer saksnummer) {
         return hentAktørIdForSporingslogg(Set.of(saksnummer));
     }
