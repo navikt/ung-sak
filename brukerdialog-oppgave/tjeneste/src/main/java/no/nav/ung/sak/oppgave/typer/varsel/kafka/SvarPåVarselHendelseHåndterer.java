@@ -21,7 +21,7 @@ public class SvarPåVarselHendelseHåndterer implements KafkaMessageHandler.Kafk
 
     private static final Logger log = LoggerFactory.getLogger(SvarPåVarselHendelseHåndterer.class);
 
-    private static final String GROUP_ID = "ung-sak"; // Hold konstant pga offset commit
+    private static final String GROUP_ID = "ung-oppgaver"; // Hold konstant pga offset commit
     private String topicName;
     private ProsessTaskTjeneste taskTjeneste;
 
