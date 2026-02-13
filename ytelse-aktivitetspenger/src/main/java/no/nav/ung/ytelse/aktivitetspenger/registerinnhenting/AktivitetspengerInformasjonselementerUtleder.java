@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.registerinnhenting.impl;
+package no.nav.ung.ytelse.aktivitetspenger.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
@@ -12,19 +12,22 @@ import java.util.Map;
 import java.util.Set;
 
 import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.INNTEKT_UNGDOMSYTELSEGRUNNLAG;
+import static no.nav.abakus.iaygrunnlag.request.RegisterdataType.LIGNET_NÆRING;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @BehandlingTypeRef
-public class UngdomsytelseInformasjonselementerUtleder implements InformasjonselementerUtleder {
+public class AktivitetspengerInformasjonselementerUtleder implements InformasjonselementerUtleder {
 
     private static final Map<BehandlingType, Set<RegisterdataType>> FILTER = Map.of(
         BehandlingType.FØRSTEGANGSSØKNAD,
         Set.of(
-            INNTEKT_UNGDOMSYTELSEGRUNNLAG),
+            INNTEKT_UNGDOMSYTELSEGRUNNLAG,
+            LIGNET_NÆRING),
         BehandlingType.REVURDERING,
         Set.of(
-            INNTEKT_UNGDOMSYTELSEGRUNNLAG));
+            INNTEKT_UNGDOMSYTELSEGRUNNLAG,
+            LIGNET_NÆRING));
 
     @Override
     public Set<RegisterdataType> utled(BehandlingType behandlingType) {

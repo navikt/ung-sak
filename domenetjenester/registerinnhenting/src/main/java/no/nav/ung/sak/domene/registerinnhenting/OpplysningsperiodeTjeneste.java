@@ -5,6 +5,8 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.typer.Periode;
 
+import java.util.Optional;
+
 public interface OpplysningsperiodeTjeneste {
 
     static OpplysningsperiodeTjeneste getTjeneste(Instance<OpplysningsperiodeTjeneste> instance, FagsakYtelseType ytelseType) {
@@ -12,5 +14,10 @@ public interface OpplysningsperiodeTjeneste {
     }
 
     Periode utledOpplysningsperiode(Long behandlingId, boolean tomDagensDato);
+
+
+    default Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long behandlingId) {
+        return Optional.empty();
+    };
 
 }

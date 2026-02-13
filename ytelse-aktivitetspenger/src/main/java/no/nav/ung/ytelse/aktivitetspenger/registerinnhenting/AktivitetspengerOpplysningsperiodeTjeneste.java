@@ -8,6 +8,9 @@ import no.nav.ung.sak.domene.registerinnhenting.OpplysningsperiodeTjeneste;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 
 @FagsakYtelseTypeRef(AKTIVITETSPENGER)
@@ -35,7 +38,16 @@ public class AktivitetspengerOpplysningsperiodeTjeneste implements Opplysningspe
             fagsakperiode.getFomDato().minusYears(5),
             fagsakperiode.getTomDato()
         );
+    }
 
+    @Override
+    public Optional<Periode> utledOpplysningsperiodeSkattegrunnlag(Long behandlingId) {
+        DatoIntervallEntitet fagsakPeriode = behandlingRepository.hentBehandling(behandlingId)
+            .getFagsak()
+            .getPeriode();
+        var fagsakperiodeTom = fagsakPeriode
+            .getTomDato();
+        return Optional.of(SkattegrunnlaginnhentingTjeneste.utledSkattegrunnlagOpplysningsperiode(fagsakPeriode.getFomDato(), fagsakperiodeTom, LocalDate.now()));
     }
 
 }

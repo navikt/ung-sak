@@ -368,7 +368,8 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhenteInntektOgYtelser(Behandling behandling) {
-        if (BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains)) {
+        boolean harÅrsakForInnhenting = BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER || harÅrsakForInnhenting) {
             var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
             Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
             return registerdata != null && !(registerdata.isEmpty());
