@@ -10,27 +10,18 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
-import no.nav.ung.sak.formidling.innhold.*;
+import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringBarnetilleggInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringHøySatsInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektReduksjonInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.AvslagScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.BrevScenarioerUtils;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringBarnetilleggScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringHøySatsScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringInntektScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.FørstegangsbehandlingScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.KombinasjonScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.VedtaksbrevReglerUng;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.*;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.*;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.VedtaksbrevReglerUng;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,6 +72,23 @@ class VedtaksbrevReglerTest {
     void skal_gi_ingen_brev_ved_full_ungdomsprogram_med_ingen_rapportert_inntekt_uten_ap() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
         var behandling = lagBehandling(EndringInntektScenarioer.endring0KrInntekt_19år(fom));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
+    void skal_gi_ingen_brev_ved_kontroll_siste_måned_ingen_rapportert_inntekt_uten_ap() {
+        LocalDate fom = LocalDate.of(2026, 1, 1);
+        int inntektSisteMåned = 0;
+        var behandling = lagBehandling(EndringInntektScenarioer.endringInntektSisteMåned_10dager(fom, inntektSisteMåned));
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isFalse();
