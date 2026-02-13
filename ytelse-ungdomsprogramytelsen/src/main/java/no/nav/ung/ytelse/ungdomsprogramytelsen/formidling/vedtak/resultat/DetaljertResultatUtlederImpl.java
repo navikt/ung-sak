@@ -2,8 +2,11 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.resultat;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.*;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -45,8 +48,9 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
         var kontrollertePerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId()).compress();
 
         var perioderTilVurdering = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId())
-            .combine(tilkjentYtelseTidslinje, fjernIkkeRelevanteKontrollårsaker(), JoinStyle.LEFT_JOIN)
-            .combine(kontrollertePerioderTidslinje, fjernIkkeRelevanteKontrollårsaker(), JoinStyle.LEFT_JOIN)
+            .mapValue(DetaljertResultatUtlederImpl::fjernIkkeRelevanteÅrsaker)
+            .combine(tilkjentYtelseTidslinje, DetaljertResultatUtlederImpl::fjernIkkeRelevanteKontrollårsaker, JoinStyle.LEFT_JOIN)
+            .combine(kontrollertePerioderTidslinje, DetaljertResultatUtlederImpl::fjernIkkeRelevanteKontrollårsaker, JoinStyle.LEFT_JOIN)
             .filterValue(it -> !it.isEmpty())
             .compress();
 
@@ -65,17 +69,23 @@ public class DetaljertResultatUtlederImpl implements DetaljertResultatUtleder {
 
     }
 
-    private static <T> LocalDateSegmentCombinator<Set<BehandlingÅrsakType>, T, Set<BehandlingÅrsakType>> fjernIkkeRelevanteKontrollårsaker() {
-        return (di, trigger, kontrollEllerYtelseSegment) -> {
+    // Fjerner årsaker som ikke er relevant for brev
+    private static Set<BehandlingÅrsakType> fjernIkkeRelevanteÅrsaker(Set<BehandlingÅrsakType> behandlingÅrsaker) {
+            var årsaker = new HashSet<>(behandlingÅrsaker);
+            //Rapportert inntekt er uinterressant uten kontrollert inntekt årsak
+            årsaker.remove(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT);
+            //uttalelse er uinterressant uten en annen årsak
+            årsaker.remove(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
+            return årsaker;
+    }
+
+    // Fjern kontrollårsak hvis det ikke er noen kontroll eller tilkjent ytelse i perioden
+    private static <T> LocalDateSegment<Set<BehandlingÅrsakType>> fjernIkkeRelevanteKontrollårsaker(LocalDateInterval di, LocalDateSegment<Set<BehandlingÅrsakType>> trigger, LocalDateSegment<T> kontrollEllerYtelseSegment) {
             var årsaker = new HashSet<>(trigger.getValue());
-            // Fjern kontrollårsak hvis det ikke er noen kontroll eller tilkjent ytelse i perioden
             if (kontrollEllerYtelseSegment == null) {
                 årsaker.remove(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
-                årsaker.remove(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT);
-                årsaker.remove(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
             }
             return new LocalDateSegment<>(di, årsaker);
-        };
     }
 
     private static LocalDateSegment<DetaljertResultat> bestemResultatForPeriode(LocalDateInterval p, LocalDateSegment<SamletVilkårResultatOgBehandlingÅrsaker> lhs, LocalDateSegment<TilkjentYtelseVerdi> rhs) {

@@ -122,9 +122,9 @@ public class EndringInntektScenarioer {
 
     /**
      * 19 år ungdom med
-     * 3. mnd: redusert utbetaling - kun 10 dager - 10 000 kr inntekt hele måneden
+     * Opphør 3. mnd etter 10 dager.
      */
-    public static UngTestScenario endringInntektSisteMåned_10dager_10k(LocalDate fom) {
+    public static UngTestScenario endringInntektSisteMåned_10dager(LocalDate fom, int inntektSisteMåned) {
         LocalDate førsteI3Måned = fom.plusMonths(3).withDayOfMonth(1);
         LocalDate tom = førsteI3Måned.plusDays(9);
         var registerInntektTimeline = new LocalDateTimeline<>(
@@ -132,14 +132,14 @@ public class EndringInntektScenarioer {
                 new LocalDateSegment<>(
                     førsteI3Måned,
                     tom,
-                    BigDecimal.valueOf(10000)) // månedsinntekt = 10 000 men får bare delvis.
+                    BigDecimal.valueOf(inntektSisteMåned)) // inntekt siste måned, men får bare delvis
 
             ));
 
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
 
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
+        return endringMedInntekt(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
     }
 
     /**
@@ -186,7 +186,7 @@ public class EndringInntektScenarioer {
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
 
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
+        return endringMedInntekt(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
     }
 
     /**
@@ -220,7 +220,7 @@ public class EndringInntektScenarioer {
                     true)
             )));
 
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
+        return endringMedInntekt(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
     }
 
     /**
@@ -240,16 +240,16 @@ public class EndringInntektScenarioer {
                     true)
             )));
 
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
+        return endringMedInntekt(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
     }
 
     private static UngTestScenario endringMedInntekt_19år(LocalDate fom, LocalDateTimeline<BigDecimal> registerInntektTimeline) {
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusWeeks(52).minusDays(1), kontrollertInntektTidslinje);
+        return endringMedInntekt(fom, fom.plusWeeks(52).minusDays(1), kontrollertInntektTidslinje);
     }
 
-    private static UngTestScenario endringMedInntekt_19år_med_kontroll(LocalDate fom, LocalDate tom, LocalDateTimeline<BrevScenarioerUtils.KontrollerInntektHolder> kontrollertInntektTidslinje) {
+    private static UngTestScenario endringMedInntekt(LocalDate fom, LocalDate tom, LocalDateTimeline<BrevScenarioerUtils.KontrollerInntektHolder> kontrollertInntektTidslinje) {
         var p = new LocalDateInterval(fom, tom);
         var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
 
@@ -270,9 +270,13 @@ public class EndringInntektScenarioer {
             ));
 
         var triggere = HashSet.<Trigger>newHashSet(2);
-        triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode))); // Ikke helt korret. Triggerperiode er egentlig til slutten av måneden. Men tar en snarvei her.
-        kontrollerInntektPerioder.filterValue(it -> it.getInntekt().compareTo(BigDecimal.ZERO) > 0)
-            .forEach(it -> triggere.add(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(it.getLocalDateInterval()))));
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode.getFomDato(), tilkjentPeriode.getTomDato().with(TemporalAdjusters.lastDayOfMonth()))));
+        kontrollerInntektPerioder
+            .forEach(it -> {
+                DatoIntervallEntitet periode = DatoIntervallEntitet.fra(it.getFom(), it.getTom().with(TemporalAdjusters.lastDayOfMonth()));
+                triggere.add(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, periode));
+                triggere.add(new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, periode));
+            });
 
         List<LocalDateSegment<Utfall>> ungVilkår = List.of(
             new LocalDateSegment<>(p.getFomDato(), tilkjentPeriode.getTomDato(), Utfall.OPPFYLT),
