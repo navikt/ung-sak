@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.registerinnhenting.impl;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
