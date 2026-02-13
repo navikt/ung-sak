@@ -1,21 +1,19 @@
 package no.nav.ung.sak.kontrakt.mottak;
 
-import java.util.Objects;
-
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.sak.abac.StandardAbacAttributt;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.abac.AppAbacAttributt;
+import no.nav.ung.sak.abac.AppAbacAttributtType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
+
+import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -48,11 +46,16 @@ public class FinnSak {
         return ytelseType;
     }
 
+    @AppAbacAttributt(AppAbacAttributtType.YTELSETYPE)
+    public String getYtelseTypeKode() {
+        return ytelseType.getKode();
+    }
+
     public Periode getPeriode() {
         return periode;
     }
 
-    @StandardAbacAttributt(StandardAbacAttributtType.AKTØR_ID)
+    @AppAbacAttributt(AppAbacAttributtType.SAKER_MED_AKTØR_ID)
     public String getAktorId() {
         return aktørId.getId();
     }

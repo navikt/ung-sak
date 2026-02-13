@@ -14,6 +14,7 @@ public enum AppAbacAttributtType implements AbacAttributtType {
      */
     OPPGAVE_ID,
     SAKER_MED_FNR(true),
+    SAKER_MED_AKTØR_ID(true),
 
     YTELSETYPE;
 

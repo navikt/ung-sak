@@ -8,6 +8,7 @@ import jakarta.persistence.Tuple;
 import jakarta.persistence.TypedQuery;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -43,7 +44,8 @@ public class PipRepository {
                b.behandling_status behandlingStatus,
                b.ansvarlig_saksbehandler ansvarligSaksbehandler,
                f.fagsak_status fagsakStatus,
-               f.saksnummer
+               f.saksnummer,
+               f.ytelse_type fagsakYtelseType
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
              WHERE b.id = :behandlingId""";
@@ -69,7 +71,8 @@ public class PipRepository {
             BehandlingStatus.fraKode(t.get("behandlingStatus", String.class)),
             FagsakStatus.fraKode(t.get("fagsakStatus", String.class)),
             t.get("ansvarligSaksbehandler", String.class),
-            new Saksnummer(t.get("saksnummer", String.class))
+            new Saksnummer(t.get("saksnummer", String.class)),
+            FagsakYtelseType.fraKode(t.get("fagsakYtelseType", String.class))
         );
     }
 
@@ -83,6 +86,7 @@ public class PipRepository {
                 b.behandling_status behandlingStatus,
                 b.ansvarlig_saksbehandler ansvarligSaksbehandler,
                 f.fagsak_status fagsakStatus,
+                f.ytelse_type fagsakYtelseType,
                 f.saksnummer
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
@@ -129,6 +133,42 @@ public class PipRepository {
         @SuppressWarnings("unchecked")
         List<String> aktørIdList = query.getResultList();
         return aktørIdList.stream().map(AktørId::new).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public FagsakYtelseType hentYtelseTypeForFagsak(Saksnummer saksnummer) {
+        Objects.requireNonNull(saksnummer, "saksnummer");
+
+        String sql = "SELECT ytelse_type ytelseType FROM FAGSAK where f.saksnummer = :saksnummer";
+
+        Query query = entityManager.createNativeQuery(sql, Tuple.class);
+        query.setParameter("saksnummer", saksnummer.getVerdi());
+
+        @SuppressWarnings("rawtypes")
+        List<Tuple> resultater = query.getResultList();
+        if (resultater.isEmpty()) {
+            return null;
+        } else if (resultater.size() == 1) {
+            Tuple tuple = resultater.getFirst();
+            return FagsakYtelseType.fraKode(tuple.get("ytelseType", String.class));
+        } else {
+            throw new IllegalStateException("Forventet 0 eller 1 treff etter søk på saksnummer, fikk flere for saksnummer " + saksnummer);
+        }
+    }
+
+    public Set<FagsakYtelseType> hentYtelseTyperForFagsaker(Collection<Saksnummer> saksnummer) {
+        Objects.requireNonNull(saksnummer, "saksnummer");
+        saksnummer.forEach(it -> Objects.requireNonNull(it, "saksnummer kan ikke være null"));
+
+        String sql = "SELECT distinct ytelse_type ytelseType FROM FAGSAK where saksnummer in :saksnumre";
+
+        Query query = entityManager.createNativeQuery(sql, Tuple.class);
+        query.setParameter("saksnumre", saksnummer.stream().map(Saksnummer::getVerdi).collect(Collectors.toSet()));
+
+        @SuppressWarnings("rawtypes")
+        List<Tuple> resultater = query.getResultList();
+        return resultater.stream()
+            .map(tuple -> FagsakYtelseType.fraKode(tuple.get("ytelseType", String.class)))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Set<AktørId> hentAktørIdForSporingslogg(Saksnummer saksnummer) {

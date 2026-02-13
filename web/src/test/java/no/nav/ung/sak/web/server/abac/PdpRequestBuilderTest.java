@@ -10,6 +10,7 @@ import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.abac.AppAbacAttributtType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
@@ -64,7 +65,7 @@ public class PdpRequestBuilderTest {
         String ansvarligSaksbehandler = "Z123456";
         FagsakStatus fagsakStatus = FagsakStatus.UNDER_BEHANDLING;
         when(pipRepository.hentDataForBehandling(any()))
-            .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, fagsakStatus, ansvarligSaksbehandler, SAKSNUMMER_1)));
+            .thenReturn(Optional.of(new PipBehandlingsData(UUID.randomUUID(), behandligStatus, fagsakStatus, ansvarligSaksbehandler, SAKSNUMMER_1, FagsakYtelseType.UNGDOMSYTELSE)));
 
         PdpRequest request = requestBuilder.lagPdpRequest(attributter);
         assertThat(request.getAktørIder()).containsOnly(new no.nav.k9.felles.sikkerhet.abac.AktørId(AKTØR_1.getId()));
@@ -192,7 +193,7 @@ public class PdpRequestBuilderTest {
         Saksnummer saksnummer = new Saksnummer("ABC");
         when(pipRepository.finnSaksnumerSomEksisterer(any())).thenReturn(Set.of(new Saksnummer("XXX")));
         when(pipRepository.hentDataForBehandling(1234L)).thenReturn(
-            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET, FagsakStatus.OPPRETTET, "Z1234", saksnummer)));
+            Optional.of(new PipBehandlingsData(UUID.randomUUID(), BehandlingStatus.OPPRETTET, FagsakStatus.OPPRETTET, "Z1234", saksnummer,FagsakYtelseType.UNGDOMSYTELSE)));
 
         // Assert
         Assertions.assertThrows(ManglerTilgangException.class, () -> {
