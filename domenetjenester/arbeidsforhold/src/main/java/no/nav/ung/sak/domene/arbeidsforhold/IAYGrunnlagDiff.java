@@ -31,8 +31,8 @@ public class IAYGrunnlagDiff {
         } else if (eksisterende.isEmpty()) {
             return false;
         } else {
-            var eksisterendeInntektFilter = new InntektFilter(eksisterende).i(perioder);
-            var nyeInntektFilter = new InntektFilter(nye).i(perioder);
+            var eksisterendeInntektFilter = new InntektFilter(eksisterende).før(perioder);
+            var nyeInntektFilter = new InntektFilter(nye).før(perioder);
             if (eksisterendeInntektFilter.getFiltrertInntektsposter().size() != nyeInntektFilter.getFiltrertInntektsposter().size()) {
                 return true;
             }
