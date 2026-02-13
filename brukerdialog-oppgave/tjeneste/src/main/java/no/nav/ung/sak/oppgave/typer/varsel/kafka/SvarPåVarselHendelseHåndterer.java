@@ -22,6 +22,7 @@ public class SvarPåVarselHendelseHåndterer implements KafkaMessageHandler.Kafk
     private static final Logger log = LoggerFactory.getLogger(SvarPåVarselHendelseHåndterer.class);
 
     private static final String GROUP_ID = "ung-varsel-bekreftelse"; // Hold konstant pga offset commit
+    private boolean oppgaverIUngsakEnabled;
     private String topicName;
     private ProsessTaskTjeneste taskTjeneste;
 
@@ -30,8 +31,10 @@ public class SvarPåVarselHendelseHåndterer implements KafkaMessageHandler.Kafk
 
     @Inject
     public SvarPåVarselHendelseHåndterer(
+        @KonfigVerdi(value = "OPPGAVER_I_UNGSAK_ENABLED", defaultVerdi = "true") boolean oppgaverIUngsakEnabled,
         @KonfigVerdi(value = "KAFKA_OPPGAVEBEKREFTELSE_TOPIC", defaultVerdi = "dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup") String topicName,
         ProsessTaskTjeneste taskTjeneste) {
+        this.oppgaverIUngsakEnabled = oppgaverIUngsakEnabled;
         this.topicName = topicName;
         this.taskTjeneste = taskTjeneste;
     }
@@ -64,6 +67,11 @@ public class SvarPåVarselHendelseHåndterer implements KafkaMessageHandler.Kafk
     @Override
     public String topic() {
         return topicName;
+    }
+
+    @Override
+    public boolean enabled() {
+        return oppgaverIUngsakEnabled;
     }
 
     @Override

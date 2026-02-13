@@ -91,7 +91,7 @@ public class KafkaConsumerManager<K,V> {
                 consumer = new KafkaConsumer<>(props, key, value);
                 consumer.subscribe(List.of(handler.topic()));
                 running.set(RUNNING);
-                while (running.get() == RUNNING) {
+                while (running.get() == RUNNING && handler.enabled()) {
                     var records = consumer.poll(POLL_TIMEOUT);
                     for (var record : records) {
                         handler.handleRecord(record.key(), record.value());
