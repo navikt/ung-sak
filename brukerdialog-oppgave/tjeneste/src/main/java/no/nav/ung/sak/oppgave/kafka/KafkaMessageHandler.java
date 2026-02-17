@@ -11,11 +11,6 @@ public interface KafkaMessageHandler<K,V> {
 
     void handleRecord(K key, V value);
 
-    // Feature toggling - implement if the handler should be enabled. Default is enabled.
-    default boolean enabled() {
-        return true;
-    }
-
     // Configuration
     String topic();
     String groupId(); // Keep stable (or it will read from autoOffsetReset()
