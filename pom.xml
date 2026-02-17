@@ -43,12 +43,12 @@
         <felles.version>10.1.1</felles.version>
         <swagger.version>2.2.42</swagger.version>
         <junit.version>6.0.2</junit.version>
-        <k9format.version>12.8.4</k9format.version>
+        <k9format.version>12.9.0</k9format.version>
         <jackson.version>2.21.0</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.10</kotlin-stdlib.version>
         <jandex.version>3.5.3</jandex.version>
-        <pdfgen-core.version>1.1.70</pdfgen-core.version>
+        <pdfgen-core.version>1.1.72</pdfgen-core.version>
         <flyway.version>11.20.0</flyway.version>
         <confluent.platform.version>8.1.1</confluent.platform.version>
         <mockito.version>5.21.0</mockito.version>
@@ -419,7 +419,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
-                <version>2.6.3</version>
+                <version>2.6.4</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
