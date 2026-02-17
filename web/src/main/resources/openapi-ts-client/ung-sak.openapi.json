@@ -9634,6 +9634,33 @@
         "tags" : [ "nav-ansatt" ]
       }
     },
+    "/api/selftest" : {
+      "get" : {
+        "operationId" : "doSelftest",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "Content-Type",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "json",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { },
+              "text/html" : { }
+            },
+            "description" : "default response"
+          }
+        }
+      }
+    },
     "/api/statistikk/forvaltning/antall-deltakere" : {
       "post" : {
         "description" : "Lister ut antall deltakere med ulike sats-typer for en dato",
