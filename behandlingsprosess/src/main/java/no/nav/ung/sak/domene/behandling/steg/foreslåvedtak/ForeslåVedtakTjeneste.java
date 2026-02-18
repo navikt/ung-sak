@@ -124,8 +124,8 @@ class ForeslåVedtakTjeneste {
                 aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
             }
             else {
-                throw new IllegalStateException(String.format("Ingen brev implementert - må håndteres manuelt. Forklaring: "
-                    + totalResultat.forklaringer()));
+                throw new IllegalStateException(String.format("Ingen brev implementert - må håndteres manuelt.  "
+                    + totalResultat.safePrint()));
 
             }
         }
