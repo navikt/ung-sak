@@ -8,25 +8,33 @@ import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
-import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class FinnGjennomsnittligPGI {
 
-    public static LocalDateTimeline<BigDecimal> finnGjennomsnittligPGI(LocalDate sisteTilgjengeligeGSnittÅr, List<Inntektspost> inntekter) {
+    public static Map<Year, BigDecimal> finnGjennomsnittligPGI(LocalDate sisteTilgjengeligeGSnittÅr, List<Inntektspost> inntekter) {
         LocalDateTimeline<Grunnbeløp> gsnittTidsserie = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
-        LocalDateTimeline<BigDecimal> inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(sisteTilgjengeligeGSnittÅr.getYear()),1);
+        LocalDateTimeline<BigDecimal> inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(sisteTilgjengeligeGSnittÅr.getYear()), 1);
 
-        LocalDateTimeline<PgiUtregner> inntektTidsserie = lagInntektstidslinjeOgOpprettPgiUtregner(inntekter);
-        return inntektTidsserie
-            .intersection(gsnittTidsserie, leggTilGrunnbeløpSnitt())
-            .intersection(inflasjonsfaktorTidsserie, leggTilInflasjonsfaktor())
-            .mapValue(PgiUtregner::beregnPGI);
+        var årsinntekter = lagÅrsinntektTidslinje(inntekter);
+        return årsinntekter.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue()
+                    .intersection(gsnittTidsserie, leggTilGrunnbeløpSnitt())
+                    .intersection(inflasjonsfaktorTidsserie, leggTilInflasjonsfaktor())
+                    .mapValue(PgiUtregner::beregnPGI)
+                    .stream()
+                    .map(LocalDateSegment::getValue)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+            ));
     }
 
     private static LocalDateSegmentCombinator<PgiUtregner, Grunnbeløp, PgiUtregner> leggTilGrunnbeløpSnitt() {
@@ -43,16 +51,29 @@ public class FinnGjennomsnittligPGI {
         };
     }
 
-    private static LocalDateTimeline<PgiUtregner> lagInntektstidslinjeOgOpprettPgiUtregner(List<Inntektspost> inntekter) {
-        var inntektsegmenter = inntekter.stream()
+    private static Map<Year, LocalDateTimeline<PgiUtregner>> lagÅrsinntektTidslinje(List<Inntektspost> inntekter) {
+        return inntekter.stream()
             .filter(ip -> !InntektspostType.YTELSE.equals(ip.getInntektspostType()))
-            .map(inntektspost -> {
-                var interval = new LocalDateInterval(inntektspost.getPeriode().getFomDato(), inntektspost.getPeriode().getTomDato());
-                return new LocalDateSegment<>(interval, new PgiUtregner(inntektspost.getBeløp()));
-            })
-            .sorted().toList();
-
-        return new LocalDateTimeline<>(inntektsegmenter);
+            .collect(Collectors.groupingBy(
+                ip -> Year.of(ip.getPeriode().getFomDato().getYear()),
+                Collectors.reducing(
+                    BigDecimal.ZERO,
+                    ip -> ip.getBeløp().getVerdi(),
+                    BigDecimal::add
+                )
+            ))
+            .entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> {
+                    var år = entry.getKey();
+                    var segment = new LocalDateSegment<>(
+                        new LocalDateInterval(år.atDay(1), år.atMonth(12).atEndOfMonth()),
+                        new PgiUtregner(entry.getValue())
+                    );
+                    return new LocalDateTimeline<>(List.of(segment));
+                }
+            ));
     }
 
     static class PgiUtregner {
@@ -60,8 +81,8 @@ public class FinnGjennomsnittligPGI {
         BigDecimal grunnbeløpSnitt;
         BigDecimal inflasjonsfaktor;
 
-        public PgiUtregner(Beløp pgInntekt) {
-            this.pgInntekt = pgInntekt.getVerdi();
+        public PgiUtregner(BigDecimal pgInntekt) {
+            this.pgInntekt = pgInntekt;
         }
 
         public PgiUtregner setGrunnbeløpSnitt(BigDecimal grunnbeløpSnitt) {
@@ -79,13 +100,19 @@ public class FinnGjennomsnittligPGI {
         }
 
         private BigDecimal beregnBidragTilPgi() {
+            if (grunnbeløpSnitt == null) {
+                return pgInntekt;
+            }
+
             if (pgInntekt.compareTo(grunnbeløpSnitt(6)) < 1) {
                 return pgInntekt;
             } else {
-                var pgBidragMellomSeksOgTolvG = (pgInntekt.min(grunnbeløpSnitt(12)).subtract(grunnbeløpSnitt(6)))
+                var avgrensetMot12G = pgInntekt.min(grunnbeløpSnitt(12));
+                var pgBidragMellomSeksOgTolvG = (avgrensetMot12G.subtract(grunnbeløpSnitt(6)))
                     .divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_EVEN);
 
-                return pgBidragMellomSeksOgTolvG.add(grunnbeløpSnitt(6));
+                var gsnitt6 = grunnbeløpSnitt(6);
+                return pgBidragMellomSeksOgTolvG.add(gsnitt6);
             }
         }
 
