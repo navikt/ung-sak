@@ -22,6 +22,7 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.barnetillegg.BeregnDagsatsInput;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.barnetillegg.FødselOgDødInfo;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningStegTjeneste;
 
 import java.util.List;
 import java.util.function.Function;
@@ -36,6 +37,7 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private VilkårTjeneste vilkårTjeneste;
+    private BeregningStegTjeneste beregningStegTjeneste;
 
     AktivitetspengerBeregningSteg() {
     }
@@ -44,11 +46,13 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
     public AktivitetspengerBeregningSteg(BasisPersonopplysningTjeneste personopplysningTjeneste,
                                          BehandlingRepository behandlingRepository,
                                          UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-                                         VilkårTjeneste vilkårTjeneste) {
+                                         VilkårTjeneste vilkårTjeneste,
+                                         BeregningStegTjeneste beregningStegTjeneste) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
+        this.beregningStegTjeneste = beregningStegTjeneste;
     }
 
 
@@ -66,6 +70,10 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
         var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
         var satsTidslinje = AktivitetspengerBeregnDagsats.beregnDagsats(beregnDagsatsInput);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
+
+        var virkningstidspunkt = oppfyltVilkårTidslinje.getMinLocalDate();
+        beregningStegTjeneste.utførBesteberegning(behandling.getId(), virkningstidspunkt);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

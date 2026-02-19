@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.diff.DiffIgnore;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -32,11 +33,13 @@ public class BesteBeregningGrunnlag {
     @Column(name = "aarsinntekt_beste_beregning", nullable = false, updatable = false)
     private BigDecimal årsinntektBesteBeregning;
 
-    @ChangeTracked
+    @Lob
+    @DiffIgnore
     @Column(name = "regel_input", nullable = false, updatable = false, length = 10000)
     private String regelInput;
 
-    @ChangeTracked
+    @Lob
+    @DiffIgnore
     @Column(name = "regel_sporing", nullable = false, updatable = false, length = 100000)
     private String regelSporing;
 
