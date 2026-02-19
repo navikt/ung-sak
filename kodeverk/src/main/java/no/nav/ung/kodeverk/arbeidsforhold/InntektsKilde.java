@@ -11,6 +11,7 @@ public enum InntektsKilde implements Kodeverdi {
 
     UDEFINERT("-", "Ikke definert", null),
     INNTEKT_UNGDOMSYTELSE("INNTEKT_UNGDOMSYTELSE", "INNTEKT_UNGDOMSYTELSE", null),
+    SIGRUN("SIGRUN", "Sigrun", null),
     @Deprecated(forRemoval = true)
     INNTEKT_SAMMENLIGNING("INNTEKT_SAMMENLIGNING", "INNTEKT_SAMMENLIGNING", null);
 

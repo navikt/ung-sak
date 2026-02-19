@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.registerinnhenting.impl;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -7,6 +7,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.domene.registerinnhenting.OpplysningsperiodeTjeneste;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
+
+import java.util.Optional;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 

@@ -149,7 +149,7 @@
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.4.1</version>
+                <version>1.5.2</version>
             </dependency>
 
             <dependency>
