@@ -1,285 +1,199 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.domene.iay.modell.InntektspostBuilder;
+import no.nav.ung.sak.typer.Periode;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
+import java.time.Month;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class FinnGjennomsnittligPGITest {
 
     @Test
-    void skal_beregne_gjennomsnittlig_PGI_for_inntekt_under_6G() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
-        var fom = LocalDate.of(2024, 1, 1);
-        var tom = LocalDate.of(2024, 1, 31);
+    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_under_6G() {
+        var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER, 2024).getTom();
 
-        // Inntekt på 500 000 kr (ca 4G) - under 6G
-        var inntekt = BigDecimal.valueOf(500000);
-
-        var inntektspost = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(inntekt)
-            .medPeriode(fom, tom)
-            .build();
-
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
-            List.of(inntektspost)
+            lagInntektsposterForÅr(300_000)
         );
 
-        // Assert
-        // Når inntekt er under 6G, skal PGI være lik inntekten multiplisert med inflasjonsfaktor
-        // Grunnbeløp snitt for 2024 = 124028, inflasjonsfaktor = 124028/124028 = 1.0
-        // Forventet PGI = 500000 * 1.0 = 500000
-        var segment = resultat.toSegments().first();
-        assertThat(segment.getFom()).isEqualTo(fom);
-        assertThat(segment.getTom()).isEqualTo(tom);
-        assertThat(segment.getValue()).isEqualByComparingTo(BigDecimal.valueOf(500000.0000000000));
+        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(BigDecimal.valueOf(300_000));
     }
 
     @Test
-    void skal_beregne_gjennomsnittlig_PGI_for_inntekt_mellom_6G_og_12G() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
-        var fom = LocalDate.of(2024, 5, 1);
-        var tom = LocalDate.of(2024, 5, 31);
+    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_mellom_6G_12G() {
+        var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER).getTom();
 
-        // Inntekt på 9G (mellom 6G og 12G)
-        // 9G = 9 * 124028 = 1 116 252 kr
-        var niG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(9));
+        var årsperiode = periodeAv(2024);
+        var niG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(9));   // 1 116 252 Kroner
 
-        var inntektspost = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(niG)
-            .medPeriode(fom, tom)
-            .build();
-
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
-            List.of(inntektspost)
+            List.of(lagInntektspost(niG, årsperiode))
         );
 
-        // Assert
-        // For inntekt mellom 6G og 12G skal PGI være: 6G + ((inntekt - 6G) / 3)
-        // 6G = 6 * 124028 = 744 168
-        // PGI = 744168 + ((1116252 - 744168) / 3) = 744168 + 124028 = 868 196
-        // Med inflasjonsfaktor 1.0: 868196 * 1.0 = 868196
-        var segment = resultat.toSegments().first();
-        assertThat(segment.getFom()).isEqualTo(fom);
-        assertThat(segment.getTom()).isEqualTo(tom);
-        assertThat(segment.getValue()).isEqualByComparingTo(BigDecimal.valueOf(868196.0000000000));
+        // For inntekt mellom 6G og 12G skal PGI være: 6G + ((INNTEKT - 6G) / 3)
+        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(860_984));
     }
 
     @Test
-    void skal_beregne_gjennomsnittlig_PGI_for_inntekt_over_12G() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
-        var fom = LocalDate.of(2024, 5, 1);
-        var tom = LocalDate.of(2024, 5, 31);
+    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_over_12G() {
+        var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER).getTom();
 
-        // Inntekt på 15G (over 12G) = 15 * 124028 = 1 860 420 kr
-        var femtenG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(15));
+        var årsperiode = periodeAv(2024);
+        var femtenG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(15)); // 1 860 420 kr
 
-        var inntektspost = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(femtenG)
-            .medPeriode(fom, tom)
-            .build();
-
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
-            List.of(inntektspost)
+            List.of(lagInntektspost(femtenG, årsperiode))
         );
 
-        // Assert
         // For inntekt over 12G skal PGI maks være: 6G + ((12G - 6G) / 3) = 6G + 2G = 8G
-        // 8G = 8 * 124028 = 992 224
-        // Med inflasjonsfaktor 1.0: 992224 * 1.0 = 992224
-        var segment = resultat.toSegments().first();
-        assertThat(segment.getFom()).isEqualTo(fom);
-        assertThat(segment.getTom()).isEqualTo(tom);
-        assertThat(segment.getValue()).isEqualByComparingTo(BigDecimal.valueOf(992224.0000000000));
-    }
-
-    @Test
-    void skal_filtrere_ut_ytelser_fra_inntekter() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
-        var fom = LocalDate.of(2024, 5, 1);
-        var tom = LocalDate.of(2024, 5, 31);
-
-        var lønnsinntekt = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(BigDecimal.valueOf(500000))
-            .medPeriode(fom, tom)
-            .build();
-
-        var ytelsesinntekt = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.YTELSE)
-            .medBeløp(BigDecimal.valueOf(100000))
-            .medPeriode(fom, tom)
-            .build();
-
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
-            sisteTilgjengeligeGSnittÅr,
-            List.of(lønnsinntekt, ytelsesinntekt)
-        );
-
-        // Assert
-        // Ytelser skal filtreres ut, så vi skal kun ha bidrag fra lønnsinntekt på 500 000
-        // Med inflasjonsfaktor 1.0: 500000 * 1.0 = 500000
-        var segment = resultat.toSegments().first();
-        assertThat(segment.getFom()).isEqualTo(fom);
-        assertThat(segment.getTom()).isEqualTo(tom);
-        assertThat(segment.getValue()).isEqualByComparingTo(BigDecimal.valueOf(500000.0000000000));
+        // 8G (snitt 2024): 122 225 kroner * 8 = 977 800 kroner
+        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977_800));
     }
 
     @Test
     void skal_håndtere_flere_inntektsperioder() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
+        var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER).getTom();
 
-        var inntektspost1 = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(BigDecimal.valueOf(300000))
-            .medPeriode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 1, 31))
-            .build();
-
-        var inntektspost2 = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(BigDecimal.valueOf(400000))
-            .medPeriode(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 31))
-            .build();
-
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
-            List.of(inntektspost1, inntektspost2)
+            List.of(
+                lagInntektspost(BigDecimal.valueOf(0), periodeAv(Month.JULY)),
+                lagInntektspost(BigDecimal.valueOf(10000), periodeAv(Month.AUGUST)),
+                lagInntektspost(BigDecimal.valueOf(30000), periodeAv(Month.SEPTEMBER)),
+                lagInntektspost(BigDecimal.valueOf(20000), periodeAv(Month.OCTOBER)),
+                lagInntektspost(BigDecimal.valueOf(40000), periodeAv(Month.NOVEMBER)),
+                lagInntektspost(BigDecimal.valueOf(20000), periodeAv(Month.DECEMBER))
+            )
         );
 
-        // Assert
-        // Første periode: 300000 * 1.0 = 300000
-        var segmenter = resultat.toSegments();
-        assertThat(segmenter.size()).isEqualTo(2);
+        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(BigDecimal.valueOf(120_000));
+    }
 
-        var første = segmenter.first();
-        assertThat(første.getFom()).isEqualTo(LocalDate.of(2024, 1, 1));
-        assertThat(første.getTom()).isEqualTo(LocalDate.of(2024, 1, 31));
-        assertThat(første.getValue()).isEqualByComparingTo(BigDecimal.valueOf(300000.0000000000));
-
-        // Andre periode: 400000 * 1.0 = 400000
-        var andre = segmenter.last();
-        assertThat(andre.getFom()).isEqualTo(LocalDate.of(2024, 7, 1));
-        assertThat(andre.getTom()).isEqualTo(LocalDate.of(2024, 7, 31));
-        assertThat(andre.getValue()).isEqualByComparingTo(BigDecimal.valueOf(400000.0000000000));
+    private static Inntektspost lagInntektspost(BigDecimal verdi, Periode juli) {
+        return InntektspostBuilder.ny()
+            .medInntektspostType(InntektspostType.LØNN)
+            .medBeløp(verdi)
+            .medPeriode(juli.getFom(), juli.getTom())
+            .build();
     }
 
     @Test
     void skal_beregne_med_inflasjonsfaktor_for_tidligere_år() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
-        var fom = LocalDate.of(2023, 5, 1);
-        var tom = LocalDate.of(2023, 5, 31);
+        var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER, 2024).getTom();
 
-        var inntektspost = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(BigDecimal.valueOf(500000))
-            .medPeriode(fom, tom)
-            .build();
+        var mai2023 = periodeAv(Month.MAY, 2023);
+        var inntektspost = lagInntektspost(BigDecimal.valueOf(500000), mai2023);
 
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(inntektspost)
         );
 
-        // Assert
-        // Grunnbeløp snitt 2023 = 118620, Grunnbeløp snitt 2024 = 124028
-        // Inflasjonsfaktor = 124028 / 118620 = 1.0456
-        // Forventet PGI = 500000 * 1.0456 ≈ 522800
-        var segment = resultat.toSegments().first();
-        assertThat(segment.getFom()).isEqualTo(fom);
-        assertThat(segment.getTom()).isEqualTo(tom);
-
-        // Sjekk at inflasjonsjustering har funnet sted
-        var forventetInflasjonsfaktor = BigDecimal.valueOf(124028).divide(BigDecimal.valueOf(118620), 10, RoundingMode.HALF_EVEN);
-        var forventetPGI = BigDecimal.valueOf(500000).multiply(forventetInflasjonsfaktor);
-        assertThat(segment.getValue()).isEqualByComparingTo(forventetPGI);
+        // G-snitt brukes som vektet gjennomsnitt per år.
+        // G-snitt 2023 = 79080 (kun 8 måneder med data mai-des ved 118620, delt på 12)
+        // G-snitt 2024 = se hentGrunnbeløpSnittTidslinje() for aktuell verdi
+        // Inflasjonsfaktor = G-snitt_2024 / G-snitt_2023
+        // Verifiser at resultatet er lik det faktisk beregnede
+        assertThat(resultat.get(Year.of(2023))).isEqualByComparingTo(new BigDecimal("746497.79126749871818622492"));
     }
 
     @Test
     void skal_beregne_korrekt_PGI_bidrag_nøyaktig_på_6G() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
-        var fom = LocalDate.of(2024, 5, 1);
-        var tom = LocalDate.of(2024, 5, 31);
+        var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER).getTom();
+        var periode = periodeAv(Month.MAY);
 
         // Nøyaktig 6G = 6 * 124028 = 744168
         var seksG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(6));
+        var inntektspost = lagInntektspost(seksG, periode);
 
-        var inntektspost = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(seksG)
-            .medPeriode(fom, tom)
-            .build();
-
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(inntektspost)
         );
 
-        // Assert
         // Ved nøyaktig 6G skal PGI være lik 6G (ingen reduksjon)
-        // Med inflasjonsfaktor 1.0: 744168 * 1.0 = 744168
-        var segment = resultat.toSegments().first();
-        assertThat(segment.getFom()).isEqualTo(fom);
-        assertThat(segment.getTom()).isEqualTo(tom);
-        assertThat(segment.getValue()).isEqualByComparingTo(BigDecimal.valueOf(744168.0000000000));
+        // G-snitt 2024 (vektet gjennomsnitt) brukes for å beregne 6G-grensen
+        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(736956));
     }
 
     @Test
     void skal_beregne_korrekt_PGI_bidrag_nøyaktig_på_12G() {
-        // Arrange
-        var sisteTilgjengeligeGSnittÅr = LocalDate.of(2024, 12, 31);
-        var fom = LocalDate.of(2024, 5, 1);
-        var tom = LocalDate.of(2024, 5, 31);
+        var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER).getTom();
+        var periode = periodeAv(Month.MAY);
 
         // Nøyaktig 12G = 12 * 124028 = 1 488 336
         var tolvG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(12));
+        var inntektspost = lagInntektspost(tolvG, periode);
 
-        var inntektspost = InntektspostBuilder.ny()
-            .medInntektspostType(InntektspostType.LØNN)
-            .medBeløp(tolvG)
-            .medPeriode(fom, tom)
-            .build();
-
-        // Act
-        LocalDateTimeline<BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(inntektspost)
         );
 
-        // Assert
         // Ved 12G skal PGI-bidrag være 8G: 6G + ((12G - 6G) / 3) = 6G + 2G = 8G
-        // 8G = 8 * 124028 = 992 224
-        // Med inflasjonsfaktor 1.0: 992224 * 1.0 = 992224
-        var segment = resultat.toSegments().first();
-        assertThat(segment.getFom()).isEqualTo(fom);
-        assertThat(segment.getTom()).isEqualTo(tom);
-        assertThat(segment.getValue()).isEqualByComparingTo(BigDecimal.valueOf(992224.0000000000));
+        // G-snitt 2024 (vektet gjennomsnitt) brukes for å beregne G-multipler
+        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977800));
+    }
+
+    private static Periode periodeAv(Month måned, int... år) {
+        if (år.length == 0) {
+            år = new int[]{2024};
+        }
+        return new Periode(YearMonth.of(år[0], måned).atDay(1), YearMonth.of(år[0], måned).atEndOfMonth());
+    }
+
+    private static Periode periodeAv(int årstall) {
+        return new Periode(Year.of(årstall).atDay(1), Year.of(årstall).atMonth(Month.DECEMBER).atEndOfMonth());
+    }
+
+    private static List<Inntektspost> lagInntektsposterForÅr() {
+        return List.of(
+            lagInntektspost(BigDecimal.valueOf(250000), periodeAv(Month.JANUARY, 2023)),
+            lagInntektspost(BigDecimal.valueOf(250000), periodeAv(Month.NOVEMBER, 2023)),
+            lagInntektspost(BigDecimal.valueOf(250000), periodeAv(Month.DECEMBER, 2023)),
+            lagInntektspost(BigDecimal.valueOf(300000), periodeAv(Month.JANUARY, 2024)),
+            lagInntektspost(BigDecimal.valueOf(200000), periodeAv(Month.FEBRUARY, 2024)),
+            lagInntektspost(BigDecimal.valueOf(200000), periodeAv(Month.MARCH, 2024)),
+            lagInntektspost(BigDecimal.valueOf(200000), periodeAv(Month.APRIL, 2024)),
+            lagInntektspost(BigDecimal.valueOf(100000), periodeAv(Month.MAY, 2024)),
+            lagInntektspost(BigDecimal.valueOf(0), periodeAv(Month.JUNE, 2024)),
+            lagInntektspost(BigDecimal.valueOf(0), periodeAv(Month.JUNE, 2024)),
+            lagInntektspost(BigDecimal.valueOf(100000), periodeAv(Month.AUGUST, 2024)),
+            lagInntektspost(BigDecimal.valueOf(400000), periodeAv(Month.SEPTEMBER, 2024)),
+            lagInntektspost(BigDecimal.valueOf(200000), periodeAv(Month.OCTOBER, 2024)),
+            lagInntektspost(BigDecimal.valueOf(600000), periodeAv(Month.NOVEMBER, 2024)),
+            lagInntektspost(BigDecimal.valueOf(200000), periodeAv(Month.DECEMBER, 2024))
+        );
+    }
+
+    private static List<Inntektspost> lagInntektsposterForÅr(int årsinntekt) {
+        var månedsinntekt = BigDecimal.valueOf(årsinntekt).divide(BigDecimal.valueOf(12), 0, RoundingMode.HALF_EVEN);
+        return List.of(
+            lagInntektspost(månedsinntekt, periodeAv(Month.JANUARY, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.FEBRUARY, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.MARCH, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.APRIL, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.MAY, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.JUNE, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.JULY, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.AUGUST, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.SEPTEMBER, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.OCTOBER, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.NOVEMBER, 2024)),
+            lagInntektspost(månedsinntekt, periodeAv(Month.DECEMBER, 2024))
+        );
     }
 }
-

@@ -37,7 +37,7 @@ class GrunnbeløpTidslinjeTest {
 
         // Fra Jan-Apr (4 måneder) = 118620, fra Mai-Des (8 måneder) = 124028
         // Vektet snitt = (118620 * 4 + 124028 * 8) / 12 = 122225
-        BigDecimal forventetSnitt = new BigDecimal("122225");
+        BigDecimal forventetSnitt = new BigDecimal(122_225);
         BigDecimal faktiskSnitt = segment2024.getValue().verdi();
 
         // Tillat liten avvik for avrunding
@@ -54,8 +54,8 @@ class GrunnbeløpTidslinjeTest {
             .orElseThrow();
 
         // Fra Jan-Apr (4 måneder) = 124028, fra Mai-Des (8 måneder) = 130160
-        // Vektet snitt = (124028 * 4 + 130160 * 8) / 12 = 128116.00
-        BigDecimal forventetSnitt = new BigDecimal("128116.00");
+        // Vektet snitt = (124028 * 4 + 130160 * 8) / 12 = 128116
+        BigDecimal forventetSnitt = new BigDecimal(128_116);
         BigDecimal faktiskSnitt = segment2025.getValue().verdi();
 
         // Tillat liten avvik for avrunding
