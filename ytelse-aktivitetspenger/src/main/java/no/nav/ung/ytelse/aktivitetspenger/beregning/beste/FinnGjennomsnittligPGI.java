@@ -19,12 +19,17 @@ import java.util.stream.Collectors;
 
 public class FinnGjennomsnittligPGI {
 
-    public static Map<Year, BigDecimal> finnGjennomsnittligPGI(LocalDate sisteTilgjengeligeGSnittÅr, List<Inntektspost> inntekter) {
+    public record Resultat(
+        Map<Year, BigDecimal> pgiPerÅr,
+        Map<String, LocalDateTimeline<?>> regelSporingMap
+    ) {}
+
+    public static Resultat finnGjennomsnittligPGI(LocalDate sisteTilgjengeligeGSnittÅr, List<Inntektspost> inntekter) {
         LocalDateTimeline<Grunnbeløp> gsnittTidsserie = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
         LocalDateTimeline<BigDecimal> inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(sisteTilgjengeligeGSnittÅr.getYear()), 1);
 
         var årsinntekter = lagÅrsinntektTidslinje(inntekter);
-        return årsinntekter.entrySet().stream()
+        var pgiPerÅr = årsinntekter.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue()
@@ -35,6 +40,13 @@ public class FinnGjennomsnittligPGI {
                     .map(LocalDateSegment::getValue)
                     .reduce(BigDecimal.ZERO, BigDecimal::add)
             ));
+
+        var regelSporingMap = new java.util.LinkedHashMap<String, LocalDateTimeline<?>>();
+        regelSporingMap.put("gsnittTidsserie", gsnittTidsserie);
+        regelSporingMap.put("inflasjonsfaktorTidsserie", inflasjonsfaktorTidsserie);
+        årsinntekter.forEach((år, tidslinje) -> regelSporingMap.put("årsinntekt_" + år, tidslinje));
+
+        return new Resultat(pgiPerÅr, regelSporingMap);
     }
 
     private static LocalDateSegmentCombinator<PgiUtregner, Grunnbeløp, PgiUtregner> leggTilGrunnbeløpSnitt() {
