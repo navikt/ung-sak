@@ -45,7 +45,7 @@ class AktivitetspengerSøktPeriodeRepositoryTest {
     Behandling opprettBehandling() {
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, new AktørId("1"), new Saksnummer("FOO"), LocalDate.now(), LocalDate.now().plusYears(1).minusDays(1));
         fagsakRepository.opprettNy(fagsak);
-        Behandling behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.AKTIVITETSPENGER_DEL_1).build();
+        Behandling behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD).build();
         Long behandlingId = behandlingRepository.lagre(behandling, new BehandlingLås(null));
         return behandlingRepository.hentBehandling(behandlingId);
     }

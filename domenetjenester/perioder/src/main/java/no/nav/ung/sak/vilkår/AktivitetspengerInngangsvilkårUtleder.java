@@ -16,15 +16,15 @@ import static no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-@BehandlingTypeRef(BehandlingType.AKTIVITETSPENGER_DEL_1)
-public class AktivitetspengerDel1InngangsvilkårUtleder implements VilkårUtleder {
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD )
+public class AktivitetspengerInngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
-        ALDERSVILKÅR, //TODO AKT denne skal kanskje flyttes til del2
+        ALDERSVILKÅR,
         BOSTEDSVILKÅR
     );
 
-    public AktivitetspengerDel1InngangsvilkårUtleder() {
+    public AktivitetspengerInngangsvilkårUtleder() {
         //for CDI proxy
     }
 
