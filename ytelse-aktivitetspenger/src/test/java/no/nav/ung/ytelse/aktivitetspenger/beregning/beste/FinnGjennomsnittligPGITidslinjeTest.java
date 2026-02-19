@@ -12,7 +12,6 @@ import java.time.Month;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -22,12 +21,12 @@ class FinnGjennomsnittligPGITest {
     void finnGjennomsnittligPGI_År_inntekt_inneværende_år_under_6G() {
         var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER, 2024).getTom();
 
-        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             lagInntektsposterForÅr(300_000)
         );
 
-        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(BigDecimal.valueOf(300_000));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(BigDecimal.valueOf(300_000));
     }
 
     @Test
@@ -37,13 +36,13 @@ class FinnGjennomsnittligPGITest {
         var årsperiode = periodeAv(2024);
         var niG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(9));   // 1 116 252 Kroner
 
-        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(lagInntektspost(niG, årsperiode))
         );
 
         // For inntekt mellom 6G og 12G skal PGI være: 6G + ((INNTEKT - 6G) / 3)
-        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(860_984));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(860_984));
     }
 
     @Test
@@ -53,21 +52,21 @@ class FinnGjennomsnittligPGITest {
         var årsperiode = periodeAv(2024);
         var femtenG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(15)); // 1 860 420 kr
 
-        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(lagInntektspost(femtenG, årsperiode))
         );
 
         // For inntekt over 12G skal PGI maks være: 6G + ((12G - 6G) / 3) = 6G + 2G = 8G
         // 8G (snitt 2024): 122 225 kroner * 8 = 977 800 kroner
-        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977_800));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977_800));
     }
 
     @Test
     void skal_håndtere_flere_inntektsperioder() {
         var sisteTilgjengeligeGSnittÅr = periodeAv(Month.DECEMBER).getTom();
 
-        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(
                 lagInntektspost(BigDecimal.valueOf(0), periodeAv(Month.JULY)),
@@ -79,7 +78,7 @@ class FinnGjennomsnittligPGITest {
             )
         );
 
-        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(BigDecimal.valueOf(120_000));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(BigDecimal.valueOf(120_000));
     }
 
     private static Inntektspost lagInntektspost(BigDecimal verdi, Periode juli) {
@@ -97,7 +96,7 @@ class FinnGjennomsnittligPGITest {
         var mai2023 = periodeAv(Month.MAY, 2023);
         var inntektspost = lagInntektspost(BigDecimal.valueOf(500000), mai2023);
 
-        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(inntektspost)
         );
@@ -107,7 +106,7 @@ class FinnGjennomsnittligPGITest {
         // G-snitt 2024 = se hentGrunnbeløpSnittTidslinje() for aktuell verdi
         // Inflasjonsfaktor = G-snitt_2024 / G-snitt_2023
         // Verifiser at resultatet er lik det faktisk beregnede
-        assertThat(resultat.get(Year.of(2023))).isEqualByComparingTo(new BigDecimal("746497.79126749871818622492"));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2023))).isEqualByComparingTo(new BigDecimal("746497.79126749871818622492"));
     }
 
     @Test
@@ -119,14 +118,14 @@ class FinnGjennomsnittligPGITest {
         var seksG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(6));
         var inntektspost = lagInntektspost(seksG, periode);
 
-        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(inntektspost)
         );
 
         // Ved nøyaktig 6G skal PGI være lik 6G (ingen reduksjon)
         // G-snitt 2024 (vektet gjennomsnitt) brukes for å beregne 6G-grensen
-        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(736956));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(736956));
     }
 
     @Test
@@ -138,14 +137,14 @@ class FinnGjennomsnittligPGITest {
         var tolvG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(12));
         var inntektspost = lagInntektspost(tolvG, periode);
 
-        Map<Year, BigDecimal> resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
             sisteTilgjengeligeGSnittÅr,
             List.of(inntektspost)
         );
 
         // Ved 12G skal PGI-bidrag være 8G: 6G + ((12G - 6G) / 3) = 6G + 2G = 8G
         // G-snitt 2024 (vektet gjennomsnitt) brukes for å beregne G-multipler
-        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977800));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977800));
     }
 
     private static Periode periodeAv(Month måned, int... år) {

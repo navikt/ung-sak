@@ -4,30 +4,30 @@ import java.math.BigDecimal;
 
 public class BesteBeregningResultat {
 
-    private final BigDecimal sisteÅrVerdi;
-    private final BigDecimal snittTreSisteÅr;
-    private final BigDecimal besteBeregning;
+    private final BigDecimal årsinntektSisteÅr;
+    private final BigDecimal årsinntektSisteTreÅr;
+    private final BigDecimal årsinntektBesteBeregning;
     private final String regelSporing;
     private final String regelInput;
 
-    public BesteBeregningResultat(BigDecimal sisteÅrVerdi, BigDecimal snittTreSisteÅr, BigDecimal besteBeregning, String regelSporing, String regelInput) {
-        this.sisteÅrVerdi = sisteÅrVerdi;
-        this.snittTreSisteÅr = snittTreSisteÅr;
-        this.besteBeregning = besteBeregning;
+    public BesteBeregningResultat(BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing, String regelInput) {
+        this.årsinntektSisteÅr = årsinntektSisteÅr;
+        this.årsinntektSisteTreÅr = årsinntektSisteTreÅr;
+        this.årsinntektBesteBeregning = årsinntektBesteBeregning;
         this.regelSporing = regelSporing;
         this.regelInput = regelInput;
     }
 
-    public BigDecimal getSisteÅrVerdi() {
-        return sisteÅrVerdi;
+    public BigDecimal getÅrsinntektSisteÅr() {
+        return årsinntektSisteÅr;
     }
 
-    public BigDecimal getSnittTreSisteÅr() {
-        return snittTreSisteÅr;
+    public BigDecimal getÅrsinntektSisteTreÅr() {
+        return årsinntektSisteTreÅr;
     }
 
-    public BigDecimal getBesteBeregning() {
-        return besteBeregning;
+    public BigDecimal getÅrsinntektBesteBeregning() {
+        return årsinntektBesteBeregning;
     }
 
     public String getRegelSporing() {

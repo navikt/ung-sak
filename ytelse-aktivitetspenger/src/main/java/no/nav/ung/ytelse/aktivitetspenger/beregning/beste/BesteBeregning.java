@@ -26,14 +26,14 @@ public class BesteBeregning {
         var gjennomsnittUtregningResultat = finnGjennomsnittligPGI(virkningsdato, inntektsposter);
         var pgiPerÅr = gjennomsnittUtregningResultat.pgiPerÅr();
 
-        BigDecimal sisteÅrVerdi = hentSisteÅr(pgiPerÅr);
-        BigDecimal snittTreSisteÅr = hentSnittTreSisteÅr(pgiPerÅr);
-        BigDecimal størsteAvSistÅrOgSnittAvTreSisteÅr = sisteÅrVerdi.max(snittTreSisteÅr);
+        BigDecimal årsinntektSisteÅr = hentSisteÅr(pgiPerÅr);
+        BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
+        BigDecimal årsinntektBesteBeregning = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
 
         String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(gjennomsnittUtregningResultat.regelSporingMap());
         String regelInput = lagRegelInput(virkningsdato, inntektsposter);
 
-        return new BesteBeregningResultat(sisteÅrVerdi, snittTreSisteÅr, størsteAvSistÅrOgSnittAvTreSisteÅr, regelSporing, regelInput);
+        return new BesteBeregningResultat(årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelSporing, regelInput);
     }
 
     private static String lagRegelInput(LocalDate virkningsdato, List<Inntektspost> inntektsposter) {
