@@ -364,6 +364,9 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhenteProgramperioder(Behandling behandling) {
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.UNGDOMSYTELSE) {
+            return false;
+        }
         return !behandling.erRevurdering() || BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
     }
 
