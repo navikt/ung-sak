@@ -159,6 +159,8 @@ spec:
       value: klage.behandling-events.v1
     - name: KAFKA_MINSIDE_VARSEL_TOPIC
       value: min-side.aapen-brukervarsel-v1
+    - name: KAFKA_OPPGAVEBEKREFTELSE_TOPIC
+      value: dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -195,6 +197,10 @@ spec:
       value: api://prod-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
+    - name: UNG_TILBAKE_SCOPE
+      value: api://prod-gcp.k9saksbehandling.ung-tilbake/.default
+    - name : UNG_TILBAKE_URL
+      value: http://ung-tilbake/ung/tilbake/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
     - name: UNGDOMSPROGRAMREGISTER_URL

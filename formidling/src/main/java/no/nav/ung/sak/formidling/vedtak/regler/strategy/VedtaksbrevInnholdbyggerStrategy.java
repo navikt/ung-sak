@@ -13,8 +13,7 @@ import java.util.stream.Collectors;
  * Reglene skal være rekkefølgeuavhengig, men regler som fører til ingen brev har høyere presedens.
  *
  */
-public sealed interface VedtaksbrevInnholdbyggerStrategy
-    permits AvslagInngangsvilkår, EndringBarnDødsfallStrategy, EndringBarnetilleggStrategy, EndringFjerneProgramPeriodeStrategy, EndringHøySatsStrategy, EndringInntektReduksjonStrategy, EndringInntektUtenReduksjonStrategy, EndringProgramPeriodeStrategy, FørstegangsInnvilgelseStrategy, OpphørStrategy {
+public interface VedtaksbrevInnholdbyggerStrategy {
 
     VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
 

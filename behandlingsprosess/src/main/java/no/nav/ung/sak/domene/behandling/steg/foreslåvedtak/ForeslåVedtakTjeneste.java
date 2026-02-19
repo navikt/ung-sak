@@ -61,8 +61,7 @@ class ForeslåVedtakTjeneste {
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
-        // TODO: Fiks integrering mot k9-tilbake
-//        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
+        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
         if (BehandlingType.KLAGE.equals(behandling.getType())) {
             if (klageVedtakTjeneste.erKlageResultatHjemsendt(behandling)) {
@@ -107,7 +106,7 @@ class ForeslåVedtakTjeneste {
     }
 
     private void vurderBrev(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
-        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getType());
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getFagsakYtelseType(), behandling.getType());
         var totalResultat = vedtaksbrevRegler.kjør(behandling.getId());
 
         feilHvisIkkeImplementertBrev(aksjonspunktDefinisjoner, totalResultat);
@@ -125,8 +124,8 @@ class ForeslåVedtakTjeneste {
                 aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
             }
             else {
-                throw new IllegalStateException(String.format("Ingen brev implementert - må håndteres manuelt. Forklaring: "
-                    + totalResultat.forklaringer()));
+                throw new IllegalStateException(String.format("Ingen brev implementert - må håndteres manuelt.  "
+                    + totalResultat.safePrint()));
 
             }
         }

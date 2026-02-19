@@ -12,6 +12,7 @@ import no.nav.openapi.spec.utils.openapi.PrefixStrippingFQNTypeNameResolver;
 import no.nav.ung.sak.web.app.exceptions.KnownExceptionMappers;
 import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
 import no.nav.ung.sak.web.app.tjenester.brukerdialog.BrukerdialogOppgaveRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.brukerdialog.MigrerBrukerdialogOppgaverRestTjeneste;
 import no.nav.ung.sak.web.server.caching.CacheControlFeature;
 import no.nav.ung.sak.web.server.typedresponse.TypedResponseFeature;
 import org.glassfish.jersey.server.ResourceConfig;
@@ -28,7 +29,7 @@ import java.util.Set;
 public class OppgaverApiConfig extends ResourceConfig {
 
     private static final Logger LOG = LoggerFactory.getLogger(OppgaverApiConfig.class);
-    public static final String API_URI = "/brukerdialog-oppgaver/api";
+    public static final String API_URI = "/brukerdialog/api";
 
     public OppgaverApiConfig() {
         LOG.info("Initialiserer: {}", API_URI);
@@ -74,7 +75,10 @@ public class OppgaverApiConfig extends ResourceConfig {
 
     private Set<Class<?>> getEksternalApplicationClasses() {
         // eksponert grensesnitt
-        return Set.of(BrukerdialogOppgaveRestTjeneste.class);
+        return Set.of(
+            BrukerdialogOppgaveRestTjeneste.class,
+            MigrerBrukerdialogOppgaverRestTjeneste.class
+        );
     }
 
     private Map<String, Object> getApplicationProperties() {

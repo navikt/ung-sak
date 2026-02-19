@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.registerinnhenting.impl;
 
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import no.nav.ung.sak.domene.registerinnhenting.YtelsesspesifikkRelasjonsFilter;
 import no.nav.ung.sak.typer.Periode;
 
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(AKTIVITETSPENGER)
 @ApplicationScoped
 public class AlleBarnUtenHistorikkForRelatertePersoner implements YtelsesspesifikkRelasjonsFilter {
 

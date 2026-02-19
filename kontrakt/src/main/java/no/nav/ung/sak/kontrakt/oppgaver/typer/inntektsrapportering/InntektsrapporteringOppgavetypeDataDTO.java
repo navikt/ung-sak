@@ -31,9 +31,6 @@ public record InntektsrapporteringOppgavetypeDataDTO(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDate tilOgMed,
 
-    @JsonProperty(value = "rapportertInntekt")
-    Object rapportertInntekt,
-
     @JsonProperty(value = "gjelderDelerAvMåned", required = true)
     @NotNull
     Boolean gjelderDelerAvMåned

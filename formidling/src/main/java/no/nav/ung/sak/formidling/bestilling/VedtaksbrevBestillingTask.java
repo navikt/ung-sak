@@ -16,8 +16,9 @@ import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntit
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.GenerertBrev;
+
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjenesteImpl;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import org.slf4j.Logger;
@@ -46,14 +47,14 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     private BrevbestillingRepository brevbestillingRepository;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
-    private VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
 
     @Inject
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
         JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste,
         BrevbestillingRepository brevbestillingRepository, VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste) {
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
@@ -92,7 +93,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     }
 
     private void genererOgJournalførAutomatiskBrev(Behandling behandling, BrevbestillingEntitet brevbestilling) {
-        var vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getType());
+        var vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
         var totalresultater = vedtaksbrevRegel.kjør(behandling.getId());
 
         DokumentMalType dokumentMalType = brevbestilling.getDokumentMalType();

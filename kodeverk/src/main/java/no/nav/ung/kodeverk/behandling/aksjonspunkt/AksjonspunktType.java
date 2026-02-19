@@ -6,7 +6,6 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public enum AksjonspunktType implements Kodeverdi {
 
@@ -14,6 +13,12 @@ public enum AksjonspunktType implements Kodeverdi {
     MANUELL("MANU", "Manuell"),
     OVERSTYRING("OVST", "Overstyring"),
     SAKSBEHANDLEROVERSTYRING("SAOV", "Saksbehandleroverstyring"),
+
+    DEL1_AUTOPUNKT("DEL1_AUTO", "Del 1 Autopunkt"),
+    DEL1_MANUELL("DEL1_MANU", "Del 1 Manuell"),
+    DEL1_OVERSTYRING("DEL1_OVST", "Del 1 Overstyring"),
+    DEL1_SAKSBEHANDLEROVERSTYRING("DEL1_SAOV", "Del 1 Saksbehandleroverstyring"),
+
     UDEFINERT("-", "Ikke definert"),
     ;
 
@@ -34,11 +39,10 @@ public enum AksjonspunktType implements Kodeverdi {
 
     private String offisiellKode;
 
-    private AksjonspunktType(String kode, String navn) {
+    AksjonspunktType(String kode, String navn) {
         this.kode = kode;
         this.navn = navn;
-        /* merkelig nok har navn blit brukt som offisiell kode bla. mot Pip/ABAC. */
-        this.offisiellKode = navn;
+        this.offisiellKode = kode;
     }
 
     public static AksjonspunktType fraKode(final String kode) {
@@ -73,20 +77,20 @@ public enum AksjonspunktType implements Kodeverdi {
         return KODEVERK;
     }
 
-    public static void main(String[] args) {
-        System.out.println(KODER.keySet());
-    }
-
     public static Map<String, AksjonspunktType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
 
     public boolean erAutopunkt() {
-        return Objects.equals(this, AUTOPUNKT);
+        return this == AUTOPUNKT
+            || this == DEL1_AUTOPUNKT;
     }
 
     public boolean erOverstyringpunkt() {
-        return Objects.equals(this, OVERSTYRING) || Objects.equals(this, SAKSBEHANDLEROVERSTYRING);
+        return this == OVERSTYRING
+            || this == SAKSBEHANDLEROVERSTYRING
+            || this == DEL1_OVERSTYRING
+            || this == DEL1_SAKSBEHANDLEROVERSTYRING;
     }
 
 }

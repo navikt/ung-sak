@@ -16,11 +16,11 @@ import no.nav.ung.sak.oppgave.*;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
-import no.nav.ung.sak.oppgave.typer.endretperiode.EndretPeriodeOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.endretsluttdato.EndretSluttdatoOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.endretstartdato.EndretStartdatoOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.inntektsrapportering.InntektsrapporteringOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.kontrollerregisterinntekt.KontrollerRegisterInntektOppgaveMapper;
+import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretperiode.EndretPeriodeOppgaveMapper;
+import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretsluttdato.EndretSluttdatoOppgaveMapper;
+import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretstartdato.EndretStartdatoOppgaveMapper;
+import no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering.InntektsrapporteringOppgaveMapper;
+import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.kontrollerregisterinntekt.KontrollerRegisterInntektOppgaveMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

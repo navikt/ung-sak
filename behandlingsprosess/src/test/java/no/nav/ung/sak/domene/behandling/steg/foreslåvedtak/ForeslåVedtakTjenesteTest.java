@@ -31,7 +31,7 @@ import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import no.nav.ung.sak.test.util.Whitebox;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.økonomi.tilbakekreving.samkjøring.SjekkTilbakekrevingAksjonspunktUtleder;
 import org.junit.jupiter.api.BeforeEach;
@@ -86,7 +86,7 @@ public class ForeslåVedtakTjenesteTest {
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     @Mock
-    private VedtaksbrevReglerUng vedtaksbrevRegler;
+    private VedtaksbrevRegel vedtaksbrevRegler;
 
     private Behandling behandling;
 

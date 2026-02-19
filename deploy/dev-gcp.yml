@@ -69,6 +69,14 @@ spec:
           - id: dfb43624-edba-45de-9e91-68ec8e74b5d9
           # 0000-CA-ung-drift
           - id: 0d0da462-c300-43d9-8364-38a0a8cf2401
+          # 0000-CA-aktivitetspenger-saksbehandler-del1
+          - id: e1bd0c68-0c47-4dd0-ba77-c6e1e46f9d30
+          # 0000-CA-aktivitetspenger-saksbehandler-del2
+          - id: 4b3f571a-44c7-4d2b-9811-c6a1ea2cc9f4
+          # 0000-CA-aktivitetspenger-veileder
+          - id: 6add4432-bfd1-4952-a8b4-28e746e9592c
+          # 0000-CA-aktivitetspenger-drift
+          - id: 91b518bd-04ce-4eed-8d93-6fb134e93598
         extra:
           - "NAVident"
           - "azp_name"
@@ -149,7 +157,8 @@ spec:
       value: klage.behandling-events.v1
     - name: KAFKA_MINSIDE_VARSEL_TOPIC
       value: min-side.aapen-brukervarsel-v1
-
+    - name: KAFKA_OPPGAVEBEKREFTELSE_TOPIC
+      value: dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -192,6 +201,10 @@ spec:
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
+    - name: UNG_TILBAKE_SCOPE
+      value: api://dev-gcp.k9saksbehandling.ung-tilbake/.default
+    - name: UNG_TILBAKE_URL
+      value: http://ung-tilbake/ung/tilbake/api
     - name: SIF_ABAC_PDP_SCOPE
       value: api://dev-gcp.k9saksbehandling.sif-abac-pdp/.default
     - name: SIF_ABAC_PDP_URL
@@ -249,7 +262,7 @@ spec:
     - name: HENT_INNTEKT_HENDELSER_ENABLED
       value: "true"
     - name: OPPFRISK_VED_INNKOMMENDE_INNTEKTSHENDELSE_ENABLED
-      value: "false"
+      value: "true"
     - name: KLAGE_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL

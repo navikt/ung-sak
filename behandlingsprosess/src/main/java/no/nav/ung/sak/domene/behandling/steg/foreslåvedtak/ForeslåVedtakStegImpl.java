@@ -33,7 +33,8 @@ public class ForeslåVedtakStegImpl implements ForeslåVedtakSteg {
     @Inject
     ForeslåVedtakStegImpl(BehandlingRepository behandlingRepository,
                           ForeslåVedtakTjeneste foreslåVedtakTjeneste,
-                          @Any Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak, VedtaksbrevTjeneste vedtaksbrevTjeneste) {
+                          @Any Instance<YtelsespesifikkForeslåVedtak> ytelsespesifikkForeslåVedtak,
+                          VedtaksbrevTjeneste vedtaksbrevTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.foreslåVedtakTjeneste = foreslåVedtakTjeneste;
         this.ytelsespesifikkForeslåVedtak = ytelsespesifikkForeslåVedtak;

@@ -100,7 +100,7 @@ public class Behandlingsoppretter {
             new BehandlingÅrsak.Builder(sisteYtelseBehandling.getBehandlingÅrsaker().stream()
                 .map(BehandlingÅrsak::getBehandlingÅrsakType)
                 .collect(toList()))
-                    .buildFor(revurdering);
+                .buildFor(revurdering);
 
             BehandlingskontrollKontekst nyKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
             behandlingRepository.lagre(revurdering, nyKontekst.getSkriveLås());
