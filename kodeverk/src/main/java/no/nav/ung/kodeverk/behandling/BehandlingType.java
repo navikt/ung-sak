@@ -23,8 +23,6 @@ public enum BehandlingType implements Kodeverdi {
     TILBAKEKREVING("BT-007", "Tilbakekreving", "BT-007", 10, false),
     REVURDERING_TILBAKEKREVING("BT-009", "Tilbakekreving revurdering", "BT-009", 10, false),
 
-    AKTIVITETSPENGER_DEL_1("BT-011", "Aktivitetspenger del 1", "N/A", 6, true),
-
     UDEFINERT("-", "Ikke definert", null, 0, false),
     ;
 

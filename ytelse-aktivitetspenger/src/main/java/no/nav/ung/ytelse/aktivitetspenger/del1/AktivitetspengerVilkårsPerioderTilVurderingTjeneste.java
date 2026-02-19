@@ -26,22 +26,22 @@ import java.util.stream.Collectors;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-@BehandlingTypeRef(BehandlingType.AKTIVITETSPENGER_DEL_1)
-public class AktivitetspengerDel1VilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårUtleder inngangsvilkårUtleder;
 
-    AktivitetspengerDel1VilkårsPerioderTilVurderingTjeneste() {
+    AktivitetspengerVilkårsPerioderTilVurderingTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public AktivitetspengerDel1VilkårsPerioderTilVurderingTjeneste(
+    public AktivitetspengerVilkårsPerioderTilVurderingTjeneste(
         AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository,
         VilkårResultatRepository vilkårResultatRepository,
-        @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.AKTIVITETSPENGER_DEL_1) VilkårUtleder inngangsvilkårUtleder) {
+        @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD) VilkårUtleder inngangsvilkårUtleder) {
         this.aktivitetspengerSøktPeriodeRepository = aktivitetspengerSøktPeriodeRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
