@@ -53,7 +53,7 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
             null // Ingen frist for søk ytelse oppgave
         );
 
-        oppgaveLivssyklusTjeneste.opprettOppgave(oppgave);
+        oppgaveLivssyklusTjeneste.opprettOppgave(oppgave, oppgave.oppgavetypeData());
 
         return brukerdialogOppgaveMapper.tilDto(oppgave);
 

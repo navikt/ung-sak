@@ -4,11 +4,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.DeaktiverMinSideVarselTask;
 import no.nav.ung.sak.PubliserMinSideVarselTask;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
 @ApplicationScoped
 public class OppgaveLivssyklusTjeneste {
@@ -72,15 +75,17 @@ public class OppgaveLivssyklusTjeneste {
     /**
      * Persisterer oppgave og publiserer varsel til Min Side.
      *
-     * @param oppgaveEntitet Oppgave som skal opprettes og publiseres.
+     * @param oppgaveEntitet     Oppgave som skal opprettes og publiseres.
+     * @param oppgavetypeData
      */
-    public void opprettOppgave(BrukerdialogOppgaveEntitet oppgaveEntitet) {
+    public void opprettOppgave(BrukerdialogOppgaveEntitet oppgaveEntitet, OppgavetypeDataDto oppgavetypeData) {
         if (oppgaveEntitet.getId() != null) {
             throw new IllegalArgumentException("Oppgave er allerede persistert med id: " + oppgaveEntitet.getId());
         }
         opprettTaskForPubliseringAvVarsel(oppgaveEntitet);
         oppgaveEntitet.setStatus(OppgaveStatus.ULØST);
         brukerdialogOppgaveRepository.persister(oppgaveEntitet);
+        brukerdialogOppgaveRepository.persisterOppgaveData(oppgaveEntitet, oppgavetypeData);
     }
 
     private void opprettTaskForPubliseringAvVarsel(BrukerdialogOppgaveEntitet oppgaveEntitet) {

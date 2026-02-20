@@ -50,8 +50,9 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
 
     @Override
     public void opprettOppgave(OpprettOppgaveDto oppgave) {
-        oppgaveLivssyklusTjeneste.opprettOppgave(new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), oppgave.oppgavetypeData().oppgavetype(), oppgave.aktørId(), oppgave.oppgavetypeData(), oppgave.frist()));
+        BrukerdialogOppgaveEntitet oppgaveEntitet = new BrukerdialogOppgaveEntitet(
+            oppgave.oppgaveReferanse(), oppgave.oppgavetypeData().oppgavetype(), oppgave.aktørId(), oppgave.oppgavetypeData(), oppgave.frist());
+        oppgaveLivssyklusTjeneste.opprettOppgave(oppgaveEntitet, oppgave.oppgavetypeData());
     }
 
     @Override
