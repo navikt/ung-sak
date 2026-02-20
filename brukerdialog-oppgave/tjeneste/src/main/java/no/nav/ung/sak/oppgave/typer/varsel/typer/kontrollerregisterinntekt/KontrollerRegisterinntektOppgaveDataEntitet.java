@@ -3,6 +3,7 @@ package no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt;
 import jakarta.persistence.*;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
+import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -14,15 +15,12 @@ import java.util.List;
  */
 @Entity(name = "KontrollerRegisterinntektOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT")
-public class KontrollerRegisterinntektOppgaveDataEntitet {
+public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT")
-    private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "bd_oppgave_id", nullable = false, updatable = false)
-    private BrukerdialogOppgaveEntitet oppgave;
+    @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT", sequenceName = "SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT", allocationSize = 1)
+    protected Long id;
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)
     private LocalDate fraOgMed;
@@ -59,7 +57,7 @@ public class KontrollerRegisterinntektOppgaveDataEntitet {
                                                         int totalInntektArbeidFrilans,
                                                         int totalInntektYtelse,
                                                         int totalInntekt) {
-        this.oppgave = oppgave;
+        super(oppgave);
         this.fraOgMed = fraOgMed;
         this.tilOgMed = tilOgMed;
         this.gjelderDelerAvMåned = gjelderDelerAvMåned;
@@ -68,20 +66,17 @@ public class KontrollerRegisterinntektOppgaveDataEntitet {
         this.totalInntekt = totalInntekt;
     }
 
+    @Override
+    public Long getId() {
+        return id;
+    }
+
     public void leggTilArbeidOgFrilansInntekt(String arbeidsgiver, int inntekt) {
         arbeidOgFrilansInntekter.add(new ArbeidOgFrilansInntektEntitet(this, arbeidsgiver, inntekt));
     }
 
     public void leggTilYtelseInntekt(YtelseType ytelsetype, int inntekt) {
         ytelseInntekter.add(new YtelseInntektEntitet(this, ytelsetype, inntekt));
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public BrukerdialogOppgaveEntitet getOppgave() {
-        return oppgave;
     }
 
     public LocalDate getFraOgMed() {
@@ -116,4 +111,3 @@ public class KontrollerRegisterinntektOppgaveDataEntitet {
         return List.copyOf(ytelseInntekter);
     }
 }
-

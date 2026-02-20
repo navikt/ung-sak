@@ -2,6 +2,7 @@ package no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
+import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
 
@@ -11,15 +12,12 @@ import java.time.LocalDate;
  */
 @Entity(name = "InntektsrapporteringOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING")
-public class InntektsrapporteringOppgaveDataEntitet {
+public class InntektsrapporteringOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING")
-    private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "bd_oppgave_id", nullable = false, updatable = false)
-    private BrukerdialogOppgaveEntitet oppgave;
+    @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING", sequenceName = "SEQ_BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING", allocationSize = 1)
+    protected Long id;
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)
     private LocalDate fraOgMed;
@@ -42,22 +40,19 @@ public class InntektsrapporteringOppgaveDataEntitet {
                                                    LocalDate fraOgMed,
                                                    LocalDate tilOgMed,
                                                    boolean gjelderDelerAvMåned) {
-        this.oppgave = oppgave;
+        super(oppgave);
         this.fraOgMed = fraOgMed;
         this.tilOgMed = tilOgMed;
         this.gjelderDelerAvMåned = gjelderDelerAvMåned;
     }
 
-    public void setRapportertInntekt(Integer rapportertInntekt) {
-        this.rapportertInntekt = rapportertInntekt;
-    }
-
+    @Override
     public Long getId() {
         return id;
     }
 
-    public BrukerdialogOppgaveEntitet getOppgave() {
-        return oppgave;
+    public void setRapportertInntekt(Integer rapportertInntekt) {
+        this.rapportertInntekt = rapportertInntekt;
     }
 
     public LocalDate getFraOgMed() {
@@ -76,4 +71,3 @@ public class InntektsrapporteringOppgaveDataEntitet {
         return rapportertInntekt;
     }
 }
-

@@ -2,6 +2,7 @@ package no.nav.ung.sak.oppgave.typer.oppgave.søkytelse;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
+import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
 
@@ -11,15 +12,12 @@ import java.time.LocalDate;
  */
 @Entity(name = "SøkYtelseOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_SOK_YTELSE")
-public class SøkYtelseOppgaveDataEntitet {
+public class SøkYtelseOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_SOK_YTELSE")
-    private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "bd_oppgave_id", nullable = false, updatable = false)
-    private BrukerdialogOppgaveEntitet oppgave;
+    @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_SOK_YTELSE", sequenceName = "SEQ_BD_OPPGAVE_DATA_SOK_YTELSE", allocationSize = 1)
+    protected Long id;
 
     @Column(name = "fom_dato", nullable = false, updatable = false)
     private LocalDate fomDato;
@@ -29,20 +27,16 @@ public class SøkYtelseOppgaveDataEntitet {
     }
 
     public SøkYtelseOppgaveDataEntitet(BrukerdialogOppgaveEntitet oppgave, LocalDate fomDato) {
-        this.oppgave = oppgave;
+        super(oppgave);
         this.fomDato = fomDato;
     }
 
+    @Override
     public Long getId() {
         return id;
-    }
-
-    public BrukerdialogOppgaveEntitet getOppgave() {
-        return oppgave;
     }
 
     public LocalDate getFomDato() {
         return fomDato;
     }
 }
-

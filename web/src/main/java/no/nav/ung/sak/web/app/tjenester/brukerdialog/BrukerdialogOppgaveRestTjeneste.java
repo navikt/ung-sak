@@ -15,12 +15,11 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto;
-import no.nav.ung.sak.oppgave.veileder.VeilederOppgaveTjeneste;
-import no.nav.ung.sak.oppgave.veileder.VeilederOppgaveTjenesteImpl;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.oppgave.brukerdialog.BrukerdialogOppgaveTjeneste;
 import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.oppgave.brukerdialog.BrukerdialogOppgaveTjeneste;
+import no.nav.ung.sak.oppgave.veileder.VeilederOppgaveTjeneste;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.List;
@@ -102,7 +101,7 @@ public class BrukerdialogOppgaveRestTjeneste {
     @BeskyttetRessurs(action = BeskyttetRessursActionType.CREATE, resource = BeskyttetRessursResourceType.UNGDOMSPROGRAM)
     public BrukerdialogOppgaveDto opprettSøkYtelseOppgave(
         @NotNull @Parameter(description = "Data om hvem og hva det søkes om") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-        OpprettSøkYtelseOppgaveDto opprettSøkYtelseOppgaveDto) {
+        OpprettOppgaveDto opprettSøkYtelseOppgaveDto) {
         return veilederOppgaveTjeneste.opprettSøkYtelseOppgave(opprettSøkYtelseOppgaveDto);
     }
 

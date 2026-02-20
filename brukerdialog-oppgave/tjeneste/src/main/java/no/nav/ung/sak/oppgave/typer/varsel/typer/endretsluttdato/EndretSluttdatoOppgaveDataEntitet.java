@@ -2,6 +2,7 @@ package no.nav.ung.sak.oppgave.typer.varsel.typer.endretsluttdato;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
+import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
 
@@ -11,15 +12,12 @@ import java.time.LocalDate;
  */
 @Entity(name = "EndretSluttdatoOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_SLUTTDATO")
-public class EndretSluttdatoOppgaveDataEntitet {
+public class EndretSluttdatoOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO")
-    private Long id;
-
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "bd_oppgave_id", nullable = false, updatable = false)
-    private BrukerdialogOppgaveEntitet oppgave;
+    @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO", sequenceName = "SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO", allocationSize = 1)
+    protected Long id;
 
     @Column(name = "ny_sluttdato", nullable = false, updatable = false)
     private LocalDate nySluttdato;
@@ -35,17 +33,14 @@ public class EndretSluttdatoOppgaveDataEntitet {
     public EndretSluttdatoOppgaveDataEntitet(BrukerdialogOppgaveEntitet oppgave,
                                               LocalDate nySluttdato,
                                               LocalDate forrigeSluttdato) {
-        this.oppgave = oppgave;
+        super(oppgave);
         this.nySluttdato = nySluttdato;
         this.forrigeSluttdato = forrigeSluttdato;
     }
 
+    @Override
     public Long getId() {
         return id;
-    }
-
-    public BrukerdialogOppgaveEntitet getOppgave() {
-        return oppgave;
     }
 
     public LocalDate getNySluttdato() {
@@ -56,4 +51,3 @@ public class EndretSluttdatoOppgaveDataEntitet {
         return forrigeSluttdato;
     }
 }
-
