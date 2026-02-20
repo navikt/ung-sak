@@ -1,11 +1,7 @@
 package no.nav.ung.sak.oppgave;
 
 import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.OpprettEndretPeriodeOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.OpprettEndretSluttdatoOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.OpprettEndretStartdatoOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.OpprettInntektsrapporteringOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.OpprettKontrollerRegisterInntektOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -22,29 +18,9 @@ public interface OppgaveForSaksbehandlingGrensesnitt {
     }
 
     /**
-     * Oppretter en oppgave for å kontrollere registerinntekt.
+     * Oppretter en oppgave. Oppgavetypen bestemmes av {@code oppgave.oppgavetypeData()}.
      */
-    void opprettKontrollerRegisterInntektOppgave(OpprettKontrollerRegisterInntektOppgaveDto oppgave);
-
-    /**
-     * Oppretter en oppgave for inntektsrapportering.
-     */
-    void opprettInntektrapporteringOppgave(OpprettInntektsrapporteringOppgaveDto oppgave);
-
-    /**
-     * Oppretter en oppgave for endret startdato.
-     */
-    void opprettEndretStartdatoOppgave(OpprettEndretStartdatoOppgaveDto oppgave);
-
-    /**
-     * Oppretter en oppgave for endret sluttdato.
-     */
-    void opprettEndretSluttdatoOppgave(OpprettEndretSluttdatoOppgaveDto oppgave);
-
-    /**
-     * Oppretter en oppgave for endret periode.
-     */
-    void opprettEndretPeriodeOppgave(OpprettEndretPeriodeOppgaveDto oppgave);
+    void opprettOppgave(OpprettOppgaveDto oppgave);
 
     /**
      * Avbryter en oppgave basert på ekstern referanse.

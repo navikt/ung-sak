@@ -7,17 +7,14 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.OpprettEndretPeriodeOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.OpprettEndretSluttdatoOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.OpprettEndretStartdatoOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.OpprettInntektsrapporteringOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.OpprettKontrollerRegisterInntektOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.RegisterinntektDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto;
 import no.nav.ung.sak.oppgave.*;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
@@ -26,15 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-/**
- * Tjeneste for å opprette og administrere brukerdialog-oppgaver.
- * Implementerer OppgaveForSaksbehandlingGrensesnitt.
- * <p>
- * Denne tjenesten brukes av etterlysning-modulen og andre moduler
- * som trenger å opprette oppgaver internt i applikasjonen.
- */
 @ApplicationScoped
 public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbehandlingGrensesnitt {
 
@@ -66,54 +55,20 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     }
 
     @Override
-    public void opprettKontrollerRegisterInntektOppgave(OpprettKontrollerRegisterInntektOppgaveDto oppgave) {
-        var arbeidOgFrilans = oppgave.registerInntekter().arbeidOgFrilansInntekter().stream()
-            .map(i -> new no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO(
-                i.inntekt(), i.arbeidsgiver(), i.arbeidsgiverNavn()))
-            .collect(Collectors.toList());
-        var ytelseInntekter = oppgave.registerInntekter().ytelseInntekter().stream()
-            .map(i -> new no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO(
-                i.inntekt(), i.ytelsetype()))
-            .collect(Collectors.toList());
-        var registerinntektData = new RegisterinntektDTO(arbeidOgFrilans, ytelseInntekter);
-        var data = new KontrollerRegisterinntektOppgavetypeDataDto(
-            oppgave.fomDato(), oppgave.tomDato(), registerinntektData, oppgave.gjelderDelerAvMåned());
+    public void opprettOppgave(OpprettOppgaveDto oppgave) {
+        var aktørId = finnAktørId(oppgave.deltakerIdent());
+        var oppgaveType = switch (oppgave.oppgavetypeData()) {
+            case EndretStartdatoDataDto ignored          -> OppgaveType.BEKREFT_ENDRET_STARTDATO;
+            case EndretSluttdatoDataDto ignored          -> OppgaveType.BEKREFT_ENDRET_SLUTTDATO;
+            case EndretPeriodeDataDto ignored            -> OppgaveType.BEKREFT_ENDRET_PERIODE;
+            case FjernetPeriodeDataDto ignored           -> OppgaveType.BEKREFT_FJERNET_PERIODE;
+            case KontrollerRegisterinntektOppgavetypeDataDto ignored -> OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT;
+            case InntektsrapporteringOppgavetypeDataDto ignored -> OppgaveType.RAPPORTER_INNTEKT;
+            case SøkYtelseOppgavetypeDataDto ignored     -> OppgaveType.SØK_YTELSE;
+            default -> throw new IllegalArgumentException("Ukjent oppgavetypeData: " + oppgave.oppgavetypeData().getClass().getName());
+        };
         oppgaveLivssyklusTjeneste.opprettOppgave(new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT,
-            finnAktørId(oppgave.deltakerIdent()), data, oppgave.frist()));
-    }
-
-    @Override
-    public void opprettInntektrapporteringOppgave(OpprettInntektsrapporteringOppgaveDto oppgave) {
-        var data = new InntektsrapporteringOppgavetypeDataDto(
-            oppgave.fomDato(), oppgave.tomDato(), oppgave.gjelderDelerAvMåned());
-        oppgaveLivssyklusTjeneste.opprettOppgave(new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), OppgaveType.RAPPORTER_INNTEKT,
-            finnAktørId(oppgave.deltakerIdent()), data, oppgave.frist()));
-    }
-
-    @Override
-    public void opprettEndretStartdatoOppgave(OpprettEndretStartdatoOppgaveDto oppgave) {
-        var data = new EndretStartdatoDataDto(oppgave.nyStartdato(), oppgave.forrigeStartdato());
-        oppgaveLivssyklusTjeneste.opprettOppgave(new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), OppgaveType.BEKREFT_ENDRET_STARTDATO,
-            finnAktørId(oppgave.deltakerIdent()), data, oppgave.frist()));
-    }
-
-    @Override
-    public void opprettEndretSluttdatoOppgave(OpprettEndretSluttdatoOppgaveDto oppgave) {
-        var data = new EndretSluttdatoDataDto(oppgave.nySluttdato(), oppgave.forrigeSluttdato());
-        oppgaveLivssyklusTjeneste.opprettOppgave(new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), OppgaveType.BEKREFT_ENDRET_SLUTTDATO,
-            finnAktørId(oppgave.deltakerIdent()), data, oppgave.frist()));
-    }
-
-    @Override
-    public void opprettEndretPeriodeOppgave(OpprettEndretPeriodeOppgaveDto oppgave) {
-        var data = new EndretPeriodeDataDto(oppgave.nyPeriode(), oppgave.forrigePeriode(), oppgave.endringer());
-        oppgaveLivssyklusTjeneste.opprettOppgave(new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), OppgaveType.BEKREFT_ENDRET_PERIODE,
-            finnAktørId(oppgave.deltakerIdent()), data, oppgave.frist()));
+            oppgave.oppgaveReferanse(), oppgaveType, aktørId, oppgave.oppgavetypeData(), oppgave.frist()));
     }
 
     @Override

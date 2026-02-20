@@ -2,7 +2,8 @@ package no.nav.ung.sak.etterlysning.sluttdato;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.OpprettEndretSluttdatoOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -34,16 +35,19 @@ public class EndretSluttdatoOppgaveOppretter {
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
         var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
-        var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode)).toList();
-        oppgaveDtoer.forEach(delegeringTjeneste::opprettEndretSluttdatoOppgave);
+        etterlysninger.stream()
+            .map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode))
+            .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private OpprettEndretSluttdatoOppgaveDto mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, Optional<DatoIntervallEntitet> originalPeriode) {
-        return new OpprettEndretSluttdatoOppgaveDto(
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, Optional<DatoIntervallEntitet> originalPeriode) {
+        return new OpprettOppgaveDto(
             deltakerIdent.getIdent(),
             etterlysning.getEksternReferanse(),
-            hentSluttdato(etterlysning.getGrunnlagsreferanse()),
-            originalPeriode.map(DatoIntervallEntitet::getTomDato).filter(d -> !d.equals(TIDENES_ENDE)).orElse(null),
+            new EndretSluttdatoDataDto(
+                hentSluttdato(etterlysning.getGrunnlagsreferanse()),
+                originalPeriode.map(DatoIntervallEntitet::getTomDato).filter(d -> !d.equals(TIDENES_ENDE)).orElse(null)
+            ),
             etterlysning.getFrist()
         );
     }

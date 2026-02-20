@@ -17,11 +17,13 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.*;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.OpprettEndretPeriodeOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.OpprettEndretSluttdatoOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.OpprettEndretStartdatoOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.OpprettInntektsrapporteringOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.OpprettKontrollerRegisterInntektOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.oppgave.OppgaveForSaksbehandlingGrensesnitt;
 
 import java.net.URI;
@@ -76,18 +78,23 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void opprettKontrollerRegisterInntektOppgave(OpprettKontrollerRegisterInntektOppgaveDto oppgave) {
+    public void opprettOppgave(OpprettOppgaveDto oppgave) {
         try {
-            restClient.post(opprettKontrollerRegisterInntektURI, mapTilRegisterInntektOppgaveDTO(oppgave));
-        } catch (Exception e) {
-            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
-        }
-    }
-
-    @Override
-    public void opprettInntektrapporteringOppgave(OpprettInntektsrapporteringOppgaveDto oppgave) {
-        try {
-            restClient.post(opprettInntektrapporteringURI, mapTilInntektsrapporteringOppgaveDTO(oppgave));
+            switch (oppgave.oppgavetypeData()) {
+                case KontrollerRegisterinntektOppgavetypeDataDto d ->
+                    restClient.post(opprettKontrollerRegisterInntektURI, mapTilRegisterInntektOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                case InntektsrapporteringOppgavetypeDataDto d ->
+                    restClient.post(opprettInntektrapporteringURI, mapTilInntektsrapporteringOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                case EndretStartdatoDataDto d ->
+                    restClient.post(opprettEndretStartdatoURI, mapTilEndretStartdatoOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                case EndretSluttdatoDataDto d ->
+                    restClient.post(opprettEndretSluttdatoURI, mapTilEndretSluttdatoOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                case EndretPeriodeDataDto d ->
+                    restClient.post(opprettEndretPeriodeURI, mapTilEndretPeriodeOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                case FjernetPeriodeDataDto d ->
+                    restClient.post(opprettEndretPeriodeURI, mapTilFjernetPeriodeOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                default -> throw new IllegalArgumentException("Ukjent oppgavetypeData: " + oppgave.oppgavetypeData().getClass().getName());
+            }
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
@@ -121,33 +128,6 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void opprettEndretSluttdatoOppgave(OpprettEndretSluttdatoOppgaveDto oppgave) {
-        try {
-            restClient.post(opprettEndretSluttdatoURI, mapTilEndretSluttdatoOppgaveDTO(oppgave));
-        } catch (Exception e) {
-            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
-        }
-    }
-
-    @Override
-    public void opprettEndretStartdatoOppgave(OpprettEndretStartdatoOppgaveDto oppgave) {
-        try {
-            restClient.post(opprettEndretStartdatoURI, mapTilEndretStartdatoOppgaveDTO(oppgave));
-        } catch (Exception e) {
-            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
-        }
-    }
-
-    @Override
-    public void opprettEndretPeriodeOppgave(OpprettEndretPeriodeOppgaveDto oppgave) {
-        try {
-            restClient.post(opprettEndretPeriodeURI, mapTilEndretPeriodeOppgaveDTO(oppgave));
-        } catch (Exception e) {
-            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
-        }
-    }
-
-    @Override
     public void løsSøkYtelseOppgave(String deltakerIdent) {
         try {
             restClient.post(løsSøkYtelseURI, new DeltakerDTO(null, deltakerIdent));
@@ -167,75 +147,49 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
 
     // --- Mapping fra ung-sak kontrakt DTOs til deltakelseopplyser DTOs ---
 
-    private static RegisterInntektOppgaveDTO mapTilRegisterInntektOppgaveDTO(OpprettKontrollerRegisterInntektOppgaveDto dto) {
-        var arbeidOgFrilans = dto.registerInntekter().arbeidOgFrilansInntekter().stream()
+    private static RegisterInntektOppgaveDTO mapTilRegisterInntektOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, KontrollerRegisterinntektOppgavetypeDataDto d) {
+        var arbeidOgFrilans = d.registerinntekt().arbeidOgFrilansInntekter().stream()
             .map(i -> new RegisterInntektArbeidOgFrilansDTO(i.inntekt(), i.arbeidsgiver()))
             .collect(Collectors.toList());
-        var ytelse = dto.registerInntekter().ytelseInntekter().stream()
+        var ytelse = d.registerinntekt().ytelseInntekter().stream()
             .map(i -> new RegisterInntektYtelseDTO(i.inntekt(), YtelseType.valueOf(i.ytelsetype().name())))
             .collect(Collectors.toList());
         return new RegisterInntektOppgaveDTO(
-            dto.deltakerIdent(),
-            dto.oppgaveReferanse(),
-            dto.frist(),
-            dto.fomDato(),
-            dto.tomDato(),
-            new RegisterInntektDTO(arbeidOgFrilans, ytelse),
-            dto.gjelderDelerAvMåned()
-        );
+            deltakerIdent, ref, frist, d.fraOgMed(), d.tilOgMed(),
+            new RegisterInntektDTO(arbeidOgFrilans, ytelse), d.gjelderDelerAvMåned());
     }
 
-    private static InntektsrapporteringOppgaveDTO mapTilInntektsrapporteringOppgaveDTO(OpprettInntektsrapporteringOppgaveDto dto) {
-        return new InntektsrapporteringOppgaveDTO(
-            dto.deltakerIdent(),
-            dto.oppgaveReferanse(),
-            dto.frist(),
-            dto.fomDato(),
-            dto.tomDato(),
-            dto.gjelderDelerAvMåned()
-        );
+    private static InntektsrapporteringOppgaveDTO mapTilInntektsrapporteringOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, InntektsrapporteringOppgavetypeDataDto d) {
+        return new InntektsrapporteringOppgaveDTO(deltakerIdent, ref, frist, d.fraOgMed(), d.tilOgMed(), d.gjelderDelerAvMåned());
     }
 
-    private static EndretStartdatoOppgaveDTO mapTilEndretStartdatoOppgaveDTO(OpprettEndretStartdatoOppgaveDto dto) {
-        return new EndretStartdatoOppgaveDTO(
-            dto.deltakerIdent(),
-            dto.oppgaveReferanse(),
-            dto.frist(),
-            dto.nyStartdato(),
-            dto.forrigeStartdato()
-        );
+    private static EndretStartdatoOppgaveDTO mapTilEndretStartdatoOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, EndretStartdatoDataDto d) {
+        return new EndretStartdatoOppgaveDTO(deltakerIdent, ref, frist, d.nyStartdato(), d.forrigeStartdato());
     }
 
-    private static EndretSluttdatoOppgaveDTO mapTilEndretSluttdatoOppgaveDTO(OpprettEndretSluttdatoOppgaveDto dto) {
-        return new EndretSluttdatoOppgaveDTO(
-            dto.deltakerIdent(),
-            dto.oppgaveReferanse(),
-            dto.frist(),
-            dto.nySluttdato(),
-            dto.forrigeSluttdato()
-        );
+    private static EndretSluttdatoOppgaveDTO mapTilEndretSluttdatoOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, EndretSluttdatoDataDto d) {
+        return new EndretSluttdatoOppgaveDTO(deltakerIdent, ref, frist, d.nySluttdato(), d.forrigeSluttdato());
     }
 
-    private static EndretPeriodeOppgaveDTO mapTilEndretPeriodeOppgaveDTO(OpprettEndretPeriodeOppgaveDto dto) {
+    private static EndretPeriodeOppgaveDTO mapTilEndretPeriodeOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, EndretPeriodeDataDto d) {
         return new EndretPeriodeOppgaveDTO(
-            dto.deltakerIdent(),
-            dto.oppgaveReferanse(),
-            dto.frist(),
-            mapPeriode(dto.nyPeriode()),
-            mapPeriode(dto.forrigePeriode()),
-            dto.endringer().stream()
-                .map(e -> PeriodeEndringType.valueOf(e.name()))
-                .collect(Collectors.toSet())
-        );
+            deltakerIdent, ref, frist,
+            mapPeriode(d.nyPeriode()), mapPeriode(d.forrigePeriode()),
+            d.endringer().stream().map(e -> PeriodeEndringType.valueOf(e.name())).collect(Collectors.toSet()));
+    }
+
+    private static EndretPeriodeOppgaveDTO mapTilFjernetPeriodeOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, FjernetPeriodeDataDto d) {
+        PeriodeDTO forrigePeriode = new PeriodeDTO(d.forrigeStartdato(), d.forrigeSluttdato());
+        return new EndretPeriodeOppgaveDTO(
+            deltakerIdent, ref, frist,
+            null, forrigePeriode,
+            java.util.Set.of(PeriodeEndringType.FJERNET_PERIODE));
     }
 
     private static EndreStatusDTO mapTilEndreStatusDTO(EndreOppgaveStatusDto dto) {
         return new EndreStatusDTO(
-            dto.deltakerIdent(),
-            Oppgavetype.valueOf(dto.oppgavetype().name()),
-            dto.fomDato(),
-            dto.tomDato()
-        );
+            dto.deltakerIdent(), Oppgavetype.valueOf(dto.oppgavetype().name()),
+            dto.fomDato(), dto.tomDato());
     }
 
     private static PeriodeDTO mapPeriode(no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO periode) {

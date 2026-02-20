@@ -4,11 +4,12 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.OpprettKontrollerRegisterInntektOppgaveDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
@@ -31,21 +32,24 @@ public class InntektkontrollOppgaveOppretter {
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
         LocalDateTimeline<Boolean> programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
-        var oppgaveDtoer = etterlysninger.stream().map(mapTilDto(behandling.getId(), deltakerIdent, programTidslinje)).toList();
-        oppgaveDtoer.forEach(delegeringTjeneste::opprettKontrollerRegisterInntektOppgave);
+        etterlysninger.stream()
+            .map(mapTilDto(behandling.getId(), deltakerIdent, programTidslinje))
+            .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private Function<Etterlysning, OpprettKontrollerRegisterInntektOppgaveDto> mapTilDto(long behandlingId, PersonIdent deltakerIdent, LocalDateTimeline<Boolean> programTidslinje) {
+    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, PersonIdent deltakerIdent, LocalDateTimeline<Boolean> programTidslinje) {
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
             LocalDateInterval etterlysningPeriode = etterlysning.getPeriode().toLocalDateInterval();
-            return new OpprettKontrollerRegisterInntektOppgaveDto(
+            return new OpprettOppgaveDto(
                 deltakerIdent.getIdent(),
                 etterlysning.getEksternReferanse(),
-                etterlysning.getPeriode().getFomDato(),
-                etterlysning.getPeriode().getTomDato(),
-                InntektKontrollOppgaveMapper.mapTilRegisterInntekter(registerinntekter),
-                overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, programTidslinje),
+                new KontrollerRegisterinntektOppgavetypeDataDto(
+                    etterlysning.getPeriode().getFomDato(),
+                    etterlysning.getPeriode().getTomDato(),
+                    InntektKontrollOppgaveMapper.mapTilRegisterInntekter(registerinntekter),
+                    overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, programTidslinje)
+                ),
                 etterlysning.getFrist()
             );
         };

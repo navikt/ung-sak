@@ -2,7 +2,8 @@ package no.nav.ung.sak.etterlysning.startdato;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.OpprettEndretStartdatoOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
@@ -49,18 +50,18 @@ public class EndretStartdatoOppgaveOppretter {
             .stream()
             .flatMap(Set::stream)
             .map(UngdomsytelseSøktStartdato::getStartdato)
-            .min(Comparator.naturalOrder())
-            .orElseThrow(() -> new IllegalStateException("Forventer å finne startdato for behandling med id: " + behandling.getId()));
-        return behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode)
-            .orElse(DatoIntervallEntitet.fraOgMed(startdato));
+    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
+        var originalPeriode = finnOriginalPeriode(behandling);
+        etterlysninger.stream()
+            .map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode))
+            .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private OpprettEndretStartdatoOppgaveDto mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, DatoIntervallEntitet originalPeriode) {
-        return new OpprettEndretStartdatoOppgaveDto(
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, DatoIntervallEntitet originalPeriode) {
+        return new OpprettOppgaveDto(
             deltakerIdent.getIdent(),
             etterlysning.getEksternReferanse(),
-            hentStartdato(etterlysning),
-            originalPeriode.getFomDato(),
+            new EndretStartdatoDataDto(hentStartdato(etterlysning), originalPeriode.getFomDato()),
             etterlysning.getFrist()
         );
     }
