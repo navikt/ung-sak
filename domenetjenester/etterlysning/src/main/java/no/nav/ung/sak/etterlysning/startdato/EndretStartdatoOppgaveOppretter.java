@@ -2,68 +2,52 @@ package no.nav.ung.sak.etterlysning.startdato;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 @Dependent
 public class EndretStartdatoOppgaveOppretter {
 
     private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private final UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
 
     @Inject
     public EndretStartdatoOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
-                                           UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                           UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
+                                           UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.delegeringTjeneste = delegeringTjeneste;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
     }
 
-
-    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
-        var originalPeriode = finnOriginalPeriode(behandling);
-        var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode)).toList();
-        oppgaveDtoer.forEach(delegeringTjeneste::opprettEndretStartdatoOppgave);
-    }
-
-    private DatoIntervallEntitet finnOriginalPeriode(Behandling behandling) {
-        var startdato = ungdomsytelseStartdatoRepository.hentGrunnlag(behandling.getId()).map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer).map(UngdomsytelseStartdatoer::getStartdatoer)
-            .stream()
-            .flatMap(Set::stream)
-            .map(UngdomsytelseSøktStartdato::getStartdato)
-    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
+    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var originalPeriode = finnOriginalPeriode(behandling);
         etterlysninger.stream()
-            .map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode))
+            .map(etterlysning -> mapTilDto(etterlysning, aktørId, originalPeriode))
             .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, DatoIntervallEntitet originalPeriode) {
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, DatoIntervallEntitet originalPeriode) {
         return new OpprettOppgaveDto(
-            deltakerIdent.getIdent(),
+            aktørId,
             etterlysning.getEksternReferanse(),
             new EndretStartdatoDataDto(hentStartdato(etterlysning), originalPeriode.getFomDato()),
             etterlysning.getFrist()
         );
+    }
+
+    private DatoIntervallEntitet finnOriginalPeriode(Behandling behandling) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .orElseThrow(() -> new IllegalStateException("Fant ikke periodegrunnlag for behandling " + behandling.getId()))
+            .hentForEksaktEnPeriodeDersomFinnes()
+            .orElseThrow(() -> new IllegalStateException("Fant ikke periode for behandling " + behandling.getId()));
     }
 
     private LocalDate hentStartdato(Etterlysning etterlysning) {

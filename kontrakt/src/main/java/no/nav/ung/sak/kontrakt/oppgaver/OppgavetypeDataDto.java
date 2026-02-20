@@ -29,5 +29,8 @@ import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDa
     @JsonSubTypes.Type(value = SøkYtelseOppgavetypeDataDto.class, name = "SØK_YTELSE")
 })
 public interface OppgavetypeDataDto {
+    /**
+     * Returnerer {@link OppgaveType} som tilsvarer denne oppgavetypedataen.
+     */
+    OppgaveType oppgavetype();
 }
-

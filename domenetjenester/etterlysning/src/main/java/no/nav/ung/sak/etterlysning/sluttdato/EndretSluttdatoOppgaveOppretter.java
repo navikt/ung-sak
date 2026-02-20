@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -33,16 +33,16 @@ public class EndretSluttdatoOppgaveOppretter {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
-    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
+    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         etterlysninger.stream()
-            .map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode))
+            .map(etterlysning -> mapTilDto(etterlysning, aktørId, originalPeriode))
             .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, Optional<DatoIntervallEntitet> originalPeriode) {
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, Optional<DatoIntervallEntitet> originalPeriode) {
         return new OpprettOppgaveDto(
-            deltakerIdent.getIdent(),
+            aktørId,
             etterlysning.getEksternReferanse(),
             new EndretSluttdatoDataDto(
                 hentSluttdato(etterlysning.getGrunnlagsreferanse()),

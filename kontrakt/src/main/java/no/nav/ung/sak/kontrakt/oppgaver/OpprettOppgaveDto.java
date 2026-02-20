@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -16,9 +17,10 @@ import java.util.UUID;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record OpprettOppgaveDto(
 
-    @JsonProperty(value = "deltakerIdent", required = true)
+    @JsonProperty(value = "aktørId", required = true)
     @NotNull
-    String deltakerIdent,
+    @Valid
+    AktørId aktørId,
 
     @JsonProperty(value = "oppgaveReferanse", required = true)
     @NotNull

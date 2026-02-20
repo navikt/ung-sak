@@ -2,6 +2,7 @@ package no.nav.ung.sak.etterlysning;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
@@ -38,6 +39,7 @@ import java.util.stream.Collectors;
 public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
 
     private final OidcRestClient restClient;
+    private final Pdl pdl;
     private final URI opprettKontrollerRegisterInntektURI;
     private final URI opprettInntektrapporteringURI;
     private final URI utløpForTypeOgPeriodeURI;
@@ -53,8 +55,10 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     @Inject
     public UngOppgaveKlient(
         OidcRestClient restClient,
+        Pdl pdl,
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
+        this.pdl = pdl;
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
         this.opprettEndretStartdatoURI = tilUri(url, "oppgave/opprett/endret-startdato");
         this.opprettEndretSluttdatoURI = tilUri(url, "oppgave/opprett/endret-sluttdato");
@@ -80,19 +84,21 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     @Override
     public void opprettOppgave(OpprettOppgaveDto oppgave) {
         try {
+            var deltakerIdent = pdl.hentPersonIdentForAktørId(oppgave.aktørId().getId())
+                .orElseThrow(() -> new IllegalArgumentException("Fant ikke personident for aktørId: " + oppgave.aktørId()));
             switch (oppgave.oppgavetypeData()) {
                 case KontrollerRegisterinntektOppgavetypeDataDto d ->
-                    restClient.post(opprettKontrollerRegisterInntektURI, mapTilRegisterInntektOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                    restClient.post(opprettKontrollerRegisterInntektURI, mapTilRegisterInntektOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 case InntektsrapporteringOppgavetypeDataDto d ->
-                    restClient.post(opprettInntektrapporteringURI, mapTilInntektsrapporteringOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                    restClient.post(opprettInntektrapporteringURI, mapTilInntektsrapporteringOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 case EndretStartdatoDataDto d ->
-                    restClient.post(opprettEndretStartdatoURI, mapTilEndretStartdatoOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                    restClient.post(opprettEndretStartdatoURI, mapTilEndretStartdatoOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 case EndretSluttdatoDataDto d ->
-                    restClient.post(opprettEndretSluttdatoURI, mapTilEndretSluttdatoOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                    restClient.post(opprettEndretSluttdatoURI, mapTilEndretSluttdatoOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 case EndretPeriodeDataDto d ->
-                    restClient.post(opprettEndretPeriodeURI, mapTilEndretPeriodeOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                    restClient.post(opprettEndretPeriodeURI, mapTilEndretPeriodeOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 case FjernetPeriodeDataDto d ->
-                    restClient.post(opprettEndretPeriodeURI, mapTilFjernetPeriodeOppgaveDTO(oppgave.deltakerIdent(), oppgave.oppgaveReferanse(), oppgave.frist(), d));
+                    restClient.post(opprettEndretPeriodeURI, mapTilFjernetPeriodeOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 default -> throw new IllegalArgumentException("Ukjent oppgavetypeData: " + oppgave.oppgavetypeData().getClass().getName());
             }
         } catch (Exception e) {

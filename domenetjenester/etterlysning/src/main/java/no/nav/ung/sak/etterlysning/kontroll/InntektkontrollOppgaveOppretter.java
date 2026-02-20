@@ -10,7 +10,7 @@ import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
 import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.util.List;
@@ -30,19 +30,19 @@ public class InntektkontrollOppgaveOppretter {
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
     }
 
-    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
+    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         LocalDateTimeline<Boolean> programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
         etterlysninger.stream()
-            .map(mapTilDto(behandling.getId(), deltakerIdent, programTidslinje))
+            .map(mapTilDto(behandling.getId(), aktørId, programTidslinje))
             .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, PersonIdent deltakerIdent, LocalDateTimeline<Boolean> programTidslinje) {
+    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<Boolean> programTidslinje) {
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
             LocalDateInterval etterlysningPeriode = etterlysning.getPeriode().toLocalDateInterval();
             return new OpprettOppgaveDto(
-                deltakerIdent.getIdent(),
+                aktørId,
                 etterlysning.getEksternReferanse(),
                 new KontrollerRegisterinntektOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
 import java.util.Set;
@@ -30,5 +31,8 @@ public record EndretPeriodeDataDto(
     @NotNull
     Set<PeriodeEndringType> endringer
 ) implements OppgavetypeDataDto {
+    @Override
+    public OppgaveType oppgavetype() {
+        return OppgaveType.BEKREFT_ENDRET_PERIODE;
+    }
 }
-

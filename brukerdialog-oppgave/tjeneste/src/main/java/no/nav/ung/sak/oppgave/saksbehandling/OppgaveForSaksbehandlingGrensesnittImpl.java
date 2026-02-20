@@ -8,13 +8,7 @@ import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto;
 import no.nav.ung.sak.oppgave.*;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
@@ -56,19 +50,8 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
 
     @Override
     public void opprettOppgave(OpprettOppgaveDto oppgave) {
-        var aktørId = finnAktørId(oppgave.deltakerIdent());
-        var oppgaveType = switch (oppgave.oppgavetypeData()) {
-            case EndretStartdatoDataDto ignored          -> OppgaveType.BEKREFT_ENDRET_STARTDATO;
-            case EndretSluttdatoDataDto ignored          -> OppgaveType.BEKREFT_ENDRET_SLUTTDATO;
-            case EndretPeriodeDataDto ignored            -> OppgaveType.BEKREFT_ENDRET_PERIODE;
-            case FjernetPeriodeDataDto ignored           -> OppgaveType.BEKREFT_FJERNET_PERIODE;
-            case KontrollerRegisterinntektOppgavetypeDataDto ignored -> OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT;
-            case InntektsrapporteringOppgavetypeDataDto ignored -> OppgaveType.RAPPORTER_INNTEKT;
-            case SøkYtelseOppgavetypeDataDto ignored     -> OppgaveType.SØK_YTELSE;
-            default -> throw new IllegalArgumentException("Ukjent oppgavetypeData: " + oppgave.oppgavetypeData().getClass().getName());
-        };
         oppgaveLivssyklusTjeneste.opprettOppgave(new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), oppgaveType, aktørId, oppgave.oppgavetypeData(), oppgave.frist()));
+            oppgave.oppgaveReferanse(), oppgave.oppgavetypeData().oppgavetype(), oppgave.aktørId(), oppgave.oppgavetypeData(), oppgave.frist()));
     }
 
     @Override

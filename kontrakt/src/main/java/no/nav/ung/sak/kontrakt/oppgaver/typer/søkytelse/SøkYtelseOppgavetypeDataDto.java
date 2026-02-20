@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
 import java.time.LocalDate;
@@ -26,5 +27,8 @@ public record SøkYtelseOppgavetypeDataDto(
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     LocalDate fomDato
 ) implements OppgavetypeDataDto {
+    @Override
+    public OppgaveType oppgavetype() {
+        return OppgaveType.SØK_YTELSE;
+    }
 }
-
