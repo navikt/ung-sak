@@ -4067,24 +4067,24 @@
         "required" : [ "type" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto" : {
+      "ung.sak.kontrakt.oppgaver.OpprettOppgaveDto" : {
         "properties" : {
           "aktørId" : {
             "type" : "string"
           },
-          "aktørIdAsString" : {
-            "type" : "string"
-          },
-          "fomDato" : {
-            "format" : "date",
+          "frist" : {
+            "format" : "date-time",
             "type" : "string"
           },
           "oppgaveReferanse" : {
             "format" : "uuid",
             "type" : "string"
+          },
+          "oppgavetypeData" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDto"
           }
         },
-        "required" : [ "aktørId", "fomDato" ],
+        "required" : [ "aktørId", "oppgaveReferanse", "oppgavetypeData" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.SvarPåVarselDTO" : {
@@ -8834,7 +8834,7 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto"
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OpprettOppgaveDto"
               }
             }
           },
