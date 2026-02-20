@@ -18,7 +18,7 @@ public class InntektsrapporteringOppgaveDataEntitet {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "oppgave_id", nullable = false, updatable = false)
+    @JoinColumn(name = "bd_oppgave_id", nullable = false, updatable = false)
     private BrukerdialogOppgaveEntitet oppgave;
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)

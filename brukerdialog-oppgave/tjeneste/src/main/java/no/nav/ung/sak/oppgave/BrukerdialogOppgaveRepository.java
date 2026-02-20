@@ -13,18 +13,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+
 @ApplicationScoped
 public class BrukerdialogOppgaveRepository {
 
     private EntityManager entityManager;
+    private OppgaveDataEntitetMapper oppgaveDataEntitetMapper;
 
     public BrukerdialogOppgaveRepository() {
         // CDI proxy
     }
 
     @Inject
-    public BrukerdialogOppgaveRepository(EntityManager entityManager) {
+    public BrukerdialogOppgaveRepository(EntityManager entityManager,
+                                          OppgaveDataEntitetMapper oppgaveDataEntitetMapper) {
         this.entityManager = entityManager;
+        this.oppgaveDataEntitetMapper = oppgaveDataEntitetMapper;
     }
 
     public List<BrukerdialogOppgaveEntitet> hentAlleOppgaverForAktør(AktørId aktørId) {
@@ -89,6 +94,17 @@ public class BrukerdialogOppgaveRepository {
     public void persister(BrukerdialogOppgaveEntitet oppgave) {
         entityManager.persist(oppgave);
         entityManager.flush();
+    }
+
+    /**
+     * Mapper {@link OppgavetypeDataDTO} til riktig JPA-entitet og persisterer den.
+     * Må kalles etter at {@code oppgave} allerede er persistert slik at FK-referansen er gyldig.
+     *
+     * @param oppgave oppgaven dataen tilhører
+     * @param data    oppgavetypedata som skal lagres
+     */
+    public void persisterOppgaveData(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDTO data) {
+        oppgaveDataEntitetMapper.persister(oppgave, data);
     }
 
     public BrukerdialogOppgaveEntitet oppdater(BrukerdialogOppgaveEntitet oppgave) {
