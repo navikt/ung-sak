@@ -2,7 +2,7 @@ package no.nav.ung.sak.etterlysning.startdato;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.OpprettEndretStartdatoOppgaveDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
+
 import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
@@ -29,8 +29,7 @@ public class EndretStartdatoOppgaveOppretter {
     private final UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
 
     @Inject
-    public EndretStartdatoOppgaveOppretter(UngOppgaveKlient ungOppgaveKlient,
-                                           MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+    public EndretStartdatoOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
                                            UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                            UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
         this.delegeringTjeneste = delegeringTjeneste;
@@ -56,13 +55,13 @@ public class EndretStartdatoOppgaveOppretter {
             .orElse(DatoIntervallEntitet.fraOgMed(startdato));
     }
 
-    private EndretStartdatoOppgaveDTO mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, DatoIntervallEntitet originalPeriode) {
-        return new EndretStartdatoOppgaveDTO(
+    private OpprettEndretStartdatoOppgaveDto mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, DatoIntervallEntitet originalPeriode) {
+        return new OpprettEndretStartdatoOppgaveDto(
             deltakerIdent.getIdent(),
             etterlysning.getEksternReferanse(),
-            etterlysning.getFrist(),
             hentStartdato(etterlysning),
-            originalPeriode.getFomDato()
+            originalPeriode.getFomDato(),
+            etterlysning.getFrist()
         );
     }
 

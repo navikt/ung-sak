@@ -1,16 +1,16 @@
-package no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode;
+package no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
 import java.time.LocalDate;
 
 /**
- * Data for oppgave om fjernet periode.
+ * Data for oppgave om å kontrollere registerinntekt.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(
@@ -20,15 +20,24 @@ import java.time.LocalDate;
     isGetterVisibility = JsonAutoDetect.Visibility.NONE,
     creatorVisibility = JsonAutoDetect.Visibility.NONE
 )
-public record FjernetPeriodeDataDTO(
-    @JsonProperty(value = "forrigeStartdato", required = true)
+public record KontrollerRegisterinntektOppgavetypeDataDto(
+    @JsonProperty(value = "fraOgMed", required = true)
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    LocalDate forrigeStartdato,
+    LocalDate fraOgMed,
 
-    @JsonProperty(value = "forrigeSluttdato")
+    @JsonProperty(value = "tilOgMed", required = true)
+    @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    LocalDate forrigeSluttdato
-) implements OppgavetypeDataDTO {
+    LocalDate tilOgMed,
+
+    @JsonProperty(value = "registerinntekt", required = true)
+    @NotNull
+    RegisterinntektDTO registerinntekt,
+
+    @JsonProperty(value = "gjelderDelerAvMåned", required = true)
+    @NotNull
+    Boolean gjelderDelerAvMåned
+) implements OppgavetypeDataDto {
 }
 

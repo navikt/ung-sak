@@ -1,9 +1,9 @@
 package no.nav.ung.sak.oppgave;
 
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
 /**
- * Felles interface for alle klasser som mapper og persisterer en {@link OppgavetypeDataDTO}-subtype
+ * Felles interface for alle klasser som mapper og persisterer en {@link OppgavetypeDataDto}-subtype
  * til sin tilhørende JPA-entitet.
  * <p>
  * Implementasjoner skal annoteres med {@link OppgaveTypeRef} for CDI-oppslag.
@@ -17,6 +17,6 @@ public interface OppgaveDataPersisterer {
      * @param oppgave oppgaven dataen tilhører
      * @param data    oppgavetypedata som skal lagres
      */
-    void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDTO data);
+    void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data);
 }
 

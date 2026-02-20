@@ -1,15 +1,16 @@
-package no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode;
+package no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
-import java.util.Set;
+import java.time.LocalDate;
 
 /**
- * Data for oppgave om endret periode.
+ * Data for søk ytelse oppgave.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(
@@ -19,16 +20,11 @@ import java.util.Set;
     isGetterVisibility = JsonAutoDetect.Visibility.NONE,
     creatorVisibility = JsonAutoDetect.Visibility.NONE
 )
-public record EndretPeriodeDataDTO(
-    @JsonProperty(value = "nyPeriode")
-    PeriodeDTO nyPeriode,
-
-    @JsonProperty(value = "forrigePeriode")
-    PeriodeDTO forrigePeriode,
-
-    @JsonProperty(value = "endringer", required = true)
+public record SøkYtelseOppgavetypeDataDto(
+    @JsonProperty(value = "fomDato", required = true)
     @NotNull
-    Set<PeriodeEndringType> endringer
-) implements OppgavetypeDataDTO {
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    LocalDate fomDato
+) implements OppgavetypeDataDto {
 }
 

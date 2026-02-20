@@ -4,13 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.OpprettEndretPeriodeOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.OpprettEndretSluttdatoOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.OpprettEndretStartdatoOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.OpprettInntektsrapporteringOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.OpprettKontrollerRegisterInntektOppgaveDto;
 import no.nav.ung.sak.oppgave.OppgaveForSaksbehandlingGrensesnitt;
 
 import java.util.UUID;
@@ -31,23 +30,23 @@ public class MidlertidigOppgaveDelegeringTjeneste {
         this.instanser = instanser;
     }
 
-    public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgave) {
+    public void opprettKontrollerRegisterInntektOppgave(OpprettKontrollerRegisterInntektOppgaveDto oppgave) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.opprettKontrollerRegisterInntektOppgave(oppgave));
     }
 
-    public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgave) {
+    public void opprettInntektrapporteringOppgave(OpprettInntektsrapporteringOppgaveDto oppgave) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.opprettInntektrapporteringOppgave(oppgave));
     }
 
-    public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO oppgave) {
+    public void opprettEndretStartdatoOppgave(OpprettEndretStartdatoOppgaveDto oppgave) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.opprettEndretStartdatoOppgave(oppgave));
     }
 
-    public void opprettEndretSluttdatoOppgave(EndretSluttdatoOppgaveDTO oppgave) {
+    public void opprettEndretSluttdatoOppgave(OpprettEndretSluttdatoOppgaveDto oppgave) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.opprettEndretSluttdatoOppgave(oppgave));
     }
 
-    public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO oppgave) {
+    public void opprettEndretPeriodeOppgave(OpprettEndretPeriodeOppgaveDto oppgave) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.opprettEndretPeriodeOppgave(oppgave));
     }
 
@@ -59,15 +58,15 @@ public class MidlertidigOppgaveDelegeringTjeneste {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.oppgaveUtløpt(eksternRef));
     }
 
-    public void settOppgaveTilUtløpt(EndreStatusDTO dto) {
+    public void settOppgaveTilUtløpt(EndreOppgaveStatusDto dto) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.settOppgaveTilUtløpt(dto));
     }
 
-    public void settOppgaveTilAvbrutt(EndreStatusDTO dto) {
+    public void settOppgaveTilAvbrutt(EndreOppgaveStatusDto dto) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.settOppgaveTilAvbrutt(dto));
     }
 
-    public void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO) {
-        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.løsSøkYtelseOppgave(deltakerDTO));
+    public void løsSøkYtelseOppgave(String deltakerIdent) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.løsSøkYtelseOppgave(deltakerIdent));
     }
 }

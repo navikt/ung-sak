@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
 import java.time.LocalDate;
 
@@ -20,7 +20,7 @@ import java.time.LocalDate;
     isGetterVisibility = JsonAutoDetect.Visibility.NONE,
     creatorVisibility = JsonAutoDetect.Visibility.NONE
 )
-public record InntektsrapporteringOppgavetypeDataDTO(
+public record InntektsrapporteringOppgavetypeDataDto(
     @JsonProperty(value = "fraOgMed", required = true)
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -34,6 +34,6 @@ public record InntektsrapporteringOppgavetypeDataDTO(
     @JsonProperty(value = "gjelderDelerAvMåned", required = true)
     @NotNull
     Boolean gjelderDelerAvMåned
-) implements OppgavetypeDataDTO {
+) implements OppgavetypeDataDto {
 }
 

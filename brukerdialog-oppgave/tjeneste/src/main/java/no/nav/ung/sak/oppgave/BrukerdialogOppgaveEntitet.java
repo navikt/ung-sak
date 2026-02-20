@@ -5,7 +5,7 @@ import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
 import org.hibernate.annotations.ColumnTransformer;
 
@@ -38,7 +38,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Convert(converter = OppgaveDataConverter.class)
     @ColumnTransformer(write = "?::jsonb")
     @Column(name = "data", nullable = false, updatable = false, columnDefinition = "jsonb")
-    private OppgavetypeDataDTO data;
+    private OppgavetypeDataDto data;
 
     @Column(name = "frist_tid")
     private LocalDateTime fristTid;
@@ -64,7 +64,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     public BrukerdialogOppgaveEntitet(UUID oppgavereferanse,
                                       OppgaveType oppgaveType,
                                       AktørId aktørId,
-                                      OppgavetypeDataDTO data,
+                                      OppgavetypeDataDto data,
                                       LocalDateTime fristTid) {
         this.oppgavereferanse = oppgavereferanse;
         this.oppgaveType = oppgaveType;
@@ -80,7 +80,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     public BrukerdialogOppgaveEntitet(UUID oppgavereferanse,
                                       OppgaveType oppgaveType,
                                       AktørId aktørId,
-                                      OppgavetypeDataDTO data,
+                                      OppgavetypeDataDto data,
                                       BekreftelseDTO bekreftelse,
                                       OppgaveStatus status,
                                       LocalDateTime fristTid,
@@ -115,7 +115,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         return oppgaveType;
     }
 
-    public OppgavetypeDataDTO getData() {
+    public OppgavetypeDataDto getData() {
         return data;
     }
 

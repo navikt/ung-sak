@@ -3,9 +3,9 @@ package no.nav.ung.sak.oppgave.typer.oppgave.søkytelse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveDataPersisterer;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
@@ -26,8 +26,8 @@ public class SøkYtelseOppgaveDataPersisterer implements OppgaveDataPersisterer 
     }
 
     @Override
-    public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDTO data) {
-        var dto = (SøkYtelseOppgavetypeDataDTO) data;
+    public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
+        var dto = (SøkYtelseOppgavetypeDataDto) data;
         var entitet = new SøkYtelseOppgaveDataEntitet(
             oppgave,
             dto.fomDato()

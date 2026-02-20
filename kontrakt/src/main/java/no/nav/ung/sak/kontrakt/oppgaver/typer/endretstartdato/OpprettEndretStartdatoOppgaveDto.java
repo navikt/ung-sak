@@ -1,27 +1,28 @@
 package no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
- * Data for oppgave om endret startdato.
+ * DTO for å opprette en oppgave om endret startdato.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonAutoDetect(
-    fieldVisibility = JsonAutoDetect.Visibility.NONE,
-    getterVisibility = JsonAutoDetect.Visibility.NONE,
-    setterVisibility = JsonAutoDetect.Visibility.NONE,
-    isGetterVisibility = JsonAutoDetect.Visibility.NONE,
-    creatorVisibility = JsonAutoDetect.Visibility.NONE
-)
-public record EndretStartdatoDataDTO(
+public record OpprettEndretStartdatoOppgaveDto(
+
+    @JsonProperty(value = "deltakerIdent", required = true)
+    @NotNull
+    String deltakerIdent,
+
+    @JsonProperty(value = "oppgaveReferanse", required = true)
+    @NotNull
+    UUID oppgaveReferanse,
+
     @JsonProperty(value = "nyStartdato", required = true)
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
@@ -30,7 +31,11 @@ public record EndretStartdatoDataDTO(
     @JsonProperty(value = "forrigeStartdato", required = true)
     @NotNull
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    LocalDate forrigeStartdato
-) implements OppgavetypeDataDTO {
+    LocalDate forrigeStartdato,
+
+    @JsonProperty(value = "frist")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    LocalDateTime frist
+) {
 }
 

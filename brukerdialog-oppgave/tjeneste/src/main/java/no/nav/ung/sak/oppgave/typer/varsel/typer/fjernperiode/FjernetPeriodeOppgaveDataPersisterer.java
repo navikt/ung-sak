@@ -3,9 +3,9 @@ package no.nav.ung.sak.oppgave.typer.varsel.typer.fjernperiode;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveDataPersisterer;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
@@ -26,8 +26,8 @@ public class FjernetPeriodeOppgaveDataPersisterer implements OppgaveDataPersiste
     }
 
     @Override
-    public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDTO data) {
-        var dto = (FjernetPeriodeDataDTO) data;
+    public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
+        var dto = (FjernetPeriodeDataDto) data;
         var entitet = new FjernetPeriodeOppgaveDataEntitet(
             oppgave,
             dto.forrigeStartdato(),

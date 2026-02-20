@@ -6,10 +6,10 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterIn
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.YtelseType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.RegisterinntektDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO;
 
@@ -26,7 +26,7 @@ public class KontrollerRegisterInntektOppgaveMapper {
         RegisterinntektDTO registerinntektData = new RegisterinntektDTO(arbeidOgFrilansInntekter, ytelseInntekter);
 
         // Opprett oppgavedata
-        OppgavetypeDataDTO kontrollerRegisterInntektOppgaveData = new KontrollerRegisterinntektOppgavetypeDataDTO(
+        OppgavetypeDataDto kontrollerRegisterInntektOppgaveData = new KontrollerRegisterinntektOppgavetypeDataDto(
             oppgaveDto.getFomDato(),
             oppgaveDto.getTomDato(),
             registerinntektData,

@@ -4,12 +4,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveMapper;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
 
     @Override
     public BrukerdialogOppgaveDto opprettSøkYtelseOppgave(OpprettSøkYtelseOppgaveDto oppgaveDto) {
-        SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(oppgaveDto.fomDato());
+        SøkYtelseOppgavetypeDataDto oppgaveData = new SøkYtelseOppgavetypeDataDto(oppgaveDto.fomDato());
 
         // Generer UUID hvis ikke oppgitt
         UUID oppgaveReferanse = oppgaveDto.oppgaveReferanse() != null

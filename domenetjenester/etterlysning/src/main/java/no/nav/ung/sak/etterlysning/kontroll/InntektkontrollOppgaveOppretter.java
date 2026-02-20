@@ -4,7 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.OpprettKontrollerRegisterInntektOppgaveDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
@@ -35,18 +35,19 @@ public class InntektkontrollOppgaveOppretter {
         oppgaveDtoer.forEach(delegeringTjeneste::opprettKontrollerRegisterInntektOppgave);
     }
 
-    private Function<Etterlysning, RegisterInntektOppgaveDTO> mapTilDto(long behandlingId, PersonIdent deltakerIdent, LocalDateTimeline<Boolean> programTidslinje) {
+    private Function<Etterlysning, OpprettKontrollerRegisterInntektOppgaveDto> mapTilDto(long behandlingId, PersonIdent deltakerIdent, LocalDateTimeline<Boolean> programTidslinje) {
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
             LocalDateInterval etterlysningPeriode = etterlysning.getPeriode().toLocalDateInterval();
-            return new RegisterInntektOppgaveDTO(deltakerIdent.getIdent(),
+            return new OpprettKontrollerRegisterInntektOppgaveDto(
+                deltakerIdent.getIdent(),
                 etterlysning.getEksternReferanse(),
-                etterlysning.getFrist(),
                 etterlysning.getPeriode().getFomDato(),
                 etterlysning.getPeriode().getTomDato(),
                 InntektKontrollOppgaveMapper.mapTilRegisterInntekter(registerinntekter),
-                overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, programTidslinje)
-                );
+                overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, programTidslinje),
+                etterlysning.getFrist()
+            );
         };
     }
 

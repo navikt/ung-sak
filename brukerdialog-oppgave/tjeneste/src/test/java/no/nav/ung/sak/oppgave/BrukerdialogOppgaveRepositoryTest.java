@@ -6,7 +6,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ class BrukerdialogOppgaveRepositoryTest {
         // Arrange
         UUID oppgaveReferanse = UUID.randomUUID();
         LocalDate fomDato = LocalDate.of(2026, 2, 1);
-        SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(fomDato);
+        SøkYtelseOppgavetypeDataDto oppgaveData = new SøkYtelseOppgavetypeDataDto(fomDato);
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,
@@ -67,7 +67,7 @@ class BrukerdialogOppgaveRepositoryTest {
         assertThat(hentetOppgave.get().getOppgaveType()).isEqualTo(OppgaveType.SØK_YTELSE);
         assertThat(hentetOppgave.get().getAktørId()).isEqualTo(aktørId);
         assertThat(hentetOppgave.get().getStatus()).isEqualTo(OppgaveStatus.ULØST);
-        assertThat(hentetOppgave.get().getData()).isInstanceOf(SøkYtelseOppgavetypeDataDTO.class);
+        assertThat(hentetOppgave.get().getData()).isInstanceOf(SøkYtelseOppgavetypeDataDto.class);
     }
 
     @Test
@@ -184,7 +184,7 @@ class BrukerdialogOppgaveRepositoryTest {
     // Hjelpemetode for å opprette testoppgaver
     private BrukerdialogOppgaveEntitet opprettOppgave(AktørId aktørId, OppgaveType type) {
         UUID oppgaveReferanse = UUID.randomUUID();
-        SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(LocalDate.now());
+        SøkYtelseOppgavetypeDataDto oppgaveData = new SøkYtelseOppgavetypeDataDto(LocalDate.now());
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,

@@ -17,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.OpprettInntektsrapporteringOppgaveDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -90,13 +91,13 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(aktørId, fom, tom);
         PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
         ZonedDateTime nesteKontrollTidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
-        delegeringTjeneste.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
+        delegeringTjeneste.opprettInntektrapporteringOppgave(new OpprettInntektsrapporteringOppgaveDto(
             deltakerIdent.getIdent(),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
-            nesteKontrollTidspunkt.toLocalDateTime().toLocalDate().atStartOfDay(),
             fom,
             tom,
-            harIkkeYtelseIHelePerioden
+            harIkkeYtelseIHelePerioden,
+            nesteKontrollTidspunkt.toLocalDateTime().toLocalDate().atStartOfDay()
         ));
     }
 

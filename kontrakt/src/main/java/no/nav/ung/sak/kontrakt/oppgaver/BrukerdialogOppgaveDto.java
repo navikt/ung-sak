@@ -33,7 +33,7 @@ public record BrukerdialogOppgaveDto(
 
     @JsonProperty(value = "oppgavetypeData", required = true)
     @NotNull
-    OppgavetypeDataDTO oppgavetypeData,
+    OppgavetypeDataDto oppgavetypeData,
 
     @JsonProperty(value = "bekreftelse")
     BekreftelseDTO bekreftelse,

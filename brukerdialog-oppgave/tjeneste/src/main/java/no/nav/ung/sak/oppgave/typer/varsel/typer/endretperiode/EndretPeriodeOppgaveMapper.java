@@ -4,9 +4,9 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriod
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.PeriodeEndringType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
 
 import java.util.stream.Collectors;
@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class EndretPeriodeOppgaveMapper {
 
     public static BrukerdialogOppgaveEntitet map(EndretPeriodeOppgaveDTO oppgaveDto, AktørId aktørId) {
-        OppgavetypeDataDTO endretPeriodeOppgaveData = new EndretPeriodeDataDTO(
+        OppgavetypeDataDto endretPeriodeOppgaveData = new EndretPeriodeDataDto(
             mapPeriode(oppgaveDto.getNyPeriode()),
             mapPeriode(oppgaveDto.getForrigePeriode()),
             oppgaveDto.getEndringer().stream().map(EndretPeriodeOppgaveMapper::mapEndringType)
