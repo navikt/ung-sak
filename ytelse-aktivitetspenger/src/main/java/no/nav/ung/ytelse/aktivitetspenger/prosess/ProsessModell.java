@@ -29,6 +29,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.VURDER_BOSTED)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
+            .medSteg(BehandlingStegType.AKTIVITETSPENGER_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
             .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
