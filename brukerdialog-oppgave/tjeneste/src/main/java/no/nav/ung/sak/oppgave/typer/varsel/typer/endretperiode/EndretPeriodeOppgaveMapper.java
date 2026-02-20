@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretperiode;
+package no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode;
 
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.PeriodeEndringType;

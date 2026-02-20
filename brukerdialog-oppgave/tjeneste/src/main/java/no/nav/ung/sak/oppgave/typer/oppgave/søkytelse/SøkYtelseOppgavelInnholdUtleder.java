@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretstartdato;
+package no.nav.ung.sak.oppgave.typer.oppgave.søkytelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -6,32 +6,32 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
-import no.nav.ung.sak.oppgave.VarselInnholdUtleder;
+import no.nav.ung.sak.oppgave.OppgavelInnholdUtleder;
 
-@OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_STARTDATO)
+@OppgaveTypeRef(OppgaveType.SØK_YTELSE)
 @ApplicationScoped
-public class EndretStartdatoVarselInnholdUtleder implements VarselInnholdUtleder {
+public class SøkYtelseOppgavelInnholdUtleder implements OppgavelInnholdUtleder {
 
     private String ungdomsprogramytelsenDeltakerBaseUrl;
 
     @Inject
-    public EndretStartdatoVarselInnholdUtleder(
+    public SøkYtelseOppgavelInnholdUtleder(
         @KonfigVerdi(value = "UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL") String ungdomsprogramytelsenDeltakerBaseUrl
     ) {
         this.ungdomsprogramytelsenDeltakerBaseUrl = ungdomsprogramytelsenDeltakerBaseUrl;
     }
 
-    public EndretStartdatoVarselInnholdUtleder() {
+    public SøkYtelseOppgavelInnholdUtleder() {
     }
 
     @Override
     public String utledVarselTekst(BrukerdialogOppgaveEntitet oppgave) {
-        return "Se og gi tilbakemelding på endret startdato i ungdomsprogrammet";
+        return "Søk om ungdomsprogramytelsen";
     }
 
     @Override
     public String utledVarselLenke(BrukerdialogOppgaveEntitet oppgave) {
-        return ungdomsprogramytelsenDeltakerBaseUrl + "/oppgave" + oppgave.getOppgavereferanse();
+        return ungdomsprogramytelsenDeltakerBaseUrl;
     }
 
 }

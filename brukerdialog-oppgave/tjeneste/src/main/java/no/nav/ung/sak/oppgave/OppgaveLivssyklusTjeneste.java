@@ -15,14 +15,14 @@ public class OppgaveLivssyklusTjeneste {
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private BrukerdialogOppgaveRepository brukerdialogOppgaveRepository;
-    private Instance<VarselInnholdUtleder> varselInnholdUtledere;
+    private Instance<OppgavelInnholdUtleder> varselInnholdUtledere;
 
     public OppgaveLivssyklusTjeneste() {
     }
 
     @Inject
     public OppgaveLivssyklusTjeneste(ProsessTaskTjeneste prosessTaskTjeneste, BrukerdialogOppgaveRepository brukerdialogOppgaveRepository,
-                                     @Any Instance<VarselInnholdUtleder> varselInnholdUtledere) {
+                                     @Any Instance<OppgavelInnholdUtleder> varselInnholdUtledere) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.brukerdialogOppgaveRepository = brukerdialogOppgaveRepository;
         this.varselInnholdUtledere = varselInnholdUtledere;
@@ -84,12 +84,12 @@ public class OppgaveLivssyklusTjeneste {
     }
 
     private void opprettTaskForPubliseringAvVarsel(BrukerdialogOppgaveEntitet oppgaveEntitet) {
-        VarselInnholdUtleder varselInnholdUtleder = VarselInnholdUtleder.finnUtleder(varselInnholdUtledere, oppgaveEntitet.getOppgaveType());
+        OppgavelInnholdUtleder oppgavelInnholdUtleder = OppgavelInnholdUtleder.finnUtleder(varselInnholdUtledere, oppgaveEntitet.getOppgaveType());
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(PubliserMinSideVarselTask.class);
         prosessTaskData.setProperty(PubliserMinSideVarselTask.OPPGAVE_REFERANSE, oppgaveEntitet.getOppgavereferanse().toString());
         prosessTaskData.setProperty(ProsessTaskData.AKTØR_ID, oppgaveEntitet.getAktørId().getId());
-        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_TEKST, varselInnholdUtleder.utledVarselTekst(oppgaveEntitet));
-        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_LENKE, varselInnholdUtleder.utledVarselLenke(oppgaveEntitet));
+        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_TEKST, oppgavelInnholdUtleder.utledVarselTekst(oppgaveEntitet));
+        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_LENKE, oppgavelInnholdUtleder.utledVarselLenke(oppgaveEntitet));
         prosessTaskTjeneste.lagre(prosessTaskData);
     }
 

@@ -3,9 +3,9 @@ package no.nav.ung.sak.oppgave;
 import jakarta.enterprise.inject.Instance;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 
-public interface VarselInnholdUtleder {
+public interface OppgavelInnholdUtleder {
 
-    public static VarselInnholdUtleder finnUtleder(Instance<VarselInnholdUtleder> utledere, OppgaveType oppgaveType) {
+    public static OppgavelInnholdUtleder finnUtleder(Instance<OppgavelInnholdUtleder> utledere, OppgaveType oppgaveType) {
         return OppgaveTypeRef.Lookup.find(utledere, oppgaveType)
             .orElseThrow(() -> new IllegalArgumentException("Finner ingen varsel innhold utleder for oppgavetype: " + oppgaveType));
     }

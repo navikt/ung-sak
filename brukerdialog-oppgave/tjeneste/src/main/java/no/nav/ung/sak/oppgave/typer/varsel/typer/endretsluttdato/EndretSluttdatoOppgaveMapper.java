@@ -1,4 +1,4 @@
-package no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretsluttdato;
+package no.nav.ung.sak.oppgave.typer.varsel.typer.endretsluttdato;
 
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.sak.typer.AktørId;

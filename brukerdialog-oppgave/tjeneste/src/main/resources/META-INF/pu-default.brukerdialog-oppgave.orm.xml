@@ -7,8 +7,28 @@
 	<!-- Sequence generator for brukerdialog oppgave (varsel and søknad) -->
 	<sequence-generator name="SEQ_BD_OPPGAVE" allocation-size="50" sequence-name="SEQ_BD_OPPGAVE" />
 
+	<!-- Sequence generators for typed oppgavedata tables -->
+	<sequence-generator name="SEQ_BD_OPPGAVE_DATA_ENDRET_STARTDATO"        allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_ENDRET_STARTDATO" />
+	<sequence-generator name="SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO"        allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO" />
+	<sequence-generator name="SEQ_BD_OPPGAVE_DATA_FJERNET_PERIODE"         allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_FJERNET_PERIODE" />
+	<sequence-generator name="SEQ_BD_OPPGAVE_DATA_ENDRET_PERIODE"          allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_ENDRET_PERIODE" />
+	<sequence-generator name="SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT"  allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT" />
+	<sequence-generator name="SEQ_BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING"    allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING" />
+	<sequence-generator name="SEQ_BD_OPPGAVE_DATA_SOK_YTELSE"              allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_SOK_YTELSE" />
+
 	<!-- Entity mappings -->
 	<entity class="no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet" />
+
+	<!-- Typed oppgavedata entities (one per OppgavetypeDataDTO subtype) -->
+	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.endretstartdato.EndretStartdatoOppgaveDataEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.endretsluttdato.EndretSluttdatoOppgaveDataEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.fjernperiode.FjernetPeriodeOppgaveDataEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode.EndretPeriodeOppgaveDataEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgaveDataEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.ArbeidOgFrilansInntektEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.YtelseInntektEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDataEntitet" />
+	<entity class="no.nav.ung.sak.oppgave.typer.oppgave.søkytelse.SøkYtelseOppgaveDataEntitet" />
 
 </entity-mappings>
 
