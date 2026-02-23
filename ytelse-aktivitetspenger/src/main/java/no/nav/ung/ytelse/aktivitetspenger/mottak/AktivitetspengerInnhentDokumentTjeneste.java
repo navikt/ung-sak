@@ -11,41 +11,27 @@ import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.repository.*;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
-import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
-import no.nav.ung.sak.mottak.dokumentmottak.DokumentmottakMidlertidigFeil;
-import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
-import no.nav.ung.sak.mottak.dokumentmottak.InnhentDokumentTjeneste;
-import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
+import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -57,6 +43,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
     private final Instance<Dokumentmottaker> mottakere;
     private final Behandlingsoppretter behandlingsoppretter;
     private final BehandlingRepository behandlingRepository;
+    private final BehandlingRevurderingRepository revurderingRepository;
     private final BehandlingLåsRepository behandlingLåsRepository;
     private final BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     private final ProsessTaskTjeneste prosessTaskTjeneste;
@@ -67,7 +54,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
     @Inject
     public AktivitetspengerInnhentDokumentTjeneste(@Any Instance<Dokumentmottaker> mottakere,
                                                    Behandlingsoppretter behandlingsoppretter,
-                                                   BehandlingRepositoryProvider repositoryProvider,
+                                                   BehandlingRepositoryProvider repositoryProvider, BehandlingRevurderingRepository revurderingRepository,
                                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                                    ProsessTaskTjeneste prosessTaskTjeneste,
                                                    FagsakProsessTaskRepository fagsakProsessTaskRepository,
@@ -76,6 +63,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingLåsRepository = repositoryProvider.getBehandlingLåsRepository();
+        this.revurderingRepository = revurderingRepository;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
@@ -121,25 +109,33 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
 
     private BehandlingMedOpprettelseResultat finnEllerOpprettBehandling(Fagsak fagsak, List<Trigger> triggere) {
         var fagsakId = fagsak.getId();
-        List<Behandling> alleBehandlinger = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsakId);
-        Optional<Behandling> sisteDel1Behandling = alleBehandlinger.stream()
-            .filter(it -> it.getType() == BehandlingType.AKTIVITETSPENGER_DEL_1)
-            .filter(it -> !it.erHenlagt())
-            .max(Comparator.comparing(BaseEntitet::getOpprettetTidspunkt));
+        Optional<Behandling> sisteYtelsesbehandling = revurderingRepository.hentSisteBehandling(fagsak.getId());
 
-        if (sisteDel1Behandling.isEmpty()) {
-            log.info("Ingen tidligere del1-behandling for fagsak {}, oppretter ny del1-behandling", fagsakId);
-            Behandling behandling = behandlingsoppretter.opprettAktivitetspengerDel1Behandling(fagsak, triggere.getFirst().behandlingÅrsak(), Optional.empty());
+        if (sisteYtelsesbehandling.isEmpty()) {
+            // ingen tidligere behandling - Opprett ny førstegangsbehandling
+            log.info("Ingen tidligere behandling for fagsak {}, oppretter ny førstegangsbehandling", fagsakId);
+            Behandling behandling = behandlingsoppretter.opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
             return BehandlingMedOpprettelseResultat.nyBehandling(behandling);
         } else {
-            var sisteBehandling = sisteDel1Behandling.get();
+            var sisteBehandling = sisteYtelsesbehandling.get();
             sjekkBehandlingKanLåses(sisteBehandling); // sjekker at kan låses (dvs ingen andre prosesserer den samtidig, hvis ikke kommer vi tilbake senere en gang)
-            if (erBehandlingAvsluttet(sisteDel1Behandling)) {
-                log.info("Det finnes en tidligere avslttet del1-behandling for fagsak {}, oppretter ny del1-behandling", fagsakId);
-                Behandling behandling = behandlingsoppretter.opprettAktivitetspengerDel1Behandling(fagsak, triggere.getFirst().behandlingÅrsak(), sisteDel1Behandling);
-                return BehandlingMedOpprettelseResultat.nyBehandling(behandling);
+            if (erBehandlingAvsluttet(sisteYtelsesbehandling)) {
+                // siste behandling er avsluttet, oppretter ny behandling
+                Optional<Behandling> sisteAvsluttetBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
+                sisteBehandling = sisteAvsluttetBehandling.orElse(sisteBehandling);
+
+                // Håndter avsluttet behandling
+                var sisteHenlagteFørstegangsbehandling = behandlingsoppretter.sisteHenlagteFørstegangsbehandling(sisteBehandling.getFagsak());
+                if (sisteHenlagteFørstegangsbehandling.isPresent()) {
+                    // oppretter ny behandling når siste var henlagt førstegangsbehandling
+                    var nyFørstegangsbehandling = behandlingsoppretter.opprettNyFørstegangsbehandling(sisteHenlagteFørstegangsbehandling.get().getFagsak(), sisteHenlagteFørstegangsbehandling.get());
+                    return BehandlingMedOpprettelseResultat.nyBehandling(nyFørstegangsbehandling);
+                } else {
+                    // oppretter ny behandling fra forrige (førstegangsbehandling eller revurdering)
+                    var nyBehandling = behandlingsoppretter.opprettNyBehandlingFra(sisteBehandling, triggere.getFirst().behandlingÅrsak());
+                    return BehandlingMedOpprettelseResultat.nyBehandling(nyBehandling);
+                }
             } else {
-                log.info("Det finnes en aktiv del1-behandling {} for fagsak {}, legger dokumentet i denne", sisteBehandling.getId(), fagsakId);
                 sjekkBehandlingKanHoppesTilbake(sisteBehandling);
                 sjekkBehandlingHarIkkeÅpneTasks(sisteBehandling);
                 return BehandlingMedOpprettelseResultat.eksisterendeBehandling(sisteBehandling);
@@ -217,7 +213,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
         final LocalDateTime fom = Tid.TIDENES_BEGYNNELSE.atStartOfDay();
         final LocalDateTime tom = Tid.TIDENES_ENDE.plusDays(1).atStartOfDay();
         //merk at denne bare finner tasks med gruppesekvensnummer != null (hindrer at den finner seg selv eller andre av typen innhentsaksopplysninger.håndterMottattDokument)
-        final List<ProsessTaskData> åpneTasks = fagsakProsessTaskRepository.finnAlleForAngittSøk(behandling.getFagsakId(), behandling.getId().toString(), null, aktuelleStatuser, true, fom, tom);
+        final List<ProsessTaskData> åpneTasks = fagsakProsessTaskRepository.finnAlleForAngittSøk(behandling.getFagsakId(), behandling.getId().toString(), null, aktuelleStatuser, true);
         if (!åpneTasks.isEmpty()) {
             //behandlingen har åpne tasks og mottak av dokument kan føre til parallelle prosesser som går i beina på hverandre
             log.info("Fant følgende åpne tasks: [" + åpneTasks.stream().map(Object::toString).collect(Collectors.joining(", ")) + "]");
@@ -237,7 +233,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
             .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
     }
 
-    record BehandlingMedOpprettelseResultat(Behandling behandling, boolean nyopprettet) {
+    record BehandlingMedOpprettelseResultat ( Behandling behandling, boolean nyopprettet) {
 
         static BehandlingMedOpprettelseResultat nyBehandling(Behandling behandling) {
             return new BehandlingMedOpprettelseResultat(behandling, true);

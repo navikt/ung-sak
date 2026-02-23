@@ -1185,9 +1185,9 @@
         "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "VURDER_BOSTED", "VURDER_BISTANDSVILKÅR", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS", "VURDER_KLAGE_FØRSTEINSTANS", "OVERFØRT_NK" ]
       },
       "ung.kodeverk.behandling.BehandlingType" : {
-        "enum" : [ "BT-002", "BT-004", "BT-003", "BT-008", "BT-007", "BT-009", "BT-011", "-" ],
+        "enum" : [ "BT-002", "BT-004", "BT-003", "BT-008", "BT-007", "BT-009", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "AKTIVITETSPENGER_DEL_1", "UDEFINERT" ]
+        "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingÅrsakType" : {
         "enum" : [ "RE-END-FRA-BRUKER", "RE-END-FRA-BRUKER-AKT", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
@@ -1220,9 +1220,9 @@
         "x-enum-varnames" : [ "AVBRUTT", "OPPRETTET", "UTFØRT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType" : {
-        "enum" : [ "AUTO", "MANU", "OVST", "SAOV", "-" ],
+        "enum" : [ "AUTO", "MANU", "OVST", "SAOV", "DEL1_AUTO", "DEL1_MANU", "DEL1_OVST", "DEL1_SAOV", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
+        "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "DEL1_AUTOPUNKT", "DEL1_MANUELL", "DEL1_OVERSTYRING", "DEL1_SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
         "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BISTANDSVILKÅR", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
@@ -1590,26 +1590,24 @@
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.abac.PipDtoV3" : {
+      "ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDtoV2" : {
         "properties" : {
-          "aktørIder" : {
+          "aktørIderForSporingslogg" : {
             "items" : {
               "type" : "string"
             },
             "type" : "array",
             "uniqueItems" : true
           },
-          "ansvarligSaksbehandler" : {
-            "type" : "string"
+          "aktørIderForTilgangskontroll" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
           },
-          "behandlingStatus" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingStatus"
-          },
-          "fagsakStatus" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
-          },
-          "saksnummer" : {
-            "type" : "string"
+          "fagsakYtelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           }
         },
         "type" : "object"
@@ -1638,6 +1636,40 @@
           },
           "fagsakStatus" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.abac.PipDtoV5" : {
+        "properties" : {
+          "aktørIder" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "aktørIderForSporingslogg" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "ansvarligSaksbehandler" : {
+            "type" : "string"
+          },
+          "behandlingStatus" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingStatus"
+          },
+          "fagsakStatus" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
+          },
+          "fagsakYtelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           },
           "saksnummer" : {
             "type" : "string"
@@ -3868,18 +3900,24 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.BekreftelseDTO" : {
-        "properties" : {
-          "harUttalelse" : {
-            "type" : "boolean"
+        "discriminator" : {
+          "mapping" : {
+            "RAPPORTERT_INNTEKT" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.RapportertInntektDto",
+            "VARSEL_SVAR" : "#/components/schemas/ung.sak.kontrakt.oppgaver.SvarPåVarselDTO"
           },
-          "uttalelseFraBruker" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
+          "propertyName" : "type"
+        },
+        "oneOf" : [ {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.SvarPåVarselDTO"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.RapportertInntektDto"
+        } ],
+        "properties" : {
+          "type" : {
             "type" : "string"
           }
         },
-        "required" : [ "harUttalelse" ],
+        "required" : [ "type" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto" : {
@@ -4049,6 +4087,21 @@
         "required" : [ "aktørId", "fomDato" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.oppgaver.SvarPåVarselDTO" : {
+        "properties" : {
+          "harUttalelse" : {
+            "type" : "boolean"
+          },
+          "uttalelseFraBruker" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "harUttalelse" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO" : {
         "properties" : {
           "endringer" : {
@@ -4137,16 +4190,31 @@
           "gjelderDelerAvMåned" : {
             "type" : "boolean"
           },
-          "rapportertInntekt" : {
-            "format" : "int32",
-            "type" : "integer"
-          },
           "tilOgMed" : {
             "format" : "date",
             "type" : "string"
           }
         },
         "required" : [ "fraOgMed", "gjelderDelerAvMåned", "tilOgMed" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.RapportertInntektDto" : {
+        "properties" : {
+          "arbeidstakerOgFrilansInntekt" : {
+            "maximum" : 999999,
+            "minimum" : 0,
+            "type" : "number"
+          },
+          "fraOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tilOgMed" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "arbeidstakerOgFrilansInntekt", "fraOgMed", "tilOgMed" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO" : {
@@ -4378,6 +4446,9 @@
           "searchString" : {
             "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
+          },
+          "ytelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           }
         },
         "required" : [ "searchString" ],
@@ -9040,16 +9111,16 @@
         "tags" : [ "pip" ]
       }
     },
-    "/api/pip/pipdata-for-behandling-v3" : {
+    "/api/pip/aktoer-for-sak-med-sporingslogghint-v2" : {
       "get" : {
-        "description" : "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
-        "operationId" : "hentPipDataTilknyttetBehandlingV3",
+        "description" : "Henter aktørId'er tilknyttet en fagsak",
+        "operationId" : "hentAktørIdListeTilknyttetSakMedSporingslogghintV2",
         "parameters" : [ {
           "in" : "query",
-          "name" : "behandlingUuid",
+          "name" : "saksnummer",
           "required" : true,
           "schema" : {
-            "type" : "string"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
           }
         } ],
         "responses" : {
@@ -9057,10 +9128,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV3"
-                  } ],
-                  "nullable" : true
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDtoV2"
                 }
               }
             },
@@ -9089,6 +9157,36 @@
                 "schema" : {
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV4"
+                  } ],
+                  "nullable" : true
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-behandling-v5" : {
+      "get" : {
+        "description" : "Henter ytelsetype, saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
+        "operationId" : "hentPipDataTilknyttetBehandlingV5",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV5"
                   } ],
                   "nullable" : true
                 }
@@ -9534,6 +9632,33 @@
         },
         "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
         "tags" : [ "nav-ansatt" ]
+      }
+    },
+    "/api/selftest" : {
+      "get" : {
+        "operationId" : "doSelftest",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "Content-Type",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "json",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { },
+              "text/html" : { }
+            },
+            "description" : "default response"
+          }
+        }
       }
     },
     "/api/statistikk/forvaltning/antall-deltakere" : {

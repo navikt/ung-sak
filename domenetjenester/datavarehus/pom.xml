@@ -14,7 +14,7 @@
 	<packaging>jar</packaging>
 	<name>ung-sak :: Domenetjenester - Datavarehus</name>
     <properties>
-        <google-cloud-bigquery.version>2.57.1</google-cloud-bigquery.version>
+        <google-cloud-bigquery.version>2.58.0</google-cloud-bigquery.version>
         <testContainers.version>1.21.3</testContainers.version>
     </properties>
 
@@ -44,10 +44,6 @@
 		<dependency>
 			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>vedtak</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>no.nav.k9.felles.integrasjon</groupId>
-			<artifactId>k9-sensu-klient</artifactId>
 		</dependency>
 
         <dependency>

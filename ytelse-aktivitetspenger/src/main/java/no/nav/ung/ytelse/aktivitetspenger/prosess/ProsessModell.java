@@ -16,11 +16,11 @@ import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 public class ProsessModell {
 
     @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-    @BehandlingTypeRef(BehandlingType.AKTIVITETSPENGER_DEL_1)
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
     public BehandlingModell aktivitetspengerDel1() {
-        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.AKTIVITETSPENGER_DEL_1, FagsakYtelseType.AKTIVITETSPENGER);
+        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.AKTIVITETSPENGER);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)

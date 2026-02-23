@@ -73,22 +73,6 @@ public class Behandlingsoppretter {
         }); // NOSONAR
     }
 
-    public Behandling opprettAktivitetspengerDel1Behandling(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<Behandling> tidligereBehandling) {
-        BehandlingType behandlingType = BehandlingType.AKTIVITETSPENGER_DEL_1;
-        if (!tidligereBehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(true)) {
-            throw new IllegalStateException("Utviklerfeil: Prøver opprette ny behandling når det finnes åpen av samme type: " + fagsak.getId());
-        }
-        return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
-            if (!BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
-                BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
-            }
-            beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-            //FIXME AKT denne må antagelig tilpasses til å ha med behandlingstype
-            OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-            beh.setBehandlendeEnhet(enhet);
-        }); // NOSONAR
-    }
-
     public Behandling opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(BehandlingÅrsakType behandlingÅrsakType, Fagsak fagsak) {
         Behandling forrigeBehandling = behandlingRepository.hentSisteBehandlingAvBehandlingTypeForFagsakId(fagsak.getId(), BehandlingType.FØRSTEGANGSSØKNAD)
             .orElseThrow(() -> new IllegalStateException("Fant ingen behandling som passet for saksnummer: " + fagsak.getSaksnummer()));

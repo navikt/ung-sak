@@ -89,7 +89,7 @@ jobs:
     needs: build-app
     with:
       tag: ${{ needs.build-app.outputs.build-version }}
-      suites: "ung,ung-tilbake,frontend-ung"
+      suites: "ung,ung-tilbake,frontend-ung,aktivitetspenger"
       override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
       image_version: ${{ needs.build-app.outputs.build-version }}
 
@@ -105,7 +105,7 @@ jobs:
     needs: build-app
     with:
       tag: ${{ needs.build-app.outputs.build-version }}
-      suites: "ung"
+      suites: "ung,aktivitetspenger"
       override_image_artifact_name: ${{ github.ref_name != github.event.repository.default_branch && needs.build-app.outputs.image-artifact-name || null }}
       image_version: ${{ needs.build-app.outputs.build-version }}
 

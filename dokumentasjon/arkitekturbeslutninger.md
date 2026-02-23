@@ -96,13 +96,12 @@ Det ble besluttet å gjenbruke arkitektur og kode fra k9-sak, saksbehandlingssyt
 
 ## Produksjonsmiljø
 1. K8S på NAIS
-1. On-prem primært p.t. pga sensitive persondata i Saksbehandling.  Avventer modenhet og grunnlag for å kunne flytte til GCP
 1. Auditlog og Securelogs
     - Hendelser
     - Prosesssteg
     - Tjenestekall
     - Diagnosetjenester (eks. diagnose av saker)
-1. Grafana, Prometheus, Sensu
+1. Grafana, Prometheus, BigQuery
 1. Kibana for logging
 1. Rollforward og auto-scaling
 1. Feature toggles (benytter deployment/env flag da ikke behov for eget system)

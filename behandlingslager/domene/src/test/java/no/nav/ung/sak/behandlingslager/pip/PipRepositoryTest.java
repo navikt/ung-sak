@@ -1,20 +1,8 @@
 package no.nav.ung.sak.behandlingslager.pip;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-
-import no.nav.ung.sak.typer.Saksnummer;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingslager.behandling.BasicBehandlingBuilder;
@@ -25,10 +13,20 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Journalpost;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.db.util.Repository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.ung.sak.db.util.Repository;
+import no.nav.ung.sak.typer.Saksnummer;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -114,10 +112,10 @@ public class PipRepositoryTest {
     @Test
     public void skal_finne_aksjonspunktTyper_for_aksjonspunktKoder() {
         Set<String> resultat1 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(Collections.singletonList(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT.getKode()));
-        assertThat(resultat1).containsOnly("Overstyring");
+        assertThat(resultat1).containsOnly("OVST");
 
         Set<String> resultat2 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(List.of(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT.getKode(), AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode()));
-        assertThat(resultat2).containsOnly("Overstyring", "Manuell");
+        assertThat(resultat2).containsOnly("OVST", "MANU");
     }
 }
 
