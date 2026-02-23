@@ -12,14 +12,12 @@ public class EndretStartdatoOppgaveMapper {
         OppgavetypeDataDto endretStartdatoOppgaveData = new EndretStartdatoDataDto(
             oppgaveDto.getNyStartdato(), oppgaveDto.getForrigeStartdato()
         );
-        BrukerdialogOppgaveEntitet nyOppgave = new BrukerdialogOppgaveEntitet(
+        return new BrukerdialogOppgaveEntitet(
             oppgaveDto.getOppgaveReferanse(),
             OppgaveType.BEKREFT_ENDRET_STARTDATO,
             aktørId,
-            endretStartdatoOppgaveData,
             oppgaveDto.getFrist()
         );
-        return nyOppgave;
     }
 }
 

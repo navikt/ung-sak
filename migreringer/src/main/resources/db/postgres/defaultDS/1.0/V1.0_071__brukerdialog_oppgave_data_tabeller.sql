@@ -252,4 +252,10 @@ alter table BD_OPPGAVE
 
 comment on column BD_OPPGAVE.oppgave_data_id is 'FK (logisk) til primærnøkkelen i den aktuelle BD_OPPGAVE_DATA-tabellen. Type-kolonnen brukes som diskriminator for å identifisere hvilken tabell det refereres til.';
 
+-- Fjerner jsonb data-kolonne fra BD_OPPGAVE nå som strukturert oppgavedata
+-- lagres i egne BD_OPPGAVE_DATA_*-tabeller og refereres via oppgave_data_id / type.
+alter table BD_OPPGAVE
+    drop column data;
+
+
 

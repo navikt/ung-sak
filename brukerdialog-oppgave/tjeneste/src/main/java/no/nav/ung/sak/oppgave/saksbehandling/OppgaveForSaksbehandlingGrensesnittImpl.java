@@ -8,8 +8,8 @@ import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.sak.oppgave.*;
+import no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDataEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,7 +51,7 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     @Override
     public void opprettOppgave(OpprettOppgaveDto oppgave) {
         BrukerdialogOppgaveEntitet oppgaveEntitet = new BrukerdialogOppgaveEntitet(
-            oppgave.oppgaveReferanse(), oppgave.oppgavetypeData().oppgavetype(), oppgave.aktørId(), oppgave.oppgavetypeData(), oppgave.frist());
+            oppgave.oppgaveReferanse(), oppgave.oppgavetypeData().oppgavetype(), oppgave.aktørId(), oppgave.frist());
         oppgaveLivssyklusTjeneste.opprettOppgave(oppgaveEntitet, oppgave.oppgavetypeData());
     }
 
@@ -130,8 +130,8 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
 
     private boolean gjelderSammePeriodeForInntektsrapportering(BrukerdialogOppgaveEntitet oppgave,
                                                                EndreOppgaveStatusDto dto) {
-        if (oppgave.getData() instanceof InntektsrapporteringOppgavetypeDataDto data) {
-            return data.fraOgMed().equals(dto.fomDato()) && data.tilOgMed().equals(dto.tomDato());
+        if (oppgave.getOppgaveData() instanceof InntektsrapporteringOppgaveDataEntitet data) {
+            return data.getFraOgMed().equals(dto.fomDato()) && data.getTilOgMed().equals(dto.tomDato());
         }
         return false;
     }

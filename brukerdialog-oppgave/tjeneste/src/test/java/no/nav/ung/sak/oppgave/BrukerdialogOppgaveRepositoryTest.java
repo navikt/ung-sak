@@ -6,7 +6,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto;
+import no.nav.ung.sak.oppgave.typer.oppgave.søkytelse.SøkYtelseOppgaveDataEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,18 +44,19 @@ class BrukerdialogOppgaveRepositoryTest {
         // Arrange
         UUID oppgaveReferanse = UUID.randomUUID();
         LocalDate fomDato = LocalDate.of(2026, 2, 1);
-        SøkYtelseOppgavetypeDataDto oppgaveData = new SøkYtelseOppgavetypeDataDto(fomDato);
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,
             OppgaveType.SØK_YTELSE,
             aktørId,
-            oppgaveData,
             null
         );
 
         // Act
         repository.persister(oppgave);
+        var oppgaveData = new SøkYtelseOppgaveDataEntitet(fomDato);
+        oppgave.setOppgaveData(oppgaveData);
+        entityManager.persist(oppgaveData);
         entityManager.flush();
         entityManager.clear();
 
@@ -67,7 +68,7 @@ class BrukerdialogOppgaveRepositoryTest {
         assertThat(hentetOppgave.get().getOppgaveType()).isEqualTo(OppgaveType.SØK_YTELSE);
         assertThat(hentetOppgave.get().getAktørId()).isEqualTo(aktørId);
         assertThat(hentetOppgave.get().getStatus()).isEqualTo(OppgaveStatus.ULØST);
-        assertThat(hentetOppgave.get().getData()).isInstanceOf(SøkYtelseOppgavetypeDataDto.class);
+        assertThat(hentetOppgave.get().getOppgaveData()).isInstanceOf(SøkYtelseOppgaveDataEntitet.class);
     }
 
     @Test
@@ -184,18 +185,18 @@ class BrukerdialogOppgaveRepositoryTest {
     // Hjelpemetode for å opprette testoppgaver
     private BrukerdialogOppgaveEntitet opprettOppgave(AktørId aktørId, OppgaveType type) {
         UUID oppgaveReferanse = UUID.randomUUID();
-        SøkYtelseOppgavetypeDataDto oppgaveData = new SøkYtelseOppgavetypeDataDto(LocalDate.now());
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,
             type,
             aktørId,
-            oppgaveData,
             null
         );
 
         repository.persister(oppgave);
+        var oppgaveData = new SøkYtelseOppgaveDataEntitet(LocalDate.now());
+        oppgave.setOppgaveData(oppgaveData);
+        entityManager.persist(oppgaveData);
         return oppgave;
     }
 }
-

@@ -37,7 +37,6 @@ public class KontrollerRegisterInntektOppgaveMapper {
             oppgaveDto.getReferanse(),
             OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT,
             aktørId,
-            kontrollerRegisterInntektOppgaveData,
             oppgaveDto.getFrist()
         );
     }

@@ -45,7 +45,6 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
             oppgaveReferanse,
             OppgaveType.SØK_YTELSE,
             oppgaveDto.aktørId(),
-            oppgaveDto.oppgavetypeData(),
             oppgaveDto.frist()
         );
 

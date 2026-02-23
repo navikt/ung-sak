@@ -14,13 +14,11 @@ public class InntektsrapporteringOppgaveMapper {
         OppgavetypeDataDto inntektsrapporteringOppgavetypeDataDto = new InntektsrapporteringOppgavetypeDataDto(
             oppgaveDto.getFomDato(), oppgaveDto.getTomDato(), oppgaveDto.getGjelderDelerAvMåned()
         );
-        BrukerdialogOppgaveEntitet nyOppgave = new BrukerdialogOppgaveEntitet(
+        return new BrukerdialogOppgaveEntitet(
             oppgaveDto.getReferanse(),
             OppgaveType.RAPPORTER_INNTEKT,
             aktørId,
-            inntektsrapporteringOppgavetypeDataDto,
             oppgaveDto.getFrist()
         );
-        return nyOppgave;
     }
 }

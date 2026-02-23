@@ -7,7 +7,6 @@ import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.OppgavelInnholdUtleder;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 
 import java.time.Month;
 
@@ -29,8 +28,8 @@ public class KontrollerRegisterinntektOppgavelInnholdUtleder implements Oppgavel
 
     @Override
     public String utledVarselTekst(BrukerdialogOppgaveEntitet oppgave) {
-        KontrollerRegisterinntektOppgavetypeDataDto oppgaveData = (KontrollerRegisterinntektOppgavetypeDataDto) oppgave.getData();
-        String norskMånedNavn = finnNorskMånedNavn(oppgaveData.fraOgMed().getMonth());
+        var oppgaveData = (KontrollerRegisterinntektOppgaveDataEntitet) oppgave.getOppgaveData();
+        String norskMånedNavn = finnNorskMånedNavn(oppgaveData.getFraOgMed().getMonth());
         return String.format("Du har fått en oppgave om å bekrefte inntekten din for %s", norskMånedNavn);
     }
 

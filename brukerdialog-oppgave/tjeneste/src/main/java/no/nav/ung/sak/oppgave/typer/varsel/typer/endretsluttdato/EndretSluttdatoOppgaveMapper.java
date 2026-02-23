@@ -12,13 +12,11 @@ public class EndretSluttdatoOppgaveMapper {
         OppgavetypeDataDto endretSlutttdatoOppgaveData = new EndretSluttdatoDataDto(
             oppgaveDto.getNySluttdato(), oppgaveDto.getForrigeSluttdato()
         );
-        BrukerdialogOppgaveEntitet nyOppgave = new BrukerdialogOppgaveEntitet(
+        return new BrukerdialogOppgaveEntitet(
             oppgaveDto.getOppgaveReferanse(),
             OppgaveType.BEKREFT_ENDRET_SLUTTDATO,
             aktørId,
-            endretSlutttdatoOppgaveData,
             oppgaveDto.getFrist()
         );
-        return nyOppgave;
     }
 }

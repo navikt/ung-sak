@@ -24,7 +24,6 @@ public class EndretPeriodeOppgaveMapper {
             oppgaveDto.getOppgaveReferanse(),
             OppgaveType.BEKREFT_ENDRET_PERIODE,
             aktørId,
-            endretPeriodeOppgaveData,
             oppgaveDto.getFrist()
         );
     }
