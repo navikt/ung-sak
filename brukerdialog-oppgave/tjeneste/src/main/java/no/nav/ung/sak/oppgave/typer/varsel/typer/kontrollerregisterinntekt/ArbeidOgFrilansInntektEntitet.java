@@ -8,10 +8,11 @@ import jakarta.persistence.*;
  */
 @Entity(name = "ArbeidOgFrilansInntekt")
 @Table(name = "BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT")
+@SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT", sequenceName = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT", allocationSize = 50)
 public class ArbeidOgFrilansInntektEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

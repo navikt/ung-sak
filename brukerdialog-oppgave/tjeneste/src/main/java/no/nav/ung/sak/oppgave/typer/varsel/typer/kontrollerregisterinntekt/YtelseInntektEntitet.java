@@ -9,10 +9,11 @@ import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseTy
  */
 @Entity(name = "YtelseInntekt")
 @Table(name = "BD_OPPGAVE_DATA_YTELSE_INNTEKT")
+@SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT", sequenceName = "SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT", allocationSize = 50)
 public class YtelseInntektEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

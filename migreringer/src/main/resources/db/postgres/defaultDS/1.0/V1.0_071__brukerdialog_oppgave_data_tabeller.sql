@@ -90,8 +90,6 @@ create table BD_OPPGAVE_DATA_ENDRET_PERIODE
     ny_periode_tom              date,
     forrige_periode_fom         date,
     forrige_periode_tom         date,
-    -- Kommaseparert liste av PeriodeEndringType-verdier (ENDRET_STARTDATO, ENDRET_SLUTTDATO, FJERNET_PERIODE, ANDRE_ENDRINGER)
-    endringer                   varchar(255) not null,
     opprettet_av                varchar(20)  not null default 'VL',
     opprettet_tid               timestamp    not null default current_timestamp,
     endret_av                   varchar(20),
@@ -104,11 +102,26 @@ comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.ny_periode_fom          is 'Fra
 comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.ny_periode_tom          is 'Til-dato for ny periode.';
 comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.forrige_periode_fom     is 'Fra-dato for forrige periode (null hvis ny).';
 comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.forrige_periode_tom     is 'Til-dato for forrige periode.';
-comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.endringer               is 'Kommaseparert liste av PeriodeEndringType-verdier som beskriver hva som har endret seg.';
 comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.opprettet_av            is 'Saksbehandler/system som opprettet raden.';
 comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.opprettet_tid           is 'Tidspunkt da raden ble opprettet.';
 comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.endret_av               is 'Saksbehandler/system som sist endret raden.';
 comment on column BD_OPPGAVE_DATA_ENDRET_PERIODE.endret_tid              is 'Tidspunkt da raden sist ble endret.';
+
+create sequence if not exists SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING increment by 50 minvalue 1000000;
+
+create table BD_OPPGAVE_DATA_PERIODE_ENDRING
+(
+    id                      bigint       not null primary key default nextval('SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING'),
+    endret_periode_data_id  bigint       not null references BD_OPPGAVE_DATA_ENDRET_PERIODE (id),
+    endring_type            varchar(50)  not null
+);
+
+create index idx_bd_periode_endring_data_id on BD_OPPGAVE_DATA_PERIODE_ENDRING (endret_periode_data_id);
+
+comment on table  BD_OPPGAVE_DATA_PERIODE_ENDRING                            is 'Enkeltendringer knyttet til en ENDRET_PERIODE-oppgave.';
+comment on column BD_OPPGAVE_DATA_PERIODE_ENDRING.id                         is 'Primary key.';
+comment on column BD_OPPGAVE_DATA_PERIODE_ENDRING.endret_periode_data_id     is 'FK til BD_OPPGAVE_DATA_ENDRET_PERIODE.id.';
+comment on column BD_OPPGAVE_DATA_PERIODE_ENDRING.endring_type               is 'PeriodeEndringType-verdi (ENDRET_STARTDATO, ENDRET_SLUTTDATO, FJERNET_PERIODE, ANDRE_ENDRINGER).';
 
 -- -------------------------------------------------------
 -- 5. KONTROLLER_REGISTERINNTEKT
@@ -143,9 +156,11 @@ comment on column BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT.endret_av          
 comment on column BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT.endret_tid                   is 'Tidspunkt da raden sist ble endret.';
 
 -- Enkeltposter for arbeid/frilans-inntekter knyttet til oppgaven
+create sequence if not exists SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT increment by 50 minvalue 1000000;
+
 create table BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT
 (
-    id                  bigserial    not null primary key,
+    id                  bigint       not null primary key default nextval('SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT'),
     kontroller_data_id  bigint       not null references BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT (id),
     arbeidsgiver        varchar(255) not null,
     inntekt             integer      not null
@@ -160,9 +175,11 @@ comment on column BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT.arbeidsgiver        is 
 comment on column BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT.inntekt             is 'Inntektsbeløp i hele kroner.';
 
 -- Enkeltposter for ytelse-inntekter knyttet til oppgaven
+create sequence if not exists SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT increment by 50 minvalue 1000000;
+
 create table BD_OPPGAVE_DATA_YTELSE_INNTEKT
 (
-    id                  bigserial    not null primary key,
+    id                  bigint       not null primary key default nextval('SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT'),
     kontroller_data_id  bigint       not null references BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT (id),
     ytelsetype          varchar(100) not null,
     inntekt             integer      not null

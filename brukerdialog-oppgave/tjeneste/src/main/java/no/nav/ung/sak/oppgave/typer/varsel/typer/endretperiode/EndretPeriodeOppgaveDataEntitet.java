@@ -5,15 +5,14 @@ import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
  * Databasestruktur for oppgavedata av type ENDRET_PERIODE.
  * Lagrer ny og forrige periode samt hvilke typer endringer som har skjedd.
- * Endringer lagres som en kommaseparert streng av PeriodeEndringType-verdier.
  */
 @Entity(name = "EndretPeriodeOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_PERIODE")
@@ -33,12 +32,9 @@ public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
     @Column(name = "forrige_periode_tom", updatable = false)
     private LocalDate forrigePeriodeTom;
 
-    /**
-     * Kommaseparert liste av PeriodeEndringType-verdier.
-     * Eksempel: "ENDRET_STARTDATO,ENDRET_SLUTTDATO"
-     */
-    @Column(name = "endringer", nullable = false, updatable = false)
-    private String endringer;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "endret_periode_data_id", nullable = false, updatable = false)
+    private List<PeriodeEndring> endringer = new ArrayList<>();
 
     protected EndretPeriodeOppgaveDataEntitet() {
         // For JPA
@@ -53,11 +49,8 @@ public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
         this.nyPeriodeTom = nyPeriodeTom;
         this.forrigePeriodeFom = forrigePeriodeFom;
         this.forrigePeriodeTom = forrigePeriodeTom;
-        this.endringer = endringer.stream()
-            .map(PeriodeEndringType::name)
-            .collect(Collectors.joining(","));
+        endringer.forEach(type -> this.endringer.add(new PeriodeEndring(type)));
     }
-
 
     public LocalDate getNyPeriodeFom() {
         return nyPeriodeFom;
@@ -76,13 +69,8 @@ public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
     }
 
     public Set<PeriodeEndringType> getEndringer() {
-        if (endringer == null || endringer.isBlank()) {
-            return Collections.emptySet();
-        }
-        return Arrays.stream(endringer.split(","))
-            .map(String::trim)
-            .map(PeriodeEndringType::valueOf)
+        return endringer.stream()
+            .map(PeriodeEndring::getEndringType)
             .collect(Collectors.toSet());
     }
 }
-
