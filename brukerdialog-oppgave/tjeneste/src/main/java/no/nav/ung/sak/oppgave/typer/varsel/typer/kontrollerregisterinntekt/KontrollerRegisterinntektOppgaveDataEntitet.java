@@ -2,7 +2,6 @@ package no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType;
-import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -16,11 +15,6 @@ import java.util.List;
 @Entity(name = "KontrollerRegisterinntektOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT")
 public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEntitet {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT")
-    @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT", sequenceName = "SEQ_BD_OPPGAVE_DATA_KONTROLLER_REG_INNTEKT", allocationSize = 1)
-    protected Long id;
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)
     private LocalDate fraOgMed;
@@ -50,14 +44,12 @@ public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEnti
         // For JPA
     }
 
-    public KontrollerRegisterinntektOppgaveDataEntitet(BrukerdialogOppgaveEntitet oppgave,
-                                                        LocalDate fraOgMed,
+    public KontrollerRegisterinntektOppgaveDataEntitet(LocalDate fraOgMed,
                                                         LocalDate tilOgMed,
                                                         boolean gjelderDelerAvMåned,
                                                         int totalInntektArbeidFrilans,
                                                         int totalInntektYtelse,
                                                         int totalInntekt) {
-        super(oppgave);
         this.fraOgMed = fraOgMed;
         this.tilOgMed = tilOgMed;
         this.gjelderDelerAvMåned = gjelderDelerAvMåned;
@@ -66,10 +58,6 @@ public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEnti
         this.totalInntekt = totalInntekt;
     }
 
-    @Override
-    public Long getId() {
-        return id;
-    }
 
     public void leggTilArbeidOgFrilansInntekt(String arbeidsgiver, int inntekt) {
         arbeidOgFrilansInntekter.add(new ArbeidOgFrilansInntektEntitet(this, arbeidsgiver, inntekt));

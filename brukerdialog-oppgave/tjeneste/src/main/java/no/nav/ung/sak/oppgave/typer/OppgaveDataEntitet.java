@@ -2,33 +2,28 @@ package no.nav.ung.sak.oppgave.typer;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.BaseEntitet;
-import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 
 /**
- * Abstrakt superklasse for alle BD_OPPGAVE_DATA-tabeller.
- * Inneholder felles felter: fremmednøkkel til {@link BrukerdialogOppgaveEntitet}
- * samt audit-kolonner fra {@link BaseEntitet} (opprettet_av, opprettet_tid, endret_av, endret_tid).
+ * Abstrakt entitet for alle BD_OPPGAVE_DATA-tabeller.
+ * Bruker TABLE_PER_CLASS-arv slik at hver subklasse har sin egen tabell,
+ * og {@link no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet} kan ha en {@code @Any}-referanse hit.
+ * Audit-kolonner arves fra {@link BaseEntitet} (opprettet_av, opprettet_tid, endret_av, endret_tid).
  * Primærnøkkel og sekvens defineres i hver subklasse.
  */
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+@SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA", sequenceName = "SEQ_BD_OPPGAVE_DATA", allocationSize = 50)
 public abstract class OppgaveDataEntitet extends BaseEntitet {
 
-    @OneToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "bd_oppgave_id", nullable = false, updatable = false)
-    protected BrukerdialogOppgaveEntitet oppgave;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA")
+    protected Long id;
 
     protected OppgaveDataEntitet() {
         // For JPA
     }
 
-    protected OppgaveDataEntitet(BrukerdialogOppgaveEntitet oppgave) {
-        this.oppgave = oppgave;
-    }
-
-    public abstract Long getId();
-
-    public BrukerdialogOppgaveEntitet getOppgave() {
-        return oppgave;
+    public Long getId() {
+        return id;
     }
 }
-

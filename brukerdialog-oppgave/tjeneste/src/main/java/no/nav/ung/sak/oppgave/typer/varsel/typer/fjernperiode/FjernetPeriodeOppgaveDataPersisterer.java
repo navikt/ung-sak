@@ -29,10 +29,10 @@ public class FjernetPeriodeOppgaveDataPersisterer implements OppgaveDataPersiste
     public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
         var dto = (FjernetPeriodeDataDto) data;
         var entitet = new FjernetPeriodeOppgaveDataEntitet(
-            oppgave,
             dto.forrigeStartdato(),
             dto.forrigeSluttdato()
         );
+        oppgave.setOppgaveData(entitet);
         entityManager.persist(entitet);
         entityManager.flush();
     }

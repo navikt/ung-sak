@@ -29,13 +29,13 @@ public class EndretPeriodeOppgaveDataPersisterer implements OppgaveDataPersister
     public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
         var dto = (EndretPeriodeDataDto) data;
         var entitet = new EndretPeriodeOppgaveDataEntitet(
-            oppgave,
             dto.nyPeriode() != null ? dto.nyPeriode().getFomDato() : null,
             dto.nyPeriode() != null ? dto.nyPeriode().getTomDato() : null,
             dto.forrigePeriode() != null ? dto.forrigePeriode().getFomDato() : null,
             dto.forrigePeriode() != null ? dto.forrigePeriode().getTomDato() : null,
             dto.endringer()
         );
+        oppgave.setOppgaveData(entitet);
         entityManager.persist(entitet);
         entityManager.flush();
     }

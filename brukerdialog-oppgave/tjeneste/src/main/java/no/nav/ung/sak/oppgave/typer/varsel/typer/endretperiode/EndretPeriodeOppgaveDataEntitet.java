@@ -2,7 +2,6 @@ package no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
-import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -19,11 +18,6 @@ import java.util.stream.Collectors;
 @Entity(name = "EndretPeriodeOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_PERIODE")
 public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_ENDRET_PERIODE")
-    @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_ENDRET_PERIODE", sequenceName = "SEQ_BD_OPPGAVE_DATA_ENDRET_PERIODE", allocationSize = 1)
-    protected Long id;
 
     /** Fra-dato for ny periode. Null dersom perioden er fjernet. */
     @Column(name = "ny_periode_fom", updatable = false)
@@ -50,13 +44,11 @@ public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
         // For JPA
     }
 
-    public EndretPeriodeOppgaveDataEntitet(BrukerdialogOppgaveEntitet oppgave,
-                                            LocalDate nyPeriodeFom,
+    public EndretPeriodeOppgaveDataEntitet(LocalDate nyPeriodeFom,
                                             LocalDate nyPeriodeTom,
                                             LocalDate forrigePeriodeFom,
                                             LocalDate forrigePeriodeTom,
                                             Set<PeriodeEndringType> endringer) {
-        super(oppgave);
         this.nyPeriodeFom = nyPeriodeFom;
         this.nyPeriodeTom = nyPeriodeTom;
         this.forrigePeriodeFom = forrigePeriodeFom;
@@ -66,10 +58,6 @@ public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
             .collect(Collectors.joining(","));
     }
 
-    @Override
-    public Long getId() {
-        return id;
-    }
 
     public LocalDate getNyPeriodeFom() {
         return nyPeriodeFom;

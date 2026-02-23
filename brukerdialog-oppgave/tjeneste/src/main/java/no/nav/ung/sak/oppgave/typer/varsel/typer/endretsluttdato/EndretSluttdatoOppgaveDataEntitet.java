@@ -1,7 +1,6 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.endretsluttdato;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -14,11 +13,6 @@ import java.time.LocalDate;
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_SLUTTDATO")
 public class EndretSluttdatoOppgaveDataEntitet extends OppgaveDataEntitet {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO")
-    @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO", sequenceName = "SEQ_BD_OPPGAVE_DATA_ENDRET_SLUTTDATO", allocationSize = 1)
-    protected Long id;
-
     @Column(name = "ny_sluttdato", nullable = false, updatable = false)
     private LocalDate nySluttdato;
 
@@ -30,18 +24,12 @@ public class EndretSluttdatoOppgaveDataEntitet extends OppgaveDataEntitet {
         // For JPA
     }
 
-    public EndretSluttdatoOppgaveDataEntitet(BrukerdialogOppgaveEntitet oppgave,
-                                              LocalDate nySluttdato,
+    public EndretSluttdatoOppgaveDataEntitet(LocalDate nySluttdato,
                                               LocalDate forrigeSluttdato) {
-        super(oppgave);
         this.nySluttdato = nySluttdato;
         this.forrigeSluttdato = forrigeSluttdato;
     }
 
-    @Override
-    public Long getId() {
-        return id;
-    }
 
     public LocalDate getNySluttdato() {
         return nySluttdato;

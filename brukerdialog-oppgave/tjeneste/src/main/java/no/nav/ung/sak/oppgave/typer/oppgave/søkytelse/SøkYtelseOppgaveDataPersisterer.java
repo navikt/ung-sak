@@ -29,9 +29,9 @@ public class SøkYtelseOppgaveDataPersisterer implements OppgaveDataPersisterer 
     public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
         var dto = (SøkYtelseOppgavetypeDataDto) data;
         var entitet = new SøkYtelseOppgaveDataEntitet(
-            oppgave,
             dto.fomDato()
         );
+        oppgave.setOppgaveData(entitet);
         entityManager.persist(entitet);
         entityManager.flush();
     }

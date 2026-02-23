@@ -30,7 +30,6 @@ public class KontrollerRegisterinntektOppgaveDataPersisterer implements OppgaveD
         var dto = (KontrollerRegisterinntektOppgavetypeDataDto) data;
         var registerinntekt = dto.registerinntekt();
         var entitet = new KontrollerRegisterinntektOppgaveDataEntitet(
-            oppgave,
             dto.fraOgMed(),
             dto.tilOgMed(),
             dto.gjelderDelerAvMåned(),
@@ -38,6 +37,7 @@ public class KontrollerRegisterinntektOppgaveDataPersisterer implements OppgaveD
             registerinntekt.totalInntektYtelse(),
             registerinntekt.totalInntekt()
         );
+        oppgave.setOppgaveData(entitet);
         registerinntekt.arbeidOgFrilansInntekter()
             .forEach(i -> entitet.leggTilArbeidOgFrilansInntekt(i.arbeidsgiver(), i.inntekt()));
         registerinntekt.ytelseInntekter()

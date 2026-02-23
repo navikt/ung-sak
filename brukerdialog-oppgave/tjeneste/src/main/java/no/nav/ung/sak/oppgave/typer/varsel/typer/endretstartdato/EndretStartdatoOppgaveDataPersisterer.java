@@ -29,10 +29,10 @@ public class EndretStartdatoOppgaveDataPersisterer implements OppgaveDataPersist
     public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
         var dto = (EndretStartdatoDataDto) data;
         var entitet = new EndretStartdatoOppgaveDataEntitet(
-            oppgave,
             dto.nyStartdato(),
             dto.forrigeStartdato()
         );
+        oppgave.setOppgaveData(entitet);
         entityManager.persist(entitet);
         entityManager.flush();
     }

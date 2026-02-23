@@ -29,11 +29,11 @@ public class InntektsrapporteringOppgaveDataPersisterer implements OppgaveDataPe
     public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
         var dto = (InntektsrapporteringOppgavetypeDataDto) data;
         var entitet = new InntektsrapporteringOppgaveDataEntitet(
-            oppgave,
             dto.fraOgMed(),
             dto.tilOgMed(),
             dto.gjelderDelerAvMåned()
         );
+        oppgave.setOppgaveData(entitet);
         entityManager.persist(entitet);
         entityManager.flush();
     }
