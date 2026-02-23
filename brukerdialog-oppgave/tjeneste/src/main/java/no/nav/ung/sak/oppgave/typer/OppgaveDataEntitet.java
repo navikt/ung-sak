@@ -12,7 +12,7 @@ import no.nav.ung.sak.BaseEntitet;
  */
 @Entity
 @Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
-@SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA", sequenceName = "SEQ_BD_OPPGAVE_DATA", allocationSize = 50)
+@Access(AccessType.FIELD)
 public abstract class OppgaveDataEntitet extends BaseEntitet {
 
     @Id

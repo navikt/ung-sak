@@ -7,6 +7,10 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.oppgave.typer.oppgave.søkytelse.SøkYtelseOppgaveDataEntitet;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType;
+import no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.ArbeidOgFrilansInntektEntitet;
+import no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgaveDataEntitet;
+import no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.YtelseInntektEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,10 +57,9 @@ class BrukerdialogOppgaveRepositoryTest {
         );
 
         // Act
-        repository.persister(oppgave);
         var oppgaveData = new SøkYtelseOppgaveDataEntitet(fomDato);
         oppgave.setOppgaveData(oppgaveData);
-        entityManager.persist(oppgaveData);
+        repository.lagre(oppgave);
         entityManager.flush();
         entityManager.clear();
 
@@ -70,6 +73,8 @@ class BrukerdialogOppgaveRepositoryTest {
         assertThat(hentetOppgave.get().getStatus()).isEqualTo(OppgaveStatus.ULØST);
         assertThat(hentetOppgave.get().getOppgaveData()).isInstanceOf(SøkYtelseOppgaveDataEntitet.class);
     }
+
+
 
     @Test
     void skal_hente_alle_oppgaver_for_aktør() {
@@ -182,6 +187,56 @@ class BrukerdialogOppgaveRepositoryTest {
         assertThat(hentetOppgave).isEmpty();
     }
 
+    @Test
+    void skal_persistere_og_hente_kontroller_registerinntekt_oppgave() {
+        // Arrange
+        UUID oppgaveReferanse = UUID.randomUUID();
+        LocalDate fraOgMed = LocalDate.of(2026, 2, 1);
+        LocalDate tilOgMed = LocalDate.of(2026, 2, 28);
+
+        BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
+            oppgaveReferanse,
+            OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT,
+            aktørId,
+            null
+        );
+
+        var oppgaveData = new KontrollerRegisterinntektOppgaveDataEntitet(
+            fraOgMed,
+            tilOgMed,
+            false,
+            30000,
+            0,
+            30000
+        );
+        oppgaveData.leggTilArbeidOgFrilansInntekt("123456789", 30000);
+        oppgaveData.leggTilYtelseInntekt(YtelseType.DAGPENGER, 0);
+
+        oppgave.setOppgaveData(oppgaveData);
+        repository.lagre(oppgave);
+        entityManager.flush();
+        entityManager.clear();
+
+        // Assert
+        Optional<BrukerdialogOppgaveEntitet> hentetOppgave = repository.hentOppgaveForOppgavereferanse(oppgaveReferanse, aktørId);
+
+        assertThat(hentetOppgave).isPresent();
+        assertThat(hentetOppgave.get().getOppgaveType()).isEqualTo(OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT);
+
+        var hentetData = (KontrollerRegisterinntektOppgaveDataEntitet) hentetOppgave.get().getOppgaveData();
+        assertThat(hentetData.getFraOgMed()).isEqualTo(fraOgMed);
+        assertThat(hentetData.getTilOgMed()).isEqualTo(tilOgMed);
+        assertThat(hentetData.isGjelderDelerAvMåned()).isFalse();
+        assertThat(hentetData.getTotalInntektArbeidFrilans()).isEqualTo(30000);
+        assertThat(hentetData.getTotalInntektYtelse()).isZero();
+        assertThat(hentetData.getTotalInntekt()).isEqualTo(30000);
+        assertThat(hentetData.getArbeidOgFrilansInntekter()).hasSize(1);
+        assertThat(hentetData.getArbeidOgFrilansInntekter().get(0).getArbeidsgiver()).isEqualTo("123456789");
+        assertThat(hentetData.getArbeidOgFrilansInntekter().get(0).getInntekt()).isEqualTo(30000);
+        assertThat(hentetData.getYtelseInntekter()).hasSize(1);
+        assertThat(hentetData.getYtelseInntekter().get(0).getYtelsetype()).isEqualTo(YtelseType.DAGPENGER);
+    }
+
     // Hjelpemetode for å opprette testoppgaver
     private BrukerdialogOppgaveEntitet opprettOppgave(AktørId aktørId, OppgaveType type) {
         UUID oppgaveReferanse = UUID.randomUUID();
@@ -193,7 +248,7 @@ class BrukerdialogOppgaveRepositoryTest {
             null
         );
 
-        repository.persister(oppgave);
+        repository.lagre(oppgave);
         var oppgaveData = new SøkYtelseOppgaveDataEntitet(LocalDate.now());
         oppgave.setOppgaveData(oppgaveData);
         entityManager.persist(oppgaveData);

@@ -113,7 +113,11 @@ create table BD_OPPGAVE_DATA_PERIODE_ENDRING
 (
     id                      bigint       not null primary key default nextval('SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING'),
     endret_periode_data_id  bigint       not null references BD_OPPGAVE_DATA_ENDRET_PERIODE (id),
-    endring_type            varchar(50)  not null
+    endring_type            varchar(50)  not null,
+    opprettet_av            varchar(20)  not null default 'VL',
+    opprettet_tid           timestamp    not null default current_timestamp,
+    endret_av               varchar(20),
+    endret_tid              timestamp
 );
 
 create index idx_bd_periode_endring_data_id on BD_OPPGAVE_DATA_PERIODE_ENDRING (endret_periode_data_id);
@@ -162,8 +166,12 @@ create table BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT
 (
     id                  bigint       not null primary key default nextval('SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT'),
     kontroller_data_id  bigint       not null references BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT (id),
-    arbeidsgiver        varchar(255) not null,
-    inntekt             integer      not null
+    arbeidsgiver        varchar(50)  not null,
+    inntekt             int          not null,
+    opprettet_av        varchar(20)  not null default 'VL',
+    opprettet_tid       timestamp    not null default current_timestamp,
+    endret_av           varchar(20),
+    endret_tid          timestamp
 );
 
 create index idx_bd_arbeid_frilans_inntekt_oppgave_id on BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT (kontroller_data_id);
@@ -181,8 +189,12 @@ create table BD_OPPGAVE_DATA_YTELSE_INNTEKT
 (
     id                  bigint       not null primary key default nextval('SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT'),
     kontroller_data_id  bigint       not null references BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT (id),
-    ytelsetype          varchar(100) not null,
-    inntekt             integer      not null
+    ytelsetype          varchar(50)  not null,
+    inntekt             int          not null,
+    opprettet_av        varchar(20)  not null default 'VL',
+    opprettet_tid       timestamp    not null default current_timestamp,
+    endret_av           varchar(20),
+    endret_tid          timestamp
 );
 
 create index idx_bd_ytelse_inntekt_oppgave_id on BD_OPPGAVE_DATA_YTELSE_INNTEKT (kontroller_data_id);

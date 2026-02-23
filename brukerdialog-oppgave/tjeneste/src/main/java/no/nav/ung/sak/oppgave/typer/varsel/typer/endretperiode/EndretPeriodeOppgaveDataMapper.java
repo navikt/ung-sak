@@ -6,37 +6,28 @@ import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
-import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
-import no.nav.ung.sak.oppgave.OppgaveDataPersisterer;
+import no.nav.ung.sak.oppgave.OppgaveDataMapper;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
+import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_PERIODE)
-public class EndretPeriodeOppgaveDataPersisterer implements OppgaveDataPersisterer {
+public class EndretPeriodeOppgaveDataMapper implements OppgaveDataMapper {
 
-    private EntityManager entityManager;
 
-    protected EndretPeriodeOppgaveDataPersisterer() {
+    protected EndretPeriodeOppgaveDataMapper() {
         // CDI proxy
     }
 
-    @Inject
-    public EndretPeriodeOppgaveDataPersisterer(EntityManager entityManager) {
-        this.entityManager = entityManager;
-    }
-
     @Override
-    public void persister(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
+    public OppgaveDataEntitet map(OppgavetypeDataDto data) {
         var dto = (EndretPeriodeDataDto) data;
-        var entitet = new EndretPeriodeOppgaveDataEntitet(
+        return new EndretPeriodeOppgaveDataEntitet(
             dto.nyPeriode() != null ? dto.nyPeriode().getFomDato() : null,
             dto.nyPeriode() != null ? dto.nyPeriode().getTomDato() : null,
             dto.forrigePeriode() != null ? dto.forrigePeriode().getFomDato() : null,
             dto.forrigePeriode() != null ? dto.forrigePeriode().getTomDato() : null,
             dto.endringer()
         );
-        oppgave.setOppgaveData(entitet);
-        entityManager.persist(entitet);
-        entityManager.flush();
     }
 }

@@ -4,8 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.DeaktiverMinSideVarselTask;
@@ -19,16 +17,20 @@ public class OppgaveLivssyklusTjeneste {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private BrukerdialogOppgaveRepository brukerdialogOppgaveRepository;
     private Instance<OppgavelInnholdUtleder> varselInnholdUtledere;
+    private Instance<OppgaveDataMapper> oppgaveDataMapper;
 
     public OppgaveLivssyklusTjeneste() {
     }
 
     @Inject
-    public OppgaveLivssyklusTjeneste(ProsessTaskTjeneste prosessTaskTjeneste, BrukerdialogOppgaveRepository brukerdialogOppgaveRepository,
-                                     @Any Instance<OppgavelInnholdUtleder> varselInnholdUtledere) {
+    public OppgaveLivssyklusTjeneste(ProsessTaskTjeneste prosessTaskTjeneste,
+                                     BrukerdialogOppgaveRepository brukerdialogOppgaveRepository,
+                                     @Any Instance<OppgavelInnholdUtleder> varselInnholdUtledere,
+                                     @Any Instance<OppgaveDataMapper> oppgaveDataMapper) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.brukerdialogOppgaveRepository = brukerdialogOppgaveRepository;
         this.varselInnholdUtledere = varselInnholdUtledere;
+        this.oppgaveDataMapper = oppgaveDataMapper;
     }
 
     /**
@@ -84,8 +86,9 @@ public class OppgaveLivssyklusTjeneste {
         }
         opprettTaskForPubliseringAvVarsel(oppgaveEntitet);
         oppgaveEntitet.setStatus(OppgaveStatus.ULØST);
-        brukerdialogOppgaveRepository.persister(oppgaveEntitet);
-        brukerdialogOppgaveRepository.persisterOppgaveData(oppgaveEntitet, oppgavetypeData);
+        var oppgaveData = OppgaveDataMapper.finnTjeneste(oppgaveDataMapper, oppgaveEntitet.getOppgaveType()).map(oppgavetypeData);
+        oppgaveEntitet.setOppgaveData(oppgaveData);
+        brukerdialogOppgaveRepository.lagre(oppgaveEntitet);
     }
 
     private void opprettTaskForPubliseringAvVarsel(BrukerdialogOppgaveEntitet oppgaveEntitet) {

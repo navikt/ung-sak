@@ -1,6 +1,7 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
 
 /**
@@ -8,8 +9,8 @@ import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
  */
 @Entity(name = "PeriodeEndring")
 @Table(name = "BD_OPPGAVE_DATA_PERIODE_ENDRING")
-@SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING", sequenceName = "SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING", allocationSize = 50)
-public class PeriodeEndring {
+@Access(AccessType.FIELD)
+public class PeriodeEndring extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING")

@@ -13,23 +13,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
-
 @ApplicationScoped
 public class BrukerdialogOppgaveRepository {
 
     private EntityManager entityManager;
-    private OppgaveDataRepository oppgaveDataRepository;
 
     public BrukerdialogOppgaveRepository() {
         // CDI proxy
     }
 
     @Inject
-    public BrukerdialogOppgaveRepository(EntityManager entityManager,
-                                          OppgaveDataRepository oppgaveDataRepository) {
+    public BrukerdialogOppgaveRepository(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.oppgaveDataRepository = oppgaveDataRepository;
     }
 
     public List<BrukerdialogOppgaveEntitet> hentAlleOppgaverForAktør(AktørId aktørId) {
@@ -91,25 +86,15 @@ public class BrukerdialogOppgaveRepository {
     }
 
 
-    public void persister(BrukerdialogOppgaveEntitet oppgave) {
+    public void lagre(BrukerdialogOppgaveEntitet oppgave) {
+        entityManager.persist(oppgave.getOppgaveData());
         entityManager.persist(oppgave);
         entityManager.flush();
     }
 
-    /**
-     * Mapper {@link OppgavetypeDataDto} til riktig JPA-entitet og persisterer den.
-     * Må kalles etter at {@code oppgave} allerede er persistert slik at FK-referansen er gyldig.
-     *
-     * @param oppgave oppgaven dataen tilhører
-     * @param data    oppgavetypedata som skal lagres
-     */
-    public void persisterOppgaveData(BrukerdialogOppgaveEntitet oppgave, OppgavetypeDataDto data) {
-        oppgaveDataRepository.persisterOppgaveData(oppgave, data);
-    }
-
     public BrukerdialogOppgaveEntitet oppdater(BrukerdialogOppgaveEntitet oppgave) {
         BrukerdialogOppgaveEntitet merged = entityManager.merge(oppgave);
-        persister(merged);
+        lagre(merged);
         return merged;
     }
 }

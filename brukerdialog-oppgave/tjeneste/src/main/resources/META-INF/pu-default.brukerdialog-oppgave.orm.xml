@@ -9,8 +9,11 @@
 
 	<!-- Sequence generators for typed oppgavedata tables -->
 	<sequence-generator name="SEQ_BD_OPPGAVE_DATA"        allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA" />
+    <sequence-generator name="SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT"        allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT" />
+    <sequence-generator name="SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT"        allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT" />
+    <sequence-generator name="SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING"        allocation-size="50" sequence-name="SEQ_BD_OPPGAVE_DATA_PERIODE_ENDRING" />
 
-	<!-- Entity mappings -->
+    <!-- Entity mappings -->
 	<entity class="no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet" />
 
 	<!-- Typed oppgavedata entities (one per OppgavetypeDataDTO subtype) -->
@@ -18,11 +21,13 @@
 	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.endretsluttdato.EndretSluttdatoOppgaveDataEntitet" />
 	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.fjernperiode.FjernetPeriodeOppgaveDataEntitet" />
 	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode.EndretPeriodeOppgaveDataEntitet" />
-	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgaveDataEntitet" />
+    <entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode.PeriodeEndring" />
+    <entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgaveDataEntitet" />
 	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.ArbeidOgFrilansInntektEntitet" />
 	<entity class="no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.YtelseInntektEntitet" />
 	<entity class="no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDataEntitet" />
 	<entity class="no.nav.ung.sak.oppgave.typer.oppgave.søkytelse.SøkYtelseOppgaveDataEntitet" />
+
 
 </entity-mappings>
 

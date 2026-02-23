@@ -11,6 +11,7 @@ import java.time.LocalDate;
  */
 @Entity(name = "SøkYtelseOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_SOK_YTELSE")
+@Access(AccessType.FIELD)
 public class SøkYtelseOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "fom_dato", nullable = false, updatable = false)

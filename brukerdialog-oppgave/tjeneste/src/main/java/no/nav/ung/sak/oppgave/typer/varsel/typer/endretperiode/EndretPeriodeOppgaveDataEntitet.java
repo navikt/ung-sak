@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
  */
 @Entity(name = "EndretPeriodeOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_PERIODE")
+@Access(AccessType.FIELD)
 public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
 
     /** Fra-dato for ny periode. Null dersom perioden er fjernet. */

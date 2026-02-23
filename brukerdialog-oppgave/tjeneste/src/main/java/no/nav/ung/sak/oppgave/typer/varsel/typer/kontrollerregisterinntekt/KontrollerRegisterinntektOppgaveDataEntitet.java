@@ -14,6 +14,7 @@ import java.util.List;
  */
 @Entity(name = "KontrollerRegisterinntektOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT")
+@Access(AccessType.FIELD)
 public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)
@@ -34,10 +35,12 @@ public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEnti
     @Column(name = "total_inntekt", nullable = false, updatable = false)
     private int totalInntekt;
 
-    @OneToMany(mappedBy = "oppgaveData", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "kontroller_data_id", nullable = false, updatable = false)
     private List<ArbeidOgFrilansInntektEntitet> arbeidOgFrilansInntekter = new ArrayList<>();
 
-    @OneToMany(mappedBy = "oppgaveData", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JoinColumn(name = "kontroller_data_id", nullable = false, updatable = false)
     private List<YtelseInntektEntitet> ytelseInntekter = new ArrayList<>();
 
     protected KontrollerRegisterinntektOppgaveDataEntitet() {
@@ -60,11 +63,11 @@ public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEnti
 
 
     public void leggTilArbeidOgFrilansInntekt(String arbeidsgiver, int inntekt) {
-        arbeidOgFrilansInntekter.add(new ArbeidOgFrilansInntektEntitet(this, arbeidsgiver, inntekt));
+        arbeidOgFrilansInntekter.add(new ArbeidOgFrilansInntektEntitet(arbeidsgiver, inntekt));
     }
 
     public void leggTilYtelseInntekt(YtelseType ytelsetype, int inntekt) {
-        ytelseInntekter.add(new YtelseInntektEntitet(this, ytelsetype, inntekt));
+        ytelseInntekter.add(new YtelseInntektEntitet(ytelsetype, inntekt));
     }
 
     public LocalDate getFraOgMed() {

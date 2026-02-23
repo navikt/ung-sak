@@ -11,6 +11,7 @@ import java.time.LocalDate;
  */
 @Entity(name = "EndretStartdatoOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_STARTDATO")
+@Access(AccessType.FIELD)
 public class EndretStartdatoOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "ny_startdato", nullable = false, updatable = false)

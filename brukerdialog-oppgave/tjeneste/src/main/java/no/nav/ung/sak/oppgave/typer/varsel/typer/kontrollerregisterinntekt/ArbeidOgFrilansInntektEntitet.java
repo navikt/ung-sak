@@ -1,6 +1,7 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.BaseEntitet;
 
 /**
  * En enkeltpost for arbeid- eller frilansinntekt knyttet til en
@@ -8,16 +9,13 @@ import jakarta.persistence.*;
  */
 @Entity(name = "ArbeidOgFrilansInntekt")
 @Table(name = "BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT")
+@Access(AccessType.FIELD)
 @SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT", sequenceName = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT", allocationSize = 50)
-public class ArbeidOgFrilansInntektEntitet {
+public class ArbeidOgFrilansInntektEntitet extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT")
     private Long id;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "kontroller_data_id", nullable = false, updatable = false)
-    private KontrollerRegisterinntektOppgaveDataEntitet oppgaveData;
 
     @Column(name = "arbeidsgiver", nullable = false, updatable = false)
     private String arbeidsgiver;
@@ -29,20 +27,13 @@ public class ArbeidOgFrilansInntektEntitet {
         // For JPA
     }
 
-    public ArbeidOgFrilansInntektEntitet(KontrollerRegisterinntektOppgaveDataEntitet oppgaveData,
-                                          String arbeidsgiver,
-                                          int inntekt) {
-        this.oppgaveData = oppgaveData;
+    ArbeidOgFrilansInntektEntitet(String arbeidsgiver, int inntekt) {
         this.arbeidsgiver = arbeidsgiver;
         this.inntekt = inntekt;
     }
 
     public Long getId() {
         return id;
-    }
-
-    public KontrollerRegisterinntektOppgaveDataEntitet getOppgaveData() {
-        return oppgaveData;
     }
 
     public String getArbeidsgiver() {
@@ -53,4 +44,3 @@ public class ArbeidOgFrilansInntektEntitet {
         return inntekt;
     }
 }
-

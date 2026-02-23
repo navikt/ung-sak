@@ -11,6 +11,7 @@ import java.time.LocalDate;
  */
 @Entity(name = "InntektsrapporteringOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING")
+@Access(AccessType.FIELD)
 public class InntektsrapporteringOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)

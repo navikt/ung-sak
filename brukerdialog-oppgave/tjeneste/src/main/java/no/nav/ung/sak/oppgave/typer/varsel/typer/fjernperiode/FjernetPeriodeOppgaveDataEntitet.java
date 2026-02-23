@@ -11,6 +11,7 @@ import java.time.LocalDate;
  */
 @Entity(name = "FjernetPeriodeOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_FJERNET_PERIODE")
+@Access(AccessType.FIELD)
 public class FjernetPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "forrige_startdato", nullable = false, updatable = false)

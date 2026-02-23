@@ -77,7 +77,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         @AnyDiscriminatorValue(discriminator = "SØK_YTELSE",                   entity = SøkYtelseOppgaveDataEntitet.class),
     })
     @AnyKeyJavaClass(Long.class)
-    @Column(name = "type", insertable = false, updatable = false)
+    @Column(name = "type", insertable = false, updatable = false, nullable = false)
     @JoinColumn(name = "oppgave_data_id")
     @SuppressWarnings("JpaAttributeTypeInspection") // @Any er ikke støttet av IntelliJs JPA-inspeksjon
     private OppgaveDataEntitet oppgaveData;
