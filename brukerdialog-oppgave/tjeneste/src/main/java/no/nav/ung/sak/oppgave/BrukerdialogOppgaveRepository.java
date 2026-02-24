@@ -87,8 +87,8 @@ public class BrukerdialogOppgaveRepository {
 
 
     public void lagre(BrukerdialogOppgaveEntitet oppgave) {
-        entityManager.persist(oppgave.getOppgaveData());
         entityManager.persist(oppgave);
+        entityManager.persist(oppgave.getOppgaveData());
         entityManager.flush();
     }
 

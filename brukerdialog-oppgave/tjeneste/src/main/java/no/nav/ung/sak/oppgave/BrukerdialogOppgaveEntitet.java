@@ -5,22 +5,9 @@ import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgaveTypeKoder;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 import no.nav.ung.sak.typer.AktørId;
-import org.hibernate.annotations.Any;
-import org.hibernate.annotations.AnyDiscriminator;
-import org.hibernate.annotations.AnyDiscriminatorValue;
-import org.hibernate.annotations.AnyDiscriminatorValues;
-import org.hibernate.annotations.AnyKeyJavaClass;
 import org.hibernate.annotations.ColumnTransformer;
-import no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDataEntitet;
-import no.nav.ung.sak.oppgave.typer.oppgave.søkytelse.SøkYtelseOppgaveDataEntitet;
-import no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode.EndretPeriodeOppgaveDataEntitet;
-import no.nav.ung.sak.oppgave.typer.varsel.typer.endretsluttdato.EndretSluttdatoOppgaveDataEntitet;
-import no.nav.ung.sak.oppgave.typer.varsel.typer.endretstartdato.EndretStartdatoOppgaveDataEntitet;
-import no.nav.ung.sak.oppgave.typer.varsel.typer.fjernperiode.FjernetPeriodeOppgaveDataEntitet;
-import no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgaveDataEntitet;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -65,21 +52,7 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Column(name = "bekreftelse", columnDefinition = "jsonb")
     private BekreftelseDTO bekreftelse;
 
-    @Any
-    @AnyDiscriminator(DiscriminatorType.STRING)
-    @AnyDiscriminatorValues({
-        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_ENDRET_STARTDATO_KODE,      entity = EndretStartdatoOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_ENDRET_SLUTTDATO_KODE,      entity = EndretSluttdatoOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_FJERNET_PERIODE_KODE,       entity = FjernetPeriodeOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_ENDRET_PERIODE_KODE,        entity = EndretPeriodeOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_AVVIK_REGISTERINNTEKT_KODE, entity = KontrollerRegisterinntektOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.RAPPORTER_INNTEKT_KODE,             entity = InntektsrapporteringOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.SØK_YTELSE_KODE,                   entity = SøkYtelseOppgaveDataEntitet.class),
-    })
-    @AnyKeyJavaClass(Long.class)
-    @Column(name = "type", insertable = false, updatable = false, nullable = false)
-    @JoinColumn(name = "oppgave_data_id")
-    @SuppressWarnings("JpaAttributeTypeInspection") // @Any er ikke støttet av IntelliJs JPA-inspeksjon
+    @OneToOne(mappedBy = "oppgave", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private OppgaveDataEntitet oppgaveData;
 
     protected BrukerdialogOppgaveEntitet() {
@@ -191,5 +164,8 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
 
     public void setOppgaveData(OppgaveDataEntitet oppgaveData) {
         this.oppgaveData = oppgaveData;
+        if (oppgaveData != null) {
+            oppgaveData.setOppgave(this);
+        }
     }
 }

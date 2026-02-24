@@ -1,6 +1,5 @@
 -- Migration: Separate tables for each OppgavetypeDataDTO subtype
--- Each table has its own PK (id) generated from a shared sequence.
--- The reference from BD_OPPGAVE to each data table is managed via oppgave_data_id / type columns.
+-- The FK from each data table to BD_OPPGAVE is via bd_oppgave_id.
 -- Audit columns (opprettet_av, opprettet_tid, endret_av, endret_tid) from BaseEntitet
 -- are included in every table.
 
@@ -14,6 +13,7 @@ create sequence if not exists SEQ_BD_OPPGAVE_DATA increment by 50 minvalue 10000
 create table BD_OPPGAVE_DATA_ENDRET_STARTDATO
 (
     id                  bigint      not null primary key,
+    bd_oppgave_id       bigint      not null references BD_OPPGAVE (id),
     ny_startdato        date        not null,
     forrige_startdato   date        not null,
     opprettet_av        varchar(20) not null default 'VL',
@@ -38,6 +38,7 @@ comment on column BD_OPPGAVE_DATA_ENDRET_STARTDATO.endret_tid            is 'Tid
 create table BD_OPPGAVE_DATA_ENDRET_SLUTTDATO
 (
     id                  bigint      not null primary key,
+    bd_oppgave_id       bigint      not null references BD_OPPGAVE (id),
     ny_sluttdato        date        not null,
     forrige_sluttdato   date,
     opprettet_av        varchar(20) not null default 'VL',
@@ -62,6 +63,7 @@ comment on column BD_OPPGAVE_DATA_ENDRET_SLUTTDATO.endret_tid            is 'Tid
 create table BD_OPPGAVE_DATA_FJERNET_PERIODE
 (
     id                  bigint      not null primary key,
+    bd_oppgave_id       bigint      not null references BD_OPPGAVE (id),
     forrige_startdato   date        not null,
     forrige_sluttdato   date,
     opprettet_av        varchar(20) not null default 'VL',
@@ -86,6 +88,7 @@ comment on column BD_OPPGAVE_DATA_FJERNET_PERIODE.endret_tid             is 'Tid
 create table BD_OPPGAVE_DATA_ENDRET_PERIODE
 (
     id                          bigint       not null primary key,
+    bd_oppgave_id               bigint       not null references BD_OPPGAVE (id),
     ny_periode_fom              date,
     ny_periode_tom              date,
     forrige_periode_fom         date,
@@ -134,6 +137,7 @@ comment on column BD_OPPGAVE_DATA_PERIODE_ENDRING.endring_type               is 
 create table BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT
 (
     id                              bigint      not null primary key,
+    bd_oppgave_id                   bigint      not null references BD_OPPGAVE (id),
     fra_og_med                      date        not null,
     til_og_med                      date        not null,
     gjelder_deler_av_maaned         boolean     not null,
@@ -212,6 +216,7 @@ comment on column BD_OPPGAVE_DATA_YTELSE_INNTEKT.inntekt                     is 
 create table BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING
 (
     id                          bigint      not null primary key,
+    bd_oppgave_id               bigint      not null references BD_OPPGAVE (id),
     fra_og_med                  date        not null,
     til_og_med                  date        not null,
     gjelder_deler_av_maaned     boolean     not null,
@@ -240,6 +245,7 @@ comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.endret_tid               
 create table BD_OPPGAVE_DATA_SOK_YTELSE
 (
     id              bigint      not null primary key,
+    bd_oppgave_id   bigint      not null references BD_OPPGAVE (id),
     fom_dato        date        not null,
     opprettet_av    varchar(20) not null default 'VL',
     opprettet_tid   timestamp   not null default current_timestamp,
@@ -256,16 +262,9 @@ comment on column BD_OPPGAVE_DATA_SOK_YTELSE.endret_av     is 'Saksbehandler/sys
 comment on column BD_OPPGAVE_DATA_SOK_YTELSE.endret_tid    is 'Tidspunkt da raden sist ble endret.';
 
 -- -------------------------------------------------------
--- Referanse fra BD_OPPGAVE til strukturert oppgavedata
--- -------------------------------------------------------
--- Den eksisterende 'type'-kolonnen brukes som diskriminator for å identifisere riktig data-tabell.
-alter table BD_OPPGAVE
-    add column oppgave_data_id bigint;
-
-comment on column BD_OPPGAVE.oppgave_data_id is 'FK (logisk) til primærnøkkelen i den aktuelle BD_OPPGAVE_DATA-tabellen. Type-kolonnen brukes som diskriminator for å identifisere hvilken tabell det refereres til.';
-
 -- Fjerner jsonb data-kolonne fra BD_OPPGAVE nå som strukturert oppgavedata
--- lagres i egne BD_OPPGAVE_DATA_*-tabeller og refereres via oppgave_data_id / type.
+-- lagres i egne BD_OPPGAVE_DATA_*-tabeller med bd_oppgave_id FK.
+-- -------------------------------------------------------
 alter table BD_OPPGAVE
     drop column data;
 
