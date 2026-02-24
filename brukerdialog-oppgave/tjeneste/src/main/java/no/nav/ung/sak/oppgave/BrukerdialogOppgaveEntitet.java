@@ -5,6 +5,7 @@ import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveTypeKoder;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import org.hibernate.annotations.Any;
@@ -43,10 +44,9 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Enumerated(EnumType.STRING)
     private OppgaveStatus status = OppgaveStatus.ULØST;
 
+    @Convert(converter = OppgaveTypeKodeverdiConverter.class)
     @Column(name = "type")
-    @Enumerated(EnumType.STRING)
     private OppgaveType oppgaveType;
-
 
     @Column(name = "frist_tid")
     private LocalDateTime fristTid;
@@ -68,13 +68,13 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Any
     @AnyDiscriminator(DiscriminatorType.STRING)
     @AnyDiscriminatorValues({
-        @AnyDiscriminatorValue(discriminator = "BEKREFT_ENDRET_STARTDATO",      entity = EndretStartdatoOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = "BEKREFT_ENDRET_SLUTTDATO",      entity = EndretSluttdatoOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = "BEKREFT_FJERNET_PERIODE",       entity = FjernetPeriodeOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = "BEKREFT_ENDRET_PERIODE",        entity = EndretPeriodeOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = "BEKREFT_AVVIK_REGISTERINNTEKT", entity = KontrollerRegisterinntektOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = "RAPPORTER_INNTEKT",             entity = InntektsrapporteringOppgaveDataEntitet.class),
-        @AnyDiscriminatorValue(discriminator = "SØK_YTELSE",                   entity = SøkYtelseOppgaveDataEntitet.class),
+        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_ENDRET_STARTDATO_KODE,      entity = EndretStartdatoOppgaveDataEntitet.class),
+        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_ENDRET_SLUTTDATO_KODE,      entity = EndretSluttdatoOppgaveDataEntitet.class),
+        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_FJERNET_PERIODE_KODE,       entity = FjernetPeriodeOppgaveDataEntitet.class),
+        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_ENDRET_PERIODE_KODE,        entity = EndretPeriodeOppgaveDataEntitet.class),
+        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.BEKREFT_AVVIK_REGISTERINNTEKT_KODE, entity = KontrollerRegisterinntektOppgaveDataEntitet.class),
+        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.RAPPORTER_INNTEKT_KODE,             entity = InntektsrapporteringOppgaveDataEntitet.class),
+        @AnyDiscriminatorValue(discriminator = OppgaveTypeKoder.SØK_YTELSE_KODE,                   entity = SøkYtelseOppgaveDataEntitet.class),
     })
     @AnyKeyJavaClass(Long.class)
     @Column(name = "type", insertable = false, updatable = false, nullable = false)

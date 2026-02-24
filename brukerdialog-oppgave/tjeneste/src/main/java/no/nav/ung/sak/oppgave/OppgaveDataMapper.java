@@ -6,7 +6,7 @@ import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 /**
- * Felles interface for alle klasser som mapper og persisterer en {@link OppgavetypeDataDto}-subtype
+ * Felles interface for alle klasser som mapper en {@link OppgavetypeDataDto}-subtype
  * til sin tilhørende JPA-entitet.
  * <p>
  * Implementasjoner skal annoteres med {@link OppgaveTypeRef} for CDI-oppslag.
