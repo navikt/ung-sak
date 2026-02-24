@@ -2,6 +2,10 @@ package no.nav.ung.sak.kontrakt.oppgaver;
 
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
 public enum OppgaveType implements Kodeverdi {
 
     BEKREFT_ENDRET_STARTDATO(OppgaveTypeKoder.BEKREFT_ENDRET_STARTDATO_KODE, "Bekreft endret startdato"),
@@ -13,6 +17,27 @@ public enum OppgaveType implements Kodeverdi {
     SØK_YTELSE(OppgaveTypeKoder.SØK_YTELSE_KODE, "Søk ytelse")
     ;
 
+    private static final Map<String, OppgaveType> KODER = new LinkedHashMap<>();
+
+
+    static {
+        // valider ingen unmapped koder
+        var sjekkKodeBrukMap = new TreeMap<>(OppgaveTypeKoder.KODER);
+
+        for (var v : values()) {
+            if (KODER.putIfAbsent(v.kode, v) != null) {
+                throw new IllegalArgumentException("Duplikat : " + v.kode + ", mulig utgått?");
+            }
+            if (v.kode != null) {
+                sjekkKodeBrukMap.remove(v.kode);
+            }
+        }
+
+        if (!sjekkKodeBrukMap.isEmpty()) {
+            System.out.printf("Ubrukt sjekk: Har koder definert i %s som ikke er i bruk i %s: %s\n", OppgaveTypeKoder.class, OppgaveType.class, sjekkKodeBrukMap);
+        }
+    }
+
     private String kode;
     private String navn;
 
@@ -20,6 +45,18 @@ public enum OppgaveType implements Kodeverdi {
         this.kode = kode;
         this.navn = navn;
     }
+
+    public static OppgaveType fraKode(final String kode) {
+        if (kode == null) {
+            return null;
+        }
+        var ad = KODER.get(kode);
+        if (ad == null) {
+            throw new IllegalArgumentException("Ukjent OppgaveType: " + kode);
+        }
+        return ad;
+    }
+
 
     @Override
     public String getKode() {
