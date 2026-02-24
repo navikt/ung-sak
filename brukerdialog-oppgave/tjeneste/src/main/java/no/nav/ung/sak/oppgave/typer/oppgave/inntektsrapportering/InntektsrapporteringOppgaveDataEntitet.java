@@ -23,10 +23,6 @@ public class InntektsrapporteringOppgaveDataEntitet extends OppgaveDataEntitet {
     @Column(name = "gjelder_deler_av_maaned", nullable = false, updatable = false)
     private boolean gjelderDelerAvMåned;
 
-    /** Null inntil bruker har besvart oppgaven. */
-    @Column(name = "rapportert_inntekt")
-    private Integer rapportertInntekt;
-
     protected InntektsrapporteringOppgaveDataEntitet() {
         // For JPA
     }
@@ -37,11 +33,6 @@ public class InntektsrapporteringOppgaveDataEntitet extends OppgaveDataEntitet {
         this.fraOgMed = fraOgMed;
         this.tilOgMed = tilOgMed;
         this.gjelderDelerAvMåned = gjelderDelerAvMåned;
-    }
-
-
-    public void setRapportertInntekt(Integer rapportertInntekt) {
-        this.rapportertInntekt = rapportertInntekt;
     }
 
     public LocalDate getFraOgMed() {
@@ -56,7 +47,4 @@ public class InntektsrapporteringOppgaveDataEntitet extends OppgaveDataEntitet {
         return gjelderDelerAvMåned;
     }
 
-    public Integer getRapportertInntekt() {
-        return rapportertInntekt;
-    }
 }

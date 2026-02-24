@@ -220,8 +220,6 @@ create table BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING
     fra_og_med                  date        not null,
     til_og_med                  date        not null,
     gjelder_deler_av_maaned     boolean     not null,
-    -- Rapportert inntekt (null inntil bruker har svart)
-    rapportert_inntekt          integer,
     opprettet_av                varchar(20) not null default 'VL',
     opprettet_tid               timestamp   not null default current_timestamp,
     endret_av                   varchar(20),
@@ -232,7 +230,6 @@ comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.id                       
 comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.fra_og_med               is 'Startdato for rapporteringsperioden.';
 comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.til_og_med               is 'Sluttdato for rapporteringsperioden.';
 comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.gjelder_deler_av_maaned  is 'Sant dersom perioden ikke dekker hele måneden.';
-comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.rapportert_inntekt        is 'Inntekt rapportert av bruker (null = ikke rapportert ennå).';
 comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.opprettet_av              is 'Saksbehandler/system som opprettet raden.';
 comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.opprettet_tid             is 'Tidspunkt da raden ble opprettet.';
 comment on column BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING.endret_av                 is 'Saksbehandler/system som sist endret raden.';
