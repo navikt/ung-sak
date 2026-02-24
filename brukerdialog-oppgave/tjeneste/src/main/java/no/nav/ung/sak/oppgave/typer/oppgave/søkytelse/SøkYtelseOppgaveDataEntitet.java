@@ -1,6 +1,8 @@
 package no.nav.ung.sak.oppgave.typer.oppgave.søkytelse;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 @Entity(name = "SøkYtelseOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_SOK_YTELSE")
 @Access(AccessType.FIELD)
+@OppgaveTypeRef(OppgaveType.SØK_YTELSE)
 public class SøkYtelseOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "fom_dato", nullable = false, updatable = false)

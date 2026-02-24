@@ -1,6 +1,8 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.fjernperiode;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 @Entity(name = "FjernetPeriodeOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_FJERNET_PERIODE")
 @Access(AccessType.FIELD)
+@OppgaveTypeRef(OppgaveType.BEKREFT_FJERNET_PERIODE)
 public class FjernetPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "forrige_startdato", nullable = false, updatable = false)

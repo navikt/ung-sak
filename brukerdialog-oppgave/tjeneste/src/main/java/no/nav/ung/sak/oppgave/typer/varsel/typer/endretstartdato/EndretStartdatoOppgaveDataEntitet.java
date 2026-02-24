@@ -1,6 +1,8 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.endretstartdato;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 @Entity(name = "EndretStartdatoOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_STARTDATO")
 @Access(AccessType.FIELD)
+@OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_STARTDATO)
 public class EndretStartdatoOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "ny_startdato", nullable = false, updatable = false)

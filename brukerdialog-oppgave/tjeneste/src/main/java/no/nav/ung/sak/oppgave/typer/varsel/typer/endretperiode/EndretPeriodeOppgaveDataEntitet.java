@@ -1,7 +1,9 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
+import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @Entity(name = "EndretPeriodeOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_ENDRET_PERIODE")
 @Access(AccessType.FIELD)
+@OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_PERIODE)
 public class EndretPeriodeOppgaveDataEntitet extends OppgaveDataEntitet {
 
     /** Fra-dato for ny periode. Null dersom perioden er fjernet. */

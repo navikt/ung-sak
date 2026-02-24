@@ -1,6 +1,8 @@
 package no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 @Entity(name = "InntektsrapporteringOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_INNTEKTSRAPPORTERING")
 @Access(AccessType.FIELD)
+@OppgaveTypeRef(OppgaveType.RAPPORTER_INNTEKT)
 public class InntektsrapporteringOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)

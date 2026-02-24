@@ -1,7 +1,9 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt;
 
 import jakarta.persistence.*;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType;
+import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 import java.time.LocalDate;
@@ -15,6 +17,7 @@ import java.util.List;
 @Entity(name = "KontrollerRegisterinntektOppgaveData")
 @Table(name = "BD_OPPGAVE_DATA_KONTROLLER_REGISTERINNTEKT")
 @Access(AccessType.FIELD)
+@OppgaveTypeRef(OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT)
 public class KontrollerRegisterinntektOppgaveDataEntitet extends OppgaveDataEntitet {
 
     @Column(name = "fra_og_med", nullable = false, updatable = false)
