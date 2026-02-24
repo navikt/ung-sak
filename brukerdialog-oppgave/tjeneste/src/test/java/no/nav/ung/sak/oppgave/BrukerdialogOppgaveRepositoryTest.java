@@ -6,12 +6,12 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
+import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 import no.nav.ung.sak.oppgave.typer.oppgave.søkytelse.SøkYtelseOppgaveDataEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType;
-import no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.ArbeidOgFrilansInntektEntitet;
 import no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgaveDataEntitet;
-import no.nav.ung.sak.oppgave.typer.varsel.typer.kontrollerregisterinntekt.YtelseInntektEntitet;
 import no.nav.ung.sak.typer.AktørId;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,9 +79,9 @@ class BrukerdialogOppgaveRepositoryTest {
     @Test
     void skal_hente_alle_oppgaver_for_aktør() {
         // Arrange
-        opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
-        opprettOppgave(aktørId, OppgaveType.RAPPORTER_INNTEKT);
-        opprettOppgave(new AktørId("9876543210987"), OppgaveType.SØK_YTELSE); // Annen aktør
+        opprettOppgave(aktørId, OppgaveType.SØK_YTELSE, lagSøkYtelseOppgaveData());
+        opprettOppgave(aktørId, OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT, lagKontrollerInntektOppgaveData());
+        opprettOppgave(new AktørId("9876543210987"), OppgaveType.SØK_YTELSE, lagSøkYtelseOppgaveData()); // Annen aktør
 
         entityManager.flush();
         entityManager.clear();
@@ -97,7 +97,7 @@ class BrukerdialogOppgaveRepositoryTest {
     @Test
     void skal_oppdatere_oppgave_til_lukket() {
         // Arrange
-        BrukerdialogOppgaveEntitet oppgave = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
+        BrukerdialogOppgaveEntitet oppgave = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE, lagSøkYtelseOppgaveData());
         UUID oppgaveReferanse = oppgave.getOppgavereferanse();
 
         entityManager.flush();
@@ -119,7 +119,7 @@ class BrukerdialogOppgaveRepositoryTest {
     @Test
     void skal_oppdatere_oppgave_til_åpnet() {
         // Arrange
-        BrukerdialogOppgaveEntitet oppgave = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
+        BrukerdialogOppgaveEntitet oppgave = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE, lagSøkYtelseOppgaveData());
         UUID oppgaveReferanse = oppgave.getOppgavereferanse();
 
         entityManager.flush();
@@ -140,9 +140,9 @@ class BrukerdialogOppgaveRepositoryTest {
     @Test
     void skal_hente_oppgaver_basert_på_type_og_status() {
         // Arrange
-        BrukerdialogOppgaveEntitet oppgave1 = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
-        opprettOppgave(aktørId, OppgaveType.RAPPORTER_INNTEKT);
-        BrukerdialogOppgaveEntitet oppgave3 = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
+        BrukerdialogOppgaveEntitet oppgave1 = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE, lagSøkYtelseOppgaveData());
+        opprettOppgave(aktørId, OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT, lagKontrollerInntektOppgaveData());
+        BrukerdialogOppgaveEntitet oppgave3 = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE, lagSøkYtelseOppgaveData());
 
         // Løs én av SØK_YTELSE oppgavene
         repository.lukkOppgave(oppgave3);
@@ -172,7 +172,7 @@ class BrukerdialogOppgaveRepositoryTest {
     @Test
     void skal_ikke_hente_oppgave_for_feil_aktør() {
         // Arrange
-        BrukerdialogOppgaveEntitet oppgave = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE);
+        BrukerdialogOppgaveEntitet oppgave = opprettOppgave(aktørId, OppgaveType.SØK_YTELSE, lagSøkYtelseOppgaveData());
         UUID oppgaveReferanse = oppgave.getOppgavereferanse();
         AktørId annenAktørId = new AktørId("9876543210987");
 
@@ -191,8 +191,6 @@ class BrukerdialogOppgaveRepositoryTest {
     void skal_persistere_og_hente_kontroller_registerinntekt_oppgave() {
         // Arrange
         UUID oppgaveReferanse = UUID.randomUUID();
-        LocalDate fraOgMed = LocalDate.of(2026, 2, 1);
-        LocalDate tilOgMed = LocalDate.of(2026, 2, 28);
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
             oppgaveReferanse,
@@ -201,6 +199,8 @@ class BrukerdialogOppgaveRepositoryTest {
             null
         );
 
+        LocalDate fraOgMed = LocalDate.of(2026, 2, 1);
+        LocalDate tilOgMed = LocalDate.of(2026, 2, 28);
         var oppgaveData = new KontrollerRegisterinntektOppgaveDataEntitet(
             fraOgMed,
             tilOgMed,
@@ -237,8 +237,28 @@ class BrukerdialogOppgaveRepositoryTest {
         assertThat(hentetData.getYtelseInntekter().get(0).getYtelsetype()).isEqualTo(YtelseType.DAGPENGER);
     }
 
+    private static KontrollerRegisterinntektOppgaveDataEntitet lagKontrollerInntektOppgaveData() {
+        LocalDate fraOgMed = LocalDate.of(2026, 2, 1);
+        LocalDate tilOgMed = LocalDate.of(2026, 2, 28);
+        var oppgaveData = new KontrollerRegisterinntektOppgaveDataEntitet(
+            fraOgMed,
+            tilOgMed,
+            false,
+            30000,
+            0,
+            30000
+        );
+        oppgaveData.leggTilArbeidOgFrilansInntekt("123456789", 30000);
+        oppgaveData.leggTilYtelseInntekt(YtelseType.DAGPENGER, 0);
+        return oppgaveData;
+    }
+
+    private static OppgaveDataEntitet lagSøkYtelseOppgaveData() {
+        return new SøkYtelseOppgaveDataEntitet(LocalDate.now());
+    }
+
     // Hjelpemetode for å opprette testoppgaver
-    private BrukerdialogOppgaveEntitet opprettOppgave(AktørId aktørId, OppgaveType type) {
+    private BrukerdialogOppgaveEntitet opprettOppgave(AktørId aktørId, OppgaveType type, OppgaveDataEntitet oppgaveData) {
         UUID oppgaveReferanse = UUID.randomUUID();
 
         BrukerdialogOppgaveEntitet oppgave = new BrukerdialogOppgaveEntitet(
@@ -248,10 +268,9 @@ class BrukerdialogOppgaveRepositoryTest {
             null
         );
 
-        repository.lagre(oppgave);
-        var oppgaveData = new SøkYtelseOppgaveDataEntitet(LocalDate.now());
         oppgave.setOppgaveData(oppgaveData);
-        entityManager.persist(oppgaveData);
+        repository.lagre(oppgave);
         return oppgave;
     }
+
 }
