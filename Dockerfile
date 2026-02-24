@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1.7.0-labs
 
-FROM ghcr.io/navikt/k9-felles/felles-java-25:10.1.2 AS duplikatfjerner
+FROM ghcr.io/navikt/k9-felles/felles-java-25:10.1.3 AS duplikatfjerner
 
 COPY --link --exclude=no.nav.ung.sak* web/target/lib/ /build/lib/
 USER root
@@ -8,7 +8,7 @@ RUN ["java", "scripts/RyddBiblioteker", "DUPLIKAT", "/app/lib", "/build/lib"]
 
 
 
-FROM ghcr.io/navikt/k9-felles/felles-java-25:10.1.2
+FROM ghcr.io/navikt/k9-felles/felles-java-25:10.1.3
 LABEL org.opencontainers.image.source=https://github.com/navikt/ung-sak
 
 ENV JAVA_OPTS="-Djdk.virtualThreadScheduler.parallelism=8 "
