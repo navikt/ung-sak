@@ -1,17 +1,13 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
 import jakarta.persistence.*;
-import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.diff.DiffIgnore;
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity(name = "BesteBeregningGrunnlag")
 @Table(name = "akt_beste_beregning_gr")
-@DynamicInsert
-@DynamicUpdate
 public class BesteBeregningGrunnlag {
 
     @Id
@@ -21,15 +17,15 @@ public class BesteBeregningGrunnlag {
     @Column(name = "behandling_id", nullable = false, updatable = false)
     private Long behandlingId;
 
-    @ChangeTracked
+    @Column(name = "virkningsdato", nullable = false, updatable = false)
+    private LocalDate virkningsdato;
+
     @Column(name = "aarsinntekt_siste_aar", nullable = false, updatable = false)
     private BigDecimal årsinntektSisteÅr;
 
-    @ChangeTracked
     @Column(name = "aarsinntekt_siste_tre_aar", nullable = false, updatable = false)
     private BigDecimal årsinntektSisteTreÅr;
 
-    @ChangeTracked
     @Column(name = "aarsinntekt_beste_beregning", nullable = false, updatable = false)
     private BigDecimal årsinntektBesteBeregning;
 
@@ -46,19 +42,20 @@ public class BesteBeregningGrunnlag {
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
-    @Version
-    @Column(name = "versjon", nullable = false)
-    private long versjon;
-
     BesteBeregningGrunnlag() {
     }
 
-    BesteBeregningGrunnlag(BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelInput, String regelSporing) {
+    BesteBeregningGrunnlag(LocalDate virkningsdato, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelInput, String regelSporing) {
+        this.virkningsdato = virkningsdato;
         this.årsinntektSisteÅr = årsinntektSisteÅr;
         this.årsinntektSisteTreÅr = årsinntektSisteTreÅr;
         this.årsinntektBesteBeregning = årsinntektBesteBeregning;
         this.regelInput = regelInput;
         this.regelSporing = regelSporing;
+    }
+
+    public LocalDate getVirkningsdato() {
+        return virkningsdato;
     }
 
     public BigDecimal getÅrsinntektSisteÅr() {

@@ -39,7 +39,7 @@ public class FinnGjennomsnittligPGI {
             ));
 
         var regelSporingMap = new java.util.LinkedHashMap<String, LocalDateTimeline<?>>();
-        regelSporingMap.put("gsnittTidsserie", gsnittTidsserie);
+        regelSporingMap.put("gsnittTidsserie", gsnittTidsserie.mapValue(Grunnbeløp::verdi));
         regelSporingMap.put("inflasjonsfaktorTidsserie", inflasjonsfaktorTidsserie);
         årsinntekter.forEach((år, tidslinje) -> regelSporingMap.put("årsinntekt_" + år, tidslinje));
 

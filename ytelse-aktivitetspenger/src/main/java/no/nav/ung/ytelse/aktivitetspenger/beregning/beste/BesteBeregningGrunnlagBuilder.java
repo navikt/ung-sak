@@ -3,9 +3,11 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 import no.nav.ung.sak.diff.DiffEntity;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 class BesteBeregningGrunnlagBuilder {
 
+    private LocalDate virkningsdato;
     private BigDecimal årsinntektSisteÅr;
     private BigDecimal årsinntektSisteTreÅr;
     private BigDecimal årsinntektBesteBeregning;
@@ -16,6 +18,7 @@ class BesteBeregningGrunnlagBuilder {
 
     BesteBeregningGrunnlagBuilder(BesteBeregningGrunnlag kladd) {
         if (kladd != null) {
+            this.virkningsdato = kladd.getVirkningsdato();
             this.årsinntektSisteÅr = kladd.getÅrsinntektSisteÅr();
             this.årsinntektSisteTreÅr = kladd.getÅrsinntektSisteTreÅr();
             this.årsinntektBesteBeregning = kladd.getÅrsinntektBesteBeregning();
@@ -25,6 +28,7 @@ class BesteBeregningGrunnlagBuilder {
     }
 
     BesteBeregningGrunnlagBuilder medResultat(BesteBeregningResultat resultat) {
+        this.virkningsdato = resultat.getVirkningsdato();
         this.årsinntektSisteÅr = resultat.getÅrsinntektSisteÅr();
         this.årsinntektSisteTreÅr = resultat.getÅrsinntektSisteTreÅr();
         this.årsinntektBesteBeregning = resultat.getÅrsinntektBesteBeregning();
@@ -40,7 +44,7 @@ class BesteBeregningGrunnlagBuilder {
     }
 
     private BesteBeregningGrunnlag repeatableBuild() {
-        return new BesteBeregningGrunnlag(årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelInput, regelSporing);
+        return new BesteBeregningGrunnlag(virkningsdato, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelInput, regelSporing);
     }
 
     boolean erForskjellig(BesteBeregningGrunnlag grunnlag, DiffEntity differ) {

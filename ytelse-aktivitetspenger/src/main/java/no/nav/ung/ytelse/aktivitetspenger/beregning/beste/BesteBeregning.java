@@ -35,7 +35,7 @@ public class BesteBeregning {
         String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(gjennomsnittUtregningResultat.regelSporingMap());
         String regelInput = lagRegelInput(virkningsdato, inntektsposter);
 
-        return new BesteBeregningResultat(årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelSporing, regelInput);
+        return new BesteBeregningResultat(virkningsdato, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelSporing, regelInput);
     }
 
     private static String lagRegelInput(LocalDate virkningsdato, List<Inntektspost> inntektsposter) {

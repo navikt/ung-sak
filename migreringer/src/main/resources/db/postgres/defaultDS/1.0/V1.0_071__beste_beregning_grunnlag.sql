@@ -1,14 +1,14 @@
 create table akt_beste_beregning_gr
 (
     id                  bigint primary key,
+    virkningsdato       date           not null,
     behandling_id       bigint         not null,
     aarsinntekt_siste_aar     numeric(19, 2) not null,
     aarsinntekt_siste_tre_aar numeric(19, 2) not null,
     aarsinntekt_beste_beregning numeric(19, 2) not null,
-    regel_input         text           not null,
-    regel_sporing       text           not null,
+    regel_input         oid            not null,
+    regel_sporing       oid            not null,
     aktiv               boolean        not null default true,
-    versjon             bigint         not null default 0,
     opprettet_av        character varying(20) DEFAULT 'VL'::character varying NOT NULL,
     opprettet_tid       timestamp(3) without time zone DEFAULT timezone('utc'::text, now()) NOT NULL,
     endret_av           character varying(20),

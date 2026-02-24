@@ -3,6 +3,8 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.diff.DiffEntity;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
@@ -10,8 +12,10 @@ import no.nav.ung.sak.diff.TraverseGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Dependent
 public class BesteBeregningGrunnlagRepository {
@@ -40,6 +44,14 @@ public class BesteBeregningGrunnlagRepository {
         } else {
             log.info("[behandlingId={}] Forkaster lagring nytt resultat da dette er identisk med eksisterende resultat.", behandlingId);
         }
+    }
+
+    public LocalDateTimeline<BesteBeregningGrunnlag> hentBesteBeregningSomTidslinje(long behandlingId) {
+        var besteberegningGrunnlag = hentGrunnlag(behandlingId).orElseThrow(
+            () -> new IllegalStateException("Fant ikke beste beregning grunnlag for behandlingId=" + behandlingId));
+
+        return new LocalDateTimeline<>(
+            List.of(new LocalDateSegment<>(besteberegningGrunnlag.getVirkningsdato(), null, besteberegningGrunnlag)));
     }
 
     /**
