@@ -11,7 +11,6 @@ import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseTy
 @Entity(name = "YtelseInntekt")
 @Table(name = "BD_OPPGAVE_DATA_YTELSE_INNTEKT")
 @Access(AccessType.FIELD)
-@SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT", sequenceName = "SEQ_BD_OPPGAVE_DATA_YTELSE_INNTEKT", allocationSize = 50)
 public class YtelseInntektEntitet extends BaseEntitet {
 
     @Id

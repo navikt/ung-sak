@@ -10,7 +10,6 @@ import no.nav.ung.sak.BaseEntitet;
 @Entity(name = "ArbeidOgFrilansInntekt")
 @Table(name = "BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT")
 @Access(AccessType.FIELD)
-@SequenceGenerator(name = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT", sequenceName = "SEQ_BD_OPPGAVE_DATA_ARBEID_FRILANS_INNTEKT", allocationSize = 50)
 public class ArbeidOgFrilansInntektEntitet extends BaseEntitet {
 
     @Id
