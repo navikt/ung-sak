@@ -25,8 +25,7 @@ public class BrukerdialogOppgaveMapper {
     }
 
     public BrukerdialogOppgaveDto tilDto(BrukerdialogOppgaveEntitet oppgave) {
-        var oppgavetypeData = OppgaveTypeRef.Lookup.find(mappere, oppgave.getOppgaveType())
-            .orElseThrow(() -> new IllegalArgumentException("Finner ingen OppgaveDataEntitetTilDtoMapper for oppgavetype: " + oppgave.getOppgaveType()))
+        var oppgavetypeData = OppgaveDataEntitetTilDtoMapper.finnTjeneste(mappere, oppgave.getOppgaveType())
             .tilDto(oppgave.getOppgaveData());
 
         return new BrukerdialogOppgaveDto(
