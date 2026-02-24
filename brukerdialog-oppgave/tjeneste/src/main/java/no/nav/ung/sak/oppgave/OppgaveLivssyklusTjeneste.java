@@ -84,11 +84,11 @@ public class OppgaveLivssyklusTjeneste {
         if (oppgaveEntitet.getId() != null) {
             throw new IllegalArgumentException("Oppgave er allerede persistert med id: " + oppgaveEntitet.getId());
         }
-        opprettTaskForPubliseringAvVarsel(oppgaveEntitet);
         oppgaveEntitet.setStatus(OppgaveStatus.ULØST);
         var oppgaveData = OppgaveDataMapper.finnTjeneste(oppgaveDataMapper, oppgaveEntitet.getOppgaveType()).map(oppgavetypeData);
         oppgaveEntitet.setOppgaveData(oppgaveData);
         brukerdialogOppgaveRepository.lagre(oppgaveEntitet);
+        opprettTaskForPubliseringAvVarsel(oppgaveEntitet);
     }
 
     private void opprettTaskForPubliseringAvVarsel(BrukerdialogOppgaveEntitet oppgaveEntitet) {
