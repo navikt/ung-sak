@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandling.prosessering.task;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -100,6 +101,11 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
         var relevanteBehandlinger = finnRelevanteBehandlinger(nyeInntektHendelser);
         log.info("Fant {} relevante behandlinger fra {} hendelser", relevanteBehandlinger.size(), nyeInntektHendelser.size());
+        if (Environment.current().isDev()){ //kan ikke logge i prod pga aktørId i hendelsen
+            for (InntektAbonnentTjeneste.InntektHendelse hendelse : nyeInntektHendelser) {
+                log.info("Mottok hendelse: " + hendelse);
+            }
+        }
 
         if (oppfriskVedInkommendeInntektshendelseEnabled) {
             var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
