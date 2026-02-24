@@ -9,7 +9,6 @@ import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Year;
 import java.util.List;
 import java.util.Map;
@@ -112,20 +111,7 @@ public class FinnGjennomsnittligPGI {
         }
 
         private BigDecimal beregnBidragTilPgi() {
-            if (grunnbeløpSnitt == null) {
-                return pgInntekt;
-            }
-
-            if (pgInntekt.compareTo(grunnbeløpSnitt(6)) < 1) {
-                return pgInntekt;
-            } else {
-                var avgrensetMot12G = pgInntekt.min(grunnbeløpSnitt(12));
-                var pgBidragMellomSeksOgTolvG = (avgrensetMot12G.subtract(grunnbeløpSnitt(6)))
-                    .divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_EVEN);
-
-                var gsnitt6 = grunnbeløpSnitt(6);
-                return pgBidragMellomSeksOgTolvG.add(gsnitt6);
-            }
+            return pgInntekt.min(grunnbeløpSnitt(6));
         }
 
         private BigDecimal grunnbeløpSnitt(int antall) {

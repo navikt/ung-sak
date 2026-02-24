@@ -31,7 +31,7 @@ class FinnGjennomsnittligPGITest {
     }
 
     @Test
-    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_mellom_6G_12G() {
+    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_mellom_6G_12G_avkortes_mot_6G() {
         var år2024 = Year.of(2024);
         var årsperiode = årsperiodeAv(år2024);
         var niG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(9));
@@ -42,25 +42,7 @@ class FinnGjennomsnittligPGITest {
             List.of(lagInntektspost(niG, årsperiode))
         );
 
-        // For inntekt mellom 6G og 12G skal PGI være: 6G + ((INNTEKT - 6G) / 3)
-        assertThat(resultat.pgiPerÅr().get(år2024)).isEqualByComparingTo(new BigDecimal(860_984));
-    }
-
-    @Test
-    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_over_12G() {
-        var år2024 = Year.of(2024);
-        var årsperiode = årsperiodeAv(år2024);
-        var femtenG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(15)); // 1 860 420 kr
-
-        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
-            år2024,
-            år2024,
-            List.of(lagInntektspost(femtenG, årsperiode))
-        );
-
-        // For inntekt over 12G skal PGI maks være: 6G + ((12G - 6G) / 3) = 6G + 2G = 8G
-        // 8G (snitt 2024): 122 225 kroner * 8 = 977 800 kroner
-        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977_800));
+        assertThat(resultat.pgiPerÅr().get(år2024)).isEqualByComparingTo(new BigDecimal(733_350));
     }
 
     @Test
@@ -86,8 +68,8 @@ class FinnGjennomsnittligPGITest {
         var år2024 = Year.of(2024);
         var periode = årsperiodeAv(år2024);
 
-        // Nøyaktig 6G = 6 * 124028 = 744168
-        var seksG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(6));
+        // 6G snitt 2024 = 6 * 122 225 = 733 350
+        var seksG = BigDecimal.valueOf(122_225).multiply(BigDecimal.valueOf(6));
         var inntektspost = lagInntektspost(seksG, periode);
 
         var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
@@ -96,29 +78,7 @@ class FinnGjennomsnittligPGITest {
             List.of(inntektspost)
         );
 
-        // Ved nøyaktig 6G skal PGI være lik 6G (ingen reduksjon)
-        // G-snitt 2024 (vektet gjennomsnitt) brukes for å beregne 6G-grensen
-        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(736956));
-    }
-
-    @Test
-    void skal_beregne_korrekt_PGI_bidrag_nøyaktig_på_12G() {
-        var år2024 = Year.of(2024);
-        var periode = årsperiodeAv(år2024);
-
-        // Nøyaktig 12G = 12 * 124028 = 1 488 336
-        var tolvG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(12));
-        var inntektspost = lagInntektspost(tolvG, periode);
-
-        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
-            år2024,
-            år2024,
-            List.of(inntektspost)
-        );
-
-        // Ved 12G skal PGI-bidrag være 8G: 6G + ((12G - 6G) / 3) = 6G + 2G = 8G
-        // G-snitt 2024 (vektet gjennomsnitt) brukes for å beregne G-multipler
-        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(977800));
+        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(733_350));
     }
 
     private static Periode årsperiodeAv(Year år) {
