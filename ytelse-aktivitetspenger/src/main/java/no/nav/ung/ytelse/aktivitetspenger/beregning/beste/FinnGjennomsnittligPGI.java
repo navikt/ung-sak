@@ -4,14 +4,12 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.Year;
 import java.util.List;
 import java.util.Map;
@@ -24,11 +22,11 @@ public class FinnGjennomsnittligPGI {
         Map<String, LocalDateTimeline<?>> regelSporingMap
     ) {}
 
-    public static Resultat finnGjennomsnittligPGI(LocalDate sisteTilgjengeligeGSnittÅr, List<Inntektspost> inntekter) {
+    public static Resultat finnGjennomsnittligPGI(Year sisteTilgjengeligeGSnittÅr, Year grunnbeløpÅr, List<Inntektspost> inntekter) {
         LocalDateTimeline<Grunnbeløp> gsnittTidsserie = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
-        LocalDateTimeline<BigDecimal> inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(sisteTilgjengeligeGSnittÅr.getYear()), 1);
+        LocalDateTimeline<BigDecimal> inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(grunnbeløpÅr, 3);
+        var årsinntekter = lagÅrsinntektTidslinje(sisteTilgjengeligeGSnittÅr, inntekter);
 
-        var årsinntekter = lagÅrsinntektTidslinje(inntekter);
         var pgiPerÅr = årsinntekter.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
@@ -63,9 +61,11 @@ public class FinnGjennomsnittligPGI {
         };
     }
 
-    private static Map<Year, LocalDateTimeline<PgiUtregner>> lagÅrsinntektTidslinje(List<Inntektspost> inntekter) {
+    private static Map<Year, LocalDateTimeline<PgiUtregner>> lagÅrsinntektTidslinje(Year sisteTilgjengeligeLigningsår, List<Inntektspost> inntekter) {
+        var sisteTilgjengeligeLigningsårTom = sisteTilgjengeligeLigningsår.atMonth(12).atEndOfMonth();
+
         return inntekter.stream()
-            .filter(ip -> !InntektspostType.YTELSE.equals(ip.getInntektspostType()))
+            .filter(ip -> !ip.getPeriode().getTomDato().isAfter(sisteTilgjengeligeLigningsårTom))
             .collect(Collectors.groupingBy(
                 ip -> Year.of(ip.getPeriode().getFomDato().getYear()),
                 Collectors.reducing(

@@ -8,7 +8,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class GrunnbeløpTidslinjeTest {
 
@@ -21,13 +22,11 @@ class GrunnbeløpTidslinjeTest {
 
             assertEquals(LocalDate.of(år, 1, 1), segment.getFom());
             assertEquals(LocalDate.of(år, 12, 31), segment.getTom());
-
-            assertTrue(segment.getValue().verdi().compareTo(BigDecimal.ZERO) > 0);
         }
     }
 
     @Test
-    void skal_beregne_korrekt_vektet_snitt_for_2024() {
+    void skal_beregne_vektet_snitt_for_2024() {
         LocalDateTimeline<Grunnbeløp> snittTidslinje = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
 
         LocalDateSegment<Grunnbeløp> segment2024 = snittTidslinje.toSegments().stream()
@@ -35,18 +34,16 @@ class GrunnbeløpTidslinjeTest {
             .findFirst()
             .orElseThrow();
 
-        // Fra Jan-Apr (4 måneder) = 118620, fra Mai-Des (8 måneder) = 124028
-        // Vektet snitt = (118620 * 4 + 124028 * 8) / 12 = 122225
+        // Fra Jan-Apr (4 måneder) = 118620, fra Mai-Des (8 måneder) = 124 028
+        // Vektet snitt = (118620 * 4 + 124028 * 8) / 12 = 122 225
         BigDecimal forventetSnitt = new BigDecimal(122_225);
         BigDecimal faktiskSnitt = segment2024.getValue().verdi();
 
-        // Tillat liten avvik for avrunding
-        assertTrue(faktiskSnitt.subtract(forventetSnitt).abs().compareTo(BigDecimal.valueOf(0.01)) <= 0,
-            "Forventet ca " + forventetSnitt + " men fikk " + faktiskSnitt);
+        assertThat(faktiskSnitt).isEqualByComparingTo(forventetSnitt);
     }
 
     @Test
-    void skal_beregne_korrekt_vektet_snitt_for_2025() {
+    void skal_beregne_vektet_snitt_for_2025() {
         LocalDateTimeline<Grunnbeløp> snittTidslinje = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
         LocalDateSegment<Grunnbeløp> segment2025 = snittTidslinje.toSegments().stream()
             .filter(s -> s.getFom().getYear() == 2025)
@@ -54,13 +51,11 @@ class GrunnbeløpTidslinjeTest {
             .orElseThrow();
 
         // Fra Jan-Apr (4 måneder) = 124028, fra Mai-Des (8 måneder) = 130160
-        // Vektet snitt = (124028 * 4 + 130160 * 8) / 12 = 128116
+        // Vektet snitt = (124028 * 4 + 130160 * 8) / 12 = 128 116
         BigDecimal forventetSnitt = new BigDecimal(128_116);
         BigDecimal faktiskSnitt = segment2025.getValue().verdi();
 
-        // Tillat liten avvik for avrunding
-        assertTrue(faktiskSnitt.subtract(forventetSnitt).abs().compareTo(BigDecimal.valueOf(0.01)) <= 0,
-            "Forventet ca " + forventetSnitt + " men fikk " + faktiskSnitt);
+        assertThat(faktiskSnitt).isEqualByComparingTo(forventetSnitt);
     }
 
     @Test
@@ -71,29 +66,29 @@ class GrunnbeløpTidslinjeTest {
             .filter(s -> s.getFom().getYear() == 2025)
             .findFirst().orElseThrow();
 
-        assertEquals(BigDecimal.ONE.setScale(10, BigDecimal.ROUND_HALF_EVEN), inflasjonsfaktorForSisteÅr.getValue(),
-            "Inflasjonsfaktoren for siste året skal være 1.0");
+        assertThat(BigDecimal.ONE).isEqualByComparingTo(inflasjonsfaktorForSisteÅr.getValue());
     }
 
     @Test
-    void skal_ha_oppjusteringsfaktor_over_1_for_tidligere_år() {
-        LocalDateTimeline<BigDecimal> oppjusteringsTidslinje = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(2024), 2);
-
-        // Hent segmenter for tidligere år (2023 og 2024)
+    void skal_ha_oppjusteringsfaktor_for_dette_året_og_siste_tre_år() {
+        LocalDateTimeline<BigDecimal> oppjusteringsTidslinje = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(2026), 3);
         for (LocalDateSegment<BigDecimal> segment : oppjusteringsTidslinje.toSegments()) {
             int år = segment.getFom().getYear();
 
-            if (år < 2024) {
-                assertTrue(segment.getValue().compareTo(BigDecimal.ONE) > 0,
-                    "Oppjusteringsfaktoren for år " + år + " skal være større enn 1.0, men var " + segment.getValue());
+            var verdi = segment.getValue();
+            switch (år) {
+                case 2023 -> assertThat(verdi).isEqualByComparingTo(BigDecimal.valueOf(1.1197618699));
+                case 2024 -> assertThat(verdi).isEqualByComparingTo(BigDecimal.valueOf(1.0649212518));
+                case 2025 -> assertThat(verdi).isEqualByComparingTo(BigDecimal.valueOf(1.0159542914));
+                case 2026 -> assertThat(verdi).isEqualByComparingTo(BigDecimal.ONE);
             }
         }
 
         long antallTidligereÅr = oppjusteringsTidslinje.toSegments().stream()
-            .filter(s -> s.getFom().getYear() < 2025)
+            .filter(s -> s.getFom().getYear() < 2026)
             .count();
 
-        assertTrue(antallTidligereÅr > 0, "Det skal være minst ett tidligere år i tidslinjen");
+        assertThat(antallTidligereÅr).isEqualTo(3);
     }
 }
 

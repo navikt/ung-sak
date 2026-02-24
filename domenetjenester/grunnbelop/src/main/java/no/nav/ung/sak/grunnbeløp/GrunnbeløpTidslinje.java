@@ -21,7 +21,8 @@ public class GrunnbeløpTidslinje {
         List.of(
             new LocalDateSegment<>(LocalDate.of(2025, 5, 1), LocalDate.of(2099, 12, 31), new Grunnbeløp(BigDecimal.valueOf(130160))),
             new LocalDateSegment<>(LocalDate.of(2024, 5, 1), LocalDate.of(2025, 4, 30), new Grunnbeløp(BigDecimal.valueOf(124028))),
-            new LocalDateSegment<>(LocalDate.of(2023, 5, 1), LocalDate.of(2024, 4,30), new Grunnbeløp(BigDecimal.valueOf(118620)))
+            new LocalDateSegment<>(LocalDate.of(2023, 5, 1), LocalDate.of(2024, 4,30), new Grunnbeløp(BigDecimal.valueOf(118620))),
+            new LocalDateSegment<>(LocalDate.of(2022, 5, 1), LocalDate.of(2023, 4,30), new Grunnbeløp(BigDecimal.valueOf(111477)))
         ));
 
 

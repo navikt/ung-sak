@@ -23,10 +23,12 @@ public class BesteBeregning {
     }
 
     public BesteBeregningResultat avgjørBestePGI(List<Inntektspost> inntektsposter) {
-        var gjennomsnittUtregningResultat = finnGjennomsnittligPGI(virkningsdato, inntektsposter);
+        var sistLignedeÅr = Year.of(virkningsdato.minusYears(1).getYear());  // TODO: Koble på utledning av siste tilgjengelige lignede år
+
+        var gjennomsnittUtregningResultat = finnGjennomsnittligPGI(sistLignedeÅr, Year.of(virkningsdato.getYear()) ,inntektsposter);
         var pgiPerÅr = gjennomsnittUtregningResultat.pgiPerÅr();
 
-        BigDecimal årsinntektSisteÅr = hentSisteÅr(pgiPerÅr);
+        BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(sistLignedeÅr, BigDecimal.ZERO);
         BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
         BigDecimal årsinntektBesteBeregning = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
 
@@ -50,13 +52,6 @@ public class BesteBeregning {
             ));
         var regelInput = new RegelInput(virkningsdato, inntekterPerÅr);
         return JsonObjectMapper.toJson(regelInput, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
-    }
-
-    private BigDecimal hentSisteÅr(Map<Year, BigDecimal> pgiPerÅr) {
-        return pgiPerÅr.entrySet().stream()
-            .max(Map.Entry.comparingByKey())
-            .orElseThrow()
-            .getValue();
     }
 
     private BigDecimal hentSnittTreSisteÅr(Map<Year, BigDecimal> pgiPerÅr) {

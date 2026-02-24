@@ -35,6 +35,7 @@ public class BeregningStegTjeneste {
         besteBeregningGrunnlagRepository.lagre(behandlingId, resultat);
     }
 
+
     private List<Inntektspost> hentSigrunInntektsposter(Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
         if (iayGrunnlag.isEmpty()) {
