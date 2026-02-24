@@ -5,15 +5,15 @@ import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
-import no.nav.ung.sak.oppgave.OppgaveDataEntitetTilDtoMapper;
+import no.nav.ung.sak.oppgave.OppgaveDataMapperFraEntitetTilDto;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_PERIODE)
-public class EndretPeriodeOppgaveDataTilDtoMapper implements OppgaveDataEntitetTilDtoMapper {
+public class EndretPeriodeOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected EndretPeriodeOppgaveDataTilDtoMapper() {
+    protected EndretPeriodeOppgaveDataTilDtoMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

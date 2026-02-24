@@ -13,19 +13,19 @@ import java.time.ZonedDateTime;
 @ApplicationScoped
 public class BrukerdialogOppgaveMapper {
 
-    private Instance<OppgaveDataEntitetTilDtoMapper> mappere;
+    private Instance<OppgaveDataMapperFraEntitetTilDto> mappere;
 
     public BrukerdialogOppgaveMapper() {
         // CDI proxy
     }
 
     @Inject
-    public BrukerdialogOppgaveMapper(@Any Instance<OppgaveDataEntitetTilDtoMapper> mappere) {
+    public BrukerdialogOppgaveMapper(@Any Instance<OppgaveDataMapperFraEntitetTilDto> mappere) {
         this.mappere = mappere;
     }
 
     public BrukerdialogOppgaveDto tilDto(BrukerdialogOppgaveEntitet oppgave) {
-        var oppgavetypeData = OppgaveDataEntitetTilDtoMapper.finnTjeneste(mappere, oppgave.getOppgaveType())
+        var oppgavetypeData = OppgaveDataMapperFraEntitetTilDto.finnTjeneste(mappere, oppgave.getOppgaveType())
             .tilDto(oppgave.getOppgaveData());
 
         return new BrukerdialogOppgaveDto(

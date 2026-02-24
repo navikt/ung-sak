@@ -17,7 +17,7 @@ public class OppgaveLivssyklusTjeneste {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private BrukerdialogOppgaveRepository brukerdialogOppgaveRepository;
     private Instance<OppgavelInnholdUtleder> varselInnholdUtledere;
-    private Instance<OppgaveDataMapper> oppgaveDataMapper;
+    private Instance<OppgaveDataMapperFraDtoTilEntitet> oppgaveDataMapper;
 
     public OppgaveLivssyklusTjeneste() {
     }
@@ -26,7 +26,7 @@ public class OppgaveLivssyklusTjeneste {
     public OppgaveLivssyklusTjeneste(ProsessTaskTjeneste prosessTaskTjeneste,
                                      BrukerdialogOppgaveRepository brukerdialogOppgaveRepository,
                                      @Any Instance<OppgavelInnholdUtleder> varselInnholdUtledere,
-                                     @Any Instance<OppgaveDataMapper> oppgaveDataMapper) {
+                                     @Any Instance<OppgaveDataMapperFraDtoTilEntitet> oppgaveDataMapper) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.brukerdialogOppgaveRepository = brukerdialogOppgaveRepository;
         this.varselInnholdUtledere = varselInnholdUtledere;
@@ -85,7 +85,7 @@ public class OppgaveLivssyklusTjeneste {
             throw new IllegalArgumentException("Oppgave er allerede persistert med id: " + oppgaveEntitet.getId());
         }
         oppgaveEntitet.setStatus(OppgaveStatus.ULØST);
-        var oppgaveData = OppgaveDataMapper.finnTjeneste(oppgaveDataMapper, oppgaveEntitet.getOppgaveType()).map(oppgavetypeData);
+        var oppgaveData = OppgaveDataMapperFraDtoTilEntitet.finnTjeneste(oppgaveDataMapper, oppgaveEntitet.getOppgaveType()).map(oppgavetypeData);
         oppgaveEntitet.setOppgaveData(oppgaveData);
         brukerdialogOppgaveRepository.lagre(oppgaveEntitet);
         opprettTaskForPubliseringAvVarsel(oppgaveEntitet);

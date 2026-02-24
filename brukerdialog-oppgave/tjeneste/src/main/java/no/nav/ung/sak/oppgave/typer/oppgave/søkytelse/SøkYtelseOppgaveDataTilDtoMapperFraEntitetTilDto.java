@@ -4,21 +4,22 @@ import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto;
-import no.nav.ung.sak.oppgave.OppgaveDataMapper;
+import no.nav.ung.sak.oppgave.OppgaveDataMapperFraEntitetTilDto;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.SØK_YTELSE)
-public class SøkYtelseOppgaveDataMapper implements OppgaveDataMapper {
+public class SøkYtelseOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected SøkYtelseOppgaveDataMapper() {
+    protected SøkYtelseOppgaveDataTilDtoMapperFraEntitetTilDto() {
         // CDI proxy
     }
 
     @Override
-    public OppgaveDataEntitet map(OppgavetypeDataDto data) {
-        var dto = (SøkYtelseOppgavetypeDataDto) data;
-        return new SøkYtelseOppgaveDataEntitet(dto.fomDato());
+    public OppgavetypeDataDto tilDto(OppgaveDataEntitet entitet) {
+        var e = (SøkYtelseOppgaveDataEntitet) entitet;
+        return new SøkYtelseOppgavetypeDataDto(e.getFomDato());
     }
 }
+

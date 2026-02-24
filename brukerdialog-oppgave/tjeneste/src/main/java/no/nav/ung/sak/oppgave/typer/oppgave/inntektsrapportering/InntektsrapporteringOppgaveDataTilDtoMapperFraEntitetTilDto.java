@@ -4,15 +4,15 @@ import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
-import no.nav.ung.sak.oppgave.OppgaveDataEntitetTilDtoMapper;
+import no.nav.ung.sak.oppgave.OppgaveDataMapperFraEntitetTilDto;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.RAPPORTER_INNTEKT)
-public class InntektsrapporteringOppgaveDataTilDtoMapper implements OppgaveDataEntitetTilDtoMapper {
+public class InntektsrapporteringOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected InntektsrapporteringOppgaveDataTilDtoMapper() {
+    protected InntektsrapporteringOppgaveDataTilDtoMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

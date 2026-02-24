@@ -11,9 +11,9 @@ import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
  * <p>
  * Implementasjoner skal annoteres med {@link OppgaveTypeRef} for CDI-oppslag.
  */
-public interface OppgaveDataMapper {
+public interface OppgaveDataMapperFraDtoTilEntitet {
 
-    static OppgaveDataMapper finnTjeneste(Instance<OppgaveDataMapper> utledere, OppgaveType oppgaveType) {
+    static OppgaveDataMapperFraDtoTilEntitet finnTjeneste(Instance<OppgaveDataMapperFraDtoTilEntitet> utledere, OppgaveType oppgaveType) {
         return OppgaveTypeRef.Lookup.find(utledere, oppgaveType)
             .orElseThrow(() -> new IllegalArgumentException("Finner tjeneste for oppgavetype: " + oppgaveType));
     }

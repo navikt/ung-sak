@@ -7,7 +7,7 @@ import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOg
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.RegisterinntektDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO;
-import no.nav.ung.sak.oppgave.OppgaveDataEntitetTilDtoMapper;
+import no.nav.ung.sak.oppgave.OppgaveDataMapperFraEntitetTilDto;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
@@ -15,9 +15,9 @@ import java.util.List;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT)
-public class KontrollerRegisterinntektOppgaveDataTilDtoMapper implements OppgaveDataEntitetTilDtoMapper {
+public class KontrollerRegisterinntektOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected KontrollerRegisterinntektOppgaveDataTilDtoMapper() {
+    protected KontrollerRegisterinntektOppgaveDataTilDtoMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

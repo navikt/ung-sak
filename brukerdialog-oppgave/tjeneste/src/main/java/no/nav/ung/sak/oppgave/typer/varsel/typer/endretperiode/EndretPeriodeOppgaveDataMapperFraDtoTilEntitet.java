@@ -1,21 +1,19 @@
 package no.nav.ung.sak.oppgave.typer.varsel.typer.endretperiode;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
-import no.nav.ung.sak.oppgave.OppgaveDataMapper;
+import no.nav.ung.sak.oppgave.OppgaveDataMapperFraDtoTilEntitet;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_PERIODE)
-public class EndretPeriodeOppgaveDataMapper implements OppgaveDataMapper {
+public class EndretPeriodeOppgaveDataMapperFraDtoTilEntitet implements OppgaveDataMapperFraDtoTilEntitet {
 
 
-    protected EndretPeriodeOppgaveDataMapper() {
+    protected EndretPeriodeOppgaveDataMapperFraDtoTilEntitet() {
         // CDI proxy
     }
 

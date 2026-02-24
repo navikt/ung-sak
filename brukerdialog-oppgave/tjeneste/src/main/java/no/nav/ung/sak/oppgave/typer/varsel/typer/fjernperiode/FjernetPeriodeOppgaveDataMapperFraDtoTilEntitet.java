@@ -6,22 +6,22 @@ import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
-import no.nav.ung.sak.oppgave.OppgaveDataMapper;
+import no.nav.ung.sak.oppgave.OppgaveDataMapperFraDtoTilEntitet;
 import no.nav.ung.sak.oppgave.OppgaveTypeRef;
 import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_FJERNET_PERIODE)
-public class FjernetPeriodeOppgaveDataMapper implements OppgaveDataMapper {
+public class FjernetPeriodeOppgaveDataMapperFraDtoTilEntitet implements OppgaveDataMapperFraDtoTilEntitet {
 
     private EntityManager entityManager;
 
-    protected FjernetPeriodeOppgaveDataMapper() {
+    protected FjernetPeriodeOppgaveDataMapperFraDtoTilEntitet() {
         // CDI proxy
     }
 
     @Inject
-    public FjernetPeriodeOppgaveDataMapper(EntityManager entityManager) {
+    public FjernetPeriodeOppgaveDataMapperFraDtoTilEntitet(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 

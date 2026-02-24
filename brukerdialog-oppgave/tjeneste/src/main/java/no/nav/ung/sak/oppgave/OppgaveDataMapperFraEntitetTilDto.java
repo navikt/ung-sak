@@ -9,9 +9,9 @@ import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
  * Mapper en {@link OppgaveDataEntitet}-subklasse til tilsvarende {@link OppgavetypeDataDto}.
  * Implementasjoner annoteres med {@link OppgaveTypeRef} for CDI-oppslag.
  */
-public interface OppgaveDataEntitetTilDtoMapper {
+public interface OppgaveDataMapperFraEntitetTilDto {
 
-    static OppgaveDataEntitetTilDtoMapper finnTjeneste(Instance<OppgaveDataEntitetTilDtoMapper> instanser, OppgaveType oppgaveType) {
+    static OppgaveDataMapperFraEntitetTilDto finnTjeneste(Instance<OppgaveDataMapperFraEntitetTilDto> instanser, OppgaveType oppgaveType) {
         return OppgaveTypeRef.Lookup.find(instanser, oppgaveType)
             .orElseThrow(() -> new IllegalArgumentException("Finner ingen OppgaveDataEntitetTilDtoMapper for oppgavetype: " + oppgaveType));
     }
