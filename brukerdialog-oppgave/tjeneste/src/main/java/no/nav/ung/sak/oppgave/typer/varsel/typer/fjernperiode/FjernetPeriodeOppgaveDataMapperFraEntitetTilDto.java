@@ -10,9 +10,9 @@ import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_FJERNET_PERIODE)
-public class FjernetPeriodeOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
+public class FjernetPeriodeOppgaveDataMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected FjernetPeriodeOppgaveDataTilDtoMapperFraEntitetTilDto() {
+    protected FjernetPeriodeOppgaveDataMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

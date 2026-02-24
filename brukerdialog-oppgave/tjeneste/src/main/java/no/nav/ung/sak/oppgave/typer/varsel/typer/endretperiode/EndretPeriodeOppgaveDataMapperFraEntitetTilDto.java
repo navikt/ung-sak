@@ -11,9 +11,9 @@ import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_PERIODE)
-public class EndretPeriodeOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
+public class EndretPeriodeOppgaveDataMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected EndretPeriodeOppgaveDataTilDtoMapperFraEntitetTilDto() {
+    protected EndretPeriodeOppgaveDataMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

@@ -15,9 +15,9 @@ import java.util.List;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_AVVIK_REGISTERINNTEKT)
-public class KontrollerRegisterinntektOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
+public class KontrollerRegisterinntektOppgaveDataMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected KontrollerRegisterinntektOppgaveDataTilDtoMapperFraEntitetTilDto() {
+    protected KontrollerRegisterinntektOppgaveDataMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

@@ -10,9 +10,9 @@ import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.BEKREFT_ENDRET_SLUTTDATO)
-public class EndretSluttdatoOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
+public class EndretSluttdatoOppgaveDataMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected EndretSluttdatoOppgaveDataTilDtoMapperFraEntitetTilDto() {
+    protected EndretSluttdatoOppgaveDataMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

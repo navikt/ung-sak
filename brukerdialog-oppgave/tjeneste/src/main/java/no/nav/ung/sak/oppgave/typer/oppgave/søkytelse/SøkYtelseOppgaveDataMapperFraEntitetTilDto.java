@@ -10,9 +10,9 @@ import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.SØK_YTELSE)
-public class SøkYtelseOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
+public class SøkYtelseOppgaveDataMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected SøkYtelseOppgaveDataTilDtoMapperFraEntitetTilDto() {
+    protected SøkYtelseOppgaveDataMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

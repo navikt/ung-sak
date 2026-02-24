@@ -10,9 +10,9 @@ import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 
 @ApplicationScoped
 @OppgaveTypeRef(OppgaveType.RAPPORTER_INNTEKT)
-public class InntektsrapporteringOppgaveDataTilDtoMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
+public class InntektsrapporteringOppgaveDataMapperFraEntitetTilDto implements OppgaveDataMapperFraEntitetTilDto {
 
-    protected InntektsrapporteringOppgaveDataTilDtoMapperFraEntitetTilDto() {
+    protected InntektsrapporteringOppgaveDataMapperFraEntitetTilDto() {
         // CDI proxy
     }
 

@@ -31,8 +31,8 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Enumerated(EnumType.STRING)
     private OppgaveStatus status = OppgaveStatus.ULØST;
 
-    @Convert(converter = OppgaveTypeKodeverdiConverter.class)
     @Column(name = "type")
+    @Enumerated(EnumType.STRING)
     private OppgaveType oppgaveType;
 
     @Column(name = "frist_tid")
