@@ -24,7 +24,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.bestilling.BrevbestillingResultat;
 import no.nav.ung.sak.formidling.informasjonsbrev.InformasjonsbrevTjeneste;
-import no.nav.ung.sak.formidling.klage.vedtak.VedtaksbrevTjenesteKlage;
+import no.nav.ung.sak.formidling.klage.vedtak.KlageVedtaksbrevTjeneste;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevForhåndsvisInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
@@ -54,7 +54,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 public class FormidlingRestTjeneste {
 
     private VedtaksbrevTjeneste vedtaksbrevTjeneste;
-    private VedtaksbrevTjenesteKlage vedtaksbrevTjenesteKlage;
+    private KlageVedtaksbrevTjeneste klageVedtaksbrevTjeneste;
     private InformasjonsbrevTjeneste informasjonsbrevTjeneste;
 
     private static final Logger LOG = LoggerFactory.getLogger(FormidlingRestTjeneste.class);
@@ -62,10 +62,10 @@ public class FormidlingRestTjeneste {
 
     @Inject
     public FormidlingRestTjeneste(VedtaksbrevTjeneste vedtaksbrevTjeneste,
-                                  VedtaksbrevTjenesteKlage vedtaksbrevTjenesteKlage,
+                                  KlageVedtaksbrevTjeneste klageVedtaksbrevTjeneste,
                                   InformasjonsbrevTjeneste informasjonsbrevTjeneste) {
         this.vedtaksbrevTjeneste = vedtaksbrevTjeneste;
-        this.vedtaksbrevTjenesteKlage = vedtaksbrevTjenesteKlage;
+        this.klageVedtaksbrevTjeneste = klageVedtaksbrevTjeneste;
         this.informasjonsbrevTjeneste = informasjonsbrevTjeneste;
     }
 
@@ -155,7 +155,7 @@ public class FormidlingRestTjeneste {
         @NotNull @Parameter(description = "") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) VedtaksbrevKlageForhåndsvisRequest dto,
         @Context HttpServletRequest request
     ) {
-        GenerertBrev generertBrev = vedtaksbrevTjenesteKlage.forhåndsvis(dto.behandlingId(), Boolean.TRUE.equals(dto.htmlVersjon()));
+        GenerertBrev generertBrev = klageVedtaksbrevTjeneste.forhåndsvis(dto.behandlingId(), Boolean.TRUE.equals(dto.htmlVersjon()));
         return lagForhåndsvisResponse(dto.behandlingId(), request, generertBrev);
     }
 
