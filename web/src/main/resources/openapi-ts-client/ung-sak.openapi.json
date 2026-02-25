@@ -678,6 +678,11 @@
         },
         "type" : "object"
       },
+      "sif.abac.kontrakt.abac.AbacFagsakYtelseType" : {
+        "enum" : [ "AKTIVITETSPENGER", "FRISINN", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_AO", "OMSORGSPENGER_MA", "OPPLÆRINGSPENGER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_SYKT_BARN", "UNGDOMSYTELSE", "OBSOLETE" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AKTIVITETSPENGER", "FRISINN", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_AO", "OMSORGSPENGER_MA", "OPPLÆRINGSPENGER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_SYKT_BARN", "UNGDOMSYTELSE", "OBSOLETE" ]
+      },
       "sif.abac.kontrakt.abac.InnloggetAnsattDto" : {
         "properties" : {
           "brukernavn" : {
@@ -712,6 +717,75 @@
             "type" : "string"
           },
           "skalViseDetaljerteFeilmeldinger" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "sif.abac.kontrakt.abac.InnloggetAnsattUngV2Dto" : {
+        "properties" : {
+          "aktivitetspengerDel1SaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          },
+          "aktivitetspengerDel2SaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          },
+          "aktuelleYtelser" : {
+            "items" : {
+              "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.AbacFagsakYtelseType"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "brukernavn" : {
+            "type" : "string"
+          },
+          "erUngdomsprogramveileder" : {
+            "type" : "boolean"
+          },
+          "funksjonellTid" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "kanBehandleKode6" : {
+            "type" : "boolean"
+          },
+          "kanBehandleKode7" : {
+            "type" : "boolean"
+          },
+          "kanBehandleKodeEgenAnsatt" : {
+            "type" : "boolean"
+          },
+          "kanDrifte" : {
+            "type" : "boolean"
+          },
+          "kanVeiledeAktivitetspenger" : {
+            "type" : "boolean"
+          },
+          "kanVeiledeUngdomsprogramytelse" : {
+            "type" : "boolean"
+          },
+          "navn" : {
+            "type" : "string"
+          },
+          "skalViseDetaljerteFeilmeldinger" : {
+            "type" : "boolean"
+          },
+          "ungdomsprogramytelseSaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          }
+        },
+        "type" : "object"
+      },
+      "sif.abac.kontrakt.abac.SaksbehandlerTilgangDto" : {
+        "properties" : {
+          "kanBeslutte" : {
+            "type" : "boolean"
+          },
+          "kanOverstyre" : {
+            "type" : "boolean"
+          },
+          "kanSaksbehandle" : {
             "type" : "boolean"
           }
         },
@@ -8485,6 +8559,26 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.InnloggetAnsattDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.",
+        "tags" : [ "nav-ansatt" ]
+      }
+    },
+    "/api/nav-ansatt/v2" : {
+      "get" : {
+        "description" : "Returnerer fullt navn og ung-releaterte rettigheter for ident",
+        "operationId" : "innloggetBrukerV2",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.InnloggetAnsattUngV2Dto"
                 }
               }
             },
