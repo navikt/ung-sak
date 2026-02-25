@@ -4,16 +4,20 @@ import jakarta.annotation.Priority;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.abac.*;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakYtelseType;
 import no.nav.sif.abac.kontrakt.abac.ResourceType;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Dependent
 @Alternative
 @Priority(1)
 public class AppPdpKlient implements PdpKlient {
 
+    private static final Logger log = LoggerFactory.getLogger(AppPdpKlient.class);
     private final SifAbacPdpRestKlient sifAbacPdpRestKlient;
 
     @Inject
@@ -39,6 +43,9 @@ public class AppPdpKlient implements PdpKlient {
         no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning resultat = gjelderAktivitetspenger
             ? sifAbacPdpRestKlient.sjekkTilgangForInnloggetBrukerAktivitetspenger(tilgangskontrollInput)
             : sifAbacPdpRestKlient.sjekkTilgangForInnloggetBrukerUng(tilgangskontrollInput);
+        if (!resultat.harTilgang() && (Environment.current().isDev() || Environment.current().isLocal())){
+            log.warn("Fikk ikke tilgang pga: {}", resultat.årsakerForIkkeTilgang());
+        }
         return new Tilgangsbeslutning(resultat.harTilgang(), pdpRequest, tilgangType);
     }
 }
