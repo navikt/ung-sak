@@ -23,6 +23,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -31,6 +32,11 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.sif.abac.kontrakt.abac.BeskyttetRessursActionAttributt;
+import no.nav.sif.abac.kontrakt.abac.ResourceType;
+import no.nav.sif.abac.kontrakt.abac.dto.OperasjonDto;
+import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonDto;
+import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.abac.AppAbacAttributtType;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
@@ -43,6 +49,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingOpprettingDto;
@@ -62,6 +69,8 @@ import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.rest.Redirect;
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingsoppretterTjeneste;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.sak.web.server.abac.AbacUtil;
+import no.nav.ung.sak.web.server.abac.SifAbacPdpRestKlient;
 
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -69,6 +78,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -99,6 +109,9 @@ public class FagsakRestTjeneste {
     private ProsessTaskTjeneste taskTjeneste;
     private FagsakRepository fagsakRepository;
 
+    private SifAbacPdpRestKlient abacPdpRestKlient;
+    private PipRepository pipRepository;
+
     public FagsakRestTjeneste() {
         // For Rest-CDI
     }
@@ -107,7 +120,11 @@ public class FagsakRestTjeneste {
     public FagsakRestTjeneste(FagsakApplikasjonTjeneste fagsakApplikasjonTjeneste,
                               FagsakTjeneste fagsakTjeneste,
                               BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
-                              @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled, BehandlingRepository behandlingRepository, ProsessTaskTjeneste taskTjeneste, FagsakRepository fagsakRepository) {
+                              @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled,
+                              BehandlingRepository behandlingRepository,
+                              ProsessTaskTjeneste taskTjeneste,
+                              FagsakRepository fagsakRepository,
+                              SifAbacPdpRestKlient abacPdpRestKlient, PipRepository pipRepository) {
         this.fagsakApplikasjonTjeneste = fagsakApplikasjonTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
@@ -115,6 +132,8 @@ public class FagsakRestTjeneste {
         this.behandlingRepository = behandlingRepository;
         this.taskTjeneste = taskTjeneste;
         this.fagsakRepository = fagsakRepository;
+        this.abacPdpRestKlient = abacPdpRestKlient;
+        this.pipRepository = pipRepository;
     }
 
     @GET
@@ -150,10 +169,10 @@ public class FagsakRestTjeneste {
 
         Saksnummer saksnummer = s.getVerdi();
         FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentFagsakForSaksnummer(saksnummer);
-        List<FagsakDto> list = tilDtoer(view);
+        List<FagsakDto> list = tilDtoer(view, _ -> true);
         if (list.isEmpty()) {
             // return 403 Forbidden istdf 404 Not Found (sikkerhet - ikke avslør for mye)
-            return Response.status(Response.Status.FORBIDDEN).build();
+            return Response.status(Status.FORBIDDEN).build();
         } else if (list.size() == 1) {
             return Response.ok(list.get(0)).build();
         } else {
@@ -168,7 +187,7 @@ public class FagsakRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Finn siste eksisterende fagsak.", summary = ("Finn siste fagsak som matcher søkekriteriene"), tags = "fordel")
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public Response finnSisteFagsak(@Parameter(description = "Oppretter fagsak") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) FinnSak finnSakDto) {
         var ytelseType = finnSakDto.getYtelseType();
 
@@ -198,7 +217,7 @@ public class FagsakRestTjeneste {
     public Response hentBrukerForFagsak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var personInfo = fagsakApplikasjonTjeneste.hentBruker(s.getVerdi());
         if (personInfo.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
         var dto = mapFraPersoninfoBasis(personInfo.get());
         return Response.ok(dto).build();
@@ -216,7 +235,7 @@ public class FagsakRestTjeneste {
     public Response hentRettigheter(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi().getSaksnummer(), false);
         if (fagsak.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
         var fagsakId = fagsak.map(Fagsak::getId).orElseThrow();
         var perioderMedGjennomførtKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsakId);
@@ -238,11 +257,31 @@ public class FagsakRestTjeneste {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Søk etter saker på saksnummer eller fødselsnummer", tags = "fagsak", summary = ("Spesifikke saker kan søkes via saksnummer. " +
         "Oversikt over saker knyttet til en deltaker kan søkes via fødselsnummer eller d-nummer."))
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.APPLIKASJON  /* HAXX: gjør filtrering av resultat isdf normal tilgangssjekk her. 99 av 100 ganger skal vanlig tilgangssjekk benyttes istedet. **/)
+    // HAXX årsak til annerledes tilgangskontroll her, er at en en person kan ha tilgang til saker med UNG og ikke Aktivitetspenger og motsatt
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SøkeSakEllerBrukerDto søkestreng) {
-        FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentSaker(søkestreng.getYtelseType(), søkestreng.getSearchString());
-        return tilDtoer(view);
+    public List<FagsakDto> søkFagsaker(@Parameter(description = "Søkestreng kan være saksnummer, fødselsnummer eller D-nummer.") @Valid @TilpassetAbacAttributt(supplierClass = IngenTilgangsAttributter.class) SøkeSakEllerBrukerDto søkestreng) {
+        FagsakSamlingForBruker view = fagsakApplikasjonTjeneste.hentSaker(søkestreng.getSearchString());
+        List<FagsakDto> resultat = tilDtoer(view, this::skalVises);
+
+        if (!view.getFagsakInfoer().isEmpty() && resultat.isEmpty()){
+            //for å gi melding til saksbehandler/veileder om det finnes sak, men at man ikke har tilgang
+            throw new ManglerTilgangException("UNG-452971", "Mangler til gang til alle saker som passet med søket");
+        }
+        return resultat;
+    }
+
+    private boolean skalVises(Fagsak fagsak) {
+        Set<AktørId> personer = pipRepository.hentAktørIdKnyttetTilFagsaker(Set.of(fagsak.getSaksnummer()));
+        List<no.nav.sif.abac.kontrakt.person.AktørId> aktørIder = personer.stream().map(it -> new no.nav.sif.abac.kontrakt.person.AktørId(it.getAktørId())).toList();
+        OperasjonDto operasjon = new OperasjonDto(ResourceType.FAGSAK, BeskyttetRessursActionAttributt.READ, Set.of());
+        SaksinformasjonDto saksinformasjonDto = new SaksinformasjonDto(null, null, AbacUtil.oversettFagstatus(fagsak.getStatus()).orElse(null), AbacUtil.oversettYtelseType(fagsak.getYtelseType()));
+        SaksinformasjonOgPersonerTilgangskontrollInputDto input = new SaksinformasjonOgPersonerTilgangskontrollInputDto(aktørIder, List.of(), operasjon, saksinformasjonDto);
+        return switch (fagsak.getYtelseType()) {
+            case AKTIVITETSPENGER -> abacPdpRestKlient.sjekkTilgangForInnloggetBrukerAktivitetspenger(input).harTilgang();
+            case UNGDOMSYTELSE -> abacPdpRestKlient.sjekkTilgangForInnloggetBrukerUng(input).harTilgang();
+            default -> throw new IllegalStateException("Fikk ikke-støttet ytelsetype: " + fagsak.getYtelseType());
+        };
     }
 
     @POST
@@ -250,7 +289,7 @@ public class FagsakRestTjeneste {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(description = "Søk etter saker på ytelse og deltaker", tags = "fagsak", summary = ("Finner matchende fagsaker for angitt ytelse, bruker, etc.. "))
-    @BeskyttetRessurs(action = BeskyttetRessursActionType.READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public List<FagsakInfoDto> matchFagsaker(@Parameter(description = "Match kritierer for å lete opp fagsaker") @Valid @TilpassetAbacAttributt(supplierClass = MatchFagsakAttributter.class) MatchFagsak matchFagsak) {
         List<FagsakInfoDto> fagsaker = fagsakApplikasjonTjeneste.matchFagsaker(matchFagsak.getYtelseType(),
@@ -270,19 +309,18 @@ public class FagsakRestTjeneste {
     public Response fjernIkkedigitalFlagg(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto s) {
         var fagsak = fagsakTjeneste.finnFagsakGittSaksnummer(s.getVerdi().getSaksnummer(), false);
         if (fagsak.isEmpty()) {
-            return Response.status(Response.Status.NOT_FOUND).build();
+            return Response.status(Status.NOT_FOUND).build();
         }
 
-        if (!fagsak.get().erIkkeDigitalBruker()){
-            return Response.status(Response.Status.BAD_REQUEST).build();
+        if (!fagsak.get().erIkkeDigitalBruker()) {
+            return Response.status(Status.BAD_REQUEST).build();
         }
         fagsakRepository.fjernIkkedigitalFlagg(fagsak.get().getId());
 
         final Optional<Behandling> behandling = finnBehandlingSomKanSendesTilbakeTilStart(s.getVerdi());
         if (behandling.isEmpty()) {
             logger.warn("Kunne ikke finne åpen behandling for: {}", s.getVerdi());
-        }
-        else {
+        } else {
             final ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
             prosessTaskData.setCallIdFraEksisterende();
             prosessTaskData.setBehandling(fagsak.get().getId(), behandling.get().getId(), fagsak.get().getAktørId().getId());
@@ -291,7 +329,7 @@ public class FagsakRestTjeneste {
         return Response.ok().build();
     }
 
-    private List<FagsakDto> tilDtoer(FagsakSamlingForBruker view) {
+    private List<FagsakDto> tilDtoer(FagsakSamlingForBruker view, Function<Fagsak, Boolean> skalVises) {
         if (view.isEmpty()) {
             return new ArrayList<>();
         }
@@ -307,7 +345,9 @@ public class FagsakRestTjeneste {
 
         List<FagsakDto> dtoer = new ArrayList<>();
         for (var info : view.getFagsakInfoer()) {
-            dtoer.add(tilFagsakDto(personDto, info.getFagsak()));
+            if (skalVises.apply(info.getFagsak())) {
+                dtoer.add(tilFagsakDto(personDto, info.getFagsak()));
+            }
         }
         return dtoer;
     }

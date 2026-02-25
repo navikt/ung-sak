@@ -64,14 +64,9 @@ public class PdpRequestMapper {
         if (ytelsetyper.size() != 1) {
             throw new IllegalArgumentException("Forventet nøyaktig én fagsakYtelseType, men har: " + ytelsetyper);
         }
-        return switch (ytelsetyper.getFirst()) {
-            case UNGDOMSYTELSE -> AbacFagsakYtelseType.UNGDOMSYTELSE;
-            case AKTIVITETSPENGER -> AbacFagsakYtelseType.AKTIVITETSPENGER;
-            case OBSOLETE -> AbacFagsakYtelseType.OBSOLETE;
-            default -> throw new IllegalArgumentException("Ikke-støttet verdi: " + ytelsetyper.getFirst());
-        };
-
+        return AbacUtil.oversettYtelseType(ytelsetyper.getFirst());
     }
+
 
     private static Set<AksjonspunktType> aksjonspunktTyperFraKoder(Collection<String> koder) {
         Set<AksjonspunktType> resultat = EnumSet.noneOf(AksjonspunktType.class);

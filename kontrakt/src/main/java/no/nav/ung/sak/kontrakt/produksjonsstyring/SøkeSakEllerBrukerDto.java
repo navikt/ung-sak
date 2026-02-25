@@ -22,10 +22,6 @@ import no.nav.ung.sak.typer.Saksnummer;
 @JsonAutoDetect(getterVisibility = Visibility.NONE, setterVisibility = Visibility.NONE, fieldVisibility = Visibility.ANY, isGetterVisibility = Visibility.NONE)
 public class SøkeSakEllerBrukerDto {
 
-    @JsonProperty(value = "ytelseType")
-    @Valid
-    private FagsakYtelseType ytelseType = FagsakYtelseType.UNGDOMSYTELSE; //TODO fjern default verdi og sett @NotNull når frontend sender inn verdien
-
     @JsonProperty(value = "searchString", required = true)
     @NotNull
     @Pattern(regexp = "^[a-zA-Z0-9]*$")
@@ -34,23 +30,11 @@ public class SøkeSakEllerBrukerDto {
     public SøkeSakEllerBrukerDto() {
     }
 
-    @Deprecated(forRemoval = true)
     public SøkeSakEllerBrukerDto(Saksnummer saksnummer) {
         this.searchString = saksnummer.getVerdi();
     }
 
-    @Deprecated(forRemoval = true)
     public SøkeSakEllerBrukerDto(String searchString) {
-        this.searchString = searchString;
-    }
-
-    public SøkeSakEllerBrukerDto(Saksnummer saksnummer, FagsakYtelseType ytelseType) {
-        this.ytelseType = ytelseType;
-        this.searchString = saksnummer.getVerdi();
-    }
-
-    public SøkeSakEllerBrukerDto(String searchString, FagsakYtelseType ytelseType) {
-        this.ytelseType = ytelseType;
         this.searchString = searchString;
     }
 
@@ -68,22 +52,6 @@ public class SøkeSakEllerBrukerDto {
     @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
     public Saksnummer getSaksnummer() {
         return !antattFnr() ? new Saksnummer(searchString) : null;
-    }
-
-    @AppAbacAttributt(AppAbacAttributtType.YTELSETYPE)
-    public String getYtelseTypeKode() {
-        return ytelseType.getKode();
-    }
-
-    public FagsakYtelseType getYtelseType() {
-        return ytelseType;
-    }
-
-    @AssertTrue
-    public boolean erStøttetYtelseType() {
-        return ytelseType == null
-            || ytelseType == FagsakYtelseType.UNGDOMSYTELSE
-            || ytelseType == FagsakYtelseType.AKTIVITETSPENGER;
     }
 
     public String getSearchString() {
