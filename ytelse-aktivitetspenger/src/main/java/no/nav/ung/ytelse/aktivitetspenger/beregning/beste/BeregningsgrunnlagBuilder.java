@@ -5,7 +5,7 @@ import no.nav.ung.sak.diff.DiffEntity;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-class BesteBeregningGrunnlagBuilder {
+class BeregningsgrunnlagBuilder {
 
     private LocalDate virkningsdato;
     private BigDecimal årsinntektSisteÅr;
@@ -16,7 +16,7 @@ class BesteBeregningGrunnlagBuilder {
 
     private boolean built = false;
 
-    BesteBeregningGrunnlagBuilder(BesteBeregningGrunnlag kladd) {
+    BeregningsgrunnlagBuilder(Beregningsgrunnlag kladd) {
         if (kladd != null) {
             this.virkningsdato = kladd.getVirkningsdato();
             this.årsinntektSisteÅr = kladd.getÅrsinntektSisteÅr();
@@ -27,8 +27,8 @@ class BesteBeregningGrunnlagBuilder {
         }
     }
 
-    BesteBeregningGrunnlagBuilder medResultat(BesteBeregningResultat resultat) {
-        this.virkningsdato = resultat.getVirkningsdato();
+    BeregningsgrunnlagBuilder medResultat(BesteberegningResultat resultat) {
+        this.virkningsdato = resultat.getBeregningInput().virkningsdato();
         this.årsinntektSisteÅr = resultat.getÅrsinntektSisteÅr();
         this.årsinntektSisteTreÅr = resultat.getÅrsinntektSisteTreÅr();
         this.årsinntektBesteBeregning = resultat.getÅrsinntektBesteBeregning();
@@ -37,17 +37,17 @@ class BesteBeregningGrunnlagBuilder {
         return this;
     }
 
-    BesteBeregningGrunnlag build() {
+    Beregningsgrunnlag build() {
         validerState();
         this.built = true;
         return repeatableBuild();
     }
 
-    private BesteBeregningGrunnlag repeatableBuild() {
-        return new BesteBeregningGrunnlag(virkningsdato, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelInput, regelSporing);
+    private Beregningsgrunnlag repeatableBuild() {
+        return new Beregningsgrunnlag(virkningsdato, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelInput, regelSporing);
     }
 
-    boolean erForskjellig(BesteBeregningGrunnlag grunnlag, DiffEntity differ) {
+    boolean erForskjellig(Beregningsgrunnlag grunnlag, DiffEntity differ) {
         return differ.areDifferent(grunnlag, repeatableBuild());
     }
 

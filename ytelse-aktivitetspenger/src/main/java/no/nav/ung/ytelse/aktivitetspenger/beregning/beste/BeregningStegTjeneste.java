@@ -9,6 +9,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -16,22 +17,24 @@ import java.util.List;
 @ApplicationScoped
 public class BeregningStegTjeneste {
 
-    private BesteBeregningGrunnlagRepository besteBeregningGrunnlagRepository;
+    private BeregningsgrunnlagRepository besteBeregningGrunnlagRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     BeregningStegTjeneste() {
     }
 
     @Inject
-    public BeregningStegTjeneste(BesteBeregningGrunnlagRepository besteBeregningGrunnlagRepository,
+    public BeregningStegTjeneste(BeregningsgrunnlagRepository beregningsgrunnlagRepository,
                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
-        this.besteBeregningGrunnlagRepository = besteBeregningGrunnlagRepository;
+        this.besteBeregningGrunnlagRepository = beregningsgrunnlagRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
-    public void utførBesteberegning(Long behandlingId, LocalDate virkningstidspunkt) {
+    public void utførBesteberegning(Long behandlingId, LocalDate virkningsdato) {
         var inntektsposter = hentSigrunInntektsposter(behandlingId);
-        var resultat = new BesteBeregning(virkningstidspunkt).avgjørBestePGI(inntektsposter);
+        var sistLignedeÅr = Year.of(virkningsdato.minusYears(1).getYear());  // TODO: Koble på utledning av siste tilgjengelige lignede år
+
+        var resultat = BeregningTjeneste.avgjørBesteberegning(virkningsdato, sistLignedeÅr, inntektsposter);
         besteBeregningGrunnlagRepository.lagre(behandlingId, resultat);
     }
 

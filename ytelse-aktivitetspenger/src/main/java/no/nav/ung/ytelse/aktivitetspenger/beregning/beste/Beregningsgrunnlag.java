@@ -6,12 +6,12 @@ import no.nav.ung.sak.diff.DiffIgnore;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Entity(name = "BesteBeregningGrunnlag")
-@Table(name = "akt_beste_beregning_gr")
-public class BesteBeregningGrunnlag {
+@Entity(name = "Beregningsgrunnlag")
+@Table(name = "GR_BEREGNINSGRUNNLAG")
+public class Beregningsgrunnlag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AKT_BESTE_BEREGNING_GR")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_BEREGNINSGRUNNLAG")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false)
@@ -42,10 +42,10 @@ public class BesteBeregningGrunnlag {
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
-    BesteBeregningGrunnlag() {
+    Beregningsgrunnlag() {
     }
 
-    BesteBeregningGrunnlag(LocalDate virkningsdato, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelInput, String regelSporing) {
+    Beregningsgrunnlag(LocalDate virkningsdato, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelInput, String regelSporing) {
         this.virkningsdato = virkningsdato;
         this.årsinntektSisteÅr = årsinntektSisteÅr;
         this.årsinntektSisteTreÅr = årsinntektSisteTreÅr;

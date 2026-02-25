@@ -1,19 +1,18 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
-public class BesteBeregningResultat {
+public class BesteberegningResultat {
 
-    private final LocalDate virkningsdato;
+    private final BeregningInput beregningInput;
     private final BigDecimal årsinntektSisteÅr;
     private final BigDecimal årsinntektSisteTreÅr;
     private final BigDecimal årsinntektBesteBeregning;
     private final String regelSporing;
     private final String regelInput;
 
-    public BesteBeregningResultat(LocalDate virkningsdato, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing, String regelInput) {
-        this.virkningsdato = virkningsdato;
+    public BesteberegningResultat(BeregningInput beregningInput, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing, String regelInput) {
+        this.beregningInput = beregningInput;
         this.årsinntektSisteÅr = årsinntektSisteÅr;
         this.årsinntektSisteTreÅr = årsinntektSisteTreÅr;
         this.årsinntektBesteBeregning = årsinntektBesteBeregning;
@@ -21,8 +20,8 @@ public class BesteBeregningResultat {
         this.regelInput = regelInput;
     }
 
-    public LocalDate getVirkningsdato() {
-        return virkningsdato;
+    public BeregningInput getBeregningInput() {
+        return beregningInput;
     }
 
     public BigDecimal getÅrsinntektSisteÅr() {

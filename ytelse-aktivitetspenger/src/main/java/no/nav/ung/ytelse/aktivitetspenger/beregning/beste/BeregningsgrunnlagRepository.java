@@ -15,25 +15,24 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 @Dependent
-public class BesteBeregningGrunnlagRepository {
+public class BeregningsgrunnlagRepository {
 
-    private static final Logger log = LoggerFactory.getLogger(BesteBeregningGrunnlagRepository.class);
+    private static final Logger log = LoggerFactory.getLogger(BeregningsgrunnlagRepository.class);
     private EntityManager entityManager;
 
     @Inject
-    public BesteBeregningGrunnlagRepository(EntityManager entityManager) {
+    public BeregningsgrunnlagRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
     }
 
-    public void lagre(Long behandlingId, BesteBeregningResultat resultat) {
+    public void lagre(Long behandlingId, BesteberegningResultat resultat) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
-        var aktivtGrunnlag = grunnlagOptional.orElse(new BesteBeregningGrunnlag());
+        var aktivtGrunnlag = grunnlagOptional.orElse(new Beregningsgrunnlag());
 
-        var builder = new BesteBeregningGrunnlagBuilder(aktivtGrunnlag);
+        var builder = new BeregningsgrunnlagBuilder(aktivtGrunnlag);
         builder.medResultat(resultat);
 
         var differ = differ();
@@ -46,7 +45,7 @@ public class BesteBeregningGrunnlagRepository {
         }
     }
 
-    public LocalDateTimeline<BesteBeregningGrunnlag> hentBesteBeregningSomTidslinje(long behandlingId) {
+    public LocalDateTimeline<Beregningsgrunnlag> hentBesteBeregningSomTidslinje(long behandlingId) {
         var besteberegningGrunnlag = hentGrunnlag(behandlingId).orElseThrow(
             () -> new IllegalStateException("Fant ikke beste beregning grunnlag for behandlingId=" + behandlingId));
 
@@ -68,10 +67,10 @@ public class BesteBeregningGrunnlagRepository {
         }
     }
 
-    public Optional<BesteBeregningGrunnlag> hentGrunnlag(Long behandlingId) {
+    public Optional<Beregningsgrunnlag> hentGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
                 "SELECT gr FROM BesteBeregningGrunnlag gr WHERE gr.behandlingId = :id AND gr.aktiv = true",
-                BesteBeregningGrunnlag.class)
+                Beregningsgrunnlag.class)
             .setParameter("id", behandlingId);
         return HibernateVerktøy.hentUniktResultat(query);
     }
@@ -81,14 +80,14 @@ public class BesteBeregningGrunnlagRepository {
         return new DiffEntity(traverser);
     }
 
-    private void deaktiverEksisterende(BesteBeregningGrunnlag grunnlag) {
+    private void deaktiverEksisterende(Beregningsgrunnlag grunnlag) {
         grunnlag.setIkkeAktivt();
         entityManager.persist(grunnlag);
         entityManager.flush();
     }
 
 
-    private void lagre(BesteBeregningGrunnlagBuilder builder, Long behandlingId) {
+    private void lagre(BeregningsgrunnlagBuilder builder, Long behandlingId) {
         var oppdatertGrunnlag = builder.build();
         oppdatertGrunnlag.setBehandlingId(behandlingId);
 

@@ -6,13 +6,16 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Year;
 import java.util.List;
 
+import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningTjeneste.lagBeregningInput;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class BesteBeregningTest {
+class BeregningTjenesteTest {
 
     private static final LocalDate VIRKNINGSDATO = LocalDate.of(2026, 3, 1);
+    private static final Year SIST_LIGNEDE_ÅR = Year.of(2025);
 
     @Test
     void siste_år_brukes_når_det_er_høyere_enn_snitt_av_tre_år() {
@@ -22,7 +25,7 @@ class BesteBeregningTest {
             lagInntektspost(2023, BigDecimal.valueOf(200_000))
         );
 
-        var resultat = new BesteBeregning(VIRKNINGSDATO).avgjørBestePGI(inntektsposter);
+        var resultat = new BeregningTjeneste().avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
     }
 
@@ -34,7 +37,7 @@ class BesteBeregningTest {
             lagInntektspost(2023, BigDecimal.valueOf(500_000))
         );
 
-        var resultat = new BesteBeregning(VIRKNINGSDATO).avgjørBestePGI(inntektsposter);
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteTreÅr());
     }
 
@@ -46,7 +49,7 @@ class BesteBeregningTest {
             // 2023 mangler
         );
 
-        var resultat = new BesteBeregning(VIRKNINGSDATO).avgjørBestePGI(inntektsposter);
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
     }
 
@@ -57,7 +60,7 @@ class BesteBeregningTest {
             lagInntektspost(2023, BigDecimal.valueOf(300_000))
         );
 
-        var resultat = new BesteBeregning(VIRKNINGSDATO).avgjørBestePGI(inntektsposter);
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
 
         assertThat(resultat.getÅrsinntektSisteÅr()).isEqualByComparingTo(BigDecimal.ZERO);
         // 130 160 (G-snitt 2026) / 116 239 (G-snitt 2023) * 300 000/ 3 = 111 976,18699
@@ -66,7 +69,7 @@ class BesteBeregningTest {
 
     @Test
     void ingen_inntektsposter_gir_null_resultat() {
-        var resultat = new BesteBeregning(VIRKNINGSDATO).avgjørBestePGI(List.of());
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, List.of()));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 

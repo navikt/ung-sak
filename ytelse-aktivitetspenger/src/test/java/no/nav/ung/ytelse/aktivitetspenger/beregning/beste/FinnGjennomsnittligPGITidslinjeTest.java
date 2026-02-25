@@ -11,17 +11,17 @@ import java.time.Month;
 import java.time.Year;
 import java.util.List;
 
-import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BesteBeregning.lagBesteBeregningInput;
-import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.FinnGjennomsnittligPGI.finnGjennomsnittligPGI;
+import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningTjeneste.lagBeregningInput;
+import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.avgrensOgOppjusterÅrsinntekter;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-class FinnGjennomsnittligPGITest {
+class PgiKalkulatorTest {
 
     @Test
-    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_under_6G() {
+    void avgrensOgOppjusterÅrsinntekter_År_inntekt_inneværende_år_under_6G() {
         var detteÅret = Year.now();
 
-        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+        var resultat = avgrensOgOppjusterÅrsinntekter(lagBeregningInput(
             detteÅret.atDay(1),
             detteÅret,
             List.of(lagInntektspost(new BigDecimal(300_000), årsperiodeAv(detteÅret)))
@@ -31,12 +31,12 @@ class FinnGjennomsnittligPGITest {
     }
 
     @Test
-    void finnGjennomsnittligPGI_År_inntekt_inneværende_år_mellom_6G_12G_avkortes_mot_6G() {
+    void avgrensOgOppjusterÅrsinntekter_År_inntekt_inneværende_år_mellom_6G_12G_avkortes_mot_6G() {
         var år2024 = Year.of(2024);
         var årsperiode = årsperiodeAv(år2024);
         var niG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(9));
 
-        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+        var resultat = avgrensOgOppjusterÅrsinntekter(lagBeregningInput(
             år2024.atDay(1),
             år2024,
             List.of(lagInntektspost(niG, årsperiode))
@@ -52,7 +52,7 @@ class FinnGjennomsnittligPGITest {
 
         var inntektspost = lagInntektspost(BigDecimal.valueOf(500_000), årsperiodeAv(sisteLigningsår));
 
-        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+        var resultat = avgrensOgOppjusterÅrsinntekter(lagBeregningInput(
             virkningsdato,
             sisteLigningsår,
             List.of(inntektspost)
@@ -71,7 +71,7 @@ class FinnGjennomsnittligPGITest {
         var seksG = BigDecimal.valueOf(122_225).multiply(BigDecimal.valueOf(6));
         var inntektspost = lagInntektspost(seksG, periode);
 
-        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+        var resultat = avgrensOgOppjusterÅrsinntekter(lagBeregningInput(
             år2024.atDay(1),
             år2024,
             List.of(inntektspost)

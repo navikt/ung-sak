@@ -15,7 +15,7 @@ class PgiUtregnerTest {
         var inntekt = G.multiply(BigDecimal.valueOf(4));
         var inflasjonsfaktor = BigDecimal.valueOf(1.05);
 
-        var resultat = lagUtregner(inntekt, G, inflasjonsfaktor).beregnPGI();
+        var resultat = lagUtregner(inntekt, G, inflasjonsfaktor).avgrensOgOppjusterårsinntekt();
 
         var forventet = inntekt.multiply(inflasjonsfaktor);
         assertThat(resultat).isEqualByComparingTo(forventet);
@@ -26,7 +26,7 @@ class PgiUtregnerTest {
         var inntekt = G.multiply(BigDecimal.valueOf(6));
         var inflasjonsfaktor = BigDecimal.ONE;
 
-        var resultat = lagUtregner(inntekt, G, inflasjonsfaktor).beregnPGI();
+        var resultat = lagUtregner(inntekt, G, inflasjonsfaktor).avgrensOgOppjusterårsinntekt();
         assertThat(resultat).isEqualByComparingTo(inntekt);
     }
 
@@ -35,14 +35,14 @@ class PgiUtregnerTest {
         var inntekt = G.multiply(BigDecimal.valueOf(20));
         var inflasjonsfaktor = BigDecimal.ONE;
 
-        var resultat = lagUtregner(inntekt, G, inflasjonsfaktor).beregnPGI();
+        var resultat = lagUtregner(inntekt, G, inflasjonsfaktor).avgrensOgOppjusterårsinntekt();
 
         assertThat(resultat).isEqualByComparingTo(G.multiply(BigDecimal.valueOf(6)));
     }
 
 
-    private static FinnGjennomsnittligPGI.PgiUtregner lagUtregner(BigDecimal inntekt, BigDecimal gSnitt, BigDecimal inflasjonsfaktor) {
-        return new FinnGjennomsnittligPGI.PgiUtregner(inntekt)
+    private PgiKalkulator.PgiUtregner lagUtregner(BigDecimal inntekt, BigDecimal gSnitt, BigDecimal inflasjonsfaktor) {
+        return new PgiKalkulator.PgiUtregner(inntekt)
             .setGrunnbeløpSnitt(gSnitt)
             .setInflasjonsfaktor(inflasjonsfaktor);
     }
