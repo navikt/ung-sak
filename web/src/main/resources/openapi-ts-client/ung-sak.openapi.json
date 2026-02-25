@@ -4520,9 +4520,6 @@
           "searchString" : {
             "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
-          },
-          "ytelseType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           }
         },
         "required" : [ "searchString" ],
