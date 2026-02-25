@@ -4,9 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
-import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 
 import java.math.BigDecimal;
 import java.time.Year;
@@ -16,17 +14,12 @@ import java.util.stream.Collectors;
 
 public class FinnGjennomsnittligPGI {
 
-    public record Resultat(
-        Map<Year, BigDecimal> pgiPerÅr,
-        Map<String, LocalDateTimeline<?>> regelSporingMap
-    ) {}
+    public static Map<Year, BigDecimal> finnGjennomsnittligPGI(BesteBeregning.BesteBeregningInput input) {
+        var gsnittTidsserie = input.gsnittTidsserie();
+        var inflasjonsfaktorTidsserie = input.inflasjonsfaktorTidsserie();
+        var årsinntekter = opprettTidsseriAvÅrsinntekter(input.årsinntektMap());
 
-    public static Resultat finnGjennomsnittligPGI(Year sisteTilgjengeligeGSnittÅr, Year grunnbeløpÅr, List<Inntektspost> inntekter) {
-        LocalDateTimeline<Grunnbeløp> gsnittTidsserie = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
-        LocalDateTimeline<BigDecimal> inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(grunnbeløpÅr, 3);
-        var årsinntekter = lagÅrsinntektTidslinje(sisteTilgjengeligeGSnittÅr, inntekter);
-
-        var pgiPerÅr = årsinntekter.entrySet().stream()
+        return årsinntekter.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> entry.getValue()
@@ -37,13 +30,6 @@ public class FinnGjennomsnittligPGI {
                     .map(LocalDateSegment::getValue)
                     .reduce(BigDecimal.ZERO, BigDecimal::add)
             ));
-
-        var regelSporingMap = new java.util.LinkedHashMap<String, LocalDateTimeline<?>>();
-        regelSporingMap.put("gsnittTidsserie", gsnittTidsserie.mapValue(Grunnbeløp::verdi));
-        regelSporingMap.put("inflasjonsfaktorTidsserie", inflasjonsfaktorTidsserie);
-        årsinntekter.forEach((år, tidslinje) -> regelSporingMap.put("årsinntekt_" + år, tidslinje));
-
-        return new Resultat(pgiPerÅr, regelSporingMap);
     }
 
     private static LocalDateSegmentCombinator<PgiUtregner, Grunnbeløp, PgiUtregner> leggTilGrunnbeløpSnitt() {
@@ -60,21 +46,8 @@ public class FinnGjennomsnittligPGI {
         };
     }
 
-    private static Map<Year, LocalDateTimeline<PgiUtregner>> lagÅrsinntektTidslinje(Year sisteTilgjengeligeLigningsår, List<Inntektspost> inntekter) {
-        var sisteTilgjengeligeLigningsårTom = sisteTilgjengeligeLigningsår.atMonth(12).atEndOfMonth();
-
-        return inntekter.stream()
-            .filter(ip -> !ip.getPeriode().getTomDato().isAfter(sisteTilgjengeligeLigningsårTom))
-            .collect(Collectors.groupingBy(
-                ip -> Year.of(ip.getPeriode().getFomDato().getYear()),
-                Collectors.reducing(
-                    BigDecimal.ZERO,
-                    ip -> ip.getBeløp().getVerdi(),
-                    BigDecimal::add
-                )
-            ))
-            .entrySet().stream()
-            .collect(Collectors.toMap(
+    private static Map<Year, LocalDateTimeline<PgiUtregner>> opprettTidsseriAvÅrsinntekter(Map<Year, BigDecimal> årsinntekter) {
+            return årsinntekter.entrySet().stream().collect(Collectors.toMap(
                 Map.Entry::getKey,
                 entry -> {
                     var år = entry.getKey();

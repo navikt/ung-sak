@@ -11,6 +11,8 @@ import java.time.Month;
 import java.time.Year;
 import java.util.List;
 
+import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BesteBeregning.lagBesteBeregningInput;
+import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.FinnGjennomsnittligPGI.finnGjennomsnittligPGI;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class FinnGjennomsnittligPGITest {
@@ -19,15 +21,13 @@ class FinnGjennomsnittligPGITest {
     void finnGjennomsnittligPGI_År_inntekt_inneværende_år_under_6G() {
         var detteÅret = Year.now();
 
-        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+            detteÅret.atDay(1),
             detteÅret,
-            detteÅret,
-            List.of(
-                lagInntektspost(new BigDecimal(300_000), årsperiodeAv(detteÅret))
-            )
-        );
+            List.of(lagInntektspost(new BigDecimal(300_000), årsperiodeAv(detteÅret)))
+        ));
 
-        assertThat(resultat.pgiPerÅr().get(detteÅret)).isEqualByComparingTo(BigDecimal.valueOf(300_000));
+        assertThat(resultat.get(detteÅret)).isEqualByComparingTo(BigDecimal.valueOf(300_000));
     }
 
     @Test
@@ -36,31 +36,30 @@ class FinnGjennomsnittligPGITest {
         var årsperiode = årsperiodeAv(år2024);
         var niG = BigDecimal.valueOf(124028).multiply(BigDecimal.valueOf(9));
 
-        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
-            år2024,
+        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+            år2024.atDay(1),
             år2024,
             List.of(lagInntektspost(niG, årsperiode))
-        );
+        ));
 
-        assertThat(resultat.pgiPerÅr().get(år2024)).isEqualByComparingTo(new BigDecimal(733_350));
+        assertThat(resultat.get(år2024)).isEqualByComparingTo(new BigDecimal(733_350));
     }
 
     @Test
     void skal_beregne_med_inflasjonsfaktor_for_tidligere_år() {
         var sisteLigningsår = Year.of(2024);
+        var virkningsdato = sisteLigningsår.plusYears(1).atDay(1);
 
-        var inntektspost = lagInntektspost(
-            BigDecimal.valueOf(500_000), årsperiodeAv(sisteLigningsår)
-        );
+        var inntektspost = lagInntektspost(BigDecimal.valueOf(500_000), årsperiodeAv(sisteLigningsår));
 
-        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
+        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+            virkningsdato,
             sisteLigningsår,
-            sisteLigningsår.plusYears(1),
             List.of(inntektspost)
-        );
+        ));
 
         // 128 116 kroner (G-snitt 2025) / 122 225 kroner (G-snitt 2024) * 500 000 = 1,048198 * 500 000 = 524 098
-        assertThat(resultat.pgiPerÅr().get(sisteLigningsår)).isEqualByComparingTo(new BigDecimal("524098.9977500000"));
+        assertThat(resultat.get(sisteLigningsår)).isEqualByComparingTo(new BigDecimal("524098.9977500000"));
     }
 
     @Test
@@ -72,13 +71,13 @@ class FinnGjennomsnittligPGITest {
         var seksG = BigDecimal.valueOf(122_225).multiply(BigDecimal.valueOf(6));
         var inntektspost = lagInntektspost(seksG, periode);
 
-        var resultat = FinnGjennomsnittligPGI.finnGjennomsnittligPGI(
-            år2024,
+        var resultat = finnGjennomsnittligPGI(lagBesteBeregningInput(
+            år2024.atDay(1),
             år2024,
             List.of(inntektspost)
-        );
+        ));
 
-        assertThat(resultat.pgiPerÅr().get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(733_350));
+        assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(733_350));
     }
 
     private static Periode årsperiodeAv(Year år) {
