@@ -2,11 +2,6 @@ package no.nav.ung.sak.etterlysning.programperiode;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.PeriodeEndringType;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.PeriodeDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -15,9 +10,15 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class EndretPeriodeOppgaveOppretter {
     }
 
 
-    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
+    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         if (etterlysninger.isEmpty()) {
             return;
         }
@@ -82,22 +83,21 @@ public class EndretPeriodeOppgaveOppretter {
                 etterlysning.getEksternReferanse(),
                 endretStartDato.get().nyDatoOgGrunnlag(),
                 endretStartDato.get().forrigeDatoOgGrunnlag());
-            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, deltakerIdent, endretStartDato.get().nyDatoOgGrunnlag().dato(), endretStartDato.get().forrigeDatoOgGrunnlag().dato());
-            delegeringTjeneste.opprettEndretStartdatoOppgave(oppgaveDto);
+            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, aktørId, endretStartDato.get().nyDatoOgGrunnlag().dato(), endretStartDato.get().forrigeDatoOgGrunnlag().dato());
+            delegeringTjeneste.opprettOppgave(oppgaveDto);
         } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
             // ENDRING AV SLUTTDATO
             log.info("Fant kun endring i sluttdato for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}",
                 etterlysning.getEksternReferanse(),
-                endretStartDato.get().nyDatoOgGrunnlag(),
-                endretStartDato.get().forrigeDatoOgGrunnlag());
-            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, deltakerIdent, endretSluttDato.get().nyDatoOgGrunnlag().dato(), endretSluttDato.get().forrigeDatoOgGrunnlag().dato());
-            delegeringTjeneste.opprettEndretSluttdatoOppgave(oppgaveDto);
+                endretSluttDato.get().nyDatoOgGrunnlag(),
+                endretSluttDato.get().forrigeDatoOgGrunnlag());
+            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, aktørId, endretSluttDato.get().nyDatoOgGrunnlag().dato(), endretSluttDato.get().forrigeDatoOgGrunnlag().dato());
+            delegeringTjeneste.opprettOppgave(oppgaveDto);
         } else if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
             // FJERNET PERIODE
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
-            var endringer = Set.of(PeriodeEndringType.FJERNET_PERIODE);
-            var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, null, forrigePeriode, endringer);
-            delegeringTjeneste.opprettEndretPeriodeOppgave(oppgaveDto);
+            var oppgaveDto = mapTilFjernetPeriodeOppgaveDto(etterlysning, aktørId, forrigePeriode);
+            delegeringTjeneste.opprettOppgave(oppgaveDto);
         } else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
             log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
                 etterlysning.getEksternReferanse(),
@@ -108,8 +108,8 @@ public class EndretPeriodeOppgaveOppretter {
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
-            var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, deltakerIdent, nyPeriode, forrigePeriode, endringer);
-            delegeringTjeneste.opprettEndretPeriodeOppgave(oppgaveDto);
+            var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, aktørId, nyPeriode, forrigePeriode, endringer);
+            delegeringTjeneste.opprettOppgave(oppgaveDto);
         } else {
             throw new IllegalStateException("Fant ingen endringer som kunne mappes til oppgave for etterlysning " + etterlysning.getEksternReferanse());
         }
@@ -140,15 +140,21 @@ public class EndretPeriodeOppgaveOppretter {
         return grunnlag.hentForEksaktEnPeriodeDersomFinnes().filter(it -> !it.getTomDato().equals(TIDENES_ENDE)).map(DatoIntervallEntitet::getTomDato);
     }
 
-    private EndretPeriodeOppgaveDTO mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, PersonIdent deltakerIdent, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {
-
-        return new EndretPeriodeOppgaveDTO(
-            deltakerIdent.getIdent(),
+    private OpprettOppgaveDto mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {
+        return new OpprettOppgaveDto(
+            aktørId,
             etterlysning.getEksternReferanse(),
-            etterlysning.getFrist(),
-            nyPeriode,
-            forrigePeriode,
-            endringer
+            new EndretPeriodeDataDto(nyPeriode, forrigePeriode, endringer),
+            etterlysning.getFrist()
+        );
+    }
+
+    private OpprettOppgaveDto mapTilFjernetPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, PeriodeDTO forrigePeriode) {
+        return new OpprettOppgaveDto(
+            aktørId,
+            etterlysning.getEksternReferanse(),
+            new FjernetPeriodeDataDto(forrigePeriode.getFomDato(), forrigePeriode.getTomDato()),
+            etterlysning.getFrist()
         );
     }
 
@@ -158,23 +164,21 @@ public class EndretPeriodeOppgaveOppretter {
         return new PeriodeDTO(fomDato, tomDato);
     }
 
-    private EndretStartdatoOppgaveDTO mapTilStartdatoOppgaveDto(Etterlysning etterlysning, PersonIdent deltakerIdent, LocalDate nyStartDato, LocalDate forrigeStartDato) {
-        return new EndretStartdatoOppgaveDTO(
-            deltakerIdent.getIdent(),
+    private OpprettOppgaveDto mapTilStartdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, LocalDate nyStartDato, LocalDate forrigeStartDato) {
+        return new OpprettOppgaveDto(
+            aktørId,
             etterlysning.getEksternReferanse(),
-            etterlysning.getFrist(),
-            nyStartDato,
-            forrigeStartDato
+            new EndretStartdatoDataDto(nyStartDato, forrigeStartDato),
+            etterlysning.getFrist()
         );
     }
 
-    private EndretSluttdatoOppgaveDTO mapTilSluttdatoOppgaveDto(Etterlysning etterlysning, PersonIdent deltakerIdent, LocalDate nySluttDato, LocalDate forrigeSluttDato) {
-        return new EndretSluttdatoOppgaveDTO(
-            deltakerIdent.getIdent(),
+    private OpprettOppgaveDto mapTilSluttdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, LocalDate nySluttDato, LocalDate forrigeSluttDato) {
+        return new OpprettOppgaveDto(
+            aktørId,
             etterlysning.getEksternReferanse(),
-            etterlysning.getFrist(),
-            nySluttDato,
-            forrigeSluttDato.equals(TIDENES_ENDE) ? null : forrigeSluttDato
+            new EndretSluttdatoDataDto(nySluttDato, forrigeSluttDato.equals(TIDENES_ENDE) ? null : forrigeSluttDato),
+            etterlysning.getFrist()
         );
     }
 

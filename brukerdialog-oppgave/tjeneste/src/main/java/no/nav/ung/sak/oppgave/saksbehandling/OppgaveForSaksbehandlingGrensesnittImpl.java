@@ -4,23 +4,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.EndreStatusDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.oppgave.*;
+import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO;
-import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretperiode.EndretPeriodeOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretsluttdato.EndretSluttdatoOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.endretstartdato.EndretStartdatoOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering.InntektsrapporteringOppgaveMapper;
-import no.nav.ung.sak.oppgave.typer.varsel.varseltyper.kontrollerregisterinntekt.KontrollerRegisterInntektOppgaveMapper;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.oppgave.*;
+import no.nav.ung.sak.oppgave.typer.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDataEntitet;
+import no.nav.ung.sak.typer.AktørId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,13 +18,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Tjeneste for å opprette og administrere brukerdialog-oppgaver.
- * Implementerer BrukerdialogOppgaveService interfacet.
- * <p>
- * Denne tjenesten brukes av etterlysning-modulen og andre moduler
- * som trenger å opprette oppgaver internt i applikasjonen.
- */
 @ApplicationScoped
 public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbehandlingGrensesnitt {
 
@@ -66,28 +49,10 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     }
 
     @Override
-    public void opprettKontrollerRegisterInntektOppgave(RegisterInntektOppgaveDTO oppgave) {
-        oppgaveLivssyklusTjeneste.opprettOppgave(KontrollerRegisterInntektOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
-    }
-
-    @Override
-    public void opprettInntektrapporteringOppgave(InntektsrapporteringOppgaveDTO oppgave) {
-        oppgaveLivssyklusTjeneste.opprettOppgave(InntektsrapporteringOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
-    }
-
-    @Override
-    public void opprettEndretStartdatoOppgave(EndretStartdatoOppgaveDTO oppgave) {
-        oppgaveLivssyklusTjeneste.opprettOppgave(EndretStartdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
-    }
-
-    @Override
-    public void opprettEndretSluttdatoOppgave(EndretSluttdatoOppgaveDTO oppgave) {
-        oppgaveLivssyklusTjeneste.opprettOppgave(EndretSluttdatoOppgaveMapper.map(oppgave, finnAktørId(oppgave.getDeltakerIdent())));
-    }
-
-    @Override
-    public void opprettEndretPeriodeOppgave(EndretPeriodeOppgaveDTO oppgaveDto) {
-        oppgaveLivssyklusTjeneste.opprettOppgave(EndretPeriodeOppgaveMapper.map(oppgaveDto, finnAktørId(oppgaveDto.getDeltakerIdent())));
+    public void opprettOppgave(OpprettOppgaveDto oppgave) {
+        BrukerdialogOppgaveEntitet oppgaveEntitet = new BrukerdialogOppgaveEntitet(
+            oppgave.oppgaveReferanse(), oppgave.oppgavetypeData().oppgavetype(), oppgave.aktørId(), oppgave.frist());
+        oppgaveLivssyklusTjeneste.opprettOppgave(oppgaveEntitet, oppgave.oppgavetypeData());
     }
 
     @Override
@@ -105,61 +70,47 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
     }
 
     @Override
-    public void settOppgaveTilUtløpt(EndreStatusDTO dto) {
-        logger.info("Utløper oppgave av type: {} med periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
-
-        AktørId aktørId = finnAktørId(dto.getDeltakerIdent());
-
-        // Hent alle oppgaver for aktøren
-        var oppgaver = repository.hentAlleOppgaverForAktør(aktørId);
-
-        // Finn uløst oppgave av riktig type og periode
-        var uløstOppgaveISammePeriode = oppgaver.stream()
+    public void settOppgaveTilUtløpt(EndreOppgaveStatusDto dto) {
+        logger.info("Utløper oppgave av type: {} med periode [{} - {}]", dto.oppgavetype(), dto.fomDato(), dto.tomDato());
+        var aktørId = finnAktørId(dto.deltakerIdent());
+        repository.hentAlleOppgaverForAktør(aktørId).stream()
             .filter(o -> o.getStatus() == OppgaveStatus.ULØST)
-            .filter(o -> matcherOppgaveType(o, dto.getOppgavetype()))
-            .filter(o -> gjelderSammePeriodeForInntektsrapportering(o, dto.getFomDato(), dto.getTomDato()))
-            .findFirst();
-
-        if (uløstOppgaveISammePeriode.isPresent()) {
-            var oppgave = uløstOppgaveISammePeriode.get();
-            logger.info("Setter oppgave {} til utløpt", oppgave.getOppgavereferanse());
-            oppgaveLivssyklusTjeneste.utløpOppgave(oppgave);
-        } else {
-            logger.info("Fant ingen uløst oppgave av type {} for periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
-        }
+            .filter(o -> o.getOppgaveType() == dto.oppgavetype())
+            .filter(o -> gjelderSammePeriodeForInntektsrapportering(o, dto))
+            .findFirst()
+            .ifPresentOrElse(
+                oppgave -> {
+                    logger.info("Setter oppgave {} til utløpt", oppgave.getOppgavereferanse());
+                    oppgaveLivssyklusTjeneste.utløpOppgave(oppgave);
+                },
+                () -> logger.info("Fant ingen uløst oppgave av type {} for periode [{} - {}]",
+                    dto.oppgavetype(), dto.fomDato(), dto.tomDato())
+            );
     }
 
     @Override
-    public void settOppgaveTilAvbrutt(EndreStatusDTO dto) {
-        logger.info("Avbryter oppgave av type: {} med periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
-
-        AktørId aktørId = finnAktørId(dto.getDeltakerIdent());
-
-        // Hent alle oppgaver for aktøren
-        var oppgaver = repository.hentAlleOppgaverForAktør(aktørId);
-
-        // Finn uløst oppgave av riktig type og periode
-        var uløstOppgaveISammePeriode = oppgaver.stream()
+    public void settOppgaveTilAvbrutt(EndreOppgaveStatusDto dto) {
+        logger.info("Avbryter oppgave av type: {} med periode [{} - {}]", dto.oppgavetype(), dto.fomDato(), dto.tomDato());
+        var aktørId = finnAktørId(dto.deltakerIdent());
+        repository.hentAlleOppgaverForAktør(aktørId).stream()
             .filter(o -> o.getStatus() == OppgaveStatus.ULØST)
-            .filter(o -> matcherOppgaveType(o, dto.getOppgavetype()))
-            .filter(o -> gjelderSammePeriodeForInntektsrapportering(o, dto.getFomDato(), dto.getTomDato()))
-            .findFirst();
-
-        if (uløstOppgaveISammePeriode.isPresent()) {
-            var oppgave = uløstOppgaveISammePeriode.get();
-            logger.info("Setter oppgave {} til avbrutt", oppgave.getOppgavereferanse());
-            oppgaveLivssyklusTjeneste.avbrytOppgave(oppgave);
-        } else {
-            logger.info("Fant ingen uløst oppgave av type {} for periode [{} - {}]", dto.getOppgavetype(), dto.getFomDato(), dto.getTomDato());
-        }
+            .filter(o -> o.getOppgaveType() == dto.oppgavetype())
+            .filter(o -> gjelderSammePeriodeForInntektsrapportering(o, dto))
+            .findFirst()
+            .ifPresentOrElse(
+                oppgave -> {
+                    logger.info("Setter oppgave {} til avbrutt", oppgave.getOppgavereferanse());
+                    oppgaveLivssyklusTjeneste.avbrytOppgave(oppgave);
+                },
+                () -> logger.info("Fant ingen uløst oppgave av type {} for periode [{} - {}]",
+                    dto.oppgavetype(), dto.fomDato(), dto.tomDato())
+            );
     }
 
     @Override
-    public void løsSøkYtelseOppgave(DeltakerDTO deltakerDTO) {
+    public void løsSøkYtelseOppgave(String deltakerIdent) {
         List<BrukerdialogOppgaveEntitet> søkYtelseOppgaver = repository.hentOppgaveForType(
-            OppgaveType.SØK_YTELSE,
-            OppgaveStatus.ULØST,
-            finnAktørId(deltakerDTO.getDeltakerIdent()));
+            OppgaveType.SØK_YTELSE, OppgaveStatus.ULØST, finnAktørId(deltakerIdent));
         if (søkYtelseOppgaver.size() > 1) {
             logger.warn("Fant flere enn én uløst søk-ytelse-oppgave. Antall: {}", søkYtelseOppgaver.size());
         }
@@ -168,31 +119,20 @@ public class OppgaveForSaksbehandlingGrensesnittImpl implements OppgaveForSaksbe
 
     @Override
     public void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist) {
-        AktørId aktørId = finnAktørId(personIdent);
-        repository.endreFrist(eksternReferanse, aktørId, frist);
+        repository.endreFrist(eksternReferanse, finnAktørId(personIdent), frist);
     }
 
     private AktørId finnAktørId(String deltakerIdent) {
         String aktørIdString = pdl.hentAktørIdForPersonIdent(deltakerIdent, false)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke aktørId for personIdent"));
-        AktørId aktørId = new AktørId(aktørIdString);
-        return aktørId;
-    }
-
-    private boolean matcherOppgaveType(BrukerdialogOppgaveEntitet oppgave, no.nav.ung.deltakelseopplyser.kontrakt.oppgave.felles.Oppgavetype oppgavetype) {
-        if (oppgave.getOppgaveType() == null) {
-            return false;
-        }
-        return oppgave.getOppgaveType().name().equals(oppgavetype.name());
+        return new AktørId(aktørIdString);
     }
 
     private boolean gjelderSammePeriodeForInntektsrapportering(BrukerdialogOppgaveEntitet oppgave,
-                                                               java.time.LocalDate fomDato,
-                                                               java.time.LocalDate tomDato) {
-        if (oppgave.getData() instanceof InntektsrapporteringOppgavetypeDataDTO data) {
-            return data.fraOgMed().equals(fomDato) && data.tilOgMed().equals(tomDato);
+                                                               EndreOppgaveStatusDto dto) {
+        if (oppgave.getOppgaveData() instanceof InntektsrapporteringOppgaveDataEntitet data) {
+            return data.getFraOgMed().equals(dto.fomDato()) && data.getTilOgMed().equals(dto.tomDato());
         }
         return false;
     }
 }
-

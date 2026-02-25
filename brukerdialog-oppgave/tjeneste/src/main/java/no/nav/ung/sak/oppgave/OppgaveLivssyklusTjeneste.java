@@ -9,23 +9,28 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.sak.DeaktiverMinSideVarselTask;
 import no.nav.ung.sak.PubliserMinSideVarselTask;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
+import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDto;
 
 @ApplicationScoped
 public class OppgaveLivssyklusTjeneste {
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private BrukerdialogOppgaveRepository brukerdialogOppgaveRepository;
-    private Instance<VarselInnholdUtleder> varselInnholdUtledere;
+    private Instance<OppgavelInnholdUtleder> varselInnholdUtledere;
+    private Instance<OppgaveDataMapperFraDtoTilEntitet> oppgaveDataMapper;
 
     public OppgaveLivssyklusTjeneste() {
     }
 
     @Inject
-    public OppgaveLivssyklusTjeneste(ProsessTaskTjeneste prosessTaskTjeneste, BrukerdialogOppgaveRepository brukerdialogOppgaveRepository,
-                                     @Any Instance<VarselInnholdUtleder> varselInnholdUtledere) {
+    public OppgaveLivssyklusTjeneste(ProsessTaskTjeneste prosessTaskTjeneste,
+                                     BrukerdialogOppgaveRepository brukerdialogOppgaveRepository,
+                                     @Any Instance<OppgavelInnholdUtleder> varselInnholdUtledere,
+                                     @Any Instance<OppgaveDataMapperFraDtoTilEntitet> oppgaveDataMapper) {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.brukerdialogOppgaveRepository = brukerdialogOppgaveRepository;
         this.varselInnholdUtledere = varselInnholdUtledere;
+        this.oppgaveDataMapper = oppgaveDataMapper;
     }
 
     /**
@@ -72,24 +77,27 @@ public class OppgaveLivssyklusTjeneste {
     /**
      * Persisterer oppgave og publiserer varsel til Min Side.
      *
-     * @param oppgaveEntitet Oppgave som skal opprettes og publiseres.
+     * @param oppgaveEntitet     Oppgave som skal opprettes og publiseres.
+     * @param oppgavetypeData
      */
-    public void opprettOppgave(BrukerdialogOppgaveEntitet oppgaveEntitet) {
+    public void opprettOppgave(BrukerdialogOppgaveEntitet oppgaveEntitet, OppgavetypeDataDto oppgavetypeData) {
         if (oppgaveEntitet.getId() != null) {
             throw new IllegalArgumentException("Oppgave er allerede persistert med id: " + oppgaveEntitet.getId());
         }
-        opprettTaskForPubliseringAvVarsel(oppgaveEntitet);
         oppgaveEntitet.setStatus(OppgaveStatus.ULØST);
-        brukerdialogOppgaveRepository.persister(oppgaveEntitet);
+        var oppgaveData = OppgaveDataMapperFraDtoTilEntitet.finnTjeneste(oppgaveDataMapper, oppgaveEntitet.getOppgaveType()).map(oppgavetypeData);
+        oppgaveEntitet.setOppgaveData(oppgaveData);
+        brukerdialogOppgaveRepository.lagre(oppgaveEntitet);
+        opprettTaskForPubliseringAvVarsel(oppgaveEntitet);
     }
 
     private void opprettTaskForPubliseringAvVarsel(BrukerdialogOppgaveEntitet oppgaveEntitet) {
-        VarselInnholdUtleder varselInnholdUtleder = VarselInnholdUtleder.finnUtleder(varselInnholdUtledere, oppgaveEntitet.getOppgaveType());
+        OppgavelInnholdUtleder oppgavelInnholdUtleder = OppgavelInnholdUtleder.finnUtleder(varselInnholdUtledere, oppgaveEntitet.getOppgaveType());
         ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(PubliserMinSideVarselTask.class);
         prosessTaskData.setProperty(PubliserMinSideVarselTask.OPPGAVE_REFERANSE, oppgaveEntitet.getOppgavereferanse().toString());
         prosessTaskData.setProperty(ProsessTaskData.AKTØR_ID, oppgaveEntitet.getAktørId().getId());
-        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_TEKST, varselInnholdUtleder.utledVarselTekst(oppgaveEntitet));
-        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_LENKE, varselInnholdUtleder.utledVarselLenke(oppgaveEntitet));
+        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_TEKST, oppgavelInnholdUtleder.utledVarselTekst(oppgaveEntitet));
+        prosessTaskData.setProperty(PubliserMinSideVarselTask.VARSEL_LENKE, oppgavelInnholdUtleder.utledVarselLenke(oppgaveEntitet));
         prosessTaskTjeneste.lagre(prosessTaskData);
     }
 

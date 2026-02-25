@@ -86,14 +86,15 @@ public class BrukerdialogOppgaveRepository {
     }
 
 
-    public void persister(BrukerdialogOppgaveEntitet oppgave) {
+    public void lagre(BrukerdialogOppgaveEntitet oppgave) {
         entityManager.persist(oppgave);
+        entityManager.persist(oppgave.getOppgaveData());
         entityManager.flush();
     }
 
     public BrukerdialogOppgaveEntitet oppdater(BrukerdialogOppgaveEntitet oppgave) {
         BrukerdialogOppgaveEntitet merged = entityManager.merge(oppgave);
-        persister(merged);
+        lagre(merged);
         return merged;
     }
 }

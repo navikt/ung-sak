@@ -5,7 +5,7 @@ import no.nav.ung.sak.BaseEntitet;
 import no.nav.ung.sak.kontrakt.oppgaver.BekreftelseDTO;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveStatus;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO;
+import no.nav.ung.sak.oppgave.typer.OppgaveDataEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import org.hibernate.annotations.ColumnTransformer;
 
@@ -35,11 +35,6 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Enumerated(EnumType.STRING)
     private OppgaveType oppgaveType;
 
-    @Convert(converter = OppgaveDataConverter.class)
-    @ColumnTransformer(write = "?::jsonb")
-    @Column(name = "data", nullable = false, updatable = false, columnDefinition = "jsonb")
-    private OppgavetypeDataDTO data;
-
     @Column(name = "frist_tid")
     private LocalDateTime fristTid;
 
@@ -57,6 +52,9 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     @Column(name = "bekreftelse", columnDefinition = "jsonb")
     private BekreftelseDTO bekreftelse;
 
+    @OneToOne(mappedBy = "oppgave", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private OppgaveDataEntitet oppgaveData;
+
     protected BrukerdialogOppgaveEntitet() {
         // For JPA
     }
@@ -64,12 +62,10 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     public BrukerdialogOppgaveEntitet(UUID oppgavereferanse,
                                       OppgaveType oppgaveType,
                                       AktørId aktørId,
-                                      OppgavetypeDataDTO data,
                                       LocalDateTime fristTid) {
         this.oppgavereferanse = oppgavereferanse;
         this.oppgaveType = oppgaveType;
         this.aktørId = aktørId;
-        this.data = data;
         this.fristTid = fristTid;
     }
 
@@ -80,7 +76,6 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
     public BrukerdialogOppgaveEntitet(UUID oppgavereferanse,
                                       OppgaveType oppgaveType,
                                       AktørId aktørId,
-                                      OppgavetypeDataDTO data,
                                       BekreftelseDTO bekreftelse,
                                       OppgaveStatus status,
                                       LocalDateTime fristTid,
@@ -90,7 +85,6 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         this.oppgavereferanse = oppgavereferanse;
         this.oppgaveType = oppgaveType;
         this.aktørId = aktørId;
-        this.data = data;
         this.bekreftelse = bekreftelse;
         this.status = status;
         this.fristTid = fristTid;
@@ -115,9 +109,6 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
         return oppgaveType;
     }
 
-    public OppgavetypeDataDTO getData() {
-        return data;
-    }
 
     public LocalDateTime getFristTid() {
         return fristTid;
@@ -165,5 +156,16 @@ public class BrukerdialogOppgaveEntitet extends BaseEntitet {
 
     Long getId() {
         return id;
+    }
+
+    public OppgaveDataEntitet getOppgaveData() {
+        return oppgaveData;
+    }
+
+    public void setOppgaveData(OppgaveDataEntitet oppgaveData) {
+        this.oppgaveData = oppgaveData;
+        if (oppgaveData != null) {
+            oppgaveData.setOppgave(this);
+        }
     }
 }
