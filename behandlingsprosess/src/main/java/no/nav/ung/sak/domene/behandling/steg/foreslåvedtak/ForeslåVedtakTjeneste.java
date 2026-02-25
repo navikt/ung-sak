@@ -121,6 +121,7 @@ class ForeslåVedtakTjeneste {
         if (!totalResultat.harBrev() && totalResultat.ingenBrevResultater().stream()
             .anyMatch(it -> it.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT)) {
             if (apVedIkkeImplementertBrev) {
+                logger.warn("Ingen brev implementert - går til aksjonspunkt istedenfor å feile. {}", totalResultat.safePrint());
                 aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
             }
             else {
