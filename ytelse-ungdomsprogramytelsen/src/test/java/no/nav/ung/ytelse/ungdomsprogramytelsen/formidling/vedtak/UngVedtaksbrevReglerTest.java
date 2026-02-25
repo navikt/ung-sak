@@ -21,7 +21,7 @@ import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.*;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.*;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.VedtaksbrevReglerUng;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.UngVedtaksbrevRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class VedtaksbrevReglerTest {
+class UngVedtaksbrevReglerTest {
 
     @Inject
     private EntityManager entityManager;
@@ -46,7 +46,7 @@ class VedtaksbrevReglerTest {
 
     @Inject
     @Any
-    private VedtaksbrevReglerUng vedtaksbrevRegler;
+    private UngVedtaksbrevRegler vedtaksbrevRegler;
 
 
     @BeforeEach

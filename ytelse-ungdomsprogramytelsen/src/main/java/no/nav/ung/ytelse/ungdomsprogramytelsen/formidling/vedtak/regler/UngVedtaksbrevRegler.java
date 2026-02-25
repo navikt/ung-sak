@@ -6,15 +6,12 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -27,22 +24,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
 @BehandlingTypeRef(BehandlingType.REVURDERING)
-public class VedtaksbrevReglerUng implements VedtaksbrevRegel {
+public class UngVedtaksbrevRegler implements VedtaksbrevRegel {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevReglerUng.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UngVedtaksbrevRegler.class);
 
     private BehandlingRepository behandlingRepository;
     private DetaljertResultatUtleder detaljertResultatUtleder;
     private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
 
-    public VedtaksbrevReglerUng() {
+    public UngVedtaksbrevRegler() {
     }
 
     @Inject
-    public VedtaksbrevReglerUng(
+    public UngVedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         DetaljertResultatUtleder detaljertResultatUtleder,
         @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies
