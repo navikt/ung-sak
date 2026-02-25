@@ -209,8 +209,10 @@ spec:
       value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
     - name: SIF_ABAC_PDP_SCOPE
       value: api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default
-    - name: SIF_ABAC_PDP_URL
+    - name: SIF_ABAC_PDP_UNG_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
+    - name: SIF_ABAC_PDP_AKTIVITETSPENGER_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
     - name: KABAL_URL

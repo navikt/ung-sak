@@ -40,16 +40,17 @@ public class PdpRequestMapper {
     }
 
     public static SaksinformasjonDto saksinformasjon(PdpRequest pdpRequest) {
-        return new SaksinformasjonDto(
-            pdpRequest.getAnsvarligSaksbehandler(),
-            Arrays.stream(AbacBehandlingStatus.values())
-                .filter(v -> v.getEksternKode().equals(pdpRequest.getBehandlingStatusEksternKode()))
-                .findFirst().orElse(null),
-            Arrays.stream(AbacFagsakStatus.values())
-                .filter(v1 -> v1.getEksternKode().equals(pdpRequest.getFagsakStatusEksternKode()))
-                .findFirst().orElse(null),
-            map(pdpRequest.getFagsakYtelseTyper(), pdpRequest.getResourceType())
-        );
+        String ansvarligSaksbehandler = pdpRequest.getAnsvarligSaksbehandler();
+        AbacBehandlingStatus behandlingStatus = Arrays.stream(AbacBehandlingStatus.values())
+            .filter(v -> v.getEksternKode().equals(pdpRequest.getBehandlingStatusEksternKode()))
+            .findFirst().orElse(null);
+        AbacFagsakStatus fagsakStatus = Arrays.stream(AbacFagsakStatus.values())
+            .filter(v1 -> v1.getEksternKode().equals(pdpRequest.getFagsakStatusEksternKode()))
+            .findFirst().orElse(null);
+        AbacFagsakYtelseType ytelseType = map(pdpRequest.getFagsakYtelseTyper(), pdpRequest.getResourceType());
+        return ansvarligSaksbehandler != null || behandlingStatus != null || fagsakStatus != null || ytelseType != null
+            ? new SaksinformasjonDto(ansvarligSaksbehandler, behandlingStatus, fagsakStatus, ytelseType)
+            : null;
     }
 
     private static AbacFagsakYtelseType map(Set<String> fagsakYtelseTyper, BeskyttetRessursResourceType ressursResourceType) {
@@ -103,7 +104,7 @@ public class PdpRequestMapper {
             case FAGSAK -> ResourceType.FAGSAK;
             case DRIFT -> ResourceType.DRIFT;
             case VENTEFRIST -> ResourceType.VENTEFRIST;
-            case UNGDOMSPROGRAM ->  ResourceType.UNGDOMSPROGRAM;
+            case UNGDOMSPROGRAM -> ResourceType.UNGDOMSPROGRAM;
             default -> throw new IllegalArgumentException("Ikke-støttet verdi: " + kode);
         };
     }
