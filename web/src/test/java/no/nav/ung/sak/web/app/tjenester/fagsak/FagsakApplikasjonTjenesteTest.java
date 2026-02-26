@@ -62,11 +62,11 @@ public class FagsakApplikasjonTjenesteTest {
         when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.of(personinfo));
 
         Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
-        when(fagsakRepository.hentForBruker(AKTØR_ID, Set.of(FagsakYtelseType.OMSORGSPENGER))).thenReturn(Collections.singletonList(fagsak));
+        when(fagsakRepository.hentForBruker(AKTØR_ID)).thenReturn(Collections.singletonList(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
 
         // Act
-        FagsakSamlingForBruker view = tjeneste.hentSaker(FagsakYtelseType.OMSORGSPENGER, FNR);
+        FagsakSamlingForBruker view = tjeneste.hentSaker(FNR);
 
         // Assert
         assertThat(view.isEmpty()).isFalse();
@@ -86,7 +86,7 @@ public class FagsakApplikasjonTjenesteTest {
         when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID)).thenReturn(Optional.of(personinfo));
 
         // Act
-        FagsakSamlingForBruker view = tjeneste.hentSaker(FagsakYtelseType.OMSORGSPENGER, SAKSNUMMER.getVerdi());
+        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
 
         // Assert
         assertThat(view.isEmpty()).isFalse();
@@ -103,7 +103,7 @@ public class FagsakApplikasjonTjenesteTest {
         when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID)).thenReturn(Optional.empty()); // Ingen treff i TPS
 
         // Act
-        FagsakSamlingForBruker view = tjeneste.hentSaker(FagsakYtelseType.OMSORGSPENGER, SAKSNUMMER.getVerdi());
+        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
 
         // Assert
         assertThat(view.isEmpty()).isTrue();
@@ -113,7 +113,7 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_returnere_tomt_view_ved_ukjent_fnr() {
         when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.empty());
 
-        FagsakSamlingForBruker view = tjeneste.hentSaker(FagsakYtelseType.OMSORGSPENGER, FNR);
+        FagsakSamlingForBruker view = tjeneste.hentSaker(FNR);
 
         assertThat(view.isEmpty()).isTrue();
     }
@@ -122,7 +122,7 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_returnere_tomt_view_ved_ukjent_saksnr() {
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.empty());
 
-        FagsakSamlingForBruker view = tjeneste.hentSaker(FagsakYtelseType.OMSORGSPENGER, SAKSNUMMER.getVerdi());
+        FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
 
         assertThat(view.isEmpty()).isTrue();
     }
