@@ -42,11 +42,9 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulatorInput;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Year;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -196,18 +194,18 @@ public class AktivitetspengerRestTjeneste {
                 Year år = Year.of(segment.getFom().getYear());
                 return new PgiÅrsinntektDto(
                     år.getValue(),
-                    segment.getValue().getVerdi(),
-                    avkortetOgOppjustert.getOrDefault(år, BigDecimal.ZERO)
+                    segment.getValue().getVerdi().setScale(0, RoundingMode.HALF_EVEN),
+                    avkortetOgOppjustert.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN)
                 );
             })
-            .sorted(java.util.Comparator.comparingInt(PgiÅrsinntektDto::årstall))
+            .sorted(Comparator.comparingInt(PgiÅrsinntektDto::årstall))
             .toList();
 
         return new BeregningsgrunnlagDto(
             grunnlag.getVirkningsdato(),
-            grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr(),
-            grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr(),
-            grunnlag.getÅrsinntektAvkortetOppjustertBesteBeregning(),
+            grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr().setScale(0, RoundingMode.HALF_EVEN),
+            grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr().setScale(0, RoundingMode.HALF_EVEN),
+            grunnlag.getÅrsinntektAvkortetOppjustertBesteBeregning().setScale(0, RoundingMode.HALF_EVEN),
             pgiÅrsinntekter
         );
     }
