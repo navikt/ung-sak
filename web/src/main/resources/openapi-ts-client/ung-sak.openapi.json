@@ -2040,7 +2040,7 @@
           "avkortetOgOppjustert" : {
             "type" : "number"
           },
-          "pgi" : {
+          "pgiÅrsinntekt" : {
             "type" : "number"
           },
           "årstall" : {
@@ -2048,7 +2048,7 @@
             "type" : "integer"
           }
         },
-        "required" : [ "avkortetOgOppjustert", "pgi", "årstall" ],
+        "required" : [ "avkortetOgOppjustert", "pgiÅrsinntekt", "årstall" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
