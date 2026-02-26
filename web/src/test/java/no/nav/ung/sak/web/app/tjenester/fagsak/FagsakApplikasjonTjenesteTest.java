@@ -62,7 +62,7 @@ public class FagsakApplikasjonTjenesteTest {
         when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.of(personinfo));
 
         Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
-        when(fagsakRepository.hentForBruker(AKTØR_ID, Set.of(FagsakYtelseType.OMSORGSPENGER))).thenReturn(Collections.singletonList(fagsak));
+        when(fagsakRepository.hentForBruker(AKTØR_ID)).thenReturn(Collections.singletonList(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
 
         // Act
