@@ -2010,6 +2010,47 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto" : {
+        "properties" : {
+          "besteBeregning" : {
+            "type" : "number"
+          },
+          "pgiÅrsinntekter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto"
+            },
+            "type" : "array"
+          },
+          "virkningstidspunkt" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "årsinntektSisteTreÅr" : {
+            "type" : "number"
+          },
+          "årsinntektSisteÅr" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "besteBeregning", "pgiÅrsinntekter", "virkningstidspunkt", "årsinntektSisteTreÅr", "årsinntektSisteÅr" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto" : {
+        "properties" : {
+          "avkortetOgOppjustert" : {
+            "type" : "number"
+          },
+          "pgi" : {
+            "type" : "number"
+          },
+          "årstall" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "avkortetOgOppjustert", "pgi", "årstall" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
         "properties" : {
           "fødselsdato" : {
@@ -5897,6 +5938,131 @@
           }
         },
         "tags" : [ "aksjonspunkt" ]
+      }
+    },
+    "/api/aktivitetspenger/beregningsgrunnlag" : {
+      "get" : {
+        "description" : "Henter beregningsgrunnlag for en aktivitetspengerbehandling",
+        "operationId" : "getBeregningsgrunnlag",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
+      }
+    },
+    "/api/aktivitetspenger/månedsvis-sats-og-utbetaling" : {
+      "get" : {
+        "description" : "Henter månedsvis satser og utbetaling",
+        "operationId" : "getSatsOgUtbetalingPerioder",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
+      }
+    },
+    "/api/aktivitetspenger/satser" : {
+      "get" : {
+        "description" : "Henter innvilgede satser for en aktivitetspengerbehandling",
+        "operationId" : "getAktivitetspengerInnvilgetSats",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
+      }
+    },
+    "/api/aktivitetspenger/uttak" : {
+      "get" : {
+        "description" : "Henter uttaksperioder for en aktivitetspengerbehandling",
+        "operationId" : "getUngdomsytelseUttak",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.uttak.UngdomsytelseUttakPeriodeDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "ung" ]
       }
     },
     "/api/aktoer-info" : {
@@ -9874,7 +10040,7 @@
     "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
       "get" : {
         "description" : "Henter månedsvis satser og utbetaling",
-        "operationId" : "getSatsOgUtbetalingPerioder",
+        "operationId" : "getSatsOgUtbetalingPerioder_1",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",
@@ -9967,7 +10133,7 @@
     "/api/ungdomsytelse/uttak" : {
       "get" : {
         "description" : "Henter uttaksperioder for en ungdomsytelsebehandling",
-        "operationId" : "getUngdomsytelseUttak",
+        "operationId" : "getUngdomsytelseUttak_1",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",
