@@ -12,7 +12,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -26,19 +25,24 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
-import no.nav.ung.sak.kontrakt.ungdomsytelse.UngdomsprogramInformasjonDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.uttak.UngdomsytelseUttakPeriodeDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto;
 import no.nav.ung.sak.tid.Virkedager;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.web.app.ungdomsytelse.BehandlingAvsluttetTidspunkt;
 import no.nav.ung.sak.web.app.ungdomsytelse.MånedsvisningDtoMapper;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningInput;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningsgrunnlagRepository;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulatorInput;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.Year;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -46,7 +50,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @Path("")
 @ApplicationScoped
@@ -58,13 +61,14 @@ public class AktivitetspengerRestTjeneste {
     public static final String AKTIVITETSPENGER_BASE_PATH = "/aktivitetspenger";
     public static final String SATSER_PATH = AKTIVITETSPENGER_BASE_PATH + "/satser";
     public static final String MÅNEDSVIS_SATS_OG_UTBETALING_PATH = AKTIVITETSPENGER_BASE_PATH + "/månedsvis-sats-og-utbetaling";
-
     public static final String UTTAK_PATH = AKTIVITETSPENGER_BASE_PATH + "/uttak";
+    public static final String BEREGNINGSGRUNNLAG_PATH = AKTIVITETSPENGER_BASE_PATH + "/beregningsgrunnlag";
 
     private BehandlingRepository behandlingRepository;
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private BeregningsgrunnlagRepository beregningsgrunnlagRepository;
 
     public AktivitetspengerRestTjeneste() {
         // for CDI proxy
@@ -73,12 +77,16 @@ public class AktivitetspengerRestTjeneste {
     @Inject
     public AktivitetspengerRestTjeneste(BehandlingRepository behandlingRepository,
                                         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-                                        TilkjentYtelseRepository tilkjentYtelseRepository, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+                                        TilkjentYtelseRepository tilkjentYtelseRepository,
+                                        MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+                                        BeregningsgrunnlagRepository beregningsgrunnlagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.beregningsgrunnlagRepository = beregningsgrunnlagRepository;
     }
+
 
     @GET
     @Operation(description = "Henter innvilgede satser for en aktivitetspengerbehandling", tags = "ung")
@@ -166,5 +174,40 @@ public class AktivitetspengerRestTjeneste {
         return grunnlag;
     }
 
+    @GET
+    @Operation(description = "Henter beregningsgrunnlag for en aktivitetspengerbehandling", tags = "ung")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @Path(BEREGNINGSGRUNNLAG_PATH)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Optional<BeregningsgrunnlagDto> getBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        return beregningsgrunnlagRepository.hentGrunnlag(behandling.getId())
+            .map(AktivitetspengerRestTjeneste::mapTilBeregningsgrunnlagDto);
+    }
 
+    private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag) {
+        BeregningInput beregningInput = grunnlag.getBeregningInput().getBeregningInput(grunnlag.getVirkningsdato());
+        PgiKalkulatorInput pgiKalkulatorInput = PgiKalkulator.lagPgiKalkulatorInput(beregningInput);
+        Map<Year, BigDecimal> avkortetOgOppjustert = PgiKalkulator.avgrensOgOppjusterÅrsinntekter(pgiKalkulatorInput);
+
+        List<PgiÅrsinntektDto> pgiÅrsinntekter = beregningInput.lagTidslinje().toSegments().stream()
+            .map(segment -> {
+                Year år = Year.of(segment.getFom().getYear());
+                return new PgiÅrsinntektDto(
+                    år.getValue(),
+                    segment.getValue().getVerdi(),
+                    avkortetOgOppjustert.getOrDefault(år, BigDecimal.ZERO)
+                );
+            })
+            .sorted(java.util.Comparator.comparingInt(PgiÅrsinntektDto::årstall))
+            .toList();
+
+        return new BeregningsgrunnlagDto(
+            grunnlag.getVirkningsdato(),
+            grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr(),
+            grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr(),
+            grunnlag.getÅrsinntektAvkortetOppjustertBesteBeregning(),
+            pgiÅrsinntekter
+        );
+    }
 }

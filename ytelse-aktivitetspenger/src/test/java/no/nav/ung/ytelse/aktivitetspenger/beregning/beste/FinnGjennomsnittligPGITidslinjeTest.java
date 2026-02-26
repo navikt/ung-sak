@@ -47,7 +47,7 @@ class PgiKalkulatorTest {
     }
 
     @Test
-    void skal_beregne_med_inflasjonsfaktor_for_tidligere_år() {
+    void skal_beregne_med_oppjusteringsfaktor_for_tidligere_år() {
         var sisteLigningsår = Year.of(2024);
         var virkningsdato = sisteLigningsår.plusYears(1).atDay(1);
 

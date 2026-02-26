@@ -16,20 +16,20 @@ public class PgiKalkulator {
 
     public static PgiKalkulatorInput lagPgiKalkulatorInput(BeregningInput beregningInput) {
         var gsnittTidsserie = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
-        var inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(beregningInput.virkningsdato().getYear()), 3);
+        var oppjusteringsfaktorTidsserie = GrunnbeløpTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(beregningInput.virkningsdato().getYear()), 3);
         var årsinntektMap = beregningInput.lagTidslinje();
 
-        return new PgiKalkulatorInput(årsinntektMap, inflasjonsfaktorTidsserie, gsnittTidsserie);
+        return new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie);
     }
 
     public static LocalDateTimeline<PgiUtregner> hentPeriodisertPgiUtregner(PgiKalkulatorInput input) {
         var gsnittTidsserie = input.gsnittTidsserie();
-        var inflasjonsfaktorTidsserie = input.inflasjonsfaktorTidsserie();
+        var oppjusteringsfaktorTidsserie = input.oppjusteringsfaktorTidsserie();
         var årsinntekter = mapTilPgiUtregner(input.årsinntekt());
 
         return årsinntekter
                     .intersection(gsnittTidsserie, leggTilGrunnbeløpSnitt())
-                    .intersection(inflasjonsfaktorTidsserie, leggTilInflasjonsfaktor());
+                    .intersection(oppjusteringsfaktorTidsserie, leggTilOppjusteringsfaktor());
     }
 
     public static Map<Year, BigDecimal> avgrensOgOppjusterÅrsinntekter(PgiKalkulatorInput input) {
@@ -53,10 +53,10 @@ public class PgiKalkulator {
         };
     }
 
-    private static LocalDateSegmentCombinator<PgiUtregner, BigDecimal, PgiUtregner> leggTilInflasjonsfaktor() {
+    private static LocalDateSegmentCombinator<PgiUtregner, BigDecimal, PgiUtregner> leggTilOppjusteringsfaktor() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue();
-            return new LocalDateSegment<>(di, builder.setInflasjonsfaktor(rhs.getValue()));
+            return new LocalDateSegment<>(di, builder.setoppjusteringsfaktor(rhs.getValue()));
         };
     }
 
@@ -64,11 +64,10 @@ public class PgiKalkulator {
             return årsinntekter.mapValue(entry -> new PgiUtregner(entry.getVerdi()));
     }
 
-
-    static class PgiUtregner {
+    public static class PgiUtregner {
         BigDecimal pgiÅrsinntekt;
         BigDecimal grunnbeløpSnitt;
-        BigDecimal inflasjonsfaktor;
+        BigDecimal oppjusteringsfaktor;
 
         public PgiUtregner(BigDecimal pgiÅrsinntekt) {
             this.pgiÅrsinntekt = pgiÅrsinntekt;
@@ -79,13 +78,13 @@ public class PgiKalkulator {
             return this;
         }
 
-        public PgiUtregner setInflasjonsfaktor(BigDecimal inflasjonsfaktor) {
-            this.inflasjonsfaktor = inflasjonsfaktor;
+        public PgiUtregner setoppjusteringsfaktor(BigDecimal oppjusteringsfaktor) {
+            this.oppjusteringsfaktor = oppjusteringsfaktor;
             return this;
         }
 
         public BigDecimal avgrensOgOppjusterårsinntekt() {
-            return beregnBidragTilPgi().multiply(inflasjonsfaktor);
+            return beregnBidragTilPgi().multiply(oppjusteringsfaktor);
         }
 
         private BigDecimal beregnBidragTilPgi() {

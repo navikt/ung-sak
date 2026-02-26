@@ -60,18 +60,18 @@ class GrunnbeløpTidslinjeTest {
 
     @Test
     void skal_ha_oppjusteringsfaktor_1_for_siste_år() {
-        LocalDateTimeline<BigDecimal> oppjusteringsTidslinje = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(2025), 2);
+        LocalDateTimeline<BigDecimal> oppjusteringsTidslinje = GrunnbeløpTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(2025), 2);
 
-        LocalDateSegment<BigDecimal> inflasjonsfaktorForSisteÅr = oppjusteringsTidslinje.toSegments().stream()
+        LocalDateSegment<BigDecimal> oppjusteringsfaktorForSisteÅr = oppjusteringsTidslinje.toSegments().stream()
             .filter(s -> s.getFom().getYear() == 2025)
             .findFirst().orElseThrow();
 
-        assertThat(BigDecimal.ONE).isEqualByComparingTo(inflasjonsfaktorForSisteÅr.getValue());
+        assertThat(BigDecimal.ONE).isEqualByComparingTo(oppjusteringsfaktorForSisteÅr.getValue());
     }
 
     @Test
     void skal_ha_oppjusteringsfaktor_for_dette_året_og_siste_tre_år() {
-        LocalDateTimeline<BigDecimal> oppjusteringsTidslinje = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(2026), 3);
+        LocalDateTimeline<BigDecimal> oppjusteringsTidslinje = GrunnbeløpTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(2026), 3);
         for (LocalDateSegment<BigDecimal> segment : oppjusteringsTidslinje.toSegments()) {
             int år = segment.getFom().getYear();
 

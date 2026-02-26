@@ -54,7 +54,7 @@ public class BeregningTjeneste {
     private static Map<String, LocalDateTimeline<?>> lagRegelSporingMap(PgiKalkulatorInput input) {
         var map = new LinkedHashMap<String, LocalDateTimeline<?>>();
         map.put("gsnittTidsserie", input.gsnittTidsserie().mapValue(Grunnbeløp::verdi));
-        map.put("inflasjonsfaktorTidsserie", input.inflasjonsfaktorTidsserie());
+        map.put("oppjusteringsfaktorTidsserie", input.oppjusteringsfaktorTidsserie());
         return map;
     }
 

@@ -63,7 +63,7 @@ public class GrunnbeløpTidslinje {
         return new LocalDateTimeline<>(gsnittSegmenter);
     }
 
-    public static LocalDateTimeline<BigDecimal> lagInflasjonsfaktorTidslinje(Year sisteÅr, int antallÅrTilbake) {
+    public static LocalDateTimeline<BigDecimal> lagOppjusteringsfaktorTidslinje(Year sisteÅr, int antallÅrTilbake) {
         var avgrensningsTimeline = new LocalDateInterval(
             sisteÅr.minusYears(antallÅrTilbake).atDay(1),
             sisteÅr.atMonth(12).atEndOfMonth()

@@ -34,7 +34,7 @@ public class Beregningsgrunnlag {
     private BigDecimal årsinntektAvkortetOppjustertBesteBeregning;
 
     @Embedded
-    private BeregningsgrunnlagInput pgiInput;
+    private BeregningsgrunnlagInput beregningInput;
 
     @Lob
     @DiffIgnore
@@ -54,7 +54,7 @@ public class Beregningsgrunnlag {
         this.årsinntektAvkortetOppjustertSisteTreÅr = årsinntektSisteTreÅr;
         this.årsinntektAvkortetOppjustertBesteBeregning = årsinntektBesteBeregning;
         this.regelSporing = regelSporing;
-        this.pgiInput = new BeregningsgrunnlagInput(beregningInputGrunnlag);
+        this.beregningInput = new BeregningsgrunnlagInput(beregningInputGrunnlag);
     }
 
     public LocalDate getVirkningsdato() {
@@ -71,6 +71,10 @@ public class Beregningsgrunnlag {
 
     public BigDecimal getÅrsinntektAvkortetOppjustertBesteBeregning() {
         return årsinntektAvkortetOppjustertBesteBeregning;
+    }
+
+    public BeregningsgrunnlagInput getBeregningInput() {
+        return beregningInput;
     }
 
     public String getRegelSporing() {
