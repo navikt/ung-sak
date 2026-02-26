@@ -1,0 +1,19 @@
+name: Typescript klient kompileringssjekk
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - 'web/src/main/resources/openapi-ts-client/ung-sak.openapi.json'
+jobs:
+  # Bygger ny typescript klient ut frå ny openapi.json fil.
+  # Viss ny kode er forskjellig frå sist publiserte pakke, sjekk om frontend (master versjon) vil kompilere med den nye koden.
+  # Skriv advarsel til pr kommentar viss kompilering feiler.
+  compile-check-typescript-client:
+    name: Kompileringssjekk
+    permissions:
+      contents: read
+      pull-requests: write # For å lage advarsel kommentar på PR
+    uses: navikt/sif-gha-workflows/.github/workflows/typescript-client-pr-check.yml@openapi-next
+    with:
+      openapiFilePath: web/src/main/resources/openapi-ts-client/ung-sak.openapi.json
+    secrets: inherit
