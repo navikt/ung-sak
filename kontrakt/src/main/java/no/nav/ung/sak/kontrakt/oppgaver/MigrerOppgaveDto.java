@@ -30,7 +30,7 @@ public record MigrerOppgaveDto(
     @JsonProperty(value = "oppgavetypeData", required = true)
     @NotNull
     @Valid
-    OppgavetypeDataDTO oppgavetypeData,
+    OppgavetypeDataDto oppgavetypeData,
 
     @JsonProperty(value = "bekreftelse")
     @Valid

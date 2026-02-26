@@ -138,7 +138,7 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
         //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
-        delegeringTjeneste.løsSøkYtelseOppgave(new DeltakerDTO(null, deltakerIdent.getIdent()));
+        delegeringTjeneste.løsSøkYtelseOppgave(deltakerIdent.getIdent());
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 

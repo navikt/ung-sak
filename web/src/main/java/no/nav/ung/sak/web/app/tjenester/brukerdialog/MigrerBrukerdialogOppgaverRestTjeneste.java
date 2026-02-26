@@ -21,6 +21,7 @@ import no.nav.ung.sak.kontrakt.oppgaver.MigreringsRequest;
 import no.nav.ung.sak.kontrakt.oppgaver.MigreringsResultat;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveRepository;
+import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,7 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
     private static final Logger log = LoggerFactory.getLogger(MigrerBrukerdialogOppgaverRestTjeneste.class);
 
     private BrukerdialogOppgaveRepository repository;
+    private OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste;
 
     public MigrerBrukerdialogOppgaverRestTjeneste() {
         // CDI proxy
@@ -49,8 +51,10 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
 
     @Inject
     public MigrerBrukerdialogOppgaverRestTjeneste(
-        BrukerdialogOppgaveRepository repository) {
+        BrukerdialogOppgaveRepository repository,
+        OppgaveLivssyklusTjeneste oppgaveLivssyklusTjeneste) {
         this.repository = repository;
+        this.oppgaveLivssyklusTjeneste = oppgaveLivssyklusTjeneste;
     }
 
     /**
@@ -103,7 +107,6 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
                     oppgaveDto.oppgaveReferanse(),
                     oppgaveDto.oppgavetype(),
                     oppgaveDto.aktørId(),
-                    oppgaveDto.oppgavetypeData(),
                     oppgaveDto.bekreftelse(),
                     oppgaveDto.status(),
                     frist,
@@ -111,7 +114,7 @@ public class MigrerBrukerdialogOppgaverRestTjeneste {
                     åpnetDato,
                     lukketDato
                 );
-                repository.persister(nyOppgave);
+                oppgaveLivssyklusTjeneste.opprettOppgave(nyOppgave, oppgaveDto.oppgavetypeData());
                 antallOpprettet++;
             }
         }

@@ -1,7 +1,7 @@
 package no.nav.ung.sak.oppgave.veileder;
 
 import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
 
 /**
  * Interface for veileder-tjeneste som kan opprette oppgaver for brukere.
@@ -15,5 +15,5 @@ public interface VeilederOppgaveTjeneste {
      * @param oppgaveDto DTO med informasjon om oppgaven som skal opprettes
      * @return
      */
-    BrukerdialogOppgaveDto opprettSøkYtelseOppgave(OpprettSøkYtelseOppgaveDto oppgaveDto);
+    BrukerdialogOppgaveDto opprettSøkYtelseOppgave(OpprettOppgaveDto oppgaveDto);
 }

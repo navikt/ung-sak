@@ -1,6 +1,9 @@
 package no.nav.ung.sak.oppgave;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
 
 import java.time.LocalDateTime;
@@ -10,15 +13,25 @@ import java.time.ZonedDateTime;
 @ApplicationScoped
 public class BrukerdialogOppgaveMapper {
 
+    private Instance<OppgaveDataMapperFraEntitetTilDto> mappere;
+
     public BrukerdialogOppgaveMapper() {
         // CDI proxy
     }
 
+    @Inject
+    public BrukerdialogOppgaveMapper(@Any Instance<OppgaveDataMapperFraEntitetTilDto> mappere) {
+        this.mappere = mappere;
+    }
+
     public BrukerdialogOppgaveDto tilDto(BrukerdialogOppgaveEntitet oppgave) {
+        var oppgavetypeData = OppgaveDataMapperFraEntitetTilDto.finnTjeneste(mappere, oppgave.getOppgaveType())
+            .tilDto(oppgave.getOppgaveData());
+
         return new BrukerdialogOppgaveDto(
             oppgave.getOppgavereferanse(),
             oppgave.getOppgaveType(),
-            oppgave.getData(),
+            oppgavetypeData,
             oppgave.getBekreftelse(),
             oppgave.getStatus(),
             toZonedDateTime(oppgave.getOpprettetTidspunkt()),

@@ -97,7 +97,7 @@ public class InntektAbonnentTjeneste {
             .ifPresent(abonnement -> {
                 inntektAbonnentKlient.avsluttAbonnement(Long.parseLong(abonnement.getAbonnementId()));
                 inntektAbonnementRepository.slettAbonnement(abonnement);
-                log.info("Avsluttet abonnement for aktørId={}", aktørId.getId());
+                log.info("Avsluttet abonnement med id={}", abonnement.getAbonnementId());
             });
     }
 

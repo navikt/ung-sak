@@ -102,22 +102,16 @@ public class FagsakApplikasjonTjeneste {
 
     }
 
-    public FagsakSamlingForBruker hentSaker(FagsakYtelseType ytelseType, String søkestreng) {
+    public FagsakSamlingForBruker hentSaker(String søkestreng) {
         if (predikatErFnr.test(søkestreng)) {
-            return hentSakerForFnr(ytelseType, new PersonIdent(søkestreng));
+            return hentSakerForFnr( new PersonIdent(søkestreng));
         } else {
-            return hentFagsakForSaksnummer(ytelseType, new Saksnummer(søkestreng));
+            return hentFagsakForSaksnummer( new Saksnummer(søkestreng));
         }
     }
 
     public FagsakSamlingForBruker hentFagsakForSaksnummer(Saksnummer saksnummer) {
         Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        return tilFagsakSamling(fagsak);
-    }
-
-    public FagsakSamlingForBruker hentFagsakForSaksnummer(FagsakYtelseType ytelseType, Saksnummer saksnummer) {
-        Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer)
-            .filter(f -> f.getYtelseType() == ytelseType);
         return tilFagsakSamling(fagsak);
     }
 
@@ -136,12 +130,12 @@ public class FagsakApplikasjonTjeneste {
         return tilFagsakView(fagsaker, funnetNavBruker.get());
     }
 
-    private FagsakSamlingForBruker hentSakerForFnr(FagsakYtelseType ytelseType, PersonIdent fnr) {
+    private FagsakSamlingForBruker hentSakerForFnr( PersonIdent fnr) {
         Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForFnr(fnr);
         if (funnetNavBruker.isEmpty()) {
             return FagsakSamlingForBruker.emptyView();
         }
-        List<Fagsak> fagsaker = fagsakRepository.hentForBruker(funnetNavBruker.get().getAktørId(), Set.of(ytelseType));
+        List<Fagsak> fagsaker = fagsakRepository.hentForBruker(funnetNavBruker.get().getAktørId());
         return tilFagsakView(fagsaker, funnetNavBruker.get());
     }
 
