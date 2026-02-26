@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler;
+package no.nav.ung.sak.formidling.vedtak.regler;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -6,17 +6,15 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatUtleder;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,29 +22,29 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+@FagsakYtelseTypeRef
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
 @BehandlingTypeRef(BehandlingType.REVURDERING)
-public class UngVedtaksbrevRegler implements VedtaksbrevRegel {
+public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
 
-    private static final Logger LOG = LoggerFactory.getLogger(UngVedtaksbrevRegler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(YtelseVedtaksbrevRegler.class);
 
     private BehandlingRepository behandlingRepository;
-    private DetaljertResultatUtleder detaljertResultatUtleder;
-    private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies;
+    private DetaljertResultatTidslinjeUtleder detaljertResultatUtleder;
+    private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances;
 
-    public UngVedtaksbrevRegler() {
+    public YtelseVedtaksbrevRegler() {
     }
 
     @Inject
-    public UngVedtaksbrevRegler(
+    public YtelseVedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
-        DetaljertResultatUtleder detaljertResultatUtleder,
-        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategies
+        DetaljertResultatTidslinjeUtleder detaljertResultatUtleder,
+        @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances
     ) {
         this.behandlingRepository = behandlingRepository;
         this.detaljertResultatUtleder = detaljertResultatUtleder;
-        this.innholdbyggerStrategies = innholdbyggerStrategies;
+        this.innholdbyggerStrategiesInstances = innholdbyggerStrategiesInstances;
     }
 
     @Override
@@ -57,6 +55,8 @@ public class UngVedtaksbrevRegler implements VedtaksbrevRegel {
     }
 
     private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var innholdbyggerStrategies = innholdbyggerStrategiesInstances.select(new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(behandling.getFagsakYtelseType()));
+
         var strategyResultater = innholdbyggerStrategies.stream()
             .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
             .map(it -> it.evaluer(behandling, detaljertResultat))

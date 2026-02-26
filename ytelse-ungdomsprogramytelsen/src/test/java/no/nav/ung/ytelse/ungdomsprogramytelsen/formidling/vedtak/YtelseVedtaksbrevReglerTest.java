@@ -15,13 +15,13 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
+import no.nav.ung.sak.formidling.vedtak.regler.YtelseVedtaksbrevRegler;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.*;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.*;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.UngVedtaksbrevRegler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -38,7 +38,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class UngVedtaksbrevReglerTest {
+class YtelseVedtaksbrevReglerTest {
 
     @Inject
     private EntityManager entityManager;
@@ -46,7 +46,7 @@ class UngVedtaksbrevReglerTest {
 
     @Inject
     @Any
-    private UngVedtaksbrevRegler vedtaksbrevRegler;
+    private YtelseVedtaksbrevRegler vedtaksbrevRegler;
 
 
     @BeforeEach
