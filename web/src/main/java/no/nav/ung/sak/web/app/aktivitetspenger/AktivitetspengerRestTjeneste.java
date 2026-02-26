@@ -179,10 +179,11 @@ public class AktivitetspengerRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(BEREGNINGSGRUNNLAG_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public Optional<BeregningsgrunnlagDto> getBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public BeregningsgrunnlagDto getBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return beregningsgrunnlagRepository.hentGrunnlag(behandling.getId())
-            .map(AktivitetspengerRestTjeneste::mapTilBeregningsgrunnlagDto);
+            .map(AktivitetspengerRestTjeneste::mapTilBeregningsgrunnlagDto)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: "+behandling.getId()));
     }
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag) {

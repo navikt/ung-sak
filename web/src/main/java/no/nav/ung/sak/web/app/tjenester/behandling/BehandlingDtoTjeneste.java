@@ -7,6 +7,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -22,6 +23,7 @@ import no.nav.ung.sak.kontrakt.ResourceLink;
 import no.nav.ung.sak.kontrakt.behandling.*;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårResultatDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
+import no.nav.ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
@@ -267,7 +269,11 @@ public class BehandlingDtoTjeneste {
 
         if (behandling.erYtelseBehandling()) {
             leggTilBeregnetYtelseBaserteLinks(behandling, dto, uuidQueryParams);
-            leggTilUngdomsytelseSpesifikkeLinks(dto, uuidQueryParams);
+            if (FagsakYtelseType.UNGDOMSYTELSE.equals(behandling.getFagsakYtelseType())) {
+                leggTilUngdomsytelseSpesifikkeLinks(dto, uuidQueryParams);
+            } else if (FagsakYtelseType.AKTIVITETSPENGER.equals(behandling.getFagsakYtelseType())) {
+                leggTilAktivitetspengerSpesifikkeLinks(dto, uuidQueryParams);
+            }
         }
     }
 
@@ -276,6 +282,13 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.MÅNEDSVIS_SATS_OG_UTBETALING_PATH, "månedsvis-sats-og-utbetaling", uuidQueryParams));
         dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.UTTAK_PATH, "uttak", uuidQueryParams));
         dto.leggTil(getFraMap(UngdomsytelseRestTjeneste.UNGDOMSPROGRAM_PATH, "ungdomsprogram-informasjon", uuidQueryParams));
+    }
+
+    private static void leggTilAktivitetspengerSpesifikkeLinks(BehandlingDto dto, Map<String, String> uuidQueryParams) {
+        dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.SATSER_PATH, "satser", uuidQueryParams));
+        dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.MÅNEDSVIS_SATS_OG_UTBETALING_PATH, "månedsvis-sats-og-utbetaling", uuidQueryParams));
+        dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.UTTAK_PATH, "uttak", uuidQueryParams));
+        dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.BEREGNINGSGRUNNLAG_PATH, "beregningsgrunnlag", uuidQueryParams));
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {

@@ -1,6 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester;
 
 import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
+import no.nav.ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.aktør.AktørRestTjeneste;
@@ -88,6 +89,7 @@ public class RestImplementationClasses {
         classes.add(OppdragProxyRestTjeneste.class);
         classes.add(ArbeidsgiverRestTjeneste.class);
 
+        classes.add(AktivitetspengerRestTjeneste.class);
 
         classes.add(KlageRestTjeneste.class);
 
