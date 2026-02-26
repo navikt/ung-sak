@@ -34,7 +34,8 @@ public class BeregningStegTjeneste {
         var inntektsposter = hentSigrunInntektsposter(behandlingId);
         var sistLignedeÅr = Year.of(virkningsdato.minusYears(1).getYear());  // TODO: Koble på utledning av siste tilgjengelige lignede år
 
-        var resultat = BeregningTjeneste.avgjørBesteberegning(virkningsdato, sistLignedeÅr, inntektsposter);
+        var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, virkningsdato, inntektsposter);
+        var resultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
         besteBeregningGrunnlagRepository.lagre(behandlingId, resultat);
     }
 

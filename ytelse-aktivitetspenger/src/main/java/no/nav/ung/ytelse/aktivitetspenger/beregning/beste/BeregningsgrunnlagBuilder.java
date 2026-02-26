@@ -3,36 +3,31 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 import no.nav.ung.sak.diff.DiffEntity;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 class BeregningsgrunnlagBuilder {
 
-    private LocalDate virkningsdato;
+    private BeregningInput beregningInput;
     private BigDecimal årsinntektSisteÅr;
     private BigDecimal årsinntektSisteTreÅr;
     private BigDecimal årsinntektBesteBeregning;
-    private String regelInput;
     private String regelSporing;
 
     private boolean built = false;
 
     BeregningsgrunnlagBuilder(Beregningsgrunnlag kladd) {
         if (kladd != null) {
-            this.virkningsdato = kladd.getVirkningsdato();
-            this.årsinntektSisteÅr = kladd.getÅrsinntektSisteÅr();
-            this.årsinntektSisteTreÅr = kladd.getÅrsinntektSisteTreÅr();
-            this.årsinntektBesteBeregning = kladd.getÅrsinntektBesteBeregning();
-            this.regelInput = kladd.getRegelInput();
+            this.årsinntektSisteÅr = kladd.getÅrsinntektAvkortetOppjustertSisteÅr();
+            this.årsinntektSisteTreÅr = kladd.getÅrsinntektAvkortetOppjustertSisteTreÅr();
+            this.årsinntektBesteBeregning = kladd.getÅrsinntektAvkortetOppjustertBesteBeregning();
             this.regelSporing = kladd.getRegelSporing();
         }
     }
 
     BeregningsgrunnlagBuilder medResultat(BesteberegningResultat resultat) {
-        this.virkningsdato = resultat.getBeregningInput().virkningsdato();
+        this.beregningInput = resultat.getBeregningInput();
         this.årsinntektSisteÅr = resultat.getÅrsinntektSisteÅr();
         this.årsinntektSisteTreÅr = resultat.getÅrsinntektSisteTreÅr();
         this.årsinntektBesteBeregning = resultat.getÅrsinntektBesteBeregning();
-        this.regelInput = resultat.getRegelInput();
         this.regelSporing = resultat.getRegelSporing();
         return this;
     }
@@ -44,7 +39,7 @@ class BeregningsgrunnlagBuilder {
     }
 
     private Beregningsgrunnlag repeatableBuild() {
-        return new Beregningsgrunnlag(virkningsdato, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelInput, regelSporing);
+        return new Beregningsgrunnlag(beregningInput, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelSporing);
     }
 
     boolean erForskjellig(Beregningsgrunnlag grunnlag, DiffEntity differ) {

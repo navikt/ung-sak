@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
+import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;
@@ -13,23 +14,35 @@ import java.util.stream.Collectors;
 
 public class PgiKalkulator {
 
-    public static Map<Year, BigDecimal> avgrensOgOppjusterÅrsinntekter(BeregningInput input) {
+    public static PgiKalkulatorInput lagPgiKalkulatorInput(BeregningInput beregningInput) {
+        var gsnittTidsserie = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
+        var inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(beregningInput.virkningsdato().getYear()), 3);
+        var årsinntektMap = beregningInput.lagTidslinje();
+
+        return new PgiKalkulatorInput(årsinntektMap, inflasjonsfaktorTidsserie, gsnittTidsserie);
+    }
+
+    public static LocalDateTimeline<PgiUtregner> hentPeriodisertPgiUtregner(PgiKalkulatorInput input) {
         var gsnittTidsserie = input.gsnittTidsserie();
         var inflasjonsfaktorTidsserie = input.inflasjonsfaktorTidsserie();
-        var årsinntekter = opprettTidsseriAvÅrsinntekter(input.årsinntektMap());
+        var årsinntekter = mapTilPgiUtregner(input.årsinntekt());
 
         return årsinntekter
                     .intersection(gsnittTidsserie, leggTilGrunnbeløpSnitt())
-                    .intersection(inflasjonsfaktorTidsserie, leggTilInflasjonsfaktor())
-                    .mapValue(PgiUtregner::avgrensOgOppjusterårsinntekt)
+                    .intersection(inflasjonsfaktorTidsserie, leggTilInflasjonsfaktor());
+    }
+
+    public static Map<Year, BigDecimal> avgrensOgOppjusterÅrsinntekter(PgiKalkulatorInput input) {
+        return hentPeriodisertPgiUtregner(input)
+            .mapValue(PgiUtregner::avgrensOgOppjusterårsinntekt)
             .toSegments().stream()
             .collect(Collectors.groupingBy(
                 segment -> Year.of(segment.getFom().getYear()),
-                    Collectors.reducing(
-                        BigDecimal.ZERO,
-                        LocalDateSegment::getValue,
-                        BigDecimal::add
-                    )
+                Collectors.reducing(
+                    BigDecimal.ZERO,
+                    LocalDateSegment::getValue,
+                    BigDecimal::add
+                )
             ));
     }
 
@@ -47,7 +60,7 @@ public class PgiKalkulator {
         };
     }
 
-    private static LocalDateTimeline<PgiUtregner> opprettTidsseriAvÅrsinntekter(LocalDateTimeline<Beløp> årsinntekter) {
+    private static LocalDateTimeline<PgiUtregner> mapTilPgiUtregner(LocalDateTimeline<Beløp> årsinntekter) {
             return årsinntekter.mapValue(entry -> new PgiUtregner(entry.getVerdi()));
     }
 

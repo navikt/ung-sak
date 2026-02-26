@@ -5,13 +5,14 @@ import no.nav.ung.sak.diff.DiffIgnore;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Year;
 
 @Entity(name = "Beregningsgrunnlag")
-@Table(name = "GR_BEREGNINSGRUNNLAG")
+@Table(name = "GR_BEREGNINGSGRUNNLAG")
 public class Beregningsgrunnlag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_BEREGNINSGRUNNLAG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_BEREGNINGSGRUNNLAG")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false)
@@ -20,19 +21,20 @@ public class Beregningsgrunnlag {
     @Column(name = "virkningsdato", nullable = false, updatable = false)
     private LocalDate virkningsdato;
 
+    @Column(name = "siste_lignede_aar", nullable = false, updatable = false)
+    private Year sisteLignedeÅr;
+
     @Column(name = "aarsinntekt_siste_aar", nullable = false, updatable = false)
-    private BigDecimal årsinntektSisteÅr;
+    private BigDecimal årsinntektAvkortetOppjustertSisteÅr;
 
     @Column(name = "aarsinntekt_siste_tre_aar", nullable = false, updatable = false)
-    private BigDecimal årsinntektSisteTreÅr;
+    private BigDecimal årsinntektAvkortetOppjustertSisteTreÅr;
 
     @Column(name = "aarsinntekt_beste_beregning", nullable = false, updatable = false)
-    private BigDecimal årsinntektBesteBeregning;
+    private BigDecimal årsinntektAvkortetOppjustertBesteBeregning;
 
-    @Lob
-    @DiffIgnore
-    @Column(name = "regel_input", nullable = false, updatable = false, length = 10000)
-    private String regelInput;
+    @Embedded
+    private BeregningsgrunnlagInput pgiInput;
 
     @Lob
     @DiffIgnore
@@ -42,36 +44,33 @@ public class Beregningsgrunnlag {
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
 
-    Beregningsgrunnlag() {
+    protected Beregningsgrunnlag() {
     }
 
-    Beregningsgrunnlag(LocalDate virkningsdato, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelInput, String regelSporing) {
-        this.virkningsdato = virkningsdato;
-        this.årsinntektSisteÅr = årsinntektSisteÅr;
-        this.årsinntektSisteTreÅr = årsinntektSisteTreÅr;
-        this.årsinntektBesteBeregning = årsinntektBesteBeregning;
-        this.regelInput = regelInput;
+    Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing) {
+        this.virkningsdato = beregningInputGrunnlag.virkningsdato();
+        this.sisteLignedeÅr = beregningInputGrunnlag.sisteLignedeÅr();
+        this.årsinntektAvkortetOppjustertSisteÅr = årsinntektSisteÅr;
+        this.årsinntektAvkortetOppjustertSisteTreÅr = årsinntektSisteTreÅr;
+        this.årsinntektAvkortetOppjustertBesteBeregning = årsinntektBesteBeregning;
         this.regelSporing = regelSporing;
+        this.pgiInput = new BeregningsgrunnlagInput(beregningInputGrunnlag);
     }
 
     public LocalDate getVirkningsdato() {
         return virkningsdato;
     }
 
-    public BigDecimal getÅrsinntektSisteÅr() {
-        return årsinntektSisteÅr;
+    public BigDecimal getÅrsinntektAvkortetOppjustertSisteÅr() {
+        return årsinntektAvkortetOppjustertSisteÅr;
     }
 
-    public BigDecimal getÅrsinntektSisteTreÅr() {
-        return årsinntektSisteTreÅr;
+    public BigDecimal getÅrsinntektAvkortetOppjustertSisteTreÅr() {
+        return årsinntektAvkortetOppjustertSisteTreÅr;
     }
 
-    public BigDecimal getÅrsinntektBesteBeregning() {
-        return årsinntektBesteBeregning;
-    }
-
-    public String getRegelInput() {
-        return regelInput;
+    public BigDecimal getÅrsinntektAvkortetOppjustertBesteBeregning() {
+        return årsinntektAvkortetOppjustertBesteBeregning;
     }
 
     public String getRegelSporing() {

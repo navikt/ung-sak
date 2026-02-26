@@ -69,7 +69,7 @@ public class BeregningsgrunnlagRepository {
 
     public Optional<Beregningsgrunnlag> hentGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
-                "SELECT gr FROM BesteBeregningGrunnlag gr WHERE gr.behandlingId = :id AND gr.aktiv = true",
+                "SELECT gr FROM GR_BEREGNINGSGRUNNLAG gr WHERE gr.behandlingId = :id AND gr.aktiv = true",
                 Beregningsgrunnlag.class)
             .setParameter("id", behandlingId);
         return HibernateVerktøy.hentUniktResultat(query);

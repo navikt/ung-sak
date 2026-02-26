@@ -25,7 +25,7 @@ class BeregningTjenesteTest {
             lagInntektspost(2023, BigDecimal.valueOf(200_000))
         );
 
-        var resultat = new BeregningTjeneste().avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
     }
 
@@ -37,7 +37,7 @@ class BeregningTjenesteTest {
             lagInntektspost(2023, BigDecimal.valueOf(500_000))
         );
 
-        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteTreÅr());
     }
 
@@ -49,7 +49,7 @@ class BeregningTjenesteTest {
             // 2023 mangler
         );
 
-        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
     }
 
@@ -60,7 +60,7 @@ class BeregningTjenesteTest {
             lagInntektspost(2023, BigDecimal.valueOf(300_000))
         );
 
-        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, inntektsposter));
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
 
         assertThat(resultat.getÅrsinntektSisteÅr()).isEqualByComparingTo(BigDecimal.ZERO);
         // 130 160 (G-snitt 2026) / 116 239 (G-snitt 2023) * 300 000/ 3 = 111 976,18699
@@ -69,7 +69,7 @@ class BeregningTjenesteTest {
 
     @Test
     void ingen_inntektsposter_gir_null_resultat() {
-        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(VIRKNINGSDATO, SIST_LIGNEDE_ÅR, List.of()));
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, List.of()));
         assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 

@@ -1,13 +1,9 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
-import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;
@@ -17,64 +13,49 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.avgrensOgOppjusterÅrsinntekter;
+import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.lagPgiKalkulatorInput;
 
 
 public class BeregningTjeneste {
 
-    public static BesteberegningResultat avgjørBesteberegning(LocalDate virkningsdato, Year sistLignedeÅr, List<Inntektspost> inntekter) {
-        return avgjørBesteberegning(lagBeregningInput(virkningsdato, sistLignedeÅr, inntekter));
-    }
-
-    public static BeregningInput lagBeregningInput(LocalDate virkningsdato, Year sistLignedeÅr, List<Inntektspost> inntekter) {
-        var gsnittTidsserie = GrunnbeløpTidslinje.hentGrunnbeløpSnittTidslinje();
-        var inflasjonsfaktorTidsserie = GrunnbeløpTidslinje.lagInflasjonsfaktorTidslinje(Year.of(virkningsdato.getYear()), 3);
-        var årsinntektMap = lagÅrsinntektMap(sistLignedeÅr, inntekter);
-
-        return new BeregningInput(virkningsdato, sistLignedeÅr, årsinntektMap, inflasjonsfaktorTidsserie, gsnittTidsserie);
-    }
-
-    private static LocalDateTimeline<Beløp> lagÅrsinntektMap(Year sisteTilgjengeligeLigningsår, List<Inntektspost> inntekter) {
+    public static BeregningInput lagBeregningInput(Year sisteTilgjengeligeLigningsår, LocalDate virkningsdato, List<Inntektspost> inntekter) {
         var sisteTilgjengeligeLigningsårTom = sisteTilgjengeligeLigningsår.atMonth(12).atEndOfMonth();
 
-        var inntektssegmenter = inntekter.stream()
+        var pgiPerÅr = inntekter.stream()
             .filter(ip -> !ip.getPeriode().getTomDato().isAfter(sisteTilgjengeligeLigningsårTom))
-            .map(it -> {
-                var periode = it.getPeriode();
+            .collect(Collectors.groupingBy(
+                ip -> Year.from(ip.getPeriode().getFomDato()),
+                Collectors.reducing(Beløp.ZERO, Inntektspost::getBeløp, Beløp::adder)
+            ));
 
-                return new LocalDateSegment<>(
-                    new LocalDateInterval(periode.getFomDato(), periode.getTomDato()),
-                    it.getBeløp()
-                );
-            }).toList();
+        var pgi3 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår, Beløp.ZERO);
+        var pgi2 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår.minusYears(1), Beløp.ZERO);
+        var pgi1 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår.minusYears(2), Beløp.ZERO);
 
-        return new LocalDateTimeline<>(inntektssegmenter);
+        return new BeregningInput(pgi1, pgi2, pgi3, virkningsdato, sisteTilgjengeligeLigningsår);
     }
 
     public static BesteberegningResultat avgjørBesteberegning(BeregningInput input) {
-        var pgiPerÅr = avgrensOgOppjusterÅrsinntekter(input);
+        var pgiKalkulatorInput = lagPgiKalkulatorInput(input);
+        var pgiPerÅr = avgrensOgOppjusterÅrsinntekter(pgiKalkulatorInput);
 
-        BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(input.sistLignedeÅr(), BigDecimal.ZERO);
+        BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(input.sisteLignedeÅr(), BigDecimal.ZERO);
         BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
         BigDecimal årsinntektBesteBeregning = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
 
-        String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(lagRegelSporingMap(input));
-        String regelInput = lagRegelInput(input);
+        String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(lagRegelSporingMap(pgiKalkulatorInput));
 
-        return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelSporing, regelInput);
+        return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelSporing);
     }
 
-    private static Map<String, LocalDateTimeline<?>> lagRegelSporingMap(BeregningInput input) {
+    private static Map<String, LocalDateTimeline<?>> lagRegelSporingMap(PgiKalkulatorInput input) {
         var map = new LinkedHashMap<String, LocalDateTimeline<?>>();
         map.put("gsnittTidsserie", input.gsnittTidsserie().mapValue(Grunnbeløp::verdi));
         map.put("inflasjonsfaktorTidsserie", input.inflasjonsfaktorTidsserie());
         return map;
-    }
-
-    private static String lagRegelInput(BeregningInput input) {
-        var regelInput = new RegelInput(input.virkningsdato(), input.årsinntektMap());
-        return JsonObjectMapper.toJson(regelInput, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
     private static BigDecimal hentSnittTreSisteÅr(Map<Year, BigDecimal> pgiPerÅr) {
@@ -85,9 +66,4 @@ public class BeregningTjeneste {
             .reduce(BigDecimal.ZERO, BigDecimal::add)
             .divide(BigDecimal.valueOf(3), 10, java.math.RoundingMode.HALF_EVEN);
     }
-
-    public record RegelInput(
-        LocalDate virkningsdato,
-        LocalDateTimeline<Beløp> inntekterPerÅr
-    ) {}
 }

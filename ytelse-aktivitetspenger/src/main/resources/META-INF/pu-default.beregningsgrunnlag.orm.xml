@@ -4,7 +4,7 @@
                  xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_2.xsd"
                  version="3.2">
 
-    <sequence-generator name="SEQ_GR_BEREGNINSGRUNNLAG" allocation-size="50" sequence-name="SEQ_GR_BEREGNINSGRUNNLAG"/>
+    <sequence-generator name="SEQ_GR_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_GR_BEREGNINGSGRUNNLAG"/>
 
     <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag"/>
 
