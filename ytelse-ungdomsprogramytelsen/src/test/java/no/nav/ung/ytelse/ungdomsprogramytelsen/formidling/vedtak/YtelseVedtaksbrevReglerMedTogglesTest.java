@@ -7,12 +7,12 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.YtelseVedtaksbrevRegler;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringInntektScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.UngVedtaksbrevRegler;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
-class UngVedtaksbrevReglerMedTogglesTest {
+class YtelseVedtaksbrevReglerMedTogglesTest {
 
     @Inject
     private EntityManager entityManager;
@@ -39,7 +39,7 @@ class UngVedtaksbrevReglerMedTogglesTest {
 
     @Inject
     @Any
-    private UngVedtaksbrevRegler vedtaksbrevRegler;
+    private YtelseVedtaksbrevRegler vedtaksbrevRegler;
 
 
     @BeforeEach
@@ -69,7 +69,7 @@ class UngVedtaksbrevReglerMedTogglesTest {
 
         var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
 
-        UngVedtaksbrevReglerTest.assertRedigerbarBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON, EndringInntektUtenReduksjonInnholdBygger.class);
+        YtelseVedtaksbrevReglerTest.assertRedigerbarBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON, EndringInntektUtenReduksjonInnholdBygger.class);
 
     }
 
