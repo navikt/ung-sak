@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.resultat;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak.resultat;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -13,17 +13,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @ApplicationScoped
-public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatForPeriodeUtleder {
+public class AktivitetspengerDetaljertResultatForPeriodeUtleder implements DetaljertResultatForPeriodeUtleder {
 
 
     private static final Map<BehandlingÅrsakType, DetaljertResultatInfo> ÅRSAK_RESULTAT_INNVILGELSE_MAP = Map.of(
         BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_DØDSFALL),
         BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS),
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL),
-        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_DELTAKER_DØDSFALL),
-        BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_FJERNE_PERIODE)
+        BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_DELTAKER_DØDSFALL)
     );
 
     @Override
@@ -43,18 +42,11 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
             resultater.add(DetaljertResultatForPeriodeUtleder.kontrollerInntektDetaljertResultat(tilkjentYtelse));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_AKTIVITETSPENGER_PERIODE)
             || vilkårResultat.manuellOpprettetBehandling() && relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
             resultater.add(DetaljertResultatForPeriodeUtleder.nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
-            resultater.add(endretStartdatoDetaljertResultat(avslåtteVilkår));
-        }
-
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
-            resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
-        }
 
         relevanteÅrsaker.stream()
             .filter(ÅRSAK_RESULTAT_INNVILGELSE_MAP::containsKey)

@@ -432,7 +432,7 @@
                 <executions>
                     <execution>
                         <!-- trengs her for at lokal kjøring av applikasjonen (fra IDE) skal finne pdfgen ressursene -->
-                        <id>copy-ungdomsprogramytelsen-pdfgen-resources</id>
+                        <id>copy-pdfgen-resources</id>
                         <phase>compile</phase>
                         <goals>
                             <goal>copy-resources</goal>
@@ -446,19 +446,12 @@
                                         <include>**/*</include>
                                     </includes>
                                 </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- trengs her for at lokal kjøring av applikasjonen (fra IDE) skal finne pdfgen ressursene -->
-                        <id>copy-felles-pdfgen-resources</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
-                            <resources>
+                                <resource>
+                                    <directory>../ytelse-aktivitetspenger/src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
                                 <resource>
                                     <directory>../formidling/src/main/resources/pdfgen</directory>
                                     <includes>
