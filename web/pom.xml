@@ -452,6 +452,19 @@
                                         <include>**/*</include>
                                     </includes>
                                 </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- trengs her for at lokal kjøring av applikasjonen (fra IDE) skal finne pdfgen ressursene -->
+                        <id>copy-felles-pdfgen-resources</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
                                 <resource>
                                     <directory>../formidling/src/main/resources/pdfgen</directory>
                                     <includes>
