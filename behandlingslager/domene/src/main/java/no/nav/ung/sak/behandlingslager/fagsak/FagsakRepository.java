@@ -96,7 +96,7 @@ public class FagsakRepository {
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
         query.setParameter("ytelseTyper", ytelsetyper);
-        return query.getResultList();
+            return query.getResultList();
     }
 
     public List<Fagsak> hentForBruker(AktørId aktørId, FagsakYtelseType fagsakYtelseType) {
