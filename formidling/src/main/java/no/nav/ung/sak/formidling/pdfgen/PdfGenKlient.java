@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.verapdf.gf.foundry.VeraGreenfieldFoundryProvider;
 
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -35,13 +37,11 @@ public class PdfGenKlient {
         System.setProperty("sun2d.cmm", "sun2d.cmm.kcms.KcmsServiceProvider");
         VeraGreenfieldFoundryProvider.initialise();
         XRLog.setLoggerImpl(new Slf4jLogger());
-        boolean kjørerEnhetstesterEllerFraIDE = Files.exists(Path.of("target"));
-        String plassering = kjørerEnhetstesterEllerFraIDE ? "target/pdfgen/" : "pdfgen/";
         Environment initialEnvironment = new Environment(
             Collections.emptyMap(),
-            new PDFGenResource(getResource(plassering + "templates/")),
-            new PDFGenResource(getResource(plassering + "resources/")),
-            new PDFGenResource(getResource(plassering + "fonts/")),
+            new PDFGenResource(getResource("templates")),
+            new PDFGenResource(getResource("resources")),
+            new PDFGenResource(getResource("fonts")),
             new PDFGenResource("") //denne trengs ikke, er er fordi PDFGenCore krever 4 argumenter
         );
         PDFGenCore.Companion.init(initialEnvironment);
@@ -49,13 +49,26 @@ public class PdfGenKlient {
 
     }
 
-    private Path getResource(String faktiskPath) {
+    private Path getResource(String relativePath) {
+        String faktiskPath = "pdfgen/%s".formatted(relativePath);
         Path path = Path.of(faktiskPath);
         if (Files.exists(path)) {
             // Finnes i rotmappen til der appen kjører fra, typisk fra docker
             return path;
         }
-        throw new IllegalArgumentException("finner ikke " + faktiskPath);
+
+        log.info("Fant ikke pdfgen-ressurser på {}. Prøver å hente fra classpath (resource) til modulen. " +
+            "Bør bare skje for test", faktiskPath);
+
+        //Fantes ikke, fallback til resourcemappen til modulen, typisk for tester
+        URL resource = getClass().getClassLoader().getResource(faktiskPath);
+        Objects.requireNonNull(resource, "Fant ingen resource på  " + faktiskPath);
+
+        try {
+            return Path.of(resource.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @WithSpan
