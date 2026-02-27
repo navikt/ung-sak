@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.sak.formidling.klage.regler.VedtaksbrevReglerKlage;
+import no.nav.ung.sak.formidling.klage.regler.KlageVedtaksbrevRegler;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
@@ -13,22 +13,22 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Dependent
-public class VedtaksbrevTjenesteKlage {
+public class KlageVedtaksbrevTjeneste {
 
     private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private VedtaksbrevReglerKlage vedtaksbrevRegler;
+    private KlageVedtaksbrevRegler vedtaksbrevRegler;
 
-    private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjenesteKlage.class);
+    private static final Logger LOG = LoggerFactory.getLogger(KlageVedtaksbrevTjeneste.class);
 
     @Inject
-    public VedtaksbrevTjenesteKlage(
+    public KlageVedtaksbrevTjeneste(
         VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        @BehandlingTypeRef(BehandlingType.KLAGE) VedtaksbrevReglerKlage vedtaksbrevRegler) {
+        @BehandlingTypeRef(BehandlingType.KLAGE) KlageVedtaksbrevRegler vedtaksbrevRegler) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
     }
 
-    public VedtaksbrevTjenesteKlage() {
+    public KlageVedtaksbrevTjeneste() {
     }
 
     public GenerertBrev forhåndsvis(Long behandlingId, boolean kunHtml) {

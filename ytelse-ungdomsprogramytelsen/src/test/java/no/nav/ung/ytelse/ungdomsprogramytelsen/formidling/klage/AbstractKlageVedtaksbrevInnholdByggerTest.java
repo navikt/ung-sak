@@ -5,11 +5,11 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.PdlKlientFake;
-import no.nav.ung.sak.formidling.klage.vedtak.VedtaksbrevTjenesteKlage;
+import no.nav.ung.sak.formidling.klage.vedtak.KlageVedtaksbrevTjeneste;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.PdlKlientFake;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -51,7 +51,7 @@ abstract class AbstractKlageVedtaksbrevInnholdByggerTest {
     protected UngTestRepositories ungTestRepositories;
 
     @Inject
-    protected VedtaksbrevTjenesteKlage vedtaksbrevTjeneste;
+    protected KlageVedtaksbrevTjeneste vedtaksbrevTjeneste;
 
     AbstractKlageVedtaksbrevInnholdByggerTest(int forventetAntallPdfSider, String forventetPdfHovedoverskrift) {
         this.forventetAntallPdfSider = forventetAntallPdfSider;
@@ -109,14 +109,14 @@ abstract class AbstractKlageVedtaksbrevInnholdByggerTest {
         return genererVedtaksbrevUtenLagring(behandlingId, vedtaksbrevTjeneste);
     }
 
-    private static GenerertBrev genererVedtaksbrevUtenLagring(Behandling behandlingId, VedtaksbrevTjenesteKlage vedtaksbrevTjeneste1) {
+    private static GenerertBrev genererVedtaksbrevUtenLagring(Behandling behandlingId, KlageVedtaksbrevTjeneste vedtaksbrevTjeneste1) {
         return vedtaksbrevTjeneste1.forhåndsvis(behandlingId.getId(), true);
     }
 
     /**
      * Lager vedtaksbrev med mulighet for å lagre pdf lokalt hvis env variabel LAGRE_PDF er satt.
      */
-    static protected GenerertBrev genererVedtaksbrev(Behandling behandlingId, TestInfo testInfo, VedtaksbrevTjenesteKlage vedtaksbrevTjeneste) {
+    static protected GenerertBrev genererVedtaksbrev(Behandling behandlingId, TestInfo testInfo, KlageVedtaksbrevTjeneste vedtaksbrevTjeneste) {
         String lagre = System.getenv("LAGRE");
 
         if (lagre == null) {

@@ -1,26 +1,15 @@
 package no.nav.ung.sak.behandlingslager.fagsak;
 
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PreRemove;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.BaseEntitet;
-import no.nav.ung.sak.tid.PostgreSQLRangeType;
-import no.nav.ung.sak.tid.Range;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.tid.Range;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.annotations.Type;
@@ -186,7 +175,7 @@ public class Fagsak extends BaseEntitet {
         return getClass().getSimpleName() + "<"
             + (id == null ? "" : "fagsakId=" + id + ",")
             + ", saksnummer=" + saksnummer
-            + ", ytelseType" + ytelseType
+            + ", ytelseType=" + ytelseType
             + ", periode=" + periode
             + ">";
     }

@@ -16,6 +16,7 @@
         <module>behandlingslager</module>
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
+        <module>formidling-pdfgen-templates</module>
         <module>formidling</module>
         <module>fordel</module>
         <module>klage</module>
@@ -393,6 +394,11 @@
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>formidling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>formidling-pdfgen-templates</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

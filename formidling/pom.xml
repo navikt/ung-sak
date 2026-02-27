@@ -29,6 +29,10 @@
 		</dependency>
         <!-- PDFGEN -->
         <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>formidling-pdfgen-templates</artifactId>
+        </dependency>
+        <dependency>
             <groupId>no.nav.pdfgen</groupId>
             <artifactId>pdfgen-core</artifactId>
             <exclusions>
@@ -71,40 +75,5 @@
 		</dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-jar-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>pdfgen/**</exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-pdfgen-resources</id>
-                        <phase>test-compile</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/resources/pdfgen</directory>
-                                    <includes>
-                                        <include>**/*</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

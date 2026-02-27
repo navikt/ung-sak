@@ -13,11 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 
 import java.util.List;
@@ -26,14 +22,14 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 @FagsakYtelseTypeRef
 @BehandlingTypeRef(BehandlingType.KLAGE)
-public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
+public class KlageVedtaksbrevRegler implements VedtaksbrevRegel {
 
     private BehandlingRepository behandlingRepository;
     private KlageRepository klageRepository;
     private Instance<VedtaksbrevKlageInnholdbyggerStrategy> innholdbyggerStrategies;
 
     @Inject
-    public VedtaksbrevReglerKlage(
+    public KlageVedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
         KlageRepository klageRepository,
         @Any Instance<VedtaksbrevKlageInnholdbyggerStrategy> innholdbyggerStrategies) {
@@ -42,7 +38,7 @@ public class VedtaksbrevReglerKlage implements VedtaksbrevRegel {
         this.innholdbyggerStrategies = innholdbyggerStrategies;
     }
 
-    public VedtaksbrevReglerKlage() {
+    public KlageVedtaksbrevRegler() {
     }
 
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {

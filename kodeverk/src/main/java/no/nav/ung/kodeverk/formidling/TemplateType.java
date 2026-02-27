@@ -14,6 +14,9 @@ public enum TemplateType {
     ENDRING_PROGRAMPERIODE("endring_programperiode", "ungdomsprogramytelse","Endring av programperiode"),
     GENERELT_FRITEKSTBREV("generelt_fritekstbrev", "ungdomsprogramytelse", "Generelt fritekstbrev"),
 
+    //TODO finne bedre måte å skille ytelsene på
+    AKTIVITETSPENGER_INNVILGELSE("innvilgelse", "aktivitetspenger", "Førstegangsinnvilgelse"),
+
     KLAGE_AVVIST("avvist", "klage", "Avvist klage grunnet formkrav"),
     KLAGE_MEDHOLD("medhold", "klage", "Medhold i klage - omgjøres"),
     KLAGE_OVERSENDT("oversendt", "klage", "Klage oversendt til Klageinstansen"),
