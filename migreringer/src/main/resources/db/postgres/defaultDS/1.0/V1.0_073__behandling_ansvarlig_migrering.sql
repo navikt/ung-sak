@@ -18,6 +18,6 @@ select nextval('seq_behandling_ansvarlig'),
        behandlende_enhet,
        behandlende_enhet_navn,
        behandlende_enhet_arsak,
-       totrinnsbehandling,id
+       totrinnsbehandling
 from behandling b;
 
