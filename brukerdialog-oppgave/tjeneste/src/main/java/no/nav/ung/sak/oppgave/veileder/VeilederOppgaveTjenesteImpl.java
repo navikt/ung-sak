@@ -4,12 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.kontrakt.oppgaver.BrukerdialogOppgaveDto;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveMapper;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.oppgave.BrukerdialogOppgaveEntitet;
 import no.nav.ung.sak.oppgave.OppgaveLivssyklusTjeneste;
 import no.nav.ung.sak.kontrakt.oppgaver.OppgaveType;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,10 +36,7 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
     }
 
     @Override
-    public BrukerdialogOppgaveDto opprettSøkYtelseOppgave(OpprettSøkYtelseOppgaveDto oppgaveDto) {
-        SøkYtelseOppgavetypeDataDTO oppgaveData = new SøkYtelseOppgavetypeDataDTO(oppgaveDto.fomDato());
-
-        // Generer UUID hvis ikke oppgitt
+    public BrukerdialogOppgaveDto opprettSøkYtelseOppgave(OpprettOppgaveDto oppgaveDto) {
         UUID oppgaveReferanse = oppgaveDto.oppgaveReferanse() != null
             ? oppgaveDto.oppgaveReferanse()
             : UUID.randomUUID();
@@ -50,11 +45,10 @@ public class VeilederOppgaveTjenesteImpl implements VeilederOppgaveTjeneste {
             oppgaveReferanse,
             OppgaveType.SØK_YTELSE,
             oppgaveDto.aktørId(),
-            oppgaveData,
-            null // Ingen frist for søk ytelse oppgave
+            oppgaveDto.frist()
         );
 
-        oppgaveLivssyklusTjeneste.opprettOppgave(oppgave);
+        oppgaveLivssyklusTjeneste.opprettOppgave(oppgave, oppgaveDto.oppgavetypeData());
 
         return brukerdialogOppgaveMapper.tilDto(oppgave);
 

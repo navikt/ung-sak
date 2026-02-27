@@ -678,6 +678,11 @@
         },
         "type" : "object"
       },
+      "sif.abac.kontrakt.abac.AbacFagsakYtelseType" : {
+        "enum" : [ "AKTIVITETSPENGER", "FRISINN", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_AO", "OMSORGSPENGER_MA", "OPPLÆRINGSPENGER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_SYKT_BARN", "UNGDOMSYTELSE", "OBSOLETE" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AKTIVITETSPENGER", "FRISINN", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_AO", "OMSORGSPENGER_MA", "OPPLÆRINGSPENGER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_SYKT_BARN", "UNGDOMSYTELSE", "OBSOLETE" ]
+      },
       "sif.abac.kontrakt.abac.InnloggetAnsattDto" : {
         "properties" : {
           "brukernavn" : {
@@ -712,6 +717,75 @@
             "type" : "string"
           },
           "skalViseDetaljerteFeilmeldinger" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "sif.abac.kontrakt.abac.InnloggetAnsattUngV2Dto" : {
+        "properties" : {
+          "aktivitetspengerDel1SaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          },
+          "aktivitetspengerDel2SaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          },
+          "aktuelleYtelser" : {
+            "items" : {
+              "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.AbacFagsakYtelseType"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "brukernavn" : {
+            "type" : "string"
+          },
+          "erUngdomsprogramveileder" : {
+            "type" : "boolean"
+          },
+          "funksjonellTid" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "kanBehandleKode6" : {
+            "type" : "boolean"
+          },
+          "kanBehandleKode7" : {
+            "type" : "boolean"
+          },
+          "kanBehandleKodeEgenAnsatt" : {
+            "type" : "boolean"
+          },
+          "kanDrifte" : {
+            "type" : "boolean"
+          },
+          "kanVeiledeAktivitetspenger" : {
+            "type" : "boolean"
+          },
+          "kanVeiledeUngdomsprogramytelse" : {
+            "type" : "boolean"
+          },
+          "navn" : {
+            "type" : "string"
+          },
+          "skalViseDetaljerteFeilmeldinger" : {
+            "type" : "boolean"
+          },
+          "ungdomsprogramytelseSaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          }
+        },
+        "type" : "object"
+      },
+      "sif.abac.kontrakt.abac.SaksbehandlerTilgangDto" : {
+        "properties" : {
+          "kanBeslutte" : {
+            "type" : "boolean"
+          },
+          "kanOverstyre" : {
+            "type" : "boolean"
+          },
+          "kanSaksbehandle" : {
             "type" : "boolean"
           }
         },
@@ -3945,7 +4019,7 @@
             "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgaveType"
           },
           "oppgavetypeData" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDto"
           },
           "opprettetDato" : {
             "format" : "date-time",
@@ -3990,7 +4064,7 @@
             "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgaveType"
           },
           "oppgavetypeData" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDto"
           },
           "opprettetDato" : {
             "format" : "date-time",
@@ -4031,33 +4105,33 @@
         "type" : "string",
         "x-enum-varnames" : [ "BEKREFT_ENDRET_STARTDATO", "BEKREFT_ENDRET_SLUTTDATO", "BEKREFT_ENDRET_PERIODE", "BEKREFT_FJERNET_PERIODE", "BEKREFT_AVVIK_REGISTERINNTEKT", "RAPPORTER_INNTEKT", "SØK_YTELSE" ]
       },
-      "ung.sak.kontrakt.oppgaver.OppgavetypeDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.OppgavetypeDataDto" : {
         "discriminator" : {
           "mapping" : {
-            "ENDRET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO",
-            "ENDRET_SLUTTDATO" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDTO",
-            "ENDRET_STARTDATO" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDTO",
-            "FJERNET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDTO",
-            "INNTEKTSRAPPORTERING" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO",
-            "KONTROLLER_REGISTERINNTEKT" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO",
-            "SØK_YTELSE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO"
+            "ENDRET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto",
+            "ENDRET_SLUTTDATO" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto",
+            "ENDRET_STARTDATO" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto",
+            "FJERNET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto",
+            "INNTEKTSRAPPORTERING" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto",
+            "KONTROLLER_REGISTERINNTEKT" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto",
+            "SØK_YTELSE" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto"
           },
           "propertyName" : "type"
         },
         "oneOf" : [ {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDTO"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDTO"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDTO"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto"
         } ],
         "properties" : {
           "type" : {
@@ -4067,24 +4141,24 @@
         "required" : [ "type" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto" : {
+      "ung.sak.kontrakt.oppgaver.OpprettOppgaveDto" : {
         "properties" : {
           "aktørId" : {
             "type" : "string"
           },
-          "aktørIdAsString" : {
-            "type" : "string"
-          },
-          "fomDato" : {
-            "format" : "date",
+          "frist" : {
+            "format" : "date-time",
             "type" : "string"
           },
           "oppgaveReferanse" : {
             "format" : "uuid",
             "type" : "string"
+          },
+          "oppgavetypeData" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OppgavetypeDataDto"
           }
         },
-        "required" : [ "aktørId", "fomDato" ],
+        "required" : [ "aktørId", "oppgaveReferanse", "oppgavetypeData" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.oppgaver.SvarPåVarselDTO" : {
@@ -4102,7 +4176,7 @@
         "required" : [ "harUttalelse" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto" : {
         "properties" : {
           "endringer" : {
             "items" : {
@@ -4139,7 +4213,7 @@
         "type" : "string",
         "x-enum-varnames" : [ "ENDRET_STARTDATO", "ENDRET_SLUTTDATO", "FJERNET_PERIODE", "ANDRE_ENDRINGER" ]
       },
-      "ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto" : {
         "properties" : {
           "forrigeSluttdato" : {
             "format" : "date",
@@ -4153,7 +4227,7 @@
         "required" : [ "nySluttdato" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto" : {
         "properties" : {
           "forrigeStartdato" : {
             "format" : "date",
@@ -4167,7 +4241,7 @@
         "required" : [ "forrigeStartdato", "nyStartdato" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto" : {
         "properties" : {
           "forrigeSluttdato" : {
             "format" : "date",
@@ -4181,7 +4255,7 @@
         "required" : [ "forrigeStartdato" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto" : {
         "properties" : {
           "fraOgMed" : {
             "format" : "date",
@@ -4233,7 +4307,7 @@
         "required" : [ "arbeidsgiver", "inntekt" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto" : {
         "properties" : {
           "fraOgMed" : {
             "format" : "date",
@@ -4301,7 +4375,7 @@
         "type" : "string",
         "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FORELDREPENGER", "PLEIEPENGER", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "AAP", "ANNET" ]
       },
-      "ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDTO" : {
+      "ung.sak.kontrakt.oppgaver.typer.søkytelse.SøkYtelseOppgavetypeDataDto" : {
         "properties" : {
           "fomDato" : {
             "format" : "date",
@@ -4446,9 +4520,6 @@
           "searchString" : {
             "pattern" : "^[a-zA-Z0-9]*$",
             "type" : "string"
-          },
-          "ytelseType" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           }
         },
         "required" : [ "searchString" ],
@@ -8495,6 +8566,26 @@
         "tags" : [ "nav-ansatt" ]
       }
     },
+    "/api/nav-ansatt/v2" : {
+      "get" : {
+        "description" : "Returnerer fullt navn og ung-releaterte rettigheter for ident",
+        "operationId" : "innloggetBrukerV2",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.InnloggetAnsattUngV2Dto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.",
+        "tags" : [ "nav-ansatt" ]
+      }
+    },
     "/api/notat" : {
       "get" : {
         "description" : "Henter alle notater for fagsak",
@@ -8834,7 +8925,7 @@
           "content" : {
             "*/*" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OpprettSøkYtelseOppgaveDto"
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.oppgaver.OpprettOppgaveDto"
               }
             }
           },

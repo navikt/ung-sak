@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.etterlysning.kontroll.InntektkontrollOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.programperiode.EndretPeriodeOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.sluttdato.EndretSluttdatoOppgaveOppretter;
@@ -25,7 +24,6 @@ public class OpprettOppgaveTjeneste {
     private final EndretStartdatoOppgaveOppretter endretStartdatoOppgaveOppretter;
     private final EndretPeriodeOppgaveOppretter endretPeriodeOppgaveOppretter;
     private final EtterlysningRepository etterlysningRepository;
-    private final PersoninfoAdapter personinfoAdapter;
     private final Duration ventePeriode;
 
     @Inject
@@ -35,7 +33,6 @@ public class OpprettOppgaveTjeneste {
         EndretStartdatoOppgaveOppretter endretStartdatoOppgaveOppretter,
         EndretPeriodeOppgaveOppretter endretPeriodeOppgaveOppretter,
         EtterlysningRepository etterlysningRepository,
-        PersoninfoAdapter personinfoAdapter,
         @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode
     ) {
         this.inntektkontrollOppgaveOppretter = inntektkontrollOppgaveOppretter;
@@ -43,25 +40,24 @@ public class OpprettOppgaveTjeneste {
         this.endretStartdatoOppgaveOppretter = endretStartdatoOppgaveOppretter;
         this.endretPeriodeOppgaveOppretter = endretPeriodeOppgaveOppretter;
         this.etterlysningRepository = etterlysningRepository;
-        this.personinfoAdapter = personinfoAdapter;
         this.ventePeriode = Duration.parse(ventePeriode);
     }
 
     public List<Etterlysning> opprett(Behandling behandling, EtterlysningType etterlysningType) {
-        var deltakerIdent = personinfoAdapter.hentIdentForAktørId(behandling.getAktørId()).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
+        var aktørId = behandling.getAktørId();
         var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), etterlysningType);
         etterlysninger.forEach(e -> e.vent(getFrist()));
         etterlysningRepository.lagre(etterlysninger);
         // REST-kall for å opprette oppgave, gjør dette til slutt
         switch (etterlysningType) {
             case UTTALELSE_KONTROLL_INNTEKT ->
-                inntektkontrollOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
+                inntektkontrollOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             case UTTALELSE_ENDRET_STARTDATO ->
-                endretStartdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
+                endretStartdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             case UTTALELSE_ENDRET_SLUTTDATO ->
-                endretSluttdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
+                endretSluttdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             case UTTALELSE_ENDRET_PERIODE ->
-                endretPeriodeOppgaveOppretter.opprettOppgave(behandling, etterlysninger, deltakerIdent);
+                endretPeriodeOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             default ->
                 throw new IllegalArgumentException("Har ikke implementert oppretting av oppgave for etterlysningstype: " + etterlysningType);
         }

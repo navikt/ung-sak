@@ -10,16 +10,14 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.InntektsrapporteringOppgaveDTO;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
+import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.slf4j.Logger;
@@ -28,7 +26,6 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
@@ -51,7 +48,6 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     public static final String PERIODE_TOM = "tom";
     public static final String OPPGAVE_REF = "oppgave_ref";
 
-    private PersoninfoAdapter personinfoAdapter;
     private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
@@ -63,14 +59,12 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     }
 
     @Inject
-    public OpprettOppgaveForInntektsrapporteringTask(PersoninfoAdapter personinfoAdapter,
-                                                     MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+    public OpprettOppgaveForInntektsrapporteringTask(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
                                                      FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                                      @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
 
-        this.personinfoAdapter = personinfoAdapter;
         this.delegeringTjeneste = delegeringTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
@@ -88,15 +82,13 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
             LOG.info("Oppretter oppgave for inntektsrapportering for periode={}", new Periode(fom, tom));
         }
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(aktørId, fom, tom);
-        PersonIdent deltakerIdent = personinfoAdapter.hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Fant ikke ident for aktørId"));
-        ZonedDateTime nesteKontrollTidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
-        delegeringTjeneste.opprettInntektrapporteringOppgave(new InntektsrapporteringOppgaveDTO(
-            deltakerIdent.getIdent(),
+        var nesteKontrolltidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
+        var frist = nesteKontrolltidspunkt.toLocalDateTime().toLocalDate().atStartOfDay();
+        delegeringTjeneste.opprettOppgave(new OpprettOppgaveDto(
+            aktørId,
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
-            nesteKontrollTidspunkt.toLocalDateTime().toLocalDate().atStartOfDay(),
-            fom,
-            tom,
-            harIkkeYtelseIHelePerioden
+            new InntektsrapporteringOppgavetypeDataDto(fom, tom, harIkkeYtelseIHelePerioden),
+            frist
         ));
     }
 
