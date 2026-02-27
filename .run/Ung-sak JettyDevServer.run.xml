@@ -14,7 +14,7 @@
     </extension>
     <method v="2">
       <option name="Make" enabled="true" />
-      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/pom.xml" goal="resources:copy-resources@copy-pdfgen-resources -pl formidling,ytelse-ungdomsprogramytelsen" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="installer pdfgen maler" run_configuration_type="MavenRunConfiguration" />
     </method>
   </configuration>
 </component>

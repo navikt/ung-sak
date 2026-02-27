@@ -55,7 +55,7 @@ public class PdfGenKlient {
             // Finnes i rotmappen til der appen kjører fra, typisk fra docker
             return path;
         }
-        throw new IllegalArgumentException("fint ikke " + faktiskPath);
+        throw new IllegalArgumentException("finner ikke " + faktiskPath);
     }
 
     @WithSpan
