@@ -8,7 +8,6 @@ import no.nav.k9.felles.integrasjon.saf.Tema;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
-import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
@@ -28,7 +27,6 @@ import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -36,7 +34,6 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
-import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlientImpl;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
@@ -138,7 +135,7 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
         //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
-        delegeringTjeneste.løsSøkYtelseOppgave(deltakerIdent.getIdent());
+        delegeringTjeneste.løsSøkYtelseOppgave(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()));
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 

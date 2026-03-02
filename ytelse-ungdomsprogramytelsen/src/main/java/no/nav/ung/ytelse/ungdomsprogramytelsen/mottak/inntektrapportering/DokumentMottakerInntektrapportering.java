@@ -17,7 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.domene.abakus.AbakusInntektArbeidYtelseTjenesteFeil;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.mottak.AsyncAbakusLagreOpptjeningTask;

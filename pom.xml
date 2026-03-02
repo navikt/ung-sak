@@ -21,8 +21,6 @@
         <module>klage</module>
         <module>ytelse-ungdomsprogramytelsen</module>
         <module>ytelse-aktivitetspenger</module>
-        <module>felles</module>
-        <module>brukerdialog-oppgave</module>
 
         <!-- Web klient og server -->
         <module>web</module>
@@ -53,6 +51,7 @@
         <confluent.platform.version>8.1.1</confluent.platform.version>
         <mockito.version>5.21.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>
+        <ung-brukerdialog.version>0.1.2</ung-brukerdialog.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
@@ -73,6 +72,11 @@
                 <groupId>no.nav.ung.deltakelseopplyser</groupId>
                 <artifactId>kontrakt</artifactId>
                 <version>${ung-deltakelse-opplyser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.brukerdialog</groupId>
+                <artifactId>kontrakt</artifactId>
+                <version>${ung-brukerdialog.version}</version>
             </dependency>
 
             <dependency>
@@ -340,34 +344,6 @@
                 <artifactId>ytelse-aktivitetspenger</artifactId>
                 <version>${project.version}</version>
             </dependency>
-
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>felles-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>felles-behandlingslager</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>brukerdialog-oppgave-saksbehandling-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>brukerdialog-oppgave-min-side-varsel</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
 
             <dependency>
                 <groupId>no.nav.sif.abac</groupId>

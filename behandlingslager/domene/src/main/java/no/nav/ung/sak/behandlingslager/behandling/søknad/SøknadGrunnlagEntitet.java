@@ -10,7 +10,7 @@ import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 @Entity(name = "SøknadGrunnlag")
 @Table(name = "GR_SOEKNAD")

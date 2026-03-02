@@ -8,8 +8,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
@@ -42,7 +42,7 @@ public class InntektkontrollOppgaveOppretter {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
             LocalDateInterval etterlysningPeriode = etterlysning.getPeriode().toLocalDateInterval();
             return new OpprettOppgaveDto(
-                aktørId,
+                new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
                 etterlysning.getEksternReferanse(),
                 new KontrollerRegisterinntektOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),
