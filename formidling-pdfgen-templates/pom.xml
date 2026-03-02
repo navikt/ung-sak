@@ -16,6 +16,20 @@
     <packaging>jar</packaging>
 	<name>ung-sak :: Formidling - PDFGen Templates</name>
 
+    <!-- Fjerner malene i jar fila slik at det ikke blir dobbel opp -->
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>pdfgen/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
 
 
