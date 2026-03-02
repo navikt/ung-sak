@@ -2,8 +2,8 @@ package no.nav.ung.sak.etterlysning.sluttdato;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -42,7 +42,7 @@ public class EndretSluttdatoOppgaveOppretter {
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, Optional<DatoIntervallEntitet> originalPeriode) {
         return new OpprettOppgaveDto(
-            aktørId,
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             etterlysning.getEksternReferanse(),
             new EndretSluttdatoDataDto(
                 hentSluttdato(etterlysning.getGrunnlagsreferanse()),

@@ -10,13 +10,13 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -142,7 +142,7 @@ public class EndretPeriodeOppgaveOppretter {
 
     private OpprettOppgaveDto mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {
         return new OpprettOppgaveDto(
-            aktørId,
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             etterlysning.getEksternReferanse(),
             new EndretPeriodeDataDto(nyPeriode, forrigePeriode, endringer),
             etterlysning.getFrist()
@@ -151,7 +151,7 @@ public class EndretPeriodeOppgaveOppretter {
 
     private OpprettOppgaveDto mapTilFjernetPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, PeriodeDTO forrigePeriode) {
         return new OpprettOppgaveDto(
-            aktørId,
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             etterlysning.getEksternReferanse(),
             new FjernetPeriodeDataDto(forrigePeriode.getFomDato(), forrigePeriode.getTomDato()),
             etterlysning.getFrist()
@@ -166,7 +166,7 @@ public class EndretPeriodeOppgaveOppretter {
 
     private OpprettOppgaveDto mapTilStartdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, LocalDate nyStartDato, LocalDate forrigeStartDato) {
         return new OpprettOppgaveDto(
-            aktørId,
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             etterlysning.getEksternReferanse(),
             new EndretStartdatoDataDto(nyStartDato, forrigeStartDato),
             etterlysning.getFrist()
@@ -175,7 +175,7 @@ public class EndretPeriodeOppgaveOppretter {
 
     private OpprettOppgaveDto mapTilSluttdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, LocalDate nySluttDato, LocalDate forrigeSluttDato) {
         return new OpprettOppgaveDto(
-            aktørId,
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             etterlysning.getEksternReferanse(),
             new EndretSluttdatoDataDto(nySluttDato, forrigeSluttDato.equals(TIDENES_ENDE) ? null : forrigeSluttDato),
             etterlysning.getFrist()

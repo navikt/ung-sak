@@ -5,7 +5,6 @@ import jakarta.security.auth.message.config.AuthConfigFactory;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
 import no.nav.ung.sak.web.app.ApplicationConfig;
-import no.nav.ung.sak.web.app.OppgaverApiConfig;
 import no.nav.ung.sak.web.app.FrontendApiConfig;
 import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 import no.nav.ung.sak.web.server.InternalApplicationConfig;
@@ -211,7 +210,6 @@ public class JettyServer {
         return new Class<?>[]{
             no.nav.k9.felles.oidc.OidcApplication.class,
             ApplicationConfig.class,
-            OppgaverApiConfig.class,
             InternalApplicationConfig.class,
             OppgaveRedirectApplication.class,
             FrontendApiConfig.class

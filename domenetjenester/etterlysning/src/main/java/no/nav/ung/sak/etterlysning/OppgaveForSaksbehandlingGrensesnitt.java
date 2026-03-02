@@ -1,7 +1,8 @@
-package no.nav.ung.sak.oppgave;
+package no.nav.ung.sak.etterlysning;
 
-import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.typer.AktørId;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -45,16 +46,16 @@ public interface OppgaveForSaksbehandlingGrensesnitt {
     /**
      * Løser en søk-ytelse-oppgave.
      *
-     * @param deltakerIdent personidentifikator for deltakeren
+     * @param aktørId aktørId for bruker
      */
-    void løsSøkYtelseOppgave(String deltakerIdent);
+    void løsSøkYtelseOppgave(AktørId aktørId);
 
     /**
      * Endrer frist for en oppgave.
      *
-     * @param personIdent      personident for den oppgaven gjelder
+     * @param aktørId      aktørId for den oppgaven gjelder
      * @param eksternReferanse oppgavereferanse
      * @param frist            ny frist for oppgaven
      */
-    void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist);
+    void endreFrist(AktørId aktørId, UUID eksternReferanse, LocalDateTime frist);
 }

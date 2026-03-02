@@ -4,9 +4,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.oppgave.OppgaveForSaksbehandlingGrensesnitt;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.typer.AktørId;
 
 import java.util.UUID;
 
@@ -46,7 +46,7 @@ public class MidlertidigOppgaveDelegeringTjeneste {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.settOppgaveTilAvbrutt(dto));
     }
 
-    public void løsSøkYtelseOppgave(String deltakerIdent) {
-        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.løsSøkYtelseOppgave(deltakerIdent));
+    public void løsSøkYtelseOppgave(AktørId aktørId) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.løsSøkYtelseOppgave(aktørId));
     }
 }
