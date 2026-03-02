@@ -33,7 +33,7 @@ public class OpprettOppgaveGodkjennVedtakTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        String oppgaveId = oppgaveTjeneste.opprettBasertPåBehandlingId(prosessTaskData.getBehandlingId(), OppgaveÅrsak.GODKJENN_VEDTAK_VL);
+        String oppgaveId = oppgaveTjeneste.opprettBasertPåBehandlingId(prosessTaskData.getBehandlingId(), OppgaveÅrsak.GODKJENN_VEDTAK);
         if (oppgaveId != null) {
             log.info("Oppgave opprettet for å godkjenne vedtak. Oppgavenummer: {}", oppgaveId);
         }

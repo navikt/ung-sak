@@ -78,11 +78,11 @@ spec:
       rules:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
+        - application: ung-brukerdialog
         - application: ung-sak
         - application: kabal-api
           namespace: klage
-        #kommenter inn når ung-tilbake er i prod
-        #- application: ung-tilbake
+        - application: ung-tilbake
       external:
         - host: "dokarkiv.prod-fss-pub.nais.io"
         - host: "k9-abakus.prod-fss-pub.nais.io"
@@ -92,6 +92,7 @@ spec:
         - host: "pdl-api.prod-fss-pub.nais.io"
         - host: "saf.prod-fss-pub.nais.io"
         - host: "ereg-services.prod-fss-pub.nais.io"
+        - host: "ikomp.prod-fss-pub.nais.io"
     inbound:
       rules:
         - application: k9-abakus
@@ -101,8 +102,7 @@ spec:
         - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
-        #kommenter inn når ung-tilbake er i prod
-        #- application: ung-tilbake
+        - application: ung-tilbake
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -121,6 +121,8 @@ spec:
             value: "all"
           - name: "pgaudit.log_parameter"
             value: "on"
+        pointInTimeRecovery: true
+        retainedBackups : 30
     bigQueryDatasets:
       - name: ung_sak_statistikk_dataset
         description: Inneholder tabeller for ung-sak ment for statistikk
@@ -156,6 +158,10 @@ spec:
       value: teamdokumenthandtering.aapen-dok-journalfoering
     - name: KAFKA_KABAL_TOPIC
       value: klage.behandling-events.v1
+    - name: KAFKA_MINSIDE_VARSEL_TOPIC
+      value: min-side.aapen-brukervarsel-v1
+    - name: KAFKA_OPPGAVEBEKREFTELSE_TOPIC
+      value: dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -192,22 +198,34 @@ spec:
       value: api://prod-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
+    - name: UNG_TILBAKE_SCOPE
+      value: api://prod-gcp.k9saksbehandling.ung-tilbake/.default
+    - name : UNG_TILBAKE_URL
+      value: http://ung-tilbake/ung/tilbake/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
+    - name: UNG_BRUKERDIALOG_URL
+      value: http://ung-brukerdialog/ung/brukerdialog/api
+    - name: UNG_BRUKERDIALOG_SCOPE
+      value: api://prod-gcp.k9saksbehandling.ung-brukerdialog/.default
     - name: SIF_ABAC_PDP_SCOPE
       value: api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default
-    - name: SIF_ABAC_PDP_URL
+    - name: SIF_ABAC_PDP_UNG_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
+    - name: SIF_ABAC_PDP_AKTIVITETSPENGER_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
     - name: KABAL_URL
       value: http://kabal-api.klage
     - name: KABAL_SCOPE
       value: api://prod-gcp.klage.kabal-api/.default
+    - name: UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL
+      value: https://www.nav.no/ungdomsprogrammet/ytelsen
 
     # Saf
     - name: SAF_BASE_URL
@@ -230,14 +248,8 @@ spec:
       value: "api://prod-gcp.k9saksbehandling.ung-sak/.default"
     - name: ABAC_ATTRIBUTT_DRIFT
       value: "no.nav.abac.attributter.k9.drift"
-    #kommenter inn når ung-tilbake er i prod
-    #- name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
-    #  value: "/ung/tilbake,api://prod-gcp.k9saksbehandling.ung-tilbake/.default"
-
-    - name: SENSU_HOST
-      value: "sensu.nais"
-    - name: SENSU_PORT
-      value: "3030"
+    - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
+      value: "/ung/tilbake,api://prod-gcp.k9saksbehandling.ung-tilbake/.default"
 
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
@@ -246,17 +258,17 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: OPPFRISK_KONTROLLBEHANDLING_ENABLED
-      value: "false"
     - name: KLAGE_ENABLED
-      value: "false"
+      value: "true"
     - name: INTEGRASJON_KABAL
-      value: "false"
+      value: "true"
     - name: PUBLISER_KONTROLLERT_INNTEKT_METRIKK_ENABLED
       value: "true"
-    - name: KONTROLL_SISTE_MND_ENABLED
-      value: "false"
     - name: ENABLE_BREV_ANSVARLIG
+      value: "false"
+    - name: PROGRAMPERIODE_ENDRING_ENABLED
+      value: "false"
+    - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
       value: "false"
 
     # Konfigurasjoner
@@ -266,10 +278,16 @@ spec:
       value: "PT1H"
     - name: INNTEKTSKONTROLL_DAG_I_MAANED
       value: "8"
+    - name: INNTEKTSKONTROLL_CRON_EXPRESSION
+      value: "0 0 7 8 * *"
+    - name: INNTEKTSRAPPORTERING_CRON_EXPRESSION
+      value: "0 0 7 1 * *"
     - name: AKSEPTERT_DIFFERANSE_KONTROLL
       value: "15"
     - name: VENTEFRIST_UTTALELSE
       value: "P14D"
+    - name: HENT_INNTEKT_HENDElSER_INTERVALL
+      value: "PT1M"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

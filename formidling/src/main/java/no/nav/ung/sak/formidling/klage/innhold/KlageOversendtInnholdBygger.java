@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.MarkdownParser;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.template.dto.KlageOversendtDto;
@@ -31,7 +32,7 @@ public class KlageOversendtInnholdBygger implements VedtaksbrevInnholdBygger {
         return new TemplateInnholdResultat(TemplateType.KLAGE_OVERSENDT,
             new KlageOversendtDto(
                 "NAV Klageinstans Sør",
-                fritekst
+                MarkdownParser.markdownTilHtml(fritekst)
             )
         );
     }

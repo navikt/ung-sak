@@ -50,17 +50,17 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
 
     @Override
     public OppdateringResultat oppdater(FastsettInntektDto dto, AksjonspunktOppdaterParameter param) {
-        var rapportertInntektTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(param.getBehandlingId());
+        var perioderTilKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(param.getBehandlingId());
+        var rapportertInntektTidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(param.getBehandlingId(), perioderTilKontroll);
         final var sammenslåtteInntekterTidslinje = finnInntektOgKildeTidslinje(dto, rapportertInntektTidslinje);
-        validerVurdertePerioder(param, sammenslåtteInntekterTidslinje);
+        validerVurdertePerioder(sammenslåtteInntekterTidslinje, perioderTilKontroll);
         kontrollerteInntektperioderTjeneste.opprettKontrollerteInntekterPerioderEtterManuellVurdering(param.getBehandlingId(), sammenslåtteInntekterTidslinje, rapportertInntektTidslinje);
         opprettHistorikkinnslag(dto, param.getRef(), sammenslåtteInntekterTidslinje);
         return OppdateringResultat.builder().medTotrinnHvis(true).build();
     }
 
-    private void validerVurdertePerioder(AksjonspunktOppdaterParameter param, LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje) {
-        final var tidslinjeTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(param.getBehandlingId());
-        final var vurdertePerioderSomIkkeSkalVurderes = sammenslåtteInntekterTidslinje.disjoint(tidslinjeTilVurdering);
+    private void validerVurdertePerioder(LocalDateTimeline<ManueltKontrollertInntekt> sammenslåtteInntekterTidslinje, LocalDateTimeline<Boolean> perioderTilKontroll) {
+        final var vurdertePerioderSomIkkeSkalVurderes = sammenslåtteInntekterTidslinje.disjoint(perioderTilKontroll);
         if (!vurdertePerioderSomIkkeSkalVurderes.isEmpty()) {
             throw new IllegalStateException("Kan ikke bekrefte perioder som ikke skal vurderes i denne behandlingen: " + vurdertePerioderSomIkkeSkalVurderes);
         }

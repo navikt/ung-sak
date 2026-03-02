@@ -18,7 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.økonomi.simulering.tjeneste.SimuleringIntegrasjonTjeneste;
 import no.nav.ung.sak.økonomi.tilbakekreving.dto.BehandlingStatusOgFeilutbetalinger;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 
 
 @Dependent
@@ -28,14 +28,14 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
 
     private SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste;
     private SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste;
-    private K9TilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient ungTilbakeRestKlient;
 
     @Inject
     public SjekkTilbakekrevingAksjonspunktUtleder(SjekkEndringUtbetalingTilBrukerTjeneste sjekkEndringUtbetalingTilBrukerTjeneste,
-                                                  K9TilbakeRestKlient k9TilbakeRestKlient,
+                                                  UngTilbakeRestKlient ungTilbakeRestKlient,
                                                   SimuleringIntegrasjonTjeneste simuleringIntegrasjonTjeneste) {
         this.sjekkEndringUtbetalingTilBrukerTjeneste = sjekkEndringUtbetalingTilBrukerTjeneste;
-        this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.ungTilbakeRestKlient = ungTilbakeRestKlient;
         this.simuleringIntegrasjonTjeneste = simuleringIntegrasjonTjeneste;
     }
 
@@ -64,7 +64,7 @@ public class SjekkTilbakekrevingAksjonspunktUtleder {
 
     boolean påvirkerÅpenTilbakekrevingsbehandling(Behandling aktuellBehandling) {
         Fagsak fagsak = aktuellBehandling.getFagsak();
-        Optional<BehandlingStatusOgFeilutbetalinger> feilutbetaling = k9TilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(fagsak.getSaksnummer());
+        Optional<BehandlingStatusOgFeilutbetalinger> feilutbetaling = ungTilbakeRestKlient.hentFeilutbetalingerForSisteBehandling(fagsak.getSaksnummer());
         boolean harÅpenTilbakekrevingsbehandling = feilutbetaling.isPresent() && feilutbetaling.get().getAvsluttetDato() == null;
         if (!harÅpenTilbakekrevingsbehandling) {
             logger.info("Har ingen åpen tilbakekrevingsbehandling");

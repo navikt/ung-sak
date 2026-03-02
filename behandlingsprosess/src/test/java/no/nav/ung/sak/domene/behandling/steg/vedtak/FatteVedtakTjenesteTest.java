@@ -10,7 +10,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
-import no.nav.ung.sak.behandlingskontroll.transisjoner.TransisjonIdentifikator;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -19,7 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 

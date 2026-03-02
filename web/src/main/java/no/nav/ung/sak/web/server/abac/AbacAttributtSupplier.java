@@ -1,8 +1,8 @@
 package no.nav.ung.sak.web.server.abac;
 
 import no.nav.k9.felles.sikkerhet.abac.AbacDataAttributter;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.kodeverk.abac.AppAbacAttributt;
+import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

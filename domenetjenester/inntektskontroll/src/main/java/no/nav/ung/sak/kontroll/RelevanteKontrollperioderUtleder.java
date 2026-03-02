@@ -1,32 +1,39 @@
 package no.nav.ung.sak.kontroll;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
+import java.time.Period;
 import java.time.YearMonth;
-import java.util.List;
+import java.time.temporal.TemporalAdjusters;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Dependent
 public class RelevanteKontrollperioderUtleder {
 
-
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
-    private final boolean kontrollSisteMndEnabled;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
-    public RelevanteKontrollperioderUtleder(ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, @KonfigVerdi(value = "KONTROLL_SISTE_MND_ENABLED", defaultVerdi = "false") boolean kontrollSisteMndEnabled) {
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+    public RelevanteKontrollperioderUtleder(@Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere,
+                                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+                                            BehandlingRepository behandlingRepository) {
+        this.prosessTriggerPeriodeUtledere = prosessTriggerPeriodeUtledere;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
-        this.kontrollSisteMndEnabled = kontrollSisteMndEnabled;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public LocalDateTimeline<Boolean> utledPerioderForKontrollAvInntekt(Long behandlingId) {
@@ -38,8 +45,17 @@ public class RelevanteKontrollperioderUtleder {
                                                                                          Set<BehandlingÅrsakType> årsakerForKontroll) {
 
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(behandlingId);
-        final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId).filterValue(it -> it.stream().anyMatch(årsakerForKontroll::contains));
-        return markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder = ProsessTriggerPeriodeUtleder.finnTjeneste(prosessTriggerPeriodeUtledere, behandling.getFagsakYtelseType());
+        final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId)
+            .mapValue(it -> it.stream().filter(årsakerForKontroll::contains).collect(Collectors.toSet()))
+            .filterValue(it -> !it.isEmpty());
+        LocalDateTimeline<Set<BehandlingÅrsakType>> markertOgRelevant = markertForKontrollTidslinje.intersection(relevantForKontrollTidslinje).compress();
+        if (markertOgRelevant.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+        return markertOgRelevant
+            .splitAtRegular(markertOgRelevant.getMinLocalDate().withDayOfMonth(1), markertOgRelevant.getMaxLocalDate(), Period.ofMonths(1));
     }
 
     /**
@@ -49,7 +65,7 @@ public class RelevanteKontrollperioderUtleder {
      * @return Perioder som er relevante for kontroll av inntekt
      */
     public LocalDateTimeline<Boolean> utledPerioderRelevantForKontrollAvInntekt(Long behandlingId) {
-        final var periodisertMånedsvis = månedsvisTidslinjeUtleder.periodiserMånedsvis(behandlingId);
+        final var periodisertMånedsvis = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
         return relevantForKontrollTidslinje;
     }
@@ -63,35 +79,28 @@ public class RelevanteKontrollperioderUtleder {
      */
     public LocalDateTimeline<Boolean> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder) {
         LocalDateTimeline<Boolean> perioderForKontroll = LocalDateTimeline.empty();
-        if (ytelsesPerioder.toSegments().size() > 2) {
-            final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder, kontrollSisteMndEnabled);
+        if (ytelsesPerioder.toSegments().size() > 1) {
+            final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
             perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(it -> true);
         }
-        return perioderForKontroll;
+        return utvidTilHeleMåneder(perioderForKontroll);
     }
 
-    public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder, boolean kontrollSisteMndEnabled) {
-        List<LocalDateSegment<FritattForKontroll>> ikkePåkrevdKontrollSegmenter;
-        if (kontrollSisteMndEnabled) {
-            ikkePåkrevdKontrollSegmenter = ytelsesPerioder.toSegments().stream()
-                .filter(it -> harIkkeYtelseDagenFør(ytelsesPerioder, it))
-                .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new FritattForKontroll(harIkkeYtelseDagenFør(ytelsesPerioder, it), false)))
-                .toList();
-        } else {
-            ikkePåkrevdKontrollSegmenter = ytelsesPerioder.toSegments().stream()
-                .filter(it -> harIkkeYtelseDagenFør(ytelsesPerioder, it)
-                    ||  harIkkeYtelseDagenEtter(ytelsesPerioder, it))
-                .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new FritattForKontroll(
-                    harIkkeYtelseDagenFør(ytelsesPerioder, it),
-                    harIkkeYtelseDagenEtter(ytelsesPerioder, it))))
-                .toList();
-        }
-        final var ikkePåkrevdKontrollTidslinje = new LocalDateTimeline<>(ikkePåkrevdKontrollSegmenter);
-        return ikkePåkrevdKontrollTidslinje;
+    private static LocalDateTimeline<Boolean> utvidTilHeleMåneder(LocalDateTimeline<Boolean> perioderForKontroll) {
+        var mappedSegments = perioderForKontroll
+            .toSegments()
+            .stream()
+            .map(it -> new LocalDateSegment<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), it.getValue()))
+            .toList(); // Mapper segmenter til å dekke hele måneder
+        return new LocalDateTimeline<>(mappedSegments, StandardCombinators::alwaysTrueForMatch).compress();
     }
 
-    private static boolean harIkkeYtelseDagenEtter(LocalDateTimeline<YearMonth> ytelsesPerioder, LocalDateSegment<YearMonth> it) {
-        return ytelsesPerioder.intersection(dagenEtter(it)).isEmpty();
+    public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder) {
+        var ikkePåkrevdKontrollSegmenter = ytelsesPerioder.toSegments().stream()
+            .filter(it -> harIkkeYtelseDagenFør(ytelsesPerioder, it))
+            .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new FritattForKontroll(harIkkeYtelseDagenFør(ytelsesPerioder, it), false)))
+            .toList();
+        return new LocalDateTimeline<>(ikkePåkrevdKontrollSegmenter);
     }
 
     private static boolean harIkkeYtelseDagenFør(LocalDateTimeline<YearMonth> ytelsesPerioder, LocalDateSegment<YearMonth> it) {
@@ -100,10 +109,6 @@ public class RelevanteKontrollperioderUtleder {
 
     private static LocalDateInterval dagenFør(LocalDateSegment<?> it) {
         return new LocalDateInterval(it.getFom().minusDays(1), it.getFom().minusDays(1));
-    }
-
-    private static LocalDateInterval dagenEtter(LocalDateSegment<?> it) {
-        return new LocalDateInterval(it.getTom().plusDays(1), it.getTom().plusDays(1));
     }
 
     public record FritattForKontroll(boolean gjelderFørstePeriode, boolean gjelderSistePeriode) {

@@ -14,7 +14,6 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
-import no.nav.ung.sak.registerendringer.Endringstype;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +26,7 @@ import java.util.UUID;
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_STARTDATO)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_SLUTTDATO)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_AVVIK_REGISTERINNTEKT)
+@OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PERIODE)
 public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndterer {
 
     private static final Logger log = LoggerFactory.getLogger(GenerellOppgaveBekreftelseHåndterer.class);
@@ -91,6 +91,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             case UTTALELSE_KONTROLL_INNTEKT -> EndringType.ENDRET_INNTEKT;
             case UTTALELSE_ENDRET_STARTDATO -> EndringType.ENDRET_STARTDATO;
             case UTTALELSE_ENDRET_SLUTTDATO -> EndringType.ENDRET_SLUTTDATO;
+            case UTTALELSE_ENDRET_PERIODE -> EndringType.ENDRET_PERIODE;
         };
     }
 

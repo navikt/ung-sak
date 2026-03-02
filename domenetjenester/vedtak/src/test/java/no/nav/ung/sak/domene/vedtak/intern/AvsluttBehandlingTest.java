@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +44,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.vedtak.impl.BehandlingVedtakEventPubliserer;
 import no.nav.ung.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.ung.sak.test.util.Whitebox;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -51,6 +52,9 @@ public class AvsluttBehandlingTest {
 
     @Mock
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+
+    @Mock
+    private InntektAbonnentTjeneste inntektAbonnentTjeneste;
 
     @Mock
     private BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer;
@@ -79,7 +83,7 @@ public class AvsluttBehandlingTest {
         vurderBehandlingerUnderIverksettelse = new VurderBehandlingerUnderIverksettelse(repositoryProvider);
 
         avsluttBehandling = new AvsluttBehandling(repositoryProvider, behandlingskontrollTjeneste,
-            behandlingVedtakEventPubliserer, vurderBehandlingerUnderIverksettelse, prosessTaskRepository);
+            behandlingVedtakEventPubliserer, vurderBehandlingerUnderIverksettelse, prosessTaskRepository, inntektAbonnentTjeneste);
 
         when(behandlingskontrollTjeneste.initBehandlingskontroll(Mockito.anyLong())).thenAnswer(invocation -> {
             Long behId = invocation.getArgument(0);

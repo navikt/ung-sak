@@ -21,8 +21,5 @@ spec:
       application: ung-sak
       access: write
     - team: dv-familie
-      application: dvh-fampp-konsumer
-      access: read
-    - team: dv-familie
       application: dvh-familie-konsument
       access: read

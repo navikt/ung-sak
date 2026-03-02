@@ -30,11 +30,22 @@ registries:
     url: https://maven.pkg.github.com/navikt/fp-tidsserie
     username: x-access-token
     password: ${{secrets.READER_TOKEN}}
+  ghcr:
+    type: docker-registry
+    url: ghcr.io
+    username: x-access-token
+    password: ${{secrets.READER_TOKEN}}
 updates:
   - package-ecosystem: maven
     directory: "/"
     schedule:
       interval: daily
+      time: "06:00"
+      timezone: "Europe/Oslo"
+    cooldown:
+      default-days: 7
+      exclude:
+        - "no.nav.*"
     open-pull-requests-limit: 15
     registries:
       - ung-sak
@@ -58,13 +69,23 @@ updates:
           - "*"
         exclude-patterns:
           - "*no.nav*"
+          - "*jersey-bom*"
+          - "*jetty-bom*"
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
       interval: daily
+      time: "06:00"
+      timezone: "Europe/Oslo"
+    cooldown:
+      default-days: 7
     open-pull-requests-limit: 15
 
   - package-ecosystem: docker
     directory: "/"
     schedule:
       interval: daily
+      time: "06:00"
+      timezone: "Europe/Oslo"
+    registries:
+      - ghcr

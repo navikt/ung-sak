@@ -1,11 +1,5 @@
 package no.nav.ung.sak.behandlingslager.fagsak;
 
-import java.time.LocalDate;
-import java.util.Objects;
-
-import no.nav.ung.sak.behandlingslager.aktør.AktørIdConverter;
-import org.hibernate.annotations.Type;
-
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
 import jakarta.persistence.Column;
@@ -22,13 +16,17 @@ import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.ung.sak.behandlingslager.Range;
+import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.domene.typer.tid.Range;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsakStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsakYtelseTypeKodeverdiConverter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
+import org.hibernate.annotations.Type;
+
+import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity(name = "Fagsak")
 @Table(name = "FAGSAK")
@@ -43,7 +41,7 @@ public class Fagsak extends BaseEntitet {
     @Column(name = "ytelse_type", nullable = false, updatable = false)
     private FagsakYtelseType ytelseType = FagsakYtelseType.UDEFINERT;
 
-    @Convert(converter = AktørIdConverter.class, attributeName = "brukerAktørId")
+    @Embedded
     @AttributeOverrides(@AttributeOverride(name = "aktørId", column = @Column(name = "bruker_aktoer_id", unique = true, nullable = false, updatable = false)))
     private AktørId brukerAktørId;
 

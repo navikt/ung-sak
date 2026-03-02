@@ -1,16 +1,7 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
-
-import java.util.Optional;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
@@ -20,16 +11,20 @@ import no.nav.ung.domenetjenester.arkiv.VurderStrukturertDokumentTask;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.kodeverdi.BrevkodeInformasjonUtleder;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-@ApplicationScoped
+import java.util.Optional;
+import java.util.Set;
+
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
+
+@Dependent
 public class StrukturertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(StrukturertJournalpost.class);
-    public static final Set<String> GODKJENTE_KODER = Set.of(
-        Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
-        Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
-        Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode()
-    );
+    private Set<String> godkjenteKoder;
 
     private Boolean dumpPayload;
 
@@ -38,8 +33,23 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Inject
     public StrukturertJournalpost(
-        @KonfigVerdi(value = "DUMP_PAYLOAD_VED_FEIL", defaultVerdi = "false") Boolean dumpPayload) {
+        @KonfigVerdi(value = "DUMP_PAYLOAD_VED_FEIL", defaultVerdi = "false") Boolean dumpPayload,
+        @KonfigVerdi(value = "aktivitetspenger.enabled", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled
+        ) {
         this.dumpPayload = dumpPayload;
+
+        this.godkjenteKoder = aktivitetspengerEnabled ?
+            Set.of(
+                Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(),
+                Brevkode.AKTIVITETSPENGER_SOKNAD.getOffisiellKode()
+            ) :
+            Set.of(
+                Brevkode.UNGDOMSYTELSE_SOKNAD.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
+                Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode()
+            );
     }
 
     @Override
@@ -66,7 +76,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
 
     @Override
     public boolean skalVurdere(Vurderingsgrunnlag vurderingsgrunnlag) {
-        return GODKJENTE_KODER.contains(vurderingsgrunnlag.journalpostInfo().getBrevkode());
+        return godkjenteKoder.contains(vurderingsgrunnlag.journalpostInfo().getBrevkode());
     }
 
     private void mapBrevkodeInformasjon(MottattMelding dataWrapper, JournalpostInfo journalpostInfo) {
@@ -83,7 +93,6 @@ public class StrukturertJournalpost implements Journalpostvurderer {
         } else {
             var bi = brevkodeInfo.get();
             bi.getYtelseType().ifPresent(dataWrapper::setYtelseType);
-            bi.getBehandlingTema().ifPresent(dataWrapper::setBehandlingTema);
             if (journalpostInfo.getInnholderStrukturertInformasjon()) {
                 bi.getBehandlingTypeHvisStrukturert().ifPresent(dataWrapper::setBehandlingType);
             }

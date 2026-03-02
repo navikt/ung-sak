@@ -9,7 +9,6 @@ import java.util.Objects;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.KantIKantVurderer;
 
 public final class Hjelpetidslinjer {
 

@@ -1,17 +1,19 @@
 package no.nav.ung.sak.formidling.pdfgen;
 
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.time.format.DateTimeFormatter;
+import java.time.format.TextStyle;
+import java.util.Locale;
 
 class PdfGenObjectMapperConfig {
 
@@ -19,6 +21,7 @@ class PdfGenObjectMapperConfig {
         var module = new SimpleModule();
         module.addSerializer(LocalDate.class, new NorskDatoSerialiserer());
         module.addSerializer(LocalDateTime.class, new NorskTidspunktSerialiserer());
+        module.addSerializer(Month.class, new NorskMånedSerialiserer());
         module.addSerializer(Double.class, new DesimaltallSerialiserer<>(Double.class));
         module.addSerializer(Float.class, new DesimaltallSerialiserer<>(Float.class));
         module.addSerializer(BigDecimal.class, new DesimaltallSerialiserer<>(BigDecimal.class));
@@ -42,6 +45,20 @@ class NorskDatoSerialiserer extends StdSerializer<LocalDate> {
     public void serialize(LocalDate dato, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeString(dato.format(NORSK_DATE_FORMATTER));
     }
+}
+
+// NorskMånedSerialiserer
+class NorskMånedSerialiserer extends StdSerializer<Month> {
+
+    public NorskMånedSerialiserer() {
+        super(Month.class);
+    }
+
+    @Override
+    public void serialize(Month month, JsonGenerator gen, SerializerProvider provider) throws IOException {
+        // Use a Norwegian locale to get the full month name
+        String norwegianMonth = month.getDisplayName(TextStyle.FULL, Locale.of("no", "NO"));
+        gen.writeString(norwegianMonth);    }
 }
 
 // NorskTidspunktSerialiserer

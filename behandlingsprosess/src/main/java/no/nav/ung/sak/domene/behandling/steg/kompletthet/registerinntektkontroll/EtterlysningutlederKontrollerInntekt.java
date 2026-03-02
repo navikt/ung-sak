@@ -3,7 +3,6 @@ package no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontrol
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningBehov;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.AvvikResultatType;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.Avviksvurdering;
 import no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll.KontrollerInntektInput;
@@ -27,27 +26,34 @@ public class EtterlysningutlederKontrollerInntekt {
     // Denne logikken er utelukkende  avhengig av Etterlysning og trenger ikke uttalelse
     public LocalDateTimeline<EtterlysningBehov> utledBehovForEtterlysninger(
         KontrollerInntektInput input) {
-        var relevantTidslinje = input.relevantTidslinje();
+        var tidslinjeTilVurdering = input.tidslinjeTilKontroll();
         var gjeldendeRapporterteInntekter = input.gjeldendeRapporterteInntekter();
         var gjeldendeEtterlysningTidslinje = input.gjeldendeEtterlysningTidslinje();
 
         var resultatTidslinje = new LocalDateTimeline<EtterlysningBehov>(List.of());
 
         // Sjekker om bruker har etterlysning/uttalelse som ikke lenger er gyldig pga endret registeropplysning
-        var etterlysningResultatFraEndretRegisteropplysning = finnNyeEtterlysningerGrunnetRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, relevantTidslinje);
+        var etterlysningResultatFraEndretRegisteropplysning = finnNyeEtterlysningerGrunnetRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, tidslinjeTilVurdering);
         resultatTidslinje = resultatTidslinje.crossJoin(etterlysningResultatFraEndretRegisteropplysning, StandardCombinators::coalesceLeftHandSide);
 
         // Sjekker om bruker har svart på etterlysning og denne fortsatt er gyldig
-        var resultatForGodkjenteInntekter = finnTidslinjeForMottatteSvarUtenRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, relevantTidslinje);
+        var resultatForGodkjenteInntekter = finnTidslinjeForMottatteSvarUtenRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, tidslinjeTilVurdering);
         resultatTidslinje = resultatTidslinje.crossJoin(resultatForGodkjenteInntekter, StandardCombinators::coalesceLeftHandSide);
 
         // Sjekker vi må ha etterlysning pga avvik mellom rapportert inntekt og registerinntekt
-        var restTidslinjeÅVurdere = relevantTidslinje.disjoint(resultatTidslinje);
+        var restTidslinjeÅVurdere = tidslinjeTilVurdering.disjoint(resultatTidslinje);
         var avviksvurderingMotRegisterinntekt = finnTidslinjeForEtterlysningFraAvvik(gjeldendeRapporterteInntekter, restTidslinjeÅVurdere);
         resultatTidslinje = resultatTidslinje.crossJoin(avviksvurderingMotRegisterinntekt, StandardCombinators::coalesceLeftHandSide);
 
+        // Etterlysninger som venter svar skal avbrytes dersom perioden de gjelder for ikke lenger er relevant for kontroll
+        resultatTidslinje = resultatTidslinje.crossJoin(input.gjeldendeEtterlysningTidslinje()
+                .filterValue(it -> it.etterlysning().etterlysningStatus() == EtterlysningStatus.VENTER)
+            .disjoint(input.relevantForKontrollTidslinje())
+            .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING),
+        StandardCombinators::coalesceLeftHandSide);
 
-        resultatTidslinje = resultatTidslinje.crossJoin(relevantTidslinje.mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING), StandardCombinators::coalesceLeftHandSide);
+        // Fyller resten av tidslinjen til vurdering med "ingen etterlysning"
+        resultatTidslinje = resultatTidslinje.crossJoin(tidslinjeTilVurdering.mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING), StandardCombinators::coalesceLeftHandSide);
 
         return resultatTidslinje;
 

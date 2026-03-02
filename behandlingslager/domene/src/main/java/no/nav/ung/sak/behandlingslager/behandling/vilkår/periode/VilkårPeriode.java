@@ -9,9 +9,10 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 
+import no.nav.ung.sak.diff.DiffIgnore;
+import org.hibernate.Hibernate;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.engine.jdbc.ClobProxy;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.AttributeOverrides;
@@ -33,8 +34,7 @@ import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.ung.sak.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
@@ -277,7 +277,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         if (this.id != null && this.regelEvaluering != null) {
             throw new IllegalStateException("Kan ikke overskrive regelEvaluering for VilkårPeriode: " + this.id);
         }
-        this.regelEvaluering = regelEvaluering == null || regelEvaluering.isEmpty() ? null : ClobProxy.generateProxy(regelEvaluering);
+        this.regelEvaluering = regelEvaluering == null || regelEvaluering.isEmpty() ? null : Hibernate.getLobHelper().createClob(regelEvaluering);
     }
 
     public String getRegelInput() {
@@ -288,7 +288,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         if (this.id != null && this.regelInput != null) {
             throw new IllegalStateException("Kan ikke overskrive regelInput for VilkårPeriode: " + this.id);
         }
-        this.regelInput = regelInput == null || regelInput.isEmpty() ? null : ClobProxy.generateProxy(regelInput);
+        this.regelInput = regelInput == null || regelInput.isEmpty() ? null : Hibernate.getLobHelper().createClob(regelInput);
     }
 
     @Override

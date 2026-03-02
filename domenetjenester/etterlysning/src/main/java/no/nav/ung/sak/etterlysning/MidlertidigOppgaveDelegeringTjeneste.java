@@ -1,0 +1,53 @@
+package no.nav.ung.sak.etterlysning;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.typer.AktørId;
+
+import java.util.UUID;
+
+/**
+ * Midlertidig tjeneste for delegering av oppgaver til enten intern eller ekstern oppgavehåndtering.
+ */
+@ApplicationScoped
+public class MidlertidigOppgaveDelegeringTjeneste {
+
+    private Instance<OppgaveForSaksbehandlingGrensesnitt> instanser;
+
+    public MidlertidigOppgaveDelegeringTjeneste() {
+    }
+
+    @Inject
+    public MidlertidigOppgaveDelegeringTjeneste(@Any Instance<OppgaveForSaksbehandlingGrensesnitt> instanser) {
+        this.instanser = instanser;
+    }
+
+    public void opprettOppgave(OpprettOppgaveDto oppgave) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.opprettOppgave(oppgave));
+    }
+
+    public void avbrytOppgave(OppgaveRequest oppgaveRequest) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.avbrytOppgave(oppgaveRequest));
+    }
+
+    public void oppgaveUtløpt(OppgaveRequest oppgaveRequest) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.oppgaveUtløpt(oppgaveRequest));
+    }
+
+    public void settOppgaveTilUtløpt(EndreOppgaveStatusDto dto) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.settOppgaveTilUtløpt(dto));
+    }
+
+    public void settOppgaveTilAvbrutt(EndreOppgaveStatusDto dto) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.settOppgaveTilAvbrutt(dto));
+    }
+
+    public void løsSøkYtelseOppgave(AktørId aktørId) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.løsSøkYtelseOppgave(aktørId));
+    }
+}

@@ -8,9 +8,10 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.AppAbacAttributtType;
 import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.abac.AppAbacAttributt;
+import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
+
 
 import java.io.Serializable;
 import java.util.Objects;

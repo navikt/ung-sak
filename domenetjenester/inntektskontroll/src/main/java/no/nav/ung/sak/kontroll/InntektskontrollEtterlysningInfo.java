@@ -21,4 +21,8 @@ public record InntektskontrollEtterlysningInfo(EtterlysningStatus etterlysningSt
         return etterlysningStatus == EtterlysningStatus.MOTTATT_SVAR && !harUttalelse();
     }
 
+    public boolean erUtløpt() {
+        return etterlysningStatus == EtterlysningStatus.UTLØPT;
+    }
+
 }

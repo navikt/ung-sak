@@ -13,9 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import org.threeten.extra.Interval;
 
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 
 /**
  * Basis klasse for modellere et dato interval.

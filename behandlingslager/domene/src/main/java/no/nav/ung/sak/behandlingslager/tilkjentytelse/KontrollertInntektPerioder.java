@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.tilkjentytelse;
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.ung.sak.diff.DiffIgnore;
 import org.hibernate.annotations.Immutable;
 
 import java.sql.Clob;

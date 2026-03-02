@@ -11,8 +11,10 @@ import no.nav.ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeD
 import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -31,20 +33,31 @@ public class MånedsvisningDtoMapper {
             final var tilkjentYtelseForMåned = tilkjentYtelseTidslinje.intersection(måned.getLocalDateInterval());
             final var kontrollertInntektForMåned = kontrollertInntektTidslinje.intersection(måned.getLocalDateInterval());
             final var satsperioder = mapSatsperioderForMåned(måned, perioder);
-            final var antallDagerIMåned = finnAntallDagerForSatsperioder(satsperioder);
+            final var antallYtelsesdagerIMåned = finnAntallDagerForSatsperioder(satsperioder);
             final var utbetaltBeløp = finnUtbetaltBeløp(tilkjentYtelseForMåned);
             final var reduksjon = finnReduksjon(tilkjentYtelseForMåned);
             final var rapportertInntekt = finnRapportertInntekt(kontrollertInntektForMåned);
+            final var reduksjonsgrunnlag = finnReduksjonsgrunnlag(måned, rapportertInntekt, antallYtelsesdagerIMåned);
             final var utbetalingStatus = statusTidslinje.getSegment(måned.getLocalDateInterval()).getValue();
+            boolean slutterYtelseFørMånedsslutt = måned.getTom().isBefore(måned.getTom().with(TemporalAdjusters.lastDayOfMonth()));
             return new UngdomsytelseUtbetaltMånedDto(
+                slutterYtelseFørMånedsslutt,
                 måned.getValue(),
                 satsperioder,
-                antallDagerIMåned,
+                antallYtelsesdagerIMåned,
                 rapportertInntekt.orElse(null),
+                reduksjonsgrunnlag.orElse(null),
                 reduksjon,
                 utbetaltBeløp,
                 utbetalingStatus);
         }).toList();
+    }
+
+    private static Optional<BigDecimal> finnReduksjonsgrunnlag(LocalDateSegment<YearMonth> måned, Optional<BigDecimal> rapportertInntekt, Integer antallYtelsesdagerIMåned) {
+        final var totaltAntallVirkedagerDagerIMåned = Virkedager.beregnAntallVirkedager(måned.getFom(), måned.getTom().with(TemporalAdjusters.lastDayOfMonth()));
+        final var reduksjonsgrunnlag = rapportertInntekt.map(it -> BigDecimal.valueOf(antallYtelsesdagerIMåned).divide(BigDecimal.valueOf(totaltAntallVirkedagerDagerIMåned), 10, RoundingMode.HALF_UP)
+            .multiply(it).setScale(0, RoundingMode.HALF_UP));
+        return reduksjonsgrunnlag;
     }
 
     private static Integer finnAntallDagerForSatsperioder(List<UngdomsytelseSatsPeriodeDto> satsperioder) {

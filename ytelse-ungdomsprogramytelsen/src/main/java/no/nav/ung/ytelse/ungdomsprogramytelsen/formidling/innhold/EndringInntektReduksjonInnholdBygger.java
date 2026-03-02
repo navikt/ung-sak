@@ -1,0 +1,107 @@
+package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
+import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
+import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringInntektReduksjonDto;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.endring.inntekt.EndringInntektPeriodeDto;
+import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.temporal.TemporalAdjusters;
+import java.util.Comparator;
+import java.util.Objects;
+
+import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
+
+@Dependent
+public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdBygger {
+
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
+
+    //TODO hente fra et annet sted?
+    public static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
+    private static final int REDUSJON_PROSENT = REDUKSJONS_FAKTOR.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
+
+    @Inject
+    public EndringInntektReduksjonInnholdBygger(
+        TilkjentYtelseRepository tilkjentYtelseRepository) {
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+    }
+
+    @Override
+    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
+        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
+        final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
+
+        var relevantTilkjentYtelse = DetaljertResultat
+            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON, DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING)
+            .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
+                LocalDateTimeline.JoinStyle.LEFT_JOIN);
+
+        if (relevantTilkjentYtelse.isEmpty()) {
+            throw new IllegalStateException("Fant ingen tilkjent ytelse i perioden" + resultatTidslinje.getLocalDateIntervals());
+        }
+
+        var periodeDtoTidslinje = relevantTilkjentYtelse.combine(kontrollertInntektPerioderTidslinje,
+            EndringInntektReduksjonInnholdBygger::mapTilPeriodeDto,
+            LocalDateTimeline.JoinStyle.LEFT_JOIN);
+
+        var utbetalingsperioder = periodeDtoTidslinje.toSegments().stream()
+            .filter(it -> it.getValue().utbetalingBeløp() > 0)
+            .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
+            .map(LocalDateSegment::getValue)
+            .toList();
+        var harFlereUtbetalingsperioder = utbetalingsperioder.size() > 1;
+
+        var ingenUtbetalingsperioder = periodeDtoTidslinje.toSegments().stream()
+            .filter(it -> it.getValue().utbetalingBeløp() == 0)
+            .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
+            .map(LocalDateSegment::getValue)
+            .toList();
+        var harIngenUtbetalingsperioder = !ingenUtbetalingsperioder.isEmpty();
+
+        var dto = new EndringInntektReduksjonDto(
+            REDUSJON_PROSENT,
+            utbetalingsperioder,
+            ingenUtbetalingsperioder,
+            harFlereUtbetalingsperioder,
+            harIngenUtbetalingsperioder
+        );
+
+        return new TemplateInnholdResultat(TemplateType.ENDRING_INNTEKT, dto);
+    }
+
+    private static LocalDateSegment<EndringInntektPeriodeDto> mapTilPeriodeDto(
+        LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<BigDecimal> rhs) {
+        var ty = lhs.getValue();
+
+        Objects.requireNonNull(rhs, "Mangler kontrollert inntekt for periode %s for tilkjent ytelse %s"
+            .formatted(p.toString(), ty.toString()));
+
+
+        boolean erUfullstendigMåned = p.getTomDato().isBefore(p.getTomDato().with(TemporalAdjusters.lastDayOfMonth()));
+        var ufullstendigMåned = erUfullstendigMåned ? p.getTomDato().getMonth() : null;
+
+        return new LocalDateSegment<>(p,
+            new EndringInntektPeriodeDto(
+                new PeriodeDto(p.getFomDato(), p.getTomDato()),
+                tilHeltall(rhs.getValue()),
+                tilHeltall(ty.tilkjentBeløp()),
+                ufullstendigMåned)
+        );
+    }
+
+}

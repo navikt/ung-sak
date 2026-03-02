@@ -18,7 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.person.personopplysning.PersonopplysningTjeneste;
 import no.nav.ung.sak.kontrakt.person.PersonopplysningDto;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 

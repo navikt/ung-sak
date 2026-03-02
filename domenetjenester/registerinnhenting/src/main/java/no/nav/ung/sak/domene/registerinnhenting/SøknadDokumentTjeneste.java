@@ -8,7 +8,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
+import no.nav.ung.sak.diff.DiffResult;
 
 public interface SøknadDokumentTjeneste {
 

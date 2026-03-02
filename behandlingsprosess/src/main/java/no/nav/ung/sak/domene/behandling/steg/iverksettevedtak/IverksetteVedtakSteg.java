@@ -112,11 +112,9 @@ public class IverksetteVedtakSteg implements BehandlingSteg {
         historikkinnslagRepository.lagre(historikkinnslag);
     }
 
-
-
-
-
     private void iverksetter(Behandling behandling) {
-        FagsakYtelseTypeRef.Lookup.find(opprettProsessTaskIverksett, behandling.getFagsakYtelseType()).orElseThrow().opprettIverksettingstasker(behandling);
+        BehandlingTypeRef.Lookup.find(OpprettProsessTaskIverksett.class, opprettProsessTaskIverksett, behandling.getFagsakYtelseType(), behandling.getType())
+            .orElseThrow()
+            .opprettIverksettingstasker(behandling);
     }
 }

@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.vedtak.intern;
 
 import java.util.Optional;
 
+import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +36,7 @@ public class AvsluttBehandling {
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private ProsessTaskTjeneste taskTjeneste;
     private VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse;
+    private InntektAbonnentTjeneste inntektAbonnentTjeneste;
 
     public AvsluttBehandling() {
         // CDI
@@ -45,13 +47,14 @@ public class AvsluttBehandling {
                              BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                              BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer,
                              VurderBehandlingerUnderIverksettelse vurderBehandlingerUnderIverksettelse,
-                             ProsessTaskTjeneste taskTjeneste) {
+                             ProsessTaskTjeneste taskTjeneste, InntektAbonnentTjeneste inntektAbonnentTjeneste) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
         this.behandlingVedtakEventPubliserer = behandlingVedtakEventPubliserer;
         this.vurderBehandlingerUnderIverksettelse = vurderBehandlingerUnderIverksettelse;
         this.taskTjeneste = taskTjeneste;
+        this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
     }
 
     void avsluttBehandling(String behandlingId) {
@@ -76,6 +79,7 @@ public class AvsluttBehandling {
         behandlingVedtakEventPubliserer.fireEvent(vedtak, behandling);
 
         behandlingskontrollTjeneste.prosesserBehandlingGjenopptaHvisStegVenter(kontekst, BehandlingStegType.IVERKSETT_VEDTAK);
+        inntektAbonnentTjeneste.avsluttAbonnentHvisFinnes(behandling.getAktørId());
 
         log.info("Har avsluttet behandling: {}", ref.getBehandlingUuid());
 

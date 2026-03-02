@@ -26,7 +26,7 @@ import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.ung.sak.diff.IndexKeyComposer;
 
 @Entity(name = "Vilkar")
 @Table(name = "VR_VILKAR")

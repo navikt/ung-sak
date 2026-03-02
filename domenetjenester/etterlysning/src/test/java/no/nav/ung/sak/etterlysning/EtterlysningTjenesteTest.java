@@ -15,7 +15,7 @@ import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -206,7 +206,7 @@ class EtterlysningTjenesteTest {
         etterlysningRepository.lagre(etterlysning3);
 
         // Act
-        final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+            final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // Assert
         assertThat(gjeldendeEtterlysninger.size()).isEqualTo(1);

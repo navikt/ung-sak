@@ -16,7 +16,11 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.*;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.formidling.innhold.TomVedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.*;
+import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegelResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,11 +64,11 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
     }
 
     @Override
-    protected void prosesser(ProsessTaskData prosessTaskData) {
+    public void prosesser(ProsessTaskData prosessTaskData) {
         Long behandlingId = Long.valueOf(prosessTaskData.getBehandlingId());
         var behandling = behandlingRepository.hentBehandling(behandlingId);
 
-        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(this.vedtaksbrevRegler, behandling.getType());
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(this.vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
         var resultat = vedtaksbrevRegler.kjør(behandlingId);
         LOG.info("Resultat fra vedtaksbrev regler: {}", resultat.safePrint());
 

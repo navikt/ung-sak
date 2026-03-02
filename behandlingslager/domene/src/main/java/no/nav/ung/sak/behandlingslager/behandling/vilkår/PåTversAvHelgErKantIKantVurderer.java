@@ -4,6 +4,7 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 
 public class PåTversAvHelgErKantIKantVurderer implements KantIKantVurderer {
     public PåTversAvHelgErKantIKantVurderer() {

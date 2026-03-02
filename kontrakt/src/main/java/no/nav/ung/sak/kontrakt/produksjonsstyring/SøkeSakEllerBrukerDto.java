@@ -9,9 +9,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.AppAbacAttributt;
-import no.nav.ung.abac.AppAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
+import no.nav.ung.kodeverk.abac.AppAbacAttributt;
+import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
+import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 import no.nav.ung.sak.typer.Saksnummer;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -34,6 +34,7 @@ public class SøkeSakEllerBrukerDto {
     public SøkeSakEllerBrukerDto(String searchString) {
         this.searchString = searchString;
     }
+
 
     @StandardAbacAttributt(StandardAbacAttributtType.FNR)
     public String getFnr() {
@@ -63,3 +64,4 @@ public class SøkeSakEllerBrukerDto {
     }
 
 }
+

@@ -47,16 +47,16 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>arbeidsforhold</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>etterlysning</artifactId>
+        </dependency>
 
         <!-- Test dependencies -->
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-testutilities</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>etterlysning</artifactId>
         </dependency>
 
     </dependencies>

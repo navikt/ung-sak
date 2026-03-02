@@ -23,7 +23,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.ung.sak.web.app.jackson.ObjectMapperResolver;
+import no.nav.ung.sak.web.app.jackson.ObjectMapperFactory;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.AlleKodeverdierSomObjektResponse;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.LegacyVenteårsakSomObjekt;
 import no.nav.ung.sak.web.app.tjenester.kodeverk.dto.VenteårsakSomObjekt;
@@ -118,7 +118,8 @@ public class KodeverkRestTjeneste {
             new TreeMap<>(avslagårsakerGruppertPåVilkårType),
             sortert(alle.klageMedholdÅrsak()),
             sortert(alle.klageAvvistÅrsaker()),
-            sortert(alle.klageVurderingTyper())
+            sortert(alle.klageVurderingTyper()),
+            sortert(alle.overordnetInntektYtelseTyper())
         );
     }
 
@@ -164,7 +165,8 @@ public class KodeverkRestTjeneste {
             o.årsakerTilVurdering(),
             o.klageMedholdÅrsak(),
             o.klageAvvistÅrsaker(),
-            o.klagevurderingType()
+            o.klagevurderingType(),
+            o.overordnetInntektYtelseType()
         );
 
         final Map<String, Object> r = new LinkedHashMap<>();
@@ -195,7 +197,7 @@ public class KodeverkRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @Deprecated(forRemoval = true)
     public Response hentGruppertKodeliste() throws IOException {
-        final ObjectMapper om = ObjectMapperResolver.getBaseObjectMapperCopy();
+        final ObjectMapper om = ObjectMapperFactory.createBaseObjectMapperCopy();
 
         String kodelisteJson = om.writeValueAsString(legacyGruppertKodeverdi);
         jakarta.ws.rs.core.CacheControl cc = new jakarta.ws.rs.core.CacheControl();

@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
@@ -24,12 +25,12 @@ import no.nav.ung.sak.metrikker.bigquery.tabeller.fagsakstatus.FagsakStatusRecor
 import no.nav.ung.sak.metrikker.bigquery.tabeller.personopplysninger.AlderOgKjønnRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.sats.SatsStatistikkRecord;
 import no.nav.ung.sak.metrikker.bigquery.tabeller.ungdomsprogram.DagerIProgrammetRecord;
+import no.nav.ung.sak.metrikker.bigquery.tabeller.uttalelse.UttalelseRecord;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.hibernate.query.NativeQuery;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -68,13 +69,11 @@ public class BigQueryStatistikkRepository {
         Collection<DagerIProgrammetRecord> dagerIProgrammet = antallDagerStatistikk.dagerIProgrammet();
         dagligRapporterte.add(new Tuple<>(DagerIProgrammetRecord.DAGER_I_PROGRAMMET_LØPENDE_BIG_QUERY_TABELL, dagerIProgrammet));
 
-
-
         return dagligRapporterte;
     }
 
 
-        public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
+    public List<Tuple<BigQueryTabell<?>, Collection<?>>> hentHyppigRapporterte(LocalDateTime sistKjørtTidspunkt) {
         List<Tuple<BigQueryTabell<?>, Collection<?>>> hyppigRapporterte = new ArrayList<>();
 
         Collection<FagsakStatusRecord> fagsakStatusStatistikk = fagsakStatusStatistikk();
@@ -94,6 +93,9 @@ public class BigQueryStatistikkRepository {
 
         Collection<EtterlysningRecord> etterlysningData = etterlysningData(sistKjørtTidspunkt);
         hyppigRapporterte.add(new Tuple<>(EtterlysningRecord.ETTERLYSNING_TABELL, etterlysningData));
+
+        Collection<UttalelseRecord> uttalelseData = uttalelseData(sistKjørtTidspunkt, null);
+        hyppigRapporterte.add(new Tuple<>(UttalelseRecord.UTTALELSE_TABELL, uttalelseData));
 
         Collection<BehandlingÅrsakRecord> behandlingÅrsakData = behandlingÅrsakStatistikk();
         hyppigRapporterte.add(new Tuple<>(BehandlingÅrsakRecord.BEHANDLING_ÅRSAK_TABELL, behandlingÅrsakData));
@@ -407,25 +409,70 @@ public class BigQueryStatistikkRepository {
             String saksnummer = t.get(0, String.class);
             String type = t.get(1, String.class);
             String status = t.get(2, String.class);
-            Date fom = t.get(3, Date.class);
-            Date tom = t.get(4, Date.class);
-            Timestamp frist = t.get(5, Timestamp.class);
-            Timestamp tidsstempel = t.get(6, Timestamp.class);
+            LocalDate fom = t.get(3, LocalDate.class);
+            LocalDate tom = t.get(4, LocalDate.class);
+            LocalDateTime frist = t.get(5, LocalDateTime.class);
+            LocalDateTime tidsstempel = t.get(6, LocalDateTime.class);
 
             return new EtterlysningRecord(
                 new Saksnummer(saksnummer),
                 EtterlysningType.fraKode(type),
                 EtterlysningStatus.fraKode(status),
-                DatoIntervallEntitet.fraOgMedTilOgMed(fom.toLocalDate(), tom.toLocalDate()),
-                frist == null ? null : frist.toLocalDateTime().atZone(ZoneId.systemDefault()),
-                tidsstempel.toLocalDateTime().atZone(ZoneId.systemDefault())
+                DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
+                frist == null ? null : frist.atZone(ZoneId.systemDefault()),
+                tidsstempel.atZone(ZoneId.systemDefault())
             );
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
+
+    /* Henter uttalelse-data for fagsaker.
+     */
+    Collection<UttalelseRecord> uttalelseData(LocalDateTime sistKjørtTidspunkt, LocalDateTime førsteKjørtTidspunkt) {
+        String sql = """
+            select f.saksnummer, u.har_uttalelse, u.endring_type, u.fom, u.tom, m.mottatt_tidspunkt
+             from gr_uttalelse gr
+             inner join uttalelse_v2 u on u.uttalelser_id = gr.uttalelser_id
+             inner join behandling b on b.id = gr.behandling_id
+             inner join fagsak f on f.id = b.fagsak_id
+             inner join mottatt_dokument m on m.journalpost_id = u.svar_journalpost_id and m.behandling_id = b.id
+             where f.ytelse_type <> :obsoleteKode and
+            """;
+        sql += førsteKjørtTidspunkt == null
+            ? "(m.mottatt_tidspunkt > :sistKjørtTidspunkt)"
+            : "(m.mottatt_tidspunkt > :sistKjørtTidspunkt or m.mottatt_tidspunkt < :førsteKjørtTidspunkt)";
+
+        NativeQuery<jakarta.persistence.Tuple> query = (NativeQuery<jakarta.persistence.Tuple>) entityManager.createNativeQuery(sql, jakarta.persistence.Tuple.class);
+        query.setParameter("obsoleteKode", OBSOLETE_KODE);
+        query.setParameter("sistKjørtTidspunkt", sistKjørtTidspunkt);
+        if (førsteKjørtTidspunkt != null) {
+            query.setParameter("førsteKjørtTidspunkt", førsteKjørtTidspunkt);
+        }
+
+        Stream<jakarta.persistence.Tuple> stream = query.getResultStream();
+
+        return stream.map(t -> {
+            String saksnummer = t.get(0, String.class);
+            boolean har_uttalelse = t.get(1, Boolean.class);
+            String endringType = t.get(2, String.class);
+            LocalDate fom = t.get(3, LocalDate.class);
+            LocalDate tom = t.get(4, LocalDate.class);
+            LocalDateTime mottattTidspunkt = t.get(5, LocalDateTime.class);
+
+            return new UttalelseRecord(
+                new Saksnummer(saksnummer),
+                har_uttalelse,
+                EndringType.fraKode(endringType),
+                DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
+                mottattTidspunkt.atZone(ZoneId.systemDefault())
+            );
+        }).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+
     /**
      * Henter statistikk for behandlinger gruppert på årsakstype og ferdigbehandlet-status.
-     *
+     * <p>
      * Denne metoden henter antall behandlinger for hver kombinasjon av relevante årsakstyper og om behandlingen er ferdigbehandlet eller ikke.
      * Resultatet inkluderer alle relevante årsaker, også de med 0 forekomster, for både ferdigbehandlet og ikke-ferdigbehandlet status.
      *
@@ -502,9 +549,6 @@ public class BigQueryStatistikkRepository {
             return new AlderOgKjønnRecord(BigDecimal.valueOf(antall), alder.intValue(), kjønn, ZonedDateTime.now());
         }).collect(Collectors.toCollection(LinkedHashSet::new));
     }
-
-
-
 
 
 }

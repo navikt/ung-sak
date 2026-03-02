@@ -5,6 +5,9 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
@@ -23,7 +26,7 @@ public class OpprettOppgaveAnkebehandlingAvsluttetTask extends BehandlingProsess
     public static final String UTFALL = "utfall";
     private static final Logger log = LoggerFactory.getLogger(OpprettOppgaveAnkebehandlingAvsluttetTask.class);
     private OppgaveTjeneste oppgaveTjeneste;
-//    private HistorikkRepository historikkRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private boolean historikkinnslagVedAvsluttetAnke;
 
     OpprettOppgaveAnkebehandlingAvsluttetTask() {
@@ -34,11 +37,11 @@ public class OpprettOppgaveAnkebehandlingAvsluttetTask extends BehandlingProsess
     public OpprettOppgaveAnkebehandlingAvsluttetTask(
         OppgaveTjeneste oppgaveTjeneste,
         BehandlingRepositoryProvider repositoryProvider,
-//        HistorikkRepository historikkRepository,
+        HistorikkinnslagRepository historikkinnslagRepository,
         @KonfigVerdi(value = "HISTORIKKINNSLAG_AVSLUTTET_ANKE", required = false, defaultVerdi = "false") boolean historikkinnslagVedAvsluttetAnke) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.oppgaveTjeneste = oppgaveTjeneste;
-//        this.historikkRepository = historikkRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
         this.historikkinnslagVedAvsluttetAnke = historikkinnslagVedAvsluttetAnke;
     }
 
@@ -64,15 +67,12 @@ public class OpprettOppgaveAnkebehandlingAvsluttetTask extends BehandlingProsess
     }
 
     private void lagHistorikkinnslagForAnkeAvsluttetGoys(Long behandlingId, String begrunnelse) {
-//        HistorikkInnslagTekstBuilder builder = new HistorikkInnslagTekstBuilder()
-//            .medHendelse(HistorikkinnslagType.ANKE_BEH)
-//            .medBegrunnelse(begrunnelse);
-//
-//        Historikkinnslag innslag = new Historikkinnslag();
-//        innslag.setAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
-//        innslag.setType(HistorikkinnslagType.ANKE_BEH);
-//        innslag.setBehandlingId(behandlingId);
-//        builder.build(innslag);
-//        historikkRepository.lagre(innslag);
+        Historikkinnslag.Builder builder = new Historikkinnslag.Builder()
+            .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN)
+            .medBehandlingId(behandlingId)
+            .medTittel("Ankebehandling")
+            .addLinje(begrunnelse);
+
+        historikkinnslagRepository.lagre(builder.build());
     }
 }

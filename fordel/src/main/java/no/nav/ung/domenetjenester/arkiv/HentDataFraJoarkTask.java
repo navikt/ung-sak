@@ -1,12 +1,5 @@
 package no.nav.ung.domenetjenester.arkiv;
 
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.exception.TekniskException;
@@ -24,6 +17,12 @@ import no.nav.ung.fordel.repo.journalpost.JournalpostMottattEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @ApplicationScoped
 @ProsessTask(value = HentDataFraJoarkTask.TASKTYPE, maxFailedRuns = 1)
@@ -81,6 +80,7 @@ public class HentDataFraJoarkTask extends WrappedProsessTaskHandler {
         var mottattTidspunkt = journalpostInfo.getForsendelseTidspunkt();
         dataWrapper.setAktørId(aktørId.map(AktørId::getId).orElseThrow());
         dataWrapper.setForsendelseMottattTidspunkt(mottattTidspunkt);
+        oppdaterBeskrivelse(journalpostInfo, dataWrapper);
         dataWrapper.setPayload(journalpostInfo.getStrukturertPayload());
         dataWrapper.setBrevkode(journalpostInfo.getBrevkode());
 
@@ -128,6 +128,15 @@ public class HentDataFraJoarkTask extends WrappedProsessTaskHandler {
             }
         }
         return journalpostInfo;
+    }
+
+    private void oppdaterBeskrivelse(JournalpostInfo journalpostInfo, MottattMelding dataWrapper) {
+        if (journalpostInfo.getTittel() != null) {
+            dataWrapper.setBeskrivelse(journalpostInfo.getTittel());
+        } else {
+            final String utledetTittel = BrevkodeInformasjonUtleder.finnTittel(journalpostInfo.getBrevkode());
+            dataWrapper.setBeskrivelse(utledetTittel);
+        }
     }
 
     private MottattMelding registerMottattJournalpostTilBehandling(

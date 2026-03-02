@@ -15,7 +15,7 @@ import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.IndexKeyComposer;
+import no.nav.ung.sak.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.VurderÅrsakKodeverdiConverter;
 
 

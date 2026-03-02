@@ -1,16 +1,15 @@
 package no.nav.ung.sak.behandlingslager;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.sak.diff.DiffIgnore;
+
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * En basis {@link Entity} klasse som håndtere felles standarder for utformign av tabeller (eks. sporing av hvem som har

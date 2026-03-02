@@ -164,7 +164,7 @@ public class KontrollerInntektMapper {
                 .filter(ip -> ip.getPeriode().toLocalDateInterval().overlaps(periode))
                 .map(ip -> new InntektspostFraRegisterDto(
                     inntekt.getArbeidsgiver() != null ? inntekt.getArbeidsgiver().getIdentifikator() : null,
-                    ip.getInntektYtelseType() != null ? ip.getInntektYtelseType().getYtelseType() : null,
+                    ip.getInntektYtelseType() != null ? ip.getInntektYtelseType().getOverordnetYtelseType() : null,
                     ip.getBeløp().getVerdi().intValue()))
                 .forEach(inntektsposterFraRegister::add);
         }

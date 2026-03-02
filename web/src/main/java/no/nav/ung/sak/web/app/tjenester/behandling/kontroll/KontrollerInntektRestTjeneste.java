@@ -83,8 +83,7 @@ public class KontrollerInntektRestTjeneste {
             .toList();
 
         final var perioderTilKontroll = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
-
-        final var rapporterteInntekter = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandling.getId());
+        final var rapporterteInntekter = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(behandling.getId(), perioderTilKontroll);
         final var gjeldendeEtterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysningTidslinje(behandling.getId(), behandling.getFagsakId(), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         final var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandling.getId());
 

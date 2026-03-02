@@ -1,5 +1,6 @@
 package no.nav.ung.kodeverk.dokument;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 
@@ -79,6 +80,7 @@ public enum DokumentMalType implements Kodeverdi {
         return vedtaksbrevmal;
     }
 
+    @JsonCreator
     public static DokumentMalType fraKode(final String kode) {
         var ad = Optional.ofNullable(KODER.get(kode));
         if (ad.isEmpty()) {

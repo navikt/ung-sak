@@ -4,10 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.util.List;
 
@@ -16,8 +18,7 @@ public class EtterlysningProssesseringTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private OpprettOppgaveTjeneste opprettOppgaveTjeneste;
-
-    private UngOppgaveKlient oppgaveKlient;
+    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public EtterlysningProssesseringTjeneste() {
@@ -27,33 +28,34 @@ public class EtterlysningProssesseringTjeneste {
     @Inject
     public EtterlysningProssesseringTjeneste(EtterlysningRepository etterlysningRepository,
                                              OpprettOppgaveTjeneste opprettOppgaveTjeneste,
-                                             UngOppgaveKlient oppgaveKlient, ProsessTaskTjeneste prosessTaskTjeneste) {
+                                             MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+                                             ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.opprettOppgaveTjeneste = opprettOppgaveTjeneste;
-        this.oppgaveKlient = oppgaveKlient;
+        this.delegeringTjeneste = delegeringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public void settTilUtløpt(Long behandlingId) {
-        final var etterlysninger = etterlysningRepository.hentUtløpteEtterlysningerSomVenterPåSvar(behandlingId);
+    public void settTilUtløpt(Behandling behandling) {
+        final var etterlysninger = etterlysningRepository.hentUtløpteEtterlysningerSomVenterPåSvar(behandling.getId());
 
-        settEttelysningerUtløpt(etterlysninger);
+        settEttelysningerUtløpt(etterlysninger, behandling.getAktørId());
     }
 
-    public void settEttelysningerUtløpt(List<Etterlysning> etterlysninger) {
+    public void settEttelysningerUtløpt(List<Etterlysning> etterlysninger, AktørId aktørId) {
         etterlysninger.forEach(e -> {
-            oppgaveKlient.oppgaveUtløpt(e.getEksternReferanse());
+            delegeringTjeneste.oppgaveUtløpt(new OppgaveRequest(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()), e.getEksternReferanse()));
             e.utløpt();
         });
 
         etterlysningRepository.lagre(etterlysninger);
     }
 
-    public void settTilAvbrutt(Long behandlingId) {
-        final var etterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandlingId);
+    public void settTilAvbrutt(Behandling behandling) {
+        final var etterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId());
 
         etterlysninger.forEach(e -> {
-            oppgaveKlient.avbrytOppgave(e.getEksternReferanse());
+            delegeringTjeneste.avbrytOppgave(new OppgaveRequest(new no.nav.ung.brukerdialog.typer.AktørId(behandling.getAktørId().getAktørId()), e.getEksternReferanse()));
             e.avbryt();
         });
 

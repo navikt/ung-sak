@@ -15,6 +15,7 @@ public record HistorikkinnslagDto(@NotNull UUID historikkinnslagUuid,
                                   UUID behandlingUuid,
                                   @NotNull HistorikkAktørDto aktør,
                                   SkjermlenkeType skjermlenke,
+                                  @NotNull
                                   LocalDateTime opprettetTidspunkt,
                                   @NotNull List<HistorikkInnslagDokumentLinkDto> dokumenter,
                                   String tittel,

@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -22,9 +21,14 @@ public class XhtmlBrevRenser {
         .charset(StandardCharsets.UTF_8)
         .prettyPrint(false);
 
-    private static final List<String> SAFE_TAGS = List.of("b", "em", "i", "strong", "u", "br", "li", "ol", "p", "ul", "h1", "h2", "h3", "a");
+    private static final Safelist SAFELIST = Safelist.none()
+        .addTags(
+            "b", "em", "i", "strong", "u", "br", "li", "ol", "p", "ul", "h1", "h2", "h3", "a"
+        )
+        .addAttributes("a", "href", "title")
+        .addProtocols("a", "href", "http", "https");
 
-    private static final Safelist SAFELIST = Safelist.none().addTags(SAFE_TAGS.toArray(new String[0]));
+
 
     public static String rens(String input) {
         Objects.requireNonNull(input, "Input må være satt");

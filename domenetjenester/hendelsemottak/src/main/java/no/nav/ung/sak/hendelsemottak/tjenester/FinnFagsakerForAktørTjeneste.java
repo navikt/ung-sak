@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -26,20 +27,21 @@ public class FinnFagsakerForAktørTjeneste {
         this.fagsakRepository = fagsakRepository;
     }
 
-    public List<Fagsak> hentRelevantFagsakForAktørSomBarnAvSøker(AktørId aktørId, LocalDate relevantDato) {
+    public List<Fagsak> hentRelevantFagsakForAktørSomBarnAvSøker(FagsakYtelseType fagsakYtelseType, AktørId aktørId, LocalDate relevantDato) {
         Query query = entityManager.createNativeQuery(
                 "SELECT f.* FROM GR_PERSONOPPLYSNING gr " +
                     "inner join PO_INFORMASJON informasjon on informasjon.id = gr.registrert_informasjon_id " +
                     "inner join PO_RELASJON relasjon on relasjon.po_informasjon_id = informasjon.id " +
                     "inner join BEHANDLING b on gr.behandling_id = b.id " +
                     "inner join FAGSAK f on b.fagsak_id = f.id " +
-                    "WHERE f.ytelse_type != 'OBSOLETE'" +
+                    "WHERE f.ytelse_type = :ytelse_type " +
                     "and relasjon.relasjonsrolle = :relasjonsrolle " +
                     "and relasjon.til_aktoer_id = :aktoer_id " +
                     "and f.periode && daterange(cast(:dato as date), cast(:dato as date), '[]') = true", //$NON-NLS-1$
                 Fagsak.class)
             .setParameter("relasjonsrolle", RelasjonsRolleType.BARN.getKode())
             .setParameter("aktoer_id", aktørId.getId())
+            .setParameter("ytelse_type", fagsakYtelseType.getKode())
             .setParameter("dato", relevantDato); // NOSONAR //$NON-NLS-1$
         return query.getResultList();
     }
@@ -61,8 +63,8 @@ public class FinnFagsakerForAktørTjeneste {
         return !query.getResultList().isEmpty();
     }
 
-    public Optional<Fagsak> hentRelevantFagsakForAktørSomSøker(AktørId aktør, LocalDate relevantDato) {
-        return fagsakRepository.hentForBruker(aktør).stream().filter(f -> f.getPeriode().overlapper(relevantDato, AbstractLocalDateInterval.TIDENES_ENDE)).findFirst();
+    public Optional<Fagsak> hentRelevantFagsakForAktørSomSøker(FagsakYtelseType fagsakYtelseType, AktørId aktør, LocalDate relevantDato) {
+        return fagsakRepository.hentForBruker(aktør, fagsakYtelseType).stream().filter(f -> f.getPeriode().overlapper(relevantDato, AbstractLocalDateInterval.TIDENES_ENDE)).findFirst();
     }
 
     private boolean finnesSakMedSøker(AktørId søkerAktørId) {

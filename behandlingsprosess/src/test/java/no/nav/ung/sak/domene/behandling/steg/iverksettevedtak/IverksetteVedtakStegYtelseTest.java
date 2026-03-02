@@ -27,7 +27,7 @@ import no.nav.ung.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

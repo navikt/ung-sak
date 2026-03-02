@@ -7,14 +7,18 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.kodeverk.hendelser.HendelseType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
+import no.nav.ung.sak.behandling.revurdering.ÅrsakerOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +47,7 @@ public class HendelsemottakTjeneste {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
     }
 
-    public Map<Fagsak, ÅrsakOgPeriode> finnFagsakerTilVurdering(Hendelse hendelse) {
+    public Map<Fagsak, List<ÅrsakOgPerioder>> finnFagsakerTilVurdering(Hendelse hendelse) {
         return finnMatchendeUtledere(hendelse.getHendelseType())
             .stream()
             .map(utleder -> utleder.finnFagsakerTilVurdering(hendelse))
@@ -51,20 +55,19 @@ public class HendelsemottakTjeneste {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public Map<Fagsak, ÅrsakOgPeriode> mottaHendelse(Hendelse payload) {
+    public Map<Fagsak, List<ÅrsakOgPerioder>> mottaHendelse(Hendelse payload) {
         var kandidaterTilRevurdering = finnFagsakerTilVurdering(payload);
 
         List<String> saksnumre = kandidaterTilRevurdering.keySet().stream().map(f -> f.getSaksnummer().getVerdi()).toList();
         log.info("Mottok hendelse '{}', fant {} relevante fagsaker: {}", payload.getHendelseType(), saksnumre.size(), saksnumre);
 
-        for (Map.Entry<Fagsak, ÅrsakOgPeriode> entry : kandidaterTilRevurdering.entrySet()) {
+        for (Map.Entry<Fagsak, List<ÅrsakOgPerioder>> entry : kandidaterTilRevurdering.entrySet()) {
             var fagsak = entry.getKey();
-            var behandlingÅrsak = entry.getValue().behandlingÅrsak();
-            log.info("Oppretter revurdering for fagsak {} med behandlingÅrsak {}", fagsak.getSaksnummer().getVerdi(), behandlingÅrsak.getKode());
+            var årsakerOgPerioderList = entry.getValue();
+            log.info("Oppretter revurdering for fagsak {} med behandlingÅrsaker og perioder {}", fagsak.getSaksnummer().getVerdi(), årsakerOgPerioderList);
+            String årsakOgPerioderString = mapTilJsonString(entry.getValue());
             ProsessTaskData tilRevurderingTaskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK, behandlingÅrsak.getKode());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_FOM, entry.getValue().periode().getFomDato().toString());
-            tilRevurderingTaskData.setProperty(OpprettRevurderingEllerOpprettDiffTask.PERIODE_TOM, entry.getValue().periode().getTomDato().toString());
+            tilRevurderingTaskData.setPayload(årsakOgPerioderString);
             var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
             if (sisteBehandling.isPresent()) {
                 Behandling tilRevurdering = sisteBehandling.get();
@@ -76,6 +79,16 @@ public class HendelsemottakTjeneste {
 
         }
         return kandidaterTilRevurdering;
+    }
+
+    private static String mapTilJsonString(List<ÅrsakOgPerioder> value) {
+        String årsakOgPerioderString;
+        try {
+            årsakOgPerioderString = JsonObjectMapper.getJson(new ÅrsakerOgPerioder(value));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return årsakOgPerioderString;
     }
 
     private List<FagsakerTilVurderingUtleder> finnMatchendeUtledere(HendelseType hendelseType) {

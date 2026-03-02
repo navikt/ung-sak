@@ -13,7 +13,7 @@ import java.util.List;
 @Alternative
 @ApplicationScoped
 @Priority(value = 1)
-public class DokDistRestKlientFake implements DokDistRestKlient {
+public class DokDistRestKlientFake implements no.nav.ung.sak.formidling.dokdist.DokDistRestKlient {
 
     private final List<DistribuerJournalpostRequest> requests = new ArrayList<>();
     private final List<DistribuerJournalpostResponse> responses = new ArrayList<>();

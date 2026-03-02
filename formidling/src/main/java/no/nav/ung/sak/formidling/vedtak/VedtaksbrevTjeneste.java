@@ -2,9 +2,12 @@ package no.nav.ung.sak.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
+import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -12,12 +15,14 @@ import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevReglerUng;
+import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevForhåndsvisRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevEditorResponse;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjon;
+import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.editor.VedtaksbrevSeksjonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,20 +35,16 @@ public class VedtaksbrevTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
-    private VedtaksbrevReglerUng vedtaksbrevRegler;
+    private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjeneste.class);
 
-    public VedtaksbrevTjeneste() {
-    }
-
     @Inject
-    public VedtaksbrevTjeneste(
-        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
-        @Any VedtaksbrevReglerUng vedtaksbrevRegler,
-        VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        BehandlingRepository behandlingRepository) {
+    public VedtaksbrevTjeneste(VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
+                               @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler,
+                               VedtaksbrevValgRepository vedtaksbrevValgRepository,
+                               BehandlingRepository behandlingRepository) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
@@ -54,8 +55,8 @@ public class VedtaksbrevTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var erAvsluttet = behandling.erAvsluttet();
 
-
-        BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegler.kjør(behandlingId);
+        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
+        BehandlingVedtaksbrevResultat totalResultat = vedtaksbrevRegel.kjør(behandlingId);
         LOG.info("Regel resultater: {}", totalResultat.safePrint());
 
         if (!totalResultat.harBrev()) {
@@ -95,8 +96,7 @@ public class VedtaksbrevTjeneste {
             valg.map(VedtaksbrevValgEntitet::isRedigert).orElse(false),
             !erAvsluttet && egenskaper.kanOverstyreRediger(),
             resultat.forklaring(),
-            redigertBrevHtml,
-            tidligereRedigertTekst);
+            redigertBrevHtml == null && deaktivertValg.isPresent());
     }
 
     private static VedtaksbrevValgResponse mapIngenBrevResponse(BehandlingVedtaksbrevResultat totalResultat) {
@@ -112,8 +112,7 @@ public class VedtaksbrevTjeneste {
                     false,
                     false,
                     it.forklaring(),
-                    null,
-                    null
+                    false
                 )).toList()
         );
     }
@@ -124,7 +123,8 @@ public class VedtaksbrevTjeneste {
             throw new IllegalArgumentException("Kan ikke endre vedtaksbrev på avsluttet behandling");
         }
 
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(dto.behandlingId());
+        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegel.kjør(dto.behandlingId());
         if (!totalresultater.harBrev()) {
             throw new IllegalArgumentException("Ingen vedtaksbrev resultater for behandling");
         }
@@ -159,9 +159,11 @@ public class VedtaksbrevTjeneste {
 
     }
 
-    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisRequest dto) {
+    public GenerertBrev forhåndsvis(VedtaksbrevForhåndsvisInput dto) {
         Long behandlingId = dto.behandlingId();
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandlingId);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegel.kjør(behandlingId);
         validerHarBrev(totalresultater);
 
         var vedtaksbrev = totalresultater.finnVedtaksbrev(dto.dokumentMalType())
@@ -189,7 +191,9 @@ public class VedtaksbrevTjeneste {
 
     //Brukes foreløpig bare i test - gir ikke mening å generere alle i ett kall.
     public List<GenerertBrev> genererAlleForBehandling(Long behandlingId, Boolean kunHtml) {
-        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandlingId);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        VedtaksbrevRegel vedtaksbrevRegel = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevRegler, behandling.getFagsakYtelseType(), behandling.getType());
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegel.kjør(behandlingId);
         validerHarBrev(totalresultater);
 
         List<GenerertBrev> genererteBrev = totalresultater.vedtaksbrevResultater().stream()
@@ -218,7 +222,6 @@ public class VedtaksbrevTjeneste {
         var relevantValg = vedtaksbrevValgRepository
             .finnVedtakbrevValg(behandlingId, dokumentMalType).stream()
             .findFirst();
-
         if (relevantValg.isPresent()) {
             var valg = relevantValg.get();
             if (valg.isHindret()) {
@@ -247,6 +250,36 @@ public class VedtaksbrevTjeneste {
             });
 
 
+    }
+
+    public VedtaksbrevEditorResponse editor(Long behandlingId, DokumentMalType dokumentMalType) {
+        GenerertBrev forhåndsvis = forhåndsvis(new VedtaksbrevForhåndsvisInput(
+            behandlingId,
+            dokumentMalType,
+            false,
+            true
+        ));
+
+        List<VedtaksbrevSeksjon> original = BrevXhtmlTilSeksjonKonverter.konverter(forhåndsvis.dokument().html());
+        List<VedtaksbrevSeksjon> redigert = vedtaksbrevValgRepository.finnVedtakbrevValg(behandlingId, dokumentMalType)
+            .filter(VedtaksbrevValgEntitet::isRedigert)
+            .map(it -> erstattRedigerBar(original, it.getRedigertBrevHtml()))
+            .orElse(null);
+
+        List<VedtaksbrevSeksjon> tidligereRedigert = redigert == null ?
+            vedtaksbrevValgRepository.finnNyesteDeaktiverteVedtakbrevValg(behandlingId, dokumentMalType)
+                .map(it -> erstattRedigerBar(original, it.getRedigertBrevHtml()))
+                .orElse(null)
+            : null;
+
+        return new VedtaksbrevEditorResponse(original, redigert, tidligereRedigert);
+    }
+
+    private List<VedtaksbrevSeksjon> erstattRedigerBar(List<VedtaksbrevSeksjon> original, String redigertBrevHtml) {
+        return original.stream().map(it ->
+                it.type() == VedtaksbrevSeksjonType.REDIGERBAR ?
+                    new VedtaksbrevSeksjon(VedtaksbrevSeksjonType.REDIGERBAR, redigertBrevHtml) : it)
+            .toList();
     }
 }
 

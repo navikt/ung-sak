@@ -1,22 +1,21 @@
 package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
-import no.nav.ung.sak.domene.behandling.steg.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
+import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
+import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +29,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_KOMPLETTHET;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
 
 /**
  * Implementasjon av steg for å vurdere kompletthet i en behandling.
@@ -55,10 +52,12 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private static final Logger log = LoggerFactory.getLogger(VurderKompletthetStegImpl.class);
     private EtterlysningRepository etterlysningRepository;
     private BehandlingRepository behandlingRepository;
-    private KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter;
-    private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
+    private InntektAbonnentTjeneste inntektAbonnentTjeneste;
     private RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder;
+    private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
+    private Instance<EtterlysningOppretter> etterlysningOppretter;
     private Duration ventePeriode;
+    private boolean hentInntektHendelserEnabled;
 
 
     VurderKompletthetStegImpl() {
@@ -67,16 +66,20 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     @Inject
     public VurderKompletthetStegImpl(EtterlysningRepository etterlysningRepository,
                                      BehandlingRepository behandlingRepository,
-                                     KontrollerInntektEtterlysningOppretter kontrollerInntektEtterlysningOppretter,
-                                     ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
+                                     InntektAbonnentTjeneste inntektAbonnentTjeneste,
                                      RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder,
-                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
+                                     RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder,
+                                     @Any Instance<EtterlysningOppretter> etterlysningOppretter,
+                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
+                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
-        this.kontrollerInntektEtterlysningOppretter = kontrollerInntektEtterlysningOppretter;
-        this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
+        this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.rapporteringsfristAutopunktUtleder = rapporteringsfristAutopunktUtleder;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
+        this.etterlysningOppretter = etterlysningOppretter;
         this.ventePeriode = Duration.parse(ventePeriode);
+        this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
     }
 
     @Override
@@ -89,10 +92,18 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         // Steg 1: Opprett etterlysninger dersom fagsak har digital bruker
         boolean erDigitalBruker = !fagsak.erIkkeDigitalBruker();
         if (erDigitalBruker) {
-            kontrollerInntektEtterlysningOppretter.opprettEtterlysninger(behandlingReferanse);
-            programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+            EtterlysningOppretter.finnTjeneste(etterlysningOppretter, behandlingReferanse).opprettEtterlysninger(behandlingReferanse);
         } else {
-            log.info("Behandling {} har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.", kontekst.getBehandlingId());
+            log.info("Behandling har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.");
+        }
+
+        if (hentInntektHendelserEnabled) {
+            LocalDateTimeline<Boolean> relevantekontrollperioder = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+            if (relevantekontrollperioder.isEmpty()) {
+                log.info("Behandlingen har ingen relevante kontrollperioder for inntekt, hopper over opprettelse av inntekt abonnement.");
+            } else {
+                inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), new Periode(relevantekontrollperioder.getMinLocalDate(), relevantekontrollperioder.getMaxLocalDate()));
+            }
         }
 
         // Steg 2: Utled aksjonspunkter
@@ -105,6 +116,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         // Sjekker etterlysninger opprettet i steg 1
         final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
+
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
     }
 
@@ -112,7 +124,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         final var lengsteFristPrType = etterlysningerSomVenterPåSvar.stream().collect(Collectors.toMap(Etterlysning::getType, Function.identity(), BinaryOperator.maxBy(Comparator.comparing(Etterlysning::getFrist, Comparator.nullsLast(Comparator.naturalOrder())))));
         final var aksjonspunktresultater = lengsteFristPrType.entrySet()
             .stream()
-            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(mapTilDefinisjon(e.getKey()), mapTilVenteårsak(e.getKey()), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
+            .map(e -> AksjonspunktResultat.opprettForAksjonspunktMedFrist(e.getKey().tilAutopunktDefinisjon(), e.getKey().mapTilVenteårsak(), e.getValue().getFrist() == null ? LocalDateTime.now().plus(ventePeriode) : e.getValue().getFrist())).toList();
         log.info("Aksjonspunktresultatfrist={}, etterlysningfrister={}, harPassertFrist={}, now={}",
             aksjonspunktresultater.stream().map(AksjonspunktResultat::getFrist).toList(),
             etterlysningerSomVenterPåSvar.stream().map(Etterlysning::getFrist).toList(),
@@ -125,28 +137,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         return frist != null && frist.isBefore(LocalDateTime.now());
     }
 
-    private static AksjonspunktDefinisjon mapTilDefinisjon(EtterlysningType type) {
-        switch (type) {
-            case UTTALELSE_KONTROLL_INNTEKT -> {
-                return AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
-            }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO -> {
-                return AUTO_SATT_PÅ_VENT_REVURDERING;
-            }
-            default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);
-        }
-    }
 
-    private Venteårsak mapTilVenteårsak(EtterlysningType type) {
-        switch (type) {
-            case UTTALELSE_KONTROLL_INNTEKT -> {
-                return Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE;
-            }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO -> {
-                return Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
-            }
-            default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + type);
-        }
-    }
 
 }

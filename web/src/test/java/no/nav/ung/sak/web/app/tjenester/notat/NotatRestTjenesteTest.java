@@ -31,7 +31,7 @@ import no.nav.ung.sak.kontrakt.notat.EndreNotatDto;
 import no.nav.ung.sak.kontrakt.notat.NotatDto;
 import no.nav.ung.sak.kontrakt.notat.OpprettNotatDto;
 import no.nav.ung.sak.kontrakt.notat.SkjulNotatDto;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 

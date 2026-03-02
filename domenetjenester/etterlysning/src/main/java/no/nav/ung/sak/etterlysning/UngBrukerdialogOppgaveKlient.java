@@ -1,0 +1,124 @@
+package no.nav.ung.sak.etterlysning;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
+import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreFristDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.typer.AktørId;
+
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+@Dependent
+@ScopedRestIntegration(scopeKey = "ung.brukerdialog.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog/.default")
+public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
+
+    private final OidcRestClient restClient;
+    private final boolean oppgaverIUngBrukerdialogEnabled;
+    private final URI opprettURI;
+    private final URI utløpForTypeOgPeriodeURI;
+    private final URI avbrytForTypeOgPeriodeURI;
+    private final URI avbrytURI;
+    private final URI utløptURI;
+    private final URI løsSøkYtelseBaseURI;
+    private final URI endreFristURI;
+
+    @Inject
+    public UngBrukerdialogOppgaveKlient(
+        OidcRestClient restClient,
+        @KonfigVerdi(value = "OPPGAVER_I_UNGBRUKERDIALOG_ENABLED", defaultVerdi = "false") boolean oppgaverIUngBrukerdialogEnabled,
+        @KonfigVerdi(value = "ung.brukerdialog.url", defaultVerdi = "http://ung-brukerdialog.k9saksbehandling") String url) {
+        this.restClient = restClient;
+        this.oppgaverIUngBrukerdialogEnabled = oppgaverIUngBrukerdialogEnabled;
+        this.opprettURI = tilUri(url, "oppgavebehandling/opprett");
+        this.avbrytURI = tilUri(url, "oppgavebehandling/sett-avbrutt");
+        this.utløptURI = tilUri(url, "oppgavebehandling/sett-utlopt");
+        this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgavebehandling/sett-utlopt-for-type-og-periode");
+        this.avbrytForTypeOgPeriodeURI = tilUri(url, "oppgavebehandling/sett-avbrutt-for-type-og-periode");
+        this.endreFristURI = tilUri(url, "oppgavebehandling/endre-frist");
+        this.løsSøkYtelseBaseURI = tilUri(url, "oppgavebehandling/los-sok-ytelse");
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return oppgaverIUngBrukerdialogEnabled;
+    }
+
+    @Override
+    public void avbrytOppgave(OppgaveRequest oppgaveRequest) {
+        try {
+            restClient.post(avbrytURI, oppgaveRequest);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    @Override
+    public void opprettOppgave(OpprettOppgaveDto oppgave) {
+        try {
+            restClient.post(opprettURI, oppgave);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    @Override
+    public void oppgaveUtløpt(OppgaveRequest oppgaveRequest) {
+        try {
+            restClient.post(utløptURI, oppgaveRequest);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    @Override
+    public void settOppgaveTilUtløpt(EndreOppgaveStatusDto dto) {
+        try {
+            restClient.post(utløpForTypeOgPeriodeURI, dto);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    @Override
+    public void settOppgaveTilAvbrutt(EndreOppgaveStatusDto dto) {
+        try {
+            restClient.post(avbrytForTypeOgPeriodeURI, dto);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    @Override
+    public void løsSøkYtelseOppgave(AktørId aktørId) {
+        try {
+            restClient.post(løsSøkYtelseBaseURI, aktørId);
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    @Override
+    public void endreFrist(AktørId aktørId, UUID eksternReferanse, LocalDateTime frist) {
+        try {
+            restClient.post(endreFristURI, new EndreFristDto(aktørId, eksternReferanse, frist));
+        } catch (Exception e) {
+            throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
+        }
+    }
+
+    private static URI tilUri(String baseUrl, String path) {
+        try {
+            return new URI(baseUrl + "/" + path);
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for ungdomsprogram.register.url", e);
+        }
+    }
+}

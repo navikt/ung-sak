@@ -9,25 +9,24 @@ import no.nav.ung.sak.web.app.FrontendApiConfig;
 import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 import no.nav.ung.sak.web.server.InternalApplicationConfig;
 import no.nav.ung.sak.web.server.jetty.db.DatabaseScript;
-import no.nav.ung.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.ung.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.ung.sak.web.server.jetty.db.EnvironmentClass;
-import org.eclipse.jetty.ee9.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.ee9.security.jaspi.DefaultAuthConfigFactory;
-import org.eclipse.jetty.ee9.security.jaspi.JaspiAuthenticatorFactory;
-import org.eclipse.jetty.ee9.security.jaspi.provider.JaspiAuthConfigProvider;
-import org.eclipse.jetty.ee9.servlet.ServletContainerInitializerHolder;
-import org.eclipse.jetty.ee9.webapp.MetaInfConfiguration;
-import org.eclipse.jetty.ee9.webapp.WebAppContext;
+import org.eclipse.jetty.ee11.security.jaspi.DefaultAuthConfigFactory;
+import org.eclipse.jetty.ee11.security.jaspi.JaspiAuthenticatorFactory;
+import org.eclipse.jetty.ee11.security.jaspi.provider.JaspiAuthConfigProvider;
+import org.eclipse.jetty.ee11.servlet.ServletContainerInitializerHolder;
+import org.eclipse.jetty.ee11.servlet.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.ee11.webapp.MetaInfConfiguration;
+import org.eclipse.jetty.ee11.webapp.WebAppContext;
 import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.eclipse.jetty.security.DefaultIdentityService;
+import org.eclipse.jetty.security.SecurityHandler;
 import org.eclipse.jetty.security.jaas.JAASLoginService;
 import org.eclipse.jetty.server.*;
 import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,16 +81,16 @@ public class JettyServer {
     }
 
     private static void taNedApplikasjonVedError() {
-            Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
-                // Frigir minne for å sikre at vi kan logge exception
-                EMERGENCY_HEAP_SPACE = null;
-                log.error("Uncaught exception for thread " + t.getId(), e);
+        Thread.setDefaultUncaughtExceptionHandler((t, e) -> {
+            // Frigir minne for å sikre at vi kan logge exception
+            EMERGENCY_HEAP_SPACE = null;
+            log.error("Uncaught exception for thread " + t.getId(), e);
 
-                if (e instanceof Error) {
-                    KILL_APPLICATION.set(true);
-                }
+            if (e instanceof Error) {
+                KILL_APPLICATION.set(true);
+            }
 
-            });
+        });
     }
 
     private void start(AppKonfigurasjon appKonfigurasjon) throws Exception {
@@ -102,11 +101,8 @@ public class JettyServer {
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
 
         WebAppContext webAppContext = createContext(appKonfigurasjon, server);
-        server.setHandler(new Handler.Sequence(
-            new ClearMdcHandler(),
-            webAppContext.get()
-        ));
 
+        server.setHandler(new Handler.Sequence(new ClearMdcHandler(), webAppContext));
         server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
         server.join();
@@ -224,6 +220,10 @@ public class JettyServer {
         // Create HTTP Config
         HttpConfiguration httpConfig = new HttpConfiguration();
 
+        // Increase max allowed http headers, since we have many big session cookies.
+        httpConfig.setRequestHeaderSize(32768); // Original is 8192
+        httpConfig.setMaxResponseHeaderSize(32768); // Original is 16384
+
         // Add support for X-Forwarded headers
         httpConfig.addCustomizer(new org.eclipse.jetty.server.ForwardedRequestCustomizer());
 
@@ -231,7 +231,7 @@ public class JettyServer {
 
     }
 
-    private org.eclipse.jetty.ee9.security.SecurityHandler createSecurityHandler() {
+    private SecurityHandler createSecurityHandler() {
         ConstraintSecurityHandler securityHandler = new ConstraintSecurityHandler();
         securityHandler.setAuthenticatorFactory(new JaspiAuthenticatorFactory());
 
@@ -252,11 +252,10 @@ public class JettyServer {
     }
 
 
-
     /**
      * brukes for å slette tilstand i MDC på starten av en request
      */
-    private static class ClearMdcHandler extends Handler.Abstract{
+    private static class ClearMdcHandler extends Handler.Abstract {
         @Override
         public boolean handle(Request request, Response response, Callback callback) {
             MDC.clear();

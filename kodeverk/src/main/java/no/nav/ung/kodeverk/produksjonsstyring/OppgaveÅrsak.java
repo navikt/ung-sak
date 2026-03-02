@@ -9,16 +9,15 @@ import java.util.Map;
 
 public enum OppgaveÅrsak implements Kodeverdi {
 
-    BEHANDLE_SAK_VL("BEH_SAK_VL", "Behandle sak i VL"),
-    REVURDER_VL("RV_VL", "Revurdere i VL"),
-    GODKJENN_VEDTAK_VL("GOD_VED_VL", "Godkjenne vedtak i VL"),
-    REG_SOKNAD_VL("REG_SOK_VL", "Registrere søknad i VL"),
+    BEHANDLE_SAK("BEH_SAK", "Behandle sak"),
+    REVURDER("RV", "Revurdere"),
+    GODKJENN_VEDTAK("GOD_VED", "Godkjenne vedtak"),
+    REG_SOKNAD("REG_SOK", "Registrere søknad"),
     VURDER_KONSEKVENS_YTELSE("VUR_KONS_YTE", "Vurder konsekvens for ytelse"),
     VURDER_DOKUMENT("VUR", "Vurder dokument"),
     FEILUTBETALING("FEILUTBET", "Feilutbetalingsvedtak"),
     INNHENT_DOK("INNH_DOK", "Innhent dokumentasjon"),
     SETTVENT("SETTVENT", "Sett utbetaling på vent"),
-    BEHANDLE_SAK_IT("BEH_SAK", "Behandle sak"),
     UDEFINERT("-", "Ikke definert"),
     ;
 

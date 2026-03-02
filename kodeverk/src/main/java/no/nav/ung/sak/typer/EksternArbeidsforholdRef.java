@@ -11,8 +11,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
-
 import no.nav.ung.kodeverk.api.IndexKey;
+
 
 /**
  * Ekstern arbeidsforhold referanse.

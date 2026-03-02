@@ -1,7 +1,7 @@
 package no.nav.ung.sak.domene.arbeidsforhold;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 
@@ -31,8 +31,8 @@ public class IAYGrunnlagDiff {
         } else if (eksisterende.isEmpty()) {
             return false;
         } else {
-            var eksisterendeInntektFilter = new InntektFilter(eksisterende).i(perioder);
-            var nyeInntektFilter = new InntektFilter(nye).i(perioder);
+            var eksisterendeInntektFilter = new InntektFilter(eksisterende).før(perioder);
+            var nyeInntektFilter = new InntektFilter(nye).før(perioder);
             if (eksisterendeInntektFilter.getFiltrertInntektsposter().size() != nyeInntektFilter.getFiltrertInntektsposter().size()) {
                 return true;
             }

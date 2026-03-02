@@ -1,17 +1,20 @@
 package no.nav.ung.domenetjenester.arkiv.journalpostvurderer;
 
 
-import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
-
-import java.util.Set;
-
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
+import no.nav.ung.domenetjenester.oppgave.gosys.OpprettOppgaveTask;
+import no.nav.ung.fordel.kodeverdi.GosysKonstanter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import no.nav.ung.domenetjenester.arkiv.JournalføringHendelsetype;
+import java.util.Set;
 
-@ApplicationScoped
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.håndtert;
+import static no.nav.ung.domenetjenester.arkiv.journalpostvurderer.VurdertJournalpost.ikkeHåndtert;
+
+@Dependent
 public class UhåndtertJournalpost implements Journalpostvurderer {
 
     private static final Logger log = LoggerFactory.getLogger(UhåndtertJournalpost.class);
@@ -21,6 +24,10 @@ public class UhåndtertJournalpost implements Journalpostvurderer {
             JournalføringHendelsetype.TEMA_ENDRET,
             JournalføringHendelsetype.ENDELING_JOURNALFØRT
     );
+
+    @Inject
+    public UhåndtertJournalpost() {
+    }
 
     @Override
     public Set<JournalføringHendelsetype> relevanteHendelsetyper() {
@@ -44,15 +51,14 @@ public class UhåndtertJournalpost implements Journalpostvurderer {
     }
 
     private VurdertJournalpost vurderAnnetEnnEndeligJournalført(Vurderingsgrunnlag vurderingsgrunnlag) {
-        // TODO: SKal vi journalposter som ikkje er endelig journalført?
-//        var melding = vurderingsgrunnlag.melding();
-//        var journalpostInfo = vurderingsgrunnlag.journalpostInfo();
-//        if (!journalpostInfo.harBrevkode()) {
-//            melding.setBeskrivelse("Må manuelt journalføres siden det mangler data som er påkrevd for automatisk journalføring. Mangler brevkode");
-//        }
-//        melding.setOppgaveType(GosysKonstanter.OppgaveType.JOURNALFØRING);
-//        return håndtert(melding.nesteSteg(OpprettOppgaveTask.TASKTYPE));
-        return ikkeHåndtert();
+
+        var melding = vurderingsgrunnlag.melding();
+        var journalpostInfo = vurderingsgrunnlag.journalpostInfo();
+        if (!journalpostInfo.harBrevkode()) {
+            melding.setBeskrivelse("Må manuelt journalføres siden det mangler data som er påkrevd for automatisk journalføring. Mangler brevkode");
+        }
+        melding.setOppgaveType(GosysKonstanter.OppgaveType.JOURNALFØRING);
+        return håndtert(melding.nesteSteg(OpprettOppgaveTask.TASKTYPE));
     }
 
 }

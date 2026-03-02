@@ -17,7 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -52,7 +52,7 @@ public class OppgaveBehandlingKoblingTest {
     public void skal_lagre_ned_en_oppgave() throws Exception {
         // Arrange
         String oppgaveIdFraGSAK = "IDFRAGSAK";
-        OppgaveÅrsak behandleSøknad = OppgaveÅrsak.BEHANDLE_SAK_VL;
+        OppgaveÅrsak behandleSøknad = OppgaveÅrsak.BEHANDLE_SAK;
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
@@ -74,7 +74,7 @@ public class OppgaveBehandlingKoblingTest {
     public void skal_knytte_en_oppgave_til_en_behandling() throws Exception {
         // Arrange
         String oppgaveIdFraGSAK = "IDFRAGSAK";
-        OppgaveÅrsak behandleSøknad = OppgaveÅrsak.BEHANDLE_SAK_VL;
+        OppgaveÅrsak behandleSøknad = OppgaveÅrsak.BEHANDLE_SAK;
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         Behandling behandling = scenario.lagre(repositoryProvider);
@@ -87,14 +87,14 @@ public class OppgaveBehandlingKoblingTest {
         List<Behandling> behandlinger = repository.hentAlle(Behandling.class);
         assertThat(behandlinger).hasSize(1);
         List<OppgaveBehandlingKobling> oppgaveBehandlingKoblinger = oppgaveBehandlingKoblingRepository.hentOppgaverRelatertTilBehandling(behandlinger.get(0).getId());
-        assertThat(OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(OppgaveÅrsak.BEHANDLE_SAK_VL, oppgaveBehandlingKoblinger)).isNotNull();
+        assertThat(OppgaveBehandlingKobling.getAktivOppgaveMedÅrsak(OppgaveÅrsak.BEHANDLE_SAK, oppgaveBehandlingKoblinger)).isNotNull();
     }
 
     @Test
     public void skal_kunne_ferdigstille_en_eksisterende_oppgave() throws Exception {
         // Arrange
         String oppgaveIdFraGSAK = "IDFRAGSAK";
-        OppgaveÅrsak behandleSøknad = OppgaveÅrsak.BEHANDLE_SAK_VL  ;
+        OppgaveÅrsak behandleSøknad = OppgaveÅrsak.BEHANDLE_SAK  ;
         String saksbehandler = "R160223";
 
         var scenario = TestScenarioBuilder.builderMedSøknad();

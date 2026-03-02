@@ -14,6 +14,8 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.TaskType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -23,6 +25,8 @@ import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
+@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef(BehandlingType.REVURDERING)
 public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessTaskIverksett {
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
@@ -54,9 +58,7 @@ public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessT
         initiellTask.ifPresent(taskData::addNesteSekvensiell);
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
-        if (behandling.erYtelseBehandling()) {
-            parallelle.add(opprettTaskSendTilØkonomi());
-        }
+        parallelle.add(opprettTaskSendTilØkonomi());
 
         taskData.addNesteParallell(parallelle);
         taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));

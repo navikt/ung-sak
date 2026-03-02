@@ -12,7 +12,7 @@
 
 	<artifactId>formidling</artifactId>
 	<packaging>jar</packaging>
-	<name>ung-sak :: Formidling </name>
+	<name>ung-sak :: Formidling - felles </name>
 
     <dependencies>
 		<dependency>
@@ -86,7 +86,7 @@
                 <executions>
                     <execution>
                         <id>copy-pdfgen-resources</id>
-                        <phase>package</phase>
+                        <phase>test-compile</phase>
                         <goals>
                             <goal>copy-resources</goal>
                         </goals>

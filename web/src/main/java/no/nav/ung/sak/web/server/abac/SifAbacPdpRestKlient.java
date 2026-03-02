@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.felles.sikkerhet.abac.Decision;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
 import no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning;
 
@@ -17,7 +16,8 @@ import java.net.URISyntaxException;
 public class SifAbacPdpRestKlient {
 
     private OidcRestClient restClient;
-    private URI uriTilgangskontrollMedSaksinformasjon;
+    private URI uriTilgangskontrollUngMedSaksinformasjon;
+    private URI uriTilgangskontrollAktivitetspengerMedSaksinformasjon;
 
     SifAbacPdpRestKlient() {
         // for CDI proxy
@@ -25,20 +25,27 @@ public class SifAbacPdpRestKlient {
 
     @Inject
     public SifAbacPdpRestKlient(OidcRestClient restClient,
-                                @KonfigVerdi(value = "sif.abac.pdp.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung") String urlSifAbacPdp) {
+                                @KonfigVerdi(value = "sif.abac.pdp.ung.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung") String urlSifAbacPdpUngUrl,
+                                @KonfigVerdi(value = "sif.abac.pdp.aktivitetspenger.url", defaultVerdi = "http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger") String urlSifAbacPdpAktivitetspengerUrl
+    ) {
         this.restClient = restClient;
-        this.uriTilgangskontrollMedSaksinformasjon = tilUri(urlSifAbacPdp, "saksinformasjon");
+        this.uriTilgangskontrollUngMedSaksinformasjon = tilUri(urlSifAbacPdpUngUrl, "saksinformasjon", "sif.abac.pdp.ung.url");
+        this.uriTilgangskontrollAktivitetspengerMedSaksinformasjon = tilUri(urlSifAbacPdpAktivitetspengerUrl, "saksinformasjon", "sif.abac.pdp.aktivitetspenger.url");
     }
 
-    public Tilgangsbeslutning sjekkTilgangForInnloggetBruker(SaksinformasjonOgPersonerTilgangskontrollInputDto input) {
-        return restClient.post(uriTilgangskontrollMedSaksinformasjon, input, Tilgangsbeslutning.class);
+    public Tilgangsbeslutning sjekkTilgangForInnloggetBrukerUng(SaksinformasjonOgPersonerTilgangskontrollInputDto input) {
+        return restClient.post(uriTilgangskontrollUngMedSaksinformasjon, input, Tilgangsbeslutning.class);
     }
 
-    private static URI tilUri(String baseUrl, String path) {
+    public Tilgangsbeslutning sjekkTilgangForInnloggetBrukerAktivitetspenger(SaksinformasjonOgPersonerTilgangskontrollInputDto input) {
+        return restClient.post(uriTilgangskontrollAktivitetspengerMedSaksinformasjon, input, Tilgangsbeslutning.class);
+    }
+
+    private static URI tilUri(String baseUrl, String path, String propertyName) {
         try {
             return new URI(baseUrl + "/" + path);
         } catch (URISyntaxException e) {
-            throw new IllegalArgumentException("Ugyldig konfigurasjon for sif.abac.pdp.url", e);
+            throw new IllegalArgumentException("Ugyldig konfigurasjon for " + propertyName, e);
         }
     }
 

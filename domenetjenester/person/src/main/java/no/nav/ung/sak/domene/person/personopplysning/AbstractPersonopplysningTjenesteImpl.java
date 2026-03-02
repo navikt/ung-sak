@@ -4,10 +4,8 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 public abstract class AbstractPersonopplysningTjenesteImpl implements StandardPersonopplysningTjeneste {

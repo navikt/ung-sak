@@ -13,8 +13,8 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
 import no.nav.ung.kodeverk.api.IndexKey;
+
 
 /**
  * Beløp representerer kombinasjon av kroner og øre på standardisert format

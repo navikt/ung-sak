@@ -3,7 +3,6 @@ package no.nav.ung.sak.økonomi.tilkjentytelse;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 

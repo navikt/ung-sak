@@ -1,0 +1,69 @@
+package no.nav.ung.ytelse.ungdomsprogramytelsen.prosess;
+
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Produces;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellImpl;
+import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
+
+@ApplicationScoped
+public class ProsessModell {
+
+    @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+    @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+    @Produces
+    @ApplicationScoped
+    public BehandlingModell førstegangsbehandling() {
+        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.UNGDOMSYTELSE);
+        modellBuilder
+            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
+            .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
+            .medSteg(BehandlingStegType.ALDERSVILKÅRET)
+            .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
+            .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
+            .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
+        return modellBuilder.build();
+    }
+
+    @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+    @BehandlingTypeRef(BehandlingType.REVURDERING)
+    @Produces
+    @ApplicationScoped
+    public BehandlingModell revurdering() {
+        var modellBuilder = BehandlingModellImpl.builder(BehandlingType.REVURDERING, FagsakYtelseType.UNGDOMSYTELSE);
+        modellBuilder
+            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
+            .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
+            .medSteg(BehandlingStegType.INIT_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_UNGDOMSPROGRAMVILKÅR)
+            .medSteg(BehandlingStegType.ALDERSVILKÅRET)
+            .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.UNGDOMSYTELSE_BEREGNING, StartpunktType.BEREGNING)
+            .medSteg(BehandlingStegType.VURDER_UTTAK)
+            .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)
+            .medSteg(BehandlingStegType.KONTROLLER_REGISTER_INNTEKT)
+            .medSteg(BehandlingStegType.BEREGN_YTELSE)
+            .medSteg(BehandlingStegType.SIMULER_OPPDRAG)
+            .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
+            .medSteg(BehandlingStegType.FATTE_VEDTAK)
+            .medSteg(BehandlingStegType.IVERKSETT_VEDTAK);
+        return modellBuilder.build();
+    }
+
+}

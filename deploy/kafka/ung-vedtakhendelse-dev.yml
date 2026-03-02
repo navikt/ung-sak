@@ -21,3 +21,6 @@ spec:
     - team: k9saksbehandling
       application: ung-tilbake
       access: read
+    - team: k9saksbehandling
+      application: ung-deltakelse-opplyser
+      access: read

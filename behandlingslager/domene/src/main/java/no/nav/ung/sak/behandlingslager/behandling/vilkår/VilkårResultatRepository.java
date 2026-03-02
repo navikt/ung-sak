@@ -9,15 +9,16 @@ import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
-import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
+import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
+import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.*;
 
 @Dependent
@@ -147,8 +148,8 @@ public class VilkårResultatRepository {
         List<VilkårPeriodeResultatDto> dtoer = new ArrayList<>();
         for (var t : resultList) {
             var vt = VilkårType.fraKode(t.get("vilkar_type", String.class));
-            var fom = t.get("fom", Date.class).toLocalDate();
-            var tom = t.get("tom", Date.class).toLocalDate();
+            var fom = t.get("fom", LocalDate.class);
+            var tom = t.get("tom", LocalDate.class);
             var avslagsårsak = Avslagsårsak.fraKode(t.get("avslag_kode", String.class));
             var utfall = Utfall.fraKode(t.get("utfall", String.class));
             var overstyrtUtfall = Utfall.fraKode(t.get("overstyrt_utfall", String.class));

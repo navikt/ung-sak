@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.KodeverdiSomObjekt;
 import no.nav.ung.kodeverk.arbeidsforhold.ArbeidType;
+import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
@@ -49,6 +50,8 @@ public record AlleKodeverdierSomObjektResponse(
     @NotNull @Valid @Size(min = 1, max = 1000) SortedMap<String, SortedSet<KodeverdiSomObjekt<Avslagsårsak>>> avslagårsakerPrVilkårTypeKode,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KlageMedholdÅrsak>> klageMedholdÅrsak,
     @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KlageAvvistÅrsak>> klageAvvistÅrsaker,
-    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KlageVurderingType>> klagevurderingType
+    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<KlageVurderingType>> klagevurderingType,
+    @NotNull @Valid @Size(min = 1, max = 1000) SortedSet<KodeverdiSomObjekt<OverordnetInntektYtelseType>> overordnetInntektYtelseType
+
 ) {
 }

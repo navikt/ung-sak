@@ -21,7 +21,7 @@ import no.nav.ung.sak.behandling.saksbehandlingstid.SaksbehandlingsfristUtleder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 
 class ForsinketSaksbehandlingEtterkontrollOppretterTaskTest {
 

@@ -47,7 +47,7 @@ public @interface OppgaveTypeRef {
 
         private final Type type;
 
-        OppgaveTypeRefLiteral(Type type) {
+        public OppgaveTypeRefLiteral(Type type) {
             this.type = Objects.requireNonNull(type, "Type");
         }
 

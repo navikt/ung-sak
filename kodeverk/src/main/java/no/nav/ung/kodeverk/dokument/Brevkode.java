@@ -32,6 +32,14 @@ public class Brevkode implements Kodeverdi {
     public static final String UNGDOMSYTELSE_VARSEL_UTTALELSE_KODE = "UNGDOMSYTELSE_VARSEL_UTTALELSE";
     public static final Brevkode UNGDOMSYTELSE_VARSEL_UTTALELSE = new Brevkode(UNGDOMSYTELSE_VARSEL_UTTALELSE_KODE, "NAV 76-13.94", VEDLEGG_RANGERING);
 
+    public static final String KLAGE_KODE = "UNGDOMSYTELSE_KLAGE";
+    public static final Brevkode KLAGE = new Brevkode(KLAGE_KODE, "NAV 90-00.08 K", VEDLEGG_RANGERING);
+
+    /**
+     * Ung brevkoder.
+     */
+    public static final String AKTIVITETSPENGER_SOKNAD_KODE = "AKTIVITETSPENGER_SOKNAD";
+    public static final Brevkode AKTIVITETSPENGER_SOKNAD = new Brevkode(AKTIVITETSPENGER_SOKNAD_KODE, "FIXME_AKTIVITETSPENGER_BREVKODE", SØKNAD_RANGERING);
 
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);

@@ -1,25 +1,6 @@
 package no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.hibernate.annotations.DynamicInsert;
-import org.hibernate.annotations.DynamicUpdate;
-
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
+import jakarta.persistence.*;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
@@ -32,6 +13,14 @@ import no.nav.ung.sak.behandlingslager.kodeverk.AksjonspunktStatusKodeverdiConve
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStegTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.VenteårsakKodeverdiConverter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Entity(name = "Aksjonspunkt")
 @Table(name = "AKSJONSPUNKT")

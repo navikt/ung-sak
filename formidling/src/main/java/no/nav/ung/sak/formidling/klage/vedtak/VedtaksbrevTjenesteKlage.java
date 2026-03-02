@@ -7,7 +7,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.klage.regler.VedtaksbrevReglerKlage;
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
-import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjenesteImpl;
+import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererTjeneste;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,14 +15,14 @@ import org.slf4j.LoggerFactory;
 @Dependent
 public class VedtaksbrevTjenesteKlage {
 
-    private VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste;
+    private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
     private VedtaksbrevReglerKlage vedtaksbrevRegler;
 
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevTjenesteKlage.class);
 
     @Inject
     public VedtaksbrevTjenesteKlage(
-        VedtaksbrevGenerererTjenesteImpl vedtaksbrevGenerererTjeneste,
+        VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
         @BehandlingTypeRef(BehandlingType.KLAGE) VedtaksbrevReglerKlage vedtaksbrevRegler) {
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;

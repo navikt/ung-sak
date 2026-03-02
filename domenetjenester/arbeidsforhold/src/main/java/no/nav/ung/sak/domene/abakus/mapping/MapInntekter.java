@@ -1,8 +1,6 @@
 package no.nav.ung.sak.domene.abakus.mapping;
 
 import no.nav.abakus.iaygrunnlag.Aktør;
-import no.nav.abakus.iaygrunnlag.AktørIdPersonident;
-import no.nav.abakus.iaygrunnlag.PersonIdent;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.InntekterDto;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingDto;
 import no.nav.abakus.iaygrunnlag.inntekt.v1.UtbetalingsPostDto;

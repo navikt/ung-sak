@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>no.nav.ung.sak</groupId>
+        <artifactId>ung-sak</artifactId>
+        <version>${revision}${sha1}${changelist}</version>
+    </parent>
+
+    <groupId>no.nav.ung.sak.ytelse</groupId>
+    <artifactId>ytelse-ungdomsprogramytelsen</artifactId>
+    <packaging>jar</packaging>
+    <name>UNGSAK :: Ytelse - Ungdomsprogramytelsen</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>mottak</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>formidling</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>fordel</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingsprosess-steg</artifactId>
+        </dependency>
+        <!-- Test avhengigheter -->
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandlingslager-testutilities</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-migrationsupport</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-pdfgen-resources</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copy-felles-pdfgen-resources</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../formidling/src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
