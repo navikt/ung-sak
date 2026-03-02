@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.typer.AktørId;
 import org.hibernate.annotations.DynamicInsert;

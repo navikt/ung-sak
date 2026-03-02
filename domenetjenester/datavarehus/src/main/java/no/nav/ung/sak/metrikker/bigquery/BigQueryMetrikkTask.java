@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
 
 
 /**

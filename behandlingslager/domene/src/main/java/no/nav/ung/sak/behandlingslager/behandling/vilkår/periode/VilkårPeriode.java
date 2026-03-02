@@ -29,16 +29,16 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
-import no.nav.ung.sak.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity
 @Table(name = "VR_VILKAR_PERIODE")

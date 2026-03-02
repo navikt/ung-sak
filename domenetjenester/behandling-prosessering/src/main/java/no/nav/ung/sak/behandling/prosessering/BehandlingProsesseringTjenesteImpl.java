@@ -29,7 +29,7 @@ import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
 import no.nav.ung.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
 import no.nav.ung.sak.domene.registerinnhenting.task.*;
-import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

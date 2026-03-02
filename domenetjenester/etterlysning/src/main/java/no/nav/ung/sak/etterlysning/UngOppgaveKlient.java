@@ -6,6 +6,16 @@ import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.typer.AktørId;
 import no.nav.ung.deltakelseopplyser.kontrakt.deltaker.DeltakerDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.EndretPeriodeOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.endretperiode.PeriodeEndringType;
@@ -17,15 +27,6 @@ import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.inntektsrapportering.Innte
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.*;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
 import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretStartdatoOppgaveDTO;
-import no.nav.ung.sak.kontrakt.oppgaver.EndreOppgaveStatusDto;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
-import no.nav.ung.sak.oppgave.OppgaveForSaksbehandlingGrensesnitt;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -73,9 +74,9 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void avbrytOppgave(UUID eksternRef) {
+    public void avbrytOppgave(OppgaveRequest eksternRef) {
         try {
-            restClient.post(avbrytURI, eksternRef);
+            restClient.post(avbrytURI, eksternRef.oppgaveReferanse());
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
@@ -84,8 +85,7 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     @Override
     public void opprettOppgave(OpprettOppgaveDto oppgave) {
         try {
-            var deltakerIdent = pdl.hentPersonIdentForAktørId(oppgave.aktørId().getId())
-                .orElseThrow(() -> new IllegalArgumentException("Fant ikke personident for aktørId: " + oppgave.aktørId()));
+            var deltakerIdent = hentPersonident(oppgave.aktørId());
             switch (oppgave.oppgavetypeData()) {
                 case KontrollerRegisterinntektOppgavetypeDataDto d ->
                     restClient.post(opprettKontrollerRegisterInntektURI, mapTilRegisterInntektOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
@@ -107,9 +107,9 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void oppgaveUtløpt(UUID eksternRef) {
+    public void oppgaveUtløpt(OppgaveRequest eksternRef) {
         try {
-            restClient.post(utløptURI, eksternRef);
+            restClient.post(utløptURI, eksternRef.oppgaveReferanse());
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
@@ -134,16 +134,17 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void løsSøkYtelseOppgave(String deltakerIdent) {
+    public void løsSøkYtelseOppgave(AktørId aktørId) {
         try {
-            restClient.post(løsSøkYtelseURI, new DeltakerDTO(null, deltakerIdent));
+            var personident = hentPersonident(aktørId);
+            restClient.post(løsSøkYtelseURI, new DeltakerDTO(null, personident));
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
     }
 
     @Override
-    public void endreFrist(String personIdent, UUID eksternReferanse, LocalDateTime frist) {
+    public void endreFrist(AktørId aktørId, UUID eksternReferanse, LocalDateTime frist) {
         try {
             restClient.post(endreFristURI, new EndreFristDto(eksternReferanse, frist.atZone(ZoneId.systemDefault())));
         } catch (Exception e) {
@@ -151,8 +152,8 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
         }
     }
 
-    // --- Mapping fra ung-sak kontrakt DTOs til deltakelseopplyser DTOs ---
 
+    // --- Mapping fra ung-sak kontrakt DTOs til deltakelseopplyser DTOs ---
     private static RegisterInntektOppgaveDTO mapTilRegisterInntektOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, KontrollerRegisterinntektOppgavetypeDataDto d) {
         var arbeidOgFrilans = d.registerinntekt().arbeidOgFrilansInntekter().stream()
             .map(i -> new RegisterInntektArbeidOgFrilansDTO(i.inntekt(), i.arbeidsgiver()))
@@ -192,15 +193,20 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
             java.util.Set.of(PeriodeEndringType.FJERNET_PERIODE));
     }
 
-    private static EndreStatusDTO mapTilEndreStatusDTO(EndreOppgaveStatusDto dto) {
+    private EndreStatusDTO mapTilEndreStatusDTO(EndreOppgaveStatusDto dto) {
         return new EndreStatusDTO(
-            dto.deltakerIdent(), Oppgavetype.valueOf(dto.oppgavetype().name()),
+           hentPersonident(dto.aktørId()) , Oppgavetype.valueOf(dto.oppgavetype().name()),
             dto.fomDato(), dto.tomDato());
     }
 
-    private static PeriodeDTO mapPeriode(no.nav.ung.sak.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO periode) {
+    private static PeriodeDTO mapPeriode(no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO periode) {
         if (periode == null) return null;
         return new PeriodeDTO(periode.getFomDato(), periode.getTomDato());
+    }
+
+    private String hentPersonident(AktørId aktørId) {
+        return pdl.hentPersonIdentForAktørId(aktørId.getAktørId())
+            .orElseThrow(() -> new IllegalArgumentException("Fant ikke personident"));
     }
 
     private static URI tilUri(String baseUrl, String path) {

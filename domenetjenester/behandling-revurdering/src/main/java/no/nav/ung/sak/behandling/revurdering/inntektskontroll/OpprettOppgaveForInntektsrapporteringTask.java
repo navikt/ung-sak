@@ -14,8 +14,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -85,7 +85,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         var nesteKontrolltidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
         var frist = nesteKontrolltidspunkt.toLocalDateTime().toLocalDate().atStartOfDay();
         delegeringTjeneste.opprettOppgave(new OpprettOppgaveDto(
-            aktørId,
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
             new InntektsrapporteringOppgavetypeDataDto(fom, tom, harIkkeYtelseIHelePerioden),
             frist

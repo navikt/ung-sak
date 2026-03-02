@@ -6,9 +6,9 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
-import no.nav.ung.sak.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.sak.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
@@ -36,7 +36,7 @@ public class EndretStartdatoOppgaveOppretter {
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, DatoIntervallEntitet originalPeriode) {
         return new OpprettOppgaveDto(
-            aktørId,
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             etterlysning.getEksternReferanse(),
             new EndretStartdatoDataDto(hentStartdato(etterlysning), originalPeriode.getFomDato()),
             etterlysning.getFrist()

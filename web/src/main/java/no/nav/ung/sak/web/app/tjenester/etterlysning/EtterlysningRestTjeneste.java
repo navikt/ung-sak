@@ -24,6 +24,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.brukerdialog.typer.AktørId;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -130,9 +131,7 @@ public class EtterlysningRestTjeneste {
             behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, etterlysning.getType());
 
             opprettHistorikkinnslag(behandlingId, behandling.getFagsakId(), etterlysning, frist);
-
-            String personIdent = pdl.hentPersonIdentForAktørId(behandling.getAktørId().getAktørId()).orElseThrow(() -> new IllegalStateException("Finner ikke personident for aktørId for behandling " + behandling.getId()));
-            oppgaveRestKlient.endreFrist(personIdent, etterlysning.getEksternReferanse(), frist);
+            oppgaveRestKlient.endreFrist(new AktørId(behandling.getAktørId().getAktørId()), etterlysning.getEksternReferanse(), frist);
         });
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }

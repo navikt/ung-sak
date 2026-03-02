@@ -14,7 +14,7 @@
     <name>ung-sak :: Webapp</name>
 
     <properties>
-        <swagger-ui.version>5.31.0</swagger-ui.version>
+        <swagger-ui.version>5.31.2</swagger-ui.version>
         <jetty.version>12.1.6</jetty.version>
         <metrics.version>4.2.38</metrics.version>
     </properties>
@@ -144,14 +144,6 @@
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>klage</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave-min-side-varsel</artifactId>
         </dependency>
 
         <!-- Ytelsespesifikke moduler -->

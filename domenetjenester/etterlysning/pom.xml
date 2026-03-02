@@ -19,15 +19,14 @@
             <groupId>no.nav.ung.deltakelseopplyser</groupId>
             <artifactId>kontrakt</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>no.nav.ung.sak</groupId>
+            <groupId>no.nav.ung.brukerdialog</groupId>
             <artifactId>kontrakt</artifactId>
         </dependency>
 
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>brukerdialog-oppgave-saksbehandling-api</artifactId>
+            <artifactId>kontrakt</artifactId>
         </dependency>
 
         <dependency>

@@ -1,7 +1,5 @@
 package no.nav.ung.kodeverk.api;
 
-import no.nav.ung.sak.IndexKey;
-
 /** Kodeverk som er portet til java. */
 public interface Kodeverdi extends IndexKey {
 
