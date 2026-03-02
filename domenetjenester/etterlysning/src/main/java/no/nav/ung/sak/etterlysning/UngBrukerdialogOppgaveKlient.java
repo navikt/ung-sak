@@ -2,12 +2,12 @@ package no.nav.ung.sak.etterlysning;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.UriBuilder;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreFristDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.typer.AktørId;
 
@@ -40,8 +40,8 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         this.opprettURI = tilUri(url, "saksbehandling/oppgave/opprett");
         this.avbrytURI = tilUri(url, "saksbehandling/oppgave/sett-avbrutt");
         this.utløptURI = tilUri(url, "saksbehandling/oppgave/sett-utlopt");
-        this.utløpForTypeOgPeriodeURI = tilUri(url, "saksbehandling/oppgave/sett-utlopt");
-        this.avbrytForTypeOgPeriodeURI = tilUri(url, "saksbehandling/oppgave/sett-avbrutt");
+        this.utløpForTypeOgPeriodeURI = tilUri(url, "saksbehandling/oppgave/sett-utlopt-for-type-og-periode");
+        this.avbrytForTypeOgPeriodeURI = tilUri(url, "saksbehandling/oppgave/sett-avbrutt-for-type-og-periode");
         this.endreFristURI = tilUri(url, "saksbehandling/oppgave/endre-frist");
         this.løsSøkYtelseBaseURI = tilUri(url, "saksbehandling/oppgave/los-sok-ytelse");
     }
@@ -52,10 +52,9 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
     }
 
     @Override
-    public void avbrytOppgave(UUID eksternRef) {
+    public void avbrytOppgave(OppgaveRequest oppgaveRequest) {
         try {
-            URI uri = UriBuilder.fromUri(avbrytURI).path(eksternRef.toString()).build();
-            restClient.post(uri, null);
+            restClient.post(avbrytURI, oppgaveRequest);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
@@ -71,10 +70,9 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
     }
 
     @Override
-    public void oppgaveUtløpt(UUID eksternRef) {
+    public void oppgaveUtløpt(OppgaveRequest oppgaveRequest) {
         try {
-            URI uri = UriBuilder.fromUri(utløptURI).path(eksternRef.toString()).build();
-            restClient.post(uri, null);
+            restClient.post(utløptURI, oppgaveRequest);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }

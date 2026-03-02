@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.typer.AktørId;
 
@@ -30,12 +31,12 @@ public class MidlertidigOppgaveDelegeringTjeneste {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.opprettOppgave(oppgave));
     }
 
-    public void avbrytOppgave(UUID eksternRef) {
-        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.avbrytOppgave(eksternRef));
+    public void avbrytOppgave(OppgaveRequest oppgaveRequest) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.avbrytOppgave(oppgaveRequest));
     }
 
-    public void oppgaveUtløpt(UUID eksternRef) {
-        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.oppgaveUtløpt(eksternRef));
+    public void oppgaveUtløpt(OppgaveRequest oppgaveRequest) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.oppgaveUtløpt(oppgaveRequest));
     }
 
     public void settOppgaveTilUtløpt(EndreOppgaveStatusDto dto) {

@@ -7,6 +7,7 @@ import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
@@ -73,9 +74,9 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void avbrytOppgave(UUID eksternRef) {
+    public void avbrytOppgave(OppgaveRequest eksternRef) {
         try {
-            restClient.post(avbrytURI, eksternRef);
+            restClient.post(avbrytURI, eksternRef.oppgaveReferanse());
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
@@ -106,9 +107,9 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     }
 
     @Override
-    public void oppgaveUtløpt(UUID eksternRef) {
+    public void oppgaveUtløpt(OppgaveRequest eksternRef) {
         try {
-            restClient.post(utløptURI, eksternRef);
+            restClient.post(utløptURI, eksternRef.oppgaveReferanse());
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }

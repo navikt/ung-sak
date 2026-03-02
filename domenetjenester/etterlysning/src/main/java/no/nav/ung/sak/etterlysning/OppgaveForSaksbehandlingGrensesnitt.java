@@ -1,5 +1,6 @@
 package no.nav.ung.sak.etterlysning;
 
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
 import no.nav.ung.brukerdialog.typer.AktørId;
@@ -26,12 +27,12 @@ public interface OppgaveForSaksbehandlingGrensesnitt {
     /**
      * Avbryter en oppgave basert på ekstern referanse.
      */
-    void avbrytOppgave(UUID eksternRef);
+    void avbrytOppgave(OppgaveRequest eksternRef);
 
     /**
      * Markerer en oppgave som utløpt basert på ekstern referanse.
      */
-    void oppgaveUtløpt(UUID eksternRef);
+    void oppgaveUtløpt(OppgaveRequest eksternRef);
 
     /**
      * Setter oppgaver av en gitt type og periode til utløpt.
