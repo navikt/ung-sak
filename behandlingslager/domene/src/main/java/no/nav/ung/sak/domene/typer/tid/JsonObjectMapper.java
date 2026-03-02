@@ -81,7 +81,7 @@ public class JsonObjectMapper {
     interface JsonMapperFeil extends DeklarerteFeil {
         JsonMapperFeil FACTORY = FeilFactory.create(JsonMapperFeil.class);
 
-        @TekniskFeil(feilkode = "F-713321", feilmelding = "Fikk IO exception ved parsing av JSON", logLevel = LogLevel.WARN)
+        @TekniskFeil(feilkode = "F-713322", feilmelding = "Fikk IO exception ved parsing av JSON", logLevel = LogLevel.WARN)
         Feil ioExceptionVedLesing(IOException cause);
     }
 
