@@ -5966,103 +5966,7 @@
             "description" : "default response"
           }
         },
-        "tags" : [ "ung" ]
-      }
-    },
-    "/api/aktivitetspenger/månedsvis-sats-og-utbetaling" : {
-      "get" : {
-        "description" : "Henter månedsvis satser og utbetaling",
-        "operationId" : "getSatsOgUtbetalingPerioder",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "ung" ]
-      }
-    },
-    "/api/aktivitetspenger/satser" : {
-      "get" : {
-        "description" : "Henter innvilgede satser for en aktivitetspengerbehandling",
-        "operationId" : "getAktivitetspengerInnvilgetSats",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeDto"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "ung" ]
-      }
-    },
-    "/api/aktivitetspenger/uttak" : {
-      "get" : {
-        "description" : "Henter uttaksperioder for en aktivitetspengerbehandling",
-        "operationId" : "getUngdomsytelseUttak",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.uttak.UngdomsytelseUttakPeriodeDto"
-                  },
-                  "type" : "array"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "ung" ]
+        "tags" : [ "akt" ]
       }
     },
     "/api/aktoer-info" : {
@@ -10040,7 +9944,7 @@
     "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
       "get" : {
         "description" : "Henter månedsvis satser og utbetaling",
-        "operationId" : "getSatsOgUtbetalingPerioder_1",
+        "operationId" : "getSatsOgUtbetalingPerioder",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",
@@ -10133,7 +10037,7 @@
     "/api/ungdomsytelse/uttak" : {
       "get" : {
         "description" : "Henter uttaksperioder for en ungdomsytelsebehandling",
-        "operationId" : "getUngdomsytelseUttak_1",
+        "operationId" : "getUngdomsytelseUttak",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",
