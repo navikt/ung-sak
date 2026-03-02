@@ -58,18 +58,13 @@ public class PdfGenKlient {
             return path;
         }
 
-        // 2. Sjekk target/pdfgen/  - brukes av maven tester
-        Path targetPath = Path.of("target", classpathSti);
-        if (Files.exists(targetPath)) {
-            return targetPath;
-        }
-
-        // 3. Fallback til classpath - brukes av IDE
-        log.info("Fant ikke pdfgen-ressurser på {} eller {}. Prøver classpath. " +
-            "Bør bare skje for test via IDE.", classpathSti, targetPath);
+        // 2. Fallback til classpath - brukes av IDE
+        log.info("Fant ikke pdfgen-ressurser på {}. Prøver classpath. " +
+            "Bør bare skje for test.", classpathSti);
 
         URL resource = getClass().getClassLoader().getResource(classpathSti);
         Objects.requireNonNull(resource, "Fant ingen pdfgen-ressurs på filsystem eller classpath: " + classpathSti);
+
 
         try {
             return Path.of(resource.toURI());
