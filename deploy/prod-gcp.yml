@@ -268,7 +268,7 @@ spec:
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
-    - name: OPPGAVER_I_UNGSAK_ENABLED
+    - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
       value: "false"
 
     # Konfigurasjoner

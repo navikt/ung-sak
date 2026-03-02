@@ -276,7 +276,7 @@ spec:
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "true"
-    - name: OPPGAVER_I_UNGSAK_ENABLED
+    - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
       value: "true"
 
 

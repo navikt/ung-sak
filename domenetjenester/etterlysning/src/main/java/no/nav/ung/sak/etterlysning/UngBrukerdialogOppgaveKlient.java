@@ -21,6 +21,7 @@ import java.util.UUID;
 public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
 
     private final OidcRestClient restClient;
+    private final boolean oppgaverIUngBrukerdialogEnabled;
     private final URI opprettURI;
     private final URI utløpForTypeOgPeriodeURI;
     private final URI avbrytForTypeOgPeriodeURI;
@@ -32,8 +33,10 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
     @Inject
     public UngBrukerdialogOppgaveKlient(
         OidcRestClient restClient,
+        @KonfigVerdi(value = "OPPGAVER_I_UNGBRUKERDIALOG_ENABLED", defaultVerdi = "false") boolean oppgaverIUngBrukerdialogEnabled,
         @KonfigVerdi(value = "ung.brukerdialog.url", defaultVerdi = "http://ung-brukerdialog.k9saksbehandling") String url) {
         this.restClient = restClient;
+        this.oppgaverIUngBrukerdialogEnabled = oppgaverIUngBrukerdialogEnabled;
         this.opprettURI = tilUri(url, "saksbehandling/oppgave/opprett");
         this.avbrytURI = tilUri(url, "saksbehandling/oppgave/sett-avbrutt");
         this.utløptURI = tilUri(url, "saksbehandling/oppgave/sett-utlopt");
@@ -41,6 +44,11 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         this.avbrytForTypeOgPeriodeURI = tilUri(url, "saksbehandling/oppgave/sett-avbrutt");
         this.endreFristURI = tilUri(url, "saksbehandling/oppgave/endre-frist");
         this.løsSøkYtelseBaseURI = tilUri(url, "saksbehandling/oppgave/los-sok-ytelse");
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return oppgaverIUngBrukerdialogEnabled;
     }
 
     @Override
