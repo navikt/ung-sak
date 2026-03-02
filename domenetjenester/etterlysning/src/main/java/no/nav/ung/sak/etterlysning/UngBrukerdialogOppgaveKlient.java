@@ -101,8 +101,8 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
     @Override
     public void løsSøkYtelseOppgave(AktørId aktørId) {
         try {
-            URI uri = UriBuilder.fromUri(løsSøkYtelseBaseURI).queryParam("aktørId", aktørId).build();
-            restClient.post(uri, null);
+            URI uri = UriBuilder.fromUri(løsSøkYtelseBaseURI).build();
+            restClient.post(uri, aktørId);
         } catch (Exception e) {
             throw UngOppgavetjenesteFeil.FACTORY.feilVedKallTilUngOppgaveTjeneste(e).toException();
         }
