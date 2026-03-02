@@ -10,7 +10,6 @@ import no.nav.k9.oppdrag.kontrakt.Saksnummer;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.*;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
-import no.nav.ung.sak.JsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
