@@ -12,8 +12,46 @@
 	</parent>
 
 	<artifactId>formidling-pdfgen-templates</artifactId>
-	<packaging>jar</packaging>
+    <!-- JAR package trengs bare for tester via IDE. Dockerfile kopierer templatene direkte -->
+    <packaging>jar</packaging>
 	<name>ung-sak :: Formidling - PDFGen Templates</name>
+
+    <!-- Dette trengs for at testene skal kjøre via maven -->
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>pdfgen/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-pdfgen-resources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
 

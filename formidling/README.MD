@@ -1,1 +1,1 @@
-Klasser, fonter og templates for generering av brev. Alt ytelsespesifikt legges i egene moduler, se disse 
+Felles modul for formidling og brev. Selve brevoppbygging gjøres i ytelsesmodulene. Brevmalene templatene ligger i egen modul.
