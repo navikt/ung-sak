@@ -285,9 +285,6 @@ public class BehandlingDtoTjeneste {
     }
 
     private static void leggTilAktivitetspengerSpesifikkeLinks(BehandlingDto dto, Map<String, String> uuidQueryParams) {
-        dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.SATSER_PATH, "satser", uuidQueryParams));
-        dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.MÅNEDSVIS_SATS_OG_UTBETALING_PATH, "månedsvis-sats-og-utbetaling", uuidQueryParams));
-        dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.UTTAK_PATH, "uttak", uuidQueryParams));
         dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.BEREGNINGSGRUNNLAG_PATH, "beregningsgrunnlag", uuidQueryParams));
     }
 

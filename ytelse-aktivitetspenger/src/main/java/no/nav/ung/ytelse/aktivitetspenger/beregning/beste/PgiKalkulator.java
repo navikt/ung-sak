@@ -22,7 +22,7 @@ public class PgiKalkulator {
         return new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie);
     }
 
-    public static LocalDateTimeline<PgiUtregner> hentPeriodisertPgiUtregner(PgiKalkulatorInput input) {
+    public static LocalDateTimeline<PgiØvreGrenseVurderer> hentPeriodisertPgiUtregner(PgiKalkulatorInput input) {
         var gsnittTidsserie = input.gsnittTidsserie();
         var oppjusteringsfaktorTidsserie = input.oppjusteringsfaktorTidsserie();
         var årsinntekter = mapTilPgiUtregner(input.årsinntekt());
@@ -34,7 +34,7 @@ public class PgiKalkulator {
 
     public static Map<Year, BigDecimal> avgrensOgOppjusterÅrsinntekter(PgiKalkulatorInput input) {
         return hentPeriodisertPgiUtregner(input)
-            .mapValue(PgiUtregner::avgrensOgOppjusterårsinntekt)
+            .mapValue(PgiØvreGrenseVurderer::avgrensOgOppjusterårsinntekt)
             .toSegments().stream()
             .collect(Collectors.groupingBy(
                 segment -> Year.of(segment.getFom().getYear()),
@@ -46,48 +46,48 @@ public class PgiKalkulator {
             ));
     }
 
-    private static LocalDateSegmentCombinator<PgiUtregner, Grunnbeløp, PgiUtregner> leggTilGrunnbeløpSnitt() {
+    private static LocalDateSegmentCombinator<PgiØvreGrenseVurderer, Grunnbeløp, PgiØvreGrenseVurderer> leggTilGrunnbeløpSnitt() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue();
             return new LocalDateSegment<>(di, builder.setGrunnbeløpSnitt(rhs.getValue().verdi()));
         };
     }
 
-    private static LocalDateSegmentCombinator<PgiUtregner, BigDecimal, PgiUtregner> leggTilOppjusteringsfaktor() {
+    private static LocalDateSegmentCombinator<PgiØvreGrenseVurderer, BigDecimal, PgiØvreGrenseVurderer> leggTilOppjusteringsfaktor() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue();
             return new LocalDateSegment<>(di, builder.setoppjusteringsfaktor(rhs.getValue()));
         };
     }
 
-    private static LocalDateTimeline<PgiUtregner> mapTilPgiUtregner(LocalDateTimeline<Beløp> årsinntekter) {
-            return årsinntekter.mapValue(entry -> new PgiUtregner(entry.getVerdi()));
+    private static LocalDateTimeline<PgiØvreGrenseVurderer> mapTilPgiUtregner(LocalDateTimeline<Beløp> årsinntekter) {
+            return årsinntekter.mapValue(entry -> new PgiØvreGrenseVurderer(entry.getVerdi()));
     }
 
-    public static class PgiUtregner {
+    public static class PgiØvreGrenseVurderer {
         BigDecimal pgiÅrsinntekt;
         BigDecimal grunnbeløpSnitt;
         BigDecimal oppjusteringsfaktor;
 
-        public PgiUtregner(BigDecimal pgiÅrsinntekt) {
+        public PgiØvreGrenseVurderer(BigDecimal pgiÅrsinntekt) {
             this.pgiÅrsinntekt = pgiÅrsinntekt;
         }
 
-        public PgiUtregner setGrunnbeløpSnitt(BigDecimal grunnbeløpSnitt) {
+        public PgiØvreGrenseVurderer setGrunnbeløpSnitt(BigDecimal grunnbeløpSnitt) {
             this.grunnbeløpSnitt = grunnbeløpSnitt;
             return this;
         }
 
-        public PgiUtregner setoppjusteringsfaktor(BigDecimal oppjusteringsfaktor) {
+        public PgiØvreGrenseVurderer setoppjusteringsfaktor(BigDecimal oppjusteringsfaktor) {
             this.oppjusteringsfaktor = oppjusteringsfaktor;
             return this;
         }
 
         public BigDecimal avgrensOgOppjusterårsinntekt() {
-            return beregnBidragTilPgi().multiply(oppjusteringsfaktor);
+            return avkortÅrsinntektMotSeksG().multiply(oppjusteringsfaktor);
         }
 
-        private BigDecimal beregnBidragTilPgi() {
+        private BigDecimal avkortÅrsinntektMotSeksG() {
             return pgiÅrsinntekt.min(grunnbeløpSnitt(6));
         }
 

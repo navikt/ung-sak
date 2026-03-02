@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class PgiUtregnerTest {
+class PgiØvreGrenseVurdererTest {
 
     private static final BigDecimal G = BigDecimal.valueOf(100000);
 
@@ -41,8 +41,8 @@ class PgiUtregnerTest {
     }
 
 
-    private PgiKalkulator.PgiUtregner lagUtregner(BigDecimal inntekt, BigDecimal gSnitt, BigDecimal oppjusteringsfaktor) {
-        return new PgiKalkulator.PgiUtregner(inntekt)
+    private PgiKalkulator.PgiØvreGrenseVurderer lagUtregner(BigDecimal inntekt, BigDecimal gSnitt, BigDecimal oppjusteringsfaktor) {
+        return new PgiKalkulator.PgiØvreGrenseVurderer(inntekt)
             .setGrunnbeløpSnitt(gSnitt)
             .setoppjusteringsfaktor(oppjusteringsfaktor);
     }
