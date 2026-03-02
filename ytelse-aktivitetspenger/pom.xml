@@ -41,5 +41,35 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <plugins>
+            <plugin>
+                <!-- Trengs for at maven-tester skal finne pdfgen-ressurser.
+                     PdfGenKlient sjekker pdfgen/ relativt til working directory.
+                     I IDE fungerer det via classpath, men i maven må filene kopieres til target/. -->
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-pdfgen-templates</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../formidling-pdfgen-templates/src/main/resources/pdfgen</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
