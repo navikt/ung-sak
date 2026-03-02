@@ -15,7 +15,7 @@ import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;

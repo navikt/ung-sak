@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.util.List;
 
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class LagBarnetilleggTidslinjeTest {

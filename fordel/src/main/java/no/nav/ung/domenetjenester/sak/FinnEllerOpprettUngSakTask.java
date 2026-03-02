@@ -4,14 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.abakus.iaygrunnlag.kodeverk.YtelseType;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.ung.fordel.handler.FordelProsessTaskTjeneste;
 import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
@@ -19,8 +17,6 @@ import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 

@@ -17,9 +17,9 @@ import jakarta.persistence.Version;
 import no.nav.ung.sak.diff.IndexKeyComposer;
 import org.hibernate.annotations.Immutable;
 
-import no.nav.ung.sak.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.typer.JournalpostId;
 

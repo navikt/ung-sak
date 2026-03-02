@@ -17,7 +17,7 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeEndr
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @Dependent
 public class EndretPeriodeOppgaveOppretter {

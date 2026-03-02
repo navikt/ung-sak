@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.abac.AppAbacAttributt;
-import no.nav.ung.sak.abac.AppAbacAttributtType;
+import no.nav.ung.kodeverk.abac.AppAbacAttributt;
+import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 

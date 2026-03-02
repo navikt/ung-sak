@@ -45,7 +45,7 @@ import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjene
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ProsessTaskGruppeIdDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
