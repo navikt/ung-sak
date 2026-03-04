@@ -7316,66 +7316,6 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/api/fordel/fagsak/sok" : {
-      "post" : {
-        "description" : "Finn eksisterende sak.",
-        "operationId" : "finnEksisterendeFagsak",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.mottak.FinnSak"
-              }
-            }
-          },
-          "description" : "Oppretter fagsak"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eksisterende fagsak",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/api/fordel/relatertSak" : {
-      "post" : {
-        "description" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-        "operationId" : "finnesEksisterendeFagsakMedEnAvAktørene",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.mottak.FinnSak"
-              }
-            }
-          },
-          "description" : "Søkeparametere"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "type" : "boolean"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-        "tags" : [ "fordel" ]
-      }
-    },
     "/api/formidling/informasjonsbrev" : {
       "get" : {
         "description" : "Maler for informasjon og støttebrev",

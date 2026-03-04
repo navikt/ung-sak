@@ -156,7 +156,7 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     // --- Mapping fra ung-sak kontrakt DTOs til deltakelseopplyser DTOs ---
     private static RegisterInntektOppgaveDTO mapTilRegisterInntektOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, KontrollerRegisterinntektOppgavetypeDataDto d) {
         var arbeidOgFrilans = d.registerinntekt().arbeidOgFrilansInntekter().stream()
-            .map(i -> new RegisterInntektArbeidOgFrilansDTO(i.inntekt(), i.arbeidsgiver()))
+            .map(i -> new RegisterInntektArbeidOgFrilansDTO(i.inntekt(), i.arbeidsgiverIdentifikator()))
             .collect(Collectors.toList());
         var ytelse = d.registerinntekt().ytelseInntekter().stream()
             .map(i -> new RegisterInntektYtelseDTO(i.inntekt(), YtelseType.valueOf(i.ytelsetype().name())))

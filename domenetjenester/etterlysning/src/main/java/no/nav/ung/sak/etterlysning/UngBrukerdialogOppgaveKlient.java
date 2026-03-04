@@ -37,13 +37,13 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         @KonfigVerdi(value = "ung.brukerdialog.url", defaultVerdi = "http://ung-brukerdialog.k9saksbehandling") String url) {
         this.restClient = restClient;
         this.oppgaverIUngBrukerdialogEnabled = oppgaverIUngBrukerdialogEnabled;
-        this.opprettURI = tilUri(url, "saksbehandling/oppgave/opprett");
-        this.avbrytURI = tilUri(url, "saksbehandling/oppgave/sett-avbrutt");
-        this.utløptURI = tilUri(url, "saksbehandling/oppgave/sett-utlopt");
-        this.utløpForTypeOgPeriodeURI = tilUri(url, "saksbehandling/oppgave/sett-utlopt-for-type-og-periode");
-        this.avbrytForTypeOgPeriodeURI = tilUri(url, "saksbehandling/oppgave/sett-avbrutt-for-type-og-periode");
-        this.endreFristURI = tilUri(url, "saksbehandling/oppgave/endre-frist");
-        this.løsSøkYtelseBaseURI = tilUri(url, "saksbehandling/oppgave/los-sok-ytelse");
+        this.opprettURI = tilUri(url, "oppgavebehandling/opprett");
+        this.avbrytURI = tilUri(url, "oppgavebehandling/sett-avbrutt");
+        this.utløptURI = tilUri(url, "oppgavebehandling/sett-utlopt");
+        this.utløpForTypeOgPeriodeURI = tilUri(url, "oppgavebehandling/sett-utlopt-for-type-og-periode");
+        this.avbrytForTypeOgPeriodeURI = tilUri(url, "oppgavebehandling/sett-avbrutt-for-type-og-periode");
+        this.endreFristURI = tilUri(url, "oppgavebehandling/endre-frist");
+        this.løsSøkYtelseBaseURI = tilUri(url, "oppgavebehandling/los-sok-ytelse");
     }
 
     @Override
