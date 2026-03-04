@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
@@ -20,7 +21,6 @@ import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
-import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.Map;
 
@@ -73,13 +73,17 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<YearMonth> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
+    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
+                                        LocalDateTimeline<YearMonth> ytelseTidslinje,
+                                        LocalDateTimeline<Boolean> godkjentUttakTidslinje,
+                                        LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
+                                        LocalDateTimeline<KontrollerteInntekter> kontrollertInntektTidslinje) {
         final var sporingsMap = Map.of(
             "satsTidslinje", satsTidslinje,
             "ytelseTidslinje", ytelseTidslinje.mapValue(IngenVerdi::ingenVerdi),
             "godkjentUttakTidslinje", godkjentUttakTidslinje.mapValue(IngenVerdi::ingenVerdi),
             "totalsatsTidslinje", totalsatsTidslinje,
-            "kontrollertInntektTidslinje", rapportertInntektTidslinje
+            "kontrollertInntektTidslinje", kontrollertInntektTidslinje
         );
         final var regelInput = LagRegelSporing.lagRegelSporingFraTidslinjer(sporingsMap);
         return regelInput;
@@ -105,7 +109,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
             .orElse(LocalDateTimeline.empty());
     }
 
-    private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<BigDecimal> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {
+    private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<KontrollerteInntekter> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {
         final var rapporterteInntekterSomIkkeOverlapperYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeOverlappendeYtelseMåned(s, månedstidslinjeForYtelse)).toList();
         if (!rapporterteInntekterSomIkkeOverlapperYtelsesperiode.isEmpty()) {
             throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av månedstidslinjen: " + rapporterteInntekterSomIkkeOverlapperYtelsesperiode.stream().map(LocalDateSegment::getLocalDateInterval).toList());

@@ -1,8 +1,10 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.RapportertInntektReduserer;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +53,7 @@ class TilkjentYtelseBeregnerTest {
     }
 
     private static TilkjentYtelseVerdi beregn(LocalDateInterval di, BeregnetSats sats, BigDecimal rapporertinntekt) {
-        return TilkjentYtelseBeregner.beregn(di, sats, rapporertinntekt).verdi();
+        return TilkjentYtelseBeregner.beregn(di, sats, new KontrollerteInntekter(rapporertinntekt, BigDecimal.ZERO)).verdi();
     }
 
     @Test

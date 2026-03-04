@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
@@ -227,7 +228,8 @@ class LagTilkjentYtelseTest {
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
-        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje.map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonth())))), godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
+        LocalDateTimeline<KontrollerteInntekter> kontrollerteInntekterTidslinje = rapportertInntektTidslinje.mapValue(it -> new KontrollerteInntekter(it, BigDecimal.ZERO));
+        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje.map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonth())))), godkjentTidslinje, totalsatsTidslinje, kontrollerteInntekterTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
 
