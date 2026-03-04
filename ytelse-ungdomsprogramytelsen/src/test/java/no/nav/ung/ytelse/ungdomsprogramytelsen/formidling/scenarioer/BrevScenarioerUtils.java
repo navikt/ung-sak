@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
@@ -162,8 +163,10 @@ public class BrevScenarioerUtils {
     public static Behandling lagAvsluttetBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
         BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
-        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
-        leggTilBeslutter(behandling,behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories1.behandlingAnsvarligRepository();
+
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
+        leggTilBeslutter(behandling,behandlingRepository, behandlingAnsvarligRepository);
         behandling.avsluttBehandling();
 
         return behandling;
@@ -172,14 +175,16 @@ public class BrevScenarioerUtils {
     public static Behandling lagÅpenBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
         BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
-        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories1.behandlingAnsvarligRepository();
+
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
 
         return behandling;
     }
 
-    public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository) {
+    public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         Aksjonspunkt aksjonspunkt = leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling);
-        behandling.setAnsvarligSaksbehandler(ident);
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), ident);
         aksjonspunkt.setAnsvarligSaksbehandler(ident);
 
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
@@ -193,9 +198,9 @@ public class BrevScenarioerUtils {
         return aksjonspunkt;
     }
 
-    public static void leggTilBeslutter(Behandling behandling, BehandlingRepository behandlingRepository) {
+    public static void leggTilBeslutter(Behandling behandling, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling);
-        behandling.setAnsvarligBeslutter(BESLUTTER_IDENT);
+        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandling.getId(), BESLUTTER_IDENT);
 
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }
