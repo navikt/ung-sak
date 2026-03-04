@@ -1,1 +1,1 @@
-Felles modul for formidling og brev. Selve brevoppbygging gjøres i ytelsesmodulene. Brevmalene templatene ligger i egen modul.
+Felles modul for formidling og brev. Selve brevoppbyggingen gjøres i ytelsesmodulene. Brevmalene ligger i egen modul.
