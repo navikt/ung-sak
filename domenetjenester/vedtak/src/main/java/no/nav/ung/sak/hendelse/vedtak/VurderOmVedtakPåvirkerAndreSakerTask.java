@@ -87,6 +87,9 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
         if (vedtak.getYtelse() == Ytelser.UNGDOMSYTELSE) {
             return FagsakYtelseType.UNGDOMSYTELSE;
         }
+        if (vedtak.getYtelse() == Ytelser.AKTIVITETSPENGER) {
+            return FagsakYtelseType.AKTIVITETSPENGER;
+        }
         throw new IllegalArgumentException("Kunne ikke håndtere vedtak for ytelse: " + vedtak.getYtelse());
     }
 }
