@@ -1,0 +1,35 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>no.nav.ung.sak</groupId>
+		<artifactId>ung-sak</artifactId>
+		<version>${revision}${sha1}${changelist}</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>formidling-pdfgen-templates</artifactId>
+    <!-- JAR package trengs bare for tester via IDE. Dockerfile kopierer templatene direkte -->
+    <packaging>jar</packaging>
+	<name>ung-sak :: Formidling - PDFGen Templates</name>
+
+    <!-- Fjerner malene i jar fila slik at det ikke blir dobbel opp -->
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>pdfgen/**</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+
+

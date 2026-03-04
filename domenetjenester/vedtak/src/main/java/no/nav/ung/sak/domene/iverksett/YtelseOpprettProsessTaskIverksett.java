@@ -1,14 +1,5 @@
 package no.nav.ung.sak.domene.iverksett;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
@@ -23,22 +14,29 @@ import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @ApplicationScoped
-@FagsakYtelseTypeRef(UNGDOMSYTELSE)
+@FagsakYtelseTypeRef
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
 @BehandlingTypeRef(BehandlingType.REVURDERING)
-public class UngdomsytelseOpprettProsessTaskIverksett implements OpprettProsessTaskIverksett {
+public class YtelseOpprettProsessTaskIverksett implements OpprettProsessTaskIverksett {
 
     protected FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private StønadstatistikkService stønadstatistikkService;
 
-    protected UngdomsytelseOpprettProsessTaskIverksett() {
+    protected YtelseOpprettProsessTaskIverksett() {
         // for CDI proxy
     }
 
     @Inject
-    public UngdomsytelseOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                                    StønadstatistikkService stønadstatistikkService) {
+    public YtelseOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                             StønadstatistikkService stønadstatistikkService) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.stønadstatistikkService = stønadstatistikkService;
     }

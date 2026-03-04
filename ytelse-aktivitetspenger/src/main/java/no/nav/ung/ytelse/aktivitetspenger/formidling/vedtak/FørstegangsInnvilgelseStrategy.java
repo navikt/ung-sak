@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -10,11 +10,14 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
+
+import java.util.stream.Collectors;
 
 @Dependent
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger;
@@ -32,7 +35,8 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
-        var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.INNVILGELSE_UTBETALING);
+        return resultatInfo.stream()
+            .map(DetaljertResultatInfo::detaljertResultatType)
+            .collect(Collectors.toSet()).contains(DetaljertResultatType.INNVILGELSE_KUN_VILKÅR); //TODO må endres senere
     }
 }
