@@ -30,7 +30,7 @@ public class AktivitetspengerProsessTriggerPeriodeUtleder implements ProsessTrig
     /**
      * Utleder tidslinje for perioder til vurdering basert på relevante triggere
      *
-     * @param behandligId BehandlingId
+     * @param behandligId Long
      * @return Tidslinje for perioder til vurdering
      */
     public LocalDateTimeline<Set<BehandlingÅrsakType>> utledTidslinje(Long behandligId) {
