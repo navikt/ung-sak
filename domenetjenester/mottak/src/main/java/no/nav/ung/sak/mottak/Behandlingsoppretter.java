@@ -14,7 +14,9 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
@@ -32,6 +34,7 @@ import static java.util.stream.Collectors.toList;
 public class Behandlingsoppretter {
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private BehandlingRevurderingRepository revurderingRepository;
@@ -42,10 +45,12 @@ public class Behandlingsoppretter {
 
     @Inject
     public Behandlingsoppretter(BehandlingRepositoryProvider behandlingRepositoryProvider,
+                                BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                 InntektArbeidYtelseTjeneste iayTjeneste,
                                 BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                 @Any Instance<NyBehandlingOppretter> nyBehandlingOpprettere) {
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.iayTjeneste = iayTjeneste;
         this.nyBehandlingOpprettere = nyBehandlingOpprettere;
@@ -63,14 +68,18 @@ public class Behandlingsoppretter {
         if (!tidligereBehandling.map(Behandling::erSaksbehandlingAvsluttet).orElse(true)) {
             throw new IllegalStateException("Utviklerfeil: Prøver opprette ny behandling når det finnes åpen av samme type: " + fagsak.getId());
         }
-        return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
+        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType, (beh) -> {
             if (!BehandlingÅrsakType.UDEFINERT.equals(behandlingÅrsakType)) {
                 BehandlingÅrsak.builder(behandlingÅrsakType).buildFor(beh);
             }
             beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-            OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-            beh.setBehandlendeEnhet(enhet);
-        }); // NOSONAR
+
+        });
+
+        OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet, null);
+
+        return behandling; // NOSONAR
     }
 
     public Behandling opprettNyFørstegangsbehandlingMedInntektsmeldingerOgVedleggFraForrige(BehandlingÅrsakType behandlingÅrsakType, Fagsak fagsak) {

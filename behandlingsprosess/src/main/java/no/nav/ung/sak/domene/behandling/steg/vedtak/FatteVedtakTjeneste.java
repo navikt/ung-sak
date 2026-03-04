@@ -10,7 +10,9 @@ import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveForBehandlingSendtTilbakeTask;
@@ -50,6 +52,7 @@ public class FatteVedtakTjeneste {
     private OppgaveTjeneste oppgaveTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingVedtakTjeneste behandlingVedtakTjeneste;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     FatteVedtakTjeneste() {
         // for CDI proxy
@@ -59,16 +62,17 @@ public class FatteVedtakTjeneste {
     public FatteVedtakTjeneste(VedtakTjeneste vedtakTjeneste,
                                OppgaveTjeneste oppgaveTjeneste,
                                TotrinnTjeneste totrinnTjeneste,
-                               BehandlingVedtakTjeneste behandlingVedtakTjeneste) {
+                               BehandlingVedtakTjeneste behandlingVedtakTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.vedtakTjeneste = vedtakTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingVedtakTjeneste = behandlingVedtakTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public BehandleStegResultat fattVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
         verifiserBehandlingsresultat(behandling);
-        if (behandling.isToTrinnsBehandling()) {
+        if (behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())) {
 
             final var fatterVedtakAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK);
 

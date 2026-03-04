@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,8 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingRepository behandlingRepository;
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     private SøknadRepository søknadRepository;
@@ -64,7 +67,7 @@ public class BehandlingDtoTjenesteImplTest {
     @BeforeEach
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, vilkårResultatRepository,
+        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingAnsvarligRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, vilkårResultatRepository,
             totrinnTjeneste, informasjonselementer);
     }
 

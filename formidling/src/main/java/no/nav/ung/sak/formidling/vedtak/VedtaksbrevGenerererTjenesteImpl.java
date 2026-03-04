@@ -9,6 +9,8 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.innhold.ManueltVedtaksbrevInnholdBygger;
@@ -33,6 +35,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     private static final Logger LOG = LoggerFactory.getLogger(VedtaksbrevGenerererTjenesteImpl.class);
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private PdfGenKlient pdfGen;
     private ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger;
     private BrevMottakerTjeneste brevMottakerTjeneste;
@@ -44,13 +47,14 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     @Inject
     public VedtaksbrevGenerererTjenesteImpl(
-        BehandlingRepository behandlingRepository,
+        BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
         PdfGenKlient pdfGen,
         ManueltVedtaksbrevInnholdBygger manueltVedtaksbrevInnholdBygger,
         BrevMottakerTjeneste brevMottakerTjeneste,
         MicrosoftGraphTjeneste microsoftGraphTjeneste,
         @KonfigVerdi(value = "ENABLE_BREV_ANSVARLIG", defaultVerdi = "true") boolean enableBrevAnsvarlig) {
         this.behandlingRepository = behandlingRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.pdfGen = pdfGen;
         this.manueltVedtaksbrevInnholdBygger = manueltVedtaksbrevInnholdBygger;
         this.brevMottakerTjeneste = brevMottakerTjeneste;
@@ -61,14 +65,16 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     @WithSpan
     public GenerertBrev genererAutomatiskVedtaksbrev(VedtaksbrevGenerererInput vedtaksbrevGenerererInput) {
-        var behandling = behandlingRepository.hentBehandling(vedtaksbrevGenerererInput.behandlingId());
+        Long behandlingId = vedtaksbrevGenerererInput.behandlingId();
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId).orElse(null);
 
         Vedtaksbrev vedtaksbrev = vedtaksbrevGenerererInput.vedtaksbrev();
         VedtaksbrevInnholdBygger bygger = vedtaksbrev.vedtaksbrevBygger();
         var resultat = bygger.bygg(behandling, vedtaksbrevGenerererInput.detaljertResultatTidslinje());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
 
-        var brevAnsvarlig = bestemBrevansvarlig(behandling);
+        var brevAnsvarlig = bestemBrevansvarlig(behandling, behandlingAnsvarlig);
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
@@ -89,24 +95,26 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private BrevAnsvarligDto bestemBrevansvarlig(Behandling behandling) {
+    private BrevAnsvarligDto bestemBrevansvarlig(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig) {
         if (harManuellAksjonspunkt(behandling)) {
-            return lagManuellBrevAnsvarlig(behandling);
+            return lagManuellBrevAnsvarlig(behandling, behandlingAnsvarlig);
         }
 
         return new BrevAnsvarligDto(true, null, null);
     }
 
-    private BrevAnsvarligDto lagManuellBrevAnsvarlig(Behandling behandling) {
+    private BrevAnsvarligDto lagManuellBrevAnsvarlig(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig) {
         if (!enableBrevAnsvarlig) {
-            return  new BrevAnsvarligDto(false, null, null);
+            return new BrevAnsvarligDto(false, null, null);
         }
 
-        var saksbehandlerNavn = Optional.ofNullable(behandling.getAnsvarligSaksbehandler())
+        var saksbehandlerNavn = Optional.ofNullable(behandlingAnsvarlig)
+            .flatMap(ba -> Optional.ofNullable(ba.getAnsvarligSaksbehandler()))
             .flatMap(microsoftGraphTjeneste::navnPåNavAnsatt)
             .orElse(null);
 
-        var beslutterNavn = Optional.ofNullable(behandling.getAnsvarligBeslutter())
+        var beslutterNavn = Optional.ofNullable(behandlingAnsvarlig)
+            .flatMap(ba -> Optional.ofNullable(ba.getAnsvarligBeslutter()))
             .flatMap(microsoftGraphTjeneste::navnPåNavAnsatt)
             .orElse(null);
 
@@ -133,12 +141,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
     @Override
     public GenerertBrev genererManuellVedtaksbrev(Long behandlingId, String brevHtml, boolean kunHtml) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId).orElse(null);
         var resultat = manueltVedtaksbrevInnholdBygger.bygg(brevHtml);
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), lagManuellBrevAnsvarlig(behandling)),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), lagManuellBrevAnsvarlig(behandling, behandlingAnsvarlig)),
                 resultat.templateInnholdDto()
             )
         );
