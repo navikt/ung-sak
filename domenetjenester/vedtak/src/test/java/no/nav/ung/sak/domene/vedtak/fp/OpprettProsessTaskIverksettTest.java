@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.ung.sak.domene.iverksett.UngdomsytelseOpprettProsessTaskIverksett;
+import no.nav.ung.sak.domene.iverksett.YtelseOpprettProsessTaskIverksett;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -71,7 +71,7 @@ public class OpprettProsessTaskIverksettTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new UngdomsytelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService);
+        opprettProsessTaskIverksett = new YtelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService);
     }
 
     @Test

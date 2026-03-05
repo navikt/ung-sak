@@ -18,6 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.verapdf.gf.foundry.VeraGreenfieldFoundryProvider;
 
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
@@ -35,13 +37,11 @@ public class PdfGenKlient {
         System.setProperty("sun2d.cmm", "sun2d.cmm.kcms.KcmsServiceProvider");
         VeraGreenfieldFoundryProvider.initialise();
         XRLog.setLoggerImpl(new Slf4jLogger());
-        boolean kjørerEnhetstesterEllerFraIDE = Files.exists(Path.of("target"));
-        String plassering = kjørerEnhetstesterEllerFraIDE ? "target/pdfgen/" : "pdfgen/";
         Environment initialEnvironment = new Environment(
             Collections.emptyMap(),
-            new PDFGenResource(getResource(plassering + "templates/")),
-            new PDFGenResource(getResource(plassering + "resources/")),
-            new PDFGenResource(getResource(plassering + "fonts/")),
+            new PDFGenResource(getResource("templates")),
+            new PDFGenResource(getResource("resources")),
+            new PDFGenResource(getResource("fonts")),
             new PDFGenResource("") //denne trengs ikke, er er fordi PDFGenCore krever 4 argumenter
         );
         PDFGenCore.Companion.init(initialEnvironment);
@@ -49,13 +49,33 @@ public class PdfGenKlient {
 
     }
 
-    private Path getResource(String faktiskPath) {
-        Path path = Path.of(faktiskPath);
+    private Path getResource(String relativePath) {
+        String classpathSti = "pdfgen/%s".formatted(relativePath);
+
+        // 1. Sjekk om filene finnes på filsystemet relativt til working directory (typisk Docker: /app/pdfgen/...)
+        Path path = Path.of(classpathSti);
         if (Files.exists(path)) {
-            // Finnes i rotmappen til der appen kjører fra, typisk fra docker
             return path;
         }
-        throw new IllegalArgumentException("fint ikke " + faktiskPath);
+
+        // 2. Sjekk target/pdfgen/  - brukes av maven tester
+        Path targetPath = Path.of("target", classpathSti);
+        if (Files.exists(targetPath)) {
+            return targetPath;
+        }
+
+        // 3. Fallback til classpath - brukes av IDE
+        log.info("Fant ikke pdfgen-ressurser på {} eller {}. Prøver classpath. " +
+            "Bør bare skje for test via IDE.", classpathSti, targetPath);
+
+        URL resource = getClass().getClassLoader().getResource(classpathSti);
+        Objects.requireNonNull(resource, "Fant ingen pdfgen-ressurs på filsystem eller classpath: " + classpathSti);
+
+        try {
+            return Path.of(resource.toURI());
+        } catch (URISyntaxException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @WithSpan
@@ -77,7 +97,7 @@ public class PdfGenKlient {
     }
 
     private PdfGenDokument lagDokument(String templateNavn, String dir, JsonNode payload, boolean kunHtml) {
-        String html = OpentelemetrySpanWrapper.forApplikasjon().span("pdfgen.lagDokument.crateHtml",
+        String html = OpentelemetrySpanWrapper.forApplikasjon().span("pdfgen.lagDokument.createHtml",
             span -> span.setAttribute("templateNavn", templateNavn).setAttribute("templateDir", dir),
             () -> CreateHtmlKt.createHtml(templateNavn, dir, payload)
         );

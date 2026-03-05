@@ -61,6 +61,7 @@ spec:
       enabled: true
       replyURLs:
         - "https://ung.intern.dev.nav.no/ung/sak/cb"
+        - "https://aktivitetspenger.intern.dev.nav.no/ung/sak/cb"
       claims:
         groups:
           # 0000-CA-ung-saksbehandler
@@ -109,6 +110,7 @@ spec:
         - application: ung-sak
         - application: ung-sak-web
         - application: ung-tilbake
+        - application: aktivitetspenger-sak-web
   gcp:
     sqlInstances:
       - type: POSTGRES_16
@@ -164,6 +166,8 @@ spec:
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
       value: https://ung.intern.dev.nav.no
+    - name: LOADBALANCER_ALTERNATIVE_URL
+      value: https://aktivitetspenger.intern.dev.nav.no
 
     # PDL
     - name: PDL_TEMA

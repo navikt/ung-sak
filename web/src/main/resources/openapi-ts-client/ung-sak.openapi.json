@@ -131,9 +131,9 @@
         "x-enum-varnames" : [ "DAG", "DAG7", "UKE", "MND", "ÅR", "ENGANG", "AKTO", "UDEFINERT" ]
       },
       "k9.oppdrag.kontrakt.kodeverk.YtelseType" : {
-        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "-" ],
+        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AKT", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "UDEFINERT" ]
+        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "AKTIVITETSPENGER", "UDEFINERT" ]
       },
       "k9.oppdrag.kontrakt.oppsummering.Mottaker" : {
         "properties" : {
