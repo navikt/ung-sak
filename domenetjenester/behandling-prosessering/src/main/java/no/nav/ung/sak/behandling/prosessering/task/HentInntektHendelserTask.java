@@ -4,11 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
@@ -39,7 +35,6 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private Duration ventetidFørNesteKjøring;
-    private boolean oppfriskVedInkommendeInntektshendelseEnabled;
 
     public HentInntektHendelserTask() {
         // For CDI
@@ -50,13 +45,11 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
                                     FagsakTjeneste fagsakTjeneste,
                                     BehandlingRepository behandlingRepository,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
-                                    @KonfigVerdi(value = "OPPFRISK_VED_INNKOMMENDE_INNTEKTSHENDELSE_ENABLED", required = false, defaultVerdi = "false") boolean oppfriskVedInkommendeInntektshendelseEnabled,
                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDElSER_INTERVALL", required = false, defaultVerdi = "PT1M") String ventetidFørNesteKjøring) {
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.oppfriskVedInkommendeInntektshendelseEnabled = oppfriskVedInkommendeInntektshendelseEnabled;
         this.ventetidFørNesteKjøring = Duration.parse(ventetidFørNesteKjøring);
     }
 
@@ -101,23 +94,17 @@ public class HentInntektHendelserTask implements ProsessTaskHandler {
     private void behandleHendelser(List<InntektAbonnentTjeneste.InntektHendelse> nyeInntektHendelser) {
         var relevanteBehandlinger = finnRelevanteBehandlinger(nyeInntektHendelser);
         log.info("Fant {} relevante behandlinger fra {} hendelser", relevanteBehandlinger.size(), nyeInntektHendelser.size());
-        if (Environment.current().isDev()){ //kan ikke logge i prod pga aktørId i hendelsen
+        if (Environment.current().isDev()) { //kan ikke logge i prod pga aktørId i hendelsen
             for (InntektAbonnentTjeneste.InntektHendelse hendelse : nyeInntektHendelser) {
                 log.info("Mottok hendelse: " + hendelse);
             }
         }
 
-        if (oppfriskVedInkommendeInntektshendelseEnabled) {
-            var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
-            if (oppfriskTasker.isEmpty()) {
-                log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
-            } else {
-                opprettOppfriskTaskGruppe(oppfriskTasker);
-            }
+        var oppfriskTasker = opprettOppfriskTaskerForBehandlinger(relevanteBehandlinger);
+        if (oppfriskTasker.isEmpty()) {
+            log.info("Ingen oppfrisk-tasker å opprette etter behandling av inntektshendelser");
         } else {
-            for (Behandling behandling : relevanteBehandlinger) {
-                log.info("Mottatt inntektshendelse for behandling={} saksnummer={} men oppfrisking er deaktivert", behandling.getId(), behandling.getFagsak().getSaksnummer());
-            }
+            opprettOppfriskTaskGruppe(oppfriskTasker);
         }
     }
 

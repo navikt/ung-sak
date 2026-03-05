@@ -266,10 +266,6 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: HENT_INNTEKT_HENDELSER_ENABLED
-      value: "true"
-    - name: OPPFRISK_VED_INNKOMMENDE_INNTEKTSHENDELSE_ENABLED
-      value: "true"
     - name: KLAGE_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL
