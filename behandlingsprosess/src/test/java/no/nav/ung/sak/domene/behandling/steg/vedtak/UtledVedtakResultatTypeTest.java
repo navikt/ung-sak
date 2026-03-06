@@ -6,11 +6,13 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +26,8 @@ public class UtledVedtakResultatTypeTest {
     @BeforeEach
     public void setup() {
         scenario = TestScenarioBuilder.builderMedSøknad();
-        vedtakTjeneste = new BehandlingVedtakTjeneste(null, scenario.mockBehandlingRepositoryProvider());
+        BehandlingAnsvarligRepository mockBehandlingAnsvarligRepository = Mockito.mock(BehandlingAnsvarligRepository.class);
+        vedtakTjeneste = new BehandlingVedtakTjeneste(null,  scenario.mockBehandlingRepositoryProvider(), mockBehandlingAnsvarligRepository);
     }
 
     @Test

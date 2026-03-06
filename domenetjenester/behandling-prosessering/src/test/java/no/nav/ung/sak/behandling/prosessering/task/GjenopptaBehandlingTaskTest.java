@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,6 +31,7 @@ public class GjenopptaBehandlingTaskTest {
     private GjenopptaBehandlingTask task; // objektet vi tester
 
     private BehandlingRepository mockBehandlingRepository;
+    private BehandlingAnsvarligRepository mockBehandlingAnsvarligRepository;
     private BehandlingskontrollTjeneste mockBehandlingskontrollTjeneste;
     private BehandlendeEnhetTjeneste mockEnhetsTjeneste;
     private OrganisasjonsEnhet organisasjonsEnhet = new OrganisasjonsEnhet("4802", "NAV Bærum");
@@ -37,6 +39,7 @@ public class GjenopptaBehandlingTaskTest {
     @BeforeEach
     public void setup() {
         mockBehandlingRepository = mock(BehandlingRepository.class);
+        mockBehandlingAnsvarligRepository = mock(BehandlingAnsvarligRepository.class);
         mockBehandlingskontrollTjeneste = mock(BehandlingskontrollTjeneste.class);
         mockEnhetsTjeneste = mock(BehandlendeEnhetTjeneste.class);
 
@@ -50,7 +53,7 @@ public class GjenopptaBehandlingTaskTest {
         var scenario = TestScenarioBuilder
             .builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
-        behandling.setBehandlendeEnhet(organisasjonsEnhet);
+        //behandling.setBehandlendeEnhet(organisasjonsEnhet);
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.empty());
 
@@ -71,7 +74,7 @@ public class GjenopptaBehandlingTaskTest {
             .builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
 
-        behandling.setBehandlendeEnhet(organisasjonsEnhet);
+        //behandling.setBehandlendeEnhet(organisasjonsEnhet);
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockBehandlingRepository.lagre(any(Behandling.class), any())).thenReturn(0L);
         when(mockBehandlingskontrollTjeneste.initBehandlingskontroll(Mockito.anyLong())).thenReturn(kontekst);

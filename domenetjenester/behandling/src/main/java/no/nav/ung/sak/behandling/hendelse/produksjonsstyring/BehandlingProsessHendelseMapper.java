@@ -1,19 +1,5 @@
 package no.nav.ung.sak.behandling.hendelse.produksjonsstyring;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -21,6 +7,9 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.k9.søknad.JsonUtils;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -30,38 +19,51 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.hendelse.produksjonsstyring.søknadsårsak.SøknadsårsakUtleder;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingProsessHendelse;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
-import no.nav.k9.søknad.JsonUtils;
-import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.Kildesystem;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingProsessHendelse;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
 import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Dependent
 public class BehandlingProsessHendelseMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(BehandlingProsessHendelseMapper.class);
-    private Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
-    private Instance<SøknadsårsakUtleder> søknadsårsakUtledere;
-    private MottatteDokumentRepository mottatteDokumentRepository;
-
-    public BehandlingProsessHendelseMapper() {
-    }
+    private final Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
+    private final Instance<SøknadsårsakUtleder> søknadsårsakUtledere;
+    private final MottatteDokumentRepository mottatteDokumentRepository;
+    private final BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     public BehandlingProsessHendelseMapper(@Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
                                            @Any Instance<SøknadsårsakUtleder> søknadsårsakUtledere,
-                                           MottatteDokumentRepository mottatteDokumentRepository) {
+                                           MottatteDokumentRepository mottatteDokumentRepository,
+                                           BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.søknadsfristTjenester = søknadsfristTjenester;
         this.søknadsårsakUtledere = søknadsårsakUtledere;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public BehandlingProsessHendelse getProduksjonstyringEventDto(LocalDateTime eventTid, EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
@@ -73,6 +75,8 @@ public class BehandlingProsessHendelseMapper {
         final boolean fraEndringsdialog = sjekkOmDetFinnesEndringFraEndringsdialog(behandling);
 
         List<UtvidetSøknadÅrsak> søknadsårsaker = utledSøknadÅrsaker(behandling);
+
+        Optional<BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId());
 
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
@@ -91,10 +95,10 @@ public class BehandlingProsessHendelseMapper {
             .medEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling))
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
-            .medAnsvarligSaksbehandlerForTotrinn(behandling.getAnsvarligSaksbehandler())
-            .medBehandlendeEnhet(behandling.getBehandlendeEnhet())
+            .medAnsvarligSaksbehandlerForTotrinn( behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
+            .medBehandlendeEnhet(behandlingAnsvarlig.map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null))
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
-            .medAnsvarligBeslutterForTotrinn(behandling.getAnsvarligBeslutter())
+            .medAnsvarligBeslutterForTotrinn(behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)
             .medBehandlingsårsaker(behandling.getBehandlingÅrsaker().stream().map(årsak -> årsak.getBehandlingÅrsakType().getKode()).distinct().toList())
