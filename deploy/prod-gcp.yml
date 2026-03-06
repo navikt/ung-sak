@@ -78,7 +78,7 @@ spec:
       rules:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
-        - application: ung-brukerdialog
+        - application: ung-brukerdialog-api
         - application: ung-sak
         - application: kabal-api
           namespace: klage
@@ -209,9 +209,9 @@ spec:
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
     - name: UNG_BRUKERDIALOG_URL
-      value: http://ung-brukerdialog/ung/brukerdialog/intern/api
+      value: http://ung-brukerdialog-api/ung/brukerdialog/intern/api
     - name: UNG_BRUKERDIALOG_SCOPE
-      value: api://prod-gcp.k9saksbehandling.ung-brukerdialog/.default
+      value: api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default
     - name: SIF_ABAC_PDP_SCOPE
       value: api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default
     - name: SIF_ABAC_PDP_UNG_URL
