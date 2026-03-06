@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
@@ -74,7 +75,7 @@ public class BrevScenarioerUtils {
         return beregnetSats.intersection(ytelseTidslinje).combine(kontrollerInntektHolder,
             (s, lhs, rhs) -> {
                 var inntekt = rhs != null ? bestemInntekt(rhs.getValue()) : BigDecimal.ZERO;
-                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), inntekt).verdi());
+                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), new KontrollerteInntekter(inntekt, BigDecimal.ZERO)).verdi());
             },
             LocalDateTimeline.JoinStyle.LEFT_JOIN
         );
