@@ -15,9 +15,6 @@ public class Beregningsgrunnlag {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_BEREGNINGSGRUNNLAG")
     private Long id;
 
-    @Column(name = "behandling_id", nullable = false, updatable = false)
-    private Long behandlingId;
-
     @Column(name = "virkningsdato", nullable = false, updatable = false)
     private LocalDate virkningsdato;
 
@@ -41,13 +38,10 @@ public class Beregningsgrunnlag {
     @Column(name = "regel_sporing", nullable = false, updatable = false, length = 100000)
     private String regelSporing;
 
-    @Column(name = "aktiv", nullable = false, updatable = true)
-    private boolean aktiv = true;
-
     protected Beregningsgrunnlag() {
     }
 
-    Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing) {
+    public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing) {
         this.virkningsdato = beregningInputGrunnlag.virkningsdato();
         this.sisteLignedeÅr = beregningInputGrunnlag.sisteLignedeÅr();
         this.årsinntektAvkortetOppjustertSisteÅr = årsinntektSisteÅr;
@@ -79,13 +73,5 @@ public class Beregningsgrunnlag {
 
     public String getRegelSporing() {
         return regelSporing;
-    }
-
-    void setIkkeAktivt() {
-        this.aktiv = false;
-    }
-
-    void setBehandlingId(Long behandlingId) {
-        this.behandlingId = behandlingId;
     }
 }

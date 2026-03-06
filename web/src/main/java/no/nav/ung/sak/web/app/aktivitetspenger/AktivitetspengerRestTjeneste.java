@@ -21,6 +21,8 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.*;
 
 import java.math.BigDecimal;
@@ -43,7 +45,7 @@ public class AktivitetspengerRestTjeneste {
     public static final String BEREGNINGSGRUNNLAG_PATH = AKTIVITETSPENGER_BASE_PATH + "/beregningsgrunnlag";
 
     private BehandlingRepository behandlingRepository;
-    private BeregningsgrunnlagRepository beregningsgrunnlagRepository;
+    private AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository;
 
     public AktivitetspengerRestTjeneste() {
         // for CDI proxy
@@ -51,9 +53,9 @@ public class AktivitetspengerRestTjeneste {
 
     @Inject
     public AktivitetspengerRestTjeneste(BehandlingRepository behandlingRepository,
-                                        BeregningsgrunnlagRepository beregningsgrunnlagRepository) {
+                                        AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.beregningsgrunnlagRepository = beregningsgrunnlagRepository;
+        this.aktivitetspengerBeregningsgrunnlagRepository = aktivitetspengerBeregningsgrunnlagRepository;
     }
 
     @GET
@@ -63,7 +65,8 @@ public class AktivitetspengerRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public BeregningsgrunnlagDto getBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
-        return beregningsgrunnlagRepository.hentGrunnlag(behandling.getId())
+        return aktivitetspengerBeregningsgrunnlagRepository.hentGrunnlag(behandling.getId())
+            .map(AktivitetspengerBeregningsgrunnlag::getBeregningsgrunnlag)
             .map(AktivitetspengerRestTjeneste::mapTilBeregningsgrunnlagDto)
             .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: "+behandling.getId()));
     }

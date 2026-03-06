@@ -7,6 +7,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
 
 import java.time.LocalDate;
 import java.time.Year;
@@ -17,16 +18,16 @@ import java.util.List;
 @ApplicationScoped
 public class BeregningStegTjeneste {
 
-    private BeregningsgrunnlagRepository besteBeregningGrunnlagRepository;
+    private AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
 
     BeregningStegTjeneste() {
     }
 
     @Inject
-    public BeregningStegTjeneste(BeregningsgrunnlagRepository beregningsgrunnlagRepository,
+    public BeregningStegTjeneste(AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository,
                                  InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
-        this.besteBeregningGrunnlagRepository = beregningsgrunnlagRepository;
+        this.aktivitetspengerBeregningsgrunnlagRepository = aktivitetspengerBeregningsgrunnlagRepository;
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
@@ -36,7 +37,8 @@ public class BeregningStegTjeneste {
 
         var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, virkningsdato, inntektsposter);
         var resultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
-        besteBeregningGrunnlagRepository.lagre(behandlingId, resultat);
+        var beregningsgrunnlag = new Beregningsgrunnlag(resultat.getBeregningInput(), resultat.getÅrsinntektSisteÅr(), resultat.getÅrsinntektSisteTreÅr(), resultat.getÅrsinntektBesteBeregning(), resultat.getRegelSporing());
+        aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandlingId, beregningsgrunnlag);
     }
 
 
