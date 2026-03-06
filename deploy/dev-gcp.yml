@@ -207,7 +207,7 @@ spec:
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
     - name: UNG_BRUKERDIALOG_URL
-      value: http://ung-brukerdialog/ung/brukerdialog/api
+      value: http://ung-brukerdialog/ung/brukerdialog/intern/api
     - name: UNG_BRUKERDIALOG_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-brukerdialog/.default
     - name: UNG_TILBAKE_SCOPE
