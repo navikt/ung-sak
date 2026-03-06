@@ -11,9 +11,9 @@ import no.nav.ung.fordel.handler.MottattMelding;
 import no.nav.ung.fordel.handler.WrappedProsessTaskHandler;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class FinnEllerOpprettUngSakTask extends WrappedProsessTaskHandler {
     @Inject
     public FinnEllerOpprettUngSakTask(FordelProsessTaskTjeneste fordelProsessTaskTjeneste,
                                       @Any Instance<SøknadMottakTjeneste> søknadMottakTjenester,
-                                      @KonfigVerdi(value = "aktivitetspenger.enabled", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled) {
+                                      @KonfigVerdi(value = "AKTIVITETSPENGER_ENABLED", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled) {
         super(fordelProsessTaskTjeneste);
         this.søknadMottakTjenester = søknadMottakTjenester;
         this.aktivitetspengerEnabled = aktivitetspengerEnabled;

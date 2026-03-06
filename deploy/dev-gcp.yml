@@ -278,6 +278,8 @@ spec:
       value: "true"
     - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
       value: "true"
+    - name: AKTIVITETSPENGER_ENABLED
+      value: "true"
 
 
       # Konfigurasjoner
