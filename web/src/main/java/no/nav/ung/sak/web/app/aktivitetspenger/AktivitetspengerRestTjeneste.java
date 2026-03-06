@@ -59,7 +59,7 @@ public class AktivitetspengerRestTjeneste {
     }
 
     @GET
-    @Operation(description = "Henter beregningsgrunnlag for en aktivitetspengerbehandling", tags = "akt")
+    @Operation(description = "Henter beregningsgrunnlag for en aktivitetspengerbehandling", tags = "avp")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(BEREGNINGSGRUNNLAG_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
