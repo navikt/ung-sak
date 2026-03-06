@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Dependent
-@ScopedRestIntegration(scopeKey = "ung.brukerdialog.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog/.default")
+@ScopedRestIntegration(scopeKey = "ung.brukerdialog.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default")
 public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
 
     private final OidcRestClient restClient;
@@ -34,7 +34,7 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
     public UngBrukerdialogOppgaveKlient(
         OidcRestClient restClient,
         @KonfigVerdi(value = "OPPGAVER_I_UNGBRUKERDIALOG_ENABLED", defaultVerdi = "false") boolean oppgaverIUngBrukerdialogEnabled,
-        @KonfigVerdi(value = "ung.brukerdialog.url", defaultVerdi = "http://ung-brukerdialog.k9saksbehandling") String url) {
+        @KonfigVerdi(value = "ung.brukerdialog.url", defaultVerdi = "http://ung-brukerdialog-api.k9saksbehandling") String url) {
         this.restClient = restClient;
         this.oppgaverIUngBrukerdialogEnabled = oppgaverIUngBrukerdialogEnabled;
         this.opprettURI = tilUri(url, "oppgavebehandling/opprett");
