@@ -39,7 +39,7 @@ public class Brevkode implements Kodeverdi {
      * Aktivitetspenger brevkoder.
      */
     public static final String AKTIVITETSPENGER_SOKNAD_KODE = "AKTIVITETSPENGER_SOKNAD";
-    public static final Brevkode AKTIVITETSPENGER_SOKNAD = new Brevkode(AKTIVITETSPENGER_SOKNAD_KODE, "NAV Aktivitetspenger", SØKNAD_RANGERING);
+    public static final Brevkode AKTIVITETSPENGER_SOKNAD = new Brevkode(AKTIVITETSPENGER_SOKNAD_KODE, "FIXME_AKTIVITETSPENGER_BREVKODE", SØKNAD_RANGERING);
 
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
