@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -96,7 +95,7 @@ public class FagsakRepository {
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
         query.setParameter("ytelseTyper", ytelsetyper);
-        return query.getResultList();
+            return query.getResultList();
     }
 
     public List<Fagsak> hentForBruker(AktørId aktørId, FagsakYtelseType fagsakYtelseType) {

@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg;
 
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;

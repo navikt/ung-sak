@@ -24,7 +24,6 @@ import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTest
 import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;

@@ -46,19 +46,18 @@ public class JournalHendelseStream implements KafkaIntegration {
 
     @Inject
     public JournalHendelseStream(@KonfigVerdi(value = "kafka.journal.topic") String topicName,
-                                 @KonfigVerdi(value = "aktivitetspenger.enabled", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled,
                                  JournalføringHendelseHåndterer journalføringHendelseHåndterer,
                                  AivenKafkaSettings kafkaSettings) {
         Serde<JournalfoeringHendelseRecord> valueSerde = isDeployment ? new SpecificAvroSerde<>() : new VtpJournalføringshendelserKafkaAvroSerde<>();
         this.topic = KafkaUtils.configureAvroTopic(topicName, kafkaSettings, Serdes.String(), valueSerde);
-        this.stream = createKafkaStreams(topic, journalføringHendelseHåndterer, kafkaSettings, aktivitetspengerEnabled);
+        this.stream = createKafkaStreams(topic, journalføringHendelseHåndterer, kafkaSettings);
     }
 
 
     @SuppressWarnings("resource")
     private static KafkaStreams createKafkaStreams(Topic<String, JournalfoeringHendelseRecord> topic,
                                                    JournalføringHendelseHåndterer journalføringHendelseHåndterer,
-                                                   AivenKafkaSettings kafkaSettings, boolean aktivitetspengerEnabled) {
+                                                   AivenKafkaSettings kafkaSettings) {
 
         Serde<String> serdeKey = topic.getSerdeKey();
         Serde<JournalfoeringHendelseRecord> serdeValue = topic.getSerdeValue();

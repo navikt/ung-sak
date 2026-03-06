@@ -1,28 +1,14 @@
 package no.nav.ung.sak.økonomi.tilkjentytelse;
 
-import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
-
-import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
+import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.*;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
@@ -31,11 +17,19 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
-import no.nav.ung.sak.JsonObjectMapper;
-import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
+import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
 
 @Dependent
 public class TilkjentYtelseTjeneste {

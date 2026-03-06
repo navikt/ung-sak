@@ -12,8 +12,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.DiffEntity;
 import no.nav.ung.sak.diff.TraverseGraph;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.tid.KantIKantVurderer;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -34,7 +34,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
     @Inject
     public StrukturertJournalpost(
         @KonfigVerdi(value = "DUMP_PAYLOAD_VED_FEIL", defaultVerdi = "false") Boolean dumpPayload,
-        @KonfigVerdi(value = "aktivitetspenger.enabled", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled
+        @KonfigVerdi(value = "AKTIVITETSPENGER_ENABLED", required = false, defaultVerdi = "false") boolean aktivitetspengerEnabled
         ) {
         this.dumpPayload = dumpPayload;
 

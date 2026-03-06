@@ -14,8 +14,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,6 +86,9 @@ public class VurderOmVedtakPåvirkerAndreSakerTask implements ProsessTaskHandler
     static FagsakYtelseType mapYtelse(Ytelse vedtak) {
         if (vedtak.getYtelse() == Ytelser.UNGDOMSYTELSE) {
             return FagsakYtelseType.UNGDOMSYTELSE;
+        }
+        if (vedtak.getYtelse() == Ytelser.AKTIVITETSPENGER) {
+            return FagsakYtelseType.AKTIVITETSPENGER;
         }
         throw new IllegalArgumentException("Kunne ikke håndtere vedtak for ytelse: " + vedtak.getYtelse());
     }

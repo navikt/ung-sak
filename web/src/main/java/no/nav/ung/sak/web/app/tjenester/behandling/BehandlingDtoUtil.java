@@ -17,7 +17,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
 import org.apache.http.client.utils.URIBuilder;
 
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;

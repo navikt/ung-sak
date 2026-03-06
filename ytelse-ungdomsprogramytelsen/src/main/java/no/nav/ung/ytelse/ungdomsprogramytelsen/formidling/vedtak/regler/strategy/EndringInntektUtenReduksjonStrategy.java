@@ -5,23 +5,26 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
-import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 
 import java.math.BigDecimal;
 
 @Dependent
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
 

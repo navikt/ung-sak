@@ -20,7 +20,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.ChangeTracked;
 
 @Entity(name = "UngdomsytelseStartdatoer")

@@ -11,7 +11,7 @@ import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
 import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.sak.abac.AppAbacAttributtType;
+import no.nav.ung.kodeverk.abac.AppAbacAttributtType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;

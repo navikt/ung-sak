@@ -8,6 +8,7 @@
 	<sequence-generator name="SEQ_BEHANDLING_STEG_TYPE_SEKV" allocation-size="50" sequence-name="SEQ_BEHANDLING_STEG_TYPE_SEKV" />
 	<sequence-generator name="SEQ_BEHANDLING_STEG_TILSTAND" allocation-size="50" sequence-name="SEQ_BEHANDLING_STEG_TILSTAND" />
 	<sequence-generator name="SEQ_BEHANDLING_ARSAK" allocation-size="50" sequence-name="SEQ_BEHANDLING_ARSAK" />
+	<sequence-generator name="SEQ_BEHANDLING_ANSVARLIG" allocation-size="50" sequence-name="SEQ_BEHANDLING_ANSVARLIG" />
 
 	<sequence-generator name="SEQ_VILKAR_RESULTAT" allocation-size="50" sequence-name="SEQ_VILKAR_RESULTAT" />
 	<sequence-generator name="SEQ_AKSJONSPUNKT" allocation-size="50" sequence-name="SEQ_AKSJONSPUNKT" />
@@ -20,6 +21,7 @@
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.Behandling" />
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.BehandlingStegTilstand" />
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak" />
+	<entity class="no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig" />
 
 	<entity class="no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt" />
 
