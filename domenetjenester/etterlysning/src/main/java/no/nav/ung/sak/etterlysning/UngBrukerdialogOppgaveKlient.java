@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Dependent
-@ScopedRestIntegration(scopeKey = "ung.brukerdialog.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default")
+@ScopedRestIntegration(scopeKey = "ung.brukerdialog.api.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default")
 public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
 
     private final OidcRestClient restClient;
