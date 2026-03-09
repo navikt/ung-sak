@@ -34,7 +34,7 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
     public UngBrukerdialogOppgaveKlient(
         OidcRestClient restClient,
         @KonfigVerdi(value = "OPPGAVER_I_UNGBRUKERDIALOG_ENABLED", defaultVerdi = "false") boolean oppgaverIUngBrukerdialogEnabled,
-        @KonfigVerdi(value = "ung.brukerdialog.url", defaultVerdi = "http://ung-brukerdialog-api.k9saksbehandling") String url) {
+        @KonfigVerdi(value = "ung.brukerdialog.api.url", defaultVerdi = "http://ung-brukerdialog-api.k9saksbehandling") String url) {
         this.restClient = restClient;
         this.oppgaverIUngBrukerdialogEnabled = oppgaverIUngBrukerdialogEnabled;
         this.opprettURI = tilUri(url, "oppgavebehandling/opprett");
