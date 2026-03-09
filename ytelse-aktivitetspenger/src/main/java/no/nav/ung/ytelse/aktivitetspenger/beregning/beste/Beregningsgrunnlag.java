@@ -8,15 +8,15 @@ import java.time.LocalDate;
 import java.time.Year;
 
 @Entity(name = "Beregningsgrunnlag")
-@Table(name = "GR_BEREGNINGSGRUNNLAG")
+@Table(name = "BEREGNINGSGRUNNLAG")
 public class Beregningsgrunnlag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_BEREGNINGSGRUNNLAG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEREGNINGSGRUNNLAG")
     private Long id;
 
-    @Column(name = "virkningsdato", nullable = false, updatable = false)
-    private LocalDate virkningsdato;
+    @Column(name = "skjaeringstidspunkt", nullable = false, updatable = false)
+    private LocalDate skjæringstidspunkt;
 
     @Column(name = "siste_lignede_aar", nullable = false, updatable = false)
     private Year sisteLignedeÅr;
@@ -42,7 +42,7 @@ public class Beregningsgrunnlag {
     }
 
     public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing) {
-        this.virkningsdato = beregningInputGrunnlag.virkningsdato();
+        this.skjæringstidspunkt = beregningInputGrunnlag.virkningsdato();
         this.sisteLignedeÅr = beregningInputGrunnlag.sisteLignedeÅr();
         this.årsinntektAvkortetOppjustertSisteÅr = årsinntektSisteÅr;
         this.årsinntektAvkortetOppjustertSisteTreÅr = årsinntektSisteTreÅr;
@@ -51,8 +51,8 @@ public class Beregningsgrunnlag {
         this.beregningInput = new BeregningsgrunnlagInput(beregningInputGrunnlag);
     }
 
-    public LocalDate getVirkningsdato() {
-        return virkningsdato;
+    public LocalDate getSkjæringstidspunkt() {
+        return skjæringstidspunkt;
     }
 
     public BigDecimal getÅrsinntektAvkortetOppjustertSisteÅr() {

@@ -1,7 +1,7 @@
-create table GR_BEREGNINGSGRUNNLAG
+create table BEREGNINGSGRUNNLAG
 (
     id                              bigint primary key,
-    virkningsdato                   date           not null,
+    skjaeringstidspunkt             date           not null,
     siste_lignede_aar               integer        not null,
     aarsinntekt_siste_aar           numeric(19, 2) not null,
     aarsinntekt_siste_tre_aar       numeric(19, 2) not null,
@@ -19,7 +19,7 @@ create table GR_BEREGNINGSGRUNNLAG
     endret_tid          timestamp(3) without time zone
 );
 
-CREATE SEQUENCE IF NOT EXISTS SEQ_GR_BEREGNINGSGRUNNLAG START WITH 1000049 INCREMENT BY 50 MINVALUE 1000000 NO MAXVALUE CACHE 1;
+CREATE SEQUENCE IF NOT EXISTS SEQ_BEREGNINGSGRUNNLAG START WITH 1000049 INCREMENT BY 50 MINVALUE 1000000 NO MAXVALUE CACHE 1;
 
 
 create table AVP_GR_BEREGNINGSGRUNNLAG

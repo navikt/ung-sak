@@ -2,7 +2,6 @@ package no.nav.ung.sak.kontrakt.aktivitetspenger.beregning;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
@@ -15,8 +14,8 @@ import java.util.List;
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public record BeregningsgrunnlagDto(
     @NotNull
-    @JsonProperty("virkningstidspunkt")
-    LocalDate virkningstidspunkt,
+    @JsonProperty("skjæringstidspunkt")
+    LocalDate skjæringstidspunkt,
 
     @NotNull
     @Digits(integer = 6, fraction = 0)
@@ -30,12 +29,15 @@ public record BeregningsgrunnlagDto(
 
     @NotNull
     @Digits(integer = 6, fraction = 0)
-    @JsonProperty("besteBeregning")
-    BigDecimal besteBeregning,
+    @JsonProperty("beregningsgrunnlag")
+    BigDecimal beregningsgrunnlag,
 
     @NotNull
     @JsonProperty("pgiÅrsinntekter")
     List<PgiÅrsinntektDto> pgiÅrsinntekter
 ) {
 }
+
+// grønn hake, redusert 66% og dagsats
+// avkortet mot 6G som egen kolonne?
 

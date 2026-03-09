@@ -72,7 +72,7 @@ public class AktivitetspengerRestTjeneste {
     }
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag) {
-        BeregningInput beregningInput = grunnlag.getBeregningInput().getBeregningInput(grunnlag.getVirkningsdato());
+        BeregningInput beregningInput = grunnlag.getBeregningInput().getBeregningInput(grunnlag.getSkjæringstidspunkt());
         PgiKalkulatorInput pgiKalkulatorInput = PgiKalkulator.lagPgiKalkulatorInput(beregningInput);
         Map<Year, BigDecimal> avkortetOgOppjustert = PgiKalkulator.avgrensOgOppjusterÅrsinntekter(pgiKalkulatorInput);
 
@@ -89,7 +89,7 @@ public class AktivitetspengerRestTjeneste {
             .toList();
 
         return new BeregningsgrunnlagDto(
-            grunnlag.getVirkningsdato(),
+            grunnlag.getSkjæringstidspunkt(),
             grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr().setScale(0, RoundingMode.HALF_EVEN),
             grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr().setScale(0, RoundingMode.HALF_EVEN),
             grunnlag.getÅrsinntektAvkortetOppjustertBesteBeregning().setScale(0, RoundingMode.HALF_EVEN),

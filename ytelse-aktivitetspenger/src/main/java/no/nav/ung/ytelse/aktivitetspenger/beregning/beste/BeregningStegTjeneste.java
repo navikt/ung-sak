@@ -31,11 +31,11 @@ public class BeregningStegTjeneste {
         this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
     }
 
-    public void utførBesteberegning(Long behandlingId, LocalDate virkningsdato) {
+    public void utførBesteberegning(Long behandlingId, LocalDate skjæringstidspunkt) {
         var inntektsposter = hentSigrunInntektsposter(behandlingId);
-        var sistLignedeÅr = Year.of(virkningsdato.minusYears(1).getYear());  // TODO: Koble på utledning av siste tilgjengelige lignede år
+        var sistLignedeÅr = Year.of(skjæringstidspunkt.minusYears(1).getYear());  // TODO: Koble på utledning av siste tilgjengelige lignede år
 
-        var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, virkningsdato, inntektsposter);
+        var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, skjæringstidspunkt, inntektsposter);
         var resultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
         var beregningsgrunnlag = new Beregningsgrunnlag(resultat.getBeregningInput(), resultat.getÅrsinntektSisteÅr(), resultat.getÅrsinntektSisteTreÅr(), resultat.getÅrsinntektBesteBeregning(), resultat.getRegelSporing());
         aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandlingId, beregningsgrunnlag);

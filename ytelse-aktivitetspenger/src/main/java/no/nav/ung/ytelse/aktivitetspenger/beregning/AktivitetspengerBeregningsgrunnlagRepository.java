@@ -71,7 +71,7 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
             throw new IllegalStateException("Fant ikke besteberegning på aktivitetspenger beregningsgrunnlag for behandlingId=" + behandlingId);
         }
         return new LocalDateTimeline<>(
-            List.of(new LocalDateSegment<>(besteberegning.getVirkningsdato(), null, besteberegning)));
+            List.of(new LocalDateSegment<>(besteberegning.getSkjæringstidspunkt(), null, besteberegning)));
     }
 
     private DiffEntity differ() {
