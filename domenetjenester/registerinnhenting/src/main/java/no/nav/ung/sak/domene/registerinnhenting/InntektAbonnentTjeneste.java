@@ -54,7 +54,7 @@ public class InntektAbonnentTjeneste {
             } else {
                 log.info("Prøver å opprette abonnement for aktør for periode {}, men det finnes allerede et abonnement for periode {} med id {}. Avslutter og oppretter ny.",
                     periode, eksisterendeAbonnement.getPeriode(), eksisterendeAbonnement.getAbonnementId());
-                avsluttAbonnentHvisFinnes(aktørId);
+                avsluttAbonnement(eksisterendeAbonnement);
             }
         }
 
@@ -96,11 +96,13 @@ public class InntektAbonnentTjeneste {
 
     public void avsluttAbonnentHvisFinnes(AktørId aktørId) {
         inntektAbonnementRepository.hentAbonnementForAktør(aktørId)
-            .ifPresent(abonnement -> {
-                inntektAbonnentKlient.avsluttAbonnement(Long.parseLong(abonnement.getAbonnementId()));
-                inntektAbonnementRepository.slettAbonnement(abonnement);
-                log.info("Avsluttet abonnement med id={}", abonnement.getAbonnementId());
-            });
+            .ifPresent(this::avsluttAbonnement);
+    }
+
+    private void avsluttAbonnement(InntektAbonnement abonnement) {
+        inntektAbonnentKlient.avsluttAbonnement(Long.parseLong(abonnement.getAbonnementId()));
+        inntektAbonnementRepository.slettAbonnement(abonnement);
+        log.info("Avsluttet abonnement med id={}", abonnement.getAbonnementId());
     }
 
     public record InntektHendelse(Long sekvensnummer, AktørId aktørId, Periode periode) {
