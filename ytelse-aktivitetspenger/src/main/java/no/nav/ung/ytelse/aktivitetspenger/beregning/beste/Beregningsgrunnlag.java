@@ -6,6 +6,7 @@ import no.nav.ung.sak.diff.DiffIgnore;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.Objects;
 
 @Entity(name = "Beregningsgrunnlag")
 @Table(name = "BEREGNINGSGRUNNLAG")
@@ -73,5 +74,17 @@ public class Beregningsgrunnlag {
 
     public String getRegelSporing() {
         return regelSporing;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Beregningsgrunnlag that)) return false;
+        return Objects.equals(getSkjæringstidspunkt(), that.getSkjæringstidspunkt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getSkjæringstidspunkt());
     }
 }

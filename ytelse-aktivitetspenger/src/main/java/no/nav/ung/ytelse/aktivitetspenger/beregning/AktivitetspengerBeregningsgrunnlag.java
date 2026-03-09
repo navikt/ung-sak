@@ -6,6 +6,10 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 @Entity(name = "AktivitetspengerBeregningsgrunnlag")
 @Table(name = "AVP_GR_BEREGNINGSGRUNNLAG")
 @DynamicInsert
@@ -20,9 +24,13 @@ public class AktivitetspengerBeregningsgrunnlag {
     private Long behandlingId;
 
     @ChangeTracked
-    @ManyToOne
-    @JoinColumn(name = "beregningsgrunnlag_id", updatable = false)
-    private Beregningsgrunnlag beregningsgrunnlag;
+    @ManyToMany
+    @JoinTable(
+        name = "BEREGNINGSGRUNNLAG_KOBLING",
+        joinColumns = @JoinColumn(name = "avp_gr_beregningsgrunnlag_id"),
+        inverseJoinColumns = @JoinColumn(name = "beregningsgrunnlag_id")
+    )
+    private List<Beregningsgrunnlag> beregningsgrunnlag = new ArrayList<>();
 
     @Column(name = "aktiv", nullable = false, updatable = true)
     private boolean aktiv = true;
@@ -34,14 +42,14 @@ public class AktivitetspengerBeregningsgrunnlag {
     public AktivitetspengerBeregningsgrunnlag() {
     }
 
-    public Beregningsgrunnlag getBeregningsgrunnlag() {
-        return beregningsgrunnlag;
+    public List<Beregningsgrunnlag> getBeregningsgrunnlag() {
+        return Collections.unmodifiableList(beregningsgrunnlag);
     }
 
-
-    void setBeregningsgrunnlag(Beregningsgrunnlag beregningsgrunnlag) {
-        this.beregningsgrunnlag = beregningsgrunnlag;
+    void setBeregningsgrunnlag(List<Beregningsgrunnlag> beregningsgrunnlag) {
+        this.beregningsgrunnlag = new ArrayList<>(beregningsgrunnlag);
     }
+
 
     void setIkkeAktivt() {
         this.aktiv = false;

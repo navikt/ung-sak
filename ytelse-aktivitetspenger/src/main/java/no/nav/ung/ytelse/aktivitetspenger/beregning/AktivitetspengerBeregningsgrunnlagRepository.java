@@ -6,14 +6,10 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.sak.diff.DiffEntity;
-import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -34,17 +30,19 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new AktivitetspengerBeregningsgrunnlag());
 
-        var builder = new AktivitetspengerBeregningsgrunnlagBuilder(aktivtGrunnlag);
-        builder.medBeregningsgrunnlag(beregningsgrunnlag);
+        boolean finnesFraFør = aktivtGrunnlag.getBeregningsgrunnlag().contains(beregningsgrunnlag);
 
-        var differ = differ();
-
-        if (builder.erForskjellig(aktivtGrunnlag, differ)) {
-            grunnlagOptional.ifPresent(this::deaktiverEksisterende);
-            lagre(builder, behandlingId);
-        } else {
-            log.info("[behandlingId={}] Forkaster lagring nytt beregningsgrunnlag da dette er identisk med eksisterende resultat.", behandlingId);
+        if (finnesFraFør) {
+            log.info("[behandlingId={}] Beregningsgrunnlag for skjæringstidspunkt {} finnes allerede, gjenbruker eksisterende.",
+                behandlingId, beregningsgrunnlag.getSkjæringstidspunkt());
+            return;
         }
+
+        var builder = new AktivitetspengerBeregningsgrunnlagBuilder(aktivtGrunnlag);
+        builder.leggTilBeregningsgrunnlag(beregningsgrunnlag);
+
+        grunnlagOptional.ifPresent(this::deaktiverEksisterende);
+        lagre(builder, behandlingId);
     }
 
     public void deaktiverGrunnlag(Long behandlingId) {
@@ -66,18 +64,16 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
     public LocalDateTimeline<Beregningsgrunnlag> hentBesteBeregningSomTidslinje(long behandlingId) {
         var grunnlag = hentGrunnlag(behandlingId).orElseThrow(
             () -> new IllegalStateException("Fant ikke aktivitetspenger beregningsgrunnlag for behandlingId=" + behandlingId));
-        var besteberegning = grunnlag.getBeregningsgrunnlag();
-        if (besteberegning == null) {
+        var beregningsgrunnlagListe = grunnlag.getBeregningsgrunnlag();
+        if (beregningsgrunnlagListe.isEmpty()) {
             throw new IllegalStateException("Fant ikke besteberegning på aktivitetspenger beregningsgrunnlag for behandlingId=" + behandlingId);
         }
-        return new LocalDateTimeline<>(
-            List.of(new LocalDateSegment<>(besteberegning.getSkjæringstidspunkt(), null, besteberegning)));
+        var segmenter = beregningsgrunnlagListe.stream()
+            .map(bg -> new LocalDateSegment<>(bg.getSkjæringstidspunkt(), null, bg))
+            .toList();
+        return new LocalDateTimeline<>(segmenter);
     }
 
-    private DiffEntity differ() {
-        TraverseGraph traverser = TraverseEntityGraphFactory.build();
-        return new DiffEntity(traverser);
-    }
 
     private void deaktiverEksisterende(AktivitetspengerBeregningsgrunnlag grunnlag) {
         grunnlag.setIkkeAktivt();
@@ -89,8 +85,10 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
         var oppdatertGrunnlag = builder.build();
         oppdatertGrunnlag.setBehandlingId(behandlingId);
 
-        if (oppdatertGrunnlag.getBeregningsgrunnlag() != null) {
-            entityManager.persist(oppdatertGrunnlag.getBeregningsgrunnlag());
+        for (Beregningsgrunnlag bg : oppdatertGrunnlag.getBeregningsgrunnlag()) {
+            if (!entityManager.contains(bg)) {
+                entityManager.persist(bg);
+            }
         }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();

@@ -1,22 +1,26 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning;
 
-import no.nav.ung.sak.diff.DiffEntity;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+
+import java.util.ArrayList;
+import java.util.List;
 
 class AktivitetspengerBeregningsgrunnlagBuilder {
 
-    private Beregningsgrunnlag beregningsgrunnlag;
+    private List<Beregningsgrunnlag> beregningsgrunnlag;
 
     private boolean built = false;
 
     AktivitetspengerBeregningsgrunnlagBuilder(AktivitetspengerBeregningsgrunnlag kladd) {
         if (kladd != null) {
-            this.beregningsgrunnlag = kladd.getBeregningsgrunnlag();
+            this.beregningsgrunnlag = new ArrayList<>(kladd.getBeregningsgrunnlag());
+        } else {
+            this.beregningsgrunnlag = new ArrayList<>();
         }
     }
 
-    AktivitetspengerBeregningsgrunnlagBuilder medBeregningsgrunnlag(Beregningsgrunnlag beregningsgrunnlag) {
-        this.beregningsgrunnlag = beregningsgrunnlag;
+    AktivitetspengerBeregningsgrunnlagBuilder leggTilBeregningsgrunnlag(Beregningsgrunnlag beregningsgrunnlag) {
+        this.beregningsgrunnlag.add(beregningsgrunnlag);
         return this;
     }
 
@@ -32,10 +36,6 @@ class AktivitetspengerBeregningsgrunnlagBuilder {
         return resultat;
     }
 
-
-    boolean erForskjellig(AktivitetspengerBeregningsgrunnlag grunnlag, DiffEntity differ) {
-        return differ.areDifferent(grunnlag, repeatableBuild());
-    }
 
     private void validerState() {
         if (built) {
