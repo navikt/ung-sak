@@ -5554,7 +5554,7 @@
             "description" : "default response"
           }
         },
-        "tags" : [ "akt" ]
+        "tags" : [ "avp" ]
       }
     },
     "/api/aktoer-info" : {
