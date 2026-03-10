@@ -17,8 +17,8 @@ import java.util.stream.Collectors;
 @Dependent
 public class BehandlingAnsvarligRepository {
 
-    private EntityManager entityManager;
-    private BehandlingRepository behandlingRepository;
+    private final EntityManager entityManager;
+    private final BehandlingRepository behandlingRepository;
 
     @Inject
     public BehandlingAnsvarligRepository(EntityManager entityManager, BehandlingRepository behandlingRepository) {
@@ -74,15 +74,6 @@ public class BehandlingAnsvarligRepository {
         lagre(behandlingAnsvarlig);
     }
 
-    public OrganisasjonsEnhet getBehandlendeEnhet(Long behandlingId) {
-        Optional<BehandlingAnsvarlig> behandlingAnsvarlig = hentBehandlingAnsvarlig(behandlingId, BehandlingAnsvarlig.BehandlingDel.HELE);
-        if (behandlingAnsvarlig.isPresent()) {
-            return behandlingAnsvarlig.get().getBehandlendeOrganisasjonsEnhet();
-        } else {
-            return null;
-        }
-    }
-
     public void setAnsvarligBeslutter(Long behandlingId, String ansvarligBeslutterIdent) {
         setAnsvarligBeslutter(behandlingId, BehandlingAnsvarlig.BehandlingDel.HELE, ansvarligBeslutterIdent);
     }
@@ -122,17 +113,6 @@ public class BehandlingAnsvarligRepository {
             .map(BehandlingAnsvarlig::getAnsvarligSaksbehandler)
             .orElse(null);
     }
-
-    public String hentAnsvarligBeslutter(Long behandlingId) {
-        return hentAnsvarligBeslutter(behandlingId, BehandlingAnsvarlig.BehandlingDel.HELE);
-    }
-
-    private String hentAnsvarligBeslutter(Long behandlingId, BehandlingAnsvarlig.BehandlingDel behandlingDel) {
-        return hentBehandlingAnsvarlig(behandlingId, behandlingDel)
-            .map(BehandlingAnsvarlig::getAnsvarligBeslutter)
-            .orElse(null);
-    }
-
 
     public void nullstillToTrinnsBehandling(Long behandlingId) {
         nullstillToTrinnsBehandling(behandlingId, BehandlingAnsvarlig.BehandlingDel.HELE);
