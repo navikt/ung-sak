@@ -97,13 +97,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
     private BrevAnsvarligDto bestemBrevansvarlig(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig) {
         if (harManuellAksjonspunkt(behandling)) {
-            return lagManuellBrevAnsvarlig(behandling, behandlingAnsvarlig);
+            return lagManuellBrevAnsvarlig(behandlingAnsvarlig);
         }
 
         return new BrevAnsvarligDto(true, null, null);
     }
 
-    private BrevAnsvarligDto lagManuellBrevAnsvarlig(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig) {
+    private BrevAnsvarligDto lagManuellBrevAnsvarlig(BehandlingAnsvarlig behandlingAnsvarlig) {
         if (!enableBrevAnsvarlig) {
             return new BrevAnsvarligDto(false, null, null);
         }
@@ -147,7 +147,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), lagManuellBrevAnsvarlig(behandling, behandlingAnsvarlig)),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), lagManuellBrevAnsvarlig(behandlingAnsvarlig)),
                 resultat.templateInnholdDto()
             )
         );
