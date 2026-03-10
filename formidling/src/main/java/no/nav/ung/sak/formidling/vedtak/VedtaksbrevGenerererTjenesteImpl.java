@@ -74,7 +74,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var resultat = bygger.bygg(behandling, vedtaksbrevGenerererInput.detaljertResultatTidslinje());
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
 
-        var brevAnsvarlig = bestemBrevansvarlig(behandling, behandlingAnsvarlig);
+        var brevAnsvarlig = bestemBrevansvarlig(behandlingAnsvarlig);
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
@@ -95,12 +95,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private BrevAnsvarligDto bestemBrevansvarlig(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig) {
-        if (harManuellAksjonspunkt(behandling)) {
-            return lagManuellBrevAnsvarlig(behandlingAnsvarlig);
-        }
+    private BrevAnsvarligDto bestemBrevansvarlig(BehandlingAnsvarlig behandlingAnsvarlig) {
+        boolean varAutomatisk = behandlingAnsvarlig == null || behandlingAnsvarlig.getAnsvarligSaksbehandler() == null;
 
-        return new BrevAnsvarligDto(true, null, null);
+        return varAutomatisk
+            ? new BrevAnsvarligDto(true, null, null)
+            : lagManuellBrevAnsvarlig(behandlingAnsvarlig);
+
     }
 
     private BrevAnsvarligDto lagManuellBrevAnsvarlig(BehandlingAnsvarlig behandlingAnsvarlig) {
@@ -127,15 +128,6 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             beslutterNavn
         );
     }
-
-    private static boolean harManuellAksjonspunkt(Behandling behandling) {
-        return behandling.getAksjonspunkter().stream()
-            .anyMatch(
-                it -> (!it.getAksjonspunktDefinisjon().getAksjonspunktType().erAutopunkt() && it.erUtført())
-                    || (it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT && it.erÅpentAksjonspunkt())
-            );
-    }
-
 
     @WithSpan
     @Override
