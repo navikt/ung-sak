@@ -26,7 +26,7 @@ class BeregningTjenesteTest {
         );
 
         var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
-        assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
     }
 
     @Test
@@ -38,7 +38,7 @@ class BeregningTjenesteTest {
         );
 
         var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
-        assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteTreÅr());
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(resultat.getÅrsinntektSisteTreÅr());
     }
 
     @Test
@@ -50,7 +50,7 @@ class BeregningTjenesteTest {
         );
 
         var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
-        assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
     }
 
     @Test
@@ -64,13 +64,13 @@ class BeregningTjenesteTest {
 
         assertThat(resultat.getÅrsinntektSisteÅr()).isEqualByComparingTo(BigDecimal.ZERO);
         // 130 160 (G-snitt 2026) / 116 239 (G-snitt 2023) * 300 000/ 3 = 111 976,18699
-        assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(new BigDecimal("111976.18699"));
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(new BigDecimal("111976.18699"));
     }
 
     @Test
     void ingen_inntektsposter_gir_null_resultat() {
         var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, List.of()));
-        assertThat(resultat.getÅrsinntektBesteBeregning()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(BigDecimal.ZERO);
     }
 
     private static Inntektspost lagInntektspost(int år, BigDecimal beløp) {

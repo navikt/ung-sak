@@ -33,11 +33,21 @@ public record BeregningsgrunnlagDto(
     BigDecimal beregningsgrunnlag,
 
     @NotNull
+    @Digits(integer = 6, fraction = 0)
+    @JsonProperty("beregningsgrunnlagRedusert")
+    BigDecimal beregningsgrunnlagRedusert,
+
+    @NotNull
+    @Digits(integer = 6, fraction = 2)
+    @JsonProperty("dagsats")
+    BigDecimal dagsats,
+
+    @NotNull
     @JsonProperty("pgiÅrsinntekter")
-    List<PgiÅrsinntektDto> pgiÅrsinntekter
+    List<PgiÅrsinntektDto> pgiÅrsinntekter,
+
+    @NotNull
+    @JsonProperty("besteBeregningResultatType")
+    BesteBeregningResultatType besteBeregningResultatType
 ) {
 }
-
-// grønn hake, redusert 66% og dagsats
-// avkortet mot 6G som egen kolonne?
-

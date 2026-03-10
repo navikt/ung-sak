@@ -18,6 +18,7 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
@@ -92,8 +93,18 @@ public class AktivitetspengerRestTjeneste {
             grunnlag.getSkjæringstidspunkt(),
             grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr().setScale(0, RoundingMode.HALF_EVEN),
             grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getÅrsinntektAvkortetOppjustertBesteBeregning().setScale(0, RoundingMode.HALF_EVEN),
-            pgiÅrsinntekter
+            grunnlag.getBeregningsgrunnlag().setScale(0, RoundingMode.HALF_EVEN),
+            grunnlag.getBeregningsgrunnlagRedusert().setScale(0, RoundingMode.HALF_EVEN),
+            grunnlag.getDagsats().setScale(2, RoundingMode.HALF_EVEN),
+            pgiÅrsinntekter,
+            mapBesteBeregningResultatType(grunnlag.utledBesteBeregningResultatType())
         );
+    }
+
+    private static BesteBeregningResultatType mapBesteBeregningResultatType(no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BesteBeregningResultatType type) {
+        return switch (type) {
+            case SISTE_ÅR -> BesteBeregningResultatType.SISTE_ÅR;
+            case SNITT_SISTE_TRE_ÅR -> BesteBeregningResultatType.SNITT_SISTE_TRE_ÅR;
+        };
     }
 }

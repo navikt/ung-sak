@@ -28,8 +28,14 @@ public class Beregningsgrunnlag {
     @Column(name = "aarsinntekt_siste_tre_aar", nullable = false, updatable = false)
     private BigDecimal årsinntektAvkortetOppjustertSisteTreÅr;
 
-    @Column(name = "aarsinntekt_beste_beregning", nullable = false, updatable = false)
-    private BigDecimal årsinntektAvkortetOppjustertBesteBeregning;
+    @Column(name = "beregningsgrunnlag", nullable = false, updatable = false)
+    private BigDecimal beregningsgrunnlag;
+
+    @Column(name = "beregningsgrunnlag_redusert", nullable = false, updatable = false)
+    private BigDecimal beregningsgrunnlagRedusert;
+
+    @Column(name = "dagsats", nullable = false, updatable = false)
+    private BigDecimal dagsats;
 
     @Embedded
     private BeregningsgrunnlagInput beregningInput;
@@ -42,12 +48,14 @@ public class Beregningsgrunnlag {
     protected Beregningsgrunnlag() {
     }
 
-    public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing) {
+    public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal beregningsgrunnlag, BigDecimal beregningsgrunnlagRedusert, BigDecimal dagsats, String regelSporing) {
         this.skjæringstidspunkt = beregningInputGrunnlag.virkningsdato();
         this.sisteLignedeÅr = beregningInputGrunnlag.sisteLignedeÅr();
         this.årsinntektAvkortetOppjustertSisteÅr = årsinntektSisteÅr;
         this.årsinntektAvkortetOppjustertSisteTreÅr = årsinntektSisteTreÅr;
-        this.årsinntektAvkortetOppjustertBesteBeregning = årsinntektBesteBeregning;
+        this.beregningsgrunnlag = beregningsgrunnlag;
+        this.beregningsgrunnlagRedusert = beregningsgrunnlagRedusert;
+        this.dagsats = dagsats;
         this.regelSporing = regelSporing;
         this.beregningInput = new BeregningsgrunnlagInput(beregningInputGrunnlag);
     }
@@ -64,8 +72,23 @@ public class Beregningsgrunnlag {
         return årsinntektAvkortetOppjustertSisteTreÅr;
     }
 
-    public BigDecimal getÅrsinntektAvkortetOppjustertBesteBeregning() {
-        return årsinntektAvkortetOppjustertBesteBeregning;
+    public BigDecimal getBeregningsgrunnlag() {
+        return beregningsgrunnlag;
+    }
+
+    public BigDecimal getBeregningsgrunnlagRedusert() {
+        return beregningsgrunnlagRedusert;
+    }
+
+    public BigDecimal getDagsats() {
+        return dagsats;
+    }
+
+    public BesteBeregningResultatType utledBesteBeregningResultatType() {
+        if (beregningsgrunnlag.compareTo(årsinntektAvkortetOppjustertSisteÅr) == 0) {
+            return BesteBeregningResultatType.SISTE_ÅR;
+        }
+        return BesteBeregningResultatType.SNITT_SISTE_TRE_ÅR;
     }
 
     public BeregningsgrunnlagInput getBeregningInput() {

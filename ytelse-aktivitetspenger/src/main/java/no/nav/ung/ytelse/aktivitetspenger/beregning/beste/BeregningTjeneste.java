@@ -44,11 +44,11 @@ public class BeregningTjeneste {
 
         BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(input.sisteLignedeÅr(), BigDecimal.ZERO);
         BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
-        BigDecimal årsinntektBesteBeregning = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
+        BigDecimal beregningsgrunnlag = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
 
         String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(lagRegelSporingMap(pgiKalkulatorInput));
 
-        return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, årsinntektBesteBeregning, regelSporing);
+        return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, beregningsgrunnlag, regelSporing);
     }
 
     private static Map<String, LocalDateTimeline<?>> lagRegelSporingMap(PgiKalkulatorInput input) {

@@ -9,6 +9,8 @@ import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.Collection;
@@ -17,6 +19,9 @@ import java.util.List;
 
 @ApplicationScoped
 public class BeregningStegTjeneste {
+
+    private static final int ARBEIDSDAGER_PER_ÅR = 260;
+    private static BigDecimal DEKNINGSGRAD = BigDecimal.valueOf(0.66);
 
     private AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository;
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
@@ -36,11 +41,14 @@ public class BeregningStegTjeneste {
         var sistLignedeÅr = Year.of(skjæringstidspunkt.minusYears(1).getYear());  // TODO: Koble på utledning av siste tilgjengelige lignede år
 
         var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, skjæringstidspunkt, inntektsposter);
-        var resultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
-        var beregningsgrunnlag = new Beregningsgrunnlag(resultat.getBeregningInput(), resultat.getÅrsinntektSisteÅr(), resultat.getÅrsinntektSisteTreÅr(), resultat.getÅrsinntektBesteBeregning(), resultat.getRegelSporing());
+        var besteBeregningResultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
+
+        BigDecimal beregningsgrunnlagRedusert = besteBeregningResultat.getBeregningsgrunnlag().multiply(DEKNINGSGRAD);
+        BigDecimal dagsats = beregningsgrunnlagRedusert.divide(BigDecimal.valueOf(ARBEIDSDAGER_PER_ÅR), 10, RoundingMode.HALF_EVEN);
+
+        var beregningsgrunnlag = new Beregningsgrunnlag(besteBeregningResultat.getBeregningInput(), besteBeregningResultat.getÅrsinntektSisteÅr(), besteBeregningResultat.getÅrsinntektSisteTreÅr(), besteBeregningResultat.getBeregningsgrunnlag(), beregningsgrunnlagRedusert, dagsats, besteBeregningResultat.getRegelSporing());
         aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandlingId, beregningsgrunnlag);
     }
-
 
     private List<Inntektspost> hentSigrunInntektsposter(Long behandlingId) {
         var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
@@ -53,4 +61,3 @@ public class BeregningStegTjeneste {
         return List.copyOf(inntektsposter);
     }
 }
-

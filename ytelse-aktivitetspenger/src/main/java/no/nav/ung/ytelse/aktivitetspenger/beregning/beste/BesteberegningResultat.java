@@ -7,14 +7,14 @@ public class BesteberegningResultat {
     private final BeregningInput beregningInput;
     private final BigDecimal årsinntektSisteÅr;
     private final BigDecimal årsinntektSisteTreÅr;
-    private final BigDecimal årsinntektBesteBeregning;
+    private final BigDecimal beregningsgrunnlag;
     private final String regelSporing;
 
-    public BesteberegningResultat(BeregningInput beregningInput, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal årsinntektBesteBeregning, String regelSporing) {
+    public BesteberegningResultat(BeregningInput beregningInput, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal beregningsgrunnlag, String regelSporing) {
         this.beregningInput = beregningInput;
         this.årsinntektSisteÅr = årsinntektSisteÅr;
         this.årsinntektSisteTreÅr = årsinntektSisteTreÅr;
-        this.årsinntektBesteBeregning = årsinntektBesteBeregning;
+        this.beregningsgrunnlag = beregningsgrunnlag;
         this.regelSporing = regelSporing;
     }
 
@@ -30,8 +30,8 @@ public class BesteberegningResultat {
         return årsinntektSisteTreÅr;
     }
 
-    public BigDecimal getÅrsinntektBesteBeregning() {
-        return årsinntektBesteBeregning;
+    public BigDecimal getBeregningsgrunnlag() {
+        return beregningsgrunnlag;
     }
 
     public String getRegelSporing() {

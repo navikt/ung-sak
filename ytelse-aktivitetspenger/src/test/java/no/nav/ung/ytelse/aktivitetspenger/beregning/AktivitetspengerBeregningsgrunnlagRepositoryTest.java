@@ -35,7 +35,7 @@ class AktivitetspengerBeregningsgrunnlagRepositoryTest {
     }
 
     @Test
-    void aktivitetspengergrunnlag_skal_gjenbruke_tidligere_bg_og_kunne_ha_flere_bg() {
+    void aktivitetspengergrunnlag_skal_kunne_gjenbruke_tidligere_bg_og_kunne_ha_flere_bg() {
         Behandling behandling1 = AktivitetspengerTestScenarioBuilder.builderMedSøknad().lagre(entityManager);
         {
             var bg1 = lagBeregningsgrunnlag(LocalDate.of(2024, 1, 1));
@@ -104,6 +104,8 @@ class AktivitetspengerBeregningsgrunnlagRepositoryTest {
             BigDecimal.valueOf(500_000),
             BigDecimal.valueOf(480_000),
             BigDecimal.valueOf(500_000),
+            BigDecimal.valueOf(330_000),
+            BigDecimal.valueOf(1_269.23),
             "{}"
         );
     }
