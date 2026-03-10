@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
@@ -300,8 +301,10 @@ public class EndringInntektScenarioer {
         var behandling = BrevScenarioerUtils.lagInnvilgetBehandling(ungTestscenario, ungTestRepositories);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository);
-        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories.behandlingAnsvarligRepository();
+
+        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
+        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository, behandlingAnsvarligRepository);
 
         return behandling;
     }
@@ -310,8 +313,10 @@ public class EndringInntektScenarioer {
         var behandling = BrevScenarioerUtils.lagInnvilgetBehandling(ungTestscenario, ungTestRepositories);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository);
-        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories.behandlingAnsvarligRepository();
+
+        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
+        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository, behandlingAnsvarligRepository);
         return behandling;
     }
 

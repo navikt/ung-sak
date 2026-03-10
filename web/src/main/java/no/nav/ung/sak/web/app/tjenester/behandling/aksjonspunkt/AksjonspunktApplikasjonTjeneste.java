@@ -11,22 +11,36 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.sak.behandling.aksjonspunkt.*;
+import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
+import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktProsessResultat;
+import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
+import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.ung.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.*;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunkt;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -45,6 +59,7 @@ public class AksjonspunktApplikasjonTjeneste {
         AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private AksjonspunktRepository aksjonspunktRepository;
     private AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste;
@@ -65,6 +80,7 @@ public class AksjonspunktApplikasjonTjeneste {
         this.aksjonspunktSporingTjeneste = aksjonspunktSporingTjeneste;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.behandlingAnsvarligRepository = repositoryProvider.getBehandlingAnsvarligRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
 
@@ -103,7 +119,7 @@ public class AksjonspunktApplikasjonTjeneste {
         if (bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> dto instanceof FatterVedtakAksjonspunktDto)) {
             return;
         }
-        behandling.setAnsvarligSaksbehandler(getCurrentUserId());
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), getCurrentUserId());
     }
 
     protected String getCurrentUserId() {

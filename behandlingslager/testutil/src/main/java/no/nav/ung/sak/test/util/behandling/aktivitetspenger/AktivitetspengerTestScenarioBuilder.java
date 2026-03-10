@@ -694,10 +694,6 @@ public class AktivitetspengerTestScenarioBuilder {
             behandlingBuilder.medBehandlingstidFrist(behandlingstidFrist);
         }
 
-        if (behandlendeEnhet != null) {
-            behandlingBuilder.medBehandlendeEnhet(new OrganisasjonsEnhet(behandlendeEnhet, null));
-        }
-
         behandlingBuilder.medBehandlingStatus(behandlingStatus);
 
         return behandlingBuilder;

@@ -43,6 +43,8 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -97,6 +99,7 @@ public class BehandlingRestTjeneste {
 
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
@@ -109,7 +112,7 @@ public class BehandlingRestTjeneste {
     }
 
     @Inject
-    public BehandlingRestTjeneste(BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, // NOSONAR
+    public BehandlingRestTjeneste(BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository, // NOSONAR
                                   BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
                                   FagsakTjeneste fagsakTjeneste,
@@ -117,6 +120,7 @@ public class BehandlingRestTjeneste {
                                   BehandlingDtoTjeneste behandlingDtoTjeneste,
                                   SjekkProsessering sjekkProsessering) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -433,8 +437,8 @@ public class BehandlingRestTjeneste {
     public BehandlingOperasjonerDto hentLovligeBehandlingsoperasjoner(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
 
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-
-        return behandlingDtoTjeneste.lovligeOperasjoner(behandling);
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).orElse(null);
+        return behandlingDtoTjeneste.lovligeOperasjoner(behandling, behandlingAnsvarlig);
     }
 
 

@@ -5,6 +5,7 @@ import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.Vurderingresultat;
@@ -19,12 +20,12 @@ import java.util.Collections;
 @Dependent
 public class KabalRequestMapper {
 
-    public KabalRequest map(Behandling behandling, PersonIdent personIdent, KlageUtredningEntitet klageUtredning) {
+    public KabalRequest map(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, PersonIdent personIdent, KlageUtredningEntitet klageUtredning) {
         KabalRequest request = new KabalRequest();
         var opprettetDato = behandling.getOpprettetDato().toLocalDate().toString();
         request.setBehandlingUuid(behandling.getUuid());
         var klagendePart = klageUtredning.getKlagendePart();
-        var opprinneligBehandlendeEnhet = behandling.getBehandlendeEnhet();
+        var opprinneligBehandlendeEnhet = behandlingAnsvarlig.getBehandlendeEnhet();
         var saksnummer = behandling.getFagsak().getSaksnummer().getVerdi();
         var ytelseType = behandling.getFagsakYtelseType();
 
@@ -44,7 +45,7 @@ public class KabalRequestMapper {
         }
 
         request.setAvsenderEnhet(opprinneligBehandlendeEnhet);
-        var avsenderSaksbehandlerIdent = behandling.getAnsvarligSaksbehandler().toUpperCase();
+        var avsenderSaksbehandlerIdent = behandlingAnsvarlig.getAnsvarligSaksbehandler().toUpperCase();
         request.setAvsenderSaksbehandlerIdent(avsenderSaksbehandlerIdent);
         request.setInnsendtTilNav(opprettetDato);
         request.setKilde("UNG");

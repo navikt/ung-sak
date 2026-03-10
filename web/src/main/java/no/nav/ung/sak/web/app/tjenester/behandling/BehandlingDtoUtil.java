@@ -13,6 +13,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -31,10 +32,10 @@ import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
 
 public class BehandlingDtoUtil {
 
-    static void settStandardfelterUtvidet(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
+    static void settStandardfelterUtvidet(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
                                           boolean erBehandlingMedGjeldendeVedtak) {
-        setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
-        dto.setAnsvarligBeslutter(behandling.getAnsvarligBeslutter());
+        setStandardfelter(behandling, behandlingAnsvarlig, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+        dto.setAnsvarligBeslutter(behandlingAnsvarlig != null ? behandlingAnsvarlig.getAnsvarligBeslutter() : null);
         dto.setBehandlingHenlagt(behandling.isBehandlingHenlagt());
     }
 
@@ -58,7 +59,7 @@ public class BehandlingDtoUtil {
         return Collections.emptyList();
     }
 
-    static void setStandardfelter(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
+    static void setStandardfelter(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
         if (behandlingVedtak != null) {
             dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
         }
@@ -78,12 +79,12 @@ public class BehandlingDtoUtil {
         dto.setGjeldendeVedtak(erBehandlingMedGjeldendeVedtak);
         dto.setBehandlingsfristTid(behandling.getBehandlingstidFrist());
         dto.setBehandlingPåVent(behandling.isBehandlingPåVent());
-        dto.setAnsvarligSaksbehandler(behandling.getAnsvarligSaksbehandler());
-        dto.setToTrinnsBehandling(behandling.isToTrinnsBehandling());
-        dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
+        dto.setAnsvarligSaksbehandler( behandlingAnsvarlig != null? behandlingAnsvarlig.getAnsvarligSaksbehandler() : null);
+        dto.setToTrinnsBehandling(behandlingAnsvarlig != null && behandlingAnsvarlig.erTotrinnsBehandling());
 
-        dto.setBehandlendeEnhetId(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId());
-        dto.setBehandlendeEnhetNavn(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
+        dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
+        dto.setBehandlendeEnhetId(behandlingAnsvarlig != null? behandlingAnsvarlig.getBehandlendeOrganisasjonsEnhet().getEnhetId() : null);
+        dto.setBehandlendeEnhetNavn(behandlingAnsvarlig != null? behandlingAnsvarlig.getBehandlendeOrganisasjonsEnhet().getEnhetNavn() : null);
 
         dto.setFørsteÅrsak(førsteÅrsak(behandling).orElse(null));
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));

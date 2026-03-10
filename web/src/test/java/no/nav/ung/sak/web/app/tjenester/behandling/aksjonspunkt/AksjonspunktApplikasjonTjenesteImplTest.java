@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -41,6 +42,9 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
 
     @Inject
     private BehandlingRepository behandlingRepository;
+
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -92,10 +96,9 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         aksjonspunktApplikasjonTjenesteImpl.setAnsvarligSaksbehandler(singletonList(dto), behandlingSpy);
 
         // Assert
-        verify(behandlingSpy, never()).setAnsvarligSaksbehandler(any());
+        Assertions.assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId())).isNull();
     }
 
-    // TODO: Vurder om disse testene skal tas inn når vi eventuelt tar i bruk totrinn
 //
 //    @Test
 //    public void skal_sette_totrinn_når_revurdering_ap_medfører_endring_i_grunnlag() {

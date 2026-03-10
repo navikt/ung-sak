@@ -11,6 +11,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +48,8 @@ public class OppgaveTjenesteTest {
 
     @Inject
     private EntityManager entityManager;
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     private OppgaveTjeneste tjeneste;
     private ProsessTaskTjeneste taskTjeneste;
@@ -70,7 +74,7 @@ public class OppgaveTjenesteTest {
     private void lagBehandling() {
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
-        behandling.setBehandlendeEnhet(new OrganisasjonsEnhet("4802", null));
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), new OrganisasjonsEnhet("4802", null));
     }
 
     @Test
