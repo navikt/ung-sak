@@ -11,6 +11,7 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.AbstractTestScenario;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;

@@ -36,7 +36,8 @@ public class FatterVedtakAksjonspunkt {
     @Inject
     public FatterVedtakAksjonspunkt(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                     VedtakTjeneste vedtakTjeneste,
-                                    TotrinnTjeneste totrinnTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
+                                    TotrinnTjeneste totrinnTjeneste,
+                                    BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.vedtakTjeneste = vedtakTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;

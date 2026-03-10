@@ -117,8 +117,8 @@ public class BehandlingAnsvarlig extends no.nav.ung.sak.behandlingslager.BaseEnt
     }
 
     public void setBehandlendeEnhet(OrganisasjonsEnhet enhet) {
-        this.behandlendeEnhet = enhet.getEnhetId();
-        this.behandlendeEnhetNavn = enhet.getEnhetNavn();
+        this.behandlendeEnhet = enhet != null? enhet.getEnhetId() : null;
+        this.behandlendeEnhetNavn = enhet != null ? enhet.getEnhetNavn() : null;
     }
 
     public void setBehandlendeEnhetÅrsak(String behandlendeEnhetÅrsak) {

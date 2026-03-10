@@ -4,7 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.ung.sak.behandlingslager.behandling   .Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 
 import java.util.List;
@@ -68,6 +68,15 @@ public class BehandlingAnsvarligRepository {
         behandlingAnsvarlig.setBehandlendeEnhet(enhet);
         behandlingAnsvarlig.setBehandlendeEnhetÅrsak(årsak);
         lagre(behandlingAnsvarlig);
+    }
+
+    public OrganisasjonsEnhet getBehandlendeEnhet(Long behandlingId) {
+        Optional<BehandlingAnsvarlig> behandlingAnsvarlig = hentBehandlingAnsvarlig(behandlingId, BehandlingAnsvarlig.BehandlingDel.HELE);
+        if (behandlingAnsvarlig.isPresent()) {
+            return behandlingAnsvarlig.get().getBehandlendeOrganisasjonsEnhet();
+        } else {
+            return null;
+        }
     }
 
     public void setAnsvarligBeslutter(Long behandlingId, String ansvarligBeslutterIdent) {

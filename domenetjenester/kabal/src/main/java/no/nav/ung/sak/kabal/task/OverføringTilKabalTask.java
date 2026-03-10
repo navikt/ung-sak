@@ -44,7 +44,8 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
     public OverføringTilKabalTask(KabalRestKlient restKlient,
                                   BehandlingRepositoryProvider repositoryProvider,
                                   KabalRequestMapperV4 kabalRequestMapper,
-                                  BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+                                  BehandlingRepository behandlingRepository,
+                                  BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                   TpsTjeneste pdlTjeneste,
                                   KlageRepository klageRepository,
                                   @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled) {

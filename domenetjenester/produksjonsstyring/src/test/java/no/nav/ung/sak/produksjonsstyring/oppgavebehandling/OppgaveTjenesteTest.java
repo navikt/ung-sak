@@ -67,7 +67,7 @@ public class OppgaveTjenesteTest {
         taskTjeneste = mock(ProsessTaskTjeneste.class);
         oppgaveRestKlient = Mockito.mock(OppgaveRestKlient.class);
         oppgaveBehandlingKoblingRepository = spy(new OppgaveBehandlingKoblingRepository(entityManager));
-        tjeneste = new OppgaveTjeneste(repositoryProvider, behandlingAnsvarligRepository, oppgaveBehandlingKoblingRepository, oppgaveRestKlient, taskTjeneste);
+        tjeneste = new OppgaveTjeneste(repositoryProvider, oppgaveBehandlingKoblingRepository, oppgaveRestKlient, taskTjeneste);
         lagBehandling();
     }
 

@@ -62,13 +62,13 @@ public class OppgaveTjeneste {
     }
 
     @Inject
-    public OppgaveTjeneste(BehandlingRepositoryProvider repositoryProvider, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+    public OppgaveTjeneste(BehandlingRepositoryProvider repositoryProvider,
                            OppgaveBehandlingKoblingRepository oppgaveBehandlingKoblingRepository,
                            OppgaveRestKlient restKlient,
                            ProsessTaskTjeneste taskTjeneste) {
         this.fagsakRepository = repositoryProvider.getFagsakRepository();
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
+        this.behandlingAnsvarligRepository = repositoryProvider.getBehandlingAnsvarligRepository();
         this.oppgaveBehandlingKoblingRepository = oppgaveBehandlingKoblingRepository;
         this.restKlient = restKlient;
         this.taskTjeneste = taskTjeneste;

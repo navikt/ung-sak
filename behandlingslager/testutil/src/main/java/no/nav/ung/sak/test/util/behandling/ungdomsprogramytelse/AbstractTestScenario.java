@@ -4,7 +4,13 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.*;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -18,7 +24,12 @@ import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -34,12 +45,16 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.diff.DiffResult;
-import no.nav.ung.sak.behandlingslager.fagsak.*;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakLås;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakTestUtil;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
+import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
@@ -60,7 +75,15 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Collections.singletonList;
@@ -102,6 +125,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private LocalDateTime opplysningerOppdatertTidspunkt;
     private String behandlendeEnhet;
     private BehandlingRepository mockBehandlingRepository;
+    private BehandlingAnsvarligRepository mockBehandlingAnsvarligRepository;
     private BehandlingVedtak behandlingVedtak;
     private BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
 
@@ -147,12 +171,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         VilkårResultatRepository vilkårResultatRepository = mockVilkårResultatRepository();
 
         BehandlingLåsRepository behandlingLåsReposiory = mockBehandlingLåsRepository();
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = mockBehandlingAnsvarligRepository();
 
         BehandlingVedtakRepository behandlingVedtakRepository = mockBehandlingVedtakRepository();
         // ikke ideelt å la mocks returnere mocks, men forenkler enormt mye test kode, forhindrer feil oppsett, så det
         // blir enklere å refactorere
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
+        when(repositoryProvider.getBehandlingAnsvarligRepository()).thenReturn(behandlingAnsvarligRepository);
         when(repositoryProvider.getFagsakRepository()).thenReturn(mockFagsakRepository);
         when(repositoryProvider.getPersonopplysningRepository()).thenReturn(mockPersonopplysningRepository);
         when(repositoryProvider.getSøknadRepository()).thenReturn(søknadRepository);
@@ -340,6 +366,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return behandlingRepository;
     }
 
+    public BehandlingAnsvarligRepository mockBehandlingAnsvarligRepository() {
+        if (mockBehandlingRepository == null) {
+            mockBehandlingAnsvarligRepository = Mockito.mock(BehandlingAnsvarligRepository.class);
+        }
+        return mockBehandlingAnsvarligRepository;
+    };
+
     public BehandlingRepositoryProvider mockBehandlingRepositoryProvider() {
         mockBehandlingRepository();
         return repositoryProvider;
@@ -382,11 +415,11 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     public Behandling lagre(EntityManager entityManager) {
-        return lagre(new BehandlingRepositoryProvider(entityManager));
+        BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        return lagre(repositoryProvider);
     }
 
     public Behandling lagre(BehandlingRepositoryProvider repositoryProvider) {
-
         build(repositoryProvider);
         return behandling;
     }
@@ -558,6 +591,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         validerTilstandVedMocking();
 
         mockBehandlingRepository = mockBehandlingRepository();
+        mockBehandlingAnsvarligRepository = mockBehandlingAnsvarligRepository();
 
         lagre(repositoryProvider); // NOSONAR //$NON-NLS-1$
         return mockBehandlingRepository;
@@ -683,6 +717,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         // få med behandlingsresultat etc.
         behandlingRepo1.lagre(nyBehandling, lås);
+
+
+        if (behandlendeEnhet != null) {
+            OrganisasjonsEnhet enhet = new OrganisasjonsEnhet(behandlendeEnhet, null);
+            repositoryProvider.getBehandlingAnsvarligRepository().setBehandlendeEnhet(nyBehandling.getId(), enhet, null);
+        }
+
         return nyBehandling;
     }
 
@@ -733,9 +774,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             behandlingBuilder.medBehandlingstidFrist(behandlingstidFrist);
         }
 
-        if (behandlendeEnhet != null) {
-            behandlingBuilder.medBehandlendeEnhet(new OrganisasjonsEnhet(behandlendeEnhet, null));
-        }
 
         behandlingBuilder.medBehandlingStatus(behandlingStatus);
 

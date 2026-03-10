@@ -31,7 +31,6 @@ public class GjenopptaBehandlingTaskTest {
     private GjenopptaBehandlingTask task; // objektet vi tester
 
     private BehandlingRepository mockBehandlingRepository;
-    private BehandlingAnsvarligRepository mockBehandlingAnsvarligRepository;
     private BehandlingskontrollTjeneste mockBehandlingskontrollTjeneste;
     private BehandlendeEnhetTjeneste mockEnhetsTjeneste;
     private OrganisasjonsEnhet organisasjonsEnhet = new OrganisasjonsEnhet("4802", "NAV Bærum");
@@ -39,7 +38,6 @@ public class GjenopptaBehandlingTaskTest {
     @BeforeEach
     public void setup() {
         mockBehandlingRepository = mock(BehandlingRepository.class);
-        mockBehandlingAnsvarligRepository = mock(BehandlingAnsvarligRepository.class);
         mockBehandlingskontrollTjeneste = mock(BehandlingskontrollTjeneste.class);
         mockEnhetsTjeneste = mock(BehandlendeEnhetTjeneste.class);
 
@@ -51,9 +49,9 @@ public class GjenopptaBehandlingTaskTest {
         final Long behandlingId = 10L;
 
         var scenario = TestScenarioBuilder
-            .builderMedSøknad();
+            .builderMedSøknad()
+            .medBehandlendeEnhet(organisasjonsEnhet.getEnhetId());
         Behandling behandling = scenario.lagMocked();
-        //behandling.setBehandlendeEnhet(organisasjonsEnhet);
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.empty());
 

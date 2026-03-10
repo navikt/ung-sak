@@ -57,18 +57,18 @@ public class BehandlingsoppretterTjeneste {
     }
 
     @Inject
-    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
+    public BehandlingsoppretterTjeneste(BehandlingRepositoryProvider behandlingRepositoryProvider,
                                         BehandlendeEnhetTjeneste behandlendeEnhetTjeneste,
                                         @Any Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere,
                                         BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                         KlageVurderingTjeneste klageVurderingTjeneste,
                                         PersonopplysningRepository personopplysningRepository,
                                         HistorikkinnslagRepository historikkinnslagRepository) {
-        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
         this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        this.behandlingAnsvarligRepository = behandlingRepositoryProvider.getBehandlingAnsvarligRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.klageVurderingTjeneste = klageVurderingTjeneste;
         this.personopplysningRepository = personopplysningRepository;

@@ -646,10 +646,6 @@ public class Behandling extends BaseEntitet {
         private LocalDateTime opprettetDato;
         private LocalDateTime avsluttetDato;
 
-        private String behandlendeEnhet;
-        private String behandlendeEnhetNavn;
-        private String behandlendeEnhetÅrsak;
-
         private LocalDate behandlingstidFrist = LocalDate.now().plusWeeks(6);
 
         private BehandlingÅrsak.Builder behandlingÅrsakBuilder;
@@ -703,17 +699,6 @@ public class Behandling extends BaseEntitet {
             return this;
         }
 
-        public Builder medBehandlendeEnhet(OrganisasjonsEnhet enhet) {
-            this.behandlendeEnhet = enhet.getEnhetId();
-            this.behandlendeEnhetNavn = enhet.getEnhetNavn();
-            return this;
-        }
-
-        public Builder medBehandlendeEnhetÅrsak(String behandlendeEnhetÅrsak) {
-            this.behandlendeEnhetÅrsak = behandlendeEnhetÅrsak;
-            return this;
-        }
-
         public Builder medBehandlingstidFrist(LocalDate frist) {
             this.behandlingstidFrist = frist;
             return this;
@@ -735,8 +720,6 @@ public class Behandling extends BaseEntitet {
             if (forrigeBehandling != null) {
                 behandling = new Behandling(forrigeBehandling.getFagsak(), behandlingType);
                 behandling.originalBehandlingId = forrigeBehandling.getId();
-                //FIXME implementer hvor denne kalles
-                //behandling.setBehandlingAnsvarlige(BehandlingAnsvarlig.koperBehandlendeEnhet(forrigeBehandling.getBehandlingAnsvarlige()));
                 if (behandlingstidFrist != null) {
                     behandling.behandlingstidFrist = behandlingstidFrist;
                 } else {
@@ -744,9 +727,6 @@ public class Behandling extends BaseEntitet {
                 }
             } else {
                 behandling = new Behandling(fagsak, behandlingType);
-                //FIXME implementer hvor denne kalles
-                //behandling.setBehandlendeEnhet(new OrganisasjonsEnhet(behandlendeEnhet, behandlendeEnhetNavn));
-                //behandling.setBehandlendeEnhetÅrsak(behandlendeEnhetÅrsak);
                 behandling.behandlingstidFrist = behandlingstidFrist;
             }
 

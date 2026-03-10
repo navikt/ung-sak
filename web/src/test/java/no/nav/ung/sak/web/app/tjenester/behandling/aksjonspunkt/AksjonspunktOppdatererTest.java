@@ -46,7 +46,6 @@ public class AksjonspunktOppdatererTest {
     @Inject
     public EntityManager entityManager;
 
-
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject

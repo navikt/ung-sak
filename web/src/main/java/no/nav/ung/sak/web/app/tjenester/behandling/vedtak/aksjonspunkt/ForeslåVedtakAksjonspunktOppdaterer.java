@@ -23,8 +23,8 @@ public class ForeslåVedtakAksjonspunktOppdaterer implements AksjonspunktOppdate
     }
 
     @Inject
-    public ForeslåVedtakAksjonspunktOppdaterer(
-        ForeslåVedtakOppdatererTjeneste foreslåVedtakOppdatererTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
+    public ForeslåVedtakAksjonspunktOppdaterer(ForeslåVedtakOppdatererTjeneste foreslåVedtakOppdatererTjeneste,
+                                               BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.foreslåVedtakOppdatererTjeneste = foreslåVedtakOppdatererTjeneste;
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
