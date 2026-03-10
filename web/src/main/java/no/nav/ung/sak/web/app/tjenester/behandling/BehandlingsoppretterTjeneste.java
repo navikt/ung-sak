@@ -125,7 +125,7 @@ public class BehandlingsoppretterTjeneste {
                 }
                 beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
             });
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet, null);
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
         return behandling;
     }
 

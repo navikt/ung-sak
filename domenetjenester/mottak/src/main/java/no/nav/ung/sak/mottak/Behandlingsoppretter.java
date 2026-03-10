@@ -77,7 +77,7 @@ public class Behandlingsoppretter {
         });
 
         OrganisasjonsEnhet enhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(fagsak);
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet, null);
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
 
         return behandling; // NOSONAR
     }

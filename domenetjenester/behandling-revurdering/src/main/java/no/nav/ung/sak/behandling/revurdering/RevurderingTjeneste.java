@@ -87,7 +87,7 @@ public class RevurderingTjeneste {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
         behandlingskontrollTjeneste.opprettBehandling(kontekst, revurdering);
 
-        behandlingAnsvarligRepository.setBehandlendeEnhet(revurdering.getId(), enhet, null);
+        behandlingAnsvarligRepository.setBehandlendeEnhet(revurdering.getId(), enhet);
 
         // Kopier vilkår (samme vilkår vurderes i Revurdering)
         revurderingTjenesteFelles.kopierVilkårsresultat(origBehandling, revurdering, kontekst);

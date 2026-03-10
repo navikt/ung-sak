@@ -721,7 +721,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         if (behandlendeEnhet != null) {
             OrganisasjonsEnhet enhet = new OrganisasjonsEnhet(behandlendeEnhet, null);
-            repositoryProvider.getBehandlingAnsvarligRepository().setBehandlendeEnhet(nyBehandling.getId(), enhet, null);
+            repositoryProvider.getBehandlingAnsvarligRepository().setBehandlendeEnhet(nyBehandling.getId(), enhet);
         }
 
         return nyBehandling;

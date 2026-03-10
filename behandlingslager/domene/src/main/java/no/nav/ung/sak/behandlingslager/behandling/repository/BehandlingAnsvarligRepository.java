@@ -59,6 +59,10 @@ public class BehandlingAnsvarligRepository {
             .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingId, Function.identity()));
     }
 
+    public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
+        setBehandlendeEnhet(behandlingId, BehandlingAnsvarlig.BehandlingDel.HELE, enhet, null);
+    }
+
     public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet, String årsak) {
         setBehandlendeEnhet(behandlingId, BehandlingAnsvarlig.BehandlingDel.HELE, enhet, årsak);
     }

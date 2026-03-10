@@ -29,7 +29,6 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private KlageRepository klageRepository;
-    private FritekstRepository fritekstRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
 
     public KlageFørsteinstansSteg(){
@@ -39,12 +38,10 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
     @Inject
     public KlageFørsteinstansSteg(BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                   KlageRepository klageRepository,
-                                  FritekstRepository fritekstRepository,
                                   BehandlendeEnhetTjeneste behandlendeEnhetTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.klageRepository = klageRepository;
-        this.fritekstRepository = fritekstRepository;
         this.behandlendeEnhetTjeneste = behandlendeEnhetTjeneste;
     }
 
@@ -81,6 +78,6 @@ public class KlageFørsteinstansSteg implements BehandlingSteg {
             return;
         }
         var tilEnhet = behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(behandling.getFagsak());
-        behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, tilEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, "");
+        behandlendeEnhetTjeneste.oppdaterBehandlendeEnhet(behandling, tilEnhet, HistorikkAktør.VEDTAKSLØSNINGEN, null);
     }
 }

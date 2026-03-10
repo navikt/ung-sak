@@ -74,7 +74,7 @@ public class OppgaveTjenesteTest {
     private void lagBehandling() {
         TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(repositoryProvider);
-        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), new OrganisasjonsEnhet("4802", null), null);
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), new OrganisasjonsEnhet("4802", null));
     }
 
     @Test
