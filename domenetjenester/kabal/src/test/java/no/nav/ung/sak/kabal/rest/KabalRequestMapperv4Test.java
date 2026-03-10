@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.kabal.kontrakt.KabalRequestv4;
@@ -26,6 +27,7 @@ import static no.nav.ung.sak.kabal.rest.KabalRestKlient.objectMapper;
 class KabalRequestMapperv4Test {
 
     private static Behandling klageBehandling;
+    private static BehandlingAnsvarlig behandlingAnsvarlig;
     private static KabalRequestv4 kabalRequest;
     private static String jsonActual;
 
@@ -50,10 +52,11 @@ class KabalRequestMapperv4Test {
 
         klageUtredning.setKlagevurdering(klageVurderingAdapter);
 
-        klageBehandling.setBehandlendeEnhet(new OrganisasjonsEnhet("4401", "Testenhet"));
-        klageBehandling.setAnsvarligSaksbehandler("Z1234567");
+        behandlingAnsvarlig = new BehandlingAnsvarlig(klageBehandling.getId(), BehandlingAnsvarlig.BehandlingDel.HELE);
+        behandlingAnsvarlig.setBehandlendeEnhet(new OrganisasjonsEnhet("4401", "Testenhet"));
+        behandlingAnsvarlig.setAnsvarligSaksbehandler("Z1234567");
         klageBehandling.setMigrertKilde(Fagsystem.UNG_SAK);
-        kabalRequest = mapper.map(klageBehandling, personIdent, klageUtredning);
+        kabalRequest = mapper.map(klageBehandling, behandlingAnsvarlig, personIdent, klageUtredning);
 
         try {
             jsonActual = objectMapper.writer().writeValueAsString(kabalRequest);
@@ -64,7 +67,7 @@ class KabalRequestMapperv4Test {
 
     @Test
     void kabal_request_mapper_test() {
-        Assertions.assertEquals(klageBehandling.getBehandlendeEnhet(), kabalRequest.forrigeBehandlendeEnhet(), "forrigeBehandlendeEnhet");
+        Assertions.assertEquals(behandlingAnsvarlig.getBehandlendeEnhet(), kabalRequest.forrigeBehandlendeEnhet(), "forrigeBehandlendeEnhet");
         Assertions.assertEquals(klageBehandling.getUuid().toString(), kabalRequest.kildeReferanse(), "kildeReferanse");
         // Assertions.assertNotNull(kabalRequest.klager(), "klager");
         Assertions.assertNotNull(kabalRequest.sakenGjelder(), "sakenGjelder");

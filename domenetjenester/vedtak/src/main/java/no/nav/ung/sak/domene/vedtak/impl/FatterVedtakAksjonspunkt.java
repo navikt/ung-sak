@@ -13,7 +13,9 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.domene.vedtak.VedtakAksjonspunktData;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
@@ -26,6 +28,7 @@ public class FatterVedtakAksjonspunkt {
     private VedtakTjeneste vedtakTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     public FatterVedtakAksjonspunkt() {
     }
@@ -33,15 +36,17 @@ public class FatterVedtakAksjonspunkt {
     @Inject
     public FatterVedtakAksjonspunkt(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                     VedtakTjeneste vedtakTjeneste,
-                                    TotrinnTjeneste totrinnTjeneste) {
+                                    TotrinnTjeneste totrinnTjeneste,
+                                    BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.vedtakTjeneste = vedtakTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public void oppdater(Behandling behandling, Collection<VedtakAksjonspunktData> aksjonspunkter) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-        behandling.setAnsvarligBeslutter(SubjectHandler.getSubjectHandler().getUid());
+        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandling.getId(), SubjectHandler.getSubjectHandler().getUid());
 
         List<Totrinnsvurdering> totrinnsvurderinger = new ArrayList<>();
         List<Aksjonspunkt> skalReåpnes = new ArrayList<>();

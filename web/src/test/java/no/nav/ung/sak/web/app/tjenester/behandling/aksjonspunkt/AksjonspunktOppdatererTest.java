@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
@@ -45,8 +46,10 @@ public class AksjonspunktOppdatererTest {
     @Inject
     public EntityManager entityManager;
 
-
     private BehandlingRepositoryProvider repositoryProvider;
+
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     private TotrinnRepository totrinnRepository;
@@ -82,10 +85,10 @@ public class AksjonspunktOppdatererTest {
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, behandlingAnsvarligRepository);
 
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-        assertThat(behandling.getAnsvarligSaksbehandler()).isEqualTo("hello");
+        assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId())).isEqualTo("hello");
     }
 
     @Test

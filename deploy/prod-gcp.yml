@@ -226,6 +226,10 @@ spec:
       value: api://prod-gcp.klage.kabal-api/.default
     - name: UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL
       value: https://www.nav.no/ungdomsprogrammet/ytelsen
+    - name: INNTEKTSKOMPONENTEN_URL
+      value: https://ikomp.prod-fss-pub.nais.io/rest/v2/abonnement
+    - name: INNTEKTSKOMPONENTEN_SCOPE
+      value: api://prod-fss.team-inntekt.ikomp/.default
 
     # Saf
     - name: SAF_BASE_URL

@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -20,6 +21,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 public class RevurderingTjenesteFelles {
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private FagsakRevurdering fagsakRevurdering;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -30,20 +32,21 @@ public class RevurderingTjenesteFelles {
     @Inject
     public RevurderingTjenesteFelles(BehandlingRepositoryProvider repositoryProvider) {
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.behandlingAnsvarligRepository = repositoryProvider.getBehandlingAnsvarligRepository();
         this.fagsakRevurdering = new FagsakRevurdering(repositoryProvider.getBehandlingRepository());
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
     }
 
     public Behandling opprettNyBehandling(BehandlingType behandlingType, BehandlingÅrsakType nyBehandlingÅrsakType,
                                           Behandling opprinneligBehandling,
-                                          boolean manueltOpprettet,
-                                          OrganisasjonsEnhet enhet) {
+                                          boolean manueltOpprettet) {
         BehandlingÅrsak.Builder nyBehandlingÅrsak = BehandlingÅrsak.builder(nyBehandlingÅrsakType)
             .medManueltOpprettet(manueltOpprettet);
-        return Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
-            .medBehandlendeEnhet(enhet)
+        Behandling behandling = Behandling.fraTidligereBehandling(opprinneligBehandling, behandlingType)
             .medBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()))
             .medBehandlingÅrsak(nyBehandlingÅrsak).build();
+
+        return behandling;
     }
 
     public Boolean kanRevurderingOpprettes(Fagsak fagsak) {

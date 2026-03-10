@@ -19,6 +19,8 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -49,6 +51,7 @@ public class RedirectToRegisterRestTjeneste {
     private TpsTjeneste tpsTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private NoAuthRestClient restClient;
     private String arbeidOgInntektBaseURL;
 
@@ -59,12 +62,13 @@ public class RedirectToRegisterRestTjeneste {
     @Inject
     public RedirectToRegisterRestTjeneste(
         TpsTjeneste tpsTjeneste,
-        FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository,
+        FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
         NoAuthRestClient restClient,
         @KonfigVerdi(value = "arbeid.og.inntekt.base.url", required = false, defaultVerdi = "https://arbeid-og-inntekt.nais.adeo.no") String arbeidOgInntektBaseURL) {
         this.tpsTjeneste = tpsTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.restClient = restClient;
         this.arbeidOgInntektBaseURL = arbeidOgInntektBaseURL;
     }
@@ -120,7 +124,7 @@ public class RedirectToRegisterRestTjeneste {
         HttpUriRequest request = new HttpGet(uri);
         request.addHeader(new BasicHeader("Nav-Personident", personIdent.getIdent()));
         request.addHeader(new BasicHeader("Nav-A-inntekt-Filter", "Ung"));
-        sisteBehandling.ifPresent(b -> request.addHeader(new BasicHeader("Nav-Enhet",  b.getBehandlendeEnhet())));
+        sisteBehandling.ifPresent(b -> request.addHeader(new BasicHeader("Nav-Enhet",  hentBehandlendeEnhet(b))));
         try {
             var respons = restClient.execute(request, new OidcRestClientResponseHandler.StringResponseHandler(uri));
             var redirectUri = URI.create(respons);
@@ -129,5 +133,11 @@ public class RedirectToRegisterRestTjeneste {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private String hentBehandlendeEnhet(Behandling behandling){
+        return behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId())
+            .map(BehandlingAnsvarlig::getBehandlendeEnhet)
+            .orElse(null);
     }
 }
