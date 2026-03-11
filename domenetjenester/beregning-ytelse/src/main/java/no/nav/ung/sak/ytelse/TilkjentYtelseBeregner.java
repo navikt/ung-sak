@@ -36,7 +36,10 @@ public class TilkjentYtelseBeregner {
         final var uredusertBeløp = sats.totalSats().setScale(10, RoundingMode.HALF_UP);
         sporing.put("totalSats", sats.totalSats().toString());
 
-        final var reduksjon = rapportertInntektBeregner.beregnReduksjon(sporing);
+        final var reduksjonResultat = rapportertInntektBeregner.beregnReduksjon();
+        sporing.putAll(reduksjonResultat.sporing());
+
+        final var reduksjon = reduksjonResultat.reduksjon();
         sporing.put("reduksjon", reduksjon.toString());
 
         final var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);

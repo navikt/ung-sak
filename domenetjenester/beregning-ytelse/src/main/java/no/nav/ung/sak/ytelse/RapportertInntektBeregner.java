@@ -7,6 +7,7 @@ import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.temporal.TemporalAdjusters;
+import java.util.HashMap;
 import java.util.Map;
 
 public class RapportertInntektBeregner {
@@ -33,7 +34,10 @@ public class RapportertInntektBeregner {
         return antallVirkedager;
     }
 
-    public BigDecimal beregnReduksjon(Map<String, String> sporing) {
+    public record Resultat(BigDecimal reduksjon, Map<String, String> sporing) {}
+
+    public Resultat beregnReduksjon() {
+        final var sporing = new HashMap<String, String>();
         sporing.put("antallVirkedager", antallVirkedager.toString());
         sporing.put("antallVirkedagerHeleMåned", antallVirkedagerHeleMåned.toString());
         sporing.put("andelVirkedagerInnenforPeriode", andelVirkedagerIMåned.toString());
@@ -56,6 +60,9 @@ public class RapportertInntektBeregner {
         var reduksjonYtelse = andelRapportertYtelseInnenforPeriode.multiply(konfigurasjon.reduksjonsfaktorYtelse());
         sporing.put("reduksjonYtelse", reduksjonYtelse.toString());
 
-        return reduksjonArbeidsInntekt.add(reduksjonYtelse);
+        return new Resultat(
+            reduksjonArbeidsInntekt.add(reduksjonYtelse),
+            sporing
+        );
     }
 }
