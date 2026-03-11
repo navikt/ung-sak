@@ -7,7 +7,6 @@ package no.nav.ung.sak.ytelse;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.typer.tid.Virkedager;
@@ -24,21 +23,10 @@ import java.util.function.Function;
 
 public class TilkjentYtelseBeregner {
 
-
-    /**
-     * Beregner verdier for tilkjent ytelse basert på en gitt periode, sats og rapportert inntekt.
-     *
-     * @param periode perioden som ytelsen gjelder for
-     * @param sats den totale satsen for perioden
-     * @param rapporertinntekt den rapporterte inntekten for perioden
-     * @return en instans av `TilkjentYtelseVerdi` som representerer de beregnede verdiene
-     */
-    public static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, KontrollerteInntekter rapportertInntekt) {
+    public static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, RapportertInntektBeregner rapportertInntektBeregner) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(sats, "sats");
-        Objects.requireNonNull(rapportertInntekt, "rapportertInntekt");
-
-        var rapportertInntektReduserer = new RapportertInntektReduserer(rapportertInntekt, periode);
+        Objects.requireNonNull(rapportertInntektBeregner, "rapportertInntektBeregner");
 
         if (!toYearMonth(periode.getFomDato()).equals(toYearMonth(periode.getTomDato()))) {
             throw new IllegalArgumentException("Periode må være innenfor samme måned");
@@ -48,13 +36,13 @@ public class TilkjentYtelseBeregner {
         final var uredusertBeløp = sats.totalSats().setScale(10, RoundingMode.HALF_UP);
         sporing.put("totalSats", sats.totalSats().toString());
 
-        final var reduksjon = rapportertInntektReduserer.beregnReduksjon(sporing);
+        final var reduksjon = rapportertInntektBeregner.beregnReduksjon(sporing);
         sporing.put("reduksjon", reduksjon.toString());
 
         final var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
         sporing.put("redusertBeløp", redusertBeløp.toString());
 
-        final var antallVirkedager = rapportertInntektReduserer.antallVirkedager();
+        final var antallVirkedager = rapportertInntektBeregner.antallVirkedager();
         final var avrundetDagsats = antallVirkedager.equals(BigDecimal.ZERO) ? BigDecimal.ZERO : redusertBeløp.divide(antallVirkedager, 0, RoundingMode.HALF_UP);
         BigDecimal tilkjentBeløp = avrundetDagsats.multiply(antallVirkedager);
         sporing.put("dagsats", avrundetDagsats.toString());

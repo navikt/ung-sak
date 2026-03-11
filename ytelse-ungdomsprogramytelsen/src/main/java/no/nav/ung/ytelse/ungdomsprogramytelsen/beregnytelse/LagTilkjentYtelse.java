@@ -6,6 +6,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
+import no.nav.ung.sak.ytelse.RapportertInntektBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 
@@ -23,9 +25,10 @@ public class LagTilkjentYtelse {
     private static final KontrollerteInntekter INGEN_INNTEKT = new KontrollerteInntekter(BigDecimal.ZERO, BigDecimal.ZERO);
 
     public static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
-                                                                         LocalDateTimeline<Boolean> godkjentTidslinje,
-                                                                         LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
-                                                                         LocalDateTimeline<KontrollerteInntekter> rapportertInntektTidslinje) {
+                                                                                LocalDateTimeline<Boolean> godkjentTidslinje,
+                                                                                LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
+                                                                                LocalDateTimeline<KontrollerteInntekter> kontrollerteInntekterTidslinje,
+                                                                                InntektsreduksjonKonfigurasjon konfigurasjon) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
@@ -36,7 +39,7 @@ public class LagTilkjentYtelse {
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);
 
         // Begrenser tilkjent ytelse til periode med kontrollert inntekt eller første/siste periode
-        var tidslinjeSomSkalHaTilkjentYtelse = rapportertInntektTidslinje
+        var tidslinjeSomSkalHaTilkjentYtelse = kontrollerteInntekterTidslinje
             .intersection(godkjentTidslinje).mapValue(it -> true)
             .crossJoin(førstePerioder);
 
@@ -44,9 +47,10 @@ public class LagTilkjentYtelse {
         tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePerioderSomSkalUtbetales);
 
 
-        return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
-                final var inntekt = rapportertInntekt == null ? INGEN_INNTEKT : rapportertInntekt.getValue();
-                final var periodeResultat = TilkjentYtelseBeregner.beregn(di, sats.getValue(), inntekt);
+        return totalsatsTidslinje.combine(kontrollerteInntekterTidslinje, (di, sats, inntekter) -> {
+                final var inntekt = inntekter == null ? INGEN_INNTEKT : inntekter.getValue();
+                final var beregner = new RapportertInntektBeregner(inntekt, konfigurasjon, di);
+                final var periodeResultat = TilkjentYtelseBeregner.beregn(di, sats.getValue(), beregner);
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);
             }, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .intersection(tidslinjeSomSkalHaTilkjentYtelse);

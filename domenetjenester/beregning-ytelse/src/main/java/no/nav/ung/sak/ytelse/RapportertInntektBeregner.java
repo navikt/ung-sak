@@ -9,17 +9,16 @@ import java.math.RoundingMode;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Map;
 
-public class RapportertInntektReduserer {
+public class RapportertInntektBeregner {
 
-    public static final BigDecimal REDUKSJONS_FAKTOR_ARBEIDSINNTEKT = BigDecimal.valueOf(0.66);
-    public static final BigDecimal REDUKSJONS_FAKTOR_YTELSE = BigDecimal.valueOf(1.00);
-
+    private final InntektsreduksjonKonfigurasjon konfigurasjon;
     private final KontrollerteInntekter kontrollerteInntekter;
     private final BigDecimal antallVirkedager;
     private final BigDecimal antallVirkedagerHeleMåned;
     private final BigDecimal andelVirkedagerIMåned;
 
-    public RapportertInntektReduserer(KontrollerteInntekter kontrollerteInntekter, LocalDateInterval periode) {
+    public RapportertInntektBeregner(KontrollerteInntekter kontrollerteInntekter, InntektsreduksjonKonfigurasjon konfigurasjon, LocalDateInterval periode) {
+        this.konfigurasjon = konfigurasjon;
         this.kontrollerteInntekter = kontrollerteInntekter;
 
         this.antallVirkedager = BigDecimal.valueOf(Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato()));
@@ -42,19 +41,19 @@ public class RapportertInntektReduserer {
         sporing.put("rapportertArbeidsinntekt", kontrollerteInntekter.arbeidsinntekt().toString());
         sporing.put("rapportertYtelse", kontrollerteInntekter.ytelse().toString());
 
-        sporing.put("reduksjonsfaktorArbeidsinntekt", REDUKSJONS_FAKTOR_ARBEIDSINNTEKT.toString());
-        sporing.put("reduksjonsfaktorYtelse", REDUKSJONS_FAKTOR_YTELSE.toString());
+        sporing.put("reduksjonsfaktorArbeidsinntekt", konfigurasjon.reduksjonsfaktorArbeidsinntekt().toString());
+        sporing.put("reduksjonsfaktorYtelse", konfigurasjon.reduksjonsfaktorYtelse().toString());
 
         var andelRapportertArbeidsInntektInnenforPeriode = kontrollerteInntekter.arbeidsinntekt().multiply(andelVirkedagerIMåned);
         sporing.put("andelRapportertInntektInnenforPeriode", andelRapportertArbeidsInntektInnenforPeriode.toString());
 
-        var reduksjonArbeidsInntekt = andelRapportertArbeidsInntektInnenforPeriode.multiply(REDUKSJONS_FAKTOR_ARBEIDSINNTEKT);
+        var reduksjonArbeidsInntekt = andelRapportertArbeidsInntektInnenforPeriode.multiply(konfigurasjon.reduksjonsfaktorArbeidsinntekt());
         sporing.put("reduksjon", reduksjonArbeidsInntekt.toString());
 
         var andelRapportertYtelseInnenforPeriode = kontrollerteInntekter.ytelse().multiply(andelVirkedagerIMåned);
         sporing.put("andelRapportertYtelseInnenforPeriode", andelRapportertYtelseInnenforPeriode.toString());
 
-        var reduksjonYtelse = andelRapportertYtelseInnenforPeriode.multiply(REDUKSJONS_FAKTOR_YTELSE);
+        var reduksjonYtelse = andelRapportertYtelseInnenforPeriode.multiply(konfigurasjon.reduksjonsfaktorYtelse());
         sporing.put("reduksjonYtelse", reduksjonYtelse.toString());
 
         return reduksjonArbeidsInntekt.add(reduksjonYtelse);
