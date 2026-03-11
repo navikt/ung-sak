@@ -5561,10 +5561,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto"
-                  },
-                  "type" : "array"
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto"
                 }
               }
             },
