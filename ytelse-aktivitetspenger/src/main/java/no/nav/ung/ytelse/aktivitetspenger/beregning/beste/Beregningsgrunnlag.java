@@ -47,7 +47,7 @@ public class Beregningsgrunnlag {
     }
 
     public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal beregnetPrAar, BigDecimal beregnetRedusertPrAar, String regelSporing) {
-        this.skjæringstidspunkt = beregningInputGrunnlag.virkningsdato();
+        this.skjæringstidspunkt = beregningInputGrunnlag.skjæringstidspunkt();
         this.sisteLignedeÅr = beregningInputGrunnlag.sisteLignedeÅr();
         this.årsinntektAvkortetOppjustertSisteÅr = årsinntektSisteÅr;
         this.årsinntektAvkortetOppjustertSisteTreÅr = årsinntektSisteTreÅr;

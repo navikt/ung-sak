@@ -22,6 +22,20 @@ create table BEREGNINGSGRUNNLAG
 
 CREATE SEQUENCE IF NOT EXISTS SEQ_BEREGNINGSGRUNNLAG START WITH 1000049 INCREMENT BY 50 MINVALUE 1000000 NO MAXVALUE CACHE 1;
 
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.skjaeringstidspunkt          IS 'Input til beregningen: skjæringstidspunkt';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.siste_lignede_aar            IS 'Input til beregningen: seneste tilgjengelige ligningsår (tilsvarer pgi3_aar)';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.aarsinntekt_siste_aar        IS 'Samlet inntekt (avkortet og oppjustert) for seneste ligningsår';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.aarsinntekt_siste_tre_aar    IS 'Samlet inntekt (avkortet og oppjustert) snitt over siste tre ligningsår';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.beregnet_pr_aar              IS 'Beregningsgrunnlag per år (maks av siste år og snitt siste tre år)';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.beregnet_redusert_pr_aar     IS 'Beregningsgrunnlag per år etter reduksjon med dekningsgrad';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.pgi1_aar                     IS 'Input til beregningen: år for PGI tidligste år (siste_lignede_aar - 2)';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.pgi1_aarsinntekt             IS 'Input til beregningen: rå PGI for tidligste år';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.pgi2_aar                     IS 'Input til beregningen: år for PGI midterste år (siste_lignede_aar - 1)';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.pgi2_aarsinntekt             IS 'Input til beregningen: rå PGI for midterste år';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.pgi3_aar                     IS 'Input til beregningen: år for PGI seneste år (siste_lignede_aar)';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.pgi3_aarsinntekt             IS 'Input til beregningen: rå PGI for seneste år';
+COMMENT ON COLUMN BEREGNINGSGRUNNLAG.regel_sporing                IS 'Sporingsdata for regelkjøring';
+
 
 create table AVP_GR_BEREGNINGSGRUNNLAG
 (
@@ -41,6 +55,9 @@ alter table AVP_GR_BEREGNINGSGRUNNLAG
 CREATE UNIQUE INDEX UIDX_AVP_GR_BEREGNINGSGRUNNLAG ON AVP_GR_BEREGNINGSGRUNNLAG (behandling_id) WHERE aktiv = true;
 
 CREATE SEQUENCE IF NOT EXISTS SEQ_AVP_GR_BEREGNINGSGRUNNLAG START WITH 1000049 INCREMENT BY 50 MINVALUE 1000000 NO MAXVALUE CACHE 1;
+
+COMMENT ON COLUMN AVP_GR_BEREGNINGSGRUNNLAG.behandling_id IS 'Behandlingen dette beregningsgrunnlaget tilhører';
+COMMENT ON COLUMN AVP_GR_BEREGNINGSGRUNNLAG.aktiv         IS 'Kun ett grunnlag er aktivt per behandling. Ved endring deaktiveres eksisterende og nytt grunnlag opprettes';
 
 CREATE TABLE BEREGNINGSGRUNNLAG_KOBLING
 (

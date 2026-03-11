@@ -21,7 +21,7 @@ import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.l
 
 public class BeregningTjeneste {
 
-    public static BeregningInput lagBeregningInput(Year sisteTilgjengeligeLigningsår, LocalDate virkningsdato, List<Inntektspost> inntekter) {
+    public static BeregningInput lagBeregningInput(Year sisteTilgjengeligeLigningsår, LocalDate skjæringstidspunkt, List<Inntektspost> inntekter) {
         var sisteTilgjengeligeLigningsårTom = sisteTilgjengeligeLigningsår.atMonth(12).atEndOfMonth();
 
         var pgiPerÅr = inntekter.stream()
@@ -35,7 +35,7 @@ public class BeregningTjeneste {
         var pgi2 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår.minusYears(1), Beløp.ZERO);
         var pgi1 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår.minusYears(2), Beløp.ZERO);
 
-        return new BeregningInput(pgi1, pgi2, pgi3, virkningsdato, sisteTilgjengeligeLigningsår);
+        return new BeregningInput(pgi1, pgi2, pgi3, skjæringstidspunkt, sisteTilgjengeligeLigningsår);
     }
 
     public static BesteberegningResultat avgjørBesteberegning(BeregningInput input) {

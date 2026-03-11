@@ -16,7 +16,7 @@ public class PgiKalkulator {
 
     public static PgiKalkulatorInput lagPgiKalkulatorInput(BeregningInput beregningInput) {
         var gsnittTidsserie = GrunnbeløpSnittTidslinje.hentGrunnbeløpSnittTidslinje();
-        var oppjusteringsfaktorTidsserie = GrunnbeløpSnittTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(beregningInput.virkningsdato().getYear()), 3);
+        var oppjusteringsfaktorTidsserie = GrunnbeløpSnittTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(beregningInput.skjæringstidspunkt().getYear()), 3);
         var årsinntektMap = beregningInput.lagTidslinje();
 
         return new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie);

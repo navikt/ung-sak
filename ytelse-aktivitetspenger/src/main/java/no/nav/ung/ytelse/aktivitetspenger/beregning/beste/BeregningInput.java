@@ -13,7 +13,7 @@ public record BeregningInput(
     Beløp pgi1,
     Beløp pgi2,
     Beløp pgi3,
-    LocalDate virkningsdato,
+    LocalDate skjæringstidspunkt,
     Year sisteLignedeÅr // Året for pgi3
 ) {
 
