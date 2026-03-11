@@ -6,9 +6,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Entity(name = "AktivitetspengerBeregningsgrunnlag")
 @Table(name = "AVP_GR_BEREGNINGSGRUNNLAG")
@@ -44,6 +42,10 @@ public class AktivitetspengerBeregningsgrunnlag {
 
     public List<Beregningsgrunnlag> getBeregningsgrunnlag() {
         return Collections.unmodifiableList(beregningsgrunnlag);
+    }
+
+    public Optional<Beregningsgrunnlag> getSenesteBeregningsgrunnlag() {
+        return beregningsgrunnlag.stream().max(Comparator.comparing(Beregningsgrunnlag::getSkjæringstidspunkt));
     }
 
     void setBeregningsgrunnlag(List<Beregningsgrunnlag> beregningsgrunnlag) {
