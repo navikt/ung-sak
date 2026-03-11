@@ -93,8 +93,8 @@ public class AktivitetspengerRestTjeneste {
             grunnlag.getSkjæringstidspunkt(),
             grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr().setScale(0, RoundingMode.HALF_EVEN),
             grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getBeregningsgrunnlag().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getBeregningsgrunnlagRedusert().setScale(0, RoundingMode.HALF_EVEN),
+            grunnlag.getBeregnetPrAar().setScale(0, RoundingMode.HALF_EVEN),
+            grunnlag.getBeregnetRedusertPrAar().setScale(0, RoundingMode.HALF_EVEN),
             grunnlag.getDagsats().setScale(2, RoundingMode.HALF_EVEN),
             pgiÅrsinntekter,
             mapBesteBeregningResultatType(grunnlag.utledBesteBeregningResultatType())

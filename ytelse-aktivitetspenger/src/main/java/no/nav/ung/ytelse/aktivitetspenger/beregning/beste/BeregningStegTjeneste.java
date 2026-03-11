@@ -10,7 +10,6 @@ import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.Collection;
@@ -20,7 +19,6 @@ import java.util.List;
 @ApplicationScoped
 public class BeregningStegTjeneste {
 
-    private static final int ARBEIDSDAGER_PER_ÅR = 260;
     private static BigDecimal DEKNINGSGRAD = BigDecimal.valueOf(0.66);
 
     private AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository;
@@ -44,9 +42,8 @@ public class BeregningStegTjeneste {
         var besteBeregningResultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);
 
         BigDecimal beregningsgrunnlagRedusert = besteBeregningResultat.getBeregningsgrunnlag().multiply(DEKNINGSGRAD);
-        BigDecimal dagsats = beregningsgrunnlagRedusert.divide(BigDecimal.valueOf(ARBEIDSDAGER_PER_ÅR), 10, RoundingMode.HALF_EVEN);
 
-        var beregningsgrunnlag = new Beregningsgrunnlag(besteBeregningResultat.getBeregningInput(), besteBeregningResultat.getÅrsinntektSisteÅr(), besteBeregningResultat.getÅrsinntektSisteTreÅr(), besteBeregningResultat.getBeregningsgrunnlag(), beregningsgrunnlagRedusert, dagsats, besteBeregningResultat.getRegelSporing());
+        var beregningsgrunnlag = new Beregningsgrunnlag(besteBeregningResultat.getBeregningInput(), besteBeregningResultat.getÅrsinntektSisteÅr(), besteBeregningResultat.getÅrsinntektSisteTreÅr(), besteBeregningResultat.getBeregningsgrunnlag(), beregningsgrunnlagRedusert, besteBeregningResultat.getRegelSporing());
         aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandlingId, beregningsgrunnlag);
     }
 

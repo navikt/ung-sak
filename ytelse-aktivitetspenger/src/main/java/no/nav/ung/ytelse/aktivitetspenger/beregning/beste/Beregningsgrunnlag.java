@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import no.nav.ung.sak.diff.DiffIgnore;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.Objects;
@@ -28,14 +29,11 @@ public class Beregningsgrunnlag {
     @Column(name = "aarsinntekt_siste_tre_aar", nullable = false, updatable = false)
     private BigDecimal årsinntektAvkortetOppjustertSisteTreÅr;
 
-    @Column(name = "beregningsgrunnlag", nullable = false, updatable = false)
-    private BigDecimal beregningsgrunnlag;
+    @Column(name = "beregnet_pr_aar", nullable = false, updatable = false)
+    private BigDecimal beregnetPrAar;
 
-    @Column(name = "beregningsgrunnlag_redusert", nullable = false, updatable = false)
-    private BigDecimal beregningsgrunnlagRedusert;
-
-    @Column(name = "dagsats", nullable = false, updatable = false)
-    private BigDecimal dagsats;
+    @Column(name = "beregnet_redusert_pr_aar", nullable = false, updatable = false)
+    private BigDecimal beregnetRedusertPrAar;
 
     @Embedded
     private BeregningsgrunnlagInput beregningInput;
@@ -48,14 +46,13 @@ public class Beregningsgrunnlag {
     protected Beregningsgrunnlag() {
     }
 
-    public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal beregningsgrunnlag, BigDecimal beregningsgrunnlagRedusert, BigDecimal dagsats, String regelSporing) {
+    public Beregningsgrunnlag(BeregningInput beregningInputGrunnlag, BigDecimal årsinntektSisteÅr, BigDecimal årsinntektSisteTreÅr, BigDecimal beregnetPrAar, BigDecimal beregnetRedusertPrAar, String regelSporing) {
         this.skjæringstidspunkt = beregningInputGrunnlag.virkningsdato();
         this.sisteLignedeÅr = beregningInputGrunnlag.sisteLignedeÅr();
         this.årsinntektAvkortetOppjustertSisteÅr = årsinntektSisteÅr;
         this.årsinntektAvkortetOppjustertSisteTreÅr = årsinntektSisteTreÅr;
-        this.beregningsgrunnlag = beregningsgrunnlag;
-        this.beregningsgrunnlagRedusert = beregningsgrunnlagRedusert;
-        this.dagsats = dagsats;
+        this.beregnetPrAar = beregnetPrAar;
+        this.beregnetRedusertPrAar = beregnetRedusertPrAar;
         this.regelSporing = regelSporing;
         this.beregningInput = new BeregningsgrunnlagInput(beregningInputGrunnlag);
     }
@@ -72,20 +69,20 @@ public class Beregningsgrunnlag {
         return årsinntektAvkortetOppjustertSisteTreÅr;
     }
 
-    public BigDecimal getBeregningsgrunnlag() {
-        return beregningsgrunnlag;
+    public BigDecimal getBeregnetPrAar() {
+        return beregnetPrAar;
     }
 
-    public BigDecimal getBeregningsgrunnlagRedusert() {
-        return beregningsgrunnlagRedusert;
+    public BigDecimal getBeregnetRedusertPrAar() {
+        return beregnetRedusertPrAar;
     }
 
     public BigDecimal getDagsats() {
-        return dagsats;
+        return beregnetRedusertPrAar.divide(BigDecimal.valueOf(260), 10, RoundingMode.HALF_EVEN);
     }
 
     public BesteBeregningResultatType utledBesteBeregningResultatType() {
-        if (beregningsgrunnlag.compareTo(årsinntektAvkortetOppjustertSisteÅr) == 0) {
+        if (beregnetPrAar.compareTo(årsinntektAvkortetOppjustertSisteÅr) == 0) {
             return BesteBeregningResultatType.SISTE_ÅR;
         }
         return BesteBeregningResultatType.SNITT_SISTE_TRE_ÅR;

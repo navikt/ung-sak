@@ -105,7 +105,6 @@ class AktivitetspengerBeregningsgrunnlagRepositoryTest {
             BigDecimal.valueOf(480_000),
             BigDecimal.valueOf(500_000),
             BigDecimal.valueOf(330_000),
-            BigDecimal.valueOf(1_269.23),
             "{}"
         );
     }
