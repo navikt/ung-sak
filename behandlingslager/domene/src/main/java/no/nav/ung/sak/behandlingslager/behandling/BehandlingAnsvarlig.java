@@ -1,9 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
-import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,7 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import java.util.Arrays;
+
 import java.util.Collection;
 import java.util.List;
 
@@ -135,36 +133,6 @@ public class BehandlingAnsvarlig extends no.nav.ung.sak.behandlingslager.BaseEnt
 
     public Long getBehandlingId() {
             return behandlingId;
-    }
-
-    public enum BehandlingDel {
-
-        HELE("HELE"),
-        DEL_1("DEL_1"),
-        DEL_2("DEL_2");
-
-        private final String kode;
-
-        BehandlingDel(String kode) {
-            this.kode = kode;
-        }
-
-        public String getKode() {
-            return kode;
-        }
-    }
-
-    @Converter(autoApply = true)
-    public static class BehandlingDelKodeverdiConverter implements AttributeConverter<BehandlingDel, String> {
-        @Override
-        public String convertToDatabaseColumn(BehandlingDel attribute) {
-            return attribute == null ? null : attribute.getKode();
-        }
-
-        @Override
-        public BehandlingDel convertToEntityAttribute(String dbData) {
-            return dbData == null ? null : Arrays.stream(BehandlingDel.values()).filter(it -> it.getKode().equals(dbData)).findFirst().orElseThrow();
-        }
     }
 
 }
