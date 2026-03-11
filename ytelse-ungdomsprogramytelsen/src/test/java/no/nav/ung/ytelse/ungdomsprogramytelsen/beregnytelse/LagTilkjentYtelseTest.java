@@ -6,6 +6,7 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
+import no.nav.ung.sak.ytelse.LagTilkjentYtelse;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import org.junit.jupiter.api.Test;
 

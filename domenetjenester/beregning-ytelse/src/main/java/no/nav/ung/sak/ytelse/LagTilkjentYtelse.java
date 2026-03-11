@@ -1,15 +1,10 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
+package no.nav.ung.sak.ytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.ytelse.BeregnetSats;
-import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
-import no.nav.ung.sak.ytelse.RapportertInntektBeregner;
-import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
-import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
