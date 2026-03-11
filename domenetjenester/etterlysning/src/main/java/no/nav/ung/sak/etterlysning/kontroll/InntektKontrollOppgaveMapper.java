@@ -1,6 +1,7 @@
 package no.nav.ung.sak.etterlysning.kontroll;
 
 import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
+import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.ung.sak.kontroll.InntektType;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.Inntektsperiode;
@@ -9,14 +10,16 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType;
 import no.nav.ung.sak.typer.Beløp;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public class InntektKontrollOppgaveMapper {
 
-    static RegisterinntektDTO mapTilRegisterInntekter(List<InntekterForKilde> registerinntekter) {
-        final var arbeidOgFrilansInntekter = finnArbeidOgFrilansInntekter(registerinntekter);
+    static RegisterinntektDTO mapTilRegisterInntekter(List<InntekterForKilde> registerinntekter, List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger) {
+        final var arbeidOgFrilansInntekter = finnArbeidOgFrilansInntekter(registerinntekter, arbeidsgiverOpplysninger);
         final var ytelseInntekter = finnYtelseInntekter(registerinntekter);
         return new RegisterinntektDTO(arbeidOgFrilansInntekter, ytelseInntekter);
     }
@@ -39,15 +42,23 @@ public class InntektKontrollOppgaveMapper {
         };
     }
 
-    private static List<ArbeidOgFrilansRegisterInntektDTO> finnArbeidOgFrilansInntekter(List<InntekterForKilde> registerinntekter) {
+    private static List<ArbeidOgFrilansRegisterInntektDTO> finnArbeidOgFrilansInntekter(List<InntekterForKilde> registerinntekter, List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger) {
         return registerinntekter.stream()
             .filter(it -> it.inntektType() == InntektType.ARBEIDSTAKER_ELLER_FRILANSER)
             .map(it -> new ArbeidOgFrilansRegisterInntektDTO(
                 summerInntekter(it),
                 it.arbeidsgiver().getIdentifikator(),
-                null
+                it.arbeidsgiver().getIdentifikator(),
+                finnArbeidsgivernavn(arbeidsgiverOpplysninger, it).orElse(null)
             ))
             .toList();
+    }
+
+    private static Optional<String> finnArbeidsgivernavn(List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger, InntekterForKilde it) {
+        return arbeidsgiverOpplysninger.stream()
+            .filter(
+                arbOppl -> arbOppl.getIdentifikator().equals(it.arbeidsgiver().getIdentifikator())
+            ).findFirst().map(ArbeidsgiverOpplysninger::getNavn);
     }
 
     private static int summerInntekter(InntekterForKilde it) {

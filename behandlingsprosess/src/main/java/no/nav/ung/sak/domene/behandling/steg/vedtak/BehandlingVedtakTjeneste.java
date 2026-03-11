@@ -12,6 +12,8 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandling.hendelse.FinnAnsvarligSaksbehandler;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -24,6 +26,7 @@ public class BehandlingVedtakTjeneste {
     private BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     BehandlingVedtakTjeneste() {
         // for CDI proxy
@@ -31,10 +34,12 @@ public class BehandlingVedtakTjeneste {
 
     @Inject
     public BehandlingVedtakTjeneste(BehandlingVedtakEventPubliserer behandlingVedtakEventPubliserer,
-                                    BehandlingRepositoryProvider repositoryProvider) {
+                                    BehandlingRepositoryProvider repositoryProvider,
+                                    BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.behandlingVedtakEventPubliserer = behandlingVedtakEventPubliserer;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.behandlingVedtakRepository = repositoryProvider.getBehandlingVedtakRepository();
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public void opprettBehandlingVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
@@ -43,7 +48,8 @@ public class BehandlingVedtakTjeneste {
         VedtakResultatType vedtakResultatType;
         var ref = BehandlingReferanse.fra(behandling);
         vedtakResultatType = utledVedtakResultatType(behandling);
-        String ansvarligSaksbehandler = FinnAnsvarligSaksbehandler.finn(behandling);
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId).orElse(null);
+        String ansvarligSaksbehandler = FinnAnsvarligSaksbehandler.finn(behandlingAnsvarlig);
         LocalDateTime vedtakstidspunkt = LocalDateTime.now();
 
         boolean erRevurderingMedUendretUtfall = ref.getBehandlingResultat().isBehandlingsresultatIkkeEndret();

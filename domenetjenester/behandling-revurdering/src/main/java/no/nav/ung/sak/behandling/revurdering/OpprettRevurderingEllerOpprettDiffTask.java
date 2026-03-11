@@ -1,24 +1,21 @@
 package no.nav.ung.sak.behandling.revurdering;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import no.nav.k9.prosesstask.api.*;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskStatus;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
@@ -26,9 +23,22 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.task.FagsakProsessTask;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Kjører tilbakehopp til starten av prosessen. Brukes til rekjøring av saker som må gjøre alt på nytt.
@@ -51,6 +61,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
     ).flatMap(Function.identity()).collect(Collectors.toSet());
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
@@ -65,13 +76,14 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
                                                   BehandlingRepository behandlingRepository,
                                                   BehandlingLåsRepository behandlingLåsRepository,
                                                   ProsessTriggereRepository prosessTriggereRepository,
-                                                  FagsakLåsRepository fagsakLåsRepository,
+                                                  FagsakLåsRepository fagsakLåsRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
                                                   BehandlingProsesseringTjeneste behandlingProsesseringTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
         super(fagsakLåsRepository, behandlingLåsRepository);
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingProsesseringTjeneste = behandlingProsesseringTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
@@ -101,8 +113,9 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             if (sisteVedtak.isPresent() && revurderingTjeneste.kanRevurderingOpprettes(fagsak)) {
                 var origBehandling = sisteVedtak.get();
                 BehandlingÅrsakType behandlingÅrsakType = perioderOgÅrsaker.getFirst().behandlingÅrsak();// Velger første årsak som behandlingsårsak, burde vurdere om vi skal legge til alle
-
-                var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, origBehandling.getBehandlendeOrganisasjonsEnhet());
+                OrganisasjonsEnhet organisasjonsEnhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(origBehandling.getId())
+                    .map(BehandlingAnsvarlig::getBehandlendeOrganisasjonsEnhet).orElse(null);
+                var behandling = revurderingTjeneste.opprettAutomatiskRevurdering(origBehandling, behandlingÅrsakType, organisasjonsEnhet);
 
                 leggTilTriggere(perioderOgÅrsaker, behandling);
                 log.info("Oppretter revurdering='{}' basert på '{}'", behandling, origBehandling);

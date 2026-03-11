@@ -17,10 +17,12 @@ import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -41,6 +43,7 @@ import static no.nav.k9.felles.feil.LogLevel.INFO;
 public class BehandlingsoppretterTjeneste {
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -65,6 +68,7 @@ public class BehandlingsoppretterTjeneste {
         this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        this.behandlingAnsvarligRepository = behandlingRepositoryProvider.getBehandlingAnsvarligRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.klageVurderingTjeneste = klageVurderingTjeneste;
         this.personopplysningRepository = personopplysningRepository;
@@ -114,14 +118,15 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private Behandling opprettBehandling(Fagsak fagsak, BehandlingType behandlingType, OrganisasjonsEnhet enhet, BehandlingÅrsakType årsak) {
-        return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
+        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
             beh -> {
                 if (!BehandlingÅrsakType.UDEFINERT.equals(årsak)) {
                     BehandlingÅrsak.builder(årsak).buildFor(beh);
                 }
                 beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-                beh.setBehandlendeEnhet(enhet);
             });
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
+        return behandling;
     }
 
     public boolean kanOppretteNyBehandlingAvType(Long fagsakId, BehandlingType type) {

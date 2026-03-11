@@ -15,7 +15,7 @@
 
     <properties>
         <swagger-ui.version>5.31.2</swagger-ui.version>
-        <jetty.version>12.1.6</jetty.version>
+        <jetty.version>12.1.7</jetty.version>
         <metrics.version>4.2.38</metrics.version>
     </properties>
 
@@ -417,50 +417,6 @@
                         <argument>${project.build.sourceDirectory}/../resources/openapi-ts-client/ung-sak.openapi.json</argument>
                     </arguments>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <!-- trengs her for at lokal kjøring av applikasjonen (fra IDE) skal finne pdfgen ressursene -->
-                        <id>copy-ungdomsprogramytelsen-pdfgen-resources</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>../ytelse-ungdomsprogramytelsen/src/main/resources/pdfgen</directory>
-                                    <includes>
-                                        <include>**/*</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <!-- trengs her for at lokal kjøring av applikasjonen (fra IDE) skal finne pdfgen ressursene -->
-                        <id>copy-felles-pdfgen-resources</id>
-                        <phase>compile</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <outputDirectory>${project.build.directory}/pdfgen</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>../formidling/src/main/resources/pdfgen</directory>
-                                    <includes>
-                                        <include>**/*</include>
-                                    </includes>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>

@@ -3,6 +3,8 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strateg
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
@@ -11,6 +13,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
 @Dependent
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class EndringFjerneProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
 

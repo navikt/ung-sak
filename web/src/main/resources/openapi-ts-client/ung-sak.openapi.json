@@ -131,9 +131,9 @@
         "x-enum-varnames" : [ "DAG", "DAG7", "UKE", "MND", "ÅR", "ENGANG", "AKTO", "UDEFINERT" ]
       },
       "k9.oppdrag.kontrakt.kodeverk.YtelseType" : {
-        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "-" ],
+        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AKT", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "UDEFINERT" ]
+        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "AKTIVITETSPENGER", "UDEFINERT" ]
       },
       "k9.oppdrag.kontrakt.oppsummering.Mottaker" : {
         "properties" : {
@@ -7314,66 +7314,6 @@
         },
         "summary" : "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /fagsak dersom asynkrone operasjoner er ferdig.",
         "tags" : [ "fagsak" ]
-      }
-    },
-    "/api/fordel/fagsak/sok" : {
-      "post" : {
-        "description" : "Finn eksisterende sak.",
-        "operationId" : "finnEksisterendeFagsak",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.mottak.FinnSak"
-              }
-            }
-          },
-          "description" : "Oppretter fagsak"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eksisterende fagsak",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/api/fordel/relatertSak" : {
-      "post" : {
-        "description" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-        "operationId" : "finnesEksisterendeFagsakMedEnAvAktørene",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.mottak.FinnSak"
-              }
-            }
-          },
-          "description" : "Søkeparametere"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "type" : "boolean"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-        "tags" : [ "fordel" ]
       }
     },
     "/api/formidling/informasjonsbrev" : {
