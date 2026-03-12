@@ -9,41 +9,59 @@ import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;
 import java.time.Year;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PgiKalkulator {
 
-    public static PgiKalkulatorInput lagPgiKalkulatorInput(BeregningInput beregningInput) {
+    private final PgiKalkulatorInput input;
+
+    public PgiKalkulator(BeregningInput beregningInput) {
         var gsnittTidsserie = GrunnbeløpSnittTidslinje.hentGrunnbeløpSnittTidslinje();
         var oppjusteringsfaktorTidsserie = GrunnbeløpSnittTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(beregningInput.skjæringstidspunkt().getYear()), 3);
         var årsinntektMap = beregningInput.lagTidslinje();
 
-        return new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie);
+        input = new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie);
     }
 
-    public static LocalDateTimeline<PgiØvreGrenseVurderer> hentPeriodisertPgiUtregner(PgiKalkulatorInput input) {
+    public Map<String, LocalDateTimeline<?>> getRegelSporingsmap() {
+        var map = new LinkedHashMap<String, LocalDateTimeline<?>>();
+        map.put("gsnittTidsserie", input.gsnittTidsserie().mapValue(Grunnbeløp::verdi));
+        map.put("oppjusteringsfaktorTidsserie", input.oppjusteringsfaktorTidsserie());
+        return map;
+    }
+
+    public Map<Year, BigDecimal> avgrensOgOppjusterÅrsinntekter() {
+        return hentPeriodisertPgiUtregner()
+            .mapValue(PgiØvreGrenseVurderer::avgrensOgOppjusterårsinntekt)
+            .toSegments().stream()
+            .collect(Collectors.groupingBy(
+                segment -> Year.of(segment.getFom().getYear()),
+                Collectors.reducing(BigDecimal.ZERO,
+                    LocalDateSegment::getValue,
+                    BigDecimal::add)
+            ));
+    }
+
+    public Map<Year, BigDecimal> avgrensÅrsinntekterUtenOppjustering() {
+        return hentPeriodisertPgiUtregner()
+            .mapValue(PgiØvreGrenseVurderer::avkortÅrsinntektMotSeksG)
+            .toSegments().stream()
+            .collect(Collectors.groupingBy(
+                segment -> Year.of(segment.getFom().getYear()),
+                Collectors.reducing(BigDecimal.ZERO, LocalDateSegment::getValue, BigDecimal::add)
+            ));
+    }
+
+    private LocalDateTimeline<PgiØvreGrenseVurderer> hentPeriodisertPgiUtregner() {
         var gsnittTidsserie = input.gsnittTidsserie();
         var oppjusteringsfaktorTidsserie = input.oppjusteringsfaktorTidsserie();
         var årsinntekter = mapTilPgiUtregner(input.årsinntekt());
 
         return årsinntekter
-                    .intersection(gsnittTidsserie, leggTilGrunnbeløpSnitt())
-                    .intersection(oppjusteringsfaktorTidsserie, leggTilOppjusteringsfaktor());
-    }
-
-    public static Map<Year, BigDecimal> avgrensOgOppjusterÅrsinntekter(PgiKalkulatorInput input) {
-        return hentPeriodisertPgiUtregner(input)
-            .mapValue(PgiØvreGrenseVurderer::avgrensOgOppjusterårsinntekt)
-            .toSegments().stream()
-            .collect(Collectors.groupingBy(
-                segment -> Year.of(segment.getFom().getYear()),
-                Collectors.reducing(
-                    BigDecimal.ZERO,
-                    LocalDateSegment::getValue,
-                    BigDecimal::add
-                )
-            ));
+            .intersection(gsnittTidsserie, leggTilGrunnbeløpSnitt())
+            .intersection(oppjusteringsfaktorTidsserie, leggTilOppjusteringsfaktor());
     }
 
     private static LocalDateSegmentCombinator<PgiØvreGrenseVurderer, Grunnbeløp, PgiØvreGrenseVurderer> leggTilGrunnbeløpSnitt() {
@@ -61,7 +79,7 @@ public class PgiKalkulator {
     }
 
     private static LocalDateTimeline<PgiØvreGrenseVurderer> mapTilPgiUtregner(LocalDateTimeline<Beløp> årsinntekter) {
-            return årsinntekter.mapValue(entry -> new PgiØvreGrenseVurderer(entry.getVerdi()));
+        return årsinntekter.mapValue(entry -> new PgiØvreGrenseVurderer(entry.getVerdi()));
     }
 
     public static class PgiØvreGrenseVurderer {
@@ -87,7 +105,7 @@ public class PgiKalkulator {
             return avkortÅrsinntektMotSeksG().multiply(oppjusteringsfaktor);
         }
 
-        private BigDecimal avkortÅrsinntektMotSeksG() {
+        public BigDecimal avkortÅrsinntektMotSeksG() {
             return pgiÅrsinntekt.min(grunnbeløpSnitt(6));
         }
 

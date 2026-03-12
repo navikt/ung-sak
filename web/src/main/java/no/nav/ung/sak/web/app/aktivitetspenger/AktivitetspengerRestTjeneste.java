@@ -83,8 +83,9 @@ public class AktivitetspengerRestTjeneste {
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag, List<Inntektspost> inntektsposter) {
         BeregningInput beregningInput = grunnlag.getBeregningInput().getBeregningInput(grunnlag.getSkjæringstidspunkt());
-        PgiKalkulatorInput pgiKalkulatorInput = PgiKalkulator.lagPgiKalkulatorInput(beregningInput);
-        Map<Year, BigDecimal> sumAvkortetOgOppjustert = PgiKalkulator.avgrensOgOppjusterÅrsinntekter(pgiKalkulatorInput);
+        PgiKalkulator pgiKalkulator = new PgiKalkulator(beregningInput);
+        Map<Year, BigDecimal> sumAvkortetPerÅr = pgiKalkulator.avgrensÅrsinntekterUtenOppjustering();
+        Map<Year, BigDecimal> sumAvkortetOgOppjustertPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
         PgiHjelper pgiHjelper = new PgiHjelper(inntektsposter, beregningInput.sisteLignedeÅr());
 
         List<PgiÅrsinntektDto> pgiÅrsinntekter = beregningInput.lagTidslinje().toSegments().stream()
@@ -98,7 +99,8 @@ public class AktivitetspengerRestTjeneste {
                 return new PgiÅrsinntektDto(
                     år.getValue(),
                     segment.getValue().getVerdi().setScale(0, RoundingMode.HALF_EVEN),
-                    sumAvkortetOgOppjustert.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN),
+                    sumAvkortetPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN),
+                    sumAvkortetOgOppjustertPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN),
                     arbeidsinntekt.setScale(0, RoundingMode.HALF_EVEN),
                     næring.setScale(0, RoundingMode.HALF_EVEN)
                 );

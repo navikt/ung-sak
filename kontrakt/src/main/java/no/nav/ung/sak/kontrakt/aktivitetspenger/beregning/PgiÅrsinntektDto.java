@@ -25,6 +25,11 @@ public record PgiÅrsinntektDto(
 
     @NotNull
     @Digits(integer = 6, fraction = 0)
+    @JsonProperty(value = "sumAvkortet", required = true)
+    BigDecimal sumAvkortet,
+
+    @NotNull
+    @Digits(integer = 6, fraction = 0)
     @JsonProperty(value = "sumAvkortetOgOppjustert", required = true)
     BigDecimal sumAvkortetOgOppjustert,
 

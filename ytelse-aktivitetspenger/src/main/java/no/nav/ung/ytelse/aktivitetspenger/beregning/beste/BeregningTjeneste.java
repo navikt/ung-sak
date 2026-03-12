@@ -2,33 +2,29 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
-import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Comparator;
-
-import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.avgrensOgOppjusterÅrsinntekter;
-import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.lagPgiKalkulatorInput;
-
+import java.util.List;
+import java.util.Map;
 
 @ApplicationScoped
 public class BeregningTjeneste {
 
-    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+    private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+
+    public BeregningTjeneste() {
+    }
 
     @Inject
     public BeregningTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
@@ -58,23 +54,16 @@ public class BeregningTjeneste {
     }
 
     public static BesteberegningResultat avgjørBesteberegning(BeregningInput input) {
-        var pgiKalkulatorInput = lagPgiKalkulatorInput(input);
-        var pgiPerÅr = avgrensOgOppjusterÅrsinntekter(pgiKalkulatorInput);
+        var pgiKalkulator = new PgiKalkulator(input);
+        var pgiPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
 
         BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(input.sisteLignedeÅr(), BigDecimal.ZERO);
         BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
         BigDecimal beregningsgrunnlag = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
 
-        String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(lagRegelSporingMap(pgiKalkulatorInput));
+        String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(pgiKalkulator.getRegelSporingsmap());
 
         return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, beregningsgrunnlag, regelSporing);
-    }
-
-    private static Map<String, LocalDateTimeline<?>> lagRegelSporingMap(PgiKalkulatorInput input) {
-        var map = new LinkedHashMap<String, LocalDateTimeline<?>>();
-        map.put("gsnittTidsserie", input.gsnittTidsserie().mapValue(Grunnbeløp::verdi));
-        map.put("oppjusteringsfaktorTidsserie", input.oppjusteringsfaktorTidsserie());
-        return map;
     }
 
     private static BigDecimal hentSnittTreSisteÅr(Map<Year, BigDecimal> pgiPerÅr) {
