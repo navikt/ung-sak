@@ -1,41 +1,60 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektsKilde;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseAggregat;
+import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
-import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.avgrensOgOppjusterÅrsinntekter;
 import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator.lagPgiKalkulatorInput;
 
 
+@ApplicationScoped
 public class BeregningTjeneste {
 
+    private final InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste;
+
+    @Inject
+    public BeregningTjeneste(InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
+        this.inntektArbeidYtelseTjeneste = inntektArbeidYtelseTjeneste;
+    }
+
+    public List<Inntektspost> hentSigrunInntektsposter(Long behandlingId) {
+        var iayGrunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingId);
+        if (iayGrunnlag.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        var inntekter = iayGrunnlag.get().getRegisterVersjon().map(InntektArbeidYtelseAggregat::getInntekter);
+        Collection<Inntektspost> inntektsposter = new InntektFilter(inntekter).getInntektsposter(InntektsKilde.SIGRUN);
+        return List.copyOf(inntektsposter);
+    }
+
     public static BeregningInput lagBeregningInput(Year sisteTilgjengeligeLigningsår, LocalDate skjæringstidspunkt, List<Inntektspost> inntekter) {
-        var sisteTilgjengeligeLigningsårTom = sisteTilgjengeligeLigningsår.atMonth(12).atEndOfMonth();
-
-        var pgiPerÅr = inntekter.stream()
-            .filter(ip -> !ip.getPeriode().getTomDato().isAfter(sisteTilgjengeligeLigningsårTom))
-            .collect(Collectors.groupingBy(
-                ip -> Year.from(ip.getPeriode().getFomDato()),
-                Collectors.reducing(Beløp.ZERO, Inntektspost::getBeløp, Beløp::adder)
-            ));
-
-        var pgi3 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår, Beløp.ZERO);
-        var pgi2 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår.minusYears(1), Beløp.ZERO);
-        var pgi1 = pgiPerÅr.getOrDefault(sisteTilgjengeligeLigningsår.minusYears(2), Beløp.ZERO);
-
-        return new BeregningInput(pgi1, pgi2, pgi3, skjæringstidspunkt, sisteTilgjengeligeLigningsår);
+        PgiHjelper pgiHjelper = new PgiHjelper(inntekter, sisteTilgjengeligeLigningsår);
+        return new BeregningInput(
+            pgiHjelper.getPgi1(),
+            pgiHjelper.getPgi2(),
+            pgiHjelper.getPgi3(),
+            skjæringstidspunkt,
+            sisteTilgjengeligeLigningsår
+        );
     }
 
     public static BesteberegningResultat avgjørBesteberegning(BeregningInput input) {

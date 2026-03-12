@@ -20,12 +20,22 @@ public record PgiÅrsinntektDto(
 
     @NotNull
     @Digits(integer = 6, fraction = 0)
-    @JsonProperty(value = "pgiÅrsinntekt", required = true)
-    BigDecimal pgiÅrsinntekt,
+    @JsonProperty(value = "sum", required = true)
+    BigDecimal sum,
 
     @NotNull
     @Digits(integer = 6, fraction = 0)
-    @JsonProperty(value = "avkortetOgOppjustert", required = true)
-    BigDecimal avkortetOgOppjustert
+    @JsonProperty(value = "sumAvkortetOgOppjustert", required = true)
+    BigDecimal sumAvkortetOgOppjustert,
+
+    @NotNull
+    @Digits(integer = 6, fraction = 0)
+    @JsonProperty(value = "arbeidsinntekt", required = true)
+    BigDecimal arbeidsinntekt,
+
+    @NotNull
+    @Digits(integer = 6, fraction = 0)
+    @JsonProperty(value = "næring", required = true)
+    BigDecimal næring
 ) {
 }
