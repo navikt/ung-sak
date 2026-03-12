@@ -92,7 +92,7 @@ public class AktivitetspengerRestTjeneste {
             .map(segment -> {
                 Year år = Year.of(segment.getFom().getYear());
 
-                var pgiInntektstyper = pgiHjelper.getSummerBeløpPrInntektsposttypePrÅr().getOrDefault(år, Map.of());
+                var pgiInntektstyper = pgiHjelper.hentSumPrInntektspostTypePrÅr().getOrDefault(år, Map.of());
                 BigDecimal arbeidsinntekt = hentPgiForTyper(pgiInntektstyper, Set.of(InntektspostType.LØNN));
                 BigDecimal næring = hentPgiForTyper(pgiInntektstyper, Set.of(InntektspostType.SELVSTENDIG_NÆRINGSDRIVENDE, InntektspostType.NÆRING_FISKE_FANGST_FAMBARNEHAGE));
 

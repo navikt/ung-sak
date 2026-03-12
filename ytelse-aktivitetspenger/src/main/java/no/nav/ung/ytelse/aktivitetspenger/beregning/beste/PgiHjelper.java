@@ -29,7 +29,7 @@ public class PgiHjelper {
             ));
     }
 
-    public Map<Year, Beløp> hentPGIPrÅr() {
+    public Map<Year, Beløp> hentSumPGIPrÅr() {
         return summerBeløpPrInntektsposttypePrÅr.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
@@ -38,18 +38,18 @@ public class PgiHjelper {
     }
 
     public Beløp getPgi1() {
-        return hentPGIPrÅr().getOrDefault(sisteTilgjengeligeLigningsår.minusYears(2), Beløp.ZERO);
+        return hentSumPGIPrÅr().getOrDefault(sisteTilgjengeligeLigningsår.minusYears(2), Beløp.ZERO);
     }
 
     public Beløp getPgi2() {
-        return hentPGIPrÅr().getOrDefault(sisteTilgjengeligeLigningsår.minusYears(1), Beløp.ZERO);
+        return hentSumPGIPrÅr().getOrDefault(sisteTilgjengeligeLigningsår.minusYears(1), Beløp.ZERO);
     }
 
     public Beløp getPgi3() {
-        return hentPGIPrÅr().getOrDefault(sisteTilgjengeligeLigningsår, Beløp.ZERO);
+        return hentSumPGIPrÅr().getOrDefault(sisteTilgjengeligeLigningsår, Beløp.ZERO);
     }
 
-    public Map<Year, Map<InntektspostType, Beløp>> getSummerBeløpPrInntektsposttypePrÅr() {
+    public Map<Year, Map<InntektspostType, Beløp>> hentSumPrInntektspostTypePrÅr() {
         return summerBeløpPrInntektsposttypePrÅr;
     }
 }
