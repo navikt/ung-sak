@@ -2051,10 +2051,19 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto" : {
         "properties" : {
-          "avkortetOgOppjustert" : {
+          "arbeidsinntekt" : {
             "type" : "number"
           },
-          "pgiÅrsinntekt" : {
+          "næring" : {
+            "type" : "number"
+          },
+          "sum" : {
+            "type" : "number"
+          },
+          "sumAvkortet" : {
+            "type" : "number"
+          },
+          "sumAvkortetOgOppjustert" : {
             "type" : "number"
           },
           "årstall" : {
@@ -2062,7 +2071,7 @@
             "type" : "integer"
           }
         },
-        "required" : [ "avkortetOgOppjustert", "pgiÅrsinntekt", "årstall" ],
+        "required" : [ "arbeidsinntekt", "næring", "sum", "sumAvkortet", "sumAvkortetOgOppjustert", "årstall" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
