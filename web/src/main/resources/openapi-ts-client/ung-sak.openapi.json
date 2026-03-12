@@ -2010,6 +2010,61 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto" : {
+        "properties" : {
+          "beregningsgrunnlag" : {
+            "type" : "number"
+          },
+          "beregningsgrunnlagRedusert" : {
+            "type" : "number"
+          },
+          "besteBeregningResultatType" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType"
+          },
+          "dagsats" : {
+            "type" : "number"
+          },
+          "pgiÅrsinntekter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto"
+            },
+            "type" : "array"
+          },
+          "skjæringstidspunkt" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "årsinntektSisteTreÅr" : {
+            "type" : "number"
+          },
+          "årsinntektSisteÅr" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "beregningsgrunnlag", "beregningsgrunnlagRedusert", "besteBeregningResultatType", "dagsats", "pgiÅrsinntekter", "skjæringstidspunkt", "årsinntektSisteTreÅr", "årsinntektSisteÅr" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType" : {
+        "enum" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ]
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto" : {
+        "properties" : {
+          "avkortetOgOppjustert" : {
+            "type" : "number"
+          },
+          "pgiÅrsinntekt" : {
+            "type" : "number"
+          },
+          "årstall" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "avkortetOgOppjustert", "pgiÅrsinntekt", "årstall" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
         "properties" : {
           "fødselsdato" : {
@@ -5485,6 +5540,35 @@
           }
         },
         "tags" : [ "aksjonspunkt" ]
+      }
+    },
+    "/api/aktivitetspenger/beregningsgrunnlag" : {
+      "get" : {
+        "description" : "Henter beregningsgrunnlag for en aktivitetspengerbehandling",
+        "operationId" : "getBeregningsgrunnlag",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "avp" ]
       }
     },
     "/api/aktoer-info" : {

@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public class MånedsvisningDtoMapper {
 
-    static List<UngdomsytelseUtbetaltMånedDto> mapSatsOgUtbetalingPrMåned(BehandlingAvsluttetTidspunkt aktuellAvsluttetTid,
+    public static List<UngdomsytelseUtbetaltMånedDto> mapSatsOgUtbetalingPrMåned(BehandlingAvsluttetTidspunkt aktuellAvsluttetTid,
                                                                           LocalDateTimeline<YearMonth> månedsvisPeriodisering,
                                                                           LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje,
                                                                           LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje,

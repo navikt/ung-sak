@@ -71,6 +71,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
         var satsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(beregnDagsatsInput);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
