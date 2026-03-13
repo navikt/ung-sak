@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
@@ -39,7 +40,7 @@ class MånedsvisningDtoMapperTest {
 
         final var månedstidslinje = new LocalDateTimeline<>(fom, tom, YearMonth.of(2025, 1));
         final var tilkjentYtelseTidslinje = new LocalDateTimeline<>(fom, tom, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, BigDecimal.valueOf(100), BigDecimal.TEN ));
-        final var kontrollTidslinje = new LocalDateTimeline<BigDecimal>(List.of());
+        final var kontrollTidslinje = new LocalDateTimeline<KontrollerteInntekter>(List.of());
         final var satsperioder = new UngdomsytelseSatsPerioder(List.of(new UngdomsytelseSatsPeriode(new LocalDateInterval(fom, tom), satser)), "", "");
         var avsluttetTid = LocalDateTime.now();
         var aktuellAvsluttetTid = new BehandlingAvsluttetTidspunkt(avsluttetTid);
@@ -99,7 +100,7 @@ class MånedsvisningDtoMapperTest {
         final var tilkjentYtelseTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fomMåned1, tomMåned1, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, BigDecimal.valueOf(100), BigDecimal.TEN)),
             new LocalDateSegment<>(fomMåned2, tomMåned2, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, BigDecimal.valueOf(100), BigDecimal.TEN))));
-        final var kontrollTidslinje = new LocalDateTimeline<>(fomMåned2, tomMåned2, BigDecimal.ZERO);
+        final var kontrollTidslinje = new LocalDateTimeline<>(fomMåned2, tomMåned2, new KontrollerteInntekter(BigDecimal.ZERO, null));
         final var satsperioder = new UngdomsytelseSatsPerioder(List.of(new UngdomsytelseSatsPeriode(new LocalDateInterval(fom, tom), satser)), "", "");
         var avsluttetTid = LocalDateTime.now();
         var aktuellAvsluttetTid = new BehandlingAvsluttetTidspunkt(avsluttetTid);
@@ -186,7 +187,7 @@ class MånedsvisningDtoMapperTest {
         final var tilkjentYtelseTidslinje = new LocalDateTimeline<TilkjentYtelseVerdi>(List.of(
             new LocalDateSegment<>(fomMåned1, tomMåned1, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, BigDecimal.valueOf(100), BigDecimal.TEN   )),
             new LocalDateSegment<>(fomMåned2, tomMåned2, new TilkjentYtelseVerdi(uredusert, reduksjon, redusert, dagsats, BigDecimal.valueOf(100), BigDecimal.TEN  ))));
-        final var kontrollTidslinje = new LocalDateTimeline<BigDecimal>(fomMåned2, tomMåned2, BigDecimal.ZERO);
+        final var kontrollTidslinje = new LocalDateTimeline<KontrollerteInntekter>(fomMåned2, tomMåned2, new KontrollerteInntekter(BigDecimal.ZERO, null));
         final var satsperioder = new UngdomsytelseSatsPerioder(List.of(
             new UngdomsytelseSatsPeriode(new LocalDateInterval(fom, fomMåned2.plusDays(10)), satser),
             new UngdomsytelseSatsPeriode(new LocalDateInterval(satsendringDato, tom), satser2)),

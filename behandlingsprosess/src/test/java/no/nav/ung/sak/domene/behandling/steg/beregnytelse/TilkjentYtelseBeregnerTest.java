@@ -1,8 +1,11 @@
 package no.nav.ung.sak.domene.behandling.steg.beregnytelse;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
+import no.nav.ung.sak.ytelse.RapportertInntektBeregner;
+import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import org.junit.jupiter.api.Test;
 
@@ -51,7 +54,9 @@ class TilkjentYtelseBeregnerTest {
     }
 
     private static TilkjentYtelseVerdi beregn(LocalDateInterval di, BeregnetSats sats, BigDecimal rapporertinntekt) {
-        return TilkjentYtelseBeregner.beregn(di, sats, rapporertinntekt).verdi();
+        var inntekt = rapporertinntekt != null ? new KontrollerteInntekter(rapporertinntekt, BigDecimal.ZERO) : new KontrollerteInntekter(BigDecimal.ZERO, BigDecimal.ZERO);
+        var beregner = new RapportertInntektBeregner(inntekt, new InntektsreduksjonKonfigurasjon(new BigDecimal("0.66"), new BigDecimal("0.66")), di);
+        return TilkjentYtelseBeregner.beregn(di, sats, beregner).verdi();
     }
 
     @Test
