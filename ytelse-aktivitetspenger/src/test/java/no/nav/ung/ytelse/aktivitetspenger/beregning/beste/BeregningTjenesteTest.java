@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.domene.iay.modell.InntektspostBuilder;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,7 @@ class BeregningTjenesteTest {
 
     private static Inntektspost lagInntektspost(int år, BigDecimal beløp) {
         return InntektspostBuilder.ny()
+            .medInntektspostType(InntektspostType.LØNN)
             .medPeriode(LocalDate.of(år, 1, 1), LocalDate.of(år, 12, 31))
             .medBeløp(beløp)
             .build();
