@@ -274,6 +274,8 @@ spec:
       value: "false"
     - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
       value: "false"
+    - name: OPPGAVER_I_UNG_DELTAKELSE_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
