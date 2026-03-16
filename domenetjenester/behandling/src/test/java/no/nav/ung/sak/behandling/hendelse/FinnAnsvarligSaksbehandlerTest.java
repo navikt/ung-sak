@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandling.hendelse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingDel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,7 +17,7 @@ public class FinnAnsvarligSaksbehandlerTest {
 
     private TestScenarioBuilder scenario = TestScenarioBuilder.builderMedSøknad();
     private Behandling behandling = scenario.lagMocked();
-    private BehandlingAnsvarlig behandlingAnsvarlig = new BehandlingAnsvarlig(behandling.getId(), BehandlingAnsvarlig.BehandlingDel.HELE);
+    private BehandlingAnsvarlig behandlingAnsvarlig = new BehandlingAnsvarlig(behandling.getId(), BehandlingDel.HELE);
 
     @Test
     public void ansvarligSaksbehandlerSettesTilAnsvarligBeslutterNårSatt() {

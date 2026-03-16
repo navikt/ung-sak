@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
-enum BehandlingDel {
+public enum BehandlingDel {
 
     HELE("HELE"),
     DEL_1("DEL_1"),
