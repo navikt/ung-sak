@@ -40,7 +40,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>10.5.0</felles.version>
-        <swagger.version>2.2.43</swagger.version>
+        <swagger.version>2.2.45</swagger.version>
         <junit.version>6.0.3</junit.version>
         <k9format.version>12.9.1</k9format.version>
         <jackson.version>2.21.1</jackson.version>
@@ -48,9 +48,9 @@
         <kotlin-stdlib.version>2.3.10</kotlin-stdlib.version>
         <jandex.version>3.5.3</jandex.version>
         <pdfgen-core.version>1.1.77</pdfgen-core.version>
-        <flyway.version>12.0.2</flyway.version>
-        <confluent.platform.version>8.1.1</confluent.platform.version>
-        <mockito.version>5.21.0</mockito.version>
+        <flyway.version>12.0.3</flyway.version>
+        <confluent.platform.version>8.2.0</confluent.platform.version>
+        <mockito.version>5.22.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>
         <ung-brukerdialog-api.version>0.1.4</ung-brukerdialog-api.version>
         <handlebars.version>4.5.0</handlebars.version>
@@ -185,7 +185,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.25.0</version>
+                <version>2.26.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -454,7 +454,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.14.0</version>
+                <version>2.14.1</version>
             </dependency>
             <dependency>
                 <groupId>org.jasypt</groupId>
@@ -756,7 +756,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
