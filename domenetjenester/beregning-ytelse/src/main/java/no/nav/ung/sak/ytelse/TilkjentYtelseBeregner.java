@@ -23,10 +23,10 @@ import java.util.function.Function;
 
 public class TilkjentYtelseBeregner {
 
-    public static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, RapportertInntektBeregner rapportertInntektBeregner) {
+    public static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, ReduksjonBeregner reduksjonBeregner) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(sats, "sats");
-        Objects.requireNonNull(rapportertInntektBeregner, "rapportertInntektBeregner");
+        Objects.requireNonNull(reduksjonBeregner, "rapportertInntektBeregner");
 
         if (!toYearMonth(periode.getFomDato()).equals(toYearMonth(periode.getTomDato()))) {
             throw new IllegalArgumentException("Periode må være innenfor samme måned");
@@ -36,7 +36,7 @@ public class TilkjentYtelseBeregner {
         final var uredusertBeløp = sats.totalSats().setScale(10, RoundingMode.HALF_UP);
         sporing.put("totalSats", sats.totalSats().toString());
 
-        final var reduksjonResultat = rapportertInntektBeregner.beregnReduksjon();
+        final var reduksjonResultat = reduksjonBeregner.beregnReduksjon();
         sporing.putAll(reduksjonResultat.sporing());
 
         final var reduksjon = reduksjonResultat.reduksjon();
@@ -45,7 +45,7 @@ public class TilkjentYtelseBeregner {
         final var redusertBeløp = uredusertBeløp.subtract(reduksjon).max(BigDecimal.ZERO);
         sporing.put("redusertBeløp", redusertBeløp.toString());
 
-        final var antallVirkedager = rapportertInntektBeregner.antallVirkedager();
+        final var antallVirkedager = reduksjonBeregner.antallVirkedager();
         final var avrundetDagsats = antallVirkedager.equals(BigDecimal.ZERO) ? BigDecimal.ZERO : redusertBeløp.divide(antallVirkedager, 0, RoundingMode.HALF_UP);
         BigDecimal tilkjentBeløp = avrundetDagsats.multiply(antallVirkedager);
         sporing.put("dagsats", avrundetDagsats.toString());

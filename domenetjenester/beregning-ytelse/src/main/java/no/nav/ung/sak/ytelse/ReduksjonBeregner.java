@@ -10,7 +10,7 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.Map;
 
-public class RapportertInntektBeregner {
+public class ReduksjonBeregner {
 
     private final InntektsreduksjonKonfigurasjon konfigurasjon;
     private final KontrollerteInntekter kontrollerteInntekter;
@@ -18,7 +18,7 @@ public class RapportertInntektBeregner {
     private final BigDecimal antallVirkedagerHeleMåned;
     private final BigDecimal andelVirkedagerIMåned;
 
-    public RapportertInntektBeregner(KontrollerteInntekter kontrollerteInntekter, InntektsreduksjonKonfigurasjon konfigurasjon, LocalDateInterval periode) {
+    public ReduksjonBeregner(KontrollerteInntekter kontrollerteInntekter, InntektsreduksjonKonfigurasjon konfigurasjon, LocalDateInterval periode) {
         this.konfigurasjon = konfigurasjon;
         this.kontrollerteInntekter = kontrollerteInntekter;
 
@@ -33,8 +33,6 @@ public class RapportertInntektBeregner {
     public BigDecimal antallVirkedager() {
         return antallVirkedager;
     }
-
-    public record Resultat(BigDecimal reduksjon, Map<String, String> sporing) {}
 
     public Resultat beregnReduksjon() {
         final var sporing = new HashMap<String, String>();
@@ -65,4 +63,9 @@ public class RapportertInntektBeregner {
             sporing
         );
     }
+
+    public record Resultat(
+        BigDecimal reduksjon,
+        Map<String, String> sporing
+    ) {}
 }

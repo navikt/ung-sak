@@ -28,7 +28,7 @@ import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
-import no.nav.ung.sak.ytelse.RapportertInntektBeregner;
+import no.nav.ung.sak.ytelse.ReduksjonBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 
 import java.math.BigDecimal;
@@ -77,7 +77,7 @@ public class BrevScenarioerUtils {
         return beregnetSats.intersection(ytelseTidslinje).combine(kontrollerInntektHolder,
             (s, lhs, rhs) -> {
                 var inntekt = rhs != null ? bestemInntekt(rhs.getValue()) : BigDecimal.ZERO;
-                var beregner = new RapportertInntektBeregner(new KontrollerteInntekter(inntekt, BigDecimal.ZERO), new InntektsreduksjonKonfigurasjon(new BigDecimal("0.66"), new BigDecimal("0.66")), s);
+                var beregner = new ReduksjonBeregner(new KontrollerteInntekter(inntekt, BigDecimal.ZERO), new InntektsreduksjonKonfigurasjon(new BigDecimal("0.66"), new BigDecimal("0.66")), s);
                 return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), beregner).verdi());
             },
             LocalDateTimeline.JoinStyle.LEFT_JOIN
