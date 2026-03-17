@@ -14,10 +14,10 @@ public enum AksjonspunktType implements Kodeverdi {
     OVERSTYRING("OVST", "Overstyring"),
     SAKSBEHANDLEROVERSTYRING("SAOV", "Saksbehandleroverstyring"),
 
-    DEL1_AUTOPUNKT("DEL1_AUTO", "Del 1 Autopunkt"),
-    DEL1_MANUELL("DEL1_MANU", "Del 1 Manuell"),
-    DEL1_OVERSTYRING("DEL1_OVST", "Del 1 Overstyring"),
-    DEL1_SAKSBEHANDLEROVERSTYRING("DEL1_SAOV", "Del 1 Saksbehandleroverstyring"),
+    LOKALKONTOR_AUTOPUNKT("LOKALKONTOR_AUTO", "Lokalkontor Autopunkt"),
+    LOKALKONTOR_MANUELL("LOKALKONTOR_MANU", "Lokalkontor Manuell"),
+    LOKALKONTOR_OVERSTYRING("LOKALKONTOR_OVST", "Lokalkontor Overstyring"),
+    LOKALKONTOR_SAKSBEHANDLEROVERSTYRING("LOKALKONTOR_SAOV", "Lokalkontor Saksbehandleroverstyring"),
 
     UDEFINERT("-", "Ikke definert"),
     ;
@@ -83,14 +83,26 @@ public enum AksjonspunktType implements Kodeverdi {
 
     public boolean erAutopunkt() {
         return this == AUTOPUNKT
-            || this == DEL1_AUTOPUNKT;
+            || this == LOKALKONTOR_AUTOPUNKT;
     }
 
     public boolean erOverstyringpunkt() {
         return this == OVERSTYRING
             || this == SAKSBEHANDLEROVERSTYRING
-            || this == DEL1_OVERSTYRING
-            || this == DEL1_SAKSBEHANDLEROVERSTYRING;
+            || this == LOKALKONTOR_OVERSTYRING
+            || this == LOKALKONTOR_SAKSBEHANDLEROVERSTYRING;
     }
 
+    public boolean erLokalkontorAksjonspunkt() {
+        return this == LOKALKONTOR_MANUELL
+            || this == LOKALKONTOR_OVERSTYRING
+            || this == LOKALKONTOR_SAKSBEHANDLEROVERSTYRING
+            || this == LOKALKONTOR_AUTOPUNKT;
+
+    }
+
+    public boolean erNavSentraltAksjonspunkt() {
+        return !erLokalkontorAksjonspunkt();
+
+    }
 }
