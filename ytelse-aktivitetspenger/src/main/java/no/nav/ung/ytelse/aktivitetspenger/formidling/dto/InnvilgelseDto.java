@@ -5,12 +5,11 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BesteBeregningResultat
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.Year;
 
 public record InnvilgelseDto(
     LocalDate ytelseFom,
     LocalDate ytelseTom,
-    Year sisteLignedeÅr,
+    String sisteLignedeÅr,
     BesteBeregningResultatType besteBeregningResultat,
     BigDecimal beregnetPrAar,
     BigDecimal dagsats

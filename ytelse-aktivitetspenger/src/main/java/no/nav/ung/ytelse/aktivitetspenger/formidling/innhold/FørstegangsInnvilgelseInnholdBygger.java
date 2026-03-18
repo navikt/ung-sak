@@ -44,7 +44,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             new InnvilgelseDto(
                 ytelseFom,
                 ytelseTom,
-                beregningsgrunnlag.getSisteLignedeÅr(),
+                beregningsgrunnlag.getSisteLignedeÅr().toString(),
                 beregningsgrunnlag.utledBesteBeregningResultatType(),
                 beregningsgrunnlag.getBeregnetPrAar(),
                 beregningsgrunnlag.getDagsats()
