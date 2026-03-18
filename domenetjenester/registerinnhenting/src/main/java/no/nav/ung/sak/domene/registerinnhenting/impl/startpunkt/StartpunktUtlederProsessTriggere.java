@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.registerinnhenting.impl.startpunkt;
 
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -59,7 +58,13 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
         if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
         }
-        return StartpunktType.INNHENT_REGISTEROPPLYSNINGER;
+        if (BehandlingÅrsakType.UTTALELSE_FRA_BRUKER.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT.equals(it.getÅrsak())
+        ) {
+            return StartpunktType.VURDER_KOMPLETTHET;
+        }
+        return StartpunktType.START;
     }
 
 

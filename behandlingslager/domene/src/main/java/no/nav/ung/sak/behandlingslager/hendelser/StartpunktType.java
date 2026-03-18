@@ -9,7 +9,7 @@ import java.util.Map;
 
 public enum StartpunktType implements Kodeverdi {
 
-    INNHENT_REGISTEROPPLYSNINGER("INNHENT_REGISTEROPPLYSNINGER", "Innhent registeropplysninger", 1),
+    START("START", "Innhent registeropplysninger", 1),
     INIT_PERIODER("INIT_PERIODER", "Initier perioder", 2),
     BEREGNING("BEREGNING", "Beregning", 25),
     VURDER_KOMPLETTHET("VURDER_KOMPLETTHET", "Vurder kompletthet", 30),
