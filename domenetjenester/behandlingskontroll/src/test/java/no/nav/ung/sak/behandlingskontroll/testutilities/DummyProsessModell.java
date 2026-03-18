@@ -25,8 +25,8 @@ public class DummyProsessModell {
     public BehandlingModell førstegangsbehandling() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, YTELSE_TYPE);
         modellBuilder
-            .medSteg(BehandlingStegType.START_STEG)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.START)
+            .medSteg(BehandlingStegType.START_STEG, StartpunktType.START)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.VURDER_SØKNADSFRIST)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
