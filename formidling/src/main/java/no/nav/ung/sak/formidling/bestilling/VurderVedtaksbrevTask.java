@@ -186,7 +186,7 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
         prosessTaskData.setProperty(VedtaksbrevBestillingTask.BREVBESTILLING_ID, brevbestillingId.toString());
         prosessTaskData.setCallIdFraEksisterende();
 
-        //setter lavere prioritert for brevgenerering for å ikke blokkere andre tasker, da brevgenereringen tar tid og
+        //setter lavere prioritet for brevgenerering for å ikke blokkere andre tasker, da brevgenereringen tar tid og
         //er begrenset til et visst antall samtidige tråder pga minnebruk.
         prosessTaskData.setPrioritet(0);
         return prosessTaskData;
