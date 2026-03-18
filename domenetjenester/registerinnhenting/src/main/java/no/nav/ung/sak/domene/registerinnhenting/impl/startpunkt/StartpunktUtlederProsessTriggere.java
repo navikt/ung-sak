@@ -55,13 +55,14 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
     }
 
     private StartpunktType mapTilStartPunktType(Trigger it) {
-        if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak())) {
+        if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.årsakerForInnhentingAvPersonopplysninger().contains(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
         }
         if (BehandlingÅrsakType.UTTALELSE_FRA_BRUKER.equals(it.getÅrsak()) ||
             BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.equals(it.getÅrsak()) ||
-            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT.equals(it.getÅrsak())
-        ) {
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().contains(it.getÅrsak())) {
             return StartpunktType.VURDER_KOMPLETTHET;
         }
         return StartpunktType.START;
