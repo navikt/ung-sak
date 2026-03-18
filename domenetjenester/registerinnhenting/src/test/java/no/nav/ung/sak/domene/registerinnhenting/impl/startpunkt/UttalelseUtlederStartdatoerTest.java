@@ -72,7 +72,7 @@ class UttalelseUtlederStartdatoerTest {
         final var startpunktType = startpunktUtleder.utledStartpunkt(null, nyGrunnlagId, gammelGrunnlagId);
 
         // assert
-        assertThat(startpunktType).isEqualTo(StartpunktType.START);
+        assertThat(startpunktType).isEqualTo(StartpunktType.VURDER_KOMPLETTHET);
     }
 
     @Test
@@ -85,7 +85,7 @@ class UttalelseUtlederStartdatoerTest {
         final var startpunktType = startpunktUtleder.utledStartpunkt(null, nyGrunnlagId, gammelGrunnlagId);
 
         // assert
-        assertThat(startpunktType).isEqualTo(StartpunktType.START);
+        assertThat(startpunktType).isEqualTo(StartpunktType.VURDER_KOMPLETTHET);
     }
 
     private Long lagGrunnlagMedJournalpostIder(int... journalpostIder) {
