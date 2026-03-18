@@ -10,6 +10,8 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.InnvilgelseDto;
 import org.slf4j.Logger;
 
@@ -18,9 +20,11 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FørstegangsInnvilgelseInnholdBygger.class);
 
-    @Inject
-    public FørstegangsInnvilgelseInnholdBygger() {
+    private final AktivitetspengerBeregningsgrunnlagRepository beregningsgrunnlagRepository;
 
+    @Inject
+    public FørstegangsInnvilgelseInnholdBygger(AktivitetspengerBeregningsgrunnlagRepository beregningsgrunnlagRepository) {
+        this.beregningsgrunnlagRepository = beregningsgrunnlagRepository;
     }
 
 
@@ -33,11 +37,18 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var ytelseFom = periode.getMinLocalDate();
         var ytelseTom = periode.getMaxLocalDate();
 
+        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlagTidslinje = beregningsgrunnlagRepository.hentBesteBeregningSomTidslinje(behandling.getId());
+        var beregningsgrunnlag = beregningsgrunnlagTidslinje.toSegments().first().getValue();
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
-                ytelseTom));
+                ytelseTom,
+                beregningsgrunnlag.getSisteLignedeÅr(),
+                beregningsgrunnlag.utledBesteBeregningResultatType(),
+                beregningsgrunnlag.getBeregnetPrAar(),
+                beregningsgrunnlag.getDagsats()
+        ));
     }
 
 }

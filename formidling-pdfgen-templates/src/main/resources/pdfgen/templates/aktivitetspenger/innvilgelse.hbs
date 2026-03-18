@@ -7,6 +7,42 @@
             Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du aktivitetspenger utenom lørdag og søndag.
         </p>
 
+        <h2>Hvorfor får du penger?</h2>
+        <p>Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning.</p>
+        <p>Pengene får du så lenge du får oppfølging fra Nav, og i inntil ett år.</p>
+
+       {{#eq besteBeregningResultat "SNITT_SISTE_TRE_ÅR"}}
+            <p>
+                Når vi har regnet ut hvor mye du får i aktivitetspenger,
+                har vi brukt den gjennomsnittlige årsinntekten din for de tre siste ferdiglignede årene.
+                Den er på {{beregnetPrAar}} kroner.
+            </p>
+
+            <p>
+                Vi har brukt denne summen fordi den er høyere enn minstesatsen for deg som er <OVER/UNDER> 25 år,
+                og høyere enn årsinntekten din i {{sisteLignedeÅr}}.
+                Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
+            </p>
+        {{else eq besteBeregningResultat "SISTE_ÅR"}}
+            <p>
+                Når vi har regnet ut hvor mye du får i aktivitetspenger,
+                har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{beregnetPrAar}} kroner.
+            </p>
+
+            <p>
+                Det er fordi denne inntekten er høyere enn minstesatsen for deg som er <OVER/UNDER> 25 år,
+                og høyere enn gjennomsnittet av årsinntekten din i for de tre siste ferdiglignende årene.
+                Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
+            </p>
+        {{/eq}}
+
+        <p>
+            For å finne dagsatsen din, har vi regnet ut hva 66 prosent av {{beregnetPrAar}} kroner er.
+            Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager.
+        </p>
+
+        <p>Det vil si at du har rett på {{dagsats}} kroner per dag.</p>
+
     {{/felles/seksjon/hoved}}
 
     {{> felles/footer/footer-vedtak }}
