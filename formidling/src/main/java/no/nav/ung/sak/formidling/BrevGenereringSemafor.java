@@ -18,16 +18,9 @@ public class BrevGenereringSemafor {
     }
 
     public static <T> T begrensetParallellitet(Supplier<T> supplier) {
-        try {
-            long t0 = System.nanoTime();
-            SEMAFOR.acquire();
-            long t1 = System.nanoTime();
-            long ventetidMillis = (t1 - t0) / 1_000_000;
-            if (ventetidMillis > 2000) {
-                LOG.warn("Ventet i {} ms på å få semafor for brevbestilling, skjer dette ofte bør semaforens antall og nodens minne økes for bedre ytelse", ventetidMillis);
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        boolean fikkSemafor = SEMAFOR.tryAcquire();
+        if (!fikkSemafor) {
+            throw new BrevGenereringSemaforIkkeTilgjengeligException();
         }
         try {
             return supplier.get();
@@ -35,6 +28,12 @@ public class BrevGenereringSemafor {
             SEMAFOR.release();
         }
 
+    }
+
+    public static class BrevGenereringSemaforIkkeTilgjengeligException extends RuntimeException {
+        public BrevGenereringSemaforIkkeTilgjengeligException() {
+            super("Alle semaforer for brevgenerering er opptatt, prøv igjen senere");
+        }
     }
 
 }

@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
@@ -46,6 +47,8 @@ class BrevdistribusjonTaskTest {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private final SafFake safTjeneste = new SafFake();
     private BehandlingRepositoryProvider repositoryProvider;
+    @Inject
+    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     @BeforeEach
     void setUp() {
@@ -79,7 +82,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VEDTAK.name());
 
         var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
-        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
+        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste, prosessTaskTjeneste);
 
         task.doTask(pd);
 
@@ -144,7 +147,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VIKTIG.name());
 
         var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
-        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
+        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste, prosessTaskTjeneste);
 
         task.doTask(pd);
 
