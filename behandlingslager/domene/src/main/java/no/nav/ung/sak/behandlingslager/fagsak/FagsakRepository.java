@@ -69,7 +69,7 @@ public class FagsakRepository {
         Objects.requireNonNull(tom, "tom");
         String sqlString = """
                     select f.* from Fagsak f
-                      where f.ytelseType <> 'OBSOLETE' and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+                      where f.ytelse_type <> 'OBSOLETE' and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
             """;
 
         Query query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
