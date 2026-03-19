@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
@@ -28,7 +29,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -490,8 +490,8 @@ public class Behandling extends BaseEntitet {
             .anyMatch(aksjonspunktDefinisjon::equals);
     }
 
-    public boolean harAksjonspunktMedTotrinnskontroll() {
-        return getAksjonspunkterStream()
+    public boolean harAksjonspunktMedTotrinnskontroll(BehandlingDel behandlingDel) {
+        return getAksjonspunkterStream(behandlingDel)
             .anyMatch(a -> !a.erAvbrutt() && a.isToTrinnsBehandling());
     }
 
@@ -506,6 +506,11 @@ public class Behandling extends BaseEntitet {
 
     private Stream<Aksjonspunkt> getAksjonspunkterStream() {
         return aksjonspunkter.stream();
+    }
+
+    private Stream<Aksjonspunkt> getAksjonspunkterStream(BehandlingDel behandlingDel) {
+        return aksjonspunkter.stream()
+            .filter(ap -> ap.getAksjonspunktDefinisjon().getBehandlingDel() == behandlingDel);
     }
 
     private Stream<Aksjonspunkt> getÅpneAksjonspunkterStream() {

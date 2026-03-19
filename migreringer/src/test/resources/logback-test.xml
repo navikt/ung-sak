@@ -14,12 +14,11 @@
     <logger name="no.nav" level="${log.level.no.nav:-INFO}" />
 
     <!-- skru paa for aa logge all sql statements med parametere -->
-    <logger name="org.hibernate.SQL" level="${log.level.org.hibernate.SQL:-TRACE}" />
+    <logger name="org.hibernate.SQL" level="${log.level.org.hibernate.SQL:-INFO}" />
     <logger name="com.zaxxer.hikari" level="${log.level.com.zaxxer.hikari:-WARN}" />
-    <logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-trace}" />
-    <logger name="org.hibernate.orm.jdbc.bind" level="TRACE" />
-
-    <logger name="org.hibernate" level="${log.level.org.hibernate:-TRACE}" />
+    <logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-WARN}" />
+    <logger name="org.hibernate.orm.jdbc.bind" level="WARN" />
+    <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}" />
     <logger name="org.hibernate.orm.deprecation" level="${log.level.org.hibernate.orm.deprecation:-ERROR}" />
 
     <logger name="ch.qos.logback" level="${log.level.ch.qos.logback:-WARN}" />

@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
@@ -29,12 +30,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunkt;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
 
 import java.util.Collection;
 import java.util.List;
@@ -61,6 +62,7 @@ public class AksjonspunktApplikasjonTjeneste {
     private BehandlingRepository behandlingRepository;
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester;
     private AksjonspunktRepository aksjonspunktRepository;
     private AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
@@ -73,8 +75,10 @@ public class AksjonspunktApplikasjonTjeneste {
     @Inject
     public AksjonspunktApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                           AksjonspunktRepository aksjonspunktRepository, AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste,
-                                           BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste) {
+                                           AksjonspunktRepository aksjonspunktRepository,
+                                           AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste,
+                                           BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
+                                           @Any Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester) {
 
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.aksjonspunktSporingTjeneste = aksjonspunktSporingTjeneste;
@@ -84,6 +88,7 @@ public class AksjonspunktApplikasjonTjeneste {
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
 
+        this.oppdaterAnsvarligSaksbehandlerTjenester = oppdaterAnsvarligSaksbehandlerTjenester;
     }
 
     public void bekreftAksjonspunkter(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Long behandlingId, BehandlingskontrollKontekst kontekst) {
@@ -116,10 +121,8 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     protected void setAnsvarligSaksbehandler(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Behandling behandling) {
-        if (bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> dto instanceof FatterVedtakAksjonspunktDto)) {
-            return;
-        }
-        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), getCurrentUserId());
+        OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste = OppdaterAnsvarligSaksbehandlerTjeneste.finnTjeneste(oppdaterAnsvarligSaksbehandlerTjenester, behandling.getFagsakYtelseType());
+        oppdaterAnsvarligSaksbehandlerTjeneste.oppdaterAnsvarligSaksbehandler(bekreftedeAksjonspunktDtoer, behandling.getId());
     }
 
     protected String getCurrentUserId() {

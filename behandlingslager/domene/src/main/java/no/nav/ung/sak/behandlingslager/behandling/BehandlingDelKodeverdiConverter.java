@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling;
 
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 
 import java.util.Arrays;
 

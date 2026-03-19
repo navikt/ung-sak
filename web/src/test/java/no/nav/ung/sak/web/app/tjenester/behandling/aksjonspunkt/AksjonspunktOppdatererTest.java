@@ -1,5 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -14,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.domene.vedtak.impl.FatterVedtakAksjonspunkt;
 import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
@@ -63,6 +66,10 @@ public class AksjonspunktOppdatererTest {
     @Inject
     private OpprettToTrinnsgrunnlag opprettTotrinnsgrunnlag;
 
+    @Inject
+    @Any
+    private Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester;
+
 
     @BeforeEach
     public void setup() {
@@ -85,7 +92,7 @@ public class AksjonspunktOppdatererTest {
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, behandlingAnsvarligRepository);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, oppdaterAnsvarligSaksbehandlerTjenester);
 
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
         assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId())).isEqualTo("hello");
