@@ -69,7 +69,7 @@ public class FagsakRepository {
         Objects.requireNonNull(tom, "tom");
         String sqlString = """
                     select f.* from Fagsak f
-                      where f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+                      where f.ytelseType <> 'OBSOLETE' and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
             """;
 
         Query query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
@@ -80,8 +80,12 @@ public class FagsakRepository {
     }
 
     public List<Fagsak> hentForBruker(AktørId aktørId) {
-        // TODO: Burde kanskje ekskludere OBSOLETE her?
-        return hentForBruker(aktørId, FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
+        Collection<FagsakYtelseType> notObsolete = FagsakYtelseType.kodeMap()
+            .values()
+            .stream()
+            .filter(it -> it != FagsakYtelseType.OBSOLETE)
+            .toList();
+        return hentForBruker(aktørId, notObsolete); // søk bare opp støtte ytelsetyper
     }
 
 
