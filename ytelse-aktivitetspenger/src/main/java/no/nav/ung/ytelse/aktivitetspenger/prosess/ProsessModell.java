@@ -22,10 +22,10 @@ public class ProsessModell {
     public BehandlingModell aktivitetspengerDel1() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.AKTIVITETSPENGER);
         modellBuilder
-            .medSteg(BehandlingStegType.START_STEG)
+            .medSteg(BehandlingStegType.START_STEG, StartpunktType.START)
             .medSteg(BehandlingStegType.INIT_PERIODER, StartpunktType.INIT_PERIODER)
             .medSteg(BehandlingStegType.INIT_VILKÅR)
-            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP, StartpunktType.INNHENT_REGISTEROPPLYSNINGER)
+            .medSteg(BehandlingStegType.INNHENT_REGISTEROPP)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.VURDER_BOSTED)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
