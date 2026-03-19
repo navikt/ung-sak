@@ -42,13 +42,15 @@ public class PipRepository {
             SELECT
                b.uuid behandlingUuid,
                b.behandling_status behandlingStatus,
-               b.ansvarlig_saksbehandler ansvarligSaksbehandler,
+               ba.ansvarlig_saksbehandler ansvarligSaksbehandler,
                f.fagsak_status fagsakStatus,
                f.saksnummer,
                f.ytelse_type fagsakYtelseType
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
-             WHERE b.id = :behandlingId""";
+             LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id AND ba.behandling_del = 'SENTRAL'
+             WHERE b.id = :behandlingId
+            """;
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("behandlingId", behandlingId);
@@ -84,13 +86,15 @@ public class PipRepository {
             SELECT
                 b.uuid behandlingUuid,
                 b.behandling_status behandlingStatus,
-                b.ansvarlig_saksbehandler ansvarligSaksbehandler,
+                ba.ansvarlig_saksbehandler ansvarligSaksbehandler,
                 f.fagsak_status fagsakStatus,
                 f.ytelse_type fagsakYtelseType,
                 f.saksnummer
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
-             WHERE b.uuid = :behandlingUuid""";
+             LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id AND ba.behandling_del = 'SENTRAL'
+             WHERE b.uuid = :behandlingUuid
+             """;
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("behandlingUuid", behandlingUuid);
