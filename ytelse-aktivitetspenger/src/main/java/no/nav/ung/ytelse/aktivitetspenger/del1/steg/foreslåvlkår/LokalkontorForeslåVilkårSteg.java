@@ -17,18 +17,18 @@ import org.slf4j.Logger;
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
-public class LokalkontorForeslsåVilkårSteg implements BehandlingSteg {
+public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
 
-    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(LokalkontorForeslsåVilkårSteg.class);
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(LokalkontorForeslåVilkårSteg.class);
 
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
-    LokalkontorForeslsåVilkårSteg() {
+    LokalkontorForeslåVilkårSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public LokalkontorForeslsåVilkårSteg(BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
+    public LokalkontorForeslåVilkårSteg(BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 

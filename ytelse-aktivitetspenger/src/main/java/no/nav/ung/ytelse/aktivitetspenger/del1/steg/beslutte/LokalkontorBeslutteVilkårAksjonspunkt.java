@@ -40,10 +40,10 @@ public class LokalkontorBeslutteVilkårAksjonspunkt {
         this.oppdaterAnsvarligSaksbehandlerTjeneste = oppdaterAnsvarligSaksbehandlerTjeneste;
     }
 
-    public void oppdater(Behandling behandling, AksjonspunktDefinisjon fatteVedtakAksjonspunktDefinisjon, Collection<VedtakAksjonspunktData> aksjonspunkter) {
+    public void oppdater(Behandling behandling, AksjonspunktDefinisjon beslutteVilkårAksjonspunktDefinisjon, Collection<VedtakAksjonspunktData> aksjonspunkter) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
-        oppdaterAnsvarligSaksbehandlerTjeneste.oppdaterAnsvarligBeslutter(fatteVedtakAksjonspunktDefinisjon, behandling.getId());
+        oppdaterAnsvarligSaksbehandlerTjeneste.oppdaterAnsvarligBeslutter(beslutteVilkårAksjonspunktDefinisjon, behandling.getId());
 
         List<Totrinnsvurdering> totrinnsvurderinger = new ArrayList<>();
         List<Aksjonspunkt> skalReåpnes = new ArrayList<>();
