@@ -4,7 +4,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
 import org.junit.jupiter.api.BeforeEach;
@@ -22,7 +22,7 @@ class BehandlingDtoUtilTest {
     private OrganisasjonsEnhet organisasjonsEnhet = new OrganisasjonsEnhet("4833", "NAV Familie- og pensjonsytelser");
 
     Behandling behandling = Mockito.mock(Behandling.class);
-    BehandlingAnsvarlig behandlingAnsvarlig = new BehandlingAnsvarlig(1L, BehandlingDel.HELE);
+    BehandlingAnsvarlig behandlingAnsvarlig = new BehandlingAnsvarlig(1L, BehandlingDel.SENTRAL);
 
     @BeforeEach
     void setUp() {

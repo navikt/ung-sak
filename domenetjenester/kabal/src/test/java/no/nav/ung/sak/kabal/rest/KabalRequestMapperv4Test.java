@@ -10,7 +10,7 @@ import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
 import no.nav.ung.sak.kabal.kontrakt.KabalRequestv4;
@@ -53,7 +53,7 @@ class KabalRequestMapperv4Test {
 
         klageUtredning.setKlagevurdering(klageVurderingAdapter);
 
-        behandlingAnsvarlig = new BehandlingAnsvarlig(klageBehandling.getId(), BehandlingDel.HELE);
+        behandlingAnsvarlig = new BehandlingAnsvarlig(klageBehandling.getId(), BehandlingDel.SENTRAL);
         behandlingAnsvarlig.setBehandlendeEnhet(new OrganisasjonsEnhet("4401", "Testenhet"));
         behandlingAnsvarlig.setAnsvarligSaksbehandler("Z1234567");
         klageBehandling.setMigrertKilde(Fagsystem.UNG_SAK);

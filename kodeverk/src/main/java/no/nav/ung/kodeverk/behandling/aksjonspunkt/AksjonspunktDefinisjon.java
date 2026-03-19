@@ -2,16 +2,34 @@ package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 import java.time.Period;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.*;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.*;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AVBRYTES;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.LOKALKONTOR_BESLUTTER_VILKÅR_KODE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_SKJERMLENKE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_VILKÅR;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_ANNET;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_ARBEIDSGIVER;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_SAKSBEHANDLER;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_SØKER;
 
 /**
  * Definerer mulige Aksjonspunkter inkludert hvilket Vurderingspunkt de må løses i.
@@ -28,6 +46,12 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.UTREDES), BehandlingStegType.FATTE_VEDTAK,
         UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK,
+        ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
+    LOKALKONTOR_BESLUTTER_VILKÅR(LOKALKONTOR_BESLUTTER_VILKÅR_KODE,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Lokalkontor beslutter vilkår",
+        Set.of(BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR, BehandlingStatus.UTREDES), BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR,
+        UTEN_VILKÅR,
+        SkjermlenkeType.LOKALKONTOR_BESLUTTER_VILKÅR,
         ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
 
     SØKERS_OPPLYSNINGSPLIKT_MANU(
@@ -65,8 +89,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
-        AksjonspunktType.MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
-        VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, ENTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
+        VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 60xx
     OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE,
@@ -464,4 +488,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return erUtgått;
     }
 
+    public BehandlingDel getBehandlingDel() {
+        return getAksjonspunktType().erLokalkontorAksjonspunkt() ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+    }
 }

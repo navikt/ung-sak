@@ -1,9 +1,5 @@
 package no.nav.ung.sak.produksjonsstyring.totrinn;
 
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
@@ -16,12 +12,15 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
-
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.kodeverk.AksjonspunktDefinisjonKodeverdiConverter;
+
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity(name = "Totrinnsvurdering")
 @Table(name = "TOTRINNSVURDERING")
@@ -105,7 +104,6 @@ public class Totrinnsvurdering extends BaseEntitet {
             totrinnsvurderingMal.vurderPåNyttÅrsaker.add(vurderPåNyttÅrsak);
             return this;
         }
-
 
         public Totrinnsvurdering build() {
             verifyStateForBuild();

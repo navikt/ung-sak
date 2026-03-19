@@ -1,19 +1,17 @@
-package no.nav.ung.sak.domene.vedtak.impl;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.beslutte;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
 import no.nav.ung.sak.domene.vedtak.VedtakAksjonspunktData;
-import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
@@ -24,32 +22,28 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class FatterVedtakAksjonspunkt {
+public class LokalkontorBeslutteVilkårAksjonspunkt {
 
-    private VedtakTjeneste vedtakTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
-    private Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester;
+    private OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste;
 
-    public FatterVedtakAksjonspunkt() {
+    public LokalkontorBeslutteVilkårAksjonspunkt() {
     }
 
     @Inject
-    public FatterVedtakAksjonspunkt(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                    VedtakTjeneste vedtakTjeneste,
-                                    TotrinnTjeneste totrinnTjeneste,
-                                    @Any Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester) {
-        this.vedtakTjeneste = vedtakTjeneste;
+    public LokalkontorBeslutteVilkårAksjonspunkt(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+                                                 TotrinnTjeneste totrinnTjeneste,
+                                                 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste) {
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
-        this.oppdaterAnsvarligSaksbehandlerTjenester = oppdaterAnsvarligSaksbehandlerTjenester;
+        this.oppdaterAnsvarligSaksbehandlerTjeneste = oppdaterAnsvarligSaksbehandlerTjeneste;
     }
 
-    public void oppdater(Behandling behandling, AksjonspunktDefinisjon fatteVedtakAksjonspunktDefinisjon, Collection<VedtakAksjonspunktData> aksjonspunkter) {
+    public void oppdater(Behandling behandling, AksjonspunktDefinisjon beslutteVilkårAksjonspunktDefinisjon, Collection<VedtakAksjonspunktData> aksjonspunkter) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
 
-        OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste = OppdaterAnsvarligSaksbehandlerTjeneste.finnTjeneste(oppdaterAnsvarligSaksbehandlerTjenester, behandling.getFagsakYtelseType());
-        oppdaterAnsvarligSaksbehandlerTjeneste.oppdaterAnsvarligBeslutter(fatteVedtakAksjonspunktDefinisjon, behandling.getId());
+        oppdaterAnsvarligSaksbehandlerTjeneste.oppdaterAnsvarligBeslutter(beslutteVilkårAksjonspunktDefinisjon, behandling.getId());
 
         List<Totrinnsvurdering> totrinnsvurderinger = new ArrayList<>();
         List<Aksjonspunkt> skalReåpnes = new ArrayList<>();
@@ -71,7 +65,7 @@ public class FatterVedtakAksjonspunkt {
             totrinnsvurderinger.add(vurderingBuilder.build());
         }
         totrinnTjeneste.settNyeTotrinnaksjonspunktvurderinger(behandling, totrinnsvurderinger);
-        vedtakTjeneste.lagHistorikkinnslagFattVedtak(behandling);
+
         // Noe spesialhåndtering ifm totrinn og tilbakeføring fra FVED
         behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, skalReåpnes, true);
     }
