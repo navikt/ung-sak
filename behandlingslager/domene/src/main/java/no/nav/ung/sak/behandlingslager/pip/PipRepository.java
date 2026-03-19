@@ -48,8 +48,7 @@ public class PipRepository {
                f.ytelse_type fagsakYtelseType
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
-             LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id
-               AND ba.behandling_del = 'SENTRAL'
+             LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id AND ba.behandling_del = 'SENTRAL'
              WHERE b.id = :behandlingId
             """;
 
@@ -93,9 +92,8 @@ public class PipRepository {
                 f.saksnummer
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
-             left join behandling_ansvarlig ba on ba.behandling_id = b.id
+             LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id AND ba.behandling_del = 'SENTRAL'
              WHERE b.uuid = :behandlingUuid
-               and ba.behandling_del = 'SENTRAL'
              """;
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
