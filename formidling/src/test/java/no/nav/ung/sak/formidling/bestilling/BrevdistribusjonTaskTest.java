@@ -47,8 +47,6 @@ class BrevdistribusjonTaskTest {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private final SafFake safTjeneste = new SafFake();
     private BehandlingRepositoryProvider repositoryProvider;
-    @Inject
-    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     @BeforeEach
     void setUp() {
@@ -82,7 +80,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VEDTAK.name());
 
         var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
-        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste, prosessTaskTjeneste);
+        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
 
         task.doTask(pd);
 
@@ -147,7 +145,7 @@ class BrevdistribusjonTaskTest {
         pd.setProperty(BREVBESTILLING_DISTRIBUSJONSTYPE, DistribusjonsType.VIKTIG.name());
 
         var brevHistorikkinnslagTjeneste = new BrevHistorikkinnslagTjeneste(historikkinnslagRepository, safTjeneste);
-        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste, prosessTaskTjeneste);
+        var task = new BrevdistribusjonTask(brevbestillingRepository, dokDistKlient, brevHistorikkinnslagTjeneste);
 
         task.doTask(pd);
 
