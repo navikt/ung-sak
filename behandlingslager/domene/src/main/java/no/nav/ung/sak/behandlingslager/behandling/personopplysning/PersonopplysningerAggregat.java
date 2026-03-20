@@ -104,6 +104,18 @@ public class PersonopplysningerAggregat {
             .collect(Collectors.toList());
     }
 
+    public List<FødselOgDødInfo> utledBarnsFødselOgDødInformasjon() {
+        return getRelasjoner().stream()
+            .filter(r -> r.getRelasjonsrolle() == RelasjonsRolleType.BARN)
+            .map(PersonRelasjonEntitet::getTilAktørId)
+            .map(mapFødselOgDødInformasjonForAktør())
+            .toList();
+    }
+
+    private Function<AktørId, FødselOgDødInfo> mapFødselOgDødInformasjonForAktør() {
+        return aktørId -> new FødselOgDødInfo(aktørId, getPersonopplysning(aktørId).getFødselsdato(), getPersonopplysning(aktørId).getDødsdato());
+    }
+
     public List<PersonopplysningEntitet> getAlleBarnFødtI(Interval fødselIntervall) {
         return getBarnaTil(søkerAktørId).stream()
             .filter(barn -> fødselIntervall.overlaps(byggInterval(barn.getFødselsdato())))

@@ -1,6 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
 import no.nav.ung.sak.diff.DiffIgnore;
@@ -45,6 +46,11 @@ public class AktivitetspengerGrunnsatsPerioder extends BaseEntitet {
 
     public List<AktivitetspengerGrunnsatsPeriode> getPerioder() {
         return perioder;
+    }
+
+    public boolean harMinstEnPeriodeMedHøySats() {
+        return perioder.stream()
+            .anyMatch(p -> p.getSatsType() == UngdomsytelseSatsType.HØY);
     }
 
     public RegelData getRegelInput() {
