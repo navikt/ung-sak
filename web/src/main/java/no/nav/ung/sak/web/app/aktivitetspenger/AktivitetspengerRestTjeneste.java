@@ -105,7 +105,7 @@ public class AktivitetspengerRestTjeneste {
                     næring.setScale(0, RoundingMode.HALF_EVEN)
                 );
             })
-            .sorted(Comparator.comparingInt(PgiÅrsinntektDto::årstall))
+            .sorted(Comparator.comparingInt(PgiÅrsinntektDto::årstall).reversed())
             .toList();
 
         return new BeregningsgrunnlagDto(
