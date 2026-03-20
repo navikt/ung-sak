@@ -6,6 +6,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -15,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
+import no.nav.ung.sak.formidling.BrevGenereringSemafor;
 import no.nav.ung.sak.formidling.GenerertBrev;
 
 import no.nav.ung.sak.formidling.vedtak.VedtaksbrevGenerererInput;
@@ -24,6 +26,8 @@ import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 /**
@@ -48,19 +52,22 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
     private Instance<VedtaksbrevRegel> vedtaksbrevRegler;
     private VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste;
+    private ProsessTaskTjeneste taskTjeneste;
 
     @Inject
     public VedtaksbrevBestillingTask(
         BehandlingRepository behandlingRepository,
         JournalføringOgDistribusjonsTjeneste journalføringOgDistribusjonsTjeneste,
         BrevbestillingRepository brevbestillingRepository, VedtaksbrevValgRepository vedtaksbrevValgRepository,
-        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste) {
+        @Any Instance<VedtaksbrevRegel> vedtaksbrevRegler, VedtaksbrevGenerererTjeneste vedtaksbrevGenerererTjeneste,
+        ProsessTaskTjeneste taskTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vedtaksbrevGenerererTjeneste = vedtaksbrevGenerererTjeneste;
         this.journalføringOgDistribusjonsTjeneste = journalføringOgDistribusjonsTjeneste;
         this.vedtaksbrevRegler = vedtaksbrevRegler;
         this.brevbestillingRepository = brevbestillingRepository;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
+        this.taskTjeneste = taskTjeneste;
     }
 
     VedtaksbrevBestillingTask() {
@@ -69,6 +76,31 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData)  {
+        if (BrevGenereringSemafor.harLedigKapasitet()) {
+            håndterBestillingAvBrev(prosessTaskData);
+        } else {
+            //det er sannsynlig at tasken vil blokkere på venting på semafor, så vi reschedulerer den istedet
+            reschedulerTask(prosessTaskData);
+        }
+    }
+
+    private void reschedulerTask(ProsessTaskData prosessTaskData) {
+        int maksAntallRekjøringer = 10;
+        Duration tidTilNesteForsøk = Duration.ofSeconds(10);
+        String propertyName = "retriesPgaSemaforUtilgjengelig";
+        int antallTidligereRekjøringer = Integer.parseInt(prosessTaskData.getProperties().getProperty(propertyName, "0"));
+        if (antallTidligereRekjøringer < maksAntallRekjøringer){
+            String rekjøringer = String.valueOf(antallTidligereRekjøringer + 1);
+            prosessTaskData.setProperty(propertyName, rekjøringer);
+            LOG.info("Fikk ikke semafor for brevgenerering, oppretter ny task til å kjøre senere, forsøk {}", rekjøringer);
+            prosessTaskData.setNesteKjøringEtter(LocalDateTime.now().plus(tidTilNesteForsøk));
+            taskTjeneste.lagre(prosessTaskData);
+        } else {
+            throw new IllegalStateException("Har utsatt task for brevgenerering " + maksAntallRekjøringer + " pga manglende kapasitet for å generere brev. Det bør undersøkes om det er en underliggende feil eller bare høyt trykk.");
+        }
+    }
+
+    private void håndterBestillingAvBrev(ProsessTaskData prosessTaskData) {
         Objects.requireNonNull(prosessTaskData.getPropertyValue(BREVBESTILLING_ID), "Må ha brevbestillingId");
 
         var brevbestilling = brevbestillingRepository.hent(Long.valueOf(prosessTaskData.getPropertyValue(BREVBESTILLING_ID)));
@@ -83,7 +115,6 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         }
 
         genererOgJournalførAutomatiskBrev(behandling, brevbestilling);
-
     }
 
     private void genererOgJournalførManuellBrev(Behandling behandling, BrevbestillingEntitet brevbestilling, Long valgId) {

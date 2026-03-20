@@ -37,4 +37,17 @@ public class BrevGenereringSemafor {
 
     }
 
+    /**
+     * dette tar ikke semaforen, så kan bare gi en indikasjon på om det er ledig kapasitet
+     */
+    public static boolean harLedigKapasitet() {
+        return SEMAFOR.availablePermits() > 0;
+    }
+
+    public static class BrevGenereringSemaforIkkeTilgjengeligException extends RuntimeException {
+        public BrevGenereringSemaforIkkeTilgjengeligException() {
+            super("Alle semaforer for brevgenerering er opptatt, prøv igjen senere");
+        }
+    }
+
 }
