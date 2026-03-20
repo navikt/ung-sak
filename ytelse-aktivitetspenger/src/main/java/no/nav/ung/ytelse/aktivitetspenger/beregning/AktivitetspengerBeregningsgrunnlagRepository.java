@@ -7,6 +7,9 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerGrunnsatsPeriode;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerGrunnsatsPerioder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +56,22 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
         }
     }
 
+    public void lagre(Long behandlingId, AktivitetspengerSatsResultat satsResultat) {
+        var grunnlagOptional = hentGrunnlag(behandlingId);
+        var aktivtGrunnlag = grunnlagOptional.orElse(new AktivitetspengerBeregningsgrunnlag());
+
+        var perioder = satsResultat.resultatTidslinje().toSegments().stream()
+            .map(s -> new AktivitetspengerGrunnsatsPeriode(s.getLocalDateInterval(), s.getValue()))
+            .toList();
+        var grunnsatser = new AktivitetspengerGrunnsatsPerioder(perioder, satsResultat.regelInput(), satsResultat.regelSporing());
+
+        var builder = new AktivitetspengerBeregningsgrunnlagBuilder(aktivtGrunnlag);
+        builder.medGrunnsatser(grunnsatser);
+
+        grunnlagOptional.ifPresent(this::deaktiverEksisterende);
+        lagre(builder, behandlingId);
+    }
+
     public Optional<AktivitetspengerBeregningsgrunnlag> hentGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
                 "SELECT bg FROM AktivitetspengerBeregningsgrunnlag bg WHERE bg.behandlingId=:id AND bg.aktiv = true",
@@ -89,6 +108,9 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
             if (!entityManager.contains(bg)) {
                 entityManager.persist(bg);
             }
+        }
+        if (oppdatertGrunnlag.getGrunnsatser() != null) {
+            entityManager.persist(oppdatertGrunnlag.getGrunnsatser());
         }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();

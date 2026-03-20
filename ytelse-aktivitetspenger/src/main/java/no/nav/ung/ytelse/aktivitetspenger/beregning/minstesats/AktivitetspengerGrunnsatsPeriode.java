@@ -64,7 +64,7 @@ public class AktivitetspengerGrunnsatsPeriode extends BaseEntitet {
         this.dagsatsBarnetillegg = other.getDagsatsBarnetillegg();
     }
 
-    public AktivitetspengerGrunnsatsPeriode(LocalDateInterval periode, UngdomsytelseSatser satser) {
+    public AktivitetspengerGrunnsatsPeriode(LocalDateInterval periode, AktivitetspengerSatser satser) {
         this.periode = DatoIntervallEntitet.fra(periode).toRange();
         this.dagsats = satser.dagsats();
         this.grunnbeløp = satser.grunnbeløp();

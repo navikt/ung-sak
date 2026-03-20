@@ -23,7 +23,7 @@ import java.util.Map;
 
 public class AktivitetspengerBeregnMinstesats {
 
-    public static AktivitetspengerSatsResultat beregnDagsats(BeregnDagsatsInput input) {
+    public static AktivitetspengerSatsResultat beregnMinstesats(BeregnDagsatsInput input) {
         var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
         var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(mapTilSatsInput(input));
         var satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
