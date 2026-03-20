@@ -1882,6 +1882,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto" : {
+        "default" : null,
         "discriminator" : {
           "mapping" : {
             "5015" : "#/components/schemas/ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto",
@@ -1981,6 +1982,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto" : {
+        "default" : null,
         "discriminator" : {
           "mapping" : {
             "6006" : "#/components/schemas/ung.sak.kontrakt.søknadsfrist.aksjonspunkt.OverstyrtSøknadsfristDto"
@@ -2955,6 +2957,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevInnholdDto" : {
+        "default" : null,
         "oneOf" : [ {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto"
         } ],
@@ -3209,6 +3212,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.hendelser.Hendelse" : {
+        "default" : null,
         "discriminator" : {
           "mapping" : {
             "DOEDSFALL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.DødsfallHendelse",
