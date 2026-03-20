@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -8,8 +8,6 @@ import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
@@ -23,9 +21,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public class AktivitetspengerBeregnDagsats {
+public class AktivitetspengerBeregnMinstesats {
 
-    public static UngdomsytelseSatsResultat beregnDagsats(BeregnDagsatsInput input) {
+    public static AktivitetspengerSatsResultat beregnDagsats(BeregnDagsatsInput input) {
         var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
         var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(mapTilSatsInput(input));
         var satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
@@ -33,12 +31,12 @@ public class AktivitetspengerBeregnDagsats {
 
         var satsTidslinje = input.perioder()
             .intersection(satsOgGrunnbeløpfaktorTidslinje, StandardCombinators::rightOnly)
-            .mapValue(AktivitetspengerBeregnDagsats::leggTilSatsTypeOgGrunnbeløpFaktor)
+            .mapValue(AktivitetspengerBeregnMinstesats::leggTilSatsTypeOgGrunnbeløpFaktor)
             .intersection(grunnbeløpTidslinje, leggTilGrunnbeløp())
             .combine(barnetilleggResultat.barnetilleggTidslinje(), leggTilBarnetillegg(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .mapValue(UngdomsytelseSatser.Builder::build);
+            .mapValue(AktivitetspengerSatser.Builder::build);
 
-        return new UngdomsytelseSatsResultat(
+        return new AktivitetspengerSatsResultat(
             satsTidslinje,
             LagRegelSporing.lagRegelSporingFraTidslinjer(Map.of(
                 "grunnbeløptidslinje", grunnbeløpTidslinje,
@@ -53,11 +51,11 @@ public class AktivitetspengerBeregnDagsats {
         return new UtledSatsInput(input.fødselsdato(), input.harTriggerBeregnHøySats(), input.harBeregnetHøySatsTidligere(), input.perioder().getMinLocalDate());
     }
 
-    private static UngdomsytelseSatser.Builder leggTilSatsTypeOgGrunnbeløpFaktor(SatsOgGrunnbeløpfaktor sats) {
-        return UngdomsytelseSatser.builder().medGrunnbeløpFaktor(sats.grunnbeløpFaktor()).medSatstype(sats.satstype());
+    private static AktivitetspengerSatser.Builder leggTilSatsTypeOgGrunnbeløpFaktor(SatsOgGrunnbeløpfaktor sats) {
+        return AktivitetspengerSatser.builder().medGrunnbeløpFaktor(sats.grunnbeløpFaktor()).medSatstype(sats.satstype());
     }
 
-    private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, Grunnbeløp, UngdomsytelseSatser.Builder> leggTilGrunnbeløp() {
+    private static LocalDateSegmentCombinator<AktivitetspengerSatser.Builder, Grunnbeløp, AktivitetspengerSatser.Builder> leggTilGrunnbeløp() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue().kopi();
             return new LocalDateSegment<>(di, builder.medGrunnbeløp(rhs.getValue().verdi()));
@@ -67,7 +65,7 @@ public class AktivitetspengerBeregnDagsats {
     /**
      * Kombinerer barnetillegg inn i satsbyggeren. Null-sikker og tydelig builder-bruk.
      */
-    private static LocalDateSegmentCombinator<UngdomsytelseSatser.Builder, Barnetillegg, UngdomsytelseSatser.Builder> leggTilBarnetillegg() {
+    private static LocalDateSegmentCombinator<AktivitetspengerSatser.Builder, Barnetillegg, AktivitetspengerSatser.Builder> leggTilBarnetillegg() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue().kopi();
             if (rhs == null) {

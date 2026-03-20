@@ -51,7 +51,8 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
 
         var skjæringstidspunkt = oppfyltVilkårTidslinje.getMinLocalDate();
-        beregningStegTjeneste.utførBesteberegning(behandling.getId(), skjæringstidspunkt);
+        var beregningsgrunnlag = beregningStegTjeneste.utførBesteberegning(behandling.getId(), skjæringstidspunkt);
+        aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
