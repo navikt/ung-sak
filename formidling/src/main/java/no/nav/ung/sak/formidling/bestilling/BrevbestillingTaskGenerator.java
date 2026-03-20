@@ -5,7 +5,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 
 public class BrevbestillingTaskGenerator {
 
-    static final String FORMIDLING_GRUPPE_PREFIX = "formidling-";
+    public static final String FORMIDLING_GRUPPE_PREFIX = "formidling-";
 
     public static ProsessTaskData formidlingProsessTaskIGruppe(Class<? extends ProsessTaskHandler> taskKlasse, Long fagsakId) {
         return formidlingProsessTaskIGruppe(taskKlasse, fagsakId, 0);

@@ -17,6 +17,7 @@
     <logger name="org.hibernate.SQL" level="${log.level.org.hibernate.SQL:-INFO}" />
     <logger name="com.zaxxer.hikari" level="${log.level.com.zaxxer.hikari:-WARN}" />
     <logger name="org.hibernate.type" level="${log.level.org.hibernate.type:-WARN}" />
+    <logger name="org.hibernate.orm.jdbc.bind" level="WARN" />
     <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}" />
     <logger name="org.hibernate.orm.deprecation" level="${log.level.org.hibernate.orm.deprecation:-ERROR}" />
 

@@ -131,9 +131,9 @@
         "x-enum-varnames" : [ "DAG", "DAG7", "UKE", "MND", "ÅR", "ENGANG", "AKTO", "UDEFINERT" ]
       },
       "k9.oppdrag.kontrakt.kodeverk.YtelseType" : {
-        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "-" ],
+        "enum" : [ "DAG", "SP", "FRISINN", "PSB", "PPN", "OMP", "OLP", "PS", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AKT", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "UDEFINERT" ]
+        "x-enum-varnames" : [ "DAGPENGER", "SYKEPENGER", "FRISINN", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "PÅRØRENDESYKDOM", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "AKTIVITETSPENGER", "UDEFINERT" ]
       },
       "k9.oppdrag.kontrakt.oppsummering.Mottaker" : {
         "properties" : {
@@ -678,6 +678,11 @@
         },
         "type" : "object"
       },
+      "sif.abac.kontrakt.abac.AbacFagsakYtelseType" : {
+        "enum" : [ "AKTIVITETSPENGER", "FRISINN", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_AO", "OMSORGSPENGER_MA", "OPPLÆRINGSPENGER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_SYKT_BARN", "UNGDOMSYTELSE", "OBSOLETE" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AKTIVITETSPENGER", "FRISINN", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_AO", "OMSORGSPENGER_MA", "OPPLÆRINGSPENGER", "PLEIEPENGER_NÆRSTÅENDE", "PLEIEPENGER_SYKT_BARN", "UNGDOMSYTELSE", "OBSOLETE" ]
+      },
       "sif.abac.kontrakt.abac.InnloggetAnsattDto" : {
         "properties" : {
           "brukernavn" : {
@@ -712,6 +717,75 @@
             "type" : "string"
           },
           "skalViseDetaljerteFeilmeldinger" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
+      "sif.abac.kontrakt.abac.InnloggetAnsattUngV2Dto" : {
+        "properties" : {
+          "aktivitetspengerDel1SaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          },
+          "aktivitetspengerDel2SaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          },
+          "aktuelleYtelser" : {
+            "items" : {
+              "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.AbacFagsakYtelseType"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "brukernavn" : {
+            "type" : "string"
+          },
+          "erUngdomsprogramveileder" : {
+            "type" : "boolean"
+          },
+          "funksjonellTid" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "kanBehandleKode6" : {
+            "type" : "boolean"
+          },
+          "kanBehandleKode7" : {
+            "type" : "boolean"
+          },
+          "kanBehandleKodeEgenAnsatt" : {
+            "type" : "boolean"
+          },
+          "kanDrifte" : {
+            "type" : "boolean"
+          },
+          "kanVeiledeAktivitetspenger" : {
+            "type" : "boolean"
+          },
+          "kanVeiledeUngdomsprogramytelse" : {
+            "type" : "boolean"
+          },
+          "navn" : {
+            "type" : "string"
+          },
+          "skalViseDetaljerteFeilmeldinger" : {
+            "type" : "boolean"
+          },
+          "ungdomsprogramytelseSaksbehandlerTilgang" : {
+            "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.SaksbehandlerTilgangDto"
+          }
+        },
+        "type" : "object"
+      },
+      "sif.abac.kontrakt.abac.SaksbehandlerTilgangDto" : {
+        "properties" : {
+          "kanBeslutte" : {
+            "type" : "boolean"
+          },
+          "kanOverstyre" : {
+            "type" : "boolean"
+          },
+          "kanSaksbehandle" : {
             "type" : "boolean"
           }
         },
@@ -1164,15 +1238,20 @@
         "type" : "string",
         "x-enum-varnames" : [ "SYKEPENGER", "PLEIEPENGER", "OMSORGSPENGER", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "DAGPENGER", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UDEFINERT" ]
       },
+      "ung.kodeverk.behandling.BehandlingDel" : {
+        "enum" : [ "SENTRAL", "LOKAL" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "SENTRAL", "LOKAL" ]
+      },
       "ung.kodeverk.behandling.BehandlingResultatType" : {
         "enum" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER", "KLAGE_AVVIST", "KLAGE_MEDHOLD", "KLAGE_YTELSESVEDTAK_OPPHEVET", "KLAGE_YTELSESVEDTAK_STADFESTET", "KLAGE_TRUKKET", "HENLAGT_KLAGE_TRUKKET", "DELVIS_MEDHOLD_I_KLAGE", "HJEMSENDE_UTEN_OPPHEVE", "UGUNST_MEDHOLD_I_KLAGE", "FEILREGISTRERT" ],
         "type" : "string",
         "x-enum-varnames" : [ "IKKE_FASTSATT", "INNVILGET", "DELVIS_INNVILGET", "AVSLÅTT", "OPPHØR", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_FEILOPPRETTET", "HENLAGT_BRUKER_DØD", "MERGET_OG_HENLAGT", "HENLAGT_SØKNAD_MANGLER", "HENLAGT_MASKINELT", "INNVILGET_ENDRING", "INGEN_ENDRING", "MANGLER_BEREGNINGSREGLER", "KLAGE_AVVIST", "KLAGE_MEDHOLD", "KLAGE_YTELSESVEDTAK_OPPHEVET", "KLAGE_YTELSESVEDTAK_STADFESTET", "KLAGE_TRUKKET", "HENLAGT_KLAGE_TRUKKET", "DELVIS_MEDHOLD_I_KLAGE", "HJEMSENDE_UTEN_OPPHEVE", "UGUNST_MEDHOLD_I_KLAGE", "FEILREGISTRERT" ]
       },
       "ung.kodeverk.behandling.BehandlingStatus" : {
-        "enum" : [ "AVSLU", "FVED", "IVED", "OPPRE", "UTRED" ],
+        "enum" : [ "AVSLU", "LOKALKONTOR_BESLUTTER_VILKÅR", "FVED", "IVED", "OPPRE", "UTRED" ],
         "type" : "string",
-        "x-enum-varnames" : [ "AVSLUTTET", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
+        "x-enum-varnames" : [ "AVSLUTTET", "LOKALKONTOR_BESLUTTER_VILKÅR", "FATTER_VEDTAK", "IVERKSETTER_VEDTAK", "OPPRETTET", "UTREDES" ]
       },
       "ung.kodeverk.behandling.BehandlingStegStatus" : {
         "enum" : [ "STARTET", "INNGANG", "UTGANG", "VENTER", "AVBRUTT", "UTFØRT", "FREMOVERFØRT", "TILBAKEFØRT", "-" ],
@@ -1180,9 +1259,9 @@
         "x-enum-varnames" : [ "STARTET", "INNGANG", "UTGANG", "VENTER", "AVBRUTT", "UTFØRT", "FREMOVERFØRT", "TILBAKEFØRT", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingStegType" : {
-        "enum" : [ "BERYT", "FVEDSTEG", "FORBRES", "FORVEDSTEG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INREG", "IVEDSTEG", "VURDEROP", "SIMOPP", "START", "VURDERKOMPLETT", "VURDER_ALDER", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FK_UI", "KLAGEUI", "OVERFØRT_NK" ],
+        "enum" : [ "BERYT", "FVEDSTEG", "LOKALKONTOR_FORESLÅ_VILKÅR_STEG", "LOKALKONTOR_BESLUTTE_VILKÅR_STEG", "FORBRES", "FORVEDSTEG", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INREG", "IVEDSTEG", "VURDEROP", "SIMOPP", "START", "VURDERKOMPLETT", "VURDER_ALDER", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "VURDER_BOSTED", "VURDER_BISTANDSVILKÅR", "AKTIVITETSPENGER_BEREGNING", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FK_UI", "KLAGEUI", "OVERFØRT_NK" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS", "VURDER_KLAGE_FØRSTEINSTANS", "OVERFØRT_NK" ]
+        "x-enum-varnames" : [ "BEREGN_YTELSE", "FATTE_VEDTAK", "LOKALKONTOR_FORESLÅ_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORESLÅ_BEHANDLINGSRESULTAT", "FORESLÅ_VEDTAK", "VURDER_SØKNADSFRIST", "INIT_PERIODER", "INIT_VILKÅR", "INNHENT_REGISTEROPP", "IVERKSETT_VEDTAK", "KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT", "SIMULER_OPPDRAG", "START_STEG", "VURDER_KOMPLETTHET", "ALDERSVILKÅRET", "VURDER_TILBAKETREKK", "VURDER_UTTAK", "VURDER_UNGDOMSPROGRAMVILKÅR", "UNGDOMSYTELSE_BEREGNING", "KONTROLLER_REGISTER_INNTEKT", "VURDER_BOSTED", "VURDER_BISTANDSVILKÅR", "AKTIVITETSPENGER_BEREGNING", "KONTROLLER_UNGDOMSPROGRAM", "VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS", "VURDER_KLAGE_FØRSTEINSTANS", "OVERFØRT_NK" ]
       },
       "ung.kodeverk.behandling.BehandlingType" : {
         "enum" : [ "BT-002", "BT-004", "BT-003", "BT-008", "BT-007", "BT-009", "-" ],
@@ -1190,9 +1269,9 @@
         "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingÅrsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-END-FRA-BRUKER-AKT", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "UTTALELSE-FRA-BRUKER", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
+        "x-enum-varnames" : [ "NY_SØKT_PROGRAM_PERIODE", "NY_SØKT_AKTIVITETSPENGER_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.FagsakStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
@@ -1200,9 +1279,9 @@
         "x-enum-varnames" : [ "OPPRETTET", "UNDER_BEHANDLING", "LØPENDE", "AVSLUTTET" ]
       },
       "ung.kodeverk.behandling.FagsakYtelseType" : {
-        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "OBSOLETE", "-" ],
+        "enum" : [ "DAG", "FRISINN", "SP", "PSB", "PPN", "OMP", "OMP_KS", "OMP_MA", "OMP_AO", "OLP", "AAP", "ES", "FP", "SVP", "EF", "UNG", "AKT", "OBSOLETE", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "OBSOLETE", "UDEFINERT" ]
+        "x-enum-varnames" : [ "DAGPENGER", "FRISINN", "SYKEPENGER", "PLEIEPENGER_SYKT_BARN", "PLEIEPENGER_NÆRSTÅENDE", "OMSORGSPENGER", "OMSORGSPENGER_KS", "OMSORGSPENGER_MA", "OMSORGSPENGER_AO", "OPPLÆRINGSPENGER", "ARBEIDSAVKLARINGSPENGER", "ENGANGSTØNAD", "FORELDREPENGER", "SVANGERSKAPSPENGER", "ENSLIG_FORSØRGER", "UNGDOMSYTELSE", "AKTIVITETSPENGER", "OBSOLETE", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.RevurderingVarslingÅrsak" : {
         "enum" : [ "BARNIKKEREG", "JOBBFULLTID", "IKKEOPPTJENT", "UTVANDRET", "JOBBUTLAND", "IKKEOPPHOLD", "JOBB6MND", "AKTIVITET", "ANNET" ],
@@ -1210,9 +1289,9 @@
         "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon" : {
-        "enum" : [ "5015", "5016", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "6006", "6100", "7001", "7003", "7005", "7014", "7040", "8000", "5082", "5035", "7100", "UNDEFINED" ],
+        "enum" : [ "5015", "5016", "5200", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "5141", "6006", "6100", "7001", "7003", "7005", "7014", "7040", "8000", "5082", "5035", "7100", "UNDEFINED" ],
         "type" : "string",
-        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
+        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "LOKALKONTOR_BESLUTTER_VILKÅR", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "VURDER_BISTANDSVILKÅR", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus" : {
         "enum" : [ "AVBR", "OPPR", "UTFO" ],
@@ -1220,14 +1299,14 @@
         "x-enum-varnames" : [ "AVBRUTT", "OPPRETTET", "UTFØRT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType" : {
-        "enum" : [ "AUTO", "MANU", "OVST", "SAOV", "-" ],
+        "enum" : [ "AUTO", "MANU", "OVST", "SAOV", "LOKALKONTOR_AUTO", "LOKALKONTOR_MANU", "LOKALKONTOR_OVST", "LOKALKONTOR_SAOV", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
+        "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "LOKALKONTOR_AUTOPUNKT", "LOKALKONTOR_MANUELL", "LOKALKONTOR_OVERSTYRING", "LOKALKONTOR_SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
-        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
+        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BISTANDSVILKÅR", "-", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
         "type" : "string",
-        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
+        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BISTANDSVILKÅR", "UDEFINERT", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.Venteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "OVERSENDT_KABAL" ],
@@ -1260,9 +1339,9 @@
         "x-enum-varnames" : [ "PERSON_DØD" ]
       },
       "ung.kodeverk.historikk.HistorikkAktør" : {
-        "enum" : [ "BESL", "SBH", "SOKER", "ARBEIDSGIVER", "VL", "-" ],
+        "enum" : [ "BESL", "SBH", "LOKALKONTOR_BESL", "LOKALKONTOR_SBH", "SOKER", "ARBEIDSGIVER", "VL", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "BESLUTTER", "SAKSBEHANDLER", "SØKER", "ARBEIDSGIVER", "VEDTAKSLØSNINGEN", "UDEFINERT" ]
+        "x-enum-varnames" : [ "BESLUTTER", "SAKSBEHANDLER", "LOKALKONTOR_BESLUTTER", "LOKALKONTOR_SAKSBEHANDLER", "SØKER", "ARBEIDSGIVER", "VEDTAKSLØSNINGEN", "UDEFINERT" ]
       },
       "ung.kodeverk.klage.KlageAvvistÅrsak" : {
         "enum" : [ "KLAGET_FOR_SENT", "KLAGE_UGYLDIG", "IKKE_PAKLAGD_VEDTAK", "KLAGER_IKKE_PART", "IKKE_KONKRET", "IKKE_SIGNERT", "-" ],
@@ -1353,9 +1432,9 @@
         "x-enum-varnames" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Avslagsårsak" : {
-        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "-" ],
+        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "3001", "3002", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UDEFINERT" ]
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED", "IKKE_14A_VEDTAK", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Utfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
@@ -1363,9 +1442,9 @@
         "x-enum-varnames" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.VilkårType" : {
-        "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "-" ],
+        "enum" : [ "UNG_VK_1", "UNG_VK_3", "UNG_VK_4", "UNG_VK_2", "AKT_VK_1", "AKT_VK_2", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "ALDERSVILKÅR", "SØKNADSFRIST", "SØKERSOPPLYSNINGSPLIKT", "UNGDOMSPROGRAMVILKÅRET", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.VilkårUtfallMerknad" : {
         "enum" : [ "1001", "1002", "1003", "1004", "1005", "1006", "1007", "1019", "1020", "1021", "1022", "1023", "1024", "1025", "1026", "1027", "1028", "1029", "1099", "1035", "1041", "1042", "1043", "1051", "1067", "1068", "1069", "1071", "1080", "1081", "1101", "1102", "5007", "7001", "7002", "7003", "7004", "7006", "7847A", "7847B", "8000", "8001", "8002", "9002", "9013", "9015", "-" ],
@@ -1590,26 +1669,24 @@
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.abac.PipDtoV3" : {
+      "ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDtoV2" : {
         "properties" : {
-          "aktørIder" : {
+          "aktørIderForSporingslogg" : {
             "items" : {
               "type" : "string"
             },
             "type" : "array",
             "uniqueItems" : true
           },
-          "ansvarligSaksbehandler" : {
-            "type" : "string"
+          "aktørIderForTilgangskontroll" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
           },
-          "behandlingStatus" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingStatus"
-          },
-          "fagsakStatus" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
-          },
-          "saksnummer" : {
-            "type" : "string"
+          "fagsakYtelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           }
         },
         "type" : "object"
@@ -1638,6 +1715,40 @@
           },
           "fagsakStatus" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.abac.PipDtoV5" : {
+        "properties" : {
+          "aktørIder" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "aktørIderForSporingslogg" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "ansvarligSaksbehandler" : {
+            "type" : "string"
+          },
+          "behandlingStatus" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingStatus"
+          },
+          "fagsakStatus" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
+          },
+          "fagsakYtelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
           },
           "saksnummer" : {
             "type" : "string"
@@ -1786,11 +1897,15 @@
             "5084" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderFeilutbetalingDto",
             "5085" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto",
             "5090" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto",
+            "5141" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.VurderBehovForBistandDto",
+            "5200" : "#/components/schemas/ung.sak.kontrakt.vedtak.LokalkontorBeslutterVilkårAksjonspunktDto",
             "8000" : "#/components/schemas/ung.sak.kontrakt.kontroll.FastsettInntektDto"
           },
           "propertyName" : "@type"
         },
         "oneOf" : [ {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.VurderBehovForBistandDto"
+        }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollAvManueltOpprettetRevurderingsbehandlingDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollerRevurderingsBehandlingDto"
@@ -1812,6 +1927,8 @@
           "$ref" : "#/components/schemas/ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.vedtak.ForeslaVedtakManueltAksjonspuntDto"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.vedtak.LokalkontorBeslutterVilkårAksjonspunktDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto"
         }, {
@@ -1888,6 +2005,81 @@
           }
         },
         "required" : [ "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.VurderBehovForBistandDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto" : {
+        "properties" : {
+          "beregningsgrunnlag" : {
+            "type" : "number"
+          },
+          "beregningsgrunnlagRedusert" : {
+            "type" : "number"
+          },
+          "besteBeregningResultatType" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType"
+          },
+          "dagsats" : {
+            "type" : "number"
+          },
+          "pgiÅrsinntekter" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto"
+            },
+            "type" : "array"
+          },
+          "skjæringstidspunkt" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "årsinntektSisteTreÅr" : {
+            "type" : "number"
+          },
+          "årsinntektSisteÅr" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "beregningsgrunnlag", "beregningsgrunnlagRedusert", "besteBeregningResultatType", "dagsats", "pgiÅrsinntekter", "skjæringstidspunkt", "årsinntektSisteTreÅr", "årsinntektSisteÅr" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType" : {
+        "enum" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ]
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto" : {
+        "properties" : {
+          "arbeidsinntekt" : {
+            "type" : "number"
+          },
+          "næring" : {
+            "type" : "number"
+          },
+          "sum" : {
+            "type" : "number"
+          },
+          "sumAvkortet" : {
+            "type" : "number"
+          },
+          "sumAvkortetOgOppjustert" : {
+            "type" : "number"
+          },
+          "årstall" : {
+            "format" : "int32",
+            "type" : "integer"
+          }
+        },
+        "required" : [ "arbeidsinntekt", "næring", "sum", "sumAvkortet", "sumAvkortetOgOppjustert", "årstall" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
@@ -4517,6 +4709,25 @@
         "required" : [ "skalBrukeOverstyrendeFritekstBrev" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.vedtak.LokalkontorBeslutterVilkårAksjonspunktDto" : {
+        "properties" : {
+          "aksjonspunktGodkjenningDtos" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto"
+            },
+            "maxItems" : 20,
+            "minItems" : 0,
+            "type" : "array"
+          },
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.vedtak.TotrinnskontrollAksjonspunkterDto" : {
         "properties" : {
           "aksjonspunktKode" : {
@@ -4524,6 +4735,9 @@
             "minLength" : 0,
             "pattern" : "^[\\p{Alnum}]+$",
             "type" : "string"
+          },
+          "behandlingDel" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingDel"
           },
           "besluttersBegrunnelse" : {
             "maxLength" : 4000,
@@ -5365,6 +5579,35 @@
           }
         },
         "tags" : [ "aksjonspunkt" ]
+      }
+    },
+    "/api/aktivitetspenger/beregningsgrunnlag" : {
+      "get" : {
+        "description" : "Henter beregningsgrunnlag for en aktivitetspengerbehandling",
+        "operationId" : "getBeregningsgrunnlag",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "avp" ]
       }
     },
     "/api/aktoer-info" : {
@@ -7196,66 +7439,6 @@
         "tags" : [ "fagsak" ]
       }
     },
-    "/api/fordel/fagsak/sok" : {
-      "post" : {
-        "description" : "Finn eksisterende sak.",
-        "operationId" : "finnEksisterendeFagsak",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.mottak.FinnSak"
-              }
-            }
-          },
-          "description" : "Oppretter fagsak"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Finn eksisterende fagsak",
-        "tags" : [ "fordel" ]
-      }
-    },
-    "/api/fordel/relatertSak" : {
-      "post" : {
-        "description" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-        "operationId" : "finnesEksisterendeFagsakMedEnAvAktørene",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.kontrakt.mottak.FinnSak"
-              }
-            }
-          },
-          "description" : "Søkeparametere"
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : {
-                "schema" : {
-                  "type" : "boolean"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "Sjekker om det finnes en eksisterende fagsak med søker, pleietrengende og/eller relatert part.",
-        "tags" : [ "fordel" ]
-      }
-    },
     "/api/formidling/informasjonsbrev" : {
       "get" : {
         "description" : "Maler for informasjon og støttebrev",
@@ -8008,6 +8191,26 @@
         "tags" : [ "nav-ansatt" ]
       }
     },
+    "/api/nav-ansatt/v2" : {
+      "get" : {
+        "description" : "Returnerer fullt navn og ung-releaterte rettigheter for ident",
+        "operationId" : "innloggetBrukerV2",
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/sif.abac.kontrakt.abac.InnloggetAnsattUngV2Dto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Ident hentes fra sikkerhetskonteksten som er tilgjengelig etter innlogging.",
+        "tags" : [ "nav-ansatt" ]
+      }
+    },
     "/api/notat" : {
       "get" : {
         "description" : "Henter alle notater for fagsak",
@@ -8456,16 +8659,16 @@
         "tags" : [ "pip" ]
       }
     },
-    "/api/pip/pipdata-for-behandling-v3" : {
+    "/api/pip/aktoer-for-sak-med-sporingslogghint-v2" : {
       "get" : {
-        "description" : "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
-        "operationId" : "hentPipDataTilknyttetBehandlingV3",
+        "description" : "Henter aktørId'er tilknyttet en fagsak",
+        "operationId" : "hentAktørIdListeTilknyttetSakMedSporingslogghintV2",
         "parameters" : [ {
           "in" : "query",
-          "name" : "behandlingUuid",
+          "name" : "saksnummer",
           "required" : true,
           "schema" : {
-            "type" : "string"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
           }
         } ],
         "responses" : {
@@ -8473,10 +8676,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV3"
-                  } ],
-                  "nullable" : true
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDtoV2"
                 }
               }
             },
@@ -8505,6 +8705,36 @@
                 "schema" : {
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV4"
+                  } ],
+                  "nullable" : true
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-behandling-v5" : {
+      "get" : {
+        "description" : "Henter ytelsetype, saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
+        "operationId" : "hentPipDataTilknyttetBehandlingV5",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV5"
                   } ],
                   "nullable" : true
                 }
@@ -8950,6 +9180,33 @@
         },
         "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
         "tags" : [ "nav-ansatt" ]
+      }
+    },
+    "/api/selftest" : {
+      "get" : {
+        "operationId" : "doSelftest",
+        "parameters" : [ {
+          "in" : "header",
+          "name" : "Content-Type",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "json",
+          "schema" : {
+            "type" : "boolean"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : { },
+              "text/html" : { }
+            },
+            "description" : "default response"
+          }
+        }
       }
     },
     "/api/statistikk/forvaltning/antall-deltakere" : {

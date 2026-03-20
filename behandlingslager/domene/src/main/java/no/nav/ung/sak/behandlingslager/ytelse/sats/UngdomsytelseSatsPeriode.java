@@ -18,8 +18,8 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.sak.behandlingslager.kodeverk.UngdomsytelseSatsTypeKodeverdiConverter;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.PostgreSQLRangeType;
-import no.nav.ung.sak.behandlingslager.Range;
+import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.domene.typer.tid.Range;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity(name = "UngdomsytelseSatsPeriode")

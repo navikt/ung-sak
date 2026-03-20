@@ -1,6 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester;
 
 import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
+import no.nav.ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.aktør.AktørRestTjeneste;
@@ -23,14 +24,9 @@ import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fagsak.FagsakRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.FordelHendelseRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.fordeling.FordelRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.fordeling.PapirSøknadRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.formidling.FormidlingRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.DiagnostikkRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppdragRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningOppgaveRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningProduksjonsstyringRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.forvaltning.*;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.rapportering.RapporteringRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.integrasjonstatus.IntegrasjonstatusRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.klage.KlageRestTjeneste;
@@ -66,7 +62,6 @@ public class RestImplementationClasses {
         classes.add(HistorikkRestTjeneste.class);
         classes.add(KodeverkRestTjeneste.class);
         classes.add(SøknadsfristRestTjeneste.class);
-        classes.add(FordelRestTjeneste.class);
         classes.add(PapirSøknadRestTjeneste.class);
         classes.add(FordelHendelseRestTjeneste.class);
         classes.add(BeregningsresultatRestTjeneste.class);
@@ -88,6 +83,7 @@ public class RestImplementationClasses {
         classes.add(OppdragProxyRestTjeneste.class);
         classes.add(ArbeidsgiverRestTjeneste.class);
 
+        classes.add(AktivitetspengerRestTjeneste.class);
 
         classes.add(KlageRestTjeneste.class);
 

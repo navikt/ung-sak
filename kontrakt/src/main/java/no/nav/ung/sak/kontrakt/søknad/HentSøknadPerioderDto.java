@@ -1,6 +1,7 @@
 package no.nav.ung.sak.kontrakt.søknad;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -28,10 +29,8 @@ public class HentSøknadPerioderDto {
 
     @JsonProperty(value = "bruker", required = true)
     @Valid
+    @NotNull
     private PersonIdent brukerIdent;
-
-
-
 
     protected HentSøknadPerioderDto() {
         //
@@ -49,6 +48,11 @@ public class HentSøknadPerioderDto {
 
     public PersonIdent getBruker() {
         return brukerIdent;
+    }
+
+    @AssertTrue
+    public boolean isNorskIdentEllerAktørId() {
+        return brukerIdent.erNorskIdent() || brukerIdent.erAktørId();
     }
 
 }

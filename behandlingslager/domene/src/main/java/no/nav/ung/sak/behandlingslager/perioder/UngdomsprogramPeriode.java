@@ -3,7 +3,7 @@ package no.nav.ung.sak.behandlingslager.perioder;
 import java.time.LocalDate;
 import java.util.Objects;
 
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
 
 import jakarta.persistence.AttributeOverride;

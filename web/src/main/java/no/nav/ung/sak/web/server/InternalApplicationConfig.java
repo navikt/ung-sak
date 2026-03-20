@@ -1,15 +1,16 @@
 package no.nav.ung.sak.web.server;
 
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import no.nav.ung.sak.web.app.selftest.HealthCheckRestService;
+import no.nav.ung.sak.web.app.selftest.SelftestRestTjeneste;
 import no.nav.ung.sak.web.server.metrics.PrometheusRestService;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 
 /**
@@ -27,6 +28,7 @@ public class InternalApplicationConfig extends Application {
 
         classes.add(PrometheusRestService.class);
         classes.add(HealthCheckRestService.class);
+        classes.add(SelftestRestTjeneste.class);
         return Collections.unmodifiableSet(classes);
     }
 

@@ -1,60 +1,64 @@
 package no.nav.ung.sak.etterlysning.kontroll;
 
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektArbeidOgFrilansDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.RegisterInntektYtelseDTO;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.registerinntekt.YtelseType;
 import no.nav.ung.kodeverk.arbeidsforhold.OverordnetInntektYtelseType;
+import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.ung.sak.kontroll.InntektType;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.Inntektsperiode;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.ArbeidOgFrilansRegisterInntektDTO;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.RegisterinntektDTO;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseRegisterInntektDTO;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.YtelseType;
 import no.nav.ung.sak.typer.Beløp;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 
 public class InntektKontrollOppgaveMapper {
 
-    static RegisterInntektDTO mapTilRegisterInntekter(List<InntekterForKilde> registerinntekter) {
-
-        final var arbeidOgFrilansInntekter = finnArbeidOgFrilansInntekter(registerinntekter);
+    static RegisterinntektDTO mapTilRegisterInntekter(List<InntekterForKilde> registerinntekter, List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger) {
+        final var arbeidOgFrilansInntekter = finnArbeidOgFrilansInntekter(registerinntekter, arbeidsgiverOpplysninger);
         final var ytelseInntekter = finnYtelseInntekter(registerinntekter);
-        return new RegisterInntektDTO(arbeidOgFrilansInntekter, ytelseInntekter);
+        return new RegisterinntektDTO(arbeidOgFrilansInntekter, ytelseInntekter);
     }
 
-    private static List<RegisterInntektYtelseDTO> finnYtelseInntekter(List<InntekterForKilde> registerinntekter) {
+    private static List<YtelseRegisterInntektDTO> finnYtelseInntekter(List<InntekterForKilde> registerinntekter) {
         return registerinntekter
             .stream()
             .filter(it -> it.inntektType() == InntektType.YTELSE)
-            .map(it -> new RegisterInntektYtelseDTO(summerInntekter(it), maptilYtelseType(it.ytelseType().getOverordnetYtelseType()))).toList();
+            .map(it -> new YtelseRegisterInntektDTO(summerInntekter(it), mapTilYtelseType(it.ytelseType().getOverordnetYtelseType())))
+            .toList();
     }
 
-
-    private static YtelseType maptilYtelseType(OverordnetInntektYtelseType ytelseType) {
-        switch (ytelseType) {
-            case SYKEPENGER -> {
-                return YtelseType.SYKEPENGER;
-            }
-            case OMSORGSPENGER-> {
-                return YtelseType.OMSORGSPENGER;
-            }
-            case PLEIEPENGER -> {
-                return YtelseType.PLEIEPENGER;
-            }
-            case OPPLÆRINGSPENGER -> {
-                return YtelseType.OPPLAERINGSPENGER;
-            }
+    private static YtelseType mapTilYtelseType(OverordnetInntektYtelseType ytelseType) {
+        return switch (ytelseType) {
+            case SYKEPENGER -> YtelseType.SYKEPENGER;
+            case OMSORGSPENGER -> YtelseType.OMSORGSPENGER;
+            case PLEIEPENGER -> YtelseType.PLEIEPENGER;
+            case OPPLÆRINGSPENGER -> YtelseType.OPPLÆRINGSPENGER;
             default -> throw new IllegalStateException("Ikke støttet ytelsetype: " + ytelseType);
-        }
+        };
     }
 
-    private static List<RegisterInntektArbeidOgFrilansDTO> finnArbeidOgFrilansInntekter(List<InntekterForKilde> registerinntekter) {
+    private static List<ArbeidOgFrilansRegisterInntektDTO> finnArbeidOgFrilansInntekter(List<InntekterForKilde> registerinntekter, List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger) {
         return registerinntekter.stream()
             .filter(it -> it.inntektType() == InntektType.ARBEIDSTAKER_ELLER_FRILANSER)
-            .map(it -> new RegisterInntektArbeidOgFrilansDTO(
-                summerInntekter(it), // Inntektene her er allerede filtrert på periode
-                it.arbeidsgiver().getIdentifikator()
-            )).toList();
+            .map(it -> new ArbeidOgFrilansRegisterInntektDTO(
+                summerInntekter(it),
+                it.arbeidsgiver().getIdentifikator(),
+                it.arbeidsgiver().getIdentifikator(),
+                finnArbeidsgivernavn(arbeidsgiverOpplysninger, it).orElse(null)
+            ))
+            .toList();
+    }
+
+    private static Optional<String> finnArbeidsgivernavn(List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger, InntekterForKilde it) {
+        return arbeidsgiverOpplysninger.stream()
+            .filter(
+                arbOppl -> arbOppl.getIdentifikator().equals(it.arbeidsgiver().getIdentifikator())
+            ).findFirst().map(ArbeidsgiverOpplysninger::getNavn);
     }
 
     private static int summerInntekter(InntekterForKilde it) {

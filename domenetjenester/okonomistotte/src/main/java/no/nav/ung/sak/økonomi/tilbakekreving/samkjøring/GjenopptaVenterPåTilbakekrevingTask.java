@@ -19,7 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.økonomi.tilbakekreving.klient.K9TilbakeRestKlient;
+import no.nav.ung.sak.økonomi.tilbakekreving.klient.UngTilbakeRestKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
     private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
-    private K9TilbakeRestKlient k9TilbakeRestKlient;
+    private UngTilbakeRestKlient ungTilbakeRestKlient;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder;
 
     public GjenopptaVenterPåTilbakekrevingTask() {
@@ -51,7 +51,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
                                                HistorikkinnslagRepository historikkinnslagRepository,
                                                BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
-                                               K9TilbakeRestKlient k9TilbakeRestKlient,
+                                               UngTilbakeRestKlient ungTilbakeRestKlient,
                                                SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder) {
         super(behandlingLåsRepository);
         this.behandlingLåsRepository = behandlingLåsRepository;
@@ -59,7 +59,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
-        this.k9TilbakeRestKlient = k9TilbakeRestKlient;
+        this.ungTilbakeRestKlient = ungTilbakeRestKlient;
         this.sjekkTilbakekrevingAksjonspunktUtleder = sjekkTilbakekrevingAksjonspunktUtleder;
     }
 
@@ -94,7 +94,7 @@ public class GjenopptaVenterPåTilbakekrevingTask extends BehandlingProsessTask 
         if (aksjonspunkt.isPresent() || autopunkt.isPresent()) {
             behandlingRepository.lagre(behandling, behandlingLås);
 
-            if (!k9TilbakeRestKlient.harÅpenTilbakekrevingsbehandling(behandling.getFagsak().getSaksnummer())) {
+            if (!ungTilbakeRestKlient.harÅpenTilbakekrevingsbehandling(behandling.getFagsak().getSaksnummer())) {
                 logger.info("Tilbakekrevingsbehandlingen er ferdig, kjører simulering-steget på nytt");
                 BehandlingskontrollKontekst behandlingskontrollKontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
                 behandlingskontrollTjeneste.behandlingTilbakeføringTilTidligereBehandlingSteg(behandlingskontrollKontekst, BehandlingStegType.SIMULER_OPPDRAG);

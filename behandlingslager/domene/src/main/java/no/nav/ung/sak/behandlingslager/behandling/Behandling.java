@@ -1,30 +1,61 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
-import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.PreRemove;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.ung.kodeverk.Fagsystem;
-import no.nav.ung.kodeverk.behandling.*;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingResultatKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingStatusKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.BehandlingTypeKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.FagsystemKodeverkConverter;
+import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.typer.AktørId;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -116,25 +147,6 @@ public class Behandling extends BaseEntitet {
 
     @Column(name = "avsluttet_dato")
     private LocalDateTime avsluttetDato;
-
-    @Column(name = "totrinnsbehandling", nullable = false)
-
-    private boolean toTrinnsBehandling = false;
-
-    @Column(name = "ansvarlig_saksbehandler")
-    private String ansvarligSaksbehandler;
-
-    @Column(name = "ansvarlig_beslutter")
-    private String ansvarligBeslutter;
-
-    @Column(name = "behandlende_enhet")
-    private String behandlendeEnhet;
-
-    @Column(name = "behandlende_enhet_navn")
-    private String behandlendeEnhetNavn;
-
-    @Column(name = "behandlende_enhet_arsak")
-    private String behandlendeEnhetÅrsak;
 
     @Column(name = "behandlingstid_frist", nullable = false)
     private LocalDate behandlingstidFrist;
@@ -392,29 +404,6 @@ public class Behandling extends BaseEntitet {
             + ">"; //$NON-NLS-1$
     }
 
-    public String getBehandlendeEnhetÅrsak() {
-        return behandlendeEnhetÅrsak;
-    }
-
-    public void setBehandlendeEnhetÅrsak(String behandlendeEnhetÅrsak) {
-        guardTilstandPåBehandling();
-        this.behandlendeEnhetÅrsak = behandlendeEnhetÅrsak;
-    }
-
-    public String getBehandlendeEnhet() {
-        return behandlendeEnhet;
-    }
-
-    public void setBehandlendeEnhet(OrganisasjonsEnhet enhet) {
-        guardTilstandPåBehandling();
-        this.behandlendeEnhet = enhet.getEnhetId();
-        this.behandlendeEnhetNavn = enhet.getEnhetNavn();
-    }
-
-    public OrganisasjonsEnhet getBehandlendeOrganisasjonsEnhet() {
-        return new OrganisasjonsEnhet(behandlendeEnhet, behandlendeEnhetNavn);
-    }
-
     public Fagsak getFagsak() {
         return fagsak;
     }
@@ -501,8 +490,8 @@ public class Behandling extends BaseEntitet {
             .anyMatch(aksjonspunktDefinisjon::equals);
     }
 
-    public boolean harAksjonspunktMedTotrinnskontroll() {
-        return getAksjonspunkterStream()
+    public boolean harAksjonspunktMedTotrinnskontroll(BehandlingDel behandlingDel) {
+        return getAksjonspunkterStream(behandlingDel)
             .anyMatch(a -> !a.erAvbrutt() && a.isToTrinnsBehandling());
     }
 
@@ -519,6 +508,11 @@ public class Behandling extends BaseEntitet {
         return aksjonspunkter.stream();
     }
 
+    private Stream<Aksjonspunkt> getAksjonspunkterStream(BehandlingDel behandlingDel) {
+        return aksjonspunkter.stream()
+            .filter(ap -> ap.getAksjonspunktDefinisjon().getBehandlingDel() == behandlingDel);
+    }
+
     private Stream<Aksjonspunkt> getÅpneAksjonspunkterStream() {
         return getAksjonspunkterStream()
             .filter(Aksjonspunkt::erÅpentAksjonspunkt);
@@ -531,42 +525,6 @@ public class Behandling extends BaseEntitet {
     public BehandlingStegStatus getBehandlingStegStatus() {
         BehandlingStegTilstand stegTilstand = getBehandlingStegTilstand().orElse(null);
         return stegTilstand == null ? null : stegTilstand.getBehandlingStegStatus();
-    }
-
-    public boolean isToTrinnsBehandling() {
-        return toTrinnsBehandling;
-    }
-
-    public void setToTrinnsBehandling() {
-        guardTilstandPåBehandling();
-        this.toTrinnsBehandling = true;
-    }
-
-    public void nullstillToTrinnsBehandling() {
-        guardTilstandPåBehandling();
-        this.toTrinnsBehandling = false;
-        this.ansvarligBeslutter = null;
-    }
-
-    public String getAnsvarligSaksbehandler() {
-        return ansvarligSaksbehandler;
-    }
-
-    public void setAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
-        guardTilstandPåBehandling();
-        this.ansvarligSaksbehandler = ansvarligSaksbehandler;
-    }
-
-    public String getAnsvarligBeslutter() {
-        return ansvarligBeslutter;
-    }
-
-    public void setAnsvarligBeslutter(String ansvarligBeslutter) {
-        if (ansvarligBeslutter != null && ansvarligBeslutter.equals(ansvarligSaksbehandler)) {
-            throw new IllegalArgumentException("Kan ikke sette beslutter lik saksbehandler");
-        }
-        guardTilstandPåBehandling();
-        this.ansvarligBeslutter = ansvarligBeslutter;
     }
 
     public boolean isBehandlingHenlagt() {
@@ -693,10 +651,6 @@ public class Behandling extends BaseEntitet {
         private LocalDateTime opprettetDato;
         private LocalDateTime avsluttetDato;
 
-        private String behandlendeEnhet;
-        private String behandlendeEnhetNavn;
-        private String behandlendeEnhetÅrsak;
-
         private LocalDate behandlingstidFrist = LocalDate.now().plusWeeks(6);
 
         private BehandlingÅrsak.Builder behandlingÅrsakBuilder;
@@ -750,17 +704,6 @@ public class Behandling extends BaseEntitet {
             return this;
         }
 
-        public Builder medBehandlendeEnhet(OrganisasjonsEnhet enhet) {
-            this.behandlendeEnhet = enhet.getEnhetId();
-            this.behandlendeEnhetNavn = enhet.getEnhetNavn();
-            return this;
-        }
-
-        public Builder medBehandlendeEnhetÅrsak(String behandlendeEnhetÅrsak) {
-            this.behandlendeEnhetÅrsak = behandlendeEnhetÅrsak;
-            return this;
-        }
-
         public Builder medBehandlingstidFrist(LocalDate frist) {
             this.behandlingstidFrist = frist;
             return this;
@@ -782,9 +725,6 @@ public class Behandling extends BaseEntitet {
             if (forrigeBehandling != null) {
                 behandling = new Behandling(forrigeBehandling.getFagsak(), behandlingType);
                 behandling.originalBehandlingId = forrigeBehandling.getId();
-                behandling.behandlendeEnhet = forrigeBehandling.behandlendeEnhet;
-                behandling.behandlendeEnhetNavn = forrigeBehandling.behandlendeEnhetNavn;
-                behandling.behandlendeEnhetÅrsak = forrigeBehandling.behandlendeEnhetÅrsak;
                 if (behandlingstidFrist != null) {
                     behandling.behandlingstidFrist = behandlingstidFrist;
                 } else {
@@ -792,9 +732,6 @@ public class Behandling extends BaseEntitet {
                 }
             } else {
                 behandling = new Behandling(fagsak, behandlingType);
-                behandling.behandlendeEnhet = behandlendeEnhet;
-                behandling.behandlendeEnhetNavn = behandlendeEnhetNavn;
-                behandling.behandlendeEnhetÅrsak = behandlendeEnhetÅrsak;
                 behandling.behandlingstidFrist = behandlingstidFrist;
             }
 

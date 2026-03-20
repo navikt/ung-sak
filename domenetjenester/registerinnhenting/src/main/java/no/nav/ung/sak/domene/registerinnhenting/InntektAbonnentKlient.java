@@ -8,7 +8,6 @@ import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.IntegrasjonFeil;
-import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.k9.felles.integrasjon.rest.DefaultJsonMapper;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
@@ -44,7 +43,7 @@ public class InntektAbonnentKlient {
     @Inject
     public InntektAbonnentKlient(
         @KonfigVerdi(value = "inntektskomponenten.url",
-            defaultVerdi = "https://ikomp.prod-fss-pub.nais.io//rest/v2/abonnement") String baseUrl,
+            defaultVerdi = "https://ikomp.prod-fss-pub.nais.io/rest/v2/abonnement") String baseUrl,
         OidcRestClient oidcRestClient) {
         this.oidcRestClient = oidcRestClient;
         this.opprettAbonnementURI = tilUri(baseUrl, "administrasjon/opprett");

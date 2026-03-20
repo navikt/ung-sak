@@ -13,7 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.diff.DiffIgnore;
+import no.nav.ung.sak.diff.DiffIgnore;
 
 @Entity(name = "Etterkontroll")
 @Table(name = "ETTERKONTROLL")

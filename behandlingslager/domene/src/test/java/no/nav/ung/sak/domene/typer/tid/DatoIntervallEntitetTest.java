@@ -6,8 +6,6 @@ import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.ung.sak.behandlingslager.Range;
-
 public class DatoIntervallEntitetTest {
 
     @Test

@@ -1,0 +1,115 @@
+package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling;
+
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringBarnetilleggScenarioer;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+
+import static no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.HtmlAssert.assertThatHtml;
+import static org.assertj.core.api.Assertions.assertThat;
+
+class EndringBarnetilleggTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
+
+
+    EndringBarnetilleggTest() {
+        super(1, "Du får mer i ungdomsprogramytelse fordi du har fått barn");
+    }
+
+    @Test
+    void standardEndringBarnetillegg() {
+        LocalDate startdato = LocalDate.of(2025, 5, 3);
+        LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
+        UngTestScenario ungTestGrunnlag = EndringBarnetilleggScenarioer.endringBarnetillegg(startdato, barnFødselsdato);
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får mer i ungdomsprogramytelse fordi du har fått barn \
+                Du får 37 kroner i barnetillegg per dag fra og med 27. mai 2025, utenom lørdag og søndag. \
+                Det er fordi du fikk barn denne datoen. \
+                Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9 tredje ledd. \
+                """
+        );
+
+        var behandling = lagStandardScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_BARNETILLEGG);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får mer i ungdomsprogramytelse fordi du har fått barn</h1>"
+            );
+
+    }
+
+    @Test
+    void flereBarn() {
+        LocalDate startdato = LocalDate.of(2025, 5, 3);
+        LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
+        UngTestScenario ungTestGrunnlag = EndringBarnetilleggScenarioer.endringBarnetilleggFlereBarn(startdato, barnFødselsdato);
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får mer i ungdomsprogramytelse fordi du har fått barn \
+                Du får 111 kroner i barnetillegg per dag fra og med 27. mai 2025, utenom lørdag og søndag. \
+                Det er fordi du fikk barn denne datoen. \
+                Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 9 tredje ledd. \
+                """
+        );
+
+        var behandling = lagStandardScenario(ungTestGrunnlag);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_BARNETILLEGG);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får mer i ungdomsprogramytelse fordi du har fått barn</h1>"
+            );
+
+    }
+
+    private Behandling lagStandardScenario(UngTestScenario ungTestscenario) {
+        TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestscenario);
+
+        var behandling = scenarioBuilder.buildOgLagreMedUng(ungTestRepositories);
+
+
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+
+
+        return behandling;
+    }
+
+
+    @Override
+    protected Behandling lagScenarioForFellesTester() {
+        LocalDate startdato = LocalDate.of(2025, 5, 3);
+        LocalDate barnFødselsdato = LocalDate.of(2025, 5, 27);
+        return lagStandardScenario(EndringBarnetilleggScenarioer.endringBarnetillegg(startdato, barnFødselsdato));
+    }
+
+
+
+}
+
+

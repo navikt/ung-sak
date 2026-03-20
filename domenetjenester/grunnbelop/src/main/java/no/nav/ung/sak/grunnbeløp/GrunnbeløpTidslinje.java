@@ -2,7 +2,6 @@ package no.nav.ung.sak.grunnbeløp;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

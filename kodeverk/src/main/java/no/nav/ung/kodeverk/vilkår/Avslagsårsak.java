@@ -27,6 +27,12 @@ public enum Avslagsårsak implements Kodeverdi {
     ENDRET_STARTDATO_UNGDOMSPROGRAM("2002", "Endret start av ungdomsprogram",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8")),
 
+    YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED("3001", "Søker bor et sted som ikke er forenelig med ytelsen.",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
+    IKKE_14A_VEDTAK("3002", "Søker har ikke oppfølgingsvedtak etter Navloven §14a.",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
     UDEFINERT("-", "Ikke definert",
         Map.of());
 

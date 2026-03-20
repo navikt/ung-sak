@@ -29,7 +29,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.hendelse.EventHendelse;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktTilstandDto;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

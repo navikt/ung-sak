@@ -1,12 +1,16 @@
 package no.nav.ung.sak.kontroll;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
@@ -19,14 +23,17 @@ import java.util.stream.Collectors;
 @Dependent
 public class RelevanteKontrollperioderUtleder {
 
-
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private BehandlingRepository behandlingRepository;
 
     @Inject
-    public RelevanteKontrollperioderUtleder(ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder, MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+    public RelevanteKontrollperioderUtleder(@Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere,
+                                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
+                                            BehandlingRepository behandlingRepository) {
+        this.prosessTriggerPeriodeUtledere = prosessTriggerPeriodeUtledere;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.behandlingRepository = behandlingRepository;
     }
 
     public LocalDateTimeline<Boolean> utledPerioderForKontrollAvInntekt(Long behandlingId) {
@@ -38,6 +45,8 @@ public class RelevanteKontrollperioderUtleder {
                                                                                          Set<BehandlingÅrsakType> årsakerForKontroll) {
 
         final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(behandlingId);
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder = ProsessTriggerPeriodeUtleder.finnTjeneste(prosessTriggerPeriodeUtledere, behandling.getFagsakYtelseType());
         final var markertForKontrollTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId)
             .mapValue(it -> it.stream().filter(årsakerForKontroll::contains).collect(Collectors.toSet()))
             .filterValue(it -> !it.isEmpty());
@@ -93,6 +102,7 @@ public class RelevanteKontrollperioderUtleder {
             .toList();
         return new LocalDateTimeline<>(ikkePåkrevdKontrollSegmenter);
     }
+
     private static boolean harIkkeYtelseDagenFør(LocalDateTimeline<YearMonth> ytelsesPerioder, LocalDateSegment<YearMonth> it) {
         return ytelsesPerioder.intersection(dagenFør(it)).isEmpty();
     }

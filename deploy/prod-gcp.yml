@@ -78,6 +78,7 @@ spec:
       rules:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
+        - application: ung-brukerdialog-api
         - application: ung-sak
         - application: kabal-api
           namespace: klage
@@ -157,6 +158,10 @@ spec:
       value: teamdokumenthandtering.aapen-dok-journalfoering
     - name: KAFKA_KABAL_TOPIC
       value: klage.behandling-events.v1
+    - name: KAFKA_MINSIDE_VARSEL_TOPIC
+      value: min-side.aapen-brukervarsel-v1
+    - name: KAFKA_OPPGAVEBEKREFTELSE_TOPIC
+      value: dusseldorf.ungdomsytelse-oppgavebekreftelse-cleanup
 
     # Loadbalancerconfig
     - name: LOADBALANCER_URL
@@ -193,22 +198,38 @@ spec:
       value: api://prod-fss.k9saksbehandling.k9-oppdrag/.default
     - name: K9_OPPDRAG_PROXY_URL
       value: /k9/oppdrag/api
+    - name: UNG_TILBAKE_SCOPE
+      value: api://prod-gcp.k9saksbehandling.ung-tilbake/.default
+    - name : UNG_TILBAKE_URL
+      value: http://ung-tilbake/ung/tilbake/api
     - name: ARBEID_OG_INNTEKT_BASE_URL
       value: https://arbeid-og-inntekt.prod-fss-pub.nais.io
     - name: UNGDOMSPROGRAMREGISTER_URL
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
+    - name: UNG_BRUKERDIALOG_API_URL
+      value: http://ung-brukerdialog-api/ung/brukerdialog/intern/api
+    - name: UNG_BRUKERDIALOG_API_SCOPE
+      value: api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default
     - name: SIF_ABAC_PDP_SCOPE
       value: api://prod-gcp.k9saksbehandling.sif-abac-pdp/.default
-    - name: SIF_ABAC_PDP_URL
+    - name: SIF_ABAC_PDP_UNG_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/ung
+    - name: SIF_ABAC_PDP_AKTIVITETSPENGER_URL
+      value: http://sif-abac-pdp/sif/sif-abac-pdp/api/tilgangskontroll/v2/aktivitetspenger
     - name: NAV_ANSATT_URL
       value: http://sif-abac-pdp/sif/sif-abac-pdp/api/ung/nav-ansatt
     - name: KABAL_URL
       value: http://kabal-api.klage
     - name: KABAL_SCOPE
       value: api://prod-gcp.klage.kabal-api/.default
+    - name: UNGDOMPROGRAMSYTELSEN_DELTAKER_BASE_URL
+      value: https://www.nav.no/ungdomsprogrammet/ytelsen
+    - name: INNTEKTSKOMPONENTEN_URL
+      value: https://ikomp.prod-fss-pub.nais.io/rest/v2/abonnement
+    - name: INNTEKTSKOMPONENTEN_SCOPE
+      value: api://prod-fss.team-inntekt.ikomp/.default
 
     # Saf
     - name: SAF_BASE_URL
@@ -234,11 +255,6 @@ spec:
     - name: APP_AUTH_SCHEMA_AZUREAD_OPTIONAL_PATHS
       value: "/ung/tilbake,api://prod-gcp.k9saksbehandling.ung-tilbake/.default"
 
-    - name: SENSU_HOST
-      value: "sensu.nais"
-    - name: SENSU_PORT
-      value: "3030"
-
     # Feature-flag
     - name: KODEVERK_SOM_STRING_TOPICS
       value: "true"
@@ -256,6 +272,10 @@ spec:
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
+    - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
+      value: "false"
+    - name: OPPGAVER_I_UNG_DELTAKELSE_ENABLED
+      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

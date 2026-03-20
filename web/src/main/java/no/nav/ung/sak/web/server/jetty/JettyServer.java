@@ -9,7 +9,6 @@ import no.nav.ung.sak.web.app.FrontendApiConfig;
 import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 import no.nav.ung.sak.web.server.InternalApplicationConfig;
 import no.nav.ung.sak.web.server.jetty.db.DatabaseScript;
-import no.nav.ung.sak.web.server.jetty.db.DatasourceRole;
 import no.nav.ung.sak.web.server.jetty.db.DatasourceUtil;
 import no.nav.ung.sak.web.server.jetty.db.EnvironmentClass;
 import org.eclipse.jetty.ee11.security.jaspi.DefaultAuthConfigFactory;
@@ -28,7 +27,6 @@ import org.eclipse.jetty.util.Callback;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.util.resource.ResourceFactory;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.eclipse.jetty.util.thread.VirtualThreadPool;
 import org.glassfish.jersey.servlet.init.JerseyServletContainerInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +101,7 @@ public class JettyServer {
         server.setConnectors(createConnectors(appKonfigurasjon, server).toArray(new Connector[]{}));
 
         WebAppContext webAppContext = createContext(appKonfigurasjon, server);
+
         server.setHandler(new Handler.Sequence(new ClearMdcHandler(), webAppContext));
         server.addEventListener(new JettyServerLifeCyleListener());
         server.start();
@@ -128,7 +127,7 @@ public class JettyServer {
         System.setProperty("task.manager.runner.threads", "7");
 
         //øker kø-størrelse og antall task som polles om gangen, gjør at systemet oppnår bedre ytelse når det finnes mange klare tasks
-        System.setProperty("task.manager.tasks.queue.size", "20");
+        System.setProperty("task.manager.tasks.queue.size", "100");
         System.setProperty("task.manager.polling.tasks.size", "10");
         System.setProperty("task.manager.polling.scrolling.select.size", "10");
 

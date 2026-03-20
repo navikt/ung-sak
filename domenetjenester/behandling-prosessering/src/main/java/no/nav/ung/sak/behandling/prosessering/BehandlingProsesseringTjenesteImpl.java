@@ -5,7 +5,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.abakus.iaygrunnlag.request.RegisterdataType;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -365,11 +364,15 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhenteProgramperioder(Behandling behandling) {
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.UNGDOMSYTELSE) {
+            return false;
+        }
         return !behandling.erRevurdering() || BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
     }
 
     private boolean skalInnhenteInntektOgYtelser(Behandling behandling) {
-        if (BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains)) {
+        boolean harÅrsakForInnhenting = BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER || harÅrsakForInnhenting) {
             var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
             Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
             return registerdata != null && !(registerdata.isEmpty());

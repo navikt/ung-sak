@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.vilkår;
 
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 
 /**
  * Ingen vurdering, alt er false (dvs. ikke kant i kant).

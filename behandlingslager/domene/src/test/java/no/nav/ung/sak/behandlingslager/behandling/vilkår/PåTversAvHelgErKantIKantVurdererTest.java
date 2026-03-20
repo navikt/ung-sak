@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 import org.junit.jupiter.api.Test;
 
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.ytelse;
 import java.util.Objects;
 import java.util.Optional;
 
+import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,9 +11,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.sak.behandlingslager.diff.DiffEntity;
-import no.nav.ung.sak.behandlingslager.diff.TraverseEntityGraphFactory;
-import no.nav.ung.sak.behandlingslager.diff.TraverseGraph;
+import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
 

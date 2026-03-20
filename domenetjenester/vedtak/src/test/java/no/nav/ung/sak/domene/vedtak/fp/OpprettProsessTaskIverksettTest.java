@@ -14,12 +14,12 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.ung.sak.domene.iverksett.UngdomsytelseOpprettProsessTaskIverksett;
+import no.nav.ung.sak.domene.iverksett.YtelseOpprettProsessTaskIverksett;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.AvsluttOppgaveTask;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 import no.nav.ung.sak.økonomi.task.VurderOppgaveTilbakekrevingTask;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +71,7 @@ public class OpprettProsessTaskIverksettTest {
 
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagMocked();
-        opprettProsessTaskIverksett = new UngdomsytelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService);
+        opprettProsessTaskIverksett = new YtelseOpprettProsessTaskIverksett(fagsakProsessTaskRepository, stønadstatistikkService);
     }
 
     @Test

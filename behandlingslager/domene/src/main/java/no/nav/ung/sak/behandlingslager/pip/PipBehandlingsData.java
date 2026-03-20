@@ -2,10 +2,9 @@ package no.nav.ung.sak.behandlingslager.pip;
 
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.Saksnummer;
 
-import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 public record PipBehandlingsData (
@@ -13,5 +12,6 @@ public record PipBehandlingsData (
     BehandlingStatus behandligStatus,
     FagsakStatus fagsakStatus,
     String ansvarligSaksbehandler,
-    Saksnummer saksnummer){
+    Saksnummer saksnummer,
+    FagsakYtelseType fagsakYtelseType){
 }

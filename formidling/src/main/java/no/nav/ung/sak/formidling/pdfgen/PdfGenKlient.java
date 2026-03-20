@@ -6,7 +6,6 @@ import com.openhtmltopdf.slf4j.Slf4jLogger;
 import com.openhtmltopdf.util.XRLog;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import no.nav.k9.felles.log.trace.OpentelemetrySpanWrapper;
 import no.nav.pdfgen.core.Environment;
 import no.nav.pdfgen.core.PDFGenCore;
@@ -34,21 +33,16 @@ public class PdfGenKlient {
 
     private final Logger log = LoggerFactory.getLogger(PdfGenKlient.class);
 
-    @Inject
     public PdfGenKlient() {
-        this(false);
-    }
-
-    public PdfGenKlient(Boolean ignorePdf) {
         System.setProperty("sun2d.cmm", "sun2d.cmm.kcms.KcmsServiceProvider");
         VeraGreenfieldFoundryProvider.initialise();
         XRLog.setLoggerImpl(new Slf4jLogger());
         Environment initialEnvironment = new Environment(
             Collections.emptyMap(),
-            new PDFGenResource(getResource("templates/")),
-            new PDFGenResource(getResource("resources/")),
-            new PDFGenResource(getResource("fonts/")),
-            new PDFGenResource("")
+            new PDFGenResource(getResource("templates")),
+            new PDFGenResource(getResource("resources")),
+            new PDFGenResource(getResource("fonts")),
+            new PDFGenResource("") //denne trengs ikke, er er fordi PDFGenCore krever 4 argumenter
         );
         PDFGenCore.Companion.init(initialEnvironment);
         pdfgenObjectMapper = PdfGenObjectMapperConfig.lag();
@@ -56,19 +50,26 @@ public class PdfGenKlient {
     }
 
     private Path getResource(String relativePath) {
-        String faktiskPath = "pdfgen/%s".formatted(relativePath);
-        Path path = Path.of(faktiskPath);
+        String classpathSti = "pdfgen/%s".formatted(relativePath);
+
+        // 1. Sjekk om filene finnes på filsystemet relativt til working directory (typisk Docker: /app/pdfgen/...)
+        Path path = Path.of(classpathSti);
         if (Files.exists(path)) {
-            // Finnes i rotmappen til der appen kjører fra, typisk fra docker
             return path;
         }
 
-        log.info("Fant ikke pdfgen-ressurser på {}. Prøver å hente fra classpath (resource) til modulen. " +
-                 "Bør bare skje for test", faktiskPath);
+        // 2. Sjekk target/pdfgen/  - brukes av maven tester
+        Path targetPath = Path.of("target", classpathSti);
+        if (Files.exists(targetPath)) {
+            return targetPath;
+        }
 
-        //Fantes ikke, fallback til resourcemappen til modulen, typisk for tester
-        URL resource = getClass().getClassLoader().getResource(faktiskPath);
-        Objects.requireNonNull(resource, "Fant ingen resource på  " + faktiskPath);
+        // 3. Fallback til classpath - brukes av IDE
+        log.info("Fant ikke pdfgen-ressurser på {} eller {}. Prøver classpath. " +
+            "Bør bare skje for test via IDE.", classpathSti, targetPath);
+
+        URL resource = getClass().getClassLoader().getResource(classpathSti);
+        Objects.requireNonNull(resource, "Fant ingen pdfgen-ressurs på filsystem eller classpath: " + classpathSti);
 
         try {
             return Path.of(resource.toURI());
@@ -96,7 +97,7 @@ public class PdfGenKlient {
     }
 
     private PdfGenDokument lagDokument(String templateNavn, String dir, JsonNode payload, boolean kunHtml) {
-        String html = OpentelemetrySpanWrapper.forApplikasjon().span("pdfgen.lagDokument.crateHtml",
+        String html = OpentelemetrySpanWrapper.forApplikasjon().span("pdfgen.lagDokument.createHtml",
             span -> span.setAttribute("templateNavn", templateNavn).setAttribute("templateDir", dir),
             () -> CreateHtmlKt.createHtml(templateNavn, dir, payload)
         );

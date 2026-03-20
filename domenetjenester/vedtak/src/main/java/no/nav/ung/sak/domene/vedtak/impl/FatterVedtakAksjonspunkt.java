@@ -1,24 +1,27 @@
 package no.nav.ung.sak.domene.vedtak.impl;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
+import no.nav.ung.sak.domene.vedtak.VedtakAksjonspunktData;
+import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
+import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
+import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.domene.vedtak.VedtakAksjonspunktData;
-import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
-import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
-import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
-import no.nav.k9.sikkerhet.context.SubjectHandler;
 
 @ApplicationScoped
 public class FatterVedtakAksjonspunkt {
@@ -26,6 +29,7 @@ public class FatterVedtakAksjonspunkt {
     private VedtakTjeneste vedtakTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester;
 
     public FatterVedtakAksjonspunkt() {
     }
@@ -33,15 +37,19 @@ public class FatterVedtakAksjonspunkt {
     @Inject
     public FatterVedtakAksjonspunkt(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                     VedtakTjeneste vedtakTjeneste,
-                                    TotrinnTjeneste totrinnTjeneste) {
+                                    TotrinnTjeneste totrinnTjeneste,
+                                    @Any Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester) {
         this.vedtakTjeneste = vedtakTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+        this.oppdaterAnsvarligSaksbehandlerTjenester = oppdaterAnsvarligSaksbehandlerTjenester;
     }
 
-    public void oppdater(Behandling behandling, Collection<VedtakAksjonspunktData> aksjonspunkter) {
+    public void oppdater(Behandling behandling, AksjonspunktDefinisjon fatteVedtakAksjonspunktDefinisjon, Collection<VedtakAksjonspunktData> aksjonspunkter) {
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(behandling);
-        behandling.setAnsvarligBeslutter(SubjectHandler.getSubjectHandler().getUid());
+
+        OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste = OppdaterAnsvarligSaksbehandlerTjeneste.finnTjeneste(oppdaterAnsvarligSaksbehandlerTjenester, behandling.getFagsakYtelseType());
+        oppdaterAnsvarligSaksbehandlerTjeneste.oppdaterAnsvarligBeslutter(fatteVedtakAksjonspunktDefinisjon, behandling.getId());
 
         List<Totrinnsvurdering> totrinnsvurderinger = new ArrayList<>();
         List<Aksjonspunkt> skalReåpnes = new ArrayList<>();

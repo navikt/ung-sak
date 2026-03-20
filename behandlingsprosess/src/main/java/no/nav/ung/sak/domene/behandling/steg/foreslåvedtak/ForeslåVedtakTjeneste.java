@@ -5,13 +5,16 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgEntitet;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.domene.vedtak.impl.KlageVedtakTjeneste;
@@ -34,6 +37,7 @@ class ForeslåVedtakTjeneste {
     private static final Logger logger = LoggerFactory.getLogger(ForeslåVedtakTjeneste.class);
 
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste;
     private KlageVedtakTjeneste klageVedtakTjeneste;
     private VedtaksbrevValgRepository vedtaksbrevValgRepository;
@@ -45,13 +49,14 @@ class ForeslåVedtakTjeneste {
     }
 
     @Inject
-    ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+    ForeslåVedtakTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                           SjekkTilbakekrevingAksjonspunktUtleder sjekkMotTilbakekrevingTjeneste,
                           VedtaksbrevValgRepository vedtaksbrevValgRepository,
                           KlageVedtakTjeneste klageVedtakTjeneste,
                           @KonfigVerdi(value = "AP_VED_IKKE_IMPLEMENTERT_BREV", defaultVerdi = "false") boolean apVedIkkeImplementertBrev,
                           @Any Instance<VedtaksbrevRegel> vedtaksbrevReglene) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.sjekkMotTilbakekrevingTjeneste = sjekkMotTilbakekrevingTjeneste;
         this.klageVedtakTjeneste = klageVedtakTjeneste;
         this.vedtaksbrevValgRepository = vedtaksbrevValgRepository;
@@ -61,12 +66,11 @@ class ForeslåVedtakTjeneste {
 
     public BehandleStegResultat foreslåVedtak(Behandling behandling, BehandlingskontrollKontekst kontekst) {
         List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = new ArrayList<>();
-        // TODO: Fiks integrering mot k9-tilbake
-//        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
+        aksjonspunktDefinisjoner.addAll(sjekkMotTilbakekrevingTjeneste.sjekkMotÅpenIkkeoverlappendeTilbakekreving(behandling));
 
         if (BehandlingType.KLAGE.equals(behandling.getType())) {
             if (klageVedtakTjeneste.erKlageResultatHjemsendt(behandling)) {
-                behandling.nullstillToTrinnsBehandling();
+                behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId());
                 settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
                 aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS);
                 return BehandleStegResultat.tilbakeførtMedAksjonspunkter(aksjonspunktDefinisjoner);
@@ -75,7 +79,7 @@ class ForeslåVedtakTjeneste {
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
         if (vedtakUtenTotrinnskontroll.isPresent()) {
-            behandling.nullstillToTrinnsBehandling();
+            behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId());
             return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
         }
 
@@ -93,21 +97,21 @@ class ForeslåVedtakTjeneste {
     }
 
     private void håndterTotrinn(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
-        if (!behandling.isToTrinnsBehandling()) {
-            behandling.setToTrinnsBehandling();
+        if (!behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())) {
+            behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId());
             logger.info("To-trinn satt på behandling={}", behandling.getId());
         }
         aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
     }
 
     private void håndterUtenTotrinn(Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        behandling.nullstillToTrinnsBehandling();
+        behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId());
         logger.info("To-trinn fjernet på behandling={}", behandling.getId());
         settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
     }
 
     private void vurderBrev(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
-        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getType());
+        var vedtaksbrevRegler = VedtaksbrevRegel.hentVedtaksbrevRegel(vedtaksbrevReglene, behandling.getFagsakYtelseType(), behandling.getType());
         var totalResultat = vedtaksbrevRegler.kjør(behandling.getId());
 
         feilHvisIkkeImplementertBrev(aksjonspunktDefinisjoner, totalResultat);
@@ -122,11 +126,12 @@ class ForeslåVedtakTjeneste {
         if (!totalResultat.harBrev() && totalResultat.ingenBrevResultater().stream()
             .anyMatch(it -> it.ingenBrevÅrsakType() == IngenBrevÅrsakType.IKKE_IMPLEMENTERT)) {
             if (apVedIkkeImplementertBrev) {
+                logger.warn("Ingen brev implementert - går til aksjonspunkt istedenfor å feile. {}", totalResultat.safePrint());
                 aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
             }
             else {
-                throw new IllegalStateException(String.format("Ingen brev implementert - må håndteres manuelt. Forklaring: "
-                    + totalResultat.forklaringer()));
+                throw new IllegalStateException(String.format("Ingen brev implementert - må håndteres manuelt.  "
+                    + totalResultat.safePrint()));
 
             }
         }
@@ -159,7 +164,7 @@ class ForeslåVedtakTjeneste {
 
     private boolean skalUtføreTotrinnsbehandling(Behandling behandling) {
         return !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
-            behandling.harAksjonspunktMedTotrinnskontroll();
+            behandling.harAksjonspunktMedTotrinnskontroll(BehandlingDel.SENTRAL);
 
     }
 

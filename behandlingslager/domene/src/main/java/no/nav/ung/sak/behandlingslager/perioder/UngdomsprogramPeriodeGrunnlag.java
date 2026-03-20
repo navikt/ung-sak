@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.perioder;
 
 import java.util.*;
 
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.hibernate.annotations.Immutable;
 

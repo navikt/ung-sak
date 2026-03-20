@@ -1,5 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -11,8 +13,10 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.domene.vedtak.impl.FatterVedtakAksjonspunkt;
 import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
@@ -21,7 +25,7 @@ import no.nav.ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnRepository;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.ung.sak.produksjonsstyring.totrinn.VurderÅrsakTotrinnsvurdering;
-import no.nav.ung.sak.test.util.behandling.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.FatterVedtakAksjonspunktOppdaterer;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakAksjonspunktOppdaterer;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.aksjonspunkt.ForeslåVedtakOppdatererTjeneste;
@@ -45,8 +49,10 @@ public class AksjonspunktOppdatererTest {
     @Inject
     public EntityManager entityManager;
 
-
     private BehandlingRepositoryProvider repositoryProvider;
+
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     private TotrinnRepository totrinnRepository;
@@ -59,6 +65,10 @@ public class AksjonspunktOppdatererTest {
 
     @Inject
     private OpprettToTrinnsgrunnlag opprettTotrinnsgrunnlag;
+
+    @Inject
+    @Any
+    private Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester;
 
 
     @BeforeEach
@@ -82,10 +92,10 @@ public class AksjonspunktOppdatererTest {
             opprettTotrinnsgrunnlag,
             vedtakTjeneste);
 
-        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer);
+        var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, oppdaterAnsvarligSaksbehandlerTjenester);
 
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-        assertThat(behandling.getAnsvarligSaksbehandler()).isEqualTo("hello");
+        assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId())).isEqualTo("hello");
     }
 
     @Test

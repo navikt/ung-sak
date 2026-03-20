@@ -14,8 +14,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.api.IndexKey;
+import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 
 /**
  * Journalpostid refererer til journalpost registret i Joark.

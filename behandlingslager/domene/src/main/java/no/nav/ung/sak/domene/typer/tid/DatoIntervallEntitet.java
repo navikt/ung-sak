@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.typer.tid;
 
 import java.time.LocalDate;
 
-import no.nav.ung.sak.behandlingslager.Range;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -71,13 +70,13 @@ public class DatoIntervallEntitet extends AbstractLocalDateInterval {
 
     public static DatoIntervallEntitet fra(Range<LocalDate> periode) {
         return DatoIntervallEntitet.fraOgMedTilOgMed(
-            periode.lower() == null ? DatoIntervallEntitet.TIDENES_BEGYNNELSE : periode.hasMask(Range.LOWER_EXCLUSIVE) ? periode.lower().plusDays(1) : periode.lower(),
-            periode.upper() == null ? DatoIntervallEntitet.TIDENES_ENDE : periode.hasMask(Range.UPPER_EXCLUSIVE) ? periode.upper().minusDays(1) : periode.upper());
+            periode.lower() == null ? TIDENES_BEGYNNELSE : periode.hasMask(Range.LOWER_EXCLUSIVE) ? periode.lower().plusDays(1) : periode.lower(),
+            periode.upper() == null ? TIDENES_ENDE : periode.hasMask(Range.UPPER_EXCLUSIVE) ? periode.upper().minusDays(1) : periode.upper());
     }
 
     public Range<LocalDate> toRange() {
-        var fom = fomDato == null || DatoIntervallEntitet.TIDENES_BEGYNNELSE.equals(fomDato) ? null : fomDato;
-        var tom = tomDato == null || DatoIntervallEntitet.TIDENES_ENDE.equals(tomDato) ? null : tomDato;
+        var fom = fomDato == null || TIDENES_BEGYNNELSE.equals(fomDato) ? null : fomDato;
+        var tom = tomDato == null || TIDENES_ENDE.equals(tomDato) ? null : tomDato;
 
         if (fom != null && tom != null) {
             return Range.closed(fom, tom);

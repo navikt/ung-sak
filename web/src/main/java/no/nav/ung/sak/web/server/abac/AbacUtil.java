@@ -2,9 +2,12 @@ package no.nav.ung.sak.web.server.abac;
 
 import no.nav.sif.abac.kontrakt.abac.AbacBehandlingStatus;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakStatus;
+import no.nav.sif.abac.kontrakt.abac.AbacFagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class AbacUtil {
@@ -26,9 +29,20 @@ public final class AbacUtil {
             return Optional.of(AbacBehandlingStatus.UTREDES);
         } else if (status == BehandlingStatus.FATTER_VEDTAK) {
             return Optional.of(AbacBehandlingStatus.FATTE_VEDTAK);
+        } else if (status == BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR) {
+            return Optional.of(AbacBehandlingStatus.FATTE_VEDTAK); //TODO vurder egen status isdf å gjenbruke FATTE_VEDTAK
         } else {
             return Optional.empty();
         }
+    }
+
+    public static AbacFagsakYtelseType oversettYtelseType(FagsakYtelseType ytelsetype) {
+        return switch (ytelsetype) {
+            case UNGDOMSYTELSE -> AbacFagsakYtelseType.UNGDOMSYTELSE;
+            case AKTIVITETSPENGER -> AbacFagsakYtelseType.AKTIVITETSPENGER;
+            case OBSOLETE -> AbacFagsakYtelseType.OBSOLETE;
+            default -> throw new IllegalArgumentException("Ikke-støttet verdi: " + ytelsetype);
+        };
     }
 
     private AbacUtil() {

@@ -32,11 +32,11 @@ public @interface DokumentGruppeRef {
     String value();
 
     /** AnnotationLiteral som kan brukes ved CDI søk. */
-    class DokumentGruppeRefLiteral extends AnnotationLiteral<DokumentGruppeRef> implements DokumentGruppeRef {
+    public class DokumentGruppeRefLiteral extends AnnotationLiteral<DokumentGruppeRef> implements DokumentGruppeRef {
 
         private String kode;
 
-        DokumentGruppeRefLiteral(String kode) {
+        public DokumentGruppeRefLiteral(String kode) {
             this.kode = Objects.requireNonNull(kode, "Brevkode.kode");
         }
 

@@ -1,5 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
+import no.nav.ung.sak.diff.DiffResult;
+
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -9,7 +11,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import no.nav.ung.sak.behandlingslager.diff.DiffResult;
 
 // Bruker en primitiv variant av Composite for å kunne vurderes enkeltvis (løvnode) og sammensatt (rotnode)
 public class EndringsresultatDiff {

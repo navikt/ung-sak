@@ -1,6 +1,5 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
@@ -10,7 +9,6 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.InntektAbonnementRepositor
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +17,6 @@ import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Dependent
 public class InntektAbonnentTjeneste {
@@ -48,14 +45,16 @@ public class InntektAbonnentTjeneste {
         this.tpsTjeneste = tpsTjeneste;
     }
 
-    public void opprettAbonnement(AktørId aktørId, Periode periode){
+    public void opprettAbonnement(AktørId aktørId, Periode periode) {
         var eksisterendeAbonnement = inntektAbonnementRepository.hentAbonnementForAktør(aktørId).orElse(null);
         if (eksisterendeAbonnement != null) {
             if (eksisterendeAbonnement.getPeriode().tilPeriode().equals(periode)) {
                 log.info("Prøver å opprette abonnement for aktør, men abonnementID = {} eksisterer allerede for denne periode", eksisterendeAbonnement.getAbonnementId());
                 return;
             } else {
-                throw new IllegalStateException("Prøver å opprette at abonnement, men det eksisterer en abbonnentId = " + eksisterendeAbonnement.getAbonnementId() + " for aktøren, på en annen periode");
+                log.info("Prøver å opprette abonnement for aktør for periode {}, men det finnes allerede et abonnement for periode {} med id {}. Avslutter og oppretter ny.",
+                    periode, eksisterendeAbonnement.getPeriode(), eksisterendeAbonnement.getAbonnementId());
+                avsluttAbonnement(eksisterendeAbonnement);
             }
         }
 
@@ -97,11 +96,13 @@ public class InntektAbonnentTjeneste {
 
     public void avsluttAbonnentHvisFinnes(AktørId aktørId) {
         inntektAbonnementRepository.hentAbonnementForAktør(aktørId)
-            .ifPresent(abonnement -> {
-                inntektAbonnentKlient.avsluttAbonnement(Long.parseLong(abonnement.getAbonnementId()));
-                inntektAbonnementRepository.slettAbonnement(abonnement);
-                log.info("Avsluttet abonnement for aktørId={}", aktørId.getId());
-            });
+            .ifPresent(this::avsluttAbonnement);
+    }
+
+    private void avsluttAbonnement(InntektAbonnement abonnement) {
+        inntektAbonnentKlient.avsluttAbonnement(Long.parseLong(abonnement.getAbonnementId()));
+        inntektAbonnementRepository.slettAbonnement(abonnement);
+        log.info("Avsluttet abonnement med id={}", abonnement.getAbonnementId());
     }
 
     public record InntektHendelse(Long sekvensnummer, AktørId aktørId, Periode periode) {

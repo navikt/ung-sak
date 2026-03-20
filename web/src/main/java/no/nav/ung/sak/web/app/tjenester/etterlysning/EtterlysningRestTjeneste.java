@@ -8,12 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -23,10 +18,15 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.brukerdialog.typer.AktørId;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
@@ -38,6 +38,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -54,19 +55,27 @@ public class EtterlysningRestTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private BehandlingRepository behandlingRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private MidlertidigOppgaveDelegeringTjeneste oppgaveDelegeringTjeneste;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository,
+                                    BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository,
+                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste,
+                                    ProsessTaskTjeneste prosessTaskTjeneste,
+                                    MidlertidigOppgaveDelegeringTjeneste oppgaveDelegeringTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.oppgaveDelegeringTjeneste = oppgaveDelegeringTjeneste;
     }
 
     @GET
@@ -112,8 +121,24 @@ public class EtterlysningRestTjeneste {
             // Det vil mest sannsynlig bare være en etterlysning her, så vi anser det som ok å lagre inne i loopen for lesbarhet
             etterlysningRepository.lagre(etterlysning);
             opprettNySettUtløptTask(behandling, frist);
+
+            // Endrer frist på autopunkt dersom nødvendig
+            behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, etterlysning.getType());
+
+            opprettHistorikkinnslag(behandlingId, behandling.getFagsakId(), etterlysning, frist);
+            oppgaveDelegeringTjeneste.endreFrist(new AktørId(behandling.getAktørId().getAktørId()), etterlysning.getEksternReferanse(), frist);
         });
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
+    }
+
+    private void opprettHistorikkinnslag(Long behandlingId, Long fagsakId, no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning etterlysning, LocalDateTime frist) {
+        Historikkinnslag.Builder builder = new Historikkinnslag.Builder()
+            .medAktør(HistorikkAktør.SAKSBEHANDLER)
+            .medBehandlingId(behandlingId)
+            .medFagsakId(fagsakId)
+            .medTittel("Frist er endret")
+            .addLinje("Frist for å motta " + etterlysning.getType().getNavn() + " er endret til " + frist.toLocalDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy")) + ".");
+        historikkinnslagRepository.lagre(builder.build());
     }
 
     private void opprettNySettUtløptTask(Behandling behandling, LocalDateTime frist) {

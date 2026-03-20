@@ -1,6 +1,5 @@
 package no.nav.ung.sak.behandlingslager.behandling.startdato;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
@@ -22,7 +21,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.diff.ChangeTracked;
+import no.nav.ung.sak.diff.ChangeTracked;
 
 @Entity(name = "UngdomsytelseStartdatoer")
 @Table(name = "UNG_STARTDATOER")
