@@ -5,13 +5,14 @@ import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.Saksnummer;
 
+import java.util.Set;
 import java.util.UUID;
 
 public record PipBehandlingsData (
     UUID behandlingUuid,
     BehandlingStatus behandligStatus,
     FagsakStatus fagsakStatus,
-    String ansvarligSaksbehandler,
+    Set<String> ansvarligSaksbehandlere,
     Saksnummer saksnummer,
     FagsakYtelseType fagsakYtelseType){
 }
