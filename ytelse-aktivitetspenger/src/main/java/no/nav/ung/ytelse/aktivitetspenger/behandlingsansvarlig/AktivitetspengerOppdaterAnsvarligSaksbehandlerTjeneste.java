@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarlig
 import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.vedtak.LokalkontorBeslutterVilkårAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto;
 
 import java.util.Collection;
 
