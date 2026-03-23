@@ -99,8 +99,9 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
                 .ifPresent(it -> pdpRequest.setBehandlingStatusEksternKode(it.getEksternKode()));
             AbacUtil.oversettFagstatus(behandlingData.fagsakStatus())
                 .ifPresent(it -> pdpRequest.setFagsakStatusEksternKode(it.getEksternKode()));
-            if (behandlingData.ansvarligSaksbehandler() != null) {
-                pdpRequest.setAnsvarligSaksbehandler(behandlingData.ansvarligSaksbehandler());
+            if (!behandlingData.ansvarligSaksbehandlere().isEmpty()) {
+                //FIXME: aktivitetspenger, send med begge ansvarlige saksbehandlere når kontrakten støtter det
+                pdpRequest.setAnsvarligSaksbehandler(behandlingData.ansvarligSaksbehandlere().iterator().next());
             }
         }
         pdpRequest.setFagsakYtelseTyper(utledYtelsetyper(attributter, saksnumre, behandlingData));

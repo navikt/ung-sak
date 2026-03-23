@@ -1691,7 +1691,7 @@
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.abac.PipDtoV4" : {
+      "ung.sak.kontrakt.abac.PipDtoV5" : {
         "properties" : {
           "aktørIder" : {
             "items" : {
@@ -1716,13 +1716,16 @@
           "fagsakStatus" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
           },
+          "fagsakYtelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
+          },
           "saksnummer" : {
             "type" : "string"
           }
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.abac.PipDtoV5" : {
+      "ung.sak.kontrakt.abac.PipDtoV6" : {
         "properties" : {
           "aktørIder" : {
             "items" : {
@@ -1738,8 +1741,12 @@
             "type" : "array",
             "uniqueItems" : true
           },
-          "ansvarligSaksbehandler" : {
-            "type" : "string"
+          "ansvarligSaksbehandlere" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
           },
           "behandlingStatus" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.BehandlingStatus"
@@ -8686,36 +8693,6 @@
         "tags" : [ "pip" ]
       }
     },
-    "/api/pip/pipdata-for-behandling-v4" : {
-      "get" : {
-        "description" : "Henter saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
-        "operationId" : "hentPipDataTilknyttetBehandlingV4",
-        "parameters" : [ {
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "allOf" : [ {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV4"
-                  } ],
-                  "nullable" : true
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "pip" ]
-      }
-    },
     "/api/pip/pipdata-for-behandling-v5" : {
       "get" : {
         "description" : "Henter ytelsetype, saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandler tilknyttet til en behandling",
@@ -8735,6 +8712,36 @@
                 "schema" : {
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV5"
+                  } ],
+                  "nullable" : true
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-behandling-v6" : {
+      "get" : {
+        "description" : "Henter ytelsetype, saksnummer, aktørIder, fagsak- og behandlingstatus og ansvarlig saksbehandlere tilknyttet til en behandling",
+        "operationId" : "hentPipDataTilknyttetBehandlingV6",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV6"
                   } ],
                   "nullable" : true
                 }
