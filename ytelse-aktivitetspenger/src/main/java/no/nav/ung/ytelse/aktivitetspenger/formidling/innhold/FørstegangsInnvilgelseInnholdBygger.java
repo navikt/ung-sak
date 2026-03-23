@@ -5,13 +5,14 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatser;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.InnvilgelseDto;
 import org.slf4j.Logger;
 
@@ -41,21 +42,26 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
         );
 
-        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlagTidslinje = aktivitetspengerGrunnlag.hentBeregningsgrunnlagTidslinje();
-        var beregningsgrunnlag = beregningsgrunnlagTidslinje.toSegments().first().getValue();
+        LocalDateTimeline<AktivitetspengerSatser> aktivitetspengerSatser = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje();
+        var førsteSats = aktivitetspengerSatser.toSegments().first().getValue();
 
-        var satsgrunnlag = aktivitetspengerGrunnlag.hentSatsTidslinje().toSegments().first().getValue();
+        var beregningsgrunnlag = førsteSats.beregningsgrunnlag();
+        var satsgrunnlag = førsteSats.satsGrunnlag();
+        var erHøySatstype = satsgrunnlag.satsType() == UngdomsytelseSatsType.HØY;
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
                 ytelseTom,
-                satsgrunnlag.satsType().getKode(),
+                førsteSats.utledGrunnsatsBenyttet(),
+                erHøySatstype,
+                satsgrunnlag.grunnbeløp(),
+                satsgrunnlag.minsteytelse(),
                 beregningsgrunnlag.getSisteLignedeÅr().toString(),
                 beregningsgrunnlag.utledBesteBeregningResultatType(),
                 beregningsgrunnlag.getBeregnetPrAar(),
-                beregningsgrunnlag.getDagsats()
+                førsteSats.hentBeregnetSats().dagsats(),
+                førsteSats.hentBeregnetSats().dagsatsBarnetillegg()
         ));
     }
-
 }

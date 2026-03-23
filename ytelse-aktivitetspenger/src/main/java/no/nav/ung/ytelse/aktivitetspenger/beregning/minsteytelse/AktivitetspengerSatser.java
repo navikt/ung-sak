@@ -2,17 +2,21 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
 
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 
-import java.math.BigDecimal;
-
 public record AktivitetspengerSatser(
     AktivitetspengerSatsGrunnlag satsGrunnlag,
     Beregningsgrunnlag beregningsgrunnlag
 ) {
-    public boolean erBeregningsgrunnlagStørreEnnMinsteytelse() {
-        return beregningsgrunnlag.getBeregnetRedusertPrAar().compareTo(satsGrunnlag.minsteytelse()) > 0;
+    public GrunnsatsType utledGrunnsatsBenyttet() {
+        return beregningsgrunnlag.getBeregnetRedusertPrAar().compareTo(satsGrunnlag.minsteytelse()) > 0
+            ? GrunnsatsType.BEREGNINGSGRUNNLAG
+            : GrunnsatsType.MINSTEYTELSE;
     }
 
-    public BigDecimal getGrunnsats() {
-        return erBeregningsgrunnlagStørreEnnMinsteytelse() ? beregningsgrunnlag.getDagsats() : satsGrunnlag.dagsats();
+    public AktivitetspengerBeregnetSats hentBeregnetSats() {
+        var dagsats = utledGrunnsatsBenyttet() == GrunnsatsType.BEREGNINGSGRUNNLAG ?
+            beregningsgrunnlag.getDagsats() :
+            satsGrunnlag.dagsats();
+
+        return new AktivitetspengerBeregnetSats(dagsats, satsGrunnlag.dagsatsBarnetillegg());
     }
 }
