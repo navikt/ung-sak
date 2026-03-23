@@ -6,13 +6,13 @@
 
     <sequence-generator name="SEQ_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_BEREGNINGSGRUNNLAG"/>
     <sequence-generator name="SEQ_AVP_GR_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_AVP_GR_BEREGNINGSGRUNNLAG"/>
-    <sequence-generator name="SEQ_AVP_GRUNNSATS_PERIODER" allocation-size="50" sequence-name="SEQ_AVP_GRUNNSATS_PERIODER"/>
-    <sequence-generator name="SEQ_AVP_GRUNNSATS_PERIODE" allocation-size="50" sequence-name="SEQ_AVP_GRUNNSATS_PERIODE"/>
+    <sequence-generator name="SEQ_AVP_SATS_PERIODER" allocation-size="50" sequence-name="SEQ_AVP_SATS_PERIODER"/>
+    <sequence-generator name="SEQ_AVP_SATS_PERIODE" allocation-size="50" sequence-name="SEQ_AVP_SATS_PERIODE"/>
 
     <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag"/>
     <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlag"/>
-    <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerGrunnsatsPerioder"/>
-    <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerGrunnsatsPeriode"/>
+    <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPerioder"/>
+    <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPeriode"/>
 
 </entity-mappings>
 

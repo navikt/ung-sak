@@ -16,7 +16,7 @@ import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.barnetillegg.BeregnDagsatsInput;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningStegTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerBeregnMinstesats;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerBeregnMinsteytelse;
 
 @ApplicationScoped
 @BehandlingStegRef(BehandlingStegType.AKTIVITETSPENGER_BEREGNING)
@@ -65,7 +65,7 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
         aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag);
 
         var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
-        var satsTidslinje = AktivitetspengerBeregnMinstesats.beregnMinstesats(beregnDagsatsInput);
+        var satsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(beregnDagsatsInput);
         aktivitetspengerBeregningsgrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
@@ -100,8 +100,8 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
     private boolean harHøySatsIOriginalBehandling(Behandling behandling) {
         return behandling.getOriginalBehandlingId()
             .flatMap(aktivitetspengerBeregningsgrunnlagRepository::hentGrunnlag)
-            .map(grunnlag -> grunnlag.getGrunnsatser() != null &&
-                grunnlag.getGrunnsatser().harMinstEnPeriodeMedHøySats())
+            .map(grunnlag -> grunnlag.getSatsperioder() != null &&
+                grunnlag.getSatsperioder().harMinstEnPeriodeMedHøySats())
             .orElse(false);
     }
 

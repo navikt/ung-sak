@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
 
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 
@@ -7,9 +7,15 @@ import java.math.RoundingMode;
 import java.util.Objects;
 
 
-public record AktivitetspengerSatser(BigDecimal dagsats, BigDecimal grunnbeløp, BigDecimal grunnbeløpFaktor,
-                                     UngdomsytelseSatsType satsType, int antallBarn, int dagsatsBarnetillegg) {
-
+public record AktivitetspengerSatsGrunnlag(
+    BigDecimal dagsats,
+    BigDecimal grunnbeløp,
+    BigDecimal grunnbeløpFaktor,
+    BigDecimal minsteytelse,
+    UngdomsytelseSatsType satsType,
+    int antallBarn,
+    int dagsatsBarnetillegg
+) {
     public static Builder builder() {
         return new Builder();
     }
@@ -64,26 +70,25 @@ public record AktivitetspengerSatser(BigDecimal dagsats, BigDecimal grunnbeløp,
             return this;
         }
 
-        public AktivitetspengerSatser build() {
-            BigDecimal dagsats = grunnbeløpFaktor.multiply(grunnbeløp)
+        public AktivitetspengerSatsGrunnlag build() {
+            BigDecimal minsteytelse = grunnbeløpFaktor.multiply(grunnbeløp);
+            BigDecimal dagsats = minsteytelse
                 .divide(BigDecimal.valueOf(VIRKEDAGER_I_ET_ÅR), 10, RoundingMode.HALF_UP);
             Objects.requireNonNull(antallBarn);
             Objects.requireNonNull(dagsatsBarnetillegg);
             Objects.requireNonNull(satsType);
-            return new AktivitetspengerSatser(dagsats, grunnbeløp, grunnbeløpFaktor, satsType, antallBarn, dagsatsBarnetillegg);
+            return new AktivitetspengerSatsGrunnlag(dagsats, grunnbeløp, grunnbeløpFaktor, minsteytelse, satsType, antallBarn, dagsatsBarnetillegg);
         }
-
-
     }
 
     @Override
     public String toString() {
-        return "UngdomsytelseSatser{" +
+        return "AktivitetspengerSatsGrunnlag{" +
             "dagsats=" + dagsats +
             ", grunnbeløp=" + grunnbeløp +
             ", grunnbeløpFaktor=" + grunnbeløpFaktor +
             ", satsType=" + satsType +
             '}';
     }
-
 }
+

@@ -37,13 +37,20 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var ytelseFom = periode.getMinLocalDate();
         var ytelseTom = periode.getMaxLocalDate();
 
-        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlagTidslinje = beregningsgrunnlagRepository.hentBesteBeregningSomTidslinje(behandling.getId());
+        var aktivitetspengerGrunnlag = beregningsgrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow(
+            () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
+        );
+
+        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlagTidslinje = aktivitetspengerGrunnlag.hentBeregningsgrunnlagTidslinje();
         var beregningsgrunnlag = beregningsgrunnlagTidslinje.toSegments().first().getValue();
+
+        var satsgrunnlag = aktivitetspengerGrunnlag.hentSatsTidslinje().toSegments().first().getValue();
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
                 ytelseTom,
+                satsgrunnlag.satsType().getKode(),
                 beregningsgrunnlag.getSisteLignedeÅr().toString(),
                 beregningsgrunnlag.utledBesteBeregningResultatType(),
                 beregningsgrunnlag.getBeregnetPrAar(),

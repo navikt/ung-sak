@@ -3,13 +3,12 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerGrunnsatsPeriode;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerGrunnsatsPerioder;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsResultat;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPeriode;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPerioder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerMinsteytelseResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +55,14 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
         }
     }
 
-    public void lagre(Long behandlingId, AktivitetspengerSatsResultat satsResultat) {
+    public void lagre(Long behandlingId, AktivitetspengerMinsteytelseResultat satsResultat) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new AktivitetspengerBeregningsgrunnlag());
 
         var perioder = satsResultat.resultatTidslinje().toSegments().stream()
-            .map(s -> new AktivitetspengerGrunnsatsPeriode(s.getLocalDateInterval(), s.getValue()))
+            .map(s -> new AktivitetspengerSatsPeriode(s.getLocalDateInterval(), s.getValue()))
             .toList();
-        var grunnsatser = new AktivitetspengerGrunnsatsPerioder(perioder, satsResultat.regelInput(), satsResultat.regelSporing());
+        var grunnsatser = new AktivitetspengerSatsPerioder(perioder, satsResultat.regelInput(), satsResultat.regelSporing());
 
         var builder = new AktivitetspengerBeregningsgrunnlagBuilder(aktivtGrunnlag);
         builder.medGrunnsatser(grunnsatser);
@@ -83,14 +82,7 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
     public LocalDateTimeline<Beregningsgrunnlag> hentBesteBeregningSomTidslinje(long behandlingId) {
         var grunnlag = hentGrunnlag(behandlingId).orElseThrow(
             () -> new IllegalStateException("Fant ikke aktivitetspenger beregningsgrunnlag for behandlingId=" + behandlingId));
-        var beregningsgrunnlagListe = grunnlag.getBeregningsgrunnlag();
-        if (beregningsgrunnlagListe.isEmpty()) {
-            throw new IllegalStateException("Fant ikke besteberegning på aktivitetspenger beregningsgrunnlag for behandlingId=" + behandlingId);
-        }
-        var segmenter = beregningsgrunnlagListe.stream()
-            .map(bg -> new LocalDateSegment<>(bg.getSkjæringstidspunkt(), null, bg))
-            .toList();
-        return new LocalDateTimeline<>(segmenter);
+        return grunnlag.hentBeregningsgrunnlagTidslinje();
     }
 
 
@@ -109,8 +101,8 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
                 entityManager.persist(bg);
             }
         }
-        if (oppdatertGrunnlag.getGrunnsatser() != null) {
-            entityManager.persist(oppdatertGrunnlag.getGrunnsatser());
+        if (oppdatertGrunnlag.getSatsperioder() != null) {
+            entityManager.persist(oppdatertGrunnlag.getSatsperioder());
         }
         entityManager.persist(oppdatertGrunnlag);
         entityManager.flush();

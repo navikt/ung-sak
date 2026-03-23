@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
 
 import jakarta.persistence.*;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.UngdomsytelseSatsTypeKodeverdiConverter;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
 import no.nav.ung.sak.domene.typer.tid.Range;
@@ -16,20 +15,23 @@ import org.hibernate.annotations.Type;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-@Entity(name = "AktivitetspengerGrunnsatsPeriode")
-@Table(name = "AVP_GRUNNSATS_PERIODE")
-public class AktivitetspengerGrunnsatsPeriode extends BaseEntitet {
+@Entity(name = "AktivitetspengerSatsPeriode")
+@Table(name = "AVP_SATS_PERIODE")
+public class AktivitetspengerSatsPeriode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AVP_GRUNNSATS_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AVP_SATS_PERIODE")
     private Long id;
-
-    @Column(name = "dagsats", nullable = false)
-    private BigDecimal dagsats;
 
     @Type(PostgreSQLRangeType.class)
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
+
+    @Column(name = "minsteytelse", nullable = false)
+    private BigDecimal minsteytelse;
+
+    @Column(name = "dagsats", nullable = false)
+    private BigDecimal dagsats;
 
     @Column(name = "grunnbeløp", nullable = false)
     private BigDecimal grunnbeløp;
@@ -51,12 +53,13 @@ public class AktivitetspengerGrunnsatsPeriode extends BaseEntitet {
     @Column(name = "dagsats_barnetillegg", nullable = false)
     private int dagsatsBarnetillegg;
 
-    public AktivitetspengerGrunnsatsPeriode() {
+    public AktivitetspengerSatsPeriode() {
     }
 
-    public AktivitetspengerGrunnsatsPeriode(AktivitetspengerGrunnsatsPeriode other) {
-        this.dagsats = other.getDagsats();
+    public AktivitetspengerSatsPeriode(AktivitetspengerSatsPeriode other) {
         this.periode = other.getPeriode().toRange();
+        this.minsteytelse = other.getMinsteytelse();
+        this.dagsats = other.getDagsats();
         this.grunnbeløp = other.getGrunnbeløp();
         this.grunnbeløpFaktor = other.getGrunnbeløpFaktor();
         this.satsType = other.getSatsType();
@@ -64,8 +67,9 @@ public class AktivitetspengerGrunnsatsPeriode extends BaseEntitet {
         this.dagsatsBarnetillegg = other.getDagsatsBarnetillegg();
     }
 
-    public AktivitetspengerGrunnsatsPeriode(LocalDateInterval periode, AktivitetspengerSatser satser) {
+    public AktivitetspengerSatsPeriode(LocalDateInterval periode, AktivitetspengerSatsGrunnlag satser) {
         this.periode = DatoIntervallEntitet.fra(periode).toRange();
+        this.minsteytelse = satser.minsteytelse();
         this.dagsats = satser.dagsats();
         this.grunnbeløp = satser.grunnbeløp();
         this.grunnbeløpFaktor = satser.grunnbeløpFaktor();
@@ -102,8 +106,11 @@ public class AktivitetspengerGrunnsatsPeriode extends BaseEntitet {
         return dagsatsBarnetillegg;
     }
 
-    public UngdomsytelseSatser satser() {
-        return new UngdomsytelseSatser(dagsats, grunnbeløp, grunnbeløpFaktor, satsType, antallBarn, dagsatsBarnetillegg);
+    public BigDecimal getMinsteytelse() {
+        return minsteytelse;
+    }
+
+    public AktivitetspengerSatsGrunnlag satsGrunnlag() {
+        return new AktivitetspengerSatsGrunnlag(dagsats, grunnbeløp, grunnbeløpFaktor, minsteytelse, satsType, antallBarn, dagsatsBarnetillegg);
     }
 }
-

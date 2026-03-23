@@ -3,10 +3,11 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning;
 import jakarta.persistence.*;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerGrunnsatsPerioder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPerioder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatser;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsGrunnlag;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -27,8 +28,8 @@ public class AktivitetspengerBeregningsgrunnlag {
 
     @ChangeTracked
     @ManyToOne
-    @JoinColumn(name = "avp_grunnsats_perioder_id", updatable = false)
-    private AktivitetspengerGrunnsatsPerioder grunnsatser;
+    @JoinColumn(name = "avp_sats_perioder_id", updatable = false)
+    private AktivitetspengerSatsPerioder satsperioder;
 
     @ChangeTracked
     @ManyToMany
@@ -49,21 +50,40 @@ public class AktivitetspengerBeregningsgrunnlag {
     public AktivitetspengerBeregningsgrunnlag() {
     }
 
-    public AktivitetspengerGrunnsatsPerioder getGrunnsatser() {
-        return grunnsatser;
+    public AktivitetspengerSatsPerioder getSatsperioder() {
+        return satsperioder;
     }
 
-    void setGrunnsatser(AktivitetspengerGrunnsatsPerioder grunnsatser) {
-        this.grunnsatser = grunnsatser;
+    void setSatsperioder(AktivitetspengerSatsPerioder grunnsatser) {
+        this.satsperioder = grunnsatser;
     }
 
-    public LocalDateTimeline<UngdomsytelseSatser> getGrunnsatsTidslinje() {
-        if (grunnsatser == null) {
+    public LocalDateTimeline<AktivitetspengerSatsGrunnlag> hentSatsTidslinje() {
+        if (satsperioder == null) {
             return LocalDateTimeline.empty();
         }
-        var segmenter = grunnsatser.getPerioder().stream().map(p -> new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(),
-            new UngdomsytelseSatser(p.getDagsats(), p.getGrunnbeløp(), p.getGrunnbeløpFaktor(), p.getSatsType(), p.getAntallBarn(), p.getDagsatsBarnetillegg()))).toList();
+        var segmenter = satsperioder.getPerioder().stream().map(p ->
+            new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.satsGrunnlag())
+        ).toList();
         return new LocalDateTimeline<>(segmenter);
+    }
+
+    public LocalDateTimeline<Beregningsgrunnlag> hentBeregningsgrunnlagTidslinje() {
+        if (beregningsgrunnlag.isEmpty()) {
+            throw new IllegalStateException("Fant ikke beregningsgrunnlag på aktivitetspenger beregningsgrunnlag");
+        }
+        var segmenter = beregningsgrunnlag.stream()
+            .map(bg -> new LocalDateSegment<>(bg.getSkjæringstidspunkt(), null, bg))
+            .toList();
+        return new LocalDateTimeline<>(segmenter);
+    }
+
+    public LocalDateTimeline<AktivitetspengerSatser> hentAktivitetspengerSatsTidslinje() {
+        return hentBeregningsgrunnlagTidslinje().combine(
+            hentSatsTidslinje(),
+            (interval, bg, satser) -> new LocalDateSegment<>(interval, new AktivitetspengerSatser(satser.getValue(), bg.getValue())),
+            LocalDateTimeline.JoinStyle.INNER_JOIN
+        );
     }
 
     public List<Beregningsgrunnlag> getBeregningsgrunnlag() {

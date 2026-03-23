@@ -9,6 +9,7 @@ import java.time.LocalDate;
 public record InnvilgelseDto(
     LocalDate ytelseFom,
     LocalDate ytelseTom,
+    String satsType,
     String sisteLignedeÅr,
     BesteBeregningResultatType besteBeregningResultat,
     BigDecimal beregnetPrAar,

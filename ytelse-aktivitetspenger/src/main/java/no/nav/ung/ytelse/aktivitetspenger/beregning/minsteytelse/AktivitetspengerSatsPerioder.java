@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
@@ -11,19 +11,19 @@ import java.sql.Clob;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity(name = "AktivitetspengerGrunnsatsPerioder")
-@Table(name = "AVP_GRUNNSATS_PERIODER")
+@Entity(name = "AktivitetspengerSatsPerioder")
+@Table(name = "AVP_SATS_PERIODER")
 @Immutable
-public class AktivitetspengerGrunnsatsPerioder extends BaseEntitet {
+public class AktivitetspengerSatsPerioder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AVP_GRUNNSATS_PERIODER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AVP_SATS_PERIODER")
     private Long id;
 
     @Immutable
-    @JoinColumn(name = "avp_grunnsats_perioder_id", nullable = false, updatable = false)
+    @JoinColumn(name = "avp_sats_perioder_id", nullable = false, updatable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    private List<AktivitetspengerGrunnsatsPeriode> perioder = new ArrayList<>();
+    private List<AktivitetspengerSatsPeriode> perioder = new ArrayList<>();
 
     @Lob
     @Column(name = "regel_input", nullable = false)
@@ -35,16 +35,16 @@ public class AktivitetspengerGrunnsatsPerioder extends BaseEntitet {
     @DiffIgnore
     private Clob regelSporing;
 
-    public AktivitetspengerGrunnsatsPerioder() {
+    public AktivitetspengerSatsPerioder() {
     }
 
-    public AktivitetspengerGrunnsatsPerioder(List<AktivitetspengerGrunnsatsPeriode> perioder, String regelInput, String regelSporing) {
-        this.perioder = perioder != null ? perioder.stream().map(AktivitetspengerGrunnsatsPeriode::new).toList() : null;
+    public AktivitetspengerSatsPerioder(List<AktivitetspengerSatsPeriode> perioder, String regelInput, String regelSporing) {
+        this.perioder = perioder != null ? perioder.stream().map(AktivitetspengerSatsPeriode::new).toList() : null;
         this.regelInput = new RegelData(regelInput).getClob();
         this.regelSporing = new RegelData(regelSporing).getClob();
     }
 
-    public List<AktivitetspengerGrunnsatsPeriode> getPerioder() {
+    public List<AktivitetspengerSatsPeriode> getPerioder() {
         return perioder;
     }
 
@@ -83,4 +83,3 @@ public class AktivitetspengerGrunnsatsPerioder extends BaseEntitet {
         this.regelSporing = data == null ? null : data.getClob();
     }
 }
-

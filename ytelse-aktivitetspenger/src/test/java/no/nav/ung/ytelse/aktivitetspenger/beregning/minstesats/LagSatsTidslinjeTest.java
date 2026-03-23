@@ -2,6 +2,8 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.LagSatsTidslinje;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.UtledSatsInput;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;

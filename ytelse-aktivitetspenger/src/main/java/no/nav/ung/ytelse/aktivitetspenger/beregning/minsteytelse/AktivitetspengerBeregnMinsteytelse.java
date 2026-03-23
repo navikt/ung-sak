@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -21,9 +21,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public class AktivitetspengerBeregnMinstesats {
+public class AktivitetspengerBeregnMinsteytelse {
 
-    public static AktivitetspengerSatsResultat beregnMinstesats(BeregnDagsatsInput input) {
+    public static AktivitetspengerMinsteytelseResultat beregnMinsteytelse(BeregnDagsatsInput input) {
         var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
         var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(mapTilSatsInput(input));
         var satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
@@ -31,12 +31,12 @@ public class AktivitetspengerBeregnMinstesats {
 
         var satsTidslinje = input.perioder()
             .intersection(satsOgGrunnbeløpfaktorTidslinje, StandardCombinators::rightOnly)
-            .mapValue(AktivitetspengerBeregnMinstesats::leggTilSatsTypeOgGrunnbeløpFaktor)
+            .mapValue(AktivitetspengerBeregnMinsteytelse::leggTilSatsTypeOgGrunnbeløpFaktor)
             .intersection(grunnbeløpTidslinje, leggTilGrunnbeløp())
             .combine(barnetilleggResultat.barnetilleggTidslinje(), leggTilBarnetillegg(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .mapValue(AktivitetspengerSatser.Builder::build);
+            .mapValue(AktivitetspengerSatsGrunnlag.Builder::build);
 
-        return new AktivitetspengerSatsResultat(
+        return new AktivitetspengerMinsteytelseResultat(
             satsTidslinje,
             LagRegelSporing.lagRegelSporingFraTidslinjer(Map.of(
                 "grunnbeløptidslinje", grunnbeløpTidslinje,
@@ -51,21 +51,18 @@ public class AktivitetspengerBeregnMinstesats {
         return new UtledSatsInput(input.fødselsdato(), input.harTriggerBeregnHøySats(), input.harBeregnetHøySatsTidligere(), input.perioder().getMinLocalDate());
     }
 
-    private static AktivitetspengerSatser.Builder leggTilSatsTypeOgGrunnbeløpFaktor(SatsOgGrunnbeløpfaktor sats) {
-        return AktivitetspengerSatser.builder().medGrunnbeløpFaktor(sats.grunnbeløpFaktor()).medSatstype(sats.satstype());
+    private static AktivitetspengerSatsGrunnlag.Builder leggTilSatsTypeOgGrunnbeløpFaktor(SatsOgGrunnbeløpfaktor sats) {
+        return AktivitetspengerSatsGrunnlag.builder().medGrunnbeløpFaktor(sats.grunnbeløpFaktor()).medSatstype(sats.satstype());
     }
 
-    private static LocalDateSegmentCombinator<AktivitetspengerSatser.Builder, Grunnbeløp, AktivitetspengerSatser.Builder> leggTilGrunnbeløp() {
+    private static LocalDateSegmentCombinator<AktivitetspengerSatsGrunnlag.Builder, Grunnbeløp, AktivitetspengerSatsGrunnlag.Builder> leggTilGrunnbeløp() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue().kopi();
             return new LocalDateSegment<>(di, builder.medGrunnbeløp(rhs.getValue().verdi()));
         };
     }
 
-    /**
-     * Kombinerer barnetillegg inn i satsbyggeren. Null-sikker og tydelig builder-bruk.
-     */
-    private static LocalDateSegmentCombinator<AktivitetspengerSatser.Builder, Barnetillegg, AktivitetspengerSatser.Builder> leggTilBarnetillegg() {
+    private static LocalDateSegmentCombinator<AktivitetspengerSatsGrunnlag.Builder, Barnetillegg, AktivitetspengerSatsGrunnlag.Builder> leggTilBarnetillegg() {
         return (di, lhs, rhs) -> {
             var builder = lhs.getValue().kopi();
             if (rhs == null) {
@@ -79,9 +76,6 @@ public class AktivitetspengerBeregnMinstesats {
         };
     }
 
-    /**
-     * Lager serialisert regelinput for sporing og dokumentasjon.
-     */
     private static String lagRegelInput(
         LocalDateTimeline<Boolean> perioder,
         LocalDate fødselsdato,
@@ -98,13 +92,11 @@ public class AktivitetspengerBeregnMinstesats {
         return JsonObjectMapper.toJson(regelInput, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
     }
 
-
     public record RegelInput(List<Periode> perioder,
                              LocalDate fødselsdato,
                              boolean harTriggerBeregnHøySats,
                              boolean harBeregnetHøySatsTidligere,
                              List<FødselOgDødInfo> barnFødselOgDød) {
     }
-
-
 }
+

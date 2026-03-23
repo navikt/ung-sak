@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
 
 import java.time.LocalDate;
 
