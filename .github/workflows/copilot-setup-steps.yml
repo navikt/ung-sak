@@ -14,9 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - uses: actions/setup-java@v5
+      - uses: navikt/sif-gha-workflows/.github/actions/maven/setup-java-and-maven@main # ratchet:exclude
         with:
-          distribution: temurin
-          java-version: '25'
+          github-token: ${{ secrets.READER_TOKEN }} # bruker READER_TOKEN pga private repos
+          java-version: 25
 
-      - run: mvn dependency:resolve --settings ./.github/.m2/settings.xml --file pom.xml
+      - run: mvn dependency:resolve -s settings.xml
