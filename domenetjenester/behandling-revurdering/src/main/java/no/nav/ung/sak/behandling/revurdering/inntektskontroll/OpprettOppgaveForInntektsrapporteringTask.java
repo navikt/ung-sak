@@ -82,7 +82,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
             logContext(new Saksnummer(prosessTaskData.getSaksnummer()));
             LOG.info("Oppretter oppgave for inntektsrapportering for periode={}", new Periode(fom, tom));
         }
-        var fagsak = hentFagsak(aktørId);
+        var fagsak = hentFagsak(prosessTaskData);
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(fagsak, fom, tom);
         var nesteKontrolltidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
         var frist = nesteKontrolltidspunkt.toLocalDateTime().toLocalDate().atStartOfDay();
@@ -108,7 +108,12 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         return overlapperPeriodeDelvisMedProgramtidslinje(månedForRapportering, månedsvisTidslinje);
     }
 
-    private Fagsak hentFagsak(AktørId aktørId) {
+    private Fagsak hentFagsak(ProsessTaskData prosessTaskData) {
+        if (prosessTaskData.getSaksnummer() != null) {
+            return fagsakRepository.hentSakGittSaksnummer(new Saksnummer(prosessTaskData.getSaksnummer()))
+                .orElseThrow(() -> new IllegalStateException("Fant ikke fagsak for saksnummer=" + prosessTaskData.getSaksnummer()));
+        }
+        var aktørId = new AktørId(prosessTaskData.getAktørId());
         List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
         if (fagsaker.isEmpty()) {
             throw new IllegalStateException("Fant ikke fagsak for aktørId=" + aktørId.getId());
