@@ -12,7 +12,7 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatser;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.InnvilgelseDto;
 import org.slf4j.Logger;
 

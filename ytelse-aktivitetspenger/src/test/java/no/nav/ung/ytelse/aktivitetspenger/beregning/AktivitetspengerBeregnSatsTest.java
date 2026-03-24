@@ -3,12 +3,14 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.FødselOgDødInfo;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.barnetillegg.BeregnDagsatsInput;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerBeregnMinsteytelse;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerBeregnSats;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -20,8 +22,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class AktivitetspengerBeregnMinsteytelseTest {
-
+class AktivitetspengerBeregnSatsTest {
 
     public static final BigDecimal DAGSATS_LAV_SATS = BigDecimal.valueOf(649.0798666826);
     public static final BigDecimal GRUNNBELØP = BigDecimal.valueOf(124028);
@@ -34,7 +35,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var tom = LocalDate.of(2024, 4, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var fødselsdag = fom.minusYears(18).minusDays(1);
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(
             lagInput(perioder, fødselsdag));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
@@ -55,7 +56,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var tom = LocalDate.of(2024, 5, 15);
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var fødselsdag = fom.minusYears(18).minusDays(1);
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(lagInput(perioder, fødselsdag));
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdag));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
@@ -83,7 +84,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = fom.plusMonths(1).plusDays(14);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(lagInput(perioder, fødselsdato));
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdato));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(1);
@@ -105,7 +106,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 15);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(new BeregnDagsatsInput(perioder, fødselsdato, false, true, List.of()));
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(new BeregnDagsatsInput(perioder, fødselsdato, false, true, List.of()));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(3);
@@ -142,7 +143,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 15);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(
             lagInput(perioder, fødselsdato, true));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
@@ -182,7 +183,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 4, 1);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(lagInput(perioder, fødselsdato, true));
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdato, true));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(3);
@@ -219,7 +220,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = LocalDate.of(2024, 5, 1);
         var fødselsdato = tjuefemårsdag.minusYears(25);
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(lagInput(perioder, fødselsdato, true));
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdato, true));
 
         var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
         assertThat(segmenter.size()).isEqualTo(2);
@@ -249,7 +250,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var fødselsdag = fom.minusYears(18);
         var barn = new FødselOgDødInfo(AktørId.dummy(), LocalDate.of(2020, 1, 1), LocalDate.of(2020, 1, 1));
         var input = new BeregnDagsatsInput(perioder, fødselsdag, false, false, List.of(barn));
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(input);
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(input);
 
         var forventetTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(
@@ -270,7 +271,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var fødselsdag = fom.minusYears(18);
         var barn = new FødselOgDødInfo(AktørId.dummy(), LocalDate.of(2020, 1, 1), null);
         var input = new BeregnDagsatsInput(perioder, fødselsdag, false, false, List.of(barn));
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(input);
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(input);
 
         var forventetTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(
@@ -291,7 +292,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var fødselsdag = fom.minusYears(18);
         var barn = new FødselOgDødInfo(AktørId.dummy(), LocalDate.of(2025, 1, 10), LocalDate.of(2025, 1, 20));
         var input = new BeregnDagsatsInput(perioder, fødselsdag, false, false, List.of(barn));
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(input);
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(input);
 
         var forventetTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(
@@ -323,7 +324,7 @@ class AktivitetspengerBeregnMinsteytelseTest {
         var barn1 = new FødselOgDødInfo(AktørId.dummy(), LocalDate.of(2020, 1, 1), null);
         var barn2 = new FødselOgDødInfo(AktørId.dummy(), LocalDate.of(2025, 1, 15), null);
         var input = new BeregnDagsatsInput(perioder, fødselsdag, false, false, List.of(barn1, barn2));
-        var dagsatsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(input);
+        var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(input);
 
         var forventetTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(
@@ -341,12 +342,13 @@ class AktivitetspengerBeregnMinsteytelseTest {
         assertThat(dagsatsTidslinje.resultatTidslinje()).isEqualTo(forventetTidslinje);
     }
 
-    private static UngdomsytelseSatser lagBarnetilleggSats(int antallBarn) {
-        return new UngdomsytelseSatser(
+    private static AktivitetspengerSatsGrunnlag lagBarnetilleggSats(int antallBarn) {
+        return new AktivitetspengerSatsGrunnlag(
             DAGSATS_LAV_SATS, // dagsats
             GRUNNBELØP, // grunnbeløp
             GRUNNBELØP_FAKTOR_LAV_SATS, // grunnbeløpFaktor
-            no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType.LAV,
+            GRUNNBELØP.multiply(GRUNNBELØP_FAKTOR_LAV_SATS),
+            UngdomsytelseSatsType.LAV,
             antallBarn, // antallBarn
             antallBarn*DAGSATS_BARNETILLEGG // dagsatsBarnetillegg
         );

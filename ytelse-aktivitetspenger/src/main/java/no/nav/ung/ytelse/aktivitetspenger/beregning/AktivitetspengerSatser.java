@@ -1,6 +1,7 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
+package no.nav.ung.ytelse.aktivitetspenger.beregning;
 
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 
 public record AktivitetspengerSatser(
     AktivitetspengerSatsGrunnlag satsGrunnlag,

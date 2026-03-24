@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
+package no.nav.ung.ytelse.aktivitetspenger.beregning;
 
 public enum GrunnsatsType {
     BEREGNINGSGRUNNLAG,

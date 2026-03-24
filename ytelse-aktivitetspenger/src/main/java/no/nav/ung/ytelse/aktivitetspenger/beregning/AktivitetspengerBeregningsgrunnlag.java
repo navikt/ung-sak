@@ -5,9 +5,8 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPerioder;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatser;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsGrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPerioder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 

@@ -6,9 +6,9 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPeriode;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPerioder;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerMinsteytelseResultat;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPerioder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,7 +55,7 @@ public class AktivitetspengerBeregningsgrunnlagRepository {
         }
     }
 
-    public void lagre(Long behandlingId, AktivitetspengerMinsteytelseResultat satsResultat) {
+    public void lagre(Long behandlingId, AktivitetspengerSatsResultat satsResultat) {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new AktivitetspengerBeregningsgrunnlag());
 

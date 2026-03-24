@@ -16,7 +16,7 @@ import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.barnetillegg.BeregnDagsatsInput;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningStegTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerBeregnMinsteytelse;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerBeregnSats;
 
 @ApplicationScoped
 @BehandlingStegRef(BehandlingStegType.AKTIVITETSPENGER_BEREGNING)
@@ -65,7 +65,7 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
         aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag);
 
         var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
-        var satsTidslinje = AktivitetspengerBeregnMinsteytelse.beregnMinsteytelse(beregnDagsatsInput);
+        var satsTidslinje = AktivitetspengerBeregnSats.beregnSats(beregnDagsatsInput);
         aktivitetspengerBeregningsgrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();

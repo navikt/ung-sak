@@ -1,7 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning;
 
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse.AktivitetspengerSatsPerioder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPerioder;
 
 import java.util.ArrayList;
 import java.util.List;

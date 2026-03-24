@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.minsteytelse;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -21,9 +21,9 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public class AktivitetspengerBeregnMinsteytelse {
+public class AktivitetspengerBeregnSats {
 
-    public static AktivitetspengerMinsteytelseResultat beregnMinsteytelse(BeregnDagsatsInput input) {
+    public static AktivitetspengerSatsResultat beregnSats(BeregnDagsatsInput input) {
         var grunnbeløpTidslinje = GrunnbeløpTidslinje.hentTidslinje();
         var satstypeTidslinje = LagSatsTidslinje.lagSatsTidslinje(mapTilSatsInput(input));
         var satsOgGrunnbeløpfaktorTidslinje = GrunnbeløpfaktorTidslinje.hentGrunnbeløpfaktorTidslinjeFor(satstypeTidslinje);
@@ -31,12 +31,12 @@ public class AktivitetspengerBeregnMinsteytelse {
 
         var satsTidslinje = input.perioder()
             .intersection(satsOgGrunnbeløpfaktorTidslinje, StandardCombinators::rightOnly)
-            .mapValue(AktivitetspengerBeregnMinsteytelse::leggTilSatsTypeOgGrunnbeløpFaktor)
+            .mapValue(AktivitetspengerBeregnSats::leggTilSatsTypeOgGrunnbeløpFaktor)
             .intersection(grunnbeløpTidslinje, leggTilGrunnbeløp())
             .combine(barnetilleggResultat.barnetilleggTidslinje(), leggTilBarnetillegg(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .mapValue(AktivitetspengerSatsGrunnlag.Builder::build);
 
-        return new AktivitetspengerMinsteytelseResultat(
+        return new AktivitetspengerSatsResultat(
             satsTidslinje,
             LagRegelSporing.lagRegelSporingFraTidslinjer(Map.of(
                 "grunnbeløptidslinje", grunnbeløpTidslinje,
