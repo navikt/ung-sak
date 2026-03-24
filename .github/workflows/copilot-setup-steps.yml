@@ -4,7 +4,11 @@
 
 name: Copilot Setup Steps
 
-on: workflow_dispatch
+on:
+  push:
+    paths:
+      - "copilot-setup-steps.yml"
+  workflow_dispatch:
 
 jobs:
   copilot-setup-steps:
@@ -13,10 +17,11 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
-
-      - uses: navikt/sif-gha-workflows/.github/actions/maven/setup-java-and-maven@main # ratchet:exclude
+      - uses: actions/setup-java@v5
         with:
-          github-token: ${{ secrets.READER_TOKEN }} # bruker READER_TOKEN pga private repos
-          java-version: 25
-
-      - run: mvn dependency:resolve -s settings.xml
+          distribution: 'temurin'
+          java-version: '25'
+          cache: 'maven'
+      - run: mvn dependency:resolve -settings ./.github/.m2/settings.xml --file pom.xml
+        env:
+          GH_ACCESS_TOKEN: ${{ secrets.READER_TOKEN }}
