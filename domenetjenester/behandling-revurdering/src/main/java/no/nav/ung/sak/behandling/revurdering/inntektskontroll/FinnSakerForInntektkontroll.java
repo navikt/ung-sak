@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -24,6 +25,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT;
 
@@ -31,6 +33,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_KONTROLL_RE
 public class FinnSakerForInntektkontroll {
 
     private static final Logger LOG = LoggerFactory.getLogger(FinnSakerForInntektkontroll.class);
+    private static final Set<FagsakYtelseType> STØTTEDE_YTELSE_TYPER = Set.of(FagsakYtelseType.UNGDOMSYTELSE, FagsakYtelseType.AKTIVITETSPENGER);
 
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
@@ -62,7 +65,9 @@ public class FinnSakerForInntektkontroll {
     }
 
     List<Fagsak> finnFagsaker(LocalDate fom, LocalDate tom) {
-        var fagsaker = fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom);
+        var fagsaker = fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom).stream()
+            .filter(f -> STØTTEDE_YTELSE_TYPER.contains(f.getYtelseType()))
+            .toList();
 
         var behandlinger = fagsaker.stream().map(Fagsak::getId).map(fagsakId -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId)).flatMap(Optional::stream).toList();
 

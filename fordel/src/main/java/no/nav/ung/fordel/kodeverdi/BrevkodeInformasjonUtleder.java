@@ -41,6 +41,7 @@ public final class BrevkodeInformasjonUtleder {
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, FordelBehandlingType.DIGITAL_SØKNAD));
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(), null, null, FagsakYtelseType.UNGDOMSYTELSE, FordelBehandlingType.DIGITAL_SØKNAD));
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.AKTIVITETSPENGER_SOKNAD.getOffisiellKode(), null, null, FagsakYtelseType.AKTIVITETSPENGER, FordelBehandlingType.DIGITAL_SØKNAD));
+        brevkodeliste.add(new BrevkodeInformasjon(Brevkode.AKTIVITETSPENGER_VARSEL_UTTALELSE.getOffisiellKode(), null, null, FagsakYtelseType.AKTIVITETSPENGER, FordelBehandlingType.DIGITAL_SØKNAD));
         brevkodeliste.add(new BrevkodeInformasjon(Brevkode.KLAGE.getOffisiellKode(), null, "Klage"));
 
         final Map<String, BrevkodeInformasjon> titler = new HashMap<>();

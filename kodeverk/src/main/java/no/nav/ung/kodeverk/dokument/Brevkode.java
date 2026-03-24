@@ -41,6 +41,9 @@ public class Brevkode implements Kodeverdi {
     public static final String AKTIVITETSPENGER_SOKNAD_KODE = "AKTIVITETSPENGER_SOKNAD";
     public static final Brevkode AKTIVITETSPENGER_SOKNAD = new Brevkode(AKTIVITETSPENGER_SOKNAD_KODE, "FIXME_AKTIVITETSPENGER_BREVKODE", SØKNAD_RANGERING);
 
+    public static final String AKTIVITETSPENGER_VARSEL_UTTALELSE_KODE = "AKTIVITETSPENGER_VARSEL_UTTALELSE";
+    public static final Brevkode AKTIVITETSPENGER_VARSEL_UTTALELSE = new Brevkode(AKTIVITETSPENGER_VARSEL_UTTALELSE_KODE, "FIXME_AKTIVITETSPENGER_VARSEL_BREVKODE", VEDLEGG_RANGERING);
+
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
