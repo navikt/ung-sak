@@ -16,6 +16,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     VEDTAK("VEDTAK", "Vedtak"),
+    LOKALKONTOR_FORESLÅR_VILKÅR("LOKALKONTOR_FORESLÅR_VILKÅR", "Lokalkontor foreslår vilkår"),
     LOKALKONTOR_BESLUTTER_VILKÅR("LOKALKONTOR_BESLUTTER_VILKÅR", "Lokalkontor beslutter vilkår"),
     FORMKRAV_KLAGE_VEDTAKSINSTANS("FORMKRAV_KLAGE_VEDTAKSINSTANS", "Formkrav klage Vedtaksinstans"),
     KLAGE_BEH_VEDTAKSINSTANS("KLAGE_BEH_VEDTAKSINSTANS", "Klageresultat Vedtaksinstans"),
