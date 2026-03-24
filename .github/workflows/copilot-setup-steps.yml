@@ -19,4 +19,4 @@ jobs:
           distribution: temurin
           java-version: '25'
 
-      - run: mvn dependency:resolve
+      - run: mvn dependency:resolve  --settings ./.github/.m2/settings.xml --file pom.xml
