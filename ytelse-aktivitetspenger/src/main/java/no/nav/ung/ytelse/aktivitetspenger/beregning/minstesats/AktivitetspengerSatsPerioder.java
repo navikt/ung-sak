@@ -39,7 +39,8 @@ public class AktivitetspengerSatsPerioder extends BaseEntitet {
     }
 
     public AktivitetspengerSatsPerioder(List<AktivitetspengerSatsPeriode> perioder, String regelInput, String regelSporing) {
-        this.perioder = perioder != null ? perioder.stream().map(AktivitetspengerSatsPeriode::new).toList() : null;
+        this.perioder = perioder != null ? perioder.stream().map(AktivitetspengerSatsPeriode::new).toList() : new ArrayList<>();
+
         this.regelInput = new RegelData(regelInput).getClob();
         this.regelSporing = new RegelData(regelSporing).getClob();
     }

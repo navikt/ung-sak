@@ -71,12 +71,15 @@ public record AktivitetspengerSatsGrunnlag(
         }
 
         public AktivitetspengerSatsGrunnlag build() {
+            Objects.requireNonNull(grunnbeløp);
+            Objects.requireNonNull(grunnbeløpFaktor);
+            Objects.requireNonNull(antallBarn);
+            Objects.requireNonNull(satsType);
+
             BigDecimal minsteytelse = grunnbeløpFaktor.multiply(grunnbeløp);
             BigDecimal dagsats = minsteytelse
                 .divide(BigDecimal.valueOf(VIRKEDAGER_I_ET_ÅR), 10, RoundingMode.HALF_UP);
-            Objects.requireNonNull(antallBarn);
-            Objects.requireNonNull(dagsatsBarnetillegg);
-            Objects.requireNonNull(satsType);
+
             return new AktivitetspengerSatsGrunnlag(dagsats, grunnbeløp, grunnbeløpFaktor, minsteytelse, satsType, antallBarn, dagsatsBarnetillegg);
         }
     }

@@ -11,7 +11,7 @@ public record InnvilgelseDto(
     LocalDate ytelseFom,
     LocalDate ytelseTom,
     GrunnsatsType grunnsatsType,
-    boolean satsType,
+    boolean erHøySatstype,
     BigDecimal grunnbeløp,
     BigDecimal minsteytelse,
     String sisteLignedeÅr,

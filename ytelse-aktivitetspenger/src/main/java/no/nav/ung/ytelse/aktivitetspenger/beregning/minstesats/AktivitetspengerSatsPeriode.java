@@ -24,7 +24,7 @@ public class AktivitetspengerSatsPeriode extends BaseEntitet {
     private Long id;
 
     @Type(PostgreSQLRangeType.class)
-    @Column(name = "periode", columnDefinition = "daterange")
+    @Column(name = "periode", nullable = false, columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
     @Column(name = "minsteytelse", nullable = false)

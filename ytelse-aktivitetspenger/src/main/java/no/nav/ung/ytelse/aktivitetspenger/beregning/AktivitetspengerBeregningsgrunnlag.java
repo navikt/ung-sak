@@ -59,7 +59,7 @@ public class AktivitetspengerBeregningsgrunnlag {
 
     public LocalDateTimeline<AktivitetspengerSatsGrunnlag> hentSatsTidslinje() {
         if (satsperioder == null) {
-            return LocalDateTimeline.empty();
+            throw new IllegalStateException("Fant ikke satsperioder på AktivitetspengerBeregningsgrunnlag");
         }
         var segmenter = satsperioder.getPerioder().stream().map(p ->
             new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.satsGrunnlag())
@@ -69,7 +69,7 @@ public class AktivitetspengerBeregningsgrunnlag {
 
     public LocalDateTimeline<Beregningsgrunnlag> hentBeregningsgrunnlagTidslinje() {
         if (beregningsgrunnlag.isEmpty()) {
-            throw new IllegalStateException("Fant ikke beregningsgrunnlag på aktivitetspenger beregningsgrunnlag");
+            throw new IllegalStateException("Fant ikke beregningsgrunnlag på AktivitetspengerBeregningsgrunnlag");
         }
         var segmenter = beregningsgrunnlag.stream()
             .map(bg -> new LocalDateSegment<>(bg.getSkjæringstidspunkt(), null, bg))
@@ -82,7 +82,7 @@ public class AktivitetspengerBeregningsgrunnlag {
             hentSatsTidslinje(),
             (interval, bg, satser) ->
                 new LocalDateSegment<>(interval, new AktivitetspengerSatser(satser.getValue(), bg.getValue())),
-            LocalDateTimeline.JoinStyle.INNER_JOIN
+            LocalDateTimeline.JoinStyle.LEFT_JOIN
         );
     }
 
