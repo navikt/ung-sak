@@ -32,6 +32,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
+            .medSteg(BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPVILKÅR)
             .medSteg(BehandlingStegType.AKTIVITETSPENGER_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.FORESLÅ_VEDTAK)
             .medSteg(BehandlingStegType.FATTE_VEDTAK)
