@@ -4,11 +4,7 @@
 
 name: Copilot Setup Steps
 
-on:
-  push:
-    paths:
-      - "copilot-setup-steps.yml"
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
   copilot-setup-steps:
