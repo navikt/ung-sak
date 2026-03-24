@@ -14,7 +14,7 @@ import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.domene.vedtak.VedtakAksjonspunktData;
 import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
-import no.nav.ung.sak.kontrakt.vedtak.LokalkontorBeslutterVilkårAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.beslutte.LokalkontorBeslutteVilkårAksjonspunkt;
 
 import java.util.Collection;

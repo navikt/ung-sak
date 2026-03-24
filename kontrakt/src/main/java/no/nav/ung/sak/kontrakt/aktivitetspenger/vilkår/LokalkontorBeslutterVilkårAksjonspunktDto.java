@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.vedtak;
+package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
 
 import java.util.ArrayList;
 import java.util.Collection;

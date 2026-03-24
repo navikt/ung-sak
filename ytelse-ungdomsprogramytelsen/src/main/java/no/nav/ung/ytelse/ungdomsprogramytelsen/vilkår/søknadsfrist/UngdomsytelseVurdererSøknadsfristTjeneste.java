@@ -1,4 +1,4 @@
-package no.nav.ung.sak.søknadsfrist;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.søknadsfrist;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
@@ -26,6 +26,10 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
+import no.nav.ung.sak.søknadsfrist.KravDokument;
+import no.nav.ung.sak.søknadsfrist.KravDokumentType;
+import no.nav.ung.sak.søknadsfrist.SøktPeriode;
+import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
 
 
 @ApplicationScoped
