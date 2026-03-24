@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
+import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -81,11 +82,13 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
             logContext(new Saksnummer(prosessTaskData.getSaksnummer()));
             LOG.info("Oppretter oppgave for inntektsrapportering for periode={}", new Periode(fom, tom));
         }
-        boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(aktørId, fom, tom);
+        var fagsak = hentFagsak(aktørId);
+        boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(fagsak, fom, tom);
         var nesteKontrolltidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
         var frist = nesteKontrolltidspunkt.toLocalDateTime().toLocalDate().atStartOfDay();
         delegeringTjeneste.opprettOppgave(new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
+            OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(fagsak.getYtelseType()),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
             new InntektsrapporteringOppgavetypeDataDto(fom, tom, harIkkeYtelseIHelePerioden),
             frist
@@ -93,24 +96,26 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     }
 
     /** Sjekker om bruker ikke har ytelse i hele perioden, men kun i deler av perioden
-     * @param aktørId AktlørId til bruker
+     * @param fagsak Fagsak til bruker
      * @param fom Første dag i måned til rapportering
      * @param tom Siste dag i måned til rapportering
      * @return
      */
-    private boolean harYtelseIDelAvPerioden(AktørId aktørId, LocalDate fom, LocalDate tom) {
+    private boolean harYtelseIDelAvPerioden(Fagsak fagsak, LocalDate fom, LocalDate tom) {
+        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalStateException("Fant ikke behandling"));
+        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
+        LocalDateInterval månedForRapportering = new LocalDateInterval(fom, tom);
+        return overlapperPeriodeDelvisMedProgramtidslinje(månedForRapportering, månedsvisTidslinje);
+    }
+
+    private Fagsak hentFagsak(AktørId aktørId) {
         List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
         if (fagsaker.isEmpty()) {
             throw new IllegalStateException("Fant ikke fagsak for aktørId=" + aktørId.getId());
         } else if (fagsaker.size() != 1) {
             throw new IllegalStateException("Forventer kun en fagsak for aktørId=" + aktørId.getId() + ", men fant flere: " + fagsaker.stream().map(Fagsak::getSaksnummer).toList());
         }
-        var fagsak = fagsaker.get(0);
-
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId()).orElseThrow(() -> new IllegalStateException("Fant ikke behandling"));
-        LocalDateTimeline<YearMonth> månedsvisTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(sisteBehandling.getId());
-        LocalDateInterval månedForRapportering = new LocalDateInterval(fom, tom);
-        return overlapperPeriodeDelvisMedProgramtidslinje(månedForRapportering, månedsvisTidslinje);
+        return fagsaker.get(0);
     }
 
     private static <T> boolean overlapperPeriodeDelvisMedProgramtidslinje(LocalDateInterval periode, LocalDateTimeline<T> programtidslinje) {
@@ -119,6 +124,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         LocalDateTimeline<Boolean> periodeEtterFjernetOverlapp = periodeSomTidslinje.disjoint(overlapp);
         return !periodeEtterFjernetOverlapp.isEmpty();
     }
+
     /** log mdc cleares automatisk når task har kjørt, så trenger ikke kalle clearLogContext. */
     public static void logContext(Saksnummer saksnummer) {
         LOG_CONTEXT.add("saksnummer", saksnummer);
