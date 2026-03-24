@@ -18,7 +18,6 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 
@@ -158,7 +157,7 @@ public class EndretPeriodeOppgaveOppretter {
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
-            new FjernetPeriodeDataDto(forrigePeriode.getFomDato(), forrigePeriode.getTomDato()),
+            new EndretPeriodeDataDto(null, forrigePeriode, Set.of(PeriodeEndringType.FJERNET_PERIODE)),
             etterlysning.getFrist()
         );
     }

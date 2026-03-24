@@ -48,7 +48,6 @@ public class InntektKontrollOppgaveMapper {
             .map(it -> new ArbeidOgFrilansRegisterInntektDTO(
                 summerInntekter(it),
                 it.arbeidsgiver().getIdentifikator(),
-                it.arbeidsgiver().getIdentifikator(),
                 finnArbeidsgivernavn(arbeidsgiverOpplysninger, it).orElse(null)
             ))
             .toList();
