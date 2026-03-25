@@ -38,7 +38,7 @@ public enum BehandlingStegType implements Kodeverdi {
 
     VURDER_BOSTED("VURDER_BOSTED", "Vurderer om bruker bor et sted ytelsen gjelder", UTREDES),
     VURDER_BISTANDSVILKÅR("VURDER_BISTANDSVILKÅR", "Vurder brukers behov om bistand ref 14a vedtak", UTREDES),
-    VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR("VURDER_FORUTGÅENDE_MEDLEMSKAP", "Vurder om bruker har bodd lenge nok i Norge", UTREDES),
+    VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR("VURDER_FORUTGÅENDE_MEDLEMSKAP", "Vurder bosteder i søknad opp mot EØS-/trygdeavtaleland", UTREDES),
     AKTIVITETSPENGER_BEREGNING("AKTIVITETSPENGER_BEREGNING", "Beregner sats for aktivitetspenger", UTREDES),
 
     // Utgåtte steg: Lagres på behandling og aksjonspunkt og kan ikke fjernes med mindre man håndterer dette i BehandlingStegTypeKodeverdiConverter,
