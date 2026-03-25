@@ -276,8 +276,6 @@ spec:
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
-    - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
-      value: "true"
     - name: OPPGAVER_I_UNG_DELTAKELSE_ENABLED
       value: "false"
     - name: AKTIVITETSPENGER_ENABLED
