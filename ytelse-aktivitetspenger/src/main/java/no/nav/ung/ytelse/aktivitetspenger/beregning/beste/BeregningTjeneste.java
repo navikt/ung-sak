@@ -57,6 +57,8 @@ public class BeregningTjeneste {
         var pgiKalkulator = new PgiKalkulator(input);
         var pgiPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
 
+        if (pgiPerÅr.size() < 3) { throw new IllegalStateException("BesteBeregning: Kan ikke utføre besteberegning uten komplette data."); }
+
         BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(input.sisteLignedeÅr(), BigDecimal.ZERO);
         BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
         BigDecimal beregningsgrunnlag = årsinntektSisteÅr.max(årsinntektSisteTreÅr);

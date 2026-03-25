@@ -37,10 +37,8 @@ public record BeregningsgrunnlagDto(
     @JsonProperty("beregningsgrunnlagRedusert")
     BigDecimal beregningsgrunnlagRedusert,
 
-    @NotNull
-    @Digits(integer = 6, fraction = 2)
     @JsonProperty("dagsats")
-    BigDecimal dagsats,
+    int dagsats,
 
     @NotNull
     @JsonProperty("pgiÅrsinntekter")

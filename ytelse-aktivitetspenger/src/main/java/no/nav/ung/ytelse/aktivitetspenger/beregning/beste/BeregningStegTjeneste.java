@@ -26,9 +26,19 @@ public class BeregningStegTjeneste {
         this.beregningTjeneste = beregningTjeneste;
     }
 
+    // TODO: Koble på utledning av siste tilgjengelige lignede år
+    private Year utledSistLignedeÅr(LocalDate skjæringstidspunkt) {
+        LocalDate maiFørste = LocalDate.of(LocalDate.now().getYear(), 5, 1);
+        if (skjæringstidspunkt.isBefore(maiFørste)) {
+            return Year.of(skjæringstidspunkt.minusYears(2).getYear());
+        } else {
+            return Year.of(skjæringstidspunkt.minusYears(1).getYear());
+        }
+    }
+
     public void utførBesteberegning(Long behandlingId, LocalDate skjæringstidspunkt) {
         var inntektsposter = beregningTjeneste.hentSigrunInntektsposter(behandlingId);
-        var sistLignedeÅr = Year.of(skjæringstidspunkt.minusYears(1).getYear());  // TODO: Koble på utledning av siste tilgjengelige lignede år
+        var sistLignedeÅr = utledSistLignedeÅr(skjæringstidspunkt);
 
         var beregningInput = BeregningTjeneste.lagBeregningInput(sistLignedeÅr, skjæringstidspunkt, inntektsposter);
         var besteBeregningResultat = BeregningTjeneste.avgjørBesteberegning(beregningInput);

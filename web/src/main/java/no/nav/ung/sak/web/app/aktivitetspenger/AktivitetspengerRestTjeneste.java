@@ -114,7 +114,7 @@ public class AktivitetspengerRestTjeneste {
             grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr().setScale(0, RoundingMode.HALF_EVEN),
             grunnlag.getBeregnetPrAar().setScale(0, RoundingMode.HALF_EVEN),
             grunnlag.getBeregnetRedusertPrAar().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getDagsats().setScale(2, RoundingMode.HALF_EVEN),
+            grunnlag.getDagsats().setScale(0, RoundingMode.HALF_EVEN).intValueExact(),
             pgiÅrsinntekter,
             mapBesteBeregningResultatType(grunnlag.utledBesteBeregningResultatType())
         );
