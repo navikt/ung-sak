@@ -1291,7 +1291,7 @@
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon" : {
         "enum" : [ "5015", "5016", "5200", "5100", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "5141", "6006", "5301", "6100", "7001", "7003", "7005", "7014", "7040", "8000", "5082", "5035", "7100", "UNDEFINED" ],
         "type" : "string",
-        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "LOKALKONTOR_BESLUTTER_VILKÅR", "LOKALKONTOR_FORESLÅR_VILKÅR", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "VURDER_BISTANDSVILKÅR", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
+        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "LOKALKONTOR_BESLUTTER_VILKÅR", "LOKALKONTOR_FORESLÅR_VILKÅR", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "VURDER_BISTANDSVILKÅR", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "AVKLAR_GYLDIG_MEDLEMSKAP", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus" : {
         "enum" : [ "AVBR", "OPPR", "UTFO" ],
@@ -2022,13 +2022,20 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto" : {
         "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
+          },
           "begrunnelse" : {
             "maxLength" : 4000,
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
+          },
+          "erVilkarOk" : {
+            "type" : "boolean"
           }
         },
+        "required" : [ "erVilkarOk" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.VurderBehovForBistandDto" : {
@@ -2105,6 +2112,11 @@
         },
         "required" : [ "arbeidsinntekt", "næring", "sum", "sumAvkortet", "sumAvkortetOgOppjustert", "årstall" ],
         "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType" : {
+        "enum" : [ "SØKER_IKKE_MEDLEM" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "SØKER_IKKE_MEDLEM" ]
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto" : {
         "properties" : {
