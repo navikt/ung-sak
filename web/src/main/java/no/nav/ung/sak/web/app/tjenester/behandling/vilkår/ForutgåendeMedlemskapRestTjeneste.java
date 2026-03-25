@@ -12,16 +12,17 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
@@ -82,28 +83,37 @@ public class ForutgåendeMedlemskapRestTjeneste {
     }
 
     private List<MedlemskapsPeriodeDto> mapTilResponse(Bosteder bosteder, no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår vilkår) {
-        return bosteder.getPerioder().entrySet().stream()
-            .map(entry -> mapBostedsEntry(vilkår, entry))
+        var bostedTidslinje = new LocalDateTimeline<>(bosteder.getPerioder().entrySet().stream()
+            .map(entry -> new LocalDateSegment<>(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), entry.getValue()))
+            .toList());
+
+        var vilkårTidslinje = vilkår == null ? LocalDateTimeline.<VilkårPeriode>empty() :
+            new LocalDateTimeline<>(vilkår.getPerioder().stream()
+                .map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), periode))
+                .toList());
+
+        return bostedTidslinje.combine(vilkårTidslinje, combinator(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .toSegments()
+            .stream()
+            .map(LocalDateSegment::getValue)
             .toList();
     }
 
-    private MedlemskapsPeriodeDto mapBostedsEntry(Vilkår vilkår, Map.Entry<Periode, Bosteder.BostedPeriodeInfo> entry) {
-        Periode bostedPeriode = entry.getKey();
-        Bosteder.BostedPeriodeInfo bosted = entry.getValue();
+    private static LocalDateSegmentCombinator<Bosteder.BostedPeriodeInfo, VilkårPeriode, MedlemskapsPeriodeDto> combinator() {
+        return (di, bostedSegment, vilkårSegment) -> {
+            var bosted = bostedSegment.getValue();
+            var vilkårPeriode = vilkårSegment != null ? vilkårSegment.getValue() : null;
+            var landkode = bosted.getLand().getLandkode();
 
-        var periode = new no.nav.ung.sak.typer.Periode(bostedPeriode.getFraOgMed(), bostedPeriode.getTilOgMed());
-        var vilkårPeriode = vilkår != null ? vilkår.finnPeriodeSomInneholderDato(bostedPeriode.getFraOgMed()).orElse(null) : null;
-        var utfall = vilkårPeriode != null ? vilkårPeriode.getGjeldendeUtfall() : null;
-        var avslagsårsak = mapAvslagsårsak(vilkårPeriode);
-
-        return new MedlemskapsPeriodeDto(
-            periode,
-            mapLandTilNorskNavn(bosted.getLand().getLandkode()),
-            bosted.getLand().getLandkode(),
-            TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(bosted.getLand(), bostedPeriode.getFraOgMed()),
-            utfall,
-            avslagsårsak
-        );
+            return new LocalDateSegment<>(di, new MedlemskapsPeriodeDto(
+                new no.nav.ung.sak.typer.Periode(di.getFomDato(), di.getTomDato()),
+                mapLandTilNorskNavn(landkode),
+                landkode,
+                TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(bosted.getLand(), di.getFomDato()),
+                vilkårPeriode != null ? vilkårPeriode.getGjeldendeUtfall() : null,
+                mapAvslagsårsak(vilkårPeriode)
+            ));
+        };
     }
 
     private static Map<String, String> lagLandkodeTilNorskNavn() {
@@ -118,11 +128,11 @@ public class ForutgåendeMedlemskapRestTjeneste {
         return Map.copyOf(result);
     }
 
-    private String mapLandTilNorskNavn(String landkodeAlpha3) {
+    private static String mapLandTilNorskNavn(String landkodeAlpha3) {
         return LANDKODE_TIL_NORSK_NAVN.getOrDefault(landkodeAlpha3, landkodeAlpha3);
     }
 
-    private MedlemskapAvslagsÅrsakType mapAvslagsårsak(VilkårPeriode vilkårPeriode) {
+    private static MedlemskapAvslagsÅrsakType mapAvslagsårsak(VilkårPeriode vilkårPeriode) {
         if (vilkårPeriode == null || vilkårPeriode.getAvslagsårsak() == null || vilkårPeriode.getAvslagsårsak() == Avslagsårsak.UDEFINERT) {
             return null;
         }
