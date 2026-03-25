@@ -49,7 +49,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String LOKALKONTOR_FORESLÅR_VILKÅR_KODE = "5100";
     public static final String LOKALKONTOR_BESLUTTER_VILKÅR_KODE = "5200";
 
-    public static final String AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE_KODE = "5301";
+    public static final String AVKLAR_GYLDIG_MEDLEMSKAP_KODE = "5301";
 
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
     public static final String SJEKK_TILBAKEKREVING_KODE = "5085";

@@ -74,7 +74,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
             .orElse(null);
 
         if (nyesteSøknad == null) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE));
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
         Bosteder forutgåendeBosteder = ((Aktivitetspenger) nyesteSøknad.getYtelse()).getForutgåendeBosteder();
@@ -103,6 +103,6 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         if (alleLandGyldige) {
             return Collections.emptyList();
         }
-        return List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE);
+        return List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP);
     }
 }

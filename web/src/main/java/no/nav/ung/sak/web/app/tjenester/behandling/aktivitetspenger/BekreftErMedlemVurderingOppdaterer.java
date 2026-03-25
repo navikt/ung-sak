@@ -6,14 +6,15 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
@@ -35,15 +36,26 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         var forutgåendeMedlemskapBuilder = resultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
-        for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            //FIXME AKT implementer regel for automatisk behandling eller opprett aksjonspunkt her
-            var periodeBuilderOppfylt = forutgåendeMedlemskapBuilder.hentBuilderFor(periode).medUtfall(Utfall.OPPFYLT).medRegelInput("TODO");
-            forutgåendeMedlemskapBuilder.leggTil(periodeBuilderOppfylt);
-        }
+        Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+        Avslagsårsak avslagsårsak = dto.getAvslagsårsak() != null ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
+
+        perioderTilVurdering.stream()
+            .map(periode -> forutgåendeMedlemskapBuilder
+                .hentBuilderFor(periode)
+                .medUtfall(utfall)
+                .medAvslagsårsak(avslagsårsak)
+                .medRegelInput("TODO"))
+            .forEach(forutgåendeMedlemskapBuilder::leggTil);
 
         resultatBuilder.leggTil(forutgåendeMedlemskapBuilder);
 
         return OppdateringResultat.nyttResultat();
+    }
+
+    private Avslagsårsak mapAvslagsårsak(MedlemskapAvslagsÅrsakType medlemskapAvslagsÅrsakType) {
+        return switch (medlemskapAvslagsÅrsakType) {
+            case SØKER_IKKE_MEDLEM -> Avslagsårsak.SØKER_ER_IKKE_MEDLEM;
+        };
     }
 
     private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) {
