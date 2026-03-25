@@ -1,7 +1,9 @@
 package no.nav.ung.domenetjenester.arkiv;
 
 import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.ung.domenetjenester.sak.FinnEllerOpprettUngSakTask;
 import no.nav.ung.fordel.handler.MottattMelding;
+import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.apache.commons.io.IOUtils;
@@ -51,6 +53,46 @@ public class VurderStrukturertDokumentTaskTest {
 
         assertThat(mottattMelding).isNotNull();
         assertThat(mottattMelding.getFørsteUttaksdag()).isPresent().hasValue(LocalDate.parse("2021-01-21"));
+    }
+
+    @Test
+    public void skal_rute_ungdomsytelse_varsel_uttalelse_til_oppgavebekreftelse_løp() {
+        var payload = hentUtString("søknader/ungdomsytelse/innrapporteringInntekt.json");
+        var data = new ProsessTaskData(VurderStrukturertDokumentTask.class);
+        data.setSekvens("1");
+        data.setPayload(payload);
+
+        var melding = new MottattMelding(data);
+        melding.setTema(OmrådeTema.UNG);
+        melding.setJournalPostId(new JournalpostId("4247"));
+        melding.setBrevkode(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode());
+
+        var task = new VurderStrukturertDokumentTask(null);
+
+        var mottattMelding = task.doTask(melding);
+
+        assertThat(mottattMelding).isNotNull();
+        assertThat(mottattMelding.getProsessTaskData().getTaskType()).isEqualTo(FinnEllerOpprettUngSakTask.TASKTYPE);
+    }
+
+    @Test
+    public void skal_rute_aktivitetspenger_varsel_uttalelse_til_oppgavebekreftelse_løp() {
+        var payload = hentUtString("søknader/ungdomsytelse/innrapporteringInntekt.json");
+        var data = new ProsessTaskData(VurderStrukturertDokumentTask.class);
+        data.setSekvens("1");
+        data.setPayload(payload);
+
+        var melding = new MottattMelding(data);
+        melding.setTema(OmrådeTema.UNG);
+        melding.setJournalPostId(new JournalpostId("4247"));
+        melding.setBrevkode(Brevkode.AKTIVITETSPENGER_VARSEL_UTTALELSE.getOffisiellKode());
+
+        var task = new VurderStrukturertDokumentTask(null);
+
+        var mottattMelding = task.doTask(melding);
+
+        assertThat(mottattMelding).isNotNull();
+        assertThat(mottattMelding.getProsessTaskData().getTaskType()).isEqualTo(FinnEllerOpprettUngSakTask.TASKTYPE);
     }
 
 

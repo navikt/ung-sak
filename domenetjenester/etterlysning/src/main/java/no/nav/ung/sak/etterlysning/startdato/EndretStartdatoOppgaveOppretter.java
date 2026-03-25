@@ -6,6 +6,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -29,14 +31,16 @@ public class EndretStartdatoOppgaveOppretter {
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var originalPeriode = finnOriginalPeriode(behandling);
+        OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
-            .map(etterlysning -> mapTilDto(etterlysning, aktørId, originalPeriode))
+            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode))
             .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, DatoIntervallEntitet originalPeriode) {
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, DatoIntervallEntitet originalPeriode) {
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
+            ytelsetype,
             etterlysning.getEksternReferanse(),
             new EndretStartdatoDataDto(hentStartdato(etterlysning), originalPeriode.getFomDato()),
             etterlysning.getFrist()
