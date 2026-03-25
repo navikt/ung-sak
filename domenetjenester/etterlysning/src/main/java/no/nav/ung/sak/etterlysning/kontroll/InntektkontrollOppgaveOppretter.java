@@ -9,8 +9,10 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
 import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
@@ -38,12 +40,13 @@ public class InntektkontrollOppgaveOppretter {
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         LocalDateTimeline<Boolean> programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+        OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
-            .map(mapTilDto(behandling.getId(), aktørId, programTidslinje))
+            .map(mapTilDto(behandling.getId(), aktørId, programTidslinje, ytelsetype))
             .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<Boolean> programTidslinje) {
+    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<Boolean> programTidslinje, OppgaveYtelsetype ytelsetype) {
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
             List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger = registerinntekter.stream().map(InntekterForKilde::arbeidsgiver)
@@ -53,6 +56,7 @@ public class InntektkontrollOppgaveOppretter {
             LocalDateInterval etterlysningPeriode = etterlysning.getPeriode().toLocalDateInterval();
             return new OpprettOppgaveDto(
                 new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
+                ytelsetype,
                 etterlysning.getEksternReferanse(),
                 new KontrollerRegisterinntektOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),

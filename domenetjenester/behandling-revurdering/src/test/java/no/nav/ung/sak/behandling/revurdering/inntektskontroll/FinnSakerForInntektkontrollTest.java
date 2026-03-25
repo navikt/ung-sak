@@ -277,6 +277,53 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
+    /**
+     * Skal finne AKTIVITETSPENGER-fagsak for inntektskontroll.
+     * Verifiserer at AKTIVITETSPENGER-fagsaker inkluderes i inntektskontroll-scannningen.
+     */
+    @Test
+    void skal_finne_aktivitetspenger_fagsak_for_inntektskontroll() {
+        // Arrange
+        var aktivitetspengerBehandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER)
+            .lagre(entityManager);
+        ungdomsprogramPeriodeRepository.lagre(aktivitetspengerBehandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LANGT_BAK, TIDENES_ENDE))));
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert
+        assertEquals(1, fagsaker.size());
+        assertEquals(FagsakYtelseType.AKTIVITETSPENGER, fagsaker.get(0).getYtelseType());
+    }
+
+    /**
+     * Skal ikke finne fagsak med ikke-støttet ytelsestype for inntektskontroll.
+     * Verifiserer at kun UNGDOMSYTELSE og AKTIVITETSPENGER inkluderes,
+     * og at andre ytelsestyper ekskluderes selv med programperiode.
+     */
+    @Test
+    void skal_ikke_finne_ikke_støttet_ytelsestype_for_inntektskontroll() {
+        // Arrange - AKTIVITETSPENGER (støttet) med programperiode
+        var aktivitetspengerBehandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER)
+            .lagre(entityManager);
+        ungdomsprogramPeriodeRepository.lagre(aktivitetspengerBehandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LANGT_BAK, TIDENES_ENDE))));
+
+        // PSB (ikke støttet) med programperiode - skal ekskluderes
+        var psbBehandling = TestScenarioBuilder.builderUtenSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
+            .lagre(entityManager);
+        ungdomsprogramPeriodeRepository.lagre(psbBehandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LANGT_BAK, TIDENES_ENDE))));
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert - kun AKTIVITETSPENGER fagsak funnet, PSB ekskludert
+        assertEquals(1, fagsaker.size());
+        assertEquals(FagsakYtelseType.AKTIVITETSPENGER, fagsaker.get(0).getYtelseType());
+    }
+
     @Test
     void skal_finne_fagsak_dersom_det_allerede_finnes_kontrollert_inntekt_for_annen_måned() {
         // Arrange
