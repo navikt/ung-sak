@@ -127,7 +127,7 @@ public class JettyServer {
         System.setProperty("task.manager.runner.threads", "7");
 
         //øker kø-størrelse og antall task som polles om gangen, gjør at systemet oppnår bedre ytelse når det finnes mange klare tasks
-        System.setProperty("task.manager.tasks.queue.size", "20");
+        System.setProperty("task.manager.tasks.queue.size", "100");
         System.setProperty("task.manager.polling.tasks.size", "10");
         System.setProperty("task.manager.polling.scrolling.select.size", "10");
 

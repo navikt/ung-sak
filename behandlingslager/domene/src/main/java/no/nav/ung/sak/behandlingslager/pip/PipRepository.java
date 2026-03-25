@@ -42,13 +42,15 @@ public class PipRepository {
             SELECT
                b.uuid behandlingUuid,
                b.behandling_status behandlingStatus,
-               b.ansvarlig_saksbehandler ansvarligSaksbehandler,
+               ba.ansvarlig_saksbehandler ansvarligSaksbehandler,
                f.fagsak_status fagsakStatus,
                f.saksnummer,
                f.ytelse_type fagsakYtelseType
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
-             WHERE b.id = :behandlingId""";
+             LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id AND ba.behandling_del = 'SENTRAL'
+             WHERE b.id = :behandlingId
+            """;
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("behandlingId", behandlingId);
@@ -57,20 +59,23 @@ public class PipRepository {
         List<Tuple> resultater = query.getResultList();
         if (resultater.isEmpty()) {
             return Optional.empty();
-        } else if (resultater.size() == 1) {
-            return Optional.of(mapPipBehandlingsDataTuple(resultater.get(0)));
         } else {
-            throw new IllegalStateException(
-                "Forventet 0 eller 1 treff etter søk på behandlingId, fikk flere for behandlingId " + behandlingId);
+            return Optional.of(mapPipBehandlingsDataTuple(resultater));
         }
     }
 
-    private PipBehandlingsData mapPipBehandlingsDataTuple(Tuple t) {
+    private PipBehandlingsData mapPipBehandlingsDataTuple(List<Tuple> tuples) {
+        Tuple t = tuples.getFirst(); //det er kun ansvarligSaksbehandler som kan variere
+        Set<String> ansvarligSaksbehandlere = tuples.stream()
+            .map(it -> it.get("ansvarligSaksbehandler", String.class))
+            .filter(Objects::nonNull) //denne er null før aksjonspunkt er løst
+            .collect(Collectors.toSet());
+
         return new PipBehandlingsData(
             t.get("behandlingUuid", UUID.class),
             BehandlingStatus.fraKode(t.get("behandlingStatus", String.class)),
             FagsakStatus.fraKode(t.get("fagsakStatus", String.class)),
-            t.get("ansvarligSaksbehandler", String.class),
+            ansvarligSaksbehandlere,
             new Saksnummer(t.get("saksnummer", String.class)),
             FagsakYtelseType.fraKode(t.get("fagsakYtelseType", String.class))
         );
@@ -84,13 +89,15 @@ public class PipRepository {
             SELECT
                 b.uuid behandlingUuid,
                 b.behandling_status behandlingStatus,
-                b.ansvarlig_saksbehandler ansvarligSaksbehandler,
+                ba.ansvarlig_saksbehandler ansvarligSaksbehandler,
                 f.fagsak_status fagsakStatus,
                 f.ytelse_type fagsakYtelseType,
                 f.saksnummer
              FROM BEHANDLING b
              JOIN FAGSAK f ON b.fagsak_id = f.id
-             WHERE b.uuid = :behandlingUuid""";
+             LEFT JOIN behandling_ansvarlig ba ON ba.behandling_id = b.id
+             WHERE b.uuid = :behandlingUuid
+            """;
 
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("behandlingUuid", behandlingUuid);
@@ -99,12 +106,8 @@ public class PipRepository {
         List<Tuple> resultater = query.getResultList();
         if (resultater.isEmpty()) {
             return Optional.empty();
-        } else if (resultater.size() == 1) {
-            return Optional.of(mapPipBehandlingsDataTuple(resultater.get(0)));
         } else {
-            throw new IllegalStateException(
-                "Forventet 0 eller 1 treff etter søk på behandlingId, fikk flere for behandlingUuid "
-                    + behandlingUuid);
+            return Optional.of(mapPipBehandlingsDataTuple(resultater));
         }
     }
 

@@ -17,6 +17,7 @@ import java.util.Set;
 public enum BehandlingStatus implements Kodeverdi {
 
     AVSLUTTET("AVSLU", "Avsluttet"),
+    LOKALKONTOR_BESLUTTER_VILKÅR("LOKALKONTOR_BESLUTTER_VILKÅR", "Lokalkontor beslutter vilkår"),
     FATTER_VEDTAK("FVED", "Fatter vedtak"),
     IVERKSETTER_VEDTAK("IVED", "Iverksetter vedtak"),
     OPPRETTET("OPPRE", "Opprettet"),

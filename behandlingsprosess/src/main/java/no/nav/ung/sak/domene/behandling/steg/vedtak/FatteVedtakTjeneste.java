@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -97,7 +98,7 @@ public class FatteVedtakTjeneste {
                 throw new IllegalStateException("Kunne ikke fatte vedtak. Hadde aksjonspunkt med status " + fatterVedtakAksjonspunkt.get().getStatus() + " og totrinnsvurderinger: " + totrinnaksjonspunktvurderinger);
             }
         } else {
-            totrinnTjeneste.deaktiverTotrinnaksjonspunktvurderinger(behandling);
+            totrinnTjeneste.deaktiverTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.SENTRAL);
             vedtakTjeneste.lagHistorikkinnslagFattVedtak(behandling);
         }
 

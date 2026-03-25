@@ -15,12 +15,15 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
@@ -32,6 +35,7 @@ import java.time.Year;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
@@ -47,6 +51,7 @@ public class AktivitetspengerRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository;
+    private BeregningTjeneste beregningTjeneste;
 
     public AktivitetspengerRestTjeneste() {
         // for CDI proxy
@@ -54,9 +59,11 @@ public class AktivitetspengerRestTjeneste {
 
     @Inject
     public AktivitetspengerRestTjeneste(BehandlingRepository behandlingRepository,
-                                        AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository) {
+                                        AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository,
+                                        BeregningTjeneste beregningTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.aktivitetspengerBeregningsgrunnlagRepository = aktivitetspengerBeregningsgrunnlagRepository;
+        this.beregningTjeneste = beregningTjeneste;
     }
 
     @GET
@@ -66,27 +73,39 @@ public class AktivitetspengerRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public BeregningsgrunnlagDto getBeregningsgrunnlag(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var inntektsposter = beregningTjeneste.hentSigrunInntektsposter(behandling.getId());
+
         return aktivitetspengerBeregningsgrunnlagRepository.hentGrunnlag(behandling.getId())
             .flatMap(AktivitetspengerBeregningsgrunnlag::getSenesteBeregningsgrunnlag)
-            .map(AktivitetspengerRestTjeneste::mapTilBeregningsgrunnlagDto)
-            .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: "+behandling.getId()));
+            .map(grunnlag -> mapTilBeregningsgrunnlagDto(grunnlag, inntektsposter))
+            .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: " + behandling.getId()));
     }
 
-    private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag) {
+    private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag, List<Inntektspost> inntektsposter) {
         BeregningInput beregningInput = grunnlag.getBeregningInput().getBeregningInput(grunnlag.getSkjæringstidspunkt());
-        PgiKalkulatorInput pgiKalkulatorInput = PgiKalkulator.lagPgiKalkulatorInput(beregningInput);
-        Map<Year, BigDecimal> avkortetOgOppjustert = PgiKalkulator.avgrensOgOppjusterÅrsinntekter(pgiKalkulatorInput);
+        PgiKalkulator pgiKalkulator = new PgiKalkulator(beregningInput);
+        Map<Year, BigDecimal> sumAvkortetPerÅr = pgiKalkulator.avgrensÅrsinntekterUtenOppjustering();
+        Map<Year, BigDecimal> sumAvkortetOgOppjustertPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
+        PgiHjelper pgiHjelper = new PgiHjelper(inntektsposter, beregningInput.sisteLignedeÅr());
 
         List<PgiÅrsinntektDto> pgiÅrsinntekter = beregningInput.lagTidslinje().toSegments().stream()
             .map(segment -> {
                 Year år = Year.of(segment.getFom().getYear());
+
+                var pgiInntektstyper = pgiHjelper.hentSumPrInntektspostTypePrÅr().getOrDefault(år, Map.of());
+                BigDecimal arbeidsinntekt = hentPgiForTyper(pgiInntektstyper, Set.of(InntektspostType.LØNN));
+                BigDecimal næring = hentPgiForTyper(pgiInntektstyper, Set.of(InntektspostType.SELVSTENDIG_NÆRINGSDRIVENDE, InntektspostType.NÆRING_FISKE_FANGST_FAMBARNEHAGE));
+
                 return new PgiÅrsinntektDto(
                     år.getValue(),
                     segment.getValue().getVerdi().setScale(0, RoundingMode.HALF_EVEN),
-                    avkortetOgOppjustert.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN)
+                    sumAvkortetPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN),
+                    sumAvkortetOgOppjustertPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN),
+                    arbeidsinntekt.setScale(0, RoundingMode.HALF_EVEN),
+                    næring.setScale(0, RoundingMode.HALF_EVEN)
                 );
             })
-            .sorted(Comparator.comparingInt(PgiÅrsinntektDto::årstall))
+            .sorted(Comparator.comparingInt(PgiÅrsinntektDto::årstall).reversed())
             .toList();
 
         return new BeregningsgrunnlagDto(
@@ -99,6 +118,12 @@ public class AktivitetspengerRestTjeneste {
             pgiÅrsinntekter,
             mapBesteBeregningResultatType(grunnlag.utledBesteBeregningResultatType())
         );
+    }
+
+    private static BigDecimal hentPgiForTyper(Map<InntektspostType, Beløp> pgiInntektstyper, Set<InntektspostType> typer) {
+        return typer.stream()
+            .map(type -> pgiInntektstyper.getOrDefault(type, Beløp.ZERO).getVerdi())
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private static BesteBeregningResultatType mapBesteBeregningResultatType(no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BesteBeregningResultatType type) {

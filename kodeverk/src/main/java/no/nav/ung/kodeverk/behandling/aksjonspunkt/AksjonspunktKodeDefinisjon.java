@@ -46,6 +46,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE = "5077";
 
     public static final String VURDER_BISTANDSVILKÅR_KODE = "5141";
+    public static final String LOKALKONTOR_FORESLÅR_VILKÅR_KODE = "5100";
+    public static final String LOKALKONTOR_BESLUTTER_VILKÅR_KODE = "5200";
 
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
     public static final String SJEKK_TILBAKEKREVING_KODE = "5085";

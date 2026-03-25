@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
@@ -96,7 +97,6 @@ class ForeslåVedtakTjeneste {
     }
 
     private void håndterTotrinn(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
-
         if (!behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())) {
             behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId());
             logger.info("To-trinn satt på behandling={}", behandling.getId());
@@ -164,7 +164,7 @@ class ForeslåVedtakTjeneste {
 
     private boolean skalUtføreTotrinnsbehandling(Behandling behandling) {
         return !behandling.harÅpentAksjonspunktMedType(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL) &&
-            behandling.harAksjonspunktMedTotrinnskontroll();
+            behandling.harAksjonspunktMedTotrinnskontroll(BehandlingDel.SENTRAL);
 
     }
 

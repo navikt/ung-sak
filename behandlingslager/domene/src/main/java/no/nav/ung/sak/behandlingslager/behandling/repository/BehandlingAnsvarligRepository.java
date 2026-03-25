@@ -6,7 +6,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +28,7 @@ public class BehandlingAnsvarligRepository {
     }
 
     public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId) {
-        return hentBehandlingAnsvarlig(behandlingId, BehandlingDel.HELE);
+        return hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL);
     }
 
     private Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
@@ -48,7 +48,7 @@ public class BehandlingAnsvarligRepository {
     }
 
     public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder) {
-        return hentBehandlingAnsvarlig(behandlingIder, BehandlingDel.HELE);
+        return hentBehandlingAnsvarlig(behandlingIder, BehandlingDel.SENTRAL);
     }
 
     public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder, BehandlingDel behandlingDel) {
@@ -61,11 +61,11 @@ public class BehandlingAnsvarligRepository {
     }
 
     public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.HELE, enhet, null);
+        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
     }
 
     public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet, String årsak) {
-        setBehandlendeEnhet(behandlingId, BehandlingDel.HELE, enhet, årsak);
+        setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, årsak);
     }
 
     private void setBehandlendeEnhet(Long behandlingId, BehandlingDel behandlingDel, OrganisasjonsEnhet enhet, String årsak) {
@@ -76,37 +76,37 @@ public class BehandlingAnsvarligRepository {
     }
 
     public void setAnsvarligBeslutter(Long behandlingId, String ansvarligBeslutterIdent) {
-        setAnsvarligBeslutter(behandlingId, BehandlingDel.HELE, ansvarligBeslutterIdent);
+        setAnsvarligBeslutter(behandlingId, BehandlingDel.SENTRAL, ansvarligBeslutterIdent);
     }
 
-    private void setAnsvarligBeslutter(Long behandlingId, BehandlingDel behandlingDel, String ansvarligBeslutterIdent) {
+    public void setAnsvarligBeslutter(Long behandlingId, BehandlingDel behandlingDel, String ansvarligBeslutterIdent) {
         BehandlingAnsvarlig behandlingAnsvarlig = hentEllerOpprett(behandlingId, behandlingDel);
         behandlingAnsvarlig.setAnsvarligBeslutter(ansvarligBeslutterIdent);
         lagre(behandlingAnsvarlig);
     }
 
     public void setAnsvarligSaksbehandler(Long behandlingId, String ansvarligSaksbehandlerIdent) {
-        setAnsvarligSaksbehandler(behandlingId, BehandlingDel.HELE, ansvarligSaksbehandlerIdent);
+        setAnsvarligSaksbehandler(behandlingId, BehandlingDel.SENTRAL, ansvarligSaksbehandlerIdent);
     }
 
-    private void setAnsvarligSaksbehandler(Long behandlingId, BehandlingDel behandlingDel, String ansvarligSaksbehandlerIdent) {
+    public void setAnsvarligSaksbehandler(Long behandlingId, BehandlingDel behandlingDel, String ansvarligSaksbehandlerIdent) {
         BehandlingAnsvarlig behandlingAnsvarlig = hentEllerOpprett(behandlingId, behandlingDel);
         behandlingAnsvarlig.setAnsvarligSaksbehandler(ansvarligSaksbehandlerIdent);
         lagre(behandlingAnsvarlig);
     }
 
     public boolean erTotrinnsBehandling(Long behandlingId) {
-        return erTotrinnsBehandling(behandlingId, BehandlingDel.HELE);
+        return erTotrinnsBehandling(behandlingId, BehandlingDel.SENTRAL);
     }
 
-    private boolean erTotrinnsBehandling(Long behandlingId, BehandlingDel behandlingDel) {
+    public boolean erTotrinnsBehandling(Long behandlingId, BehandlingDel behandlingDel) {
         return hentBehandlingAnsvarlig(behandlingId, behandlingDel)
             .map(BehandlingAnsvarlig::erTotrinnsBehandling)
             .orElse(false);
     }
 
     public String hentAnsvarligSaksbehandler(Long behandlingId) {
-        return hentAnsvarligSaksbehandler(behandlingId, BehandlingDel.HELE);
+        return hentAnsvarligSaksbehandler(behandlingId, BehandlingDel.SENTRAL);
     }
 
     private String hentAnsvarligSaksbehandler(Long behandlingId, BehandlingDel behandlingDel) {
@@ -116,7 +116,7 @@ public class BehandlingAnsvarligRepository {
     }
 
     public void nullstillToTrinnsBehandling(Long behandlingId) {
-        nullstillToTrinnsBehandling(behandlingId, BehandlingDel.HELE);
+        nullstillToTrinnsBehandling(behandlingId, BehandlingDel.SENTRAL);
     }
 
     private void nullstillToTrinnsBehandling(Long behandlingId, BehandlingDel behandlingDel) {
@@ -130,10 +130,10 @@ public class BehandlingAnsvarligRepository {
     }
 
     public void setToTrinnsbehandling(Long behandlingId) {
-        setToTrinnsbehandling(behandlingId, BehandlingDel.HELE);
+        setToTrinnsbehandling(behandlingId, BehandlingDel.SENTRAL);
     }
 
-    private void setToTrinnsbehandling(Long behandlingId, BehandlingDel behandlingDel) {
+    public void setToTrinnsbehandling(Long behandlingId, BehandlingDel behandlingDel) {
         BehandlingAnsvarlig behandlingAnsvarlig = hentEllerOpprett(behandlingId, behandlingDel);
         behandlingAnsvarlig.setToTrinnsBehandling(true);
         lagre(behandlingAnsvarlig);

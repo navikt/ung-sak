@@ -51,12 +51,14 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     private final URI løsSøkYtelseURI;
     private final URI opprettEndretPeriodeURI;
     private final URI endreFristURI;
+    private final Boolean oppgaverIUngDeltakelseEnabled;
 
     @Inject
     public UngOppgaveKlient(
         OidcRestClient restClient,
         Pdl pdl,
-        @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
+        @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url,
+        @KonfigVerdi(value = "OPPGAVER_I_UNG_DELTAKELSE_ENABLED", defaultVerdi = "false") boolean oppgaverIUngDeltakelseEnabled) {
         this.restClient = restClient;
         this.pdl = pdl;
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
@@ -70,6 +72,12 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
         this.avbrytForTypeOgPeriodeURI = tilUri(url, "oppgave/avbrutt/forTypeOgPeriode");
         this.endreFristURI = tilUri(url, "oppgave/endre/frist");
         this.løsSøkYtelseURI = tilUri(url, "oppgave/los/sokytelse");
+        this.oppgaverIUngDeltakelseEnabled = oppgaverIUngDeltakelseEnabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return oppgaverIUngDeltakelseEnabled;
     }
 
     @Override

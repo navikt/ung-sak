@@ -107,4 +107,8 @@ public class Beregningsgrunnlag {
     public int hashCode() {
         return Objects.hash(getSkjæringstidspunkt());
     }
+
+    public Year getSisteLignedeÅr() {
+        return sisteLignedeÅr;
+    }
 }

@@ -124,5 +124,4 @@ public class K9OppdragRestKlient {
         return restClient.post(uriAktørBytte, request, Integer.class);
     }
 
-
 }

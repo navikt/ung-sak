@@ -8,16 +8,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
@@ -32,8 +26,8 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
 import no.nav.ung.sak.kontrakt.etterlysning.Etterlysning;
@@ -64,23 +58,24 @@ public class EtterlysningRestTjeneste {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private UngOppgaveKlient oppgaveRestKlient;
-    private Pdl pdl;
+    private MidlertidigOppgaveDelegeringTjeneste oppgaveDelegeringTjeneste;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository,
-                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste, UngOppgaveKlient oppgaveRestKlient, Pdl pdl) {
+    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository,
+                                    BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository,
+                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste,
+                                    ProsessTaskTjeneste prosessTaskTjeneste,
+                                    MidlertidigOppgaveDelegeringTjeneste oppgaveDelegeringTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.oppgaveRestKlient = oppgaveRestKlient;
-        this.pdl = pdl;
+        this.oppgaveDelegeringTjeneste = oppgaveDelegeringTjeneste;
     }
 
     @GET
@@ -131,7 +126,7 @@ public class EtterlysningRestTjeneste {
             behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, etterlysning.getType());
 
             opprettHistorikkinnslag(behandlingId, behandling.getFagsakId(), etterlysning, frist);
-            oppgaveRestKlient.endreFrist(new AktørId(behandling.getAktørId().getAktørId()), etterlysning.getEksternReferanse(), frist);
+            oppgaveDelegeringTjeneste.endreFrist(new AktørId(behandling.getAktørId().getAktørId()), etterlysning.getEksternReferanse(), frist);
         });
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }
