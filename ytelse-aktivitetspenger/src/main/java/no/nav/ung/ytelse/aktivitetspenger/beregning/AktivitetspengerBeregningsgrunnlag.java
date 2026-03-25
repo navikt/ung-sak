@@ -82,7 +82,7 @@ public class AktivitetspengerBeregningsgrunnlag {
             hentSatsTidslinje(),
             (interval, bg, satser) ->
                 new LocalDateSegment<>(interval, new AktivitetspengerSatser(satser.getValue(), bg.getValue())),
-            LocalDateTimeline.JoinStyle.LEFT_JOIN
+            LocalDateTimeline.JoinStyle.INNER_JOIN
         );
     }
 
