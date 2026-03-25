@@ -35,6 +35,7 @@ public class PgiKalkulator {
         var map = new LinkedHashMap<String, LocalDateTimeline<?>>();
         map.put("gsnittTidsserie", input.gsnittTidsserie().mapValue(Grunnbeløp::verdi));
         map.put("oppjusteringsfaktorTidsserie", input.oppjusteringsfaktorTidsserie());
+        map.put("grunnbeløpTidsserie", GrunnbeløpTidslinje.hentTidslinje());
         return map;
     }
 
