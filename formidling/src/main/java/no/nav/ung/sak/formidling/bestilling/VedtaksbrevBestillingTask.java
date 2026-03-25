@@ -91,10 +91,19 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
         int antallTidligereRekjøringer = Integer.parseInt(prosessTaskData.getProperties().getProperty(propertyName, "0"));
         if (antallTidligereRekjøringer < maksAntallRekjøringer){
             String rekjøringer = String.valueOf(antallTidligereRekjøringer + 1);
-            prosessTaskData.setProperty(propertyName, rekjøringer);
+
+            ProsessTaskData nyTask = ProsessTaskData.forProsessTask(VedtaksbrevBestillingTask.class);
+            nyTask.setProperties(prosessTaskData.getProperties());
+            nyTask.setPrioritet(prosessTaskData.getPriority());
+            nyTask.setPayload(prosessTaskData.getPayloadAsString());
+            nyTask.setProperty(propertyName, rekjøringer);
+            nyTask.setTraceparent(prosessTaskData.getTraceparent());
+            nyTask.setGruppe(prosessTaskData.getGruppe()); //må kopieres for å bevare rekkefølge i brevbestillingene
+            nyTask.setSekvens(prosessTaskData.getSekvens()); //må kopieres for å bevare rekkefølge i brevbestillingene
+            nyTask.setNesteKjøringEtter(LocalDateTime.now().plus(tidTilNesteForsøk)); //utsetter kjøringen
+            taskTjeneste.lagre(nyTask);
+
             LOG.info("Fikk ikke semafor for brevgenerering, oppretter ny task til å kjøre senere, forsøk {}", rekjøringer);
-            prosessTaskData.setNesteKjøringEtter(LocalDateTime.now().plus(tidTilNesteForsøk));
-            taskTjeneste.lagre(prosessTaskData);
         } else {
             throw new IllegalStateException("Har utsatt task for brevgenerering " + maksAntallRekjøringer + " pga manglende kapasitet for å generere brev. Det bør undersøkes om det er en underliggende feil eller bare høyt trykk.");
         }
