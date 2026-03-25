@@ -85,8 +85,8 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
     }
 
     private void reschedulerTask(ProsessTaskData prosessTaskData) {
-        int maksAntallRekjøringer = 10;
-        Duration tidTilNesteForsøk = Duration.ofSeconds(10);
+        int maksAntallRekjøringer = 12;
+        Duration tidTilNesteForsøk = Duration.ofSeconds(5);
         String propertyName = "retriesPgaSemaforUtilgjengelig";
         int antallTidligereRekjøringer = Integer.parseInt(prosessTaskData.getProperties().getProperty(propertyName, "0"));
         if (antallTidligereRekjøringer < maksAntallRekjøringer){

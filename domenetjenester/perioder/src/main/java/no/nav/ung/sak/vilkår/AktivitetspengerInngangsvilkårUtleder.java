@@ -12,6 +12,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static no.nav.ung.kodeverk.vilkår.VilkårType.ALDERSVILKÅR;
+import static no.nav.ung.kodeverk.vilkår.VilkårType.BISTANDSVILKÅR;
 import static no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR;
 
 @ApplicationScoped
@@ -21,7 +22,8 @@ public class AktivitetspengerInngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
         ALDERSVILKÅR,
-        BOSTEDSVILKÅR
+        BOSTEDSVILKÅR,
+        BISTANDSVILKÅR
     );
 
     public AktivitetspengerInngangsvilkårUtleder() {
