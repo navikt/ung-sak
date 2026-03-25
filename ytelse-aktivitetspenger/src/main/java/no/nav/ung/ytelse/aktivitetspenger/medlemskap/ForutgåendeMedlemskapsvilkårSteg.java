@@ -1,8 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Aktivitetspenger;
@@ -16,10 +14,8 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,23 +32,17 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅE
 public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
 
     private final SøknadParser søknadParser;
-    private BehandlingRepository behandlingRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
-    private MottatteDokumentRepository mottatteDokumentRepository;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final MottatteDokumentRepository mottatteDokumentRepository;
 
 
     @Inject
-    public ForutgåendeMedlemskapsvilkårSteg(BehandlingRepository behandlingRepository,
-                                            VilkårResultatRepository vilkårResultatRepository,
+    public ForutgåendeMedlemskapsvilkårSteg(VilkårResultatRepository vilkårResultatRepository,
                                             MottatteDokumentRepository mottatteDokumentRepository,
-                                            SøknadParser søknadParser,
-                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
-        this.behandlingRepository = behandlingRepository;
+                                            SøknadParser søknadParser) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadParser = søknadParser;
-        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
     @Override
