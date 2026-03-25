@@ -1,10 +1,12 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpSnittTidslinje;
+import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.Beløp;
 
 import java.math.BigDecimal;
@@ -19,10 +21,14 @@ public class PgiKalkulator {
 
     public PgiKalkulator(BeregningInput beregningInput) {
         var gsnittTidsserie = GrunnbeløpSnittTidslinje.hentGrunnbeløpSnittTidslinje();
-        var oppjusteringsfaktorTidsserie = GrunnbeløpSnittTidslinje.lagOppjusteringsfaktorTidslinje(beregningInput.sisteLignedeÅr(), 3);
+        var grunnbeløpVedStp = GrunnbeløpTidslinje.hentTidslinje()
+            .getSegment(new LocalDateInterval(beregningInput.skjæringstidspunkt(), beregningInput.skjæringstidspunkt()))
+            .getValue()
+            .verdi();
+        var oppjusteringsfaktorTidsserie = GrunnbeløpSnittTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(beregningInput.skjæringstidspunkt().getYear()), grunnbeløpVedStp, 4);
         var årsinntektMap = beregningInput.lagTidslinje();
 
-        input = new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie);
+        input = new PgiKalkulatorInput(årsinntektMap, oppjusteringsfaktorTidsserie, gsnittTidsserie, grunnbeløpVedStp);
     }
 
     public Map<String, LocalDateTimeline<?>> getRegelSporingsmap() {
