@@ -14,7 +14,9 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 
 import java.util.Collections;
@@ -49,19 +51,14 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
 
-        var medlemskapsvilkår = vilkårene.getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
-        var harAvklartMedlemskap = !medlemskapsvilkår.map(vilkår -> vilkår.getPerioder().stream().anyMatch(periode -> Utfall.IKKE_VURDERT.equals(periode.getUtfall()))).orElse(true);
+        var vilkårOpt = vilkårene.getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
+        var harAvklartMedlemskap = !vilkårOpt.map(vilkår -> vilkår.getPerioder().stream().anyMatch(periode -> Utfall.IKKE_VURDERT.equals(periode.getUtfall()))).orElse(true);
 
         if (harAvklartMedlemskap) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        Søknad nyesteSøknad = mottatteDokumentRepository.hentMottatteDokumentForBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId(), List.of(Brevkode.AKTIVITETSPENGER_SOKNAD), false, DokumentStatus.GYLDIG)
-            .stream()
-            .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt).reversed())
-            .collect(Collectors.toCollection(LinkedHashSet::new)).stream().findFirst()
-            .map(søknadParser::parseSøknad)
-            .orElse(null);
+        Søknad nyesteSøknad = finnNyesteSøknad(kontekst);
 
         if (nyesteSøknad == null) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
@@ -71,11 +68,37 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         var aksjonspunkter = vurderForutgåendeMedlemskap(forutgåendeBosteder);
 
         if (aksjonspunkter.isEmpty()) {
-            //TODO sett vilkår til oppfylt
+            var medlemskapsvilkår = vilkårOpt.orElseThrow(
+                () -> new IllegalStateException("Forutgående medlemsskapsvilkåret ikke initialisert"));
+
+            oppfyllVilkår(vilkårene, medlemskapsvilkår, kontekst.getBehandlingId());
+
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
+    }
+
+    private Søknad finnNyesteSøknad(BehandlingskontrollKontekst kontekst) {
+        return mottatteDokumentRepository.hentMottatteDokumentForBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId(), List.of(Brevkode.AKTIVITETSPENGER_SOKNAD), false, DokumentStatus.GYLDIG)
+            .stream()
+            .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt).reversed())
+            .collect(Collectors.toCollection(LinkedHashSet::new)).stream().findFirst()
+            .map(søknadParser::parseSøknad)
+            .orElse(null);
+    }
+
+    private void oppfyllVilkår(Vilkårene vilkårene, Vilkår tidligereVilkår, Long behandlingId) {
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
+        tidligereVilkår.getPerioder().stream()
+            .map(it -> vilkårBuilder.hentBuilderFor(it.getPeriode()).medUtfall(Utfall.OPPFYLT))
+            .forEach(vilkårBuilder::leggTil);
+
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
+
+        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
+
     }
 
 

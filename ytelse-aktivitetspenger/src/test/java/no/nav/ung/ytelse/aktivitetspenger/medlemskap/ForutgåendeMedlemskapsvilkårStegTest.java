@@ -23,6 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
@@ -49,6 +50,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     private EntityManager entityManager;
 
     private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
     private ForutgåendeMedlemskapsvilkårSteg steg;
 
     @SuppressWarnings("unchecked")
@@ -56,6 +58,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     void setUp() {
         behandlingRepository = new BehandlingRepository(entityManager);
         var repoProvider = new BehandlingRepositoryProvider(entityManager);
+        vilkårResultatRepository = repoProvider.getVilkårResultatRepository();
         steg = new ForutgåendeMedlemskapsvilkårSteg(
             repoProvider.getVilkårResultatRepository(),
             new MottatteDokumentRepository(entityManager),
@@ -65,7 +68,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
 
     @Test
     void skal_returnere_uten_aksjonspunkter_når_vilkår_allerede_avklart() {
-        var behandling = lagScenario(Utfall.OPPFYLT, null);
+        var behandling = lagScenario(Utfall.IKKE_OPPFYLT, null);
 
         var resultat = utførSteg(behandling);
 
@@ -83,19 +86,25 @@ class ForutgåendeMedlemskapsvilkårStegTest {
 
     @Test
     void skal_returnere_uten_aksjonspunkter_når_ingen_bosted_oppgitt() {
-        var resultat = utførStegMedBosted(Map.of());
+        var behandling = lagScenario(Utfall.IKKE_VURDERT, lagSøknadPayload(Map.of()));
+
+        var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
+        assertVilkårOppfylt(behandling);
     }
 
     @Test
     void skal_returnere_uten_aksjonspunkter_når_bosted_er_eøs_land() {
-        var resultat = utførStegMedBosted(Map.of(
+        var behandling = lagScenario(Utfall.IKKE_VURDERT, lagSøknadPayload(Map.of(
             new Periode(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 6, 30)),
             Landkode.SVERIGE
-        ));
+        )));
+
+        var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
+        assertVilkårOppfylt(behandling);
     }
 
     @Test
@@ -118,6 +127,14 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         ));
 
         assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP);
+    }
+
+    private void assertVilkårOppfylt(Behandling behandling) {
+        var vilkår = vilkårResultatRepository.hent(behandling.getId())
+            .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
+            .orElseThrow();
+        assertThat(vilkår.getPerioder()).allSatisfy(p ->
+            assertThat(p.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT));
     }
 
     private BehandleStegResultat utførStegMedBosted(Map<Periode, Landkode> bostederMap) {
