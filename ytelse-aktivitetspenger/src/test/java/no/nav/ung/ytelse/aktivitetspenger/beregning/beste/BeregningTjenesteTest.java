@@ -15,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class BeregningTjenesteTest {
 
-    private static final LocalDate VIRKNINGSDATO = LocalDate.of(2026, 3, 1);
+    private static final LocalDate VIRKNINGSDATO = LocalDate.of(2026, 5, 2);
     private static final Year SIST_LIGNEDE_ÅR = Year.of(2025);
 
     @Test
