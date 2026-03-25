@@ -2040,7 +2040,8 @@
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType"
           },
           "dagsats" : {
-            "type" : "number"
+            "format" : "int32",
+            "type" : "integer"
           },
           "pgiÅrsinntekter" : {
             "items" : {
@@ -2059,7 +2060,7 @@
             "type" : "number"
           }
         },
-        "required" : [ "beregningsgrunnlag", "beregningsgrunnlagRedusert", "besteBeregningResultatType", "dagsats", "pgiÅrsinntekter", "skjæringstidspunkt", "årsinntektSisteTreÅr", "årsinntektSisteÅr" ],
+        "required" : [ "beregningsgrunnlag", "beregningsgrunnlagRedusert", "besteBeregningResultatType", "pgiÅrsinntekter", "skjæringstidspunkt", "årsinntektSisteTreÅr", "årsinntektSisteÅr" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType" : {
