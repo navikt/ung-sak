@@ -87,7 +87,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     AVKLAR_GYLDIG_MEDLEMSKAP(
         AksjonspunktKodeDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP_KODE, AksjonspunktType.MANUELL, "Avklar om bruker har gyldig periode.",
-        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPVILKÅR, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET,
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET,
         SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
     OVERSTYRING_AV_INNTEKT(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_INNTEKT_KODE,

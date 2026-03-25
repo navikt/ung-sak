@@ -25,10 +25,10 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPVILKÅR;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR;
 
 @ApplicationScoped
-@BehandlingStegRef(value = VURDER_FORUTGÅENDE_MEDLEMSKAPVILKÅR)
+@BehandlingStegRef(value = VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
