@@ -2,28 +2,18 @@ package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Aktivitetspenger;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR;
 
@@ -33,18 +23,15 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅE
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
 
-    private final SøknadParser søknadParser;
     private final VilkårResultatRepository vilkårResultatRepository;
-    private final MottatteDokumentRepository mottatteDokumentRepository;
+    private final ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste;
 
 
     @Inject
     public ForutgåendeMedlemskapsvilkårSteg(VilkårResultatRepository vilkårResultatRepository,
-                                            MottatteDokumentRepository mottatteDokumentRepository,
-                                            SøknadParser søknadParser) {
+                                            ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.søknadParser = søknadParser;
+        this.forutgåendeMedlemskapTjeneste = forutgåendeMedlemskapTjeneste;
     }
 
     @Override
@@ -58,14 +45,13 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        Søknad nyesteSøknad = finnNyesteSøknad(kontekst);
+        var forutgåendeBosteder = forutgåendeMedlemskapTjeneste.utledForutgåendeBosteder(kontekst.getFagsakId(), kontekst.getBehandlingId());
 
-        if (nyesteSøknad == null) {
+        if (forutgåendeBosteder.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
-        Bosteder forutgåendeBosteder = ((Aktivitetspenger) nyesteSøknad.getYtelse()).getForutgåendeBosteder();
-        var aksjonspunkter = vurderForutgåendeMedlemskap(forutgåendeBosteder);
+        var aksjonspunkter = vurderForutgåendeMedlemskap(forutgåendeBosteder.orElseThrow());
 
         if (aksjonspunkter.isEmpty()) {
             var medlemskapsvilkår = vilkårOpt.orElseThrow(
@@ -77,15 +63,6 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         }
 
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
-    }
-
-    private Søknad finnNyesteSøknad(BehandlingskontrollKontekst kontekst) {
-        return mottatteDokumentRepository.hentMottatteDokumentForBehandling(kontekst.getFagsakId(), kontekst.getBehandlingId(), List.of(Brevkode.AKTIVITETSPENGER_SOKNAD), false, DokumentStatus.GYLDIG)
-            .stream()
-            .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt).reversed())
-            .collect(Collectors.toCollection(LinkedHashSet::new)).stream().findFirst()
-            .map(søknadParser::parseSøknad)
-            .orElse(null);
     }
 
     private void oppfyllVilkår(Vilkårene vilkårene, Vilkår tidligereVilkår, Long behandlingId) {

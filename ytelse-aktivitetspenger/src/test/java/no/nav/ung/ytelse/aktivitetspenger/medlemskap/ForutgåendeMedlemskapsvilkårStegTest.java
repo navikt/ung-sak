@@ -25,7 +25,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -61,8 +60,10 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         vilkårResultatRepository = repoProvider.getVilkårResultatRepository();
         steg = new ForutgåendeMedlemskapsvilkårSteg(
             repoProvider.getVilkårResultatRepository(),
-            new MottatteDokumentRepository(entityManager),
-            new SøknadParser()
+            new ForutgåendeMedlemskapTjeneste(
+                new MottatteDokumentRepository(entityManager),
+                new no.nav.ung.sak.mottak.dokumentmottak.SøknadParser()
+            )
         );
     }
 
