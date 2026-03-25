@@ -44,10 +44,4 @@ public class BrevGenereringSemafor {
         return SEMAFOR.availablePermits() > 0;
     }
 
-    public static class BrevGenereringSemaforIkkeTilgjengeligException extends RuntimeException {
-        public BrevGenereringSemaforIkkeTilgjengeligException() {
-            super("Alle semaforer for brevgenerering er opptatt, prøv igjen senere");
-        }
-    }
-
 }
