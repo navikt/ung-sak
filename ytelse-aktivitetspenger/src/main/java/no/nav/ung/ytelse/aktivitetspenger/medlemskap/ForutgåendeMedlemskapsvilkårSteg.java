@@ -73,11 +73,15 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
             .map(søknadParser::parseSøknad)
             .orElse(null);
 
+        if (nyesteSøknad == null) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAPSPERIODE));
+        }
+
         Bosteder forutgåendeBosteder = ((Aktivitetspenger) nyesteSøknad.getYtelse()).getForutgåendeBosteder();
         var aksjonspunkter = vurderForutgåendeMedlemskap(forutgåendeBosteder);
 
         if (aksjonspunkter.isEmpty()) {
-
+            //TODO sett vilkår til oppfylt
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
