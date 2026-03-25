@@ -4914,6 +4914,40 @@
         "required" : [ "periode", "utfall" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse" : {
+        "properties" : {
+          "medlemskap" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
+          },
+          "harTrygdeavtale" : {
+            "type" : "boolean"
+          },
+          "land" : {
+            "type" : "string"
+          },
+          "landkode" : {
+            "type" : "string"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "vilkårUtfall" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto" : {
         "properties" : {
           "begrunnelse" : {
@@ -6128,6 +6162,35 @@
         },
         "summary" : "Henter perioder for kontroll av inntekt",
         "tags" : [ "kontroll" ]
+      }
+    },
+    "/api/behandling/medlemskap" : {
+      "get" : {
+        "description" : "Hent informasjon om forutgående medlemskap",
+        "operationId" : "medlemskap",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "forutgående medlemskap" ]
       }
     },
     "/api/behandling/perioder" : {
