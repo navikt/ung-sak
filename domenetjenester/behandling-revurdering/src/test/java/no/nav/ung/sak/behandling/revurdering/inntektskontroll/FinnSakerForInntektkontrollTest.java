@@ -279,7 +279,7 @@ class FinnSakerForInntektkontrollTest {
 
     /**
      * Skal finne AKTIVITETSPENGER-fagsak for inntektskontroll.
-     * Verifiserer at AKTIVITETSPENGER-fagsaker inkluderes i inntektskontroll-scannningen.
+     * Verifiserer at AKTIVITETSPENGER-fagsaker inkluderes i inntektskontroll-skanningen.
      */
     @Test
     void skal_finne_aktivitetspenger_fagsak_for_inntektskontroll() {
