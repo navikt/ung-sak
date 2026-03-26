@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -17,12 +16,6 @@ import org.slf4j.Logger;
 public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FørstegangsAvslagInnholdBygger.class);
-
-
-    @Inject
-    public FørstegangsAvslagInnholdBygger() {
-    }
-
 
     @WithSpan
     @Override
