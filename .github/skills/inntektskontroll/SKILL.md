@@ -27,5 +27,5 @@ The applicant can then choose to accept the income information from a-ordningen,
 If the applicant provides a statement, the case is flagged for manual review by a caseworker (aksjonspunkt). It is up to the caseworker to decide whether to accept the income information from a-ordningen, or to accept the applicants statement and reduce the payment by 66% of the reported income from the applicant.
 Alternatively, the caseworker can determine a different income based on the information provided by the applicant and the income from a-ordningen.
 
-In case where the income from a-ordningen is zero and the reported income from the applicant is above zero the case is also flagged for manual review by a caseworker (aksjonspunkt).
+In cases where the income from a-ordningen is zero and the reported income from the applicant is above zero, the case is also flagged for manual review by a caseworker (aksjonspunkt).
 In this case the caseworker is asked to determine the correct income and possibly contact the applicant for more information. It is likely that the applicant has misunderstood the income reporting.
