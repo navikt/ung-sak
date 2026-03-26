@@ -72,7 +72,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
     public List<Trigger> getTriggere(Collection<MottattDokument> mottattDokument) {
         return mottattDokument.stream().map(it -> søknadParser.parseSøknad(it))
             .map(it -> it.getYtelse().getSøknadsperiode())
-            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.NY_SØKT_AKTIVITETSPENGER_PERIODE))
+            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.NY_SØKT_PERIODE))
             .toList();
     }
 

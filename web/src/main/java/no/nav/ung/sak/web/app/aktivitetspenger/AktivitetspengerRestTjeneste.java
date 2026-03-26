@@ -98,11 +98,11 @@ public class AktivitetspengerRestTjeneste {
 
                 return new PgiÅrsinntektDto(
                     år.getValue(),
-                    segment.getValue().getVerdi().setScale(0, RoundingMode.HALF_EVEN),
-                    sumAvkortetPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN),
-                    sumAvkortetOgOppjustertPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_EVEN),
-                    arbeidsinntekt.setScale(0, RoundingMode.HALF_EVEN),
-                    næring.setScale(0, RoundingMode.HALF_EVEN)
+                    segment.getValue().getVerdi().setScale(0, RoundingMode.HALF_UP),
+                    sumAvkortetPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_UP),
+                    sumAvkortetOgOppjustertPerÅr.getOrDefault(år, BigDecimal.ZERO).setScale(0, RoundingMode.HALF_UP),
+                    arbeidsinntekt.setScale(0, RoundingMode.HALF_UP),
+                    næring.setScale(0, RoundingMode.HALF_UP)
                 );
             })
             .sorted(Comparator.comparingInt(PgiÅrsinntektDto::årstall).reversed())
@@ -110,11 +110,11 @@ public class AktivitetspengerRestTjeneste {
 
         return new BeregningsgrunnlagDto(
             grunnlag.getSkjæringstidspunkt(),
-            grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getBeregnetPrAar().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getBeregnetRedusertPrAar().setScale(0, RoundingMode.HALF_EVEN),
-            grunnlag.getDagsats().setScale(2, RoundingMode.HALF_EVEN),
+            grunnlag.getÅrsinntektAvkortetOppjustertSisteÅr().setScale(0, RoundingMode.HALF_UP),
+            grunnlag.getÅrsinntektAvkortetOppjustertSisteTreÅr().setScale(0, RoundingMode.HALF_UP),
+            grunnlag.getBeregnetPrAar().setScale(0, RoundingMode.HALF_UP),
+            grunnlag.getBeregnetRedusertPrAar().setScale(0, RoundingMode.HALF_UP),
+            grunnlag.getDagsats().setScale(0, RoundingMode.HALF_UP).intValueExact(),
             pgiÅrsinntekter,
             mapBesteBeregningResultatType(grunnlag.utledBesteBeregningResultatType())
         );

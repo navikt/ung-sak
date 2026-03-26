@@ -40,7 +40,7 @@ public class PdpRequestMapper {
     }
 
     public static SaksinformasjonDto saksinformasjon(PdpRequest pdpRequest) {
-        String ansvarligSaksbehandler = pdpRequest.getAnsvarligSaksbehandler();
+        Set<String> ansvarligSaksbehandlere = pdpRequest.getAnsvarligSaksbehandlere();
         AbacBehandlingStatus behandlingStatus = Arrays.stream(AbacBehandlingStatus.values())
             .filter(v -> v.getEksternKode().equals(pdpRequest.getBehandlingStatusEksternKode()))
             .findFirst().orElse(null);
@@ -48,8 +48,8 @@ public class PdpRequestMapper {
             .filter(v1 -> v1.getEksternKode().equals(pdpRequest.getFagsakStatusEksternKode()))
             .findFirst().orElse(null);
         AbacFagsakYtelseType ytelseType = map(pdpRequest.getFagsakYtelseTyper(), pdpRequest.getResourceType());
-        return ansvarligSaksbehandler != null || behandlingStatus != null || fagsakStatus != null || ytelseType != null
-            ? new SaksinformasjonDto(ansvarligSaksbehandler, behandlingStatus, fagsakStatus, ytelseType)
+        return !ansvarligSaksbehandlere.isEmpty() || behandlingStatus != null || fagsakStatus != null || ytelseType != null
+            ? new SaksinformasjonDto(ansvarligSaksbehandlere, behandlingStatus, fagsakStatus, ytelseType)
             : null;
     }
 

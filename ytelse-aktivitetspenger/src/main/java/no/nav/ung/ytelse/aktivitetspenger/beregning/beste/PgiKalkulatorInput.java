@@ -9,5 +9,6 @@ import java.math.BigDecimal;
 public record PgiKalkulatorInput(
     LocalDateTimeline<Beløp> årsinntekt,
     LocalDateTimeline<BigDecimal> oppjusteringsfaktorTidsserie,
-    LocalDateTimeline<Grunnbeløp> gsnittTidsserie
+    LocalDateTimeline<Grunnbeløp> gsnittTidsserie,
+    BigDecimal grunnbeløpVedStp
 ) {}

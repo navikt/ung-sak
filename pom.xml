@@ -39,10 +39,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>10.5.0</felles.version>
+        <felles.version>10.6.1</felles.version>
         <swagger.version>2.2.43</swagger.version>
         <junit.version>6.0.3</junit.version>
-        <k9format.version>12.9.1</k9format.version>
+        <k9format.version>12.9.2</k9format.version>
         <jackson.version>2.21.1</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.10</kotlin-stdlib.version>
@@ -52,7 +52,7 @@
         <confluent.platform.version>8.1.1</confluent.platform.version>
         <mockito.version>5.21.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>
-        <ung-brukerdialog-api.version>0.1.4</ung-brukerdialog-api.version>
+        <ung-brukerdialog-api.version>0.2.1</ung-brukerdialog-api.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
@@ -349,7 +349,7 @@
             <dependency>
                 <groupId>no.nav.sif.abac</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.8.2</version>
+                <version>1.9.0</version>
             </dependency>
 
             <dependency>

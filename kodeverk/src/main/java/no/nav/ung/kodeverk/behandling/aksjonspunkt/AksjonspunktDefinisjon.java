@@ -22,6 +22,7 @@ import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefini
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.LOKALKONTOR_BESLUTTER_VILKÅR_KODE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.LOKALKONTOR_FORESLÅR_VILKÅR_KODE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_SKJERMLENKE;
@@ -53,6 +54,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_VILKÅR,
         SkjermlenkeType.LOKALKONTOR_BESLUTTER_VILKÅR,
         ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
+
+    LOKALKONTOR_FORESLÅR_VILKÅR(AksjonspunktKodeDefinisjon.LOKALKONTOR_FORESLÅR_VILKÅR_KODE,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Lokalkontor foreslår vilkår", BehandlingStatus.UTREDES, BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR,
+        UTEN_VILKÅR, SkjermlenkeType.LOKALKONTOR_FORESLÅR_VILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
     SØKERS_OPPLYSNINGSPLIKT_MANU(
         AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU_KODE, AksjonspunktType.MANUELL,
