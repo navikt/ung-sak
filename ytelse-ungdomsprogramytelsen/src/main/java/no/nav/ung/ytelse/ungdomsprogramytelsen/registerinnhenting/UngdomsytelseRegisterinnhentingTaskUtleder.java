@@ -1,10 +1,11 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinnhenting;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
@@ -13,13 +14,17 @@ import no.nav.ung.sak.domene.registerinnhenting.UtvidetRegisterinnhentingTaskUtl
 import java.util.Collections;
 import java.util.List;
 
-@Dependent
-public class AktivitetspengerRegisterinnhentingTaskUtleder implements UtvidetRegisterinnhentingTaskUtleder {
+@ApplicationScoped
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+public class UngdomsytelseRegisterinnhentingTaskUtleder implements UtvidetRegisterinnhentingTaskUtleder {
 
     private Instance<EndringStartpunktUtleder> startpunktUtledere;
 
+    UngdomsytelseRegisterinnhentingTaskUtleder() {
+    }
+
     @Inject
-    public AktivitetspengerRegisterinnhentingTaskUtleder(Instance<EndringStartpunktUtleder> startpunktUtledere) {
+    public UngdomsytelseRegisterinnhentingTaskUtleder(Instance<EndringStartpunktUtleder> startpunktUtledere) {
         this.startpunktUtledere = startpunktUtledere;
     }
 

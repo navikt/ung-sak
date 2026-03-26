@@ -1,4 +1,4 @@
-package no.nav.ung.sak.mottak.dokumentmottak;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +22,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)

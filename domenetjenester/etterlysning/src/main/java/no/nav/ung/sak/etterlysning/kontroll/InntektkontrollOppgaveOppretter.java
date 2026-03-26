@@ -1,6 +1,7 @@
 package no.nav.ung.sak.etterlysning.kontroll;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -16,7 +17,7 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 
 import java.util.List;
 import java.util.function.Function;
@@ -27,19 +28,19 @@ public class InntektkontrollOppgaveOppretter {
 
     private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private final RapportertInntektMapper rapportertInntektMapper;
-    private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private final Instance<KvalifiserteYtelsesperioderTjeneste> periodeTjenester;
     private final ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
     @Inject
-    public InntektkontrollOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste, RapportertInntektMapper rapportertInntektMapper, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+    public InntektkontrollOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste, RapportertInntektMapper rapportertInntektMapper, Instance<KvalifiserteYtelsesperioderTjeneste> periodeTjenester, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.delegeringTjeneste = delegeringTjeneste;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.periodeTjenester = periodeTjenester;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
-        LocalDateTimeline<Boolean> programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+        LocalDateTimeline<Boolean> programTidslinje = KvalifiserteYtelsesperioderTjeneste.finnTjeneste(behandling.getFagsakYtelseType(), periodeTjenester).finnPeriodeTidslinje(behandling.getId());
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
             .map(mapTilDto(behandling.getId(), aktørId, programTidslinje, ytelsetype))

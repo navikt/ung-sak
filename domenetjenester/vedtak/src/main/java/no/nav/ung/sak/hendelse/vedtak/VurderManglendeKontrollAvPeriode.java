@@ -6,13 +6,13 @@ import no.nav.abakus.vedtak.ytelse.Ytelse;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,18 +23,19 @@ public class VurderManglendeKontrollAvPeriode implements VurderOmVedtakPåvirker
     private ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
-    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     public VurderManglendeKontrollAvPeriode() {
     }
 
     @Inject
     public VurderManglendeKontrollAvPeriode(ManglendeKontrollperioderTjeneste manglendeKontrollperioderTjeneste,
-                                            FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+                                            FagsakRepository fagsakRepository, BehandlingRepository behandlingRepository,
+                                            UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.manglendeKontrollperioderTjeneste = manglendeKontrollperioderTjeneste;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     @Override
@@ -63,12 +64,26 @@ public class VurderManglendeKontrollAvPeriode implements VurderOmVedtakPåvirker
     }
 
     private boolean erEndretOppstartTilTidligereMåned(Behandling vedtattBehandling) {
-        var endretStartdatoerFraOriginal = ungdomsprogramPeriodeTjeneste.finnEndretStartdatoerFraOriginal(BehandlingReferanse.fra(vedtattBehandling));
-        boolean harEndringAvStartdatoTilTidligereMåned = endretStartdatoerFraOriginal.stream().anyMatch(it -> erEndretTilTidligereMåned(it.nyDato(), it.forrigeDato()));
-        return vedtattBehandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM) && harEndringAvStartdatoTilTidligereMåned;
+        if (!vedtattBehandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM)) {
+            return false;
+        }
+        var gjeldendeStartdato = ungdomsprogramPeriodeRepository.hentGrunnlag(vedtattBehandling.getId())
+            .flatMap(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriodeDersomFinnes)
+            .map(p -> p.getFomDato())
+            .orElse(null);
+        var originalStartdato = vedtattBehandling.getOriginalBehandlingId()
+            .flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag)
+            .flatMap(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriodeDersomFinnes)
+            .map(p -> p.getFomDato())
+            .orElse(null);
+        if (gjeldendeStartdato == null || originalStartdato == null || gjeldendeStartdato.equals(originalStartdato)) {
+            return false;
+        }
+        return erEndretTilTidligereMåned(gjeldendeStartdato, originalStartdato);
     }
 
     private static boolean erEndretTilTidligereMåned(LocalDate nyVerdi, LocalDate forrigeVerdi) {
         return nyVerdi.getMonth().getValue() < forrigeVerdi.getMonth().getValue() || nyVerdi.getYear() < forrigeVerdi.getYear();
     }
 }
+
