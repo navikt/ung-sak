@@ -1,5 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -25,6 +27,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,9 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     @Inject
     private EntityManager entityManager;
 
+    @Inject
+    private @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private ForutgåendeMedlemskapsvilkårSteg steg;
@@ -63,7 +69,9 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             new ForutgåendeMedlemskapTjeneste(
                 new MottatteDokumentRepository(entityManager),
                 new no.nav.ung.sak.mottak.dokumentmottak.SøknadParser()
-            )
+            ),
+            perioderTilVurderingTjenester,
+            behandlingRepository
         );
     }
 

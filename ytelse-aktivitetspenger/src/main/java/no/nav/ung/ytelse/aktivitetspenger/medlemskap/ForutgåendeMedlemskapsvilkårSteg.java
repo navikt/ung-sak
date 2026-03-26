@@ -1,16 +1,20 @@
 package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,13 +29,19 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
 
     private final VilkårResultatRepository vilkårResultatRepository;
     private final ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste;
+    private final BehandlingRepository behandlingRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
 
     @Inject
     public ForutgåendeMedlemskapsvilkårSteg(VilkårResultatRepository vilkårResultatRepository,
-                                            ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste) {
+                                            ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste,
+                                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                            BehandlingRepository behandlingRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.forutgåendeMedlemskapTjeneste = forutgåendeMedlemskapTjeneste;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -47,6 +57,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
 
         var forutgåendeBosteder = forutgåendeMedlemskapTjeneste.utledForutgåendeBosteder(kontekst.getFagsakId(), kontekst.getBehandlingId());
 
+        //Søknad finnes ikke
         if (forutgåendeBosteder.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
@@ -54,10 +65,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         var aksjonspunkter = vurderForutgåendeMedlemskap(forutgåendeBosteder.orElseThrow());
 
         if (aksjonspunkter.isEmpty()) {
-            var medlemskapsvilkår = vilkårOpt.orElseThrow(
-                () -> new IllegalStateException("Forutgående medlemsskapsvilkåret ikke initialisert"));
-
-            oppfyllVilkår(vilkårene, medlemskapsvilkår, kontekst.getBehandlingId());
+            oppfyllVilkår(vilkårene, kontekst.getBehandlingId());
 
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
@@ -65,17 +73,30 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunkter);
     }
 
-    private void oppfyllVilkår(Vilkårene vilkårene, Vilkår tidligereVilkår, Long behandlingId) {
+    private void oppfyllVilkår(Vilkårene vilkårene, Long behandlingId) {
+        var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var perioderTilVurdering = getPerioderTilVurderingTjeneste(behandling.getFagsakYtelseType(), behandling.getType())
+            .utled(behandlingId, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
+
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
-        tidligereVilkår.getPerioder().stream()
-            .map(it -> vilkårBuilder.hentBuilderFor(it.getPeriode()).medUtfall(Utfall.OPPFYLT))
+
+        perioderTilVurdering.stream()
+            .map(it -> vilkårBuilder.hentBuilderFor(it)
+                .medUtfall(Utfall.OPPFYLT)
+                .medAvslagsårsak(null)
+                .medRegelInput("TODO fra steg"))
             .forEach(vilkårBuilder::leggTil);
 
         vilkårResultatBuilder.leggTil(vilkårBuilder);
 
         vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
 
+    }
+
+
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) {
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, fagsakYtelseType, behandlingType);
     }
 
 
