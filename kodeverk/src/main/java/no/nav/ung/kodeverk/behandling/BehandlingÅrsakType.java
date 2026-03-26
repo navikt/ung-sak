@@ -11,7 +11,6 @@ import java.util.Set;
 public enum BehandlingÅrsakType implements Kodeverdi {
 
     NY_SØKT_PERIODE("RE-END-FRA-BRUKER", "Endring fra bruker"),
-    NY_SØKT_AKTIVITETSPENGER_PERIODE("RE-END-FRA-BRUKER-AKT", "Endring fra søker"),
     RE_ANNET("RE-ANNET", "Annet"),
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),
     RE_SATS_ENDRING("RE-SATS-ENDRING", "Generelle endringer som påvirker sats og barnetillegg"),
