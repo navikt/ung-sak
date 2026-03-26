@@ -4916,20 +4916,23 @@
       },
       "ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse" : {
         "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
+          },
           "medlemskapFraBruker" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto"
             },
             "type" : "array"
+          },
+          "vilkårUtfall" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
           }
         },
         "type" : "object"
       },
       "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto" : {
         "properties" : {
-          "avslagsårsak" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
-          },
           "harTrygdeavtale" : {
             "type" : "boolean"
           },
@@ -4941,9 +4944,6 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
-          },
-          "vilkårUtfall" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
           }
         },
         "type" : "object"
