@@ -4936,9 +4936,6 @@
           "harTrygdeavtale" : {
             "type" : "boolean"
           },
-          "land" : {
-            "type" : "string"
-          },
           "landkode" : {
             "type" : "string"
           },
