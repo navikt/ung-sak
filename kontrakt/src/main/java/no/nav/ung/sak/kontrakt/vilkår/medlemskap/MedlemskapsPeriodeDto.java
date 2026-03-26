@@ -6,8 +6,6 @@ import no.nav.ung.sak.typer.Periode;
 public record MedlemskapsPeriodeDto(
     @JsonProperty(value = "periode")
     Periode periode,
-    @JsonProperty(value = "land")
-    String land,
     @JsonProperty(value = "landkode")
     String landkode,
     @JsonProperty(value = "harTrygdeavtale")
