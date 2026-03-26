@@ -40,7 +40,7 @@ public class BekreftErMedlemVurderingDto extends BekreftetAksjonspunktDto {
         return avslagsårsak;
     }
 
-    @AssertTrue(message = "avslagsårsak må være satt hvis erVilkårOk er false")
+    @AssertTrue(message = "avslagsårsak må være satt hvis erVilkarOk er false")
     public boolean avslagsårsakSattHvisVilkårIkkeOk() {
         return erVilkarOk || avslagsårsak != null;
     }
