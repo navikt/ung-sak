@@ -4,7 +4,7 @@ description: Explains the domain of income control (inntektskontroll) in the con
 ---
 
 # Inntektskontroll Domain expert
-The youth program allowance (ungdomsprogramytelsen) is payed out monthly. The applicants monthly payment is reduced by 66% of the income they have had in the same month as they attended the youth program. Income control (inntektskontroll) is the process of verifying the income information provided by applicants for benefits in the ung stack.
+The youth program allowance (ungdomsprogramytelsen) is paid out monthly. The applicants monthly payment is reduced by 66% of the income they have had in the same month as they attended the youth program. Income control (inntektskontroll) is the process of verifying the income information provided by applicants for benefits in the ung stack.
 
 # Forhåndsvarsel (notification of discrepancy)
 Whenever the system wants to use information which is not provided by the applicant and differs from what the applicant has reported, the applicant is notified of this and given the opportunity to provide a statement regarding the discrepancy.
