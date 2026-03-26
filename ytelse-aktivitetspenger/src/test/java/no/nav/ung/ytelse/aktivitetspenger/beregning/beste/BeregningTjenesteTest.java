@@ -19,6 +19,35 @@ class BeregningTjenesteTest {
     private static final Year SIST_LIGNEDE_ÅR = Year.of(2025);
 
     @Test
+    void skal_bruke_siste_år_med_kun_to_lignede_år() {
+        var inntektsposter = List.of(
+            lagInntektspost(2025, BigDecimal.valueOf(300_000)),
+            lagInntektspost(2024, BigDecimal.valueOf(200_000))
+        );
+
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(resultat.getÅrsinntektSisteÅr());
+    }
+
+    @Test
+    void skal_bruke_snitt_av_siste_tre_år_med_kun_to_lignede_år_dersom_første_året_er_høyt() {
+        var inntektsposter = List.of(
+            lagInntektspost(2025, BigDecimal.valueOf(25_000)),
+            lagInntektspost(2024, BigDecimal.valueOf(600_000))
+        );
+
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, inntektsposter));
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo("221450.5361216667");
+    }
+
+    @Test
+    void skal_håndtere_ingen_inntekter() {
+        var resultat = BeregningTjeneste.avgjørBesteberegning(lagBeregningInput(SIST_LIGNEDE_ÅR, VIRKNINGSDATO, List.of()));
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(BigDecimal.ZERO);
+    }
+
+
+    @Test
     void siste_år_brukes_når_det_er_høyere_enn_snitt_av_tre_år() {
         var inntektsposter = List.of(
             lagInntektspost(2025, BigDecimal.valueOf(600_000)),

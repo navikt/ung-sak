@@ -10,6 +10,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.Collection;
@@ -57,8 +58,6 @@ public class BeregningTjeneste {
         var pgiKalkulator = new PgiKalkulator(input);
         var pgiPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
 
-        if (pgiPerÅr.size() < 3) { throw new IllegalStateException("BesteBeregning: Kan ikke utføre besteberegning uten komplette data."); }
-
         BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(input.sisteLignedeÅr(), BigDecimal.ZERO);
         BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
         BigDecimal beregningsgrunnlag = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
@@ -74,6 +73,6 @@ public class BeregningTjeneste {
             .limit(3)
             .map(Map.Entry::getValue)
             .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .divide(BigDecimal.valueOf(3), 10, java.math.RoundingMode.HALF_EVEN);
+            .divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP);
     }
 }
