@@ -271,6 +271,8 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
         // Arrange
         opprettBehandlingFor(Optional.empty());
         when(totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling)).thenReturn(Collections.emptyList());
+        when(totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.SENTRAL)).thenReturn(Collections.emptyList());
+        when(totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.LOKAL)).thenReturn(Collections.emptyList());
         // Act
         List<TotrinnskontrollSkjermlenkeContextDto> context = totrinnskontrollAksjonspunkterTjeneste.hentTotrinnsvurderingSkjermlenkeContext(behandling);
         // Assert
@@ -285,6 +287,8 @@ public class TotrinnskontrollAksjonspunkterTjenesteImplTest {
 
     private void setFelleseMockMetoder(TotrinnskontrollAksjonspunkterDto totrinnskontrollAksjonspunkterDto, List<Totrinnsvurdering> ttv) {
         when(totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling)).thenReturn(ttv);
+        when(totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.SENTRAL)).thenReturn(ttv);
+        when(totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.LOKAL)).thenReturn(Collections.emptyList());
         when(totrinnTjeneste.hentTotrinngrunnlagHvisEksisterer(behandling)).thenReturn(Optional.of(totrinnresultatgrunnlag));
         when(totrinnsaksjonspunktDtoTjeneste.lagTotrinnskontrollAksjonspunktDto(any()))
             .thenReturn(totrinnskontrollAksjonspunkterDto);

@@ -17,8 +17,6 @@ public class TotrinnsaksjonspunktDtoTjeneste {
     }
 
     public TotrinnskontrollAksjonspunkterDto lagTotrinnskontrollAksjonspunktDto(Totrinnsvurdering aksjonspunkt) {
-
-
         return new TotrinnskontrollAksjonspunkterDto.Builder()
             .medAksjonspunktKode(aksjonspunkt.getAksjonspunktDefinisjon())
             .medBesluttersBegrunnelse(aksjonspunkt.getBegrunnelse())

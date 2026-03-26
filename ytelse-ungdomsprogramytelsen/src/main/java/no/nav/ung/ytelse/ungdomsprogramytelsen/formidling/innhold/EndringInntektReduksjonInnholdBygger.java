@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
@@ -85,12 +86,11 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
     }
 
     private static LocalDateSegment<EndringInntektPeriodeDto> mapTilPeriodeDto(
-        LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<BigDecimal> rhs) {
+        LocalDateInterval p, LocalDateSegment<TilkjentYtelseVerdi> lhs, LocalDateSegment<KontrollerteInntekter> rhs) {
         var ty = lhs.getValue();
 
         Objects.requireNonNull(rhs, "Mangler kontrollert inntekt for periode %s for tilkjent ytelse %s"
             .formatted(p.toString(), ty.toString()));
-
 
         boolean erUfullstendigMåned = p.getTomDato().isBefore(p.getTomDato().with(TemporalAdjusters.lastDayOfMonth()));
         var ufullstendigMåned = erUfullstendigMåned ? p.getTomDato().getMonth() : null;
@@ -98,7 +98,7 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         return new LocalDateSegment<>(p,
             new EndringInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
-                tilHeltall(rhs.getValue()),
+                tilHeltall(Objects.requireNonNullElse(rhs.getValue().inntekt(), BigDecimal.ZERO)),
                 tilHeltall(ty.tilkjentBeløp()),
                 ufullstendigMåned)
         );
