@@ -4,7 +4,7 @@ description: Explains the domain of income control (inntektskontroll) in the con
 ---
 
 # Inntektskontroll Domain expert
-The youth program allowance (ungdomsprogramytelsen) is payed out monthly. The applicant's monthly payment is reduced by 66% of the income they have had in the same month as they attended the youth program. Income control (inntektskontroll) is the process of verifying the income information provided by applicants for benefits in the ung stack.
+The youth program allowance (ungdomsprogramytelsen) is paid out monthly. The applicant's monthly payment is reduced by 66% of the income they have had in the same month as they attended the youth program. Income control (inntektskontroll) is the process of verifying the income information provided by applicants for benefits in the ung stack.
 
 # Forhåndsvarsel (notification of discrepancy)
 Whenever the system wants to use information which is not provided by the applicant and differs from what the applicant has reported, the applicant is notified of this and given the opportunity to provide a statement regarding the discrepancy.
@@ -24,8 +24,8 @@ If income from a-ordningen and the reported income from the applicant are approx
 If income from a-ordningen and the reported income from the applicant are not the same, and the income from a-ordningen is not zero, the applicant is notified (varsel) of this discrepancy (avvik).
 The applicant can then choose to accept the income information from a-ordningen, or they can choose to provide a statement (uttalelse) regarding the discrepancy between the reported income and the income from a-ordningen.
 
-If the applicant provides a statement, the case is flagged for manual review by a caseworker (aksjonspunkt). It is up to the caseworker to decide whether to accept the income information from a-ordningen, or to accept the applicants statement and reduce the payment by 66% of the reported income from the applicant.
+If the applicant provides a statement, the case is flagged for manual review by a caseworker (aksjonspunkt). It is up to the caseworker to decide whether to accept the income information from a-ordningen, or to accept the applicant's statement and reduce the payment by 66% of the reported income from the applicant.
 Alternatively, the caseworker can determine a different income based on the information provided by the applicant and the income from a-ordningen.
 
-In case where the income from a-ordningen is zero and the reported income from the applicant is above zero the case is also flagged for manual review by a caseworker (aksjonspunkt).
+In cases where the income from a-ordningen is zero and the reported income from the applicant is above zero, the case is also flagged for manual review by a caseworker (aksjonspunkt).
 In this case the caseworker is asked to determine the correct income and possibly contact the applicant for more information. It is likely that the applicant has misunderstood the income reporting.
