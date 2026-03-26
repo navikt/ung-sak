@@ -10,7 +10,7 @@ import java.util.Objects;
  * Periodisert oppslag for land med gyldig trygdeavtale iht. folketrygdloven §11-3 jf. §1-3b.
  *
  * Dekker:
- * - EØS-land (EU + EFTA/EØS: NOR, ISL, LIE) med historisk korrekte inntredelsesd atoer
+ * - EØS-land (EU + EFTA/EØS: NOR, ISL, LIE) med historisk korrekte inntredelsesdatoer
  * - Sveits (CHE) via EFTA-konvensjonen §1-3b(b)
  * - Storbritannia (GBR) — EØS fra 1994, deretter §1-3b(c,d,e) etter Brexit uten gap
  */
@@ -66,8 +66,8 @@ public final class TrygdeavtaleLandOppslag {
     }
 
     /**
-     * Sjekker om et land er et gyldig EØS-/trygdeavtaleland for hele den oppgitte perioden.
-     * Bostedperioden må starte på eller etter landets inntredelses dato.
+     * Sjekker om et land er et gyldig EØS-/trygdeavtaleland fra og med den oppgitte startdatoen.
+     * Bostedsperioden anses som gyldig dersom den starter på eller etter landets inntredelsesdato.
      */
     public static boolean erGyldigTrygdeavtaleLand(Landkode landkode, LocalDate fom) {
         Objects.requireNonNull(landkode, "landkode kan ikke være null");

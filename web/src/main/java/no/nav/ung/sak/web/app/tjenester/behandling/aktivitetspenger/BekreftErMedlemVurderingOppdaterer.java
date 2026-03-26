@@ -37,7 +37,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-        Avslagsårsak avslagsårsak = dto.getAvslagsårsak() != null ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
+        Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
 
         perioderTilVurdering.stream()
             .map(periode -> forutgåendeMedlemskapBuilder
