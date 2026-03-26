@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 public record ForutgåendeMedlemskapResponse(
-    @JsonProperty("medlemskap")
+    @JsonProperty("medlemskapFraBruker")
     List<MedlemskapsPeriodeDto> medlemskapFraBruker
 ) {
 }

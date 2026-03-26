@@ -22,6 +22,11 @@ public class BekreftErMedlemVurderingDto extends BekreftetAksjonspunktDto {
     @JsonProperty(value = "avslagsårsak")
     private MedlemskapAvslagsÅrsakType avslagsårsak;
 
+    public BekreftErMedlemVurderingDto(String begrunnelse, Boolean erVilkarOk, MedlemskapAvslagsÅrsakType avslagsårsak) {
+        super(begrunnelse);
+        this.erVilkarOk = erVilkarOk;
+        this.avslagsårsak = avslagsårsak;
+    }
 
     public Boolean getErVilkarOk() {
         return erVilkarOk;
