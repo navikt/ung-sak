@@ -41,7 +41,7 @@ public class AktivitetspengerDetaljertResultatForPeriodeUtleder implements Detal
             resultater.add(DetaljertResultatForPeriodeUtleder.kontrollerInntektDetaljertResultat(tilkjentYtelse));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_AKTIVITETSPENGER_PERIODE)
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PERIODE)
             || vilkårResultat.manuellOpprettetBehandling() && relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
             resultater.add(DetaljertResultatForPeriodeUtleder.nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
