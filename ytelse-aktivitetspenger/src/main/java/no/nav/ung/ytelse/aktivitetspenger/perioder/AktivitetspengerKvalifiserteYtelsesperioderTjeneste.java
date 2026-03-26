@@ -1,13 +1,16 @@
 package no.nav.ung.ytelse.aktivitetspenger.perioder;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
-@Dependent
+@ApplicationScoped
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class AktivitetspengerKvalifiserteYtelsesperioderTjeneste implements KvalifiserteYtelsesperioderTjeneste {
 
     private final AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
