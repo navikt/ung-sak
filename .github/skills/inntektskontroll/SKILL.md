@@ -1,5 +1,5 @@
 ---
-name: income-control-domain-expert
+name: inntektskontroll
 description: Explains the domain of income control (inntektskontroll) in the context of the ung stack and provides guidance on how to approach it
 ---
 
