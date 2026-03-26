@@ -30,7 +30,7 @@ import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

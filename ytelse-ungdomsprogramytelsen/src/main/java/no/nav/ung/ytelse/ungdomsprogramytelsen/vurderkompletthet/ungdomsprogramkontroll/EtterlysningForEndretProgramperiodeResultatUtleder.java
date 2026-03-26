@@ -8,7 +8,7 @@ import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 
 import java.util.List;
 
-import static no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste.*;
+import static no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste.*;
 
 public class EtterlysningForEndretProgramperiodeResultatUtleder {
 

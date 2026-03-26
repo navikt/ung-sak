@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

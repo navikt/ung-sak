@@ -26,7 +26,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)

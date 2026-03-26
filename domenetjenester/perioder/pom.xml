@@ -23,11 +23,6 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>ungdomsprogram</artifactId>
-        </dependency>
-
 
         <dependency>
             <groupId>no.nav.k9.felles</groupId>
