@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -218,9 +219,10 @@ public class DokumentArkivTjenesteImplTest {
     }
 
     private DokumentInfo byggDokumentInfo(ArkivFilType arkivFilType, Variantformat variantFormat, Brevkode brevkode) {
-        return new DokumentInfo(DOKUMENT_ID, "tittel", brevkode.getOffisiellKode(), Dokumentstatus.FERDIGSTILT, LocalDateTime.now(), "origJpId", SkjermingType.POL.name(),
+        Integer filstørrelse = null; //skal kun settes ved avtale med team dokumentløsninger
+        return new DokumentInfo(DOKUMENT_ID, "tittel", brevkode.getOffisiellKode(), Dokumentstatus.FERDIGSTILT, LocalDateTime.now(), "origJpId", SkjermingType.POL.name(), false,
             List.of(new LogiskVedlegg("id", "tittel")),
-            List.of(new Dokumentvariant(variantFormat, "filnavn", "fluuid", arkivFilType.name(), true, SkjermingType.POL)));
+            List.of(new Dokumentvariant(variantFormat, "filnavn", "fluuid", arkivFilType.name(), filstørrelse, true, SkjermingType.POL, true, List.of())));
     }
 
     // Hjelpebyggere

@@ -275,7 +275,7 @@ public class FagsakRestTjeneste {
         Set<AktørId> personer = pipRepository.hentAktørIdKnyttetTilFagsaker(Set.of(fagsak.getSaksnummer()));
         List<no.nav.sif.abac.kontrakt.person.AktørId> aktørIder = personer.stream().map(it -> new no.nav.sif.abac.kontrakt.person.AktørId(it.getAktørId())).toList();
         OperasjonDto operasjon = new OperasjonDto(ResourceType.FAGSAK, BeskyttetRessursActionAttributt.READ, Set.of());
-        SaksinformasjonDto saksinformasjonDto = new SaksinformasjonDto(null, null, AbacUtil.oversettFagstatus(fagsak.getStatus()).orElse(null), AbacUtil.oversettYtelseType(fagsak.getYtelseType()));
+                SaksinformasjonDto saksinformasjonDto = new SaksinformasjonDto(Set.of(), null, AbacUtil.oversettFagstatus(fagsak.getStatus()).orElse(null), AbacUtil.oversettYtelseType(fagsak.getYtelseType()));
         SaksinformasjonOgPersonerTilgangskontrollInputDto input = new SaksinformasjonOgPersonerTilgangskontrollInputDto(aktørIder, List.of(), operasjon, saksinformasjonDto);
         return switch (fagsak.getYtelseType()) {
             case AKTIVITETSPENGER -> abacPdpRestKlient.sjekkTilgangForInnloggetBrukerAktivitetspenger(input).harTilgang();
