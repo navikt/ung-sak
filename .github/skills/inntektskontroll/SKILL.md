@@ -16,8 +16,9 @@ Income information from a-ordningen is retrieved through an external application
 The income information is available through InntektArbeidYtelseAggregat in InntektArbeidYtelseGrunnlag (IAYGrunnlag) in the ung-sak application which is retrieved from k9-abakus after the process of register information retrieval (registerinnhenting) is completed.
 
 # The process of income control in the ung stack
-At the start of each month, the applicants are notified to report their income for the previous month. They can report their income through a task (oppgave) tiggered by ung-sak and handled by ung-brukerdialog-api.
-On the 8th of each month, the income control process starts. The income control process checks the reported income against the income information from a-ordningen.
+At the start of each month, the applicants are notified to report their income for the previous month. They can report their income through an assignment (oppgave) tiggered by ung-sak via `OpprettOppgaverForInntektsrapporteringBatchTask` and handled by ung-brukerdialog-api.
+On the 8th of each month, the income control process starts. Ung-sak runs the scheduled task `OpprettRevurderingForInntektskontrollBatchTask` which starts the process of income control for all relevant cases (fagsaker).
+The income control process checks the reported income against the income information from a-ordningen.
 
 If income from a-ordningen and the reported income from the applicant are approximately the same, the payment is reduced by 66% of the reported income from the applicant.
 If income from a-ordningen and the reported income from the applicant are not the same, and the income from a-ordningen is not zero, the applicant is notified (varsel) of this discrepancy (avvik).
