@@ -22,16 +22,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class AktivitetspengerBeregningsgrunnlagRepositoryTest {
+class AktivitetspengerGrunnlagRepositoryTest {
 
     @Inject
     private EntityManager entityManager;
 
-    private AktivitetspengerBeregningsgrunnlagRepository repository;
+    private AktivitetspengerGrunnlagRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new AktivitetspengerBeregningsgrunnlagRepository(entityManager);
+        repository = new AktivitetspengerGrunnlagRepository(entityManager);
     }
 
     @Test
@@ -113,7 +113,7 @@ class AktivitetspengerBeregningsgrunnlagRepositoryTest {
     private List<Long> bgIderForBehandling(Long behandlingId) {
         return entityManager.createNativeQuery(
                 "SELECT k.beregningsgrunnlag_id FROM BEREGNINGSGRUNNLAG_KOBLING k " +
-                "JOIN AVP_GR_BEREGNINGSGRUNNLAG g ON g.id = k.avp_gr_beregningsgrunnlag_id " +
+                "JOIN GR_AVP g ON g.id = k.gr_avp_id " +
                 "WHERE g.behandling_id = :behandlingId AND g.aktiv = true ")
             .setParameter("behandlingId", behandlingId)
             .getResultList();

@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
