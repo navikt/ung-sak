@@ -31,6 +31,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.AKTIVITETSPENGER_BEREGNING, StartpunktType.BEREGNING)
             .medSteg(BehandlingStegType.VURDER_KOMPLETTHET, StartpunktType.VURDER_KOMPLETTHET)

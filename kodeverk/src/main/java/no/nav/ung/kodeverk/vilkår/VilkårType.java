@@ -45,6 +45,13 @@ public enum VilkårType implements Kodeverdi {
         Avslagsårsak.IKKE_14A_VEDTAK
     ),
 
+    FORUTGÅENDE_MEDLEMSKAPSVILKÅRET(
+        "AKT_VK_3",
+        "Forutgående medlemskapsvilkåret",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Avslagsårsak.SØKER_ER_IKKE_MEDLEM
+    ),
+
     /**
      * Brukes i stedet for null der det er optional.
      */

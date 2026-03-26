@@ -59,7 +59,7 @@ public class VurderManglendeKontrollAvPeriode implements VurderOmVedtakPåvirker
 
     private static boolean erFørstegangssøknadEllerSøknadOmNyPeriode(Behandling vedtattBehandling) {
         return vedtattBehandling.getType() == BehandlingType.FØRSTEGANGSSØKNAD ||
-            vedtattBehandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE);
+            vedtattBehandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.NY_SØKT_PERIODE);
     }
 
     private boolean erEndretOppstartTilTidligereMåned(Behandling vedtattBehandling) {

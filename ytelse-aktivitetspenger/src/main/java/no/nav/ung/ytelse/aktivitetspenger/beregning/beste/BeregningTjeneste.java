@@ -10,6 +10,7 @@ import no.nav.ung.sak.domene.iay.modell.InntektFilter;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.Year;
 import java.util.Collection;
@@ -55,12 +56,12 @@ public class BeregningTjeneste {
 
     public static BesteberegningResultat avgjørBesteberegning(BeregningInput input) {
         var pgiKalkulator = new PgiKalkulator(input);
-        var pgiPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
+        var oppjustertOgAvgrensetÅrsinntekt = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
 
-        if (pgiPerÅr.size() < 3) { throw new IllegalStateException("BesteBeregning: Kan ikke utføre besteberegning uten komplette data."); }
+        if (oppjustertOgAvgrensetÅrsinntekt.size() < 3) { throw new IllegalStateException("BesteBeregning: Kan ikke utføre besteberegning uten komplette data."); }
 
-        BigDecimal årsinntektSisteÅr = pgiPerÅr.getOrDefault(input.sisteLignedeÅr(), BigDecimal.ZERO);
-        BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(pgiPerÅr);
+        BigDecimal årsinntektSisteÅr = oppjustertOgAvgrensetÅrsinntekt.getOrDefault(input.sisteLignedeÅr(), BigDecimal.ZERO);
+        BigDecimal årsinntektSisteTreÅr = hentSnittTreSisteÅr(oppjustertOgAvgrensetÅrsinntekt);
         BigDecimal beregningsgrunnlag = årsinntektSisteÅr.max(årsinntektSisteTreÅr);
 
         String regelSporing = LagRegelSporing.lagRegelSporingFraTidslinjer(pgiKalkulator.getRegelSporingsmap());
@@ -68,12 +69,12 @@ public class BeregningTjeneste {
         return new BesteberegningResultat(input, årsinntektSisteÅr, årsinntektSisteTreÅr, beregningsgrunnlag, regelSporing);
     }
 
-    private static BigDecimal hentSnittTreSisteÅr(Map<Year, BigDecimal> pgiPerÅr) {
-        return pgiPerÅr.entrySet().stream()
+    private static BigDecimal hentSnittTreSisteÅr(Map<Year, BigDecimal> oppjustertOgAvgrensetÅrsinntekt) {
+        return oppjustertOgAvgrensetÅrsinntekt.entrySet().stream()
             .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
             .limit(3)
             .map(Map.Entry::getValue)
             .reduce(BigDecimal.ZERO, BigDecimal::add)
-            .divide(BigDecimal.valueOf(3), 10, java.math.RoundingMode.HALF_EVEN);
+            .divide(BigDecimal.valueOf(3), 10, RoundingMode.HALF_UP);
     }
 }

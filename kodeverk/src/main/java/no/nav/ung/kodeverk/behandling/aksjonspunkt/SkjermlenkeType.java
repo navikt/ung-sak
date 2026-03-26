@@ -13,6 +13,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     SOEKNADSFRIST("SOEKNADSFRIST", "Søknadsfrist"),
     BISTANDSVILKÅR("BISTANDSVILKÅR", "Bistandsvilkår"),
     UDEFINERT("-", "Ikke definert"),
+    FAKTA_OM_MEDLEMSKAP("FAKTA_OM_MEDLEMSKAP", "Medlemskap"),
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     VEDTAK("VEDTAK", "Vedtak"),
