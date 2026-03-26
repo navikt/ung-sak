@@ -12,7 +12,6 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.brukerdialog.typer.AktørId;
@@ -105,8 +104,6 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
                     restClient.post(opprettEndretSluttdatoURI, mapTilEndretSluttdatoOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 case EndretPeriodeDataDto d ->
                     restClient.post(opprettEndretPeriodeURI, mapTilEndretPeriodeOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
-                case FjernetPeriodeDataDto d ->
-                    restClient.post(opprettEndretPeriodeURI, mapTilFjernetPeriodeOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 default -> throw new IllegalArgumentException("Ukjent oppgavetypeData: " + oppgave.oppgavetypeData().getClass().getName());
             }
         } catch (Exception e) {
@@ -191,14 +188,6 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
             deltakerIdent, ref, frist,
             mapPeriode(d.nyPeriode()), mapPeriode(d.forrigePeriode()),
             d.endringer().stream().map(e -> PeriodeEndringType.valueOf(e.name())).collect(Collectors.toSet()));
-    }
-
-    private static EndretPeriodeOppgaveDTO mapTilFjernetPeriodeOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, FjernetPeriodeDataDto d) {
-        PeriodeDTO forrigePeriode = new PeriodeDTO(d.forrigeStartdato(), d.forrigeSluttdato());
-        return new EndretPeriodeOppgaveDTO(
-            deltakerIdent, ref, frist,
-            null, forrigePeriode,
-            java.util.Set.of(PeriodeEndringType.FJERNET_PERIODE));
     }
 
     private EndreStatusDTO mapTilEndreStatusDTO(EndreOppgaveStatusDto dto) {
