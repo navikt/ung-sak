@@ -99,9 +99,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
                 .ifPresent(it -> pdpRequest.setBehandlingStatusEksternKode(it.getEksternKode()));
             AbacUtil.oversettFagstatus(behandlingData.fagsakStatus())
                 .ifPresent(it -> pdpRequest.setFagsakStatusEksternKode(it.getEksternKode()));
-            if (!behandlingData.ansvarligSaksbehandlere().isEmpty()) {
-                pdpRequest.setAnsvarligSaksbehandlere(behandlingData.ansvarligSaksbehandlere());
-            }
+            pdpRequest.setAnsvarligSaksbehandlere(behandlingData.ansvarligSaksbehandlere());
         }
         pdpRequest.setFagsakYtelseTyper(utledYtelsetyper(attributter, saksnumre, behandlingData));
         return pdpRequest;
@@ -238,7 +236,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
 
         Set<AktørId> aktørIdForSaksnummerSøk = new HashSet<>();
         aktørIdForSaksnummerSøk.addAll(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR)));
-        aktørIdForSaksnummerSøk.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_AKTØR_ID).stream().map(it -> new AktørId((String)it)).collect(Collectors.toSet()));
+        aktørIdForSaksnummerSøk.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_AKTØR_ID).stream().map(it -> new AktørId((String) it)).collect(Collectors.toSet()));
 
         saksnumre.addAll(pipRepository.saksnumreForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
         saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(StandardAbacAttributtType.JOURNALPOST_ID)));
