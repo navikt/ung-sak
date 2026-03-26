@@ -12,14 +12,14 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.*;
 
-@Entity(name = "AktivitetspengerBeregningsgrunnlag")
-@Table(name = "AVP_GR_BEREGNINGSGRUNNLAG")
+@Entity(name = "AktivitetspengerGrunnlag")
+@Table(name = "GR_AVP")
 @DynamicInsert
 @DynamicUpdate
-public class AktivitetspengerBeregningsgrunnlag {
+public class AktivitetspengerGrunnlag {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AVP_GR_BEREGNINGSGRUNNLAG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_AVP")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false)
@@ -34,7 +34,7 @@ public class AktivitetspengerBeregningsgrunnlag {
     @ManyToMany
     @JoinTable(
         name = "BEREGNINGSGRUNNLAG_KOBLING",
-        joinColumns = @JoinColumn(name = "avp_gr_beregningsgrunnlag_id"),
+        joinColumns = @JoinColumn(name = "gr_avp_id"),
         inverseJoinColumns = @JoinColumn(name = "beregningsgrunnlag_id")
     )
     private List<Beregningsgrunnlag> beregningsgrunnlag = new ArrayList<>();
@@ -46,7 +46,7 @@ public class AktivitetspengerBeregningsgrunnlag {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public AktivitetspengerBeregningsgrunnlag() {
+    public AktivitetspengerGrunnlag() {
     }
 
     public AktivitetspengerSatsPerioder getSatsperioder() {
@@ -59,7 +59,7 @@ public class AktivitetspengerBeregningsgrunnlag {
 
     public LocalDateTimeline<AktivitetspengerSatsGrunnlag> hentSatsTidslinje() {
         if (satsperioder == null) {
-            throw new IllegalStateException("Fant ikke satsperioder på AktivitetspengerBeregningsgrunnlag");
+            throw new IllegalStateException("Fant ikke satsperioder på AktivitetspengerGrunnlag");
         }
         var segmenter = satsperioder.getPerioder().stream().map(p ->
             new LocalDateSegment<>(p.getPeriode().getFomDato(), p.getPeriode().getTomDato(), p.satsGrunnlag())
@@ -69,7 +69,7 @@ public class AktivitetspengerBeregningsgrunnlag {
 
     public LocalDateTimeline<Beregningsgrunnlag> hentBeregningsgrunnlagTidslinje() {
         if (beregningsgrunnlag.isEmpty()) {
-            throw new IllegalStateException("Fant ikke beregningsgrunnlag på AktivitetspengerBeregningsgrunnlag");
+            throw new IllegalStateException("Fant ikke beregningsgrunnlag på AktivitetspengerGrunnlag");
         }
         var segmenter = beregningsgrunnlag.stream()
             .map(bg -> new LocalDateSegment<>(bg.getSkjæringstidspunkt(), null, bg))

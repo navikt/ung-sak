@@ -26,7 +26,7 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
 
     private BasisPersonopplysningTjeneste personopplysningTjeneste;
     private BehandlingRepository behandlingRepository;
-    private AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository;
+    private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private VilkårTjeneste vilkårTjeneste;
     private BeregningStegTjeneste beregningStegTjeneste;
 
@@ -36,12 +36,12 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
     @Inject
     public AktivitetspengerBeregningSteg(BasisPersonopplysningTjeneste personopplysningTjeneste,
                                          BehandlingRepository behandlingRepository,
-                                         AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository,
+                                         AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
                                          VilkårTjeneste vilkårTjeneste,
                                          BeregningStegTjeneste beregningStegTjeneste) {
         this.personopplysningTjeneste = personopplysningTjeneste;
         this.behandlingRepository = behandlingRepository;
-        this.aktivitetspengerBeregningsgrunnlagRepository = aktivitetspengerBeregningsgrunnlagRepository;
+        this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.vilkårTjeneste = vilkårTjeneste;
         this.beregningStegTjeneste = beregningStegTjeneste;
     }
@@ -54,7 +54,7 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
 
         var oppfyltVilkårTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.OPPFYLT)).mapValue(it -> true);
         if (oppfyltVilkårTidslinje.isEmpty()) {
-            aktivitetspengerBeregningsgrunnlagRepository.deaktiverGrunnlag(kontekst.getBehandlingId());
+            aktivitetspengerGrunnlagRepository.deaktiverGrunnlag(kontekst.getBehandlingId());
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
@@ -62,21 +62,15 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
 
         var skjæringstidspunkt = oppfyltVilkårTidslinje.getMinLocalDate();
         var beregningsgrunnlag = beregningStegTjeneste.utførBesteberegning(behandling.getId(), skjæringstidspunkt);
-        aktivitetspengerBeregningsgrunnlagRepository.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag);
+        aktivitetspengerGrunnlagRepository.lagreBeregningsgrunnlag(behandling.getId(), beregningsgrunnlag);
 
         var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
         var satsTidslinje = AktivitetspengerBeregnSats.beregnSats(beregnDagsatsInput);
-        aktivitetspengerBeregningsgrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
+        aktivitetspengerGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    /**
-         * Validerer at alle perioder i tidslinjen er vurdert.
-         * Kaster IllegalStateException hvis noen periode ikke er vurdert.
-         *
-         * @param samletResultat Tidslinje med vurderte vilkår
-         */
     private static void validerKunVurdertePerioder(LocalDateTimeline<VilkårUtfallSamlet> samletResultat) {
         var ikkeVurdertTidslinje = samletResultat.filterValue(v -> v.getSamletUtfall().equals(Utfall.IKKE_VURDERT)).mapValue(it -> true);
 
@@ -99,7 +93,7 @@ public class AktivitetspengerBeregningSteg implements BehandlingSteg {
 
     private boolean harHøySatsIOriginalBehandling(Behandling behandling) {
         return behandling.getOriginalBehandlingId()
-            .flatMap(aktivitetspengerBeregningsgrunnlagRepository::hentGrunnlag)
+            .flatMap(aktivitetspengerGrunnlagRepository::hentGrunnlag)
             .map(grunnlag -> grunnlag.getSatsperioder() != null &&
                 grunnlag.getSatsperioder().harMinstEnPeriodeMedHøySats())
             .orElse(false);

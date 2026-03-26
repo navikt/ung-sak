@@ -30,13 +30,28 @@ create table AVP_SATS_PERIODE
     endret_tid               timestamp(3) without time zone
 );
 
+COMMENT ON COLUMN AVP_SATS_PERIODE.avp_sats_perioder_id IS 'Referanse til samling av satsperioder';
+COMMENT ON COLUMN AVP_SATS_PERIODE.dagsats IS 'Beregnet dagsats for perioden';
+COMMENT ON COLUMN AVP_SATS_PERIODE.periode IS 'Perioden satsen gjelder for';
+COMMENT ON COLUMN AVP_SATS_PERIODE.grunnbeløp IS 'Grunnbeløpet (G) benyttet i beregningen';
+COMMENT ON COLUMN AVP_SATS_PERIODE.grunnbeløp_faktor IS 'Faktor for beregning av sats basert på grunnbeløp';
+COMMENT ON COLUMN AVP_SATS_PERIODE.sats_type IS 'Satstype (høy/lav) som benyttes';
+COMMENT ON COLUMN AVP_SATS_PERIODE.hjemmel IS 'Lovhjemmel for benyttet';
+COMMENT ON COLUMN AVP_SATS_PERIODE.antall_barn IS 'Antall barn som gir rett til barnetillegg';
+COMMENT ON COLUMN AVP_SATS_PERIODE.dagsats_barnetillegg IS 'Dagsats for barnetillegg';
+COMMENT ON COLUMN AVP_SATS_PERIODE.minsteytelse IS 'Den garanterte årlige grunnytelsen som brukeren har rett til';
+
 alter table AVP_SATS_PERIODE
     add constraint fk_avp_sats_periode_perioder foreign key (avp_sats_perioder_id) references AVP_SATS_PERIODER (id);
 
 CREATE SEQUENCE IF NOT EXISTS SEQ_AVP_SATS_PERIODE START WITH 1000049 INCREMENT BY 50 MINVALUE 1000000 NO MAXVALUE CACHE 1;
 
-alter table AVP_GR_BEREGNINGSGRUNNLAG
+ALTER TABLE AVP_GR_BEREGNINGSGRUNNLAG RENAME TO GR_AVP;
+ALTER SEQUENCE SEQ_AVP_GR_BEREGNINGSGRUNNLAG RENAME TO SEQ_GR_AVP;
+ALTER TABLE BEREGNINGSGRUNNLAG_KOBLING RENAME COLUMN avp_gr_beregningsgrunnlag_id TO gr_avp_id;
+
+alter table GR_AVP
     add column avp_sats_perioder_id bigint;
 
-alter table AVP_GR_BEREGNINGSGRUNNLAG
+alter table GR_AVP
     add constraint fk_avp_gr_sats_perioder foreign key (avp_sats_perioder_id) references AVP_SATS_PERIODER (id);

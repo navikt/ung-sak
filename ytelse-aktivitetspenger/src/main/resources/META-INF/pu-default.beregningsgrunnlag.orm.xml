@@ -5,12 +5,12 @@
                  version="3.2">
 
     <sequence-generator name="SEQ_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_BEREGNINGSGRUNNLAG"/>
-    <sequence-generator name="SEQ_AVP_GR_BEREGNINGSGRUNNLAG" allocation-size="50" sequence-name="SEQ_AVP_GR_BEREGNINGSGRUNNLAG"/>
+    <sequence-generator name="SEQ_GR_AVP" allocation-size="50" sequence-name="SEQ_GR_AVP"/>
     <sequence-generator name="SEQ_AVP_SATS_PERIODER" allocation-size="50" sequence-name="SEQ_AVP_SATS_PERIODER"/>
     <sequence-generator name="SEQ_AVP_SATS_PERIODE" allocation-size="50" sequence-name="SEQ_AVP_SATS_PERIODE"/>
 
     <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag"/>
-    <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlag"/>
+    <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlag"/>
     <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPerioder"/>
     <entity class="no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode"/>
 

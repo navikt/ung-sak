@@ -25,8 +25,8 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlag;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.*;
 
 import java.math.BigDecimal;
@@ -50,7 +50,7 @@ public class AktivitetspengerRestTjeneste {
     public static final String BEREGNINGSGRUNNLAG_PATH = AKTIVITETSPENGER_BASE_PATH + "/beregningsgrunnlag";
 
     private BehandlingRepository behandlingRepository;
-    private AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository;
+    private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private BeregningTjeneste beregningTjeneste;
 
     public AktivitetspengerRestTjeneste() {
@@ -59,10 +59,10 @@ public class AktivitetspengerRestTjeneste {
 
     @Inject
     public AktivitetspengerRestTjeneste(BehandlingRepository behandlingRepository,
-                                        AktivitetspengerBeregningsgrunnlagRepository aktivitetspengerBeregningsgrunnlagRepository,
+                                        AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
                                         BeregningTjeneste beregningTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.aktivitetspengerBeregningsgrunnlagRepository = aktivitetspengerBeregningsgrunnlagRepository;
+        this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.beregningTjeneste = beregningTjeneste;
     }
 
@@ -75,8 +75,8 @@ public class AktivitetspengerRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var inntektsposter = beregningTjeneste.hentSigrunInntektsposter(behandling.getId());
 
-        return aktivitetspengerBeregningsgrunnlagRepository.hentGrunnlag(behandling.getId())
-            .flatMap(AktivitetspengerBeregningsgrunnlag::getSenesteBeregningsgrunnlag)
+        return aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
+            .flatMap(AktivitetspengerGrunnlag::getSenesteBeregningsgrunnlag)
             .map(grunnlag -> mapTilBeregningsgrunnlagDto(grunnlag, inntektsposter))
             .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: " + behandling.getId()));
     }

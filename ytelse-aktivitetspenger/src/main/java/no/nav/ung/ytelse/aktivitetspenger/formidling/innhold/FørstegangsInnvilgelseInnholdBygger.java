@@ -11,7 +11,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerBeregningsgrunnlagRepository;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.InnvilgelseDto;
 import org.slf4j.Logger;
@@ -21,10 +21,10 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FørstegangsInnvilgelseInnholdBygger.class);
 
-    private final AktivitetspengerBeregningsgrunnlagRepository beregningsgrunnlagRepository;
+    private final AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository;
 
     @Inject
-    public FørstegangsInnvilgelseInnholdBygger(AktivitetspengerBeregningsgrunnlagRepository beregningsgrunnlagRepository) {
+    public FørstegangsInnvilgelseInnholdBygger(AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository) {
         this.beregningsgrunnlagRepository = beregningsgrunnlagRepository;
     }
 
