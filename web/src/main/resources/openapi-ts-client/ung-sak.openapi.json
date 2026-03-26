@@ -4916,7 +4916,7 @@
       },
       "ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse" : {
         "properties" : {
-          "medlemskap" : {
+          "medlemskapFraBruker" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto"
             },
