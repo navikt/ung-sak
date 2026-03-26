@@ -20,8 +20,6 @@ public class UngdomsytelseRegisterinnhentingTaskUtleder implements UtvidetRegist
 
     private Instance<EndringStartpunktUtleder> startpunktUtledere;
 
-    UngdomsytelseRegisterinnhentingTaskUtleder() {
-    }
 
     @Inject
     public UngdomsytelseRegisterinnhentingTaskUtleder(Instance<EndringStartpunktUtleder> startpunktUtledere) {
