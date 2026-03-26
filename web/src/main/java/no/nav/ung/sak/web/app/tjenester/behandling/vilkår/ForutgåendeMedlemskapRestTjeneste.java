@@ -12,29 +12,30 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.TrygdeavtaleLandOppslag;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
@@ -72,48 +73,73 @@ public class ForutgåendeMedlemskapRestTjeneste {
     @CacheControl()
     public ForutgåendeMedlemskapResponse medlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+
+        var medlemskap = forutgåendeMedlemskapTjeneste.utledForutgåendeBosteder(behandling.getFagsakId(), behandling.getId())
+            .map(this::mapTilDto)
+            .orElse(List.of());
+
         var vilkår = vilkårResultatRepository.hent(behandling.getId())
             .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
 
-        var medlemskap = forutgåendeMedlemskapTjeneste.utledForutgåendeBosteder(behandling.getFagsakId(), behandling.getId())
-            .map(bosteder -> mapTilResponse(bosteder, vilkår.orElse(null)))
-            .orElse(List.of());
+        var utfall = finnUtfall(vilkår);
 
-        return new ForutgåendeMedlemskapResponse(medlemskap);
+        MedlemskapAvslagsÅrsakType avslagsårsak = null;
+        if (utfall == Utfall.IKKE_OPPFYLT) {
+            avslagsårsak = finnAvslagsårsak(vilkår);
+        }
+
+        return new ForutgåendeMedlemskapResponse(medlemskap, utfall, avslagsårsak);
     }
 
-    private List<MedlemskapsPeriodeDto> mapTilResponse(Bosteder bosteder, no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår vilkår) {
-        var bostedTidslinje = new LocalDateTimeline<>(bosteder.getPerioder().entrySet().stream()
-            .map(entry -> new LocalDateSegment<>(entry.getKey().getFraOgMed(), entry.getKey().getTilOgMed(), entry.getValue()))
-            .toList());
-
-        var vilkårTidslinje = vilkår == null ? LocalDateTimeline.<VilkårPeriode>empty() :
-            new LocalDateTimeline<>(vilkår.getPerioder().stream()
-                .map(periode -> new LocalDateSegment<>(periode.getFom(), periode.getTom(), periode))
-                .toList());
-
-        return bostedTidslinje.combine(vilkårTidslinje, combinator(), LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .toSegments()
+    private static MedlemskapAvslagsÅrsakType finnAvslagsårsak(Optional<Vilkår> vilkår) {
+        var avslagsårsaker = vilkår
+            .map(Vilkår::getPerioder)
             .stream()
-            .map(LocalDateSegment::getValue)
-            .toList();
+            .flatMap(List::stream)
+            .map(VilkårPeriode::getAvslagsårsak)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        if (avslagsårsaker.size() > 1) {
+            throw new IllegalStateException("Kan ikke ha flere enn en avslagsårsak for medlemskap");
+        }
+        Avslagsårsak avslagsårsak = avslagsårsaker.stream().findFirst().orElseThrow();
+
+        return switch (avslagsårsak) {
+            case SØKER_ER_IKKE_MEDLEM -> MedlemskapAvslagsÅrsakType.SØKER_IKKE_MEDLEM;
+            default -> throw new IllegalStateException("Unexpected value: " + avslagsårsak);
+        };
+
     }
 
-    private static LocalDateSegmentCombinator<Bosteder.BostedPeriodeInfo, VilkårPeriode, MedlemskapsPeriodeDto> combinator() {
-        return (di, bostedSegment, vilkårSegment) -> {
-            var bosted = bostedSegment.getValue();
-            var vilkårPeriode = vilkårSegment != null ? vilkårSegment.getValue() : null;
+    private static Utfall finnUtfall(Optional<Vilkår> vilkår) {
+        Set<Utfall> alleUtfall = vilkår
+            .map(Vilkår::getPerioder)
+            .stream()
+            .flatMap(List::stream)
+            .map(VilkårPeriode::getGjeldendeUtfall)
+            .collect(Collectors.toSet());
+
+        if (alleUtfall.size() > 1) {
+            throw new IllegalStateException("Kan ikke ha periodiserte utfall på medlemskap");
+        }
+
+        return alleUtfall.stream().findFirst().orElse(Utfall.IKKE_VURDERT);
+    }
+
+    private List<MedlemskapsPeriodeDto> mapTilDto(Bosteder bosteder) {
+        return bosteder.getPerioder().entrySet().stream().map(it ->  {
+            var di = it.getKey();
+            var bosted = it.getValue();
             var landkode = bosted.getLand().getLandkode();
 
-            return new LocalDateSegment<>(di, new MedlemskapsPeriodeDto(
-                new no.nav.ung.sak.typer.Periode(di.getFomDato(), di.getTomDato()),
+            return new MedlemskapsPeriodeDto(
+                new Periode(di.getFraOgMed(), di.getTilOgMed()),
                 mapLandTilNorskNavn(landkode),
                 landkode,
-                TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(bosted.getLand(), di.getFomDato()),
-                vilkårPeriode != null ? vilkårPeriode.getGjeldendeUtfall() : null,
-                mapAvslagsårsak(vilkårPeriode)
-            ));
-        };
+                TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(bosted.getLand(), di.getFraOgMed())
+            );
+            }
+        ).toList();
     }
 
     private static Map<String, String> lagLandkodeTilNorskNavn() {
@@ -130,16 +156,6 @@ public class ForutgåendeMedlemskapRestTjeneste {
 
     private static String mapLandTilNorskNavn(String landkodeAlpha3) {
         return LANDKODE_TIL_NORSK_NAVN.getOrDefault(landkodeAlpha3, landkodeAlpha3);
-    }
-
-    private static MedlemskapAvslagsÅrsakType mapAvslagsårsak(VilkårPeriode vilkårPeriode) {
-        if (vilkårPeriode == null || vilkårPeriode.getAvslagsårsak() == null || vilkårPeriode.getAvslagsårsak() == Avslagsårsak.UDEFINERT) {
-            return null;
-        }
-        return switch (vilkårPeriode.getAvslagsårsak()) {
-            case SØKER_ER_IKKE_MEDLEM -> MedlemskapAvslagsÅrsakType.SØKER_IKKE_MEDLEM;
-            default -> null;
-        };
     }
 
 }
