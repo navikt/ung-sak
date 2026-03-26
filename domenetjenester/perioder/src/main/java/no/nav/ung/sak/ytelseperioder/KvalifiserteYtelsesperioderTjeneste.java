@@ -8,7 +8,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 /**
  * Tjeneste for å definere hvilke perioder som kvalifiserer for ytelse. Dette vil typisk vere perioder der bruker er under aktiv oppfølging.
  * Periodene brukes til å utlede hvilke perioder som vi kjører inntektskontroll for og hvilke perioder som kan kvalifisere for ytelse gitt at andre vilkår er oppfylt.
- * Implementasjoner må annoteres med @FagsakYtelseType
+ * Implementasjoner må annoteres med @FagsakYtelseTypeRef
  */
 public interface KvalifiserteYtelsesperioderTjeneste {
 
