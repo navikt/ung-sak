@@ -1,10 +1,14 @@
 package no.nav.ung.sak.etterlysning.kontroll;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
@@ -13,9 +17,6 @@ import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 
@@ -32,7 +33,8 @@ public class InntektkontrollOppgaveOppretter {
     private final ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
     @Inject
-    public InntektkontrollOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste, RapportertInntektMapper rapportertInntektMapper, Instance<KvalifiserteYtelsesperioderTjeneste> periodeTjenester, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+    public InntektkontrollOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste, RapportertInntektMapper rapportertInntektMapper,
+                                           @Any Instance<KvalifiserteYtelsesperioderTjeneste> periodeTjenester, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
         this.delegeringTjeneste = delegeringTjeneste;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.periodeTjenester = periodeTjenester;

@@ -4,13 +4,13 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -68,7 +68,7 @@ class UngBeregnYtelseStegTest {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
+            new UnitTestLookupInstanceImpl<>(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository)),
             behandlingRepository);
         beregnYtelseSteg = new UngBeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,

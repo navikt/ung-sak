@@ -1,6 +1,7 @@
 package no.nav.ung.sak.ytelseperioder;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -20,7 +21,7 @@ public class MånedsvisTidslinjeUtleder {
 
 
     @Inject
-    public MånedsvisTidslinjeUtleder(Instance<KvalifiserteYtelsesperioderTjeneste> periodeTjenester, BehandlingRepository behandlingRepository) {
+    public MånedsvisTidslinjeUtleder(@Any Instance<KvalifiserteYtelsesperioderTjeneste> periodeTjenester, BehandlingRepository behandlingRepository) {
         this.periodeTjenester = periodeTjenester;
         this.behandlingRepository = behandlingRepository;
     }

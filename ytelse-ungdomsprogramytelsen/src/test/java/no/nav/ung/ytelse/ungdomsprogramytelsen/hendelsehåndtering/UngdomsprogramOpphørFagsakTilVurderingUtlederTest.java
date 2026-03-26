@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
@@ -57,7 +56,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakRepository = new FagsakRepository(entityManager);
         this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
             new BehandlingRepository(entityManager),
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository)
         );
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)

@@ -6,6 +6,9 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
@@ -47,23 +50,42 @@ public class ManglendeKontrollperioderTjeneste {
      * Lager prosesstaskdata for revurdering grunnet manglende kontroll av inntekt
      * Dette kan skje dersom programperioden er flyttet langt nok tilbake i tid eller at første søknad er sendt inn etter at rapporteringsfristen for andre måned er passert.
      *
-     * @param behandlingId BehandlingId
+     * @param behandling BehandlingId
      * @return
      */
-    public NavigableSet<DatoIntervallEntitet> finnPerioderForManglendeKontroll(Long behandlingId) {
-        final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
+    public NavigableSet<DatoIntervallEntitet> finnPerioderForManglendeKontroll(Behandling behandling) {
+        final var månedsvisYtelsestidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandling.getId());
+        final var intiellTidslinje = månedsvisTidslinjeUtleder.finnInitielleMånedsvisPeriodisertePerioder(behandling.getId());
         final var påkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(månedsvisYtelsestidslinje);
-        final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
-        final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandlingId);
-        var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandlingId);
-        final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
-        if (manglendeKontrollTidslinje.isEmpty()) {
-            return new TreeSet<>();
-        }
-        return splittPåMåneder(manglendeKontrollTidslinje).stream()
-            .map(DatoIntervallEntitet::fra)
-            .collect(Collectors.toCollection(TreeSet::new));
+        final var initieltPåkrevdKontrollTidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(intiellTidslinje);
 
+        final var endretPåkrevdTidslinje = påkrevdKontrollTidslinje.disjoint(initieltPåkrevdKontrollTidslinje);
+        final var passertRapporteringsfristTidslinje = finnPerioderMedPassertRapporteringsfrist();
+
+         var endretPåkrevdTidslinjeMedPassertFrist = endretPåkrevdTidslinje.intersection(passertRapporteringsfristTidslinje);
+
+         // For førstegangssøknader og søknader om ny periode skal vi alltid sjekke om det er perioder som mangler kontroll
+        // For andre behandlinger krever vi at det skal vere endringer i relevante kontrollperioder med passert frist i løpet av behandlingen
+        // I praksis vil dette bety at startdato har endret seg til å ligge en måned tidligere
+         if (erFørstegangssøknadEllerSøknadOmNyPeriode(behandling) || !endretPåkrevdTidslinjeMedPassertFrist.isEmpty()) {
+             final var markertForKontrollTidslinje = finnPerioderMarkertForKontroll(behandling.getId());
+             var utførtKontrollTidslinje = finnPerioderSomErKontrollertITidligereBehandlinger(behandling.getId());
+             final var manglendeKontrollTidslinje = påkrevdKontrollTidslinje.disjoint(utførtKontrollTidslinje).disjoint(markertForKontrollTidslinje).intersection(passertRapporteringsfristTidslinje);
+             if (manglendeKontrollTidslinje.isEmpty()) {
+                 return new TreeSet<>();
+             }
+             return splittPåMåneder(manglendeKontrollTidslinje).stream()
+                 .map(DatoIntervallEntitet::fra)
+                 .collect(Collectors.toCollection(TreeSet::new));
+         } else {
+             return new TreeSet<>();
+         }
+    }
+
+
+    private static boolean erFørstegangssøknadEllerSøknadOmNyPeriode(Behandling vedtattBehandling) {
+        return vedtattBehandling.getType() == BehandlingType.FØRSTEGANGSSØKNAD ||
+            vedtattBehandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.NY_SØKT_PERIODE);
     }
 
 

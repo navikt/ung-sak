@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinntektkontroll;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -58,8 +59,8 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
 
     @BeforeEach
     void setUp() {
-        final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository);
-        ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
+        final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository);
+        ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<>(ungdomsprogramPeriodeTjeneste), behandlingRepository);
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
     }
 
@@ -74,7 +75,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
     }
@@ -90,7 +91,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
     }
@@ -107,7 +108,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isFalse();
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(3).withDayOfMonth(1), LocalDate.now().minusMonths(3).with(TemporalAdjusters.lastDayOfMonth()));
@@ -125,7 +126,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
     }
@@ -146,7 +147,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.size()).isEqualTo(1);
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1).withDayOfMonth(1), LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
@@ -165,7 +166,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.size()).isEqualTo(1);
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1).withDayOfMonth(1), LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
@@ -189,7 +190,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
             KontrollertInntektPeriode.ny().medPeriode(sisteMåned).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.BRUKER).medErManueltVurdert(false).build()
             ));
 
-        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
     }

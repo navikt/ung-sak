@@ -22,4 +22,5 @@ public interface KvalifiserteYtelsesperioderTjeneste {
     LocalDateTimeline<Boolean> finnPeriodeTidslinje(Long behandlingId);
 
     LocalDateTimeline<Boolean> finnInitiellPeriodeTidslinje(Long behandlingId);
+
 }

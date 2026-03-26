@@ -28,6 +28,10 @@ public class UngdomsytelseRegisterinnhentingTaskUtleder implements UtvidetRegist
         this.startpunktUtledere = startpunktUtledere;
     }
 
+    public UngdomsytelseRegisterinnhentingTaskUtleder() {
+        // CDI
+    }
+
     @Override
     public List<String> utledRegisterinnhentingTaskTyper(Behandling behandling) {
         if (skalInnhenteProgramperioder(behandling)) {

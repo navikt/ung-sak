@@ -3,10 +3,10 @@ package no.nav.ung.sak.web.app.ungdomsytelse;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelsePeriode;
@@ -53,9 +53,9 @@ class UngdomsytelseRestTjenesteTest {
         ungdomsytelseRestTjeneste = new UngdomsytelseRestTjeneste(
             behandlingRepository,
             ungdomsytelseGrunnlagRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             tilkjentYtelseRepository,
-            new MånedsvisTidslinjeUtleder(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)), behandlingRepository)
+            new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<>(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository)), behandlingRepository)
         );
 
 

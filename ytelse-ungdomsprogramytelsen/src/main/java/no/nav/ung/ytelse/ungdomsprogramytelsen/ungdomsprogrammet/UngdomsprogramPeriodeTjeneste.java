@@ -1,7 +1,7 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -11,14 +11,13 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
-import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.VurderAntallDagerResultat;
@@ -28,20 +27,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public class UngdomsprogramPeriodeTjeneste implements KvalifiserteYtelsesperioderTjeneste {
 
-    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private final UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private static final KantIKantVurderer KANT_I_KANT_VURDERER = new DefaultKantIKantVurderer();
 
     @Inject
-    public UngdomsprogramPeriodeTjeneste(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
+    public UngdomsprogramPeriodeTjeneste(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
     }
 
+    public UngdomsprogramPeriodeTjeneste() {
+        // CDI
+    }
 
     @Override
     public LocalDateTimeline<Boolean> finnPeriodeTidslinje(Long behandlingId) {
