@@ -78,7 +78,7 @@ public class Beregningsgrunnlag {
     }
 
     public BigDecimal getDagsats() {
-        return beregnetRedusertPrAar.divide(BigDecimal.valueOf(260), 10, RoundingMode.HALF_EVEN);
+        return beregnetRedusertPrAar.divide(BigDecimal.valueOf(260), 10, RoundingMode.HALF_UP);
     }
 
     public BesteBeregningResultatType utledBesteBeregningResultatType() {
