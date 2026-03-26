@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface UtvidetRegisterinnhentingTaskUtleder {
 
-    public static Optional<UtvidetRegisterinnhentingTaskUtleder> finnTjeneste(FagsakYtelseType ytelseType) {
+    static Optional<UtvidetRegisterinnhentingTaskUtleder> finnTjeneste(FagsakYtelseType ytelseType) {
         return FagsakYtelseTypeRef.Lookup.find(UtvidetRegisterinnhentingTaskUtleder.class, ytelseType);
     }
 

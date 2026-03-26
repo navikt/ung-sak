@@ -338,17 +338,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var tasks = new ArrayList<String>();
         // Rekkefølgen her viktig
         // Innhenting av ungdomsprogramperioder må komme før annen innhenting siden denne påvirker opplysningsperioden
-
         UtvidetRegisterinnhentingTaskUtleder.finnTjeneste(behandling.getFagsakYtelseType())
             .stream()
             .map(u -> u.utledRegisterinnhentingTaskTyper(behandling))
             .flatMap(Collection::stream)
             .forEach(tasks::add);
-
-        if (skalInnhenteProgramperioder(behandling)) {
-            EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
-                .ifPresent(u -> tasks.add(InnhentUngdomsprogramperioderTask.TASKTYPE));
-        }
 
         if (skalInnhentePersonopplysningerPåNytt(behandling)) {
             EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())

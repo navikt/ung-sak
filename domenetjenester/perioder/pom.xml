@@ -40,6 +40,10 @@
             <artifactId>behandlingslager-testutilities</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandling</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
