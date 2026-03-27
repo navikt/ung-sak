@@ -31,7 +31,7 @@ public class BehandlingAnsvarligRepository {
         return hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL);
     }
 
-    private Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
+    public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(behandlingDel, "behandlingDel");
         List<BehandlingAnsvarlig> resultat = entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingDel = :behandlingDel AND ba.behandlingId = :behandlingId", BehandlingAnsvarlig.class)
