@@ -17,6 +17,8 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.perioder.UngdomsytelseKvalifiserteYtelsesperioderTjeneste;
+import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,7 +57,7 @@ class UngdomsytelseRestTjenesteTest {
             ungdomsytelseGrunnlagRepository,
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             tilkjentYtelseRepository,
-            new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<>(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository)), behandlingRepository)
+            new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<KvalifiserteYtelsesperioderTjeneste>(new UngdomsytelseKvalifiserteYtelsesperioderTjeneste(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), ungdomsytelseGrunnlagRepository)), behandlingRepository)
         );
 
 
