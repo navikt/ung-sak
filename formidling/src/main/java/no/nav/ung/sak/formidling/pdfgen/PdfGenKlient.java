@@ -62,8 +62,8 @@ public class PdfGenKlient {
         URL resource = getClass().getClassLoader().getResource(classpathSti);
         if (resource != null) {
             try {
-                log.info("Fant ikke pdfgen-ressurser på {}. Prøver classpath. " +
-                    "Bør bare skje for test via IDE.", classpathSti);
+                log.info("Fant ikke pdfgen-ressurser på filsystemet på {}. Fant ressurs på classpath ({}). " +
+                    "Bør bare skje for test via IDE.", path.toAbsolutePath(), resource);
                 return Path.of(resource.toURI());
             } catch (URISyntaxException e) {
                 throw new RuntimeException(e);
@@ -77,7 +77,10 @@ public class PdfGenKlient {
             return targetPath;
         }
 
-        throw new IllegalArgumentException("Fant ikke pdfgen ressurser på filsystem eller classpath");
+        throw new IllegalArgumentException(
+            "Fant ikke pdfgen-ressurser. Forsøkte relativePath='%s', classpathSti='%s', targetPath='%s'"
+                .formatted(relativePath, classpathSti, targetPath)
+        );
 
     }
 
