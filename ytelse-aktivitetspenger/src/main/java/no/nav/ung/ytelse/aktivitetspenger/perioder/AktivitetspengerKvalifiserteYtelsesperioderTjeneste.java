@@ -16,7 +16,7 @@ public class AktivitetspengerKvalifiserteYtelsesperioderTjeneste implements Kval
     private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
     @Inject
-     public AktivitetspengerKvalifiserteYtelsesperioderTjeneste(AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste) {
+     public AktivitetspengerKvalifiserteYtelsesperioderTjeneste(@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste) {
         this.aktivitetspengerVilkårsPerioderTilVurderingTjeneste = aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
     }
 
