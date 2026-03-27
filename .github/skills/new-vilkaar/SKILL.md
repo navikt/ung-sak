@@ -42,8 +42,7 @@ Fil: `kodeverk/src/main/java/no/nav/ung/kodeverk/vilkår/Avslagsårsak.java`
 Legg til ny(e) enum-konstant(er):
 ```java
 AVSLAGSÅRSAK_NAVN("KODE", "Beskrivelse",
-    Map.of(FagsakYtelseType.AKTIVITETSPENGER, "Lovreferanse"),
-    "VILKAR_TYPE"),
+    Map.of(FagsakYtelseType.AKTIVITETSPENGER, "Lovreferanse")),
 ```
 
 ### 2. VilkårType
@@ -79,7 +78,7 @@ private static final List<VilkårType> YTELSE_VILKÅR = asList(
 
 Steget som ble opprettet i `new-aksjonspunkt`-skillen må utvides til å vurdere vilkåret:
 
-- Injiser `VilkårResultatRepository` og `Instance<VilkårsPerioderTilVurderingTjeneste>`
+- Injiser `VilkårResultatRepository` og `@Any Instance<VilkårsPerioderTilVurderingTjeneste>` (bruk `@Any` siden implementasjonene er kvalifisert med egne qualifiers)
 - I `utførSteg()`: sjekk om vilkåret allerede er vurdert (ikke `IKKE_VURDERT`), og hopp over i så fall
 - Ved automatisk vurdering: oppdater vilkåret via `VilkårResultatBuilder`
 
@@ -96,11 +95,15 @@ Oppdatereren som ble opprettet i `new-aksjonspunkt`-skillen må utvides til å o
 var resultatBuilder = param.getVilkårResultatBuilder();
 var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.MITT_VILKÅR);
 
-var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.MITT_VILKÅR);
+var vilkårsPerioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjeneste, VilkårType.MITT_VILKÅR);
+var perioderTilVurdering = vilkårsPerioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.MITT_VILKÅR);
+
+var utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+var avslagsårsak = dto.getErVilkarOk() ? null : dto.getAvslagsårsak();
 
 perioderTilVurdering.stream()
     .map(periode -> vilkårBuilder.hentBuilderFor(periode)
-        .medUtfall(dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT)
+        .medUtfall(utfall)
         .medAvslagsårsak(avslagsårsak)
         .medRegelInput("..."))
     .forEach(vilkårBuilder::leggTil);

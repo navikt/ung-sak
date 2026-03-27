@@ -249,7 +249,7 @@ var scenario = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
 
 var behandling = scenario.getBehandling();
 var kontekst = new BehandlingskontrollKontekst(
-    behandling.getFagsakId(), behandling.getId(),
+    behandling.getFagsakId(), behandling.getAktørId(),
     repositoryProvider.getBehandlingLåsRepository().taLås(behandling.getId()));
 
 var resultat = steg.utførSteg(kontekst);
