@@ -5520,8 +5520,11 @@
           },
           "taskTyperSomIgnoreres" : {
             "items" : {
+              "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
               "type" : "string"
             },
+            "maxItems" : 100,
+            "minItems" : 0,
             "type" : "array"
           }
         },
@@ -5534,8 +5537,11 @@
           },
           "taskTyperSomEndres" : {
             "items" : {
+              "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
               "type" : "string"
             },
+            "maxItems" : 100,
+            "minItems" : 0,
             "type" : "array"
           }
         },
@@ -5545,12 +5551,15 @@
         "properties" : {
           "nyMinimumPrioritet" : {
             "format" : "int32",
+            "maximum" : 1000,
+            "minimum" : 0,
             "type" : "integer"
           },
           "saksnummer" : {
             "type" : "string"
           }
         },
+        "required" : [ "nyMinimumPrioritet" ],
         "type" : "object"
       }
     }
