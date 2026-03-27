@@ -26,7 +26,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
@@ -58,7 +58,7 @@ public class EtterlysningRestTjeneste {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private MidlertidigOppgaveDelegeringTjeneste oppgaveDelegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveDelegeringTjeneste;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
@@ -69,7 +69,7 @@ public class EtterlysningRestTjeneste {
                                     BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository,
                                     BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
-                                    MidlertidigOppgaveDelegeringTjeneste oppgaveDelegeringTjeneste) {
+                                    UngBrukerdialogOppgaveKlient oppgaveDelegeringTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;

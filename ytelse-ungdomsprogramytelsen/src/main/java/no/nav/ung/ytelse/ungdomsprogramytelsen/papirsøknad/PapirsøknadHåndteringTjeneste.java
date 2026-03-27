@@ -26,7 +26,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -59,7 +59,7 @@ public class PapirsøknadHåndteringTjeneste {
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private TilJournalføringTjeneste journalføringTjeneste;
-    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient delegeringTjeneste;
     private SøknadMottakTjeneste ungdomsytelseSøknadMottaker;
     private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
 
@@ -80,7 +80,7 @@ public class PapirsøknadHåndteringTjeneste {
         TilJournalføringTjeneste journalføringTjeneste,
         @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) Instance<SøknadMottakTjeneste> ungdomsytelseSøknadMottaker,
         UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient,
-        MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste
+        UngBrukerdialogOppgaveKlient delegeringTjeneste
     ) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlient = dokArkivKlient;

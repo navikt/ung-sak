@@ -13,7 +13,7 @@ import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
@@ -49,7 +49,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     public static final String PERIODE_TOM = "tom";
     public static final String OPPGAVE_REF = "oppgave_ref";
 
-    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient delegeringTjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
@@ -60,7 +60,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     }
 
     @Inject
-    public OpprettOppgaveForInntektsrapporteringTask(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+    public OpprettOppgaveForInntektsrapporteringTask(UngBrukerdialogOppgaveKlient delegeringTjeneste,
                                                      FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,

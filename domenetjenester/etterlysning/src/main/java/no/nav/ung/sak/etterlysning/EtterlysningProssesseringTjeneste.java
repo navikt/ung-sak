@@ -18,7 +18,7 @@ public class EtterlysningProssesseringTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private OpprettOppgaveTjeneste opprettOppgaveTjeneste;
-    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient delegeringTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public EtterlysningProssesseringTjeneste() {
@@ -28,7 +28,7 @@ public class EtterlysningProssesseringTjeneste {
     @Inject
     public EtterlysningProssesseringTjeneste(EtterlysningRepository etterlysningRepository,
                                              OpprettOppgaveTjeneste opprettOppgaveTjeneste,
-                                             MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+                                             UngBrukerdialogOppgaveKlient delegeringTjeneste,
                                              ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.opprettOppgaveTjeneste = opprettOppgaveTjeneste;

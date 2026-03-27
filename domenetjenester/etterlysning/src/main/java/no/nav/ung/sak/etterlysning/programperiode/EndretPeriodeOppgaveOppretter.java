@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
@@ -34,12 +34,12 @@ public class EndretPeriodeOppgaveOppretter {
 
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(EndretPeriodeOppgaveOppretter.class);
 
-    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private final UngBrukerdialogOppgaveKlient delegeringTjeneste;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final EtterlysningRepository etterlysningRepository;
 
     @Inject
-    public EndretPeriodeOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+    public EndretPeriodeOppgaveOppretter(UngBrukerdialogOppgaveKlient delegeringTjeneste,
                                          UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                          EtterlysningRepository etterlysningRepository) {
         this.delegeringTjeneste = delegeringTjeneste;

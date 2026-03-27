@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
@@ -24,12 +24,12 @@ import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_
 @Dependent
 public class EndretSluttdatoOppgaveOppretter {
 
-    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private final UngBrukerdialogOppgaveKlient delegeringTjeneste;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
     public EndretSluttdatoOppgaveOppretter(
-        MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+        UngBrukerdialogOppgaveKlient delegeringTjeneste,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.delegeringTjeneste = delegeringTjeneste;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
