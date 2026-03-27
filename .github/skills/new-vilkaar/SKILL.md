@@ -1,6 +1,6 @@
 ---
 name: new-vilkaar
-description: Legg til nytt vilkår knyttet til et aksjonspunkt for aktivitetspenger i ung-sak
+description: Legg til eller endre vilkår for aktivitetspenger i ung-sak. USE FOR: opprette nytt vilkår, endre eksisterende vilkår, legge til/endre avslagsårsaker, endre vilkårstype, endre vilkårsvurdering i steg eller oppdaterer. DO NOT USE FOR: aksjonspunkt uten vilkår (bruk new-aksjonspunkt), formidling/brev, frontend.
 ---
 
 # Nytt vilkår for Aktivitetspenger

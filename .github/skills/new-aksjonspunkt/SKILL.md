@@ -1,6 +1,6 @@
 ---
 name: new-aksjonspunkt
-description: Legg til nytt aksjonspunkt med steg, DTO og oppdaterer for aktivitetspenger i ung-sak
+description: Legg til eller endre aksjonspunkt, steg, DTO og oppdaterer for aktivitetspenger i ung-sak. USE FOR: opprette nytt aksjonspunkt, endre eksisterende aksjonspunkt, legge til felt i aksjonspunkt-DTO, endre steg-logikk, flytte steg i prosessmodell, endre aksjonspunkttype (lokal/sentral). DO NOT USE FOR: vilkår-spesifikke endringer (bruk new-vilkaar), formidling/brev, frontend.
 ---
 
 # Nytt aksjonspunkt for Aktivitetspenger
