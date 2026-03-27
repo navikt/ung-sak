@@ -438,8 +438,8 @@ public class BehandlingRestTjeneste {
     public BehandlingOperasjonerDto hentLovligeBehandlingsoperasjoner(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
         Long behandlingId = behandling.getId();
-        BehandlingAnsvarlig behandlingAnsvarligSentralDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.LOKAL).orElse(null);
-        BehandlingAnsvarlig behandlingAnsvarligLolkalDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL).orElse(null);
+        BehandlingAnsvarlig behandlingAnsvarligSentralDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL).orElse(null);
+        BehandlingAnsvarlig behandlingAnsvarligLolkalDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.LOKAL).orElse(null);
         return behandlingDtoTjeneste.lovligeOperasjoner(behandling, behandlingAnsvarligLolkalDel, behandlingAnsvarligSentralDel);
     }
 
