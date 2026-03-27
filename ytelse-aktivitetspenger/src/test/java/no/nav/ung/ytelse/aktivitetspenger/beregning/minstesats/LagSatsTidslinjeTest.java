@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning;
+package no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
@@ -67,7 +67,11 @@ class LagSatsTidslinjeTest {
         LocalDate tjuefemårsdag = LocalDate.now().plusDays(10);
         LocalDate fødselsdato = tjuefemårsdag.minusYears(25);
 
-        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(new UtledSatsInput(fødselsdato, false, false, tjuefemårsdag));
+        LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(new UtledSatsInput(fødselsdato,
+            false,
+            false,
+            tjuefemårsdag)
+        );
 
         assertEquals(2, satsTidslinje.size());
     }
@@ -77,7 +81,11 @@ class LagSatsTidslinjeTest {
         LocalDate fødselsdato = LocalDate.now().minusYears(24);
         LocalDate førsteDagMedYtelse = LocalDate.now();
         LocalDateTimeline<Sats> satsTidslinje = LagSatsTidslinje.lagSatsTidslinje(
-            new UtledSatsInput(fødselsdato, true, false, førsteDagMedYtelse)
+            new UtledSatsInput(
+                fødselsdato,
+                true,
+                false,
+                førsteDagMedYtelse)
         );
         // Skal gi både lav og høy sats
         assertEquals(2, satsTidslinje.size());

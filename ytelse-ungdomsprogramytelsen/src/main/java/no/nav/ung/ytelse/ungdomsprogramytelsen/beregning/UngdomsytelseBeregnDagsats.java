@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.FødselOgDødInfo;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
@@ -16,7 +17,6 @@ import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.Barnetillegg;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.BeregnDagsatsInput;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.FødselOgDødInfo;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.LagBarnetilleggTidslinje;
 
 import java.time.LocalDate;

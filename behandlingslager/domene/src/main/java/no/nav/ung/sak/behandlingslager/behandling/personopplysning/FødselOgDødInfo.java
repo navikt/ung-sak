@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning.barnetillegg;
+package no.nav.ung.sak.behandlingslager.behandling.personopplysning;
 
 import no.nav.ung.sak.typer.AktørId;
 
