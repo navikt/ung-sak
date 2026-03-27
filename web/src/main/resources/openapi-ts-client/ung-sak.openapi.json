@@ -2396,6 +2396,9 @@
           "behandlingTilGodkjenning" : {
             "type" : "boolean"
           },
+          "behandlingTilGodkjenningVedLokalkontor" : {
+            "type" : "boolean"
+          },
           "uuid" : {
             "format" : "uuid",
             "type" : "string"
