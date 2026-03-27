@@ -58,7 +58,7 @@ public class EtterlysningRestTjeneste {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private UngBrukerdialogOppgaveKlient oppgaveDelegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
@@ -69,13 +69,13 @@ public class EtterlysningRestTjeneste {
                                     BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository,
                                     BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste,
                                     ProsessTaskTjeneste prosessTaskTjeneste,
-                                    UngBrukerdialogOppgaveKlient oppgaveDelegeringTjeneste) {
+                                    UngBrukerdialogOppgaveKlient oppgaveKlient) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.oppgaveDelegeringTjeneste = oppgaveDelegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
     }
 
     @GET
@@ -126,7 +126,7 @@ public class EtterlysningRestTjeneste {
             behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, etterlysning.getType());
 
             opprettHistorikkinnslag(behandlingId, behandling.getFagsakId(), etterlysning, frist);
-            oppgaveDelegeringTjeneste.endreFrist(new AktørId(behandling.getAktørId().getAktørId()), etterlysning.getEksternReferanse(), frist);
+            oppgaveKlient.endreFrist(new AktørId(behandling.getAktørId().getAktørId()), etterlysning.getEksternReferanse(), frist);
         });
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }

@@ -26,16 +26,16 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
 
-    private UngBrukerdialogOppgaveKlient delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
 
 
     SettOppgaveUtløptForInntektsrapporteringTask() {
     }
 
     @Inject
-    public SettOppgaveUtløptForInntektsrapporteringTask(UngBrukerdialogOppgaveKlient delegeringTjeneste) {
+    public SettOppgaveUtløptForInntektsrapporteringTask(UngBrukerdialogOppgaveKlient oppgaveKlient) {
 
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
     }
 
 
@@ -44,7 +44,7 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
         final var aktørId = new AktørId(prosessTaskData.getAktørId());
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
-        delegeringTjeneste.settOppgaveTilUtløpt(new EndreOppgaveStatusDto(
+        oppgaveKlient.settOppgaveTilUtløpt(new EndreOppgaveStatusDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             OppgaveType.RAPPORTER_INNTEKT,
             fom,

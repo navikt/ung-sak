@@ -25,14 +25,14 @@ import java.util.stream.Collectors;
 @Dependent
 public class InntektkontrollOppgaveOppretter {
 
-    private final UngBrukerdialogOppgaveKlient delegeringTjeneste;
+    private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final RapportertInntektMapper rapportertInntektMapper;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final ArbeidsgiverTjeneste arbeidsgiverTjeneste;
 
     @Inject
-    public InntektkontrollOppgaveOppretter(UngBrukerdialogOppgaveKlient delegeringTjeneste, RapportertInntektMapper rapportertInntektMapper, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
-        this.delegeringTjeneste = delegeringTjeneste;
+    public InntektkontrollOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient, RapportertInntektMapper rapportertInntektMapper, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+        this.oppgaveKlient = oppgaveKlient;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
@@ -43,7 +43,7 @@ public class InntektkontrollOppgaveOppretter {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
             .map(mapTilDto(behandling.getId(), aktørId, programTidslinje, ytelsetype))
-            .forEach(delegeringTjeneste::opprettOppgave);
+            .forEach(oppgaveKlient::opprettOppgave);
     }
 
     private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<Boolean> programTidslinje, OppgaveYtelsetype ytelsetype) {

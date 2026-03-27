@@ -59,7 +59,7 @@ public class PapirsøknadHåndteringTjeneste {
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private TilJournalføringTjeneste journalføringTjeneste;
-    private UngBrukerdialogOppgaveKlient delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
     private SøknadMottakTjeneste ungdomsytelseSøknadMottaker;
     private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
 
@@ -80,7 +80,7 @@ public class PapirsøknadHåndteringTjeneste {
         TilJournalføringTjeneste journalføringTjeneste,
         @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) Instance<SøknadMottakTjeneste> ungdomsytelseSøknadMottaker,
         UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient,
-        UngBrukerdialogOppgaveKlient delegeringTjeneste
+        UngBrukerdialogOppgaveKlient oppgaveKlient
     ) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlient = dokArkivKlient;
@@ -93,7 +93,7 @@ public class PapirsøknadHåndteringTjeneste {
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker.get();
         this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
     }
 
     public Saksnummer journalførPapirsøknadMotFagsak(String deltakerIdent, JournalpostId journalpostId) {
@@ -135,7 +135,7 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
         //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
-        delegeringTjeneste.løsSøkYtelseOppgave(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()));
+        oppgaveKlient.løsSøkYtelseOppgave(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()));
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 

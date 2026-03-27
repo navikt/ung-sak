@@ -18,7 +18,7 @@ public class EtterlysningProssesseringTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private OpprettOppgaveTjeneste opprettOppgaveTjeneste;
-    private UngBrukerdialogOppgaveKlient delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     public EtterlysningProssesseringTjeneste() {
@@ -28,11 +28,11 @@ public class EtterlysningProssesseringTjeneste {
     @Inject
     public EtterlysningProssesseringTjeneste(EtterlysningRepository etterlysningRepository,
                                              OpprettOppgaveTjeneste opprettOppgaveTjeneste,
-                                             UngBrukerdialogOppgaveKlient delegeringTjeneste,
+                                             UngBrukerdialogOppgaveKlient oppgaveKlient,
                                              ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
         this.opprettOppgaveTjeneste = opprettOppgaveTjeneste;
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
@@ -44,7 +44,7 @@ public class EtterlysningProssesseringTjeneste {
 
     public void settEttelysningerUtløpt(List<Etterlysning> etterlysninger, AktørId aktørId) {
         etterlysninger.forEach(e -> {
-            delegeringTjeneste.oppgaveUtløpt(new OppgaveRequest(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()), e.getEksternReferanse()));
+            oppgaveKlient.oppgaveUtløpt(new OppgaveRequest(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()), e.getEksternReferanse()));
             e.utløpt();
         });
 
@@ -55,7 +55,7 @@ public class EtterlysningProssesseringTjeneste {
         final var etterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId());
 
         etterlysninger.forEach(e -> {
-            delegeringTjeneste.avbrytOppgave(new OppgaveRequest(new no.nav.ung.brukerdialog.typer.AktørId(behandling.getAktørId().getAktørId()), e.getEksternReferanse()));
+            oppgaveKlient.avbrytOppgave(new OppgaveRequest(new no.nav.ung.brukerdialog.typer.AktørId(behandling.getAktørId().getAktørId()), e.getEksternReferanse()));
             e.avbryt();
         });
 

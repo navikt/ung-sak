@@ -49,7 +49,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     public static final String PERIODE_TOM = "tom";
     public static final String OPPGAVE_REF = "oppgave_ref";
 
-    private UngBrukerdialogOppgaveKlient delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
@@ -60,13 +60,13 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     }
 
     @Inject
-    public OpprettOppgaveForInntektsrapporteringTask(UngBrukerdialogOppgaveKlient delegeringTjeneste,
+    public OpprettOppgaveForInntektsrapporteringTask(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                                      FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                                      @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
 
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
@@ -86,7 +86,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(fagsak, fom, tom);
         var nesteKontrolltidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
         var frist = nesteKontrolltidspunkt.toLocalDateTime().toLocalDate().atStartOfDay();
-        delegeringTjeneste.opprettOppgave(new OpprettOppgaveDto(
+        oppgaveKlient.opprettOppgave(new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(fagsak.getYtelseType()),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),

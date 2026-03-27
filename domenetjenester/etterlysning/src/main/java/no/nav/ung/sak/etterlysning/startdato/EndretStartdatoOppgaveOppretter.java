@@ -19,13 +19,13 @@ import java.util.List;
 @Dependent
 public class EndretStartdatoOppgaveOppretter {
 
-    private final UngBrukerdialogOppgaveKlient delegeringTjeneste;
+    private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public EndretStartdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient delegeringTjeneste,
+    public EndretStartdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                            UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
@@ -34,7 +34,7 @@ public class EndretStartdatoOppgaveOppretter {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
             .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode))
-            .forEach(delegeringTjeneste::opprettOppgave);
+            .forEach(oppgaveKlient::opprettOppgave);
     }
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, DatoIntervallEntitet originalPeriode) {
