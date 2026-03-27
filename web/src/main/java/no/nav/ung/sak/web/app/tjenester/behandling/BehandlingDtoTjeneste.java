@@ -343,20 +343,26 @@ public class BehandlingDtoTjeneste {
         return links;
     }
 
-    public BehandlingOperasjonerDto lovligeOperasjoner(Behandling b, BehandlingAnsvarlig behandlingAnsvarlig) {
+    public BehandlingOperasjonerDto lovligeOperasjoner(Behandling b, BehandlingAnsvarlig behandlingAnsvarligLokalDel, BehandlingAnsvarlig behandlingAnsvarligSentralDel) {
         if (b.erSaksbehandlingAvsluttet()) {
             return BehandlingOperasjonerDto.builder(b.getUuid()).build(); // Skal ikke foreta menyvalg lenger
-        } else if (BehandlingStatus.FATTER_VEDTAK.equals(b.getStatus())) {
-            boolean tilgokjenning = behandlingAnsvarlig != null
-                && behandlingAnsvarlig.getAnsvarligSaksbehandler() != null
-                && !behandlingAnsvarlig.getAnsvarligSaksbehandler().equalsIgnoreCase(SubjectHandler.getSubjectHandler().getUid());
+        } else if (BehandlingStatus.FATTER_VEDTAK == b.getStatus()) {
+            boolean tilgokjenning = behandlingAnsvarligSentralDel != null
+                && behandlingAnsvarligSentralDel.getAnsvarligSaksbehandler() != null
+                && !behandlingAnsvarligSentralDel.getAnsvarligSaksbehandler().equalsIgnoreCase(SubjectHandler.getSubjectHandler().getUid());
             return BehandlingOperasjonerDto.builder(b.getUuid()).medTilGodkjenning(tilgokjenning).build();
+        } else if (BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR == b.getStatus()) {
+            boolean tilgokjenning = behandlingAnsvarligLokalDel != null
+                && behandlingAnsvarligLokalDel.getAnsvarligSaksbehandler() != null
+                && !behandlingAnsvarligLokalDel.getAnsvarligSaksbehandler().equalsIgnoreCase(SubjectHandler.getSubjectHandler().getUid());
+            return BehandlingOperasjonerDto.builder(b.getUuid()).medTilGodkjenningVedLokalkontor(tilgokjenning).build();
         } else {
             boolean kanÅpnesForEndring = b.erRevurdering() && !b.isBehandlingPåVent();
             boolean totrinnRetur = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(b).stream()
                 .anyMatch(tt -> !tt.isGodkjent());
             return BehandlingOperasjonerDto.builder(b.getUuid())
                 .medTilGodkjenning(false)
+                .medTilGodkjenningVedLokalkontor(false)
                 .medFraBeslutter(!b.isBehandlingPåVent() && totrinnRetur)
                 .medKanBytteEnhet(false)
                 .medKanHenlegges(false)

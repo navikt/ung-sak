@@ -35,6 +35,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -435,10 +436,11 @@ public class BehandlingRestTjeneste {
     @Operation(description = "Henter lovlige operasjoner på behandling for menyvalg", tags = "behandlinger")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public BehandlingOperasjonerDto hentLovligeBehandlingsoperasjoner(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).orElse(null);
-        return behandlingDtoTjeneste.lovligeOperasjoner(behandling, behandlingAnsvarlig);
+        Long behandlingId = behandling.getId();
+        BehandlingAnsvarlig behandlingAnsvarligSentralDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.LOKAL).orElse(null);
+        BehandlingAnsvarlig behandlingAnsvarligLolkalDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL).orElse(null);
+        return behandlingDtoTjeneste.lovligeOperasjoner(behandling, behandlingAnsvarligLolkalDel, behandlingAnsvarligSentralDel);
     }
 
 
