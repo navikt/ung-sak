@@ -1,6 +1,7 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -22,7 +23,7 @@ public class UngdomsytelseRegisterinnhentingTaskUtleder implements UtvidetRegist
 
 
     @Inject
-    public UngdomsytelseRegisterinnhentingTaskUtleder(Instance<EndringStartpunktUtleder> startpunktUtledere) {
+    public UngdomsytelseRegisterinnhentingTaskUtleder(@Any Instance<EndringStartpunktUtleder> startpunktUtledere) {
         this.startpunktUtledere = startpunktUtledere;
     }
 
