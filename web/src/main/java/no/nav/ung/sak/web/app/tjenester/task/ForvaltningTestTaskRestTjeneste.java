@@ -7,7 +7,11 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -16,6 +20,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.k9.prosesstask.rest.AbacEmptySupplier;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -49,8 +54,8 @@ public class ForvaltningTestTaskRestTjeneste {
     }
 
     public record ØkPrioritetTaskerForSakRequest(
-        Saksnummer saksnummer,
-        Integer nyMinimumPrioritet
+        @Valid Saksnummer saksnummer,
+        @NotNull @Min(0) @Max(1000) Integer nyMinimumPrioritet
     ) {
     }
 
@@ -124,8 +129,8 @@ public class ForvaltningTestTaskRestTjeneste {
     }
 
     public record EndreKlarTilKjørtRequests(
-        Saksnummer saksnummer,
-        List<String> taskTyperSomEndres
+        @Valid Saksnummer saksnummer,
+        @Size(max = 100) List<@NotNull @Pattern(regexp = InputValideringRegex.FRITEKST) String> taskTyperSomEndres
     ) {
     }
 
@@ -167,8 +172,8 @@ public class ForvaltningTestTaskRestTjeneste {
 
 
     public record AntallGjenståendeTaskerForSakRequest(
-        Saksnummer saksnummer,
-        List<String> taskTyperSomIgnoreres
+        @Valid Saksnummer saksnummer,
+        @Size(max = 100) List<@NotNull @Pattern(regexp = InputValideringRegex.FRITEKST) String> taskTyperSomIgnoreres
     ) {
     }
 
