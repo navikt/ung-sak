@@ -7,9 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
@@ -18,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
-import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.VurderAntallDagerResultat;
 
@@ -28,8 +25,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @ApplicationScoped
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public class UngdomsprogramPeriodeTjeneste implements KvalifiserteYtelsesperioderTjeneste {
+public class UngdomsprogramPeriodeTjeneste {
 
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private static final KantIKantVurderer KANT_I_KANT_VURDERER = new DefaultKantIKantVurderer();
@@ -43,13 +39,11 @@ public class UngdomsprogramPeriodeTjeneste implements KvalifiserteYtelsesperiode
         // CDI
     }
 
-    @Override
     public LocalDateTimeline<Boolean> finnPeriodeTidslinje(Long behandlingId) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
         return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);
     }
 
-    @Override
     public LocalDateTimeline<Boolean> finnInitiellPeriodeTidslinje(Long behandlingId) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingId);
         return lagPeriodeTidslinje(ungdomsprogramPeriodeGrunnlag);

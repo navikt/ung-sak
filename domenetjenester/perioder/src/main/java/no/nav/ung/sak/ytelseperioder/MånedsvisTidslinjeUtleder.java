@@ -51,15 +51,15 @@ public class MånedsvisTidslinjeUtleder {
         return finnMånedsvisPeriodisertePerioder(fagsak, ungdomsprogramperioder);
     }
 
-    public static LocalDateTimeline<YearMonth> finnMånedsvisPeriodisertePerioder(Fagsak fagsak, LocalDateTimeline<Boolean> ungdomsprogramperioder) {
+    public static LocalDateTimeline<YearMonth> finnMånedsvisPeriodisertePerioder(Fagsak fagsak, LocalDateTimeline<Boolean> perioder) {
         final var fagsakPeriode = fagsak.getPeriode();
-        LocalDateTimeline<Boolean> programOgFagsakTidslinje = ungdomsprogramperioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
+        LocalDateTimeline<Boolean> programOgFagsakTidslinje = perioder.intersection(new LocalDateTimeline<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), true))
             .compress();
         if (programOgFagsakTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
         return programOgFagsakTidslinje
-            .splitAtRegular(ungdomsprogramperioder.getMinLocalDate().withDayOfMonth(1), fagsakPeriode.getTomDato(), Period.ofMonths(1))
+            .splitAtRegular(perioder.getMinLocalDate().withDayOfMonth(1), fagsakPeriode.getTomDato(), Period.ofMonths(1))
             .map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonthValue()))));
     }
 

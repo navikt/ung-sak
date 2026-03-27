@@ -74,7 +74,7 @@ public class ManglendeKontrollperioderTjeneste {
              if (manglendeKontrollTidslinje.isEmpty()) {
                  return new TreeSet<>();
              }
-             return splittPåMåneder(manglendeKontrollTidslinje).stream()
+             return splittPåMåneder(manglendeKontrollTidslinje.mapValue(_ -> true)).stream()
                  .map(DatoIntervallEntitet::fra)
                  .collect(Collectors.toCollection(TreeSet::new));
          } else {

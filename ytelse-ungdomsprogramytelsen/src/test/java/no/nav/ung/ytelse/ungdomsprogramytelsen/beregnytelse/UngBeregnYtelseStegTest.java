@@ -30,6 +30,7 @@ import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.perioder.UngdomsytelseKvalifiserteYtelsesperioderTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
@@ -68,7 +69,8 @@ class UngBeregnYtelseStegTest {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
-            new UnitTestLookupInstanceImpl<>(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository)),
+            new UnitTestLookupInstanceImpl<>(
+                new UngdomsytelseKvalifiserteYtelsesperioderTjeneste(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), ungdomsytelseGrunnlagRepository)),
             behandlingRepository);
         beregnYtelseSteg = new UngBeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,

@@ -13,13 +13,15 @@ import no.nav.ung.ytelse.aktivitetspenger.del1.AktivitetspengerVilkårsPerioderT
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class AktivitetspengerKvalifiserteYtelsesperioderTjeneste implements KvalifiserteYtelsesperioderTjeneste {
 
-    private final AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
     @Inject
      public AktivitetspengerKvalifiserteYtelsesperioderTjeneste(AktivitetspengerVilkårsPerioderTilVurderingTjeneste aktivitetspengerVilkårsPerioderTilVurderingTjeneste) {
         this.aktivitetspengerVilkårsPerioderTilVurderingTjeneste = aktivitetspengerVilkårsPerioderTilVurderingTjeneste;
     }
 
+    public AktivitetspengerKvalifiserteYtelsesperioderTjeneste() {
+    }
 
     @Override
     public LocalDateTimeline<Boolean> finnPeriodeTidslinje(Long behandlingId) {
