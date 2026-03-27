@@ -151,13 +151,12 @@ public class KontrollerteInntektperioderTjeneste {
                                                                                             Optional<KontrollertInntektKilde> defaultKilde) {
 
         return vurdertTidslinje.combine(inntektTidslinje, settVerdiForIngenInntekter(defaultKilde), LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .toSegments().stream().map(
-                s -> {
-                    var rapporterteInntekter = Optional.ofNullable(rapporterteInntekterTidslinje.getSegment(s.getLocalDateInterval())).map(it -> it.getValue());
+            .toSegments().stream().map(vurdertInntektTidslinjesegment -> {
+                    var rapporterteInntekter = Optional.ofNullable(rapporterteInntekterTidslinje.getSegment(vurdertInntektTidslinjesegment.getLocalDateInterval())).map(it -> it.getValue());
                     return KontrollertInntektPeriode.ny()
-                        .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()))
-                        .medInntekt(s.getValue().samletInntekt())
-                        .medKilde(s.getValue().kilde())
+                        .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(vurdertInntektTidslinjesegment.getFom(), vurdertInntektTidslinjesegment.getTom()))
+                        .medInntekt(vurdertInntektTidslinjesegment.getValue().samletInntekt())
+                        .medKilde(vurdertInntektTidslinjesegment.getValue().kilde())
                         .medErManueltVurdert(false)
                         .medRegisterInntekt(rapporterteInntekter.map(it -> it.registerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
                         .medRapportertInntekt(rapporterteInntekter.map(it -> it.brukerRapporterteInntekter().stream().map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO)).orElse(BigDecimal.ZERO))
