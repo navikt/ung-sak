@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ungdomsprogram.forbruktedager;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -6,7 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;

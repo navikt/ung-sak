@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ungdomsprogram;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;

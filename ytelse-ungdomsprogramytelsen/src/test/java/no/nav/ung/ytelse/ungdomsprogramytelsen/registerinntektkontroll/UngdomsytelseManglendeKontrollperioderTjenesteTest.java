@@ -1,17 +1,15 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinntektkontroll;
 
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -19,14 +17,14 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontroll.ManglendeKontrollperioderTjeneste;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIf;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,31 +33,33 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
 class UngdomsytelseManglendeKontrollperioderTjenesteTest {
 
     @Inject
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    @Inject
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     @Inject
     private BehandlingRepository behandlingRepository;
-    @Inject
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
     @Inject
     private FagsakRepository fagsakRepository;
     @Inject
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     private Behandling behandling;
     private MånedsvisTidslinjeUtleder ytelsesperiodeutleder;
+    private KvalifiserteYtelsesperioderTjeneste kvalifiserteYtelsesperioderTjeneste;
 
 
     @BeforeEach
     void setUp() {
-        final var ungdomsprogramPeriodeTjeneste = new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository);
-        ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
+
+        kvalifiserteYtelsesperioderTjeneste = Mockito.mock(KvalifiserteYtelsesperioderTjeneste.class);
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
+        when(kvalifiserteYtelsesperioderTjeneste.finnInitiellPeriodeTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
+        ytelsesperiodeutleder = new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<>(kvalifiserteYtelsesperioderTjeneste), behandlingRepository);
         lagFagsakOgBehandling(LocalDate.now().minusMonths(6));
     }
 
@@ -71,10 +71,9 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
 
-        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
+        lagPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram);
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
     }
@@ -87,10 +86,9 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(3).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(3).with(TemporalAdjusters.lastDayOfMonth());
 
-        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
+        lagPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram);
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
     }
@@ -104,10 +102,9 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(4).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().minusMonths(2).with(TemporalAdjusters.lastDayOfMonth());
 
-        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
+        lagPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram);
 
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isFalse();
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(3).withDayOfMonth(1), LocalDate.now().minusMonths(3).with(TemporalAdjusters.lastDayOfMonth()));
@@ -120,12 +117,9 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(LocalDate.now().getDayOfMonth() + 1);
+        lagPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram);
 
-
-        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
-
-        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
     }
@@ -142,11 +136,9 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(LocalDate.now().getDayOfMonth() - 1);
 
+        lagPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram);
 
-        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
-
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.size()).isEqualTo(1);
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1).withDayOfMonth(1), LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
@@ -160,12 +152,9 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(LocalDate.now().getDayOfMonth());
+        lagPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram);
 
-
-        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
-
-        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        final var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.size()).isEqualTo(1);
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(1).withDayOfMonth(1), LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
@@ -182,16 +171,19 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         final var månedNrTre = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now().minusMonths(3).withDayOfMonth(1), LocalDate.now().minusMonths(3).with(TemporalAdjusters.lastDayOfMonth()));
         final var sisteMåned = DatoIntervallEntitet.fraOgMedTilOgMed(sluttdatoUngdomsprogram.withDayOfMonth(1), sluttdatoUngdomsprogram);
 
-        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(startdatoUngdomsprogram, new JournalpostId(1L))));
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram)));
+        lagPeriode(startdatoUngdomsprogram, sluttdatoUngdomsprogram);
         tilkjentYtelseRepository.lagre(behandling.getId(), List.of(
             KontrollertInntektPeriode.ny().medPeriode(månedNrTre).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.BRUKER).medErManueltVurdert(false).build(),
             KontrollertInntektPeriode.ny().medPeriode(sisteMåned).medInntekt(BigDecimal.ZERO).medKilde(KontrollertInntektKilde.BRUKER).medErManueltVurdert(false).build()
-            ));
+        ));
 
-        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling.getId());
+        var perioder = manglendeKontrollperioderTjeneste.finnPerioderForManglendeKontroll(behandling);
 
         assertThat(perioder.isEmpty()).isTrue();
+    }
+
+    private void lagPeriode(LocalDate startdatoUngdomsprogram, LocalDate sluttdatoUngdomsprogram) {
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(anyLong())).thenReturn(new LocalDateTimeline<>(startdatoUngdomsprogram, sluttdatoUngdomsprogram, true));
     }
 
     private Long lagFagsakOgBehandling(LocalDate fom) {
@@ -206,8 +198,8 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         ZonedDateTime nå = ZonedDateTime.now();
         ZonedDateTime tiSekunderSiden = nå.minusSeconds(10);
         // Dersom denne kjøre innenfor 10 sekunder etter midnatt og dagIMånedForInntektsKontroll er lik dagens dato, vil denne generere feil cron-uttrykk
-        String tidspunktCron = nå.toLocalDate().getDayOfMonth() == dagIMånedForInntektsKontroll ? tiSekunderSiden.getSecond() + " " + (tiSekunderSiden.getMinute())  + " " + tiSekunderSiden.getHour(): "0 0 " + nå.getHour();
-        String cron = tidspunktCron +  " " + dagIMånedForInntektsKontroll + " * *";
+        String tidspunktCron = nå.toLocalDate().getDayOfMonth() == dagIMånedForInntektsKontroll ? tiSekunderSiden.getSecond() + " " + (tiSekunderSiden.getMinute()) + " " + tiSekunderSiden.getHour() : "0 0 " + nå.getHour();
+        String cron = tidspunktCron + " " + dagIMånedForInntektsKontroll + " * *";
         return new ManglendeKontrollperioderTjeneste(ytelsesperiodeutleder, cron, tilkjentYtelseRepository, relevanteKontrollperioderUtleder);
     }
 }
