@@ -42,7 +42,7 @@
         <felles.version>10.6.1</felles.version>
         <swagger.version>2.2.43</swagger.version>
         <junit.version>6.0.3</junit.version>
-        <k9format.version>12.9.2</k9format.version>
+        <k9format.version>12.9.3</k9format.version>
         <jackson.version>2.21.1</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.10</kotlin-stdlib.version>
@@ -149,12 +149,12 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>3.0.2</version>
+                <version>3.0.3</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.5.3</version>
+                <version>1.5.4</version>
             </dependency>
 
             <dependency>
