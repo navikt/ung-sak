@@ -4,7 +4,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import net.jpountz.lz4.LZ4FrameOutputStream;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
 import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
