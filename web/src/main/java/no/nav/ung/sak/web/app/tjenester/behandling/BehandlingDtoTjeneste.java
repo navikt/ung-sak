@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -176,7 +177,7 @@ public class BehandlingDtoTjeneste {
         }
         Optional<BehandlingVedtak> gjeldendeVedtak = behandlingVedtakRepository.hentGjeldendeVedtak(behandlinger.get(0).getFagsak());
         List<Long> behandlingIder = behandlinger.stream().map(b -> b.getId()).toList();
-        Map<Long, BehandlingAnsvarlig> behandlingAnsvarligMap = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingIder);
+        Map<Long, BehandlingAnsvarlig> behandlingAnsvarligMap = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingIder, BehandlingDel.SENTRAL);
         Optional<Long> behandlingMedGjeldendeVedtak = gjeldendeVedtak.map(BehandlingVedtak::getBehandlingId);
         return behandlinger.stream().map(behandling -> {
             boolean erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(behandling, behandlingMedGjeldendeVedtak);

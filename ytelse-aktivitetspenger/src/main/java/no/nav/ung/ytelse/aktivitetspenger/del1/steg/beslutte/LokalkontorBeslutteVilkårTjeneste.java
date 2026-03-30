@@ -59,9 +59,7 @@ public class LokalkontorBeslutteVilkårTjeneste {
                 return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.LOKALKONTOR_BESLUTTER_VILKÅR));
             }
 
-            Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling).stream()
-                .filter(totrinnsvurdering -> totrinnsvurdering.getAksjonspunktDefinisjon().getBehandlingDel() == BehandlingDel.LOKAL)
-                .toList();
+            Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.LOKAL);
             // Sjekker om vi har minst en ikke godkjent vurdering og om behandlingen skal flyttes tilbake
             if (sendesTilbakeTilSaksbehandler(totrinnaksjonspunktvurderinger)) {
                 List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner = finnIkkeGodkjenteVurderinger(totrinnaksjonspunktvurderinger);
@@ -102,9 +100,7 @@ public class LokalkontorBeslutteVilkårTjeneste {
         boolean erTotrinn = behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.LOKAL);
 
         if (erTotrinn) {
-            Collection<Totrinnsvurdering> totrinnsvurderings = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling).stream()
-                .filter(totrinnsvurdering -> totrinnsvurdering.getAksjonspunktDefinisjon().getBehandlingDel() == BehandlingDel.LOKAL)
-                .toList();;
+            Collection<Totrinnsvurdering> totrinnsvurderings = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.LOKAL);
             if (sendesTilbakeTilSaksbehandler(totrinnsvurderings)) {
                 lagHistorikkInnslagVurderPåNytt(behandling, totrinnsvurderings);
                 return;
@@ -125,7 +121,7 @@ public class LokalkontorBeslutteVilkårTjeneste {
     }
 
     private HistorikkAktør utledAktør(Behandling behandling) {
-        boolean erTotrinn = behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId());
+        boolean erTotrinn = behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.LOKAL);
         return erTotrinn ? HistorikkAktør.LOKALKONTOR_BESLUTTER : HistorikkAktør.VEDTAKSLØSNINGEN;
     }
 

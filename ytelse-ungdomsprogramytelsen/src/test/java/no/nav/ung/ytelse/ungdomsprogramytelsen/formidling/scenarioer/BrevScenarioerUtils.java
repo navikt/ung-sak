@@ -4,6 +4,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -184,7 +185,7 @@ public class BrevScenarioerUtils {
 
     public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         Aksjonspunkt aksjonspunkt = leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling);
-        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), ident);
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.SENTRAL, ident);
         aksjonspunkt.setAnsvarligSaksbehandler(ident);
 
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
@@ -200,7 +201,7 @@ public class BrevScenarioerUtils {
 
     public static void leggTilBeslutter(Behandling behandling, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling);
-        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandling.getId(), BESLUTTER_IDENT);
+        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandling.getId(), BehandlingDel.SENTRAL, BESLUTTER_IDENT);
 
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }

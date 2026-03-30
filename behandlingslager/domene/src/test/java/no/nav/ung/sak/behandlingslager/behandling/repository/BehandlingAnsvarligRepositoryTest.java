@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.repository;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.BasicBehandlingBuilder;
@@ -19,10 +20,6 @@ class BehandlingAnsvarligRepositoryTest {
     @Inject
     private EntityManager entityManager;
     @Inject
-    private FagsakRepository fagsakRepository;
-    @Inject
-    private BehandlingRepository behandlingRepository;
-    @Inject
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     private BasicBehandlingBuilder behandlingBuilder;
@@ -37,10 +34,16 @@ class BehandlingAnsvarligRepositoryTest {
     }
 
     @Test
-    void skal_lagre_og_hente_ansvarligSaksbehandler() {
+    void skal_lagre_og_hente_ansvarligSaksbehandlere_og_besluttere() {
         var behandling = behandlingBuilder.opprettOgLagreFørstegangssøknad(fagsak, BehandlingStatus.UTREDES);
-        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), "Z000000");
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.LOKAL, "Z000000");
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.SENTRAL, "Z000001");
+        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandling.getId(), BehandlingDel.LOKAL, "B000000");
+        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandling.getId(), BehandlingDel.SENTRAL, "B000001");
+        Assertions.assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.LOKAL)).isEqualTo("Z000000");
+        Assertions.assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.SENTRAL)).isEqualTo("Z000001");
+        Assertions.assertThat(behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.LOKAL).get().getAnsvarligBeslutter()).isEqualTo("B000000");
+        Assertions.assertThat(behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.SENTRAL).get().getAnsvarligBeslutter()).isEqualTo("B000001");
 
-        Assertions.assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId())).isEqualTo("Z000000");
     }
 }
