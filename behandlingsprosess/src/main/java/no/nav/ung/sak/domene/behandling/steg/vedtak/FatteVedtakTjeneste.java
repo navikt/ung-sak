@@ -73,7 +73,7 @@ public class FatteVedtakTjeneste {
 
     public BehandleStegResultat fattVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
         verifiserBehandlingsresultat(behandling);
-        if (behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())) {
+        if (behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)) {
 
             final var fatterVedtakAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK);
 
@@ -82,7 +82,7 @@ public class FatteVedtakTjeneste {
                 return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FATTER_VEDTAK));
             }
 
-            Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
+            Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.SENTRAL);
             // Sjekker om vi har minst en ikke godkjent vurdering og om behandlingen skal flyttes tilbake
             if (sendesTilbakeTilSaksbehandler(totrinnaksjonspunktvurderinger)) {
                 if (!behandling.erYtelseBehandling()) {
