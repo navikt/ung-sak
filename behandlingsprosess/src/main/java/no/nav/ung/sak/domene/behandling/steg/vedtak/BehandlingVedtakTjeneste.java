@@ -6,6 +6,7 @@ import java.util.Objects;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -48,7 +49,7 @@ public class BehandlingVedtakTjeneste {
         VedtakResultatType vedtakResultatType;
         var ref = BehandlingReferanse.fra(behandling);
         vedtakResultatType = utledVedtakResultatType(behandling);
-        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId).orElse(null);
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL).orElse(null);
         String ansvarligSaksbehandler = FinnAnsvarligSaksbehandler.finn(behandlingAnsvarlig);
         LocalDateTime vedtakstidspunkt = LocalDateTime.now();
 

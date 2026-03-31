@@ -76,6 +76,7 @@ public class BehandlingProsessHendelseMapper {
 
         List<UtvidetSøknadÅrsak> søknadsårsaker = utledSøknadÅrsaker(behandling);
 
+        //TODO dersom vi skal bruke LOS for aktivitetspenger, må denne hente begge behandlingsansvarlige
         Optional<BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId());
 
         return BehandlingProsessHendelse.builder()

@@ -47,17 +47,19 @@ public class BehandlingAnsvarligRepository {
         }
     }
 
-    public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder) {
-        return hentBehandlingAnsvarlig(behandlingIder, BehandlingDel.SENTRAL);
+    public Map<BehandlingDel, BehandlingAnsvarlig> hentBehandlingAnsvarlige(Long behandlingId) {
+        return hentBehandlingAnsvarlige(List.of(behandlingId))
+            .getOrDefault(behandlingId, List.of())
+            .stream()
+            .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingDel, Function.identity()));
     }
 
-    public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder, BehandlingDel behandlingDel) {
-        return entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingDel = :behandlingDel AND ba.behandlingId in (:behandlingId)", BehandlingAnsvarlig.class)
-            .setParameter("behandlingDel", behandlingDel)
+    public Map<Long, List<BehandlingAnsvarlig>> hentBehandlingAnsvarlige(List<Long> behandlingIder) {
+        return entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingId in (:behandlingId)", BehandlingAnsvarlig.class)
             .setParameter("behandlingId", behandlingIder)
             .getResultList()
             .stream()
-            .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingId, Function.identity()));
+            .collect(Collectors.groupingBy(BehandlingAnsvarlig::getBehandlingId));
     }
 
     public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
