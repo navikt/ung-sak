@@ -95,6 +95,7 @@ public class BehandlingDtoUtil {
         dto.setBehandlendeEnhetId(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetId() : null);
         dto.setBehandlendeEnhetNavn(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetNavn() : null);
 
+        dto.setBehandlingAnsvarlige(map(behandlingAnsvarlige));
 
         dto.setFørsteÅrsak(førsteÅrsak(behandling).orElse(null));
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));
