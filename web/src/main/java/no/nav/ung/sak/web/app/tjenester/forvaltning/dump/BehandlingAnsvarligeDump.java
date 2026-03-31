@@ -8,8 +8,8 @@ import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.CsvOutput;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
-import java.util.Optional;
 import java.util.function.Function;
 
 @ApplicationScoped
@@ -29,8 +29,9 @@ public class BehandlingAnsvarligeDump implements DebugDumpBehandling {
 
     @Override
     public void dump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
-        Optional<BehandlingAnsvarlig> ba = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId());
-        ba.ifPresent(it -> {
+        Collection<BehandlingAnsvarlig> ba = behandlingAnsvarligRepository.hentBehandlingAnsvarlige(behandling.getId())
+            .values();
+        ba.forEach(it -> {
             final String path = "behandling-" + behandling.getId();
             final var toCsv = new LinkedHashMap<String, Function<BehandlingAnsvarlig, ?>>();
 

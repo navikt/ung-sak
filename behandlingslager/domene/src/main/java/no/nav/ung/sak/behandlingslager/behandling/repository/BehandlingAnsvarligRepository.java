@@ -47,19 +47,6 @@ public class BehandlingAnsvarligRepository {
         }
     }
 
-    public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder) {
-        return hentBehandlingAnsvarlig(behandlingIder, BehandlingDel.SENTRAL);
-    }
-
-    public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder, BehandlingDel behandlingDel) {
-        return entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingDel = :behandlingDel AND ba.behandlingId in (:behandlingId)", BehandlingAnsvarlig.class)
-            .setParameter("behandlingDel", behandlingDel)
-            .setParameter("behandlingId", behandlingIder)
-            .getResultList()
-            .stream()
-            .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingId, Function.identity()));
-    }
-
     public Map<BehandlingDel, BehandlingAnsvarlig> hentBehandlingAnsvarlige(Long behandlingIder) {
         return hentBehandlingAnsvarlige(List.of(behandlingIder))
             .getOrDefault(behandlingIder, List.of())
