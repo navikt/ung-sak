@@ -47,9 +47,9 @@ public class BehandlingAnsvarligRepository {
         }
     }
 
-    public Map<BehandlingDel, BehandlingAnsvarlig> hentBehandlingAnsvarlige(Long behandlingIder) {
-        return hentBehandlingAnsvarlige(List.of(behandlingIder))
-            .getOrDefault(behandlingIder, List.of())
+    public Map<BehandlingDel, BehandlingAnsvarlig> hentBehandlingAnsvarlige(Long behandlingId) {
+        return hentBehandlingAnsvarlige(List.of(behandlingId))
+            .getOrDefault(behandlingId, List.of())
             .stream()
             .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingDel, Function.identity()));
     }
