@@ -1,41 +1,35 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.kontrakt.ResourceLink;
+import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingAnsvarligDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
+import no.nav.ung.sak.web.app.ApplicationConfig;
+import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
+import org.apache.http.client.utils.URIBuilder;
+
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
-
-import no.nav.ung.kodeverk.behandling.BehandlingDel;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingAnsvarligDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
-import org.apache.http.client.utils.URIBuilder;
-
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.ung.sak.kontrakt.ResourceLink;
-import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
-import no.nav.ung.sak.web.app.ApplicationConfig;
-import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
-import org.apache.kafka.common.compress.Lz4BlockOutputStream;
 
 public class BehandlingDtoUtil {
 
