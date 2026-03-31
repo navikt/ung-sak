@@ -2181,6 +2181,26 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.behandling.BehandlingAnsvarligDto" : {
+        "properties" : {
+          "ansvarligBeslutter" : {
+            "type" : "string"
+          },
+          "ansvarligSaksbehandler" : {
+            "type" : "string"
+          },
+          "behandlendeEnhetId" : {
+            "type" : "string"
+          },
+          "behandlendeEnhetNavn" : {
+            "type" : "string"
+          },
+          "toTrinnsBehandling" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.behandling.BehandlingDto" : {
         "properties" : {
           "ansvarligBeslutter" : {
@@ -2210,6 +2230,12 @@
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$",
             "type" : "string"
+          },
+          "behandlingAnsvarlige" : {
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.BehandlingAnsvarligDto"
+            },
+            "type" : "object"
           },
           "behandlingHenlagt" : {
             "type" : "boolean"
@@ -2353,7 +2379,7 @@
             "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.BehandlingVisningsnavn"
           }
         },
-        "required" : [ "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
+        "required" : [ "behandlingAnsvarlige", "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.behandling.BehandlingIdListe" : {
