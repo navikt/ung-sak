@@ -185,10 +185,10 @@ public class BehandlingDtoTjeneste {
         return behandlinger.stream().map(behandling -> {
             boolean erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(behandling, behandlingMedGjeldendeVedtak);
             var behandlingsresultat = lagBehandlingsresultat(behandling);
-            Map<BehandlingDel, BehandlingAnsvarlig> behandlinAnsvarligPrDel = behandlingAnsvarligMap.getOrDefault(behandling.getId(), Collections.emptyList())
+            Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige = behandlingAnsvarligMap.getOrDefault(behandling.getId(), Collections.emptyList())
                 .stream()
                 .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingDel, Function.identity()));
-            return lagBehandlingDto(behandling, behandlinAnsvarligPrDel, behandlingsresultat, erBehandlingMedGjeldendeVedtak);
+            return lagBehandlingDto(behandling, behandlingAnsvarlige, behandlingsresultat, erBehandlingMedGjeldendeVedtak);
         }).collect(Collectors.toList());
     }
 
