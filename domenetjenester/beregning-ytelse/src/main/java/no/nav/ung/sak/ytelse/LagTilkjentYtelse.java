@@ -1,12 +1,10 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
+package no.nav.ung.sak.ytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
-import no.nav.ung.sak.ytelse.BeregnetSats;
-import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
-import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -19,10 +17,13 @@ import java.time.YearMonth;
  */
 public class LagTilkjentYtelse {
 
+    private static final KontrollerteInntekter INGEN_INNTEKT = new KontrollerteInntekter(BigDecimal.ZERO, BigDecimal.ZERO);
+
     public static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
-                                                                         LocalDateTimeline<Boolean> godkjentTidslinje,
-                                                                         LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
-                                                                         LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
+                                                                                LocalDateTimeline<Boolean> godkjentTidslinje,
+                                                                                LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
+                                                                                LocalDateTimeline<KontrollerteInntekter> kontrollerteInntekterTidslinje,
+                                                                                InntektsreduksjonKonfigurasjon konfigurasjon) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
@@ -33,17 +34,18 @@ public class LagTilkjentYtelse {
         final var førstePerioder = ikkePåkrevdKontrollTidslinje.filterValue(RelevanteKontrollperioderUtleder.FritattForKontroll::gjelderFørstePeriode).mapValue(it -> true);
 
         // Begrenser tilkjent ytelse til periode med kontrollert inntekt eller første/siste periode
-        var tidslinjeSomSkalHaTilkjentYtelse = rapportertInntektTidslinje.intersection(godkjentTidslinje).mapValue(it -> true);
-        tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(førstePerioder);
+        var tidslinjeSomSkalHaTilkjentYtelse = kontrollerteInntekterTidslinje
+            .intersection(godkjentTidslinje).mapValue(it -> true)
+            .crossJoin(førstePerioder);
+
         final var sistePerioderSomSkalUtbetales = finnSistePerioderSomSkalLeggesTil(ikkePåkrevdKontrollTidslinje, tidslinjeSomSkalHaTilkjentYtelse);
         tidslinjeSomSkalHaTilkjentYtelse = tidslinjeSomSkalHaTilkjentYtelse.crossJoin(sistePerioderSomSkalUtbetales);
 
 
-        return totalsatsTidslinje.combine(rapportertInntektTidslinje, (di, sats, rapportertInntekt) -> {
-                // Dersom det ikke er rapportert inntekt settes denne til 0, ellers summeres alle inntektene
-                final var rapporertinntekt = rapportertInntekt == null ? BigDecimal.ZERO : rapportertInntekt.getValue();
-                // Mapper verdier til TilkjentYtelsePeriodeResultat
-                final var periodeResultat = TilkjentYtelseBeregner.beregn(di, sats.getValue(), rapporertinntekt);
+        return totalsatsTidslinje.combine(kontrollerteInntekterTidslinje, (di, sats, inntekter) -> {
+                final var inntekt = inntekter == null ? INGEN_INNTEKT : inntekter.getValue();
+                final var beregner = new ReduksjonBeregner(inntekt, konfigurasjon, di);
+                final var periodeResultat = TilkjentYtelseBeregner.beregn(di, sats.getValue(), beregner);
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);
             }, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .intersection(tidslinjeSomSkalHaTilkjentYtelse);

@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
+package no.nav.ung.ytelse.aktivitetspenger.beregnytelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -26,24 +26,24 @@ import java.util.Map;
 
 @ApplicationScoped
 @BehandlingStegRef(BehandlingStegType.BEREGN_YTELSE)
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @BehandlingTypeRef
-public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
+public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
 
     private static final BigDecimal REDUKSJONSFAKTOR_ARBEIDSINNTEKT = new BigDecimal("0.66");
-    private static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("0.66");
+    private static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("1.00");
 
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
 
-    public UngBeregnYtelseSteg() {
+    public AktivitetspengerBeregnYtelseSteg() {
     }
 
     @Inject
-    public UngBeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-                               TilkjentYtelseRepository tilkjentYtelseRepository,
-                               MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+    public AktivitetspengerBeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+                                            TilkjentYtelseRepository tilkjentYtelseRepository,
+                                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;

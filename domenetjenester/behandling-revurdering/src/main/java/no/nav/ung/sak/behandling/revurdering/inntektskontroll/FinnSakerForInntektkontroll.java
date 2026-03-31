@@ -20,9 +20,7 @@ import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -132,7 +130,7 @@ public class FinnSakerForInntektkontroll {
     }
 
     private boolean harIkkeUtførtKontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
-        LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
+        var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
         return kontrollertInntektTidslinje.intersection(new LocalDateInterval(fom, tom)).isEmpty();
     }
 

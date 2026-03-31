@@ -166,14 +166,15 @@ public class TilkjentYtelseRepository {
 
     }
 
-    public LocalDateTimeline<BigDecimal> hentKontrollerInntektTidslinje(Long behandlingId) {
+    public LocalDateTimeline<KontrollerteInntekter> hentKontrollerInntektTidslinje(Long behandlingId) {
         return hentKontrollertInntektPerioder(behandlingId)
             .stream()
             .flatMap(it -> it.getPerioder().stream())
             .map(p -> new LocalDateTimeline<>(
                 p.getPeriode().getFomDato(),
                 p.getPeriode().getTomDato(),
-                p.getInntekt())).reduce(LocalDateTimeline::crossJoin)
+                new KontrollerteInntekter(p.getInntekt(), p.getYtelse())))
+            .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
     }
 
