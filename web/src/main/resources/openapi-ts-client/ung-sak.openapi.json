@@ -345,7 +345,7 @@
             "items" : {
               "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1"
             },
-            "maxItems" : 800,
+            "maxItems" : 4680,
             "minItems" : 0,
             "type" : "array"
           }
