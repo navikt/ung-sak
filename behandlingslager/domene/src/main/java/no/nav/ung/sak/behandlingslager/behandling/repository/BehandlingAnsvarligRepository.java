@@ -60,6 +60,21 @@ public class BehandlingAnsvarligRepository {
             .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingId, Function.identity()));
     }
 
+    public Map<BehandlingDel, BehandlingAnsvarlig> hentBehandlingAnsvarlige(Long behandlingIder) {
+        return hentBehandlingAnsvarlige(List.of(behandlingIder))
+            .getOrDefault(behandlingIder, List.of())
+            .stream()
+            .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingDel, Function.identity()));
+    }
+
+    public Map<Long, List<BehandlingAnsvarlig>> hentBehandlingAnsvarlige(List<Long> behandlingIder) {
+        return entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingId in (:behandlingId)", BehandlingAnsvarlig.class)
+            .setParameter("behandlingId", behandlingIder)
+            .getResultList()
+            .stream()
+            .collect(Collectors.groupingBy(BehandlingAnsvarlig::getBehandlingId));
+    }
+
     public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
         setBehandlendeEnhet(behandlingId, BehandlingDel.SENTRAL, enhet, null);
     }

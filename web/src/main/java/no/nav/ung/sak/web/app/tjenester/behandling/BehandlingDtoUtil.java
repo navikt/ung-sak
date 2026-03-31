@@ -5,15 +5,21 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingAnsvarligDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
 import org.apache.http.client.utils.URIBuilder;
 
@@ -29,13 +35,14 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
 import no.nav.ung.sak.web.app.ApplicationConfig;
 import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
+import org.apache.kafka.common.compress.Lz4BlockOutputStream;
 
 public class BehandlingDtoUtil {
 
-    static void settStandardfelterUtvidet(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
+    static void settStandardfelterUtvidet(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
                                           boolean erBehandlingMedGjeldendeVedtak) {
-        setStandardfelter(behandling, behandlingAnsvarlig, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
-        dto.setAnsvarligBeslutter(behandlingAnsvarlig != null ? behandlingAnsvarlig.getAnsvarligBeslutter() : null);
+        setStandardfelter(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+
         dto.setBehandlingHenlagt(behandling.isBehandlingHenlagt());
     }
 
@@ -59,7 +66,7 @@ public class BehandlingDtoUtil {
         return Collections.emptyList();
     }
 
-    static void setStandardfelter(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
+    static void setStandardfelter(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
         if (behandlingVedtak != null) {
             dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
         }
@@ -79,12 +86,15 @@ public class BehandlingDtoUtil {
         dto.setGjeldendeVedtak(erBehandlingMedGjeldendeVedtak);
         dto.setBehandlingsfristTid(behandling.getBehandlingstidFrist());
         dto.setBehandlingPåVent(behandling.isBehandlingPåVent());
-        dto.setAnsvarligSaksbehandler( behandlingAnsvarlig != null? behandlingAnsvarlig.getAnsvarligSaksbehandler() : null);
-        dto.setToTrinnsBehandling(behandlingAnsvarlig != null && behandlingAnsvarlig.erTotrinnsBehandling());
-
         dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
-        dto.setBehandlendeEnhetId(behandlingAnsvarlig != null? behandlingAnsvarlig.getBehandlendeOrganisasjonsEnhet().getEnhetId() : null);
-        dto.setBehandlendeEnhetNavn(behandlingAnsvarlig != null? behandlingAnsvarlig.getBehandlendeOrganisasjonsEnhet().getEnhetNavn() : null);
+
+        BehandlingAnsvarlig behandlingAnsvarligSentralDel = behandlingAnsvarlige.get(BehandlingDel.SENTRAL);
+        dto.setAnsvarligSaksbehandler( behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getAnsvarligSaksbehandler() : null);
+        dto.setAnsvarligBeslutter(behandlingAnsvarligSentralDel != null ? behandlingAnsvarligSentralDel.getAnsvarligBeslutter() : null);
+        dto.setToTrinnsBehandling(behandlingAnsvarligSentralDel != null && behandlingAnsvarligSentralDel.erTotrinnsBehandling());
+        dto.setBehandlendeEnhetId(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetId() : null);
+        dto.setBehandlendeEnhetNavn(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetNavn() : null);
+
 
         dto.setFørsteÅrsak(førsteÅrsak(behandling).orElse(null));
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));
@@ -95,6 +105,21 @@ public class BehandlingDtoUtil {
             dto.setBehandlingStegTilstand(new BehandlingStegTilstandDto(st.getBehandlingSteg(), st.getBehandlingStegStatus(), st.getOpprettetTidspunkt()));
         });
 
+    }
+
+    private static Map<BehandlingDel, BehandlingAnsvarligDto> map(Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige){
+        return behandlingAnsvarlige.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> map(e.getValue())));
+    }
+
+    private static BehandlingAnsvarligDto map(BehandlingAnsvarlig behandlingAnsvarlig){
+        return new BehandlingAnsvarligDto(
+            behandlingAnsvarlig.getAnsvarligSaksbehandler(),
+            behandlingAnsvarlig.getAnsvarligBeslutter(),
+            behandlingAnsvarlig.getBehandlendeEnhet(),
+            behandlingAnsvarlig.getBehandlendeEnhetNavn(),
+            behandlingAnsvarlig.erTotrinnsBehandling()
+        );
     }
 
     private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling) {

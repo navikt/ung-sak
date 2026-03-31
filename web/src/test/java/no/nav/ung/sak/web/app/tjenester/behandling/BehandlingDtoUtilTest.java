@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -23,6 +24,8 @@ class BehandlingDtoUtilTest {
 
     Behandling behandling = Mockito.mock(Behandling.class);
     BehandlingAnsvarlig behandlingAnsvarlig = new BehandlingAnsvarlig(1L, BehandlingDel.SENTRAL);
+    Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige = Map.of(BehandlingDel.SENTRAL, behandlingAnsvarlig);
+
 
     @BeforeEach
     void setUp() {
@@ -34,7 +37,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of());
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.INGEN_RELEVANT_BEHANDLINGÅRSAK);
     }
@@ -44,7 +47,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.INGEN_RELEVANT_BEHANDLINGÅRSAK);
     }
@@ -54,7 +57,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_REGISTEROPPLYSNING));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.INGEN_RELEVANT_BEHANDLINGÅRSAK);
     }
@@ -64,7 +67,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.KONTROLL_AV_INNTEKT);
     }
@@ -74,7 +77,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.KONTROLL_AV_INNTEKT);
     }
@@ -84,7 +87,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.INGEN_RELEVANT_BEHANDLINGÅRSAK);
     }
@@ -97,7 +100,7 @@ class BehandlingDtoUtilTest {
         ));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.KONTROLL_AV_INNTEKT);
     }
@@ -114,7 +117,7 @@ class BehandlingDtoUtilTest {
         behandlingAnsvarlig.setBehandlendeEnhet(organisasjonsEnhet);
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.KONTROLL_AV_INNTEKT);
     }
@@ -124,7 +127,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.BEREGNING_AV_HØY_SATS);
     }
@@ -134,7 +137,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_FØDSEL));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.ENDRING_AV_BARNETILLEGG);
     }
@@ -144,7 +147,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.ENDRING_AV_BARNETILLEGG);
     }
@@ -157,7 +160,7 @@ class BehandlingDtoUtilTest {
         ));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.ENDRING_AV_BARNETILLEGG);
     }
@@ -167,7 +170,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.BRUKERS_DØDSFALL);
     }
@@ -177,7 +180,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.UNGDOMSPROGRAMENDRING);
     }
@@ -187,7 +190,7 @@ class BehandlingDtoUtilTest {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.UNGDOMSPROGRAMENDRING);
     }
@@ -200,7 +203,7 @@ class BehandlingDtoUtilTest {
         ));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.UNGDOMSPROGRAMENDRING);
     }
@@ -213,7 +216,7 @@ class BehandlingDtoUtilTest {
         ));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER);
     }
@@ -227,7 +230,7 @@ class BehandlingDtoUtilTest {
         ));
 
         BehandlingDto dto = new BehandlingDto();
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlig, dto, null, false);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
 
         assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.KONTROLL_AV_INNTEKT);
     }
