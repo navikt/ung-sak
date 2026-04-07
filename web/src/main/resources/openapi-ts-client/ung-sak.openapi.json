@@ -5601,6 +5601,55 @@
         },
         "required" : [ "ident" ],
         "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.task.ForvaltningTestTaskRestTjeneste.AntallGjenståendeTaskerForSakRequest" : {
+        "properties" : {
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "taskTyperSomIgnoreres" : {
+            "items" : {
+              "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+              "type" : "string"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.task.ForvaltningTestTaskRestTjeneste.EndreKlarTilKjørtRequests" : {
+        "properties" : {
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "taskTyperSomEndres" : {
+            "items" : {
+              "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+              "type" : "string"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.task.ForvaltningTestTaskRestTjeneste.ØkPrioritetTaskerForSakRequest" : {
+        "properties" : {
+          "nyMinimumPrioritet" : {
+            "format" : "int32",
+            "maximum" : 1000,
+            "minimum" : 0,
+            "type" : "integer"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "nyMinimumPrioritet" ],
+        "type" : "object"
       }
     }
   },
@@ -8937,6 +8986,106 @@
         },
         "summary" : "Brukes for produksjonsstyring",
         "tags" : [ "produksjonsstyring" ]
+      }
+    },
+    "/api/prosesstask-ung/antall-gjenstaaende-tasker-for-sak" : {
+      "post" : {
+        "description" : "Endrer tasker som er knyttet til sak via parametre fra å være klar til å være kjørt",
+        "operationId" : "antallGjenståendeTasker",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.task.ForvaltningTestTaskRestTjeneste.AntallGjenståendeTaskerForSakRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "500" : {
+            "description" : "Feilet pga ukjent feil eller tekniske/funksjonelle feil"
+          }
+        },
+        "tags" : [ "prosesstask" ]
+      }
+    },
+    "/api/prosesstask-ung/endre-klar-til-kjoert-alle-tasker" : {
+      "post" : {
+        "description" : "Endrer tasker som er knyttet til sak via parametre fra å være klar til å være kjørt",
+        "operationId" : "endreKlarTilKjørt",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "type" : "string"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "500" : {
+            "description" : "Feilet pga ukjent feil eller tekniske/funksjonelle feil"
+          }
+        },
+        "tags" : [ "prosesstask" ]
+      }
+    },
+    "/api/prosesstask-ung/endre-klar-til-kjoert-spesifikke-tasker" : {
+      "post" : {
+        "description" : "Endrer tasker som er knyttet til sak via parametre fra å være klar til å være kjørt",
+        "operationId" : "endreKlarTilKjørt_1",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.task.ForvaltningTestTaskRestTjeneste.EndreKlarTilKjørtRequests"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "500" : {
+            "description" : "Feilet pga ukjent feil eller tekniske/funksjonelle feil"
+          }
+        },
+        "tags" : [ "prosesstask" ]
+      }
+    },
+    "/api/prosesstask-ung/økPrioritet" : {
+      "post" : {
+        "description" : "Øker prioritet på tasker releatert til saksnummer",
+        "operationId" : "økPrioritet",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.task.ForvaltningTestTaskRestTjeneste.ØkPrioritetTaskerForSakRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "description" : "OK"
+          },
+          "500" : {
+            "description" : "Feilet pga ukjent feil eller tekniske/funksjonelle feil"
+          }
+        },
+        "tags" : [ "prosesstask" ]
       }
     },
     "/api/prosesstask/create" : {
