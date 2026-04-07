@@ -18,12 +18,16 @@ import java.time.YearMonth;
 public class LagTilkjentYtelse {
 
     private static final KontrollerteInntekter INGEN_INNTEKT = new KontrollerteInntekter(BigDecimal.ZERO, BigDecimal.ZERO);
+    private InntektsreduksjonKonfigurasjon inntektsreduksjonKonfigurasjon;
 
-    public static LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
+    public LagTilkjentYtelse(InntektsreduksjonKonfigurasjon inntektsreduksjonKonfigurasjon) {
+        this.inntektsreduksjonKonfigurasjon = inntektsreduksjonKonfigurasjon;
+    }
+
+    public LocalDateTimeline<TilkjentYtelsePeriodeResultat> lagTidslinje(LocalDateTimeline<YearMonth> månedsvisYtelseTidslinje,
                                                                                 LocalDateTimeline<Boolean> godkjentTidslinje,
                                                                                 LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
-                                                                                LocalDateTimeline<KontrollerteInntekter> kontrollerteInntekterTidslinje,
-                                                                                InntektsreduksjonKonfigurasjon konfigurasjon) {
+                                                                                LocalDateTimeline<KontrollerteInntekter> kontrollerteInntekterTidslinje) {
         if (godkjentTidslinje.isEmpty()) {
             return LocalDateTimeline.empty();
         }
@@ -44,7 +48,7 @@ public class LagTilkjentYtelse {
 
         return totalsatsTidslinje.combine(kontrollerteInntekterTidslinje, (di, sats, inntekter) -> {
                 final var inntekt = inntekter == null ? INGEN_INNTEKT : inntekter.getValue();
-                final var beregner = new ReduksjonBeregner(inntekt, konfigurasjon, di);
+                final var beregner = new ReduksjonBeregner(inntekt, inntektsreduksjonKonfigurasjon, di);
                 final var periodeResultat = TilkjentYtelseBeregner.beregn(di, sats.getValue(), beregner);
                 return new LocalDateSegment<>(di.getFomDato(), di.getTomDato(), periodeResultat);
             }, LocalDateTimeline.JoinStyle.LEFT_JOIN)

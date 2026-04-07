@@ -232,7 +232,7 @@ class LagTilkjentYtelseTest {
     private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
         final var inntektTidslinje = rapportertInntektTidslinje.mapValue(it -> new KontrollerteInntekter(it, BigDecimal.ZERO));
         final var konfigurasjon = new InntektsreduksjonKonfigurasjon(new BigDecimal("0.66"), new BigDecimal("0.66"));
-        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje.map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonth())))), godkjentTidslinje, totalsatsTidslinje, inntektTidslinje, konfigurasjon).mapValue(TilkjentYtelsePeriodeResultat::verdi);
+        return new LagTilkjentYtelse(konfigurasjon).lagTidslinje(godkjentTidslinje.map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonth())))), godkjentTidslinje, totalsatsTidslinje, inntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
 
