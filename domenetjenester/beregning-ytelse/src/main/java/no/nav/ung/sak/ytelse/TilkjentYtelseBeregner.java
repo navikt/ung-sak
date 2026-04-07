@@ -26,7 +26,7 @@ public class TilkjentYtelseBeregner {
     public static TilkjentYtelsePeriodeResultat beregn(LocalDateInterval periode, BeregnetSats sats, ReduksjonBeregner reduksjonBeregner) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(sats, "sats");
-        Objects.requireNonNull(reduksjonBeregner, "rapportertInntektBeregner");
+        Objects.requireNonNull(reduksjonBeregner, "reduksjonBeregner");
 
         if (!toYearMonth(periode.getFomDato()).equals(toYearMonth(periode.getTomDato()))) {
             throw new IllegalArgumentException("Periode må være innenfor samme måned");
