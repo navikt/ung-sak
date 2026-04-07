@@ -105,16 +105,6 @@ public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
         return sporing;
     }
 
-    private static LocalDateTimeline<Boolean> finnGodkjentUttakstidslinje(UngdomsytelseGrunnlag ungdomsytelseGrunnlag) {
-        return ungdomsytelseGrunnlag.getUttakPerioder()
-            .getPerioder()
-            .stream()
-            .filter(it -> it.getAvslagsårsak() == null)
-            .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
-            .reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
-    }
-
     private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<KontrollerteInntekter> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {
         final var rapporterteInntekterSomIkkeOverlapperYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeOverlappendeYtelseMåned(s, månedstidslinjeForYtelse)).toList();
         if (!rapporterteInntekterSomIkkeOverlapperYtelsesperiode.isEmpty()) {
