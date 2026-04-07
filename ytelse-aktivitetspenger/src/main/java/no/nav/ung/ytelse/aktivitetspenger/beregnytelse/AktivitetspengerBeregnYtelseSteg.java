@@ -11,7 +11,6 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.domene.behandling.steg.beregnytelse.BeregnYtelseSteg;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.ytelse.BeregnetSats;
