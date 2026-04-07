@@ -98,7 +98,7 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         return new LocalDateSegment<>(p,
             new EndringInntektPeriodeDto(
                 new PeriodeDto(p.getFomDato(), p.getTomDato()),
-                tilHeltall(rhs.getValue().inntekt()),
+                tilHeltall(Objects.requireNonNullElse(rhs.getValue().inntekt(), BigDecimal.ZERO)),
                 tilHeltall(ty.tilkjentBeløp()),
                 ufullstendigMåned)
         );
