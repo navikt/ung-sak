@@ -13,7 +13,7 @@ public class InformasjonsbrevVerifikasjon {
         Fødselsnummer: %s \
         %s\
         Med vennlig hilsen \
-        Nav Arbeid og ytelser \
+        Nav Tiltak Oslo \
         %s side av""";
 
     static String medHeaderOgFooter(String fnr, String body) {
