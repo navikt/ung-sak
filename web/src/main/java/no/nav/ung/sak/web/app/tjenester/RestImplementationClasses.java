@@ -1,6 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester;
 
 import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
+import no.nav.ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.abakus.IAYRegisterdataCallbackRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.aktør.AktørRestTjeneste;
@@ -18,6 +19,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.søknad.SøknadRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.ForutgåendeMedlemskapRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
@@ -82,6 +84,8 @@ public class RestImplementationClasses {
         classes.add(OppdragProxyRestTjeneste.class);
         classes.add(ArbeidsgiverRestTjeneste.class);
 
+        classes.add(AktivitetspengerRestTjeneste.class);
+        classes.add(ForutgåendeMedlemskapRestTjeneste.class);
 
         classes.add(KlageRestTjeneste.class);
 

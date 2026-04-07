@@ -17,11 +17,10 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Dependent
-@ScopedRestIntegration(scopeKey = "ung.brukerdialog.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog/.default")
+@ScopedRestIntegration(scopeKey = "ung.brukerdialog.api.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default")
 public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
 
     private final OidcRestClient restClient;
-    private final boolean oppgaverIUngBrukerdialogEnabled;
     private final URI opprettURI;
     private final URI utløpForTypeOgPeriodeURI;
     private final URI avbrytForTypeOgPeriodeURI;
@@ -33,10 +32,8 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
     @Inject
     public UngBrukerdialogOppgaveKlient(
         OidcRestClient restClient,
-        @KonfigVerdi(value = "OPPGAVER_I_UNGBRUKERDIALOG_ENABLED", defaultVerdi = "false") boolean oppgaverIUngBrukerdialogEnabled,
-        @KonfigVerdi(value = "ung.brukerdialog.url", defaultVerdi = "http://ung-brukerdialog.k9saksbehandling") String url) {
+        @KonfigVerdi(value = "ung.brukerdialog.api.url", defaultVerdi = "http://ung-brukerdialog-api.k9saksbehandling") String url) {
         this.restClient = restClient;
-        this.oppgaverIUngBrukerdialogEnabled = oppgaverIUngBrukerdialogEnabled;
         this.opprettURI = tilUri(url, "oppgavebehandling/opprett");
         this.avbrytURI = tilUri(url, "oppgavebehandling/sett-avbrutt");
         this.utløptURI = tilUri(url, "oppgavebehandling/sett-utlopt");
@@ -44,11 +41,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         this.avbrytForTypeOgPeriodeURI = tilUri(url, "oppgavebehandling/sett-avbrutt-for-type-og-periode");
         this.endreFristURI = tilUri(url, "oppgavebehandling/endre-frist");
         this.løsSøkYtelseBaseURI = tilUri(url, "oppgavebehandling/los-sok-ytelse");
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return oppgaverIUngBrukerdialogEnabled;
     }
 
     @Override

@@ -16,6 +16,8 @@ public enum BehandlingStegType implements Kodeverdi {
 
     BEREGN_YTELSE("BERYT", "Beregn ytelse", UTREDES),
     FATTE_VEDTAK("FVEDSTEG", "Fatte Vedtak", BehandlingStatus.FATTER_VEDTAK),
+    LOKALKONTOR_FORESLÅ_VILKÅR("LOKALKONTOR_FORESLÅ_VILKÅR_STEG", "Lokalkontor foreslå vilkår til beslutning", UTREDES),
+    LOKALKONTOR_BESLUTTER_VILKÅR("LOKALKONTOR_BESLUTTE_VILKÅR_STEG", "Lokalkontor beslutte vilkår", BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR),
     FORESLÅ_BEHANDLINGSRESULTAT("FORBRES", "Foreslå behandlingsresultat", UTREDES),
     FORESLÅ_VEDTAK("FORVEDSTEG", "Foreslå vedtak", UTREDES),
     VURDER_SØKNADSFRIST("VURDER_SØKNADSFRIST", "Vurder søknadsfrist", UTREDES),
@@ -36,17 +38,17 @@ public enum BehandlingStegType implements Kodeverdi {
 
     VURDER_BOSTED("VURDER_BOSTED", "Vurderer om bruker bor et sted ytelsen gjelder", UTREDES),
     VURDER_BISTANDSVILKÅR("VURDER_BISTANDSVILKÅR", "Vurder brukers behov om bistand ref 14a vedtak", UTREDES),
+    VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR("VURDER_FORUTGÅENDE_MEDLEMSKAP", "Vurder bosteder i søknad opp mot EØS-/trygdeavtaleland", UTREDES),
     AKTIVITETSPENGER_BEREGNING("AKTIVITETSPENGER_BEREGNING", "Beregner sats for aktivitetspenger", UTREDES),
 
-    // Utgåtte steg: Lagres på behandling og aksjonspunkt og kan ikke fjernes med mindre man håndterer dette i BehandlingStegTypeKodeverdiConverter
+    // Utgåtte steg: Lagres på behandling og aksjonspunkt og kan ikke fjernes med mindre man håndterer dette i BehandlingStegTypeKodeverdiConverter,
     @Deprecated
     KONTROLLER_UNGDOMSPROGRAM("KONTROLLER_UNGDOMSPROGRAM", "Utgått steg: Kontroller endring i ungdomsprogram", UTREDES),
 
 
     VURDER_FORMKRAV_KLAGE_FØRSTEINSTANS("VURDER_FK_UI", "Vurder formkrav (Vedtaksinstans)", UTREDES),
     VURDER_KLAGE_FØRSTEINSTANS("KLAGEUI", "Vurder Klage (Vedtaksinstans)", UTREDES),
-    OVERFØRT_NK("OVERFØRT_NK", "Overført til enhet for Klage-og ankebehandling", BehandlingStatus.FATTER_VEDTAK),
-    ;
+    OVERFØRT_NK("OVERFØRT_NK", "Overført til enhet for Klage-og ankebehandling", BehandlingStatus.FATTER_VEDTAK);
 
     private static final Map<String, BehandlingStegType> KODER = new LinkedHashMap<>();
 

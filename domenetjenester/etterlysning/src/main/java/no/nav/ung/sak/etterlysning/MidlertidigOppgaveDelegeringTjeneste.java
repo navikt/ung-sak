@@ -9,6 +9,7 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.typer.AktørId;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -49,5 +50,9 @@ public class MidlertidigOppgaveDelegeringTjeneste {
 
     public void løsSøkYtelseOppgave(AktørId aktørId) {
         instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.løsSøkYtelseOppgave(aktørId));
+    }
+
+    public void endreFrist(AktørId aktørId, UUID eksternReferanse, LocalDateTime frist) {
+        instanser.stream().filter(OppgaveForSaksbehandlingGrensesnitt::isEnabled).forEach(it -> it.endreFrist(aktørId, eksternReferanse, frist));
     }
 }

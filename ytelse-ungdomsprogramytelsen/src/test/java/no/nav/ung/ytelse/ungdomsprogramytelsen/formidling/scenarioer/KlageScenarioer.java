@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -12,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageFormkravAdapter;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingAdapter;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -114,7 +116,9 @@ public class KlageScenarioer {
             }
         );
 
-        klageBehandling.setAnsvarligSaksbehandler(BrevScenarioerUtils.SAKSBEHANDLER1_IDENT);
+
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories.behandlingAnsvarligRepository();
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(klageBehandling.getId(), BehandlingDel.SENTRAL, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
         behandlingRepository.lagre(klageBehandling, behandlingRepository.taSkriveLås(klageBehandling));

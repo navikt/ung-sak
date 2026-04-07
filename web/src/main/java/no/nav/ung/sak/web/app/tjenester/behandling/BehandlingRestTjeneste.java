@@ -35,6 +35,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -43,6 +44,8 @@ import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.behandling.steg.iverksettevedtak.HenleggBehandlingTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -97,6 +100,7 @@ public class BehandlingRestTjeneste {
 
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingsoppretterTjeneste behandlingsoppretterTjeneste;
     private FagsakTjeneste fagsakTjeneste;
     private HenleggBehandlingTjeneste henleggBehandlingTjeneste;
@@ -109,7 +113,7 @@ public class BehandlingRestTjeneste {
     }
 
     @Inject
-    public BehandlingRestTjeneste(BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, // NOSONAR
+    public BehandlingRestTjeneste(BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository, // NOSONAR
                                   BehandlingsoppretterTjeneste behandlingsoppretterTjeneste,
                                   BehandlingsprosessApplikasjonTjeneste behandlingsprosessTjeneste,
                                   FagsakTjeneste fagsakTjeneste,
@@ -117,6 +121,7 @@ public class BehandlingRestTjeneste {
                                   BehandlingDtoTjeneste behandlingDtoTjeneste,
                                   SjekkProsessering sjekkProsessering) {
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingsprosessTjeneste = behandlingsprosessTjeneste;
         this.behandlingsoppretterTjeneste = behandlingsoppretterTjeneste;
         this.fagsakTjeneste = fagsakTjeneste;
@@ -431,10 +436,11 @@ public class BehandlingRestTjeneste {
     @Operation(description = "Henter lovlige operasjoner på behandling for menyvalg", tags = "behandlinger")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public BehandlingOperasjonerDto hentLovligeBehandlingsoperasjoner(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-
         Behandling behandling = behandlingsprosessTjeneste.hentBehandling(behandlingUuid.getBehandlingUuid());
-
-        return behandlingDtoTjeneste.lovligeOperasjoner(behandling);
+        Long behandlingId = behandling.getId();
+        BehandlingAnsvarlig behandlingAnsvarligLokalDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.LOKAL).orElse(null);
+        BehandlingAnsvarlig behandlingAnsvarligSentralDel = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL).orElse(null);
+        return behandlingDtoTjeneste.lovligeOperasjoner(behandling, behandlingAnsvarligLokalDel, behandlingAnsvarligSentralDel);
     }
 
 

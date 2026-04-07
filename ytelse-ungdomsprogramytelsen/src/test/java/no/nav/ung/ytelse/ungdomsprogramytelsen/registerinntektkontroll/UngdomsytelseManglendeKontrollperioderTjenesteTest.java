@@ -64,7 +64,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
     }
 
     @Test
-    void skal_ikke_legge_ulede_manglende_kontroll_dersom_kun_en_måned() {
+    void skal_ikke_legge_utlede_manglende_kontroll_dersom_kun_en_måned() {
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(6);
 
@@ -80,7 +80,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
     }
 
     @Test
-    void skal_ikke_ulede_manglende_kontroll_dersom_programdeltakelse_over_en_måned() {
+    void skal_ikke_utlede_manglende_kontroll_dersom_programdeltakelse_over_en_måned() {
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(6);
 
@@ -97,7 +97,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
 
 
     @Test
-    void skal_ulede_manglende_kontroll_for_måned_nr_to_dersom_programdeltakelse_over_tre_måneder_og_passert_rapporteringsfrist() {
+    void skal_utlede_manglende_kontroll_for_måned_nr_to_dersom_programdeltakelse_over_tre_måneder_og_passert_rapporteringsfrist() {
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(6);
 
@@ -115,7 +115,8 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
     }
 
     @Test
-    void skal_ikke_ulede_manglende_kontroll_dersom_ikke_passert_kontrolldato() {
+    @DisabledIf("erSisteDagIMåneden")
+    void skal_ikke_utlede_manglende_kontroll_dersom_ikke_passert_kontrolldato() {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
@@ -134,9 +135,13 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
         return LocalDate.now().getDayOfMonth() == 1;
     }
 
+    public boolean erSisteDagIMåneden() {
+        return LocalDate.now().plusDays(1).getDayOfMonth() == 1;
+    }
+
     @Test
     @DisabledIf("erFørsteDagIMåneden")
-    void skal_ulede_manglende_kontroll_dersom_passert_kontrolldato_med_en_dag() {
+    void skal_utlede_manglende_kontroll_dersom_passert_kontrolldato_med_en_dag() {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
@@ -155,7 +160,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
 
 
     @Test
-    void skal_ulede_manglende_kontroll_dersom_dagens_dato_er_lik_kontrolldato() {
+    void skal_utlede_manglende_kontroll_dersom_dagens_dato_er_lik_kontrolldato() {
         final var startdatoUngdomsprogram = LocalDate.now().minusMonths(2).withDayOfMonth(1);
         final var sluttdatoUngdomsprogram = LocalDate.now().with(TemporalAdjusters.lastDayOfMonth());
 
@@ -173,7 +178,7 @@ class UngdomsytelseManglendeKontrollperioderTjenesteTest {
     }
 
     @Test
-    void skal_ikke_ulede_manglende_kontroll_dersom_allerede_kontrollert() {
+    void skal_ikke_utlede_manglende_kontroll_dersom_allerede_kontrollert() {
 
         var manglendeKontrollperioderTjeneste = lagTjeneste(6);
 

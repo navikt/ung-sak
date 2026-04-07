@@ -1,25 +1,22 @@
 package no.nav.ung.sak.behandlingslager.behandling;
 
-import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
-import jakarta.persistence.Converter;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 @Entity(name = "BehandlingAnsvarlig")
 @Table(name = "BEHANDLING_ANSVARLIG")
-public class BehandlingAnsvarlig extends BaseEntitet {
+public class BehandlingAnsvarlig extends no.nav.ung.sak.behandlingslager.BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEHANDLING_ANSVARLIG")
@@ -28,6 +25,9 @@ public class BehandlingAnsvarlig extends BaseEntitet {
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
+
+    @Column(name = "behandling_id", nullable = false, updatable = false)
+    private Long behandlingId;
 
     @Convert(converter = BehandlingDelKodeverdiConverter.class)
     @Column(name = "behandling_del", nullable = false)
@@ -55,20 +55,21 @@ public class BehandlingAnsvarlig extends BaseEntitet {
         // For JPA
     }
 
-    public BehandlingAnsvarlig(BehandlingDel behandlingDel) {
+    public BehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
+        this.behandlingId = behandlingId;
         this.behandlingDel = behandlingDel;
     }
 
-    public BehandlingAnsvarlig kopierBehandlendeEnhet() {
-        BehandlingAnsvarlig ba = new BehandlingAnsvarlig(behandlingDel);
+    public BehandlingAnsvarlig kopierBehandlendeEnhet(Long nyBehandlingId) {
+        BehandlingAnsvarlig ba = new BehandlingAnsvarlig(nyBehandlingId, behandlingDel);
         ba.behandlendeEnhet = this.behandlendeEnhet;
         ba.behandlendeEnhetNavn = this.behandlendeEnhetNavn;
         ba.behandlendeEnhetÅrsak = this.behandlendeEnhetÅrsak;
         return ba;
     }
 
-    public static List<BehandlingAnsvarlig> koperBehandlendeEnhet(Collection<BehandlingAnsvarlig> ansvarlige) {
-        return ansvarlige.stream().map(BehandlingAnsvarlig::kopierBehandlendeEnhet).toList();
+    public static List<BehandlingAnsvarlig> kopierBehandlendeEnhet(Long nyBehandligId, Collection<BehandlingAnsvarlig> ansvarlige) {
+        return ansvarlige.stream().map(it -> it.kopierBehandlendeEnhet(nyBehandligId)).toList();
     }
 
 
@@ -89,6 +90,9 @@ public class BehandlingAnsvarlig extends BaseEntitet {
     }
 
     public OrganisasjonsEnhet getBehandlendeOrganisasjonsEnhet() {
+        if (behandlendeEnhet == null){
+            throw new IllegalArgumentException("Behandlende enhet er ikke satt");
+        }
         return new OrganisasjonsEnhet(behandlendeEnhet, behandlendeEnhetNavn);
     }
 
@@ -112,8 +116,8 @@ public class BehandlingAnsvarlig extends BaseEntitet {
     }
 
     public void setBehandlendeEnhet(OrganisasjonsEnhet enhet) {
-        this.behandlendeEnhet = enhet.getEnhetId();
-        this.behandlendeEnhetNavn = enhet.getEnhetNavn();
+        this.behandlendeEnhet = enhet != null? enhet.getEnhetId() : null;
+        this.behandlendeEnhetNavn = enhet != null ? enhet.getEnhetNavn() : null;
     }
 
     public void setBehandlendeEnhetÅrsak(String behandlendeEnhetÅrsak) {
@@ -128,34 +132,8 @@ public class BehandlingAnsvarlig extends BaseEntitet {
         this.toTrinnsBehandling = toTrinnsBehandling;
     }
 
-    enum BehandlingDel {
-
-        HELE("HELE"),
-        DEL_1("DEL_1"),
-        DEL_2("DEL_2");
-
-        private final String kode;
-
-        BehandlingDel(String kode) {
-            this.kode = kode;
-        }
-
-        public String getKode() {
-            return kode;
-        }
-    }
-
-    @Converter(autoApply = true)
-    public static class BehandlingDelKodeverdiConverter implements AttributeConverter<BehandlingDel, String> {
-        @Override
-        public String convertToDatabaseColumn(BehandlingDel attribute) {
-            return attribute == null ? null : attribute.getKode();
-        }
-
-        @Override
-        public BehandlingDel convertToEntityAttribute(String dbData) {
-            return dbData == null ? null : Arrays.stream(BehandlingDel.values()).filter(it -> it.getKode().equals(dbData)).findFirst().orElseThrow();
-        }
+    public Long getBehandlingId() {
+            return behandlingId;
     }
 
 }

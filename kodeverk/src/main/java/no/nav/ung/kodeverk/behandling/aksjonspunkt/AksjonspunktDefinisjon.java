@@ -2,6 +2,7 @@ package no.nav.ung.kodeverk.behandling.aksjonspunkt;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -29,6 +30,16 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK,
         ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
+    LOKALKONTOR_BESLUTTER_VILKÅR(LOKALKONTOR_BESLUTTER_VILKÅR_KODE,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Lokalkontor beslutter vilkår",
+        Set.of(BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR, BehandlingStatus.UTREDES), BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR,
+        UTEN_VILKÅR,
+        SkjermlenkeType.LOKALKONTOR_BESLUTTER_VILKÅR,
+        ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
+
+    LOKALKONTOR_FORESLÅR_VILKÅR(AksjonspunktKodeDefinisjon.LOKALKONTOR_FORESLÅR_VILKÅR_KODE,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Lokalkontor foreslår vilkår", BehandlingStatus.UTREDES, BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR,
+        UTEN_VILKÅR, SkjermlenkeType.LOKALKONTOR_FORESLÅR_VILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
     SØKERS_OPPLYSNINGSPLIKT_MANU(
         AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU_KODE, AksjonspunktType.MANUELL,
@@ -65,14 +76,19 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
-        AksjonspunktType.MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
-        VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, ENTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
+        VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     // Gruppe : 60xx
     OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE,
         AksjonspunktType.SAKSBEHANDLEROVERSTYRING, "Overstyring av Søknadsfrist",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST, VilkårType.SØKNADSFRIST,
         SkjermlenkeType.SOEKNADSFRIST, TOTRINN, AVVENTER_SAKSBEHANDLER),
+
+    AVKLAR_GYLDIG_MEDLEMSKAP(
+        AksjonspunktKodeDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP_KODE, AksjonspunktType.MANUELL, "Avklar om bruker har gyldig medlemskap.",
+        BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET,
+        SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
     OVERSTYRING_AV_INNTEKT(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_INNTEKT_KODE,
         AksjonspunktType.OVERSTYRING, "Overstyring av intekt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT,
@@ -464,4 +480,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         return erUtgått;
     }
 
+    public BehandlingDel getBehandlingDel() {
+        return getAksjonspunktType().erLokalkontorAksjonspunkt() ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+    }
 }

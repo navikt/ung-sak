@@ -7,6 +7,60 @@
             Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du aktivitetspenger utenom lørdag og søndag.
         </p>
 
+        <h2>Hvorfor får du penger?</h2>
+        <p>Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning.</p>
+        <p>Pengene får du så lenge du får oppfølging fra Nav, og i inntil ett år.</p>
+
+        <p>Vedtaket er gjort etter </p>
+
+        {{#eq grunnsatsType "MINSTEYTELSE"}}
+            <p>
+                {{#if erHøySatstype}}
+                    Fordi du er over 25 år, har du rett på 2,041 ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
+                {{else}}
+                    Fordi du er under 25 år, har du rett på 2/3 av 2,041 ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
+                {{/if}}
+                Det vil si at du kan få opptil {{> felles/beløp minsteytelse}} i året.
+            </p>
+            <p>Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.</p>
+
+        {{else}}
+           {{#eq besteBeregningResultat "SNITT_SISTE_TRE_ÅR"}}
+                <p>
+                    Når vi har regnet ut hvor mye du får i aktivitetspenger,
+                    har vi brukt årsinntektene dine for de tre siste ferdiglignede årene og funnet gjennomsnittet av disse.
+                    Gjennomsnittet er på {{> felles/beløp beregnetPrAar}}.
+                </p>
+
+                <p>
+                    Vi har brukt denne summen fordi den er høyere enn minstesatsen for deg som er {{#if erHøySatstype}}OVER{{else}}UNDER{{/if}} 25 år,
+                    og høyere enn årsinntekten din i {{sisteLignedeÅr}}.
+                    Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
+                </p>
+            {{else eq besteBeregningResultat "SISTE_ÅR"}}
+                <p>
+                    Når vi har regnet ut hvor mye du får i aktivitetspenger,
+                    har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{> felles/beløp beregnetPrAar}}.
+                </p>
+
+                <p>
+                    Det er fordi denne inntekten er høyere enn minstesatsen for deg som er {{#if erHøySatstype}}OVER{{else}}UNDER{{/if}} 25 år,
+                    og høyere enn gjennomsnittet av årsinntekten din for de tre siste ferdiglignede årene.
+                    Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
+                </p>
+            {{/eq}}
+
+            <p>
+                For å finne dagsatsen din, har vi regnet ut hva 66 prosent av {{> felles/beløp beregnetPrAar}} er.
+                Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager.
+            </p>
+        {{/eq}}
+
+        <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
+        {{#if dagsatsBarnetillegg}}
+            Fordi du har et barn, får du i tillegg {{> felles/beløp dagsatsBarnetillegg}} per dag i barnetillegg.
+        {{/if}}
+
     {{/felles/seksjon/hoved}}
 
     {{> felles/footer/footer-vedtak }}

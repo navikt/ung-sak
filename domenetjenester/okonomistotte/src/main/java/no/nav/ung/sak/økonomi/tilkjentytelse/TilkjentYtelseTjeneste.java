@@ -8,12 +8,19 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import no.nav.k9.oppdrag.kontrakt.Saksnummer;
 import no.nav.k9.oppdrag.kontrakt.kodeverk.YtelseType;
-import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.*;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.InntrekkBeslutning;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelse;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseBehandlingInfoV1;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
+import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -30,7 +37,6 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-
 @Dependent
 public class TilkjentYtelseTjeneste {
 
@@ -40,24 +46,22 @@ public class TilkjentYtelseTjeneste {
     private TilkjentYtelseMaskerer maskerer = new TilkjentYtelseMaskerer(objectMapper).ikkeMaskerSats();
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private TilkjentYtelseUtleder tilkjentYtelseUtleder;
 
     private PersonopplysningRepository personopplysningRepository;
 
-    TilkjentYtelseTjeneste() {
-        // for CDI proxy
-    }
-
     @Inject
-    public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository,
+    public TilkjentYtelseTjeneste(BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                   BehandlingVedtakRepository behandlingVedtakRepository,
                                   TilbakekrevingRepository tilbakekrevingRepository,
                                   UngdomsytelseTilkjentYtelseUtleder utledTilkjentYtelse,
                                   PersonopplysningRepository personopplysningRepository
     ) {
         this.behandlingRepository = behandlingRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.tilkjentYtelseUtleder = utledTilkjentYtelse;
@@ -66,11 +70,12 @@ public class TilkjentYtelseTjeneste {
 
     public TilkjentYtelseBehandlingInfoV1 hentilkjentYtelseBehandlingInfo(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL).orElse(null);
         BehandlingVedtak vedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandlingId)
             .orElse(null);
 
         LocalDate dødsdato = hentBrukersDødsdato(behandling);
-        return mapBehandlingsinfo(behandling, vedtak, dødsdato);
+        return mapBehandlingsinfo(behandling, behandlingAnsvarlig, vedtak, dødsdato);
     }
 
     private LocalDate hentBrukersDødsdato(Behandling behandling) {
@@ -132,13 +137,13 @@ public class TilkjentYtelseTjeneste {
         return new InntrekkBeslutning(!erInntrekkDeaktivert);
     }
 
-    private TilkjentYtelseBehandlingInfoV1 mapBehandlingsinfo(Behandling behandling, BehandlingVedtak vedtak, LocalDate dødsdatoBruker) {
+    private TilkjentYtelseBehandlingInfoV1 mapBehandlingsinfo(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, BehandlingVedtak vedtak, LocalDate dødsdatoBruker) {
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
         info.setSaksnummer(new Saksnummer(behandling.getFagsak().getSaksnummer().getVerdi()));
         info.setBehandlingId(behandling.getUuid());
         info.setYtelseType(YtelseType.fraKode(behandling.getFagsakYtelseType().getKode()));
-        info.setAnsvarligSaksbehandler(vedtak == null ? behandling.getAnsvarligSaksbehandler() : vedtak.getAnsvarligSaksbehandler());
-        info.setBehandlendeEnhet(behandling.getBehandlendeEnhet());
+        info.setAnsvarligSaksbehandler(vedtak != null ? vedtak.getAnsvarligSaksbehandler() : (behandlingAnsvarlig != null ? behandlingAnsvarlig.getAnsvarligSaksbehandler() : null));
+        info.setBehandlendeEnhet(behandlingAnsvarlig != null ? behandlingAnsvarlig.getBehandlendeEnhet() : null);
         info.setAktørId(behandling.getAktørId().getId());
         info.setVedtaksdato(vedtak == null ? LocalDate.now() : vedtak.getVedtaksdato());
         info.setDødsdatoBruker(dødsdatoBruker);

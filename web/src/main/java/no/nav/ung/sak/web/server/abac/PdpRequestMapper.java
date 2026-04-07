@@ -40,7 +40,7 @@ public class PdpRequestMapper {
     }
 
     public static SaksinformasjonDto saksinformasjon(PdpRequest pdpRequest) {
-        String ansvarligSaksbehandler = pdpRequest.getAnsvarligSaksbehandler();
+        Set<String> ansvarligSaksbehandlere = pdpRequest.getAnsvarligSaksbehandlere();
         AbacBehandlingStatus behandlingStatus = Arrays.stream(AbacBehandlingStatus.values())
             .filter(v -> v.getEksternKode().equals(pdpRequest.getBehandlingStatusEksternKode()))
             .findFirst().orElse(null);
@@ -48,8 +48,8 @@ public class PdpRequestMapper {
             .filter(v1 -> v1.getEksternKode().equals(pdpRequest.getFagsakStatusEksternKode()))
             .findFirst().orElse(null);
         AbacFagsakYtelseType ytelseType = map(pdpRequest.getFagsakYtelseTyper(), pdpRequest.getResourceType());
-        return ansvarligSaksbehandler != null || behandlingStatus != null || fagsakStatus != null || ytelseType != null
-            ? new SaksinformasjonDto(ansvarligSaksbehandler, behandlingStatus, fagsakStatus, ytelseType)
+        return !ansvarligSaksbehandlere.isEmpty() || behandlingStatus != null || fagsakStatus != null || ytelseType != null
+            ? new SaksinformasjonDto(ansvarligSaksbehandlere, behandlingStatus, fagsakStatus, ytelseType)
             : null;
     }
 
@@ -85,10 +85,10 @@ public class PdpRequestMapper {
             case MANUELL -> AksjonspunktType.MANUELL;
             case OVERSTYRING -> AksjonspunktType.OVERSTYRING;
             case SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.SAKSBEHANDLEROVERSTYRING;
-            case DEL1_AUTOPUNKT -> AksjonspunktType.DEL1_AUTOPUNKT;
-            case DEL1_MANUELL -> AksjonspunktType.DEL1_MANUELL;
-            case DEL1_OVERSTYRING -> AksjonspunktType.DEL1_OVERSTYRING;
-            case DEL1_SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.DEL1_SAKSBEHANDLEROVERSTYRING;
+            case LOKALKONTOR_AUTOPUNKT -> AksjonspunktType.DEL1_AUTOPUNKT;
+            case LOKALKONTOR_MANUELL -> AksjonspunktType.DEL1_MANUELL;
+            case LOKALKONTOR_OVERSTYRING -> AksjonspunktType.DEL1_OVERSTYRING;
+            case LOKALKONTOR_SAKSBEHANDLEROVERSTYRING -> AksjonspunktType.DEL1_SAKSBEHANDLEROVERSTYRING;
             case UDEFINERT -> throw new IllegalStateException("Uforventet verdi: " + internAksjonspunktType);
         };
     }

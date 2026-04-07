@@ -1,22 +1,5 @@
 package no.nav.ung.sak.behandlingskontroll.impl;
 
-import static java.util.Collections.singletonList;
-import static no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_IVERKSETT_VEDTAK;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
@@ -60,6 +43,23 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakLås;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static java.util.Collections.singletonList;
+import static no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner.FREMHOPP_TIL_IVERKSETT_VEDTAK;
+
 @RequestScoped // må være RequestScoped sålenge ikke nøstet prosessering støttes.
 public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjeneste {
 
@@ -90,7 +90,6 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
      */
     @Inject
     public BehandlingskontrollTjenesteImpl(BehandlingskontrollServiceProvider serviceProvider) {
-
         this.serviceProvider = serviceProvider;
         this.behandlingRepository = serviceProvider.getBehandlingRepository();
         this.behandlingModellRepository = serviceProvider.getBehandlingModellRepository();
@@ -412,7 +411,6 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         Behandling.Builder behandlingBuilder = Behandling.nyBehandlingFor(fagsak, behandlingType);
         Behandling nyBehandling = behandlingBuilder.build();
         behandlingOppdaterer.accept(nyBehandling);
-
         BehandlingskontrollKontekst kontekst = this.initBehandlingskontroll(nyBehandling);
         this.opprettBehandling(kontekst, nyBehandling);
         return nyBehandling;
@@ -565,7 +563,6 @@ public class BehandlingskontrollTjenesteImpl implements BehandlingskontrollTjene
         BehandlingTransisjonEvent event = new BehandlingTransisjonEvent(kontekst, FREMHOPP_TIL_IVERKSETT_VEDTAK, stegTilstandFør.orElse(null), stegEtter, erOverhopp);
         eventPubliserer.fireEvent(event);
     }
-
 
 
     // TODO: (PK-49128) Midlertidig løsning for å filtrere aksjonspunkter til høyre for steg i hendelsemodul

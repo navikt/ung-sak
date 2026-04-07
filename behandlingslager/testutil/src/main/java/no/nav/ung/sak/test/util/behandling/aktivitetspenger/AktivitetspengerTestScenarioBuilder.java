@@ -5,28 +5,21 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
-import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -41,20 +34,16 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakLås;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakTestUtil;
+import no.nav.ung.sak.behandlingslager.fagsak.*;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.diff.DiffResult;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personas;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -68,14 +57,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Collections.singletonList;
@@ -125,6 +107,7 @@ public class AktivitetspengerTestScenarioBuilder {
     private BehandlingResultatType behandlingResultatType = BehandlingResultatType.IKKE_FASTSATT;
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
     private AktivitetspengerTestScenario aktivitetspengerTestscenario;
+    private final List<MottattDokumentTestGrunnlag> mottatteDokumenter = new ArrayList<>();
 
     private AktivitetspengerTestScenarioBuilder() {
         this.fagsakBuilder = FagsakBuilder
@@ -428,7 +411,12 @@ public class AktivitetspengerTestScenarioBuilder {
     }
 
     public Behandling lagre(EntityManager entityManager) {
-        return lagre(new BehandlingRepositoryProvider(entityManager));
+        var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        build(repositoryProvider);
+        if (!mottatteDokumenter.isEmpty()) {
+            lagreMottatteDokumenter(entityManager);
+        }
+        return behandling;
     }
 
     public Behandling lagre(BehandlingRepositoryProvider repositoryProvider) {
@@ -694,10 +682,6 @@ public class AktivitetspengerTestScenarioBuilder {
             behandlingBuilder.medBehandlingstidFrist(behandlingstidFrist);
         }
 
-        if (behandlendeEnhet != null) {
-            behandlingBuilder.medBehandlendeEnhet(new OrganisasjonsEnhet(behandlendeEnhet, null));
-        }
-
         behandlingBuilder.medBehandlingStatus(behandlingStatus);
 
         return behandlingBuilder;
@@ -812,6 +796,35 @@ public class AktivitetspengerTestScenarioBuilder {
     public AktivitetspengerTestScenarioBuilder medBehandlingType(BehandlingType behandlingType) {
         this.behandlingType = behandlingType;
         return this;
+    }
+
+    public Long getFagsakId() {
+        return fagsakId;
+    }
+
+    public AktivitetspengerTestScenarioBuilder medMottattDokument(MottattDokumentTestGrunnlag grunnlag) {
+        this.mottatteDokumenter.add(grunnlag);
+        return this;
+    }
+
+    private void lagreMottatteDokumenter(EntityManager entityManager) {
+        var repo = new MottatteDokumentRepository(entityManager);
+        for (var grunnlag : mottatteDokumenter) {
+            var dokument = new MottattDokument.Builder()
+                .medFagsakId(behandling.getFagsakId())
+                .medBehandlingId(behandling.getId())
+                .medType(grunnlag.brevkode())
+                .medPayload(grunnlag.payload())
+                .medMottattTidspunkt(grunnlag.mottattTidspunkt())
+                .build();
+            repo.lagre(dokument, DokumentStatus.GYLDIG);
+        }
+    }
+
+    public record MottattDokumentTestGrunnlag(Brevkode brevkode, String payload, LocalDateTime mottattTidspunkt) {
+        public MottattDokumentTestGrunnlag(Brevkode brevkode, String payload) {
+            this(brevkode, payload, LocalDateTime.now());
+        }
     }
 
     public AktivitetspengerTestScenarioBuilder leggTilVilkår(VilkårType vilkårType, Utfall utfall) {

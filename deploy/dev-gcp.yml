@@ -86,7 +86,7 @@ spec:
       rules:
         - application: sif-abac-pdp
         - application: ung-deltakelse-opplyser
-        - application: ung-brukerdialog
+        - application: ung-brukerdialog-api
         - application: ung-tilbake
         - application: kabal-api
           namespace: klage
@@ -206,10 +206,10 @@ spec:
       value: http://ung-deltakelse-opplyser
     - name: UNGDOMSPROGRAMREGISTER_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default
-    - name: UNG_BRUKERDIALOG_URL
-      value: http://ung-brukerdialog/ung/brukerdialog/api
-    - name: UNG_BRUKERDIALOG_SCOPE
-      value: api://dev-gcp.k9saksbehandling.ung-brukerdialog/.default
+    - name: UNG_BRUKERDIALOG_API_URL
+      value: http://ung-brukerdialog-api/ung/brukerdialog/intern/api
+    - name: UNG_BRUKERDIALOG_API_SCOPE
+      value: api://dev-gcp.k9saksbehandling.ung-brukerdialog-api/.default
     - name: UNG_TILBAKE_SCOPE
       value: api://dev-gcp.k9saksbehandling.ung-tilbake/.default
     - name: UNG_TILBAKE_URL
@@ -266,10 +266,6 @@ spec:
       value: "false"
     - name: BIGQUERY_ENABLED
       value: "true"
-    - name: HENT_INNTEKT_HENDELSER_ENABLED
-      value: "true"
-    - name: OPPFRISK_VED_INNKOMMENDE_INNTEKTSHENDELSE_ENABLED
-      value: "true"
     - name: KLAGE_ENABLED
       value: "true"
     - name: INTEGRASJON_KABAL
@@ -279,8 +275,10 @@ spec:
     - name: ENABLE_BREV_ANSVARLIG
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
-      value: "true"
-    - name: OPPGAVER_I_UNGBRUKERDIALOG_ENABLED
+      value: "false"
+    - name: OPPGAVER_I_UNG_DELTAKELSE_ENABLED
+      value: "false"
+    - name: AKTIVITETSPENGER_ENABLED
       value: "true"
 
 

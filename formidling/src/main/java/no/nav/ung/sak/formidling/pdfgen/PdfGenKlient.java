@@ -58,24 +58,30 @@ public class PdfGenKlient {
             return path;
         }
 
-        // 2. Sjekk target/pdfgen/  - brukes av maven tester
+        // 2. sjekk classpath - brukes av IDE
+        URL resource = getClass().getClassLoader().getResource(classpathSti);
+        if (resource != null) {
+            try {
+                log.info("Fant ikke pdfgen-ressurser på filsystemet på {}. Fant ressurs på classpath ({}). " +
+                    "Bør bare skje for test via IDE.", path.toAbsolutePath(), resource);
+                return Path.of(resource.toURI());
+            } catch (URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+        // 3. Sjekk target/pdfgen/  - brukes av maven tester
         Path targetPath = Path.of("target", classpathSti);
         if (Files.exists(targetPath)) {
             return targetPath;
         }
 
-        // 3. Fallback til classpath - brukes av IDE
-        log.info("Fant ikke pdfgen-ressurser på {} eller {}. Prøver classpath. " +
-            "Bør bare skje for test via IDE.", classpathSti, targetPath);
+        throw new IllegalArgumentException(
+            "Fant ikke pdfgen-ressurser. Forsøkte relativePath='%s', classpathSti='%s', targetPath='%s'"
+                .formatted(relativePath, classpathSti, targetPath)
+        );
 
-        URL resource = getClass().getClassLoader().getResource(classpathSti);
-        Objects.requireNonNull(resource, "Fant ingen pdfgen-ressurs på filsystem eller classpath: " + classpathSti);
-
-        try {
-            return Path.of(resource.toURI());
-        } catch (URISyntaxException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @WithSpan

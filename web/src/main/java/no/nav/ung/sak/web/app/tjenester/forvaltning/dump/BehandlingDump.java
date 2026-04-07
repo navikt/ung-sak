@@ -1,12 +1,5 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning.dump;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.function.Function;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
@@ -18,6 +11,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.CsvOutput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.function.Function;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -84,10 +83,6 @@ public class BehandlingDump implements DebugDumpFagsak {
             toCsv.put("aktoer_id", it -> it.getAktørId().getAktørId());
             toCsv.put("behandling_status", Behandling::getStatus);
             toCsv.put("behandling_resultat_type", Behandling::getBehandlingResultatType);
-            toCsv.put("ansvarlig_beslutter", Behandling::getAnsvarligBeslutter);
-            toCsv.put("ansvarlig_saksbehandler", Behandling::getAnsvarligSaksbehandler);
-            toCsv.put("behandlende_enhet", Behandling::getBehandlendeEnhet);
-            toCsv.put("behandlende_enhet_årsak", Behandling::getBehandlendeEnhetÅrsak);
             toCsv.put("behandling_steg", Behandling::getAktivtBehandlingSteg);
             toCsv.put("behandling_steg_status", Behandling::getBehandlingStegStatus);
             toCsv.put("behandling_steg_tilstand", Behandling::getBehandlingStegTilstand);

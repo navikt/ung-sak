@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.behandling.steg.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -10,7 +11,9 @@ import no.nav.ung.kodeverk.produksjonsstyring.OppgaveÅrsak;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.domene.vedtak.VedtakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.task.OpprettOppgaveForBehandlingSendtTilbakeTask;
@@ -50,6 +53,7 @@ public class FatteVedtakTjeneste {
     private OppgaveTjeneste oppgaveTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingVedtakTjeneste behandlingVedtakTjeneste;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     FatteVedtakTjeneste() {
         // for CDI proxy
@@ -59,16 +63,17 @@ public class FatteVedtakTjeneste {
     public FatteVedtakTjeneste(VedtakTjeneste vedtakTjeneste,
                                OppgaveTjeneste oppgaveTjeneste,
                                TotrinnTjeneste totrinnTjeneste,
-                               BehandlingVedtakTjeneste behandlingVedtakTjeneste) {
+                               BehandlingVedtakTjeneste behandlingVedtakTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.vedtakTjeneste = vedtakTjeneste;
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingVedtakTjeneste = behandlingVedtakTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public BehandleStegResultat fattVedtak(BehandlingskontrollKontekst kontekst, Behandling behandling) {
         verifiserBehandlingsresultat(behandling);
-        if (behandling.isToTrinnsBehandling()) {
+        if (behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)) {
 
             final var fatterVedtakAksjonspunkt = behandling.getAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.FATTER_VEDTAK);
 
@@ -77,7 +82,7 @@ public class FatteVedtakTjeneste {
                 return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FATTER_VEDTAK));
             }
 
-            Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
+            Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.SENTRAL);
             // Sjekker om vi har minst en ikke godkjent vurdering og om behandlingen skal flyttes tilbake
             if (sendesTilbakeTilSaksbehandler(totrinnaksjonspunktvurderinger)) {
                 if (!behandling.erYtelseBehandling()) {
@@ -93,7 +98,7 @@ public class FatteVedtakTjeneste {
                 throw new IllegalStateException("Kunne ikke fatte vedtak. Hadde aksjonspunkt med status " + fatterVedtakAksjonspunkt.get().getStatus() + " og totrinnsvurderinger: " + totrinnaksjonspunktvurderinger);
             }
         } else {
-            totrinnTjeneste.deaktiverTotrinnaksjonspunktvurderinger(behandling);
+            totrinnTjeneste.deaktiverTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.SENTRAL);
             vedtakTjeneste.lagHistorikkinnslagFattVedtak(behandling);
         }
 

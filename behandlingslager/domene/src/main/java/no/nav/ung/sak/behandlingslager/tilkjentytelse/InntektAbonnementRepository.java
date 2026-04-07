@@ -32,6 +32,7 @@ public class InntektAbonnementRepository {
     public void slettAbonnement(InntektAbonnement abonnement) {
         abonnement.setAktiv(false);
         entityManager.persist(abonnement);
+        entityManager.flush();
     }
 }
 

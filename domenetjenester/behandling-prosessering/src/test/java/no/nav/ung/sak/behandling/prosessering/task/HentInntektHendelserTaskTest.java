@@ -43,7 +43,6 @@ class HentInntektHendelserTaskTest {
             fagsakTjeneste,
             behandlingRepository,
             prosessTaskTjeneste,
-            false,
             "PT1M"
         );
     }

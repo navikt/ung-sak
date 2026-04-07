@@ -57,7 +57,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
     private Instance<EtterlysningOppretter> etterlysningOppretter;
     private Duration ventePeriode;
-    private boolean hentInntektHendelserEnabled;
 
 
     VurderKompletthetStegImpl() {
@@ -70,8 +69,7 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
                                      RapporteringsfristAutopunktUtleder rapporteringsfristAutopunktUtleder,
                                      RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder,
                                      @Any Instance<EtterlysningOppretter> etterlysningOppretter,
-                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
-                                     @KonfigVerdi(value = "HENT_INNTEKT_HENDELSER_ENABLED", required = false, defaultVerdi = "false") boolean hentInntektHendelserEnabled) {
+                                     @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.inntektAbonnentTjeneste = inntektAbonnentTjeneste;
@@ -79,7 +77,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
         this.etterlysningOppretter = etterlysningOppretter;
         this.ventePeriode = Duration.parse(ventePeriode);
-        this.hentInntektHendelserEnabled = hentInntektHendelserEnabled;
     }
 
     @Override
@@ -97,13 +94,11 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
             log.info("Behandling har ikke digital bruker, hopper over opprettelse av etterlysninger for endret programperiode og kontroll av inntekt.");
         }
 
-        if (hentInntektHendelserEnabled) {
-            LocalDateTimeline<Boolean> relevantekontrollperioder = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
-            if (relevantekontrollperioder.isEmpty()) {
-                log.info("Behandlingen har ingen relevante kontrollperioder for inntekt, hopper over opprettelse av inntekt abonnement.");
-            } else {
-                inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), new Periode(relevantekontrollperioder.getMinLocalDate(), relevantekontrollperioder.getMaxLocalDate()));
-            }
+        LocalDateTimeline<Boolean> relevantekontrollperioder = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId());
+        if (relevantekontrollperioder.isEmpty()) {
+            log.info("Behandlingen har ingen relevante kontrollperioder for inntekt, hopper over opprettelse av inntekt abonnement.");
+        } else {
+            inntektAbonnentTjeneste.opprettAbonnement(behandlingReferanse.getAktørId(), new Periode(relevantekontrollperioder.getMinLocalDate(), relevantekontrollperioder.getMaxLocalDate()));
         }
 
         // Steg 2: Utled aksjonspunkter
@@ -136,7 +131,6 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
     private static boolean harPassertFrist(LocalDateTime frist) {
         return frist != null && frist.isBefore(LocalDateTime.now());
     }
-
 
 
 }

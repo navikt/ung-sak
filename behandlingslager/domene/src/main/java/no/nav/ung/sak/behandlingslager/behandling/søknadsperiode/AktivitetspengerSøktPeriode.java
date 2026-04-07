@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 
@@ -19,7 +20,7 @@ import java.util.Objects;
 
 @Entity(name = "AktivitetspengerSøktPeriode")
 @Table(name = "akt_soekt_periode")
-public class AktivitetspengerSøktPeriode extends BaseEntitet {
+public class AktivitetspengerSøktPeriode extends BaseEntitet implements VurdertSøktPeriode.SøktPeriodeData {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_akt_soekt_periode")
@@ -60,8 +61,8 @@ public class AktivitetspengerSøktPeriode extends BaseEntitet {
         return behandlingId;
     }
 
-    public String getJournalpostId() {
-        return journalpostId;
+    public JournalpostId getJournalpostId() {
+        return new JournalpostId(journalpostId);
     }
 
     public DatoIntervallEntitet getPeriode() {
@@ -80,5 +81,11 @@ public class AktivitetspengerSøktPeriode extends BaseEntitet {
     @Override
     public int hashCode() {
         return Objects.hash(behandlingId, journalpostId, periode);
+    }
+
+    @Override
+    public <V> V getPayload() {
+        // skal returnere data til bruk ved komprimering av perioder
+        return null;
     }
 }

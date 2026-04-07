@@ -12,7 +12,6 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.fjernperiode.FjernetPeriodeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.brukerdialog.typer.AktørId;
@@ -52,12 +51,14 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
     private final URI løsSøkYtelseURI;
     private final URI opprettEndretPeriodeURI;
     private final URI endreFristURI;
+    private final Boolean oppgaverIUngDeltakelseEnabled;
 
     @Inject
     public UngOppgaveKlient(
         OidcRestClient restClient,
         Pdl pdl,
-        @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
+        @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url,
+        @KonfigVerdi(value = "OPPGAVER_I_UNG_DELTAKELSE_ENABLED", defaultVerdi = "false") boolean oppgaverIUngDeltakelseEnabled) {
         this.restClient = restClient;
         this.pdl = pdl;
         this.opprettKontrollerRegisterInntektURI = tilUri(url, "oppgave/opprett/kontroll/registerinntekt");
@@ -71,6 +72,12 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
         this.avbrytForTypeOgPeriodeURI = tilUri(url, "oppgave/avbrutt/forTypeOgPeriode");
         this.endreFristURI = tilUri(url, "oppgave/endre/frist");
         this.løsSøkYtelseURI = tilUri(url, "oppgave/los/sokytelse");
+        this.oppgaverIUngDeltakelseEnabled = oppgaverIUngDeltakelseEnabled;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return oppgaverIUngDeltakelseEnabled;
     }
 
     @Override
@@ -97,8 +104,6 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
                     restClient.post(opprettEndretSluttdatoURI, mapTilEndretSluttdatoOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 case EndretPeriodeDataDto d ->
                     restClient.post(opprettEndretPeriodeURI, mapTilEndretPeriodeOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
-                case FjernetPeriodeDataDto d ->
-                    restClient.post(opprettEndretPeriodeURI, mapTilFjernetPeriodeOppgaveDTO(deltakerIdent, oppgave.oppgaveReferanse(), oppgave.frist(), d));
                 default -> throw new IllegalArgumentException("Ukjent oppgavetypeData: " + oppgave.oppgavetypeData().getClass().getName());
             }
         } catch (Exception e) {
@@ -183,14 +188,6 @@ public class UngOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
             deltakerIdent, ref, frist,
             mapPeriode(d.nyPeriode()), mapPeriode(d.forrigePeriode()),
             d.endringer().stream().map(e -> PeriodeEndringType.valueOf(e.name())).collect(Collectors.toSet()));
-    }
-
-    private static EndretPeriodeOppgaveDTO mapTilFjernetPeriodeOppgaveDTO(String deltakerIdent, UUID ref, LocalDateTime frist, FjernetPeriodeDataDto d) {
-        PeriodeDTO forrigePeriode = new PeriodeDTO(d.forrigeStartdato(), d.forrigeSluttdato());
-        return new EndretPeriodeOppgaveDTO(
-            deltakerIdent, ref, frist,
-            null, forrigePeriode,
-            java.util.Set.of(PeriodeEndringType.FJERNET_PERIODE));
     }
 
     private EndreStatusDTO mapTilEndreStatusDTO(EndreOppgaveStatusDto dto) {

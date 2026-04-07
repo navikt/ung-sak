@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -34,6 +35,7 @@ public class RevurderingTjeneste {
     private Instance<GrunnlagKopierer> grunnlagKopierere;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     public RevurderingTjeneste() {
         // for CDI proxy
@@ -43,12 +45,15 @@ public class RevurderingTjeneste {
     public RevurderingTjeneste(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                RevurderingTjenesteFelles revurderingTjenesteFelles,
                                @Any Instance<GrunnlagKopierer> grunnlagKopierere,
-                               HistorikkinnslagRepository historikkinnslagRepository, ProsessTriggereRepository prosessTriggereRepository) {
+                               HistorikkinnslagRepository historikkinnslagRepository,
+                               ProsessTriggereRepository prosessTriggereRepository,
+                               BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.revurderingTjenesteFelles = revurderingTjenesteFelles;
         this.grunnlagKopierere = grunnlagKopierere;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public Behandling opprettManuellRevurdering(Behandling origBehandling, BehandlingÅrsakType revurderingsÅrsak, OrganisasjonsEnhet enhet, Optional<DatoIntervallEntitet> periode) {
@@ -78,9 +83,11 @@ public class RevurderingTjeneste {
         behandlingskontrollTjeneste.initBehandlingskontroll(origBehandling);
 
         // Opprett revurderingsbehandling
-        Behandling revurdering = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.REVURDERING, revurderingsÅrsak, origBehandling, manueltOpprettet, enhet);
+        Behandling revurdering = revurderingTjenesteFelles.opprettNyBehandling(BehandlingType.REVURDERING, revurderingsÅrsak, origBehandling, manueltOpprettet);
         BehandlingskontrollKontekst kontekst = behandlingskontrollTjeneste.initBehandlingskontroll(revurdering);
         behandlingskontrollTjeneste.opprettBehandling(kontekst, revurdering);
+
+        behandlingAnsvarligRepository.setBehandlendeEnhet(revurdering.getId(), enhet);
 
         // Kopier vilkår (samme vilkår vurderes i Revurdering)
         revurderingTjenesteFelles.kopierVilkårsresultat(origBehandling, revurdering, kontekst);

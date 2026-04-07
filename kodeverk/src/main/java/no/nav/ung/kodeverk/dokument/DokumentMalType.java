@@ -89,4 +89,12 @@ public enum DokumentMalType implements Kodeverdi {
         return ad.get();
     }
 
+
+    /**
+     * Denne er nødvendig siden enumen brukes som query parameter. Da brukes ikke jackson,
+     * men JAX-RS der denne metoden er konvensjon
+     */
+    public static DokumentMalType fromString(String value) {
+        return fraKode(value);
+    }
 }

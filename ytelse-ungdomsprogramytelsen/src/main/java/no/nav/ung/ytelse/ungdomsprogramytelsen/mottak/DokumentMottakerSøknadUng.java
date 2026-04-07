@@ -71,7 +71,7 @@ public class DokumentMottakerSøknadUng implements Dokumentmottaker {
     public List<Trigger> getTriggere(Collection<MottattDokument> mottattDokument) {
         return mottattDokument.stream().map(it -> søknadParser.parseSøknad(it))
             .map(it -> ((Ungdomsytelse) it.getYtelse()).getSøknadsperiode())
-            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE))
+            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.NY_SØKT_PERIODE))
             .toList();
     }
 

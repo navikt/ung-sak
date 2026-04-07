@@ -1,5 +1,24 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.kontrakt.ResourceLink;
+import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingAnsvarligDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
+import no.nav.ung.sak.web.app.ApplicationConfig;
+import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
+import org.apache.http.client.utils.URIBuilder;
+
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,29 +31,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
-import org.apache.http.client.utils.URIBuilder;
-
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.ung.sak.kontrakt.ResourceLink;
-import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
-import no.nav.ung.sak.web.app.ApplicationConfig;
-import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
-
 public class BehandlingDtoUtil {
 
-    static void settStandardfelterUtvidet(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
+    static void settStandardfelterUtvidet(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
                                           boolean erBehandlingMedGjeldendeVedtak) {
-        setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
-        dto.setAnsvarligBeslutter(behandling.getAnsvarligBeslutter());
+        setStandardfelter(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+
         dto.setBehandlingHenlagt(behandling.isBehandlingHenlagt());
     }
 
@@ -58,7 +60,7 @@ public class BehandlingDtoUtil {
         return Collections.emptyList();
     }
 
-    static void setStandardfelter(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
+    static void setStandardfelter(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
         if (behandlingVedtak != null) {
             dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
         }
@@ -78,12 +80,16 @@ public class BehandlingDtoUtil {
         dto.setGjeldendeVedtak(erBehandlingMedGjeldendeVedtak);
         dto.setBehandlingsfristTid(behandling.getBehandlingstidFrist());
         dto.setBehandlingPåVent(behandling.isBehandlingPåVent());
-        dto.setAnsvarligSaksbehandler(behandling.getAnsvarligSaksbehandler());
-        dto.setToTrinnsBehandling(behandling.isToTrinnsBehandling());
         dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
 
-        dto.setBehandlendeEnhetId(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId());
-        dto.setBehandlendeEnhetNavn(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
+        BehandlingAnsvarlig behandlingAnsvarligSentralDel = behandlingAnsvarlige.get(BehandlingDel.SENTRAL);
+        dto.setAnsvarligSaksbehandler( behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getAnsvarligSaksbehandler() : null);
+        dto.setAnsvarligBeslutter(behandlingAnsvarligSentralDel != null ? behandlingAnsvarligSentralDel.getAnsvarligBeslutter() : null);
+        dto.setToTrinnsBehandling(behandlingAnsvarligSentralDel != null && behandlingAnsvarligSentralDel.erTotrinnsBehandling());
+        dto.setBehandlendeEnhetId(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetId() : null);
+        dto.setBehandlendeEnhetNavn(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetNavn() : null);
+
+        dto.setBehandlingAnsvarlige(map(behandlingAnsvarlige));
 
         dto.setFørsteÅrsak(førsteÅrsak(behandling).orElse(null));
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));
@@ -94,6 +100,21 @@ public class BehandlingDtoUtil {
             dto.setBehandlingStegTilstand(new BehandlingStegTilstandDto(st.getBehandlingSteg(), st.getBehandlingStegStatus(), st.getOpprettetTidspunkt()));
         });
 
+    }
+
+    private static Map<BehandlingDel, BehandlingAnsvarligDto> map(Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige){
+        return behandlingAnsvarlige.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> map(e.getValue())));
+    }
+
+    private static BehandlingAnsvarligDto map(BehandlingAnsvarlig behandlingAnsvarlig){
+        return new BehandlingAnsvarligDto(
+            behandlingAnsvarlig.getAnsvarligSaksbehandler(),
+            behandlingAnsvarlig.getAnsvarligBeslutter(),
+            behandlingAnsvarlig.getBehandlendeEnhet(),
+            behandlingAnsvarlig.getBehandlendeEnhetNavn(),
+            behandlingAnsvarlig.erTotrinnsBehandling()
+        );
     }
 
     private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling) {

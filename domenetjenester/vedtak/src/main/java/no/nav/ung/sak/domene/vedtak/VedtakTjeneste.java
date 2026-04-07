@@ -2,6 +2,7 @@ package no.nav.ung.sak.domene.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -13,11 +14,16 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class VedtakTjeneste {
@@ -25,6 +31,7 @@ public class VedtakTjeneste {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     VedtakTjeneste() {
         // CDI
@@ -33,15 +40,18 @@ public class VedtakTjeneste {
     @Inject
     public VedtakTjeneste(HistorikkinnslagRepository historikkinnslagRepository,
                           BehandlingRepository behandlingRepository,
-                          TotrinnTjeneste totrinnTjeneste) {
+                          TotrinnTjeneste totrinnTjeneste, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingRepository = behandlingRepository;
         this.totrinnTjeneste = totrinnTjeneste;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public void lagHistorikkinnslagFattVedtak(Behandling behandling) {
-        if (behandling.isToTrinnsBehandling()) {
-            Collection<Totrinnsvurdering> totrinnsvurderings = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
+        boolean erTotrinn = behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL);
+
+        if (erTotrinn) {
+            Collection<Totrinnsvurdering> totrinnsvurderings = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, BehandlingDel.SENTRAL);
             if (sendesTilbakeTilSaksbehandler(totrinnsvurderings)) {
                 lagHistorikkInnslagVurderPåNytt(behandling, totrinnsvurderings);
                 return;
@@ -68,11 +78,13 @@ public class VedtakTjeneste {
     }
 
     private HistorikkAktør utledAktør(Behandling behandling) {
-        if (behandling.isToTrinnsBehandling()) {
+        boolean erTotrinn = behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL);
+        if (erTotrinn) {
             return HistorikkAktør.BESLUTTER;
         }
         var aksjonspunkt = behandling.getAksjonspunktForHvisFinnes(AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT.getKode());
-        if (aksjonspunkt.map(Aksjonspunkt::erUtført).orElse(false) && !Objects.equals(null, behandling.getAnsvarligSaksbehandler())) {
+        String ansvarligSaksbehandler = behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.SENTRAL);
+        if (aksjonspunkt.map(Aksjonspunkt::erUtført).orElse(false) && ansvarligSaksbehandler != null) {
             return HistorikkAktør.SAKSBEHANDLER;
         }
         return HistorikkAktør.VEDTAKSLØSNINGEN;

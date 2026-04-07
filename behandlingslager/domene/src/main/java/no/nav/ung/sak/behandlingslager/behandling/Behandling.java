@@ -17,6 +17,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegStatus;
@@ -28,7 +29,6 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -132,11 +132,6 @@ public class Behandling extends BaseEntitet {
     @JoinColumn(name = "behandling_id", nullable = false)
     @BatchSize(size = 20)
     private Set<BehandlingÅrsak> behandlingÅrsaker = new HashSet<>(2);
-
-    @OneToMany(cascade = {CascadeType.ALL}, orphanRemoval = true /* ok med orphanremoval siden behandlingAnsvarlig er eid av denne */)
-    @JoinColumn(name = "behandling_id", nullable = false)
-    @BatchSize(size = 20)
-    private List<BehandlingAnsvarlig> behandlingAnsvarlige = new ArrayList<>(2);
 
     @Version
     @Column(name = "versjon", nullable = false)
@@ -409,41 +404,6 @@ public class Behandling extends BaseEntitet {
             + ">"; //$NON-NLS-1$
     }
 
-    public void setBehandlingAnsvarlige(List<BehandlingAnsvarlig> behandlingAnsvarlige) {
-        guardTilstandPåBehandling();
-        this.behandlingAnsvarlige = new ArrayList<>(behandlingAnsvarlige);
-    }
-
-    public String getBehandlendeEnhetÅrsak() {
-        return getBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .map(BehandlingAnsvarlig::getBehandlendeEnhetÅrsak)
-            .orElse(null);
-    }
-
-    public void setBehandlendeEnhetÅrsak(String behandlendeEnhetÅrsak) {
-        guardTilstandPåBehandling();
-        getEllerOpprettBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .setBehandlendeEnhetÅrsak(behandlendeEnhetÅrsak);
-    }
-
-    public String getBehandlendeEnhet() {
-        return getBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .map(BehandlingAnsvarlig::getBehandlendeEnhet)
-            .orElse(null);
-    }
-
-    public void setBehandlendeEnhet(OrganisasjonsEnhet enhet) {
-        guardTilstandPåBehandling();
-        getEllerOpprettBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .setBehandlendeEnhet(enhet);
-    }
-
-    public OrganisasjonsEnhet getBehandlendeOrganisasjonsEnhet() {
-        return getBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .map(BehandlingAnsvarlig::getBehandlendeOrganisasjonsEnhet)
-            .orElse(null);
-    }
-
     public Fagsak getFagsak() {
         return fagsak;
     }
@@ -530,8 +490,8 @@ public class Behandling extends BaseEntitet {
             .anyMatch(aksjonspunktDefinisjon::equals);
     }
 
-    public boolean harAksjonspunktMedTotrinnskontroll() {
-        return getAksjonspunkterStream()
+    public boolean harAksjonspunktMedTotrinnskontroll(BehandlingDel behandlingDel) {
+        return getAksjonspunkterStream(behandlingDel)
             .anyMatch(a -> !a.erAvbrutt() && a.isToTrinnsBehandling());
     }
 
@@ -548,6 +508,11 @@ public class Behandling extends BaseEntitet {
         return aksjonspunkter.stream();
     }
 
+    private Stream<Aksjonspunkt> getAksjonspunkterStream(BehandlingDel behandlingDel) {
+        return aksjonspunkter.stream()
+            .filter(ap -> ap.getAksjonspunktDefinisjon().getBehandlingDel() == behandlingDel);
+    }
+
     private Stream<Aksjonspunkt> getÅpneAksjonspunkterStream() {
         return getAksjonspunkterStream()
             .filter(Aksjonspunkt::erÅpentAksjonspunkt);
@@ -560,68 +525,6 @@ public class Behandling extends BaseEntitet {
     public BehandlingStegStatus getBehandlingStegStatus() {
         BehandlingStegTilstand stegTilstand = getBehandlingStegTilstand().orElse(null);
         return stegTilstand == null ? null : stegTilstand.getBehandlingStegStatus();
-    }
-
-    public boolean isToTrinnsBehandling() {
-        return getBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .map(BehandlingAnsvarlig::erTotrinnsBehandling)
-            .orElse(false);
-    }
-
-    public void setToTrinnsBehandling() {
-        guardTilstandPåBehandling();
-        getEllerOpprettBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .setToTrinnsBehandling(true);
-    }
-
-    public void nullstillToTrinnsBehandling() {
-        guardTilstandPåBehandling();
-        BehandlingAnsvarlig bhandlingAnsvarlig = getEllerOpprettBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE);
-        bhandlingAnsvarlig.setToTrinnsBehandling(false);
-        bhandlingAnsvarlig.setAnsvarligBeslutter(null);
-    }
-
-    public String getAnsvarligSaksbehandler() {
-        return getBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .map(BehandlingAnsvarlig::getAnsvarligSaksbehandler)
-            .orElse(null);
-    }
-
-    public void setAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
-        guardTilstandPåBehandling();
-        getEllerOpprettBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .setAnsvarligSaksbehandler(ansvarligSaksbehandler);
-    }
-
-    private BehandlingAnsvarlig getEllerOpprettBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel behandlingDel){
-        BehandlingAnsvarlig behandlingAnsvarlig = getBehandlingAnsvarlig(behandlingDel).orElse(null);
-        if (behandlingAnsvarlig == null){
-            behandlingAnsvarlig = new BehandlingAnsvarlig(behandlingDel);
-            behandlingAnsvarlige.add(behandlingAnsvarlig);
-        }
-        return behandlingAnsvarlig;
-    }
-
-    public List<BehandlingAnsvarlig> getBehandlingAnsvarlige() {
-        return behandlingAnsvarlige;
-    }
-
-    private Optional<BehandlingAnsvarlig> getBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel behandlingDel) {
-        return behandlingAnsvarlige.stream()
-            .filter(it -> it.getBehandlingDel().equals(behandlingDel))
-            .findFirst();
-    }
-
-    public String getAnsvarligBeslutter() {
-        return getBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .map(BehandlingAnsvarlig::getAnsvarligBeslutter)
-            .orElse(null);
-    }
-
-    public void setAnsvarligBeslutter(String ansvarligBeslutter) {
-        getEllerOpprettBehandlingAnsvarlig(BehandlingAnsvarlig.BehandlingDel.HELE)
-            .setAnsvarligBeslutter(ansvarligBeslutter);
-        guardTilstandPåBehandling();
     }
 
     public boolean isBehandlingHenlagt() {
@@ -748,10 +651,6 @@ public class Behandling extends BaseEntitet {
         private LocalDateTime opprettetDato;
         private LocalDateTime avsluttetDato;
 
-        private String behandlendeEnhet;
-        private String behandlendeEnhetNavn;
-        private String behandlendeEnhetÅrsak;
-
         private LocalDate behandlingstidFrist = LocalDate.now().plusWeeks(6);
 
         private BehandlingÅrsak.Builder behandlingÅrsakBuilder;
@@ -805,17 +704,6 @@ public class Behandling extends BaseEntitet {
             return this;
         }
 
-        public Builder medBehandlendeEnhet(OrganisasjonsEnhet enhet) {
-            this.behandlendeEnhet = enhet.getEnhetId();
-            this.behandlendeEnhetNavn = enhet.getEnhetNavn();
-            return this;
-        }
-
-        public Builder medBehandlendeEnhetÅrsak(String behandlendeEnhetÅrsak) {
-            this.behandlendeEnhetÅrsak = behandlendeEnhetÅrsak;
-            return this;
-        }
-
         public Builder medBehandlingstidFrist(LocalDate frist) {
             this.behandlingstidFrist = frist;
             return this;
@@ -837,7 +725,6 @@ public class Behandling extends BaseEntitet {
             if (forrigeBehandling != null) {
                 behandling = new Behandling(forrigeBehandling.getFagsak(), behandlingType);
                 behandling.originalBehandlingId = forrigeBehandling.getId();
-                behandling.setBehandlingAnsvarlige(BehandlingAnsvarlig.koperBehandlendeEnhet(forrigeBehandling.getBehandlingAnsvarlige()));
                 if (behandlingstidFrist != null) {
                     behandling.behandlingstidFrist = behandlingstidFrist;
                 } else {
@@ -845,8 +732,6 @@ public class Behandling extends BaseEntitet {
                 }
             } else {
                 behandling = new Behandling(fagsak, behandlingType);
-                behandling.setBehandlendeEnhet(new OrganisasjonsEnhet(behandlendeEnhet, behandlendeEnhetNavn));
-                behandling.setBehandlendeEnhetÅrsak(behandlendeEnhetÅrsak);
                 behandling.behandlingstidFrist = behandlingstidFrist;
             }
 

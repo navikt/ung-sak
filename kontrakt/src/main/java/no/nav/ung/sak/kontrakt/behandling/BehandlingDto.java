@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonAlias;
@@ -22,6 +23,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -44,6 +46,7 @@ public class BehandlingDto {
     @JsonProperty(value = "ansvarligSaksbehandler")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     private String ansvarligSaksbehandler;
 
     @JsonInclude(value = Include.NON_NULL)
@@ -54,12 +57,14 @@ public class BehandlingDto {
     @JsonProperty(value = "behandlendeEnhetId")
     @Size(max = 20)
     @Pattern(regexp = "^[\\p{Alnum}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     private String behandlendeEnhetId;
 
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "behandlendeEnhetNavn")
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     private String behandlendeEnhetNavn;
 
     @JsonProperty(value = "behandlingÅrsaker")
@@ -164,6 +169,7 @@ public class BehandlingDto {
     private BehandlingStegTilstandDto stegTilstand;
 
     @JsonProperty(value = "toTrinnsBehandling")
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     private boolean toTrinnsBehandling;
 
     @JsonProperty(value = "type", required = true)
@@ -192,6 +198,7 @@ public class BehandlingDto {
     @JsonProperty("ansvarligBeslutter")
     @Size(max = 100000)
     @Pattern(regexp = "^[\\p{Alnum}\\p{Space}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     private String ansvarligBeslutter;
 
     @JsonProperty(value = "behandlingHenlagt")
@@ -209,6 +216,11 @@ public class BehandlingDto {
     @Max(Long.MAX_VALUE)
     private Long versjon;
 
+    @NotNull
+    @JsonProperty(value = "behandlingAnsvarlige", required = true)
+    @Size(min = 0, max = 2)
+    private Map<BehandlingDel, BehandlingAnsvarligDto> behandlingAnsvarlige;
+
     public BehandlingVisningsnavn getVisningsnavn() {
         return visningsnavn;
     }
@@ -217,6 +229,7 @@ public class BehandlingDto {
         this.visningsnavn = visningsnavn;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public String getAnsvarligSaksbehandler() {
         return ansvarligSaksbehandler;
     }
@@ -225,10 +238,12 @@ public class BehandlingDto {
         return avsluttet;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public String getBehandlendeEnhetId() {
         return behandlendeEnhetId;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public String getBehandlendeEnhetNavn() {
         return behandlendeEnhetNavn;
     }
@@ -299,6 +314,7 @@ public class BehandlingDto {
         return status;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public boolean getToTrinnsBehandling() {
         return toTrinnsBehandling;
     }
@@ -343,6 +359,7 @@ public class BehandlingDto {
         links.add(link);
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public void setAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
         this.ansvarligSaksbehandler = ansvarligSaksbehandler;
     }
@@ -351,10 +368,12 @@ public class BehandlingDto {
         this.avsluttet = avsluttet;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public void setBehandlendeEnhetId(String behandlendeEnhetId) {
         this.behandlendeEnhetId = behandlendeEnhetId;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public void setBehandlendeEnhetNavn(String behandlendeEnhetNavn) {
         this.behandlendeEnhetNavn = behandlendeEnhetNavn;
     }
@@ -443,6 +462,7 @@ public class BehandlingDto {
         this.status = status;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public void setToTrinnsBehandling(boolean toTrinnsBehandling) {
         this.toTrinnsBehandling = toTrinnsBehandling;
     }
@@ -468,6 +488,7 @@ public class BehandlingDto {
         this.behandlingKøet = behandlingKøet;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public String getAnsvarligBeslutter() {
         return ansvarligBeslutter;
     }
@@ -480,6 +501,7 @@ public class BehandlingDto {
         return behandlingHenlagt;
     }
 
+    @Deprecated(forRemoval = true, since = "2026-03-31") //bruk behandlingAnsvarlige istedet
     public void setAnsvarligBeslutter(String ansvarligBeslutter) {
         this.ansvarligBeslutter = ansvarligBeslutter;
     }
@@ -494,6 +516,14 @@ public class BehandlingDto {
 
     public void setTaskStatus(AsyncPollingStatus taskStatus) {
         this.taskStatus = taskStatus;
+    }
+
+    public Map<BehandlingDel, BehandlingAnsvarligDto> getBehandlingAnsvarlige() {
+        return behandlingAnsvarlige;
+    }
+
+    public void setBehandlingAnsvarlige(Map<BehandlingDel, BehandlingAnsvarligDto> behandlingAnsvarlige) {
+        this.behandlingAnsvarlige = behandlingAnsvarlige;
     }
 
     @Override

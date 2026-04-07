@@ -43,7 +43,7 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
             resultater.add(DetaljertResultatForPeriodeUtleder.kontrollerInntektDetaljertResultat(tilkjentYtelse));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE)
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PERIODE)
             || vilkårResultat.manuellOpprettetBehandling() && relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
             resultater.add(DetaljertResultatForPeriodeUtleder.nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
