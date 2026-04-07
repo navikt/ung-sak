@@ -80,28 +80,4 @@ public class TilkjentYtelseBeregner {
         return tilkjentBeløp.multiply(BigDecimal.valueOf(100)).divide(avrundetGrunnsatsMedBarnetillegg, 10, RoundingMode.HALF_UP);
     }
 
-    public static <V> LocalDateTimeline<BeregnetSats> mapSatserTilTotalbeløpForPerioder(
-        LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
-        LocalDateTimeline<V> ytelseTidslinje) {
-        final var mappetTidslinje = ytelseTidslinje.map(mapTotaltSatsbeløpForSegment(satsTidslinje));
-        return mappetTidslinje;
-    }
-
-    private static <V> Function<LocalDateSegment<V>, List<LocalDateSegment<BeregnetSats>>> mapTotaltSatsbeløpForSegment(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {
-        return (inntektSegment) -> {
-            var delTidslinje = satsTidslinje.intersection(inntektSegment.getLocalDateInterval());
-            final BeregnetSats totatSatsbeløpForPeriode = reduser(delTidslinje);
-            return List.of(new LocalDateSegment<>(inntektSegment.getFom(), inntektSegment.getTom(), totatSatsbeløpForPeriode));
-        };
-    }
-
-    private static BeregnetSats reduser(LocalDateTimeline<UngdomsytelseSatser> delTidslinje) {
-        return delTidslinje.stream().reduce(BeregnetSats.ZERO, TilkjentYtelseBeregner::reduserSegmenterIDelTidslinje, BeregnetSats::adder);
-    }
-
-    private static BeregnetSats reduserSegmenterIDelTidslinje(BeregnetSats beregnetSats, LocalDateSegment<UngdomsytelseSatser> s2) {
-        final var antallVirkedager = Virkedager.beregnAntallVirkedager(s2.getFom(), s2.getTom());
-        final var bergnetForSegment = new BeregnetSats(s2.getValue().dagsats(), s2.getValue().dagsatsBarnetillegg()).multipliser(antallVirkedager);
-        return beregnetSats.adder(bergnetForSegment);
-    }
 }

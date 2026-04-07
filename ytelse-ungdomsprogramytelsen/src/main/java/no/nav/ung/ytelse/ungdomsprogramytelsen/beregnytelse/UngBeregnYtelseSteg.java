@@ -64,7 +64,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);
 
         final var satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
-        final var totalsatsTidslinje = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
+        final var totalsatsTidslinje = TotalbeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
         final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
 
         // Utfør reduksjon og map til tilkjent ytelse

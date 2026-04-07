@@ -32,6 +32,7 @@ import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
 import no.nav.ung.sak.ytelse.ReduksjonBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse.TotalbeløpForPeriodeMapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -75,7 +76,7 @@ public class BrevScenarioerUtils {
 
     static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektHolder) {
         LocalDateTimeline<Boolean> ytelseTidslinje = splitPrMåned(new LocalDateTimeline<>(tilkjentPeriode, true));
-        LocalDateTimeline<BeregnetSats> beregnetSats = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
+        LocalDateTimeline<BeregnetSats> beregnetSats = TotalbeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
         return beregnetSats.intersection(ytelseTidslinje).combine(kontrollerInntektHolder,
             (s, lhs, rhs) -> {
                 var inntekt = rhs != null ? bestemInntekt(rhs.getValue()) : BigDecimal.ZERO;
