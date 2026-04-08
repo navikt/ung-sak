@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveType;
 import no.nav.ung.sak.typer.AktørId;
@@ -26,16 +26,16 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
     public static final String PERIODE_FOM = "fom";
     public static final String PERIODE_TOM = "tom";
 
-    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
 
 
     SettOppgaveUtløptForInntektsrapporteringTask() {
     }
 
     @Inject
-    public SettOppgaveUtløptForInntektsrapporteringTask(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste) {
+    public SettOppgaveUtløptForInntektsrapporteringTask(UngBrukerdialogOppgaveKlient oppgaveKlient) {
 
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
     }
 
 
@@ -44,7 +44,7 @@ public class SettOppgaveUtløptForInntektsrapporteringTask implements ProsessTas
         final var aktørId = new AktørId(prosessTaskData.getAktørId());
         final var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM), DateTimeFormatter.ISO_LOCAL_DATE);
         final var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM), DateTimeFormatter.ISO_LOCAL_DATE);
-        delegeringTjeneste.settOppgaveTilUtløpt(new EndreOppgaveStatusDto(
+        oppgaveKlient.settOppgaveTilUtløpt(new EndreOppgaveStatusDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             OppgaveType.RAPPORTER_INNTEKT,
             fom,

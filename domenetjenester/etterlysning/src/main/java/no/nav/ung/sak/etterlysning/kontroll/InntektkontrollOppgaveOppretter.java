@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
@@ -25,17 +25,17 @@ import java.util.stream.Collectors;
 @Dependent
 public class InntektkontrollOppgaveOppretter {
 
-    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final RapportertInntektMapper rapportertInntektMapper;
     private final ArbeidsgiverTjeneste arbeidsgiverTjeneste;
     private final RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     @Inject
-    public InntektkontrollOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+    public InntektkontrollOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                            RapportertInntektMapper rapportertInntektMapper,
                                            ArbeidsgiverTjeneste arbeidsgiverTjeneste,
                                            RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
         this.rapportertInntektMapper = rapportertInntektMapper;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
         this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
@@ -46,7 +46,7 @@ public class InntektkontrollOppgaveOppretter {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
             .map(mapTilDto(behandling.getId(), aktørId, relevantKontrolltidslinje, ytelsetype))
-            .forEach(delegeringTjeneste::opprettOppgave);
+            .forEach(oppgaveKlient::opprettOppgave);
     }
 
     private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId,
