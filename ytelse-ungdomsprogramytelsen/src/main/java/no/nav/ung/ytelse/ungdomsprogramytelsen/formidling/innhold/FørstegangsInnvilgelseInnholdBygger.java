@@ -24,8 +24,8 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregn
 import no.nav.ung.sak.formidling.vedtak.regler.SatsEndring;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;

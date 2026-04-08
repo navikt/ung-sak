@@ -35,8 +35,8 @@ public class KontrollerInntektInputMapper {
         var eksisterendeEtterlysningOgGrunnlagTidslinje = finnGjeldendeEtterlysningTidslinje(eksisterendeEtterlysninger, behandlingReferanse);
 
         return new KontrollerInntektInput(
-            markertOgRelevantForKontrollTidslinje.mapValue(it -> true),
-            relevantForKontrollTidslinje,
+            markertOgRelevantForKontrollTidslinje.mapValue(_ -> true),
+            relevantForKontrollTidslinje.mapValue(_ -> true),
             rapporterteInntekterTidslinje,
             eksisterendeEtterlysningOgGrunnlagTidslinje
         );
