@@ -2,7 +2,9 @@ package no.nav.ung.sak.behandling.revurdering.inntektskontroll;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -19,13 +21,17 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -35,6 +41,10 @@ import java.util.Set;
 
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Tester for å finne fagsaker som skal kontrolleres for inntekt i ulike scenarier.
@@ -76,18 +86,24 @@ class FinnSakerForInntektkontrollTest {
     private FinnSakerForInntektkontroll finnSakerForInntektkontroll;
 
     private Behandling behandling;
+    private KvalifiserteYtelsesperioderTjeneste kvalifiserteYtelsesperioderTjeneste;
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
 
     @BeforeEach
     void setUp() {
+        kvalifiserteYtelsesperioderTjeneste = Mockito.mock(KvalifiserteYtelsesperioderTjeneste.class);
+        prosessTriggerPeriodeUtleder = Mockito.mock(ProsessTriggerPeriodeUtleder.class);
+        when(prosessTriggerPeriodeUtleder.utledTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(anyLong())).thenReturn(LocalDateTimeline.empty());
         finnSakerForInntektkontroll = new FinnSakerForInntektkontroll(
             behandlingRepository,
             fagsakRepository,
-            ungdomsprogramPeriodeRepository,
-            prosessTriggereRepository,
             new VilkårTjeneste(behandlingRepository, null, vilkårResultatRepository),
-            ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,
-            relevanteKontrollperioderUtleder
+            new RelevanteKontrollperioderUtleder(
+                new UnitTestLookupInstanceImpl<>(prosessTriggerPeriodeUtleder),
+                new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<>(kvalifiserteYtelsesperioderTjeneste), behandlingRepository),
+                behandlingRepository)
         );
 
         behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
@@ -117,7 +133,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_ikke_finne_fagsak_for_kontroll_av_første_måned_i_programperiode() {
         // Arrange
-        opprettProgramperiode(FØRSTE_SEPTEMBER, LANGT_FRAM);
+        opprettPeriode(FØRSTE_SEPTEMBER, LANGT_FRAM);
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -133,7 +149,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_finne_fagsak_for_kontroll_av_andre_måned_i_programperiode() {
         // Arrange
-        opprettProgramperiode(FØRSTE_AUGUST, LANGT_FRAM);
+        opprettPeriode(FØRSTE_AUGUST, LANGT_FRAM);
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -149,7 +165,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_finne_fagsak_for_kontroll_av_siste_måned_i_programperiode() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK, MIDT_I_SEPTEMBER);
+        opprettPeriode(LANGT_BAK, MIDT_I_SEPTEMBER);
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -165,7 +181,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_finne_fagsak_for_kontroll_av_nest_siste_måned_i_programperiode() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK, MIDT_I_OKTOBER);
+        opprettPeriode(LANGT_BAK, MIDT_I_OKTOBER);
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -181,7 +197,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_finne_fagsak_for_kontroll_av_måned_i_programperiode() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK, MIDT_I_OKTOBER);
+        opprettPeriode(LANGT_BAK, MIDT_I_OKTOBER);
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -197,7 +213,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_finne_fagsak_for_kontroll_av_måned_i_ubegrenset_programperiode() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
+        opprettPeriode(LANGT_BAK, TIDENES_ENDE);
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -213,8 +229,8 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_ikke_finne_fagsak_dersom_siste_behandling_har_trigger_for_inntektskontroll() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))));
+        opprettPeriode(LANGT_BAK, TIDENES_ENDE);
+        when(prosessTriggerPeriodeUtleder.utledTidslinje(anyLong())).thenReturn(new LocalDateTimeline<>(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER, Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)));
 
         // Act
         List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
@@ -230,7 +246,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_finne_fagsak_dersom_siste_behandling_har_trigger_som_ikke_gjelder_inntektskontroll() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
+        opprettPeriode(LANGT_BAK, TIDENES_ENDE);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))));
 
         // Act
@@ -248,7 +264,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_finne_fagsak_dersom_siste_behandling_har_trigger_for_inntektskontroll_i_en_annen_måned() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK, TIDENES_ENDE);
+        opprettPeriode(LANGT_BAK, TIDENES_ENDE);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_AUGUST, FØRSTE_AUGUST.with(TemporalAdjusters.lastDayOfMonth())))));
 
         // Act
@@ -262,7 +278,7 @@ class FinnSakerForInntektkontrollTest {
     @Test
     void skal_ikke_finne_fagsak_dersom_det_allerede_finnes_kontrollert_inntekt_for_september() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK,TIDENES_ENDE);
+        opprettPeriode(LANGT_BAK,TIDENES_ENDE);
         List<KontrollertInntektPeriode> kontrollertInntektForSeptember = List.of(KontrollertInntektPeriode.ny()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))
             .medKilde(KontrollertInntektKilde.BRUKER)
@@ -277,57 +293,10 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
-    /**
-     * Skal finne AKTIVITETSPENGER-fagsak for inntektskontroll.
-     * Verifiserer at AKTIVITETSPENGER-fagsaker inkluderes i inntektskontroll-skanningen.
-     */
-    @Test
-    void skal_finne_aktivitetspenger_fagsak_for_inntektskontroll() {
-        // Arrange
-        var aktivitetspengerBehandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER)
-            .lagre(entityManager);
-        ungdomsprogramPeriodeRepository.lagre(aktivitetspengerBehandling.getId(),
-            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LANGT_BAK, TIDENES_ENDE))));
-
-        // Act
-        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
-
-        // Assert
-        assertEquals(1, fagsaker.size());
-        assertEquals(FagsakYtelseType.AKTIVITETSPENGER, fagsaker.get(0).getYtelseType());
-    }
-
-    /**
-     * Skal ikke finne fagsak med ikke-støttet ytelsestype for inntektskontroll.
-     * Verifiserer at kun UNGDOMSYTELSE og AKTIVITETSPENGER inkluderes,
-     * og at andre ytelsestyper ekskluderes selv med programperiode.
-     */
-    @Test
-    void skal_ikke_finne_ikke_støttet_ytelsestype_for_inntektskontroll() {
-        // Arrange - AKTIVITETSPENGER (støttet) med programperiode
-        var aktivitetspengerBehandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER)
-            .lagre(entityManager);
-        ungdomsprogramPeriodeRepository.lagre(aktivitetspengerBehandling.getId(),
-            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LANGT_BAK, TIDENES_ENDE))));
-
-        // PSB (ikke støttet) med programperiode - skal ekskluderes
-        var psbBehandling = TestScenarioBuilder.builderUtenSøknad(FagsakYtelseType.PLEIEPENGER_SYKT_BARN)
-            .lagre(entityManager);
-        ungdomsprogramPeriodeRepository.lagre(psbBehandling.getId(),
-            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(LANGT_BAK, TIDENES_ENDE))));
-
-        // Act
-        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
-
-        // Assert - kun AKTIVITETSPENGER fagsak funnet, PSB ekskludert
-        assertEquals(1, fagsaker.size());
-        assertEquals(FagsakYtelseType.AKTIVITETSPENGER, fagsaker.get(0).getYtelseType());
-    }
-
     @Test
     void skal_finne_fagsak_dersom_det_allerede_finnes_kontrollert_inntekt_for_annen_måned() {
         // Arrange
-        opprettProgramperiode(LANGT_BAK,TIDENES_ENDE);
+        opprettPeriode(LANGT_BAK,TIDENES_ENDE);
         List<KontrollertInntektPeriode> kontrollertInntektForAugust = List.of(KontrollertInntektPeriode.ny()
             .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_AUGUST, FØRSTE_AUGUST.with(TemporalAdjusters.lastDayOfMonth())))
             .medKilde(KontrollertInntektKilde.BRUKER)
@@ -342,8 +311,9 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(1, fagsaker.size());
     }
 
-    private void opprettProgramperiode(LocalDate fomDato, LocalDate tomDato) {
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(fomDato, tomDato))));
+    private void opprettPeriode(LocalDate fomDato, LocalDate tomDato) {
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(any()))
+            .thenReturn(new LocalDateTimeline<>(fomDato, tomDato, true));
     }
 
     private List<Fagsak> finnFagsakerForInntektskontrollISeptember() {

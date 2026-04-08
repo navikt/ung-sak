@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -12,7 +13,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.sak.ytelseperioder.KvalifiserteYtelsesperioderTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ import static org.mockito.Mockito.when;
 class MånedsvisTidslinjeUtlederTest {
 
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
-    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
+    private KvalifiserteYtelsesperioderTjeneste kvalifiserteYtelsesperioderTjeneste = mock(KvalifiserteYtelsesperioderTjeneste.class);
 
     @Inject
     private BehandlingRepository behandlingRepository;
@@ -45,7 +46,7 @@ class MånedsvisTidslinjeUtlederTest {
     @BeforeEach
     void setUp() {
 
-        månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(ungdomsprogramPeriodeTjeneste, behandlingRepository);
+        månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(new UnitTestLookupInstanceImpl<>(kvalifiserteYtelsesperioderTjeneste), behandlingRepository);
     }
 
     @Test
@@ -54,7 +55,7 @@ class MånedsvisTidslinjeUtlederTest {
         final var fagsakTom = startDate.plusMonths(1);
         Long behandlingId = lagFagsakOgBehandling(startDate, fagsakTom);
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, TIDENES_ENDE, true);
-        when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
         var result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
@@ -73,7 +74,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDate endDate = LocalDate.of(2023, 1, 20);
         Long behandlingId = lagFagsakOgBehandling(startDate, startDate.plusWeeks(52).minusDays(1));
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
-        when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
         var result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
@@ -90,7 +91,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDate endDate = LocalDate.of(2023, 1, 15);
         Long behandlingId = lagFagsakOgBehandling(startDate, startDate.plusWeeks(52).minusDays(1));
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
-        when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
         LocalDateTimeline<YearMonth> result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
@@ -106,7 +107,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDate endDate = LocalDate.of(2023, 2, 15);
         Long behandlingId = lagFagsakOgBehandling(startDate, startDate.plusWeeks(52).minusDays(1));
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
-        when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
         LocalDateTimeline<YearMonth> result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 
@@ -125,7 +126,7 @@ class MånedsvisTidslinjeUtlederTest {
         LocalDate endDate = LocalDate.of(2023, 2, 28);
         Long behandlingId = lagFagsakOgBehandling(startDate, startDate.plusWeeks(52).minusDays(1));
         LocalDateTimeline<Boolean> mockedTimeline = new LocalDateTimeline<>(startDate, endDate, true);
-        when(ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
+        when(kvalifiserteYtelsesperioderTjeneste.finnPeriodeTidslinje(behandlingId)).thenReturn(mockedTimeline);
 
         var result = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
 

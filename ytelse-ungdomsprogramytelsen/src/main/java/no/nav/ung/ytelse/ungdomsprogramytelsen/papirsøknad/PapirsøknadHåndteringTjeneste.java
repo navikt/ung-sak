@@ -40,7 +40,7 @@ import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramRegisterKlient;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
 
 import java.time.LocalDate;
 import java.util.List;

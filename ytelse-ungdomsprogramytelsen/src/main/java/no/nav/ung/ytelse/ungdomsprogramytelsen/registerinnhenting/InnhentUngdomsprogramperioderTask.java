@@ -1,4 +1,4 @@
-package no.nav.ung.sak.domene.registerinnhenting.task;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.registerinnhenting;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -10,9 +10,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramTjeneste;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

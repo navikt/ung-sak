@@ -131,10 +131,6 @@
         </dependency>
         <dependency>
             <groupId>no.nav.ung.sak</groupId>
-            <artifactId>ungdomsprogram</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
             <artifactId>hendelsemottak</artifactId>
         </dependency>
         <dependency>

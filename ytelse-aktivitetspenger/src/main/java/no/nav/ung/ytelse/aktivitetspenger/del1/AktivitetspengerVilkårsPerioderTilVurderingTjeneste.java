@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -26,7 +27,8 @@ import java.util.stream.Collectors;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-@BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
+@BehandlingTypeRef
+@ApplicationScoped
 public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
