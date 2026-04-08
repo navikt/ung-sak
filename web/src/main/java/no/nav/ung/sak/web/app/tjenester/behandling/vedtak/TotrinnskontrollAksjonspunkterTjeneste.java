@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,17 +39,22 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
     }
 
     public List<TotrinnskontrollSkjermlenkeContextDto> hentTotrinnsSkjermlenkeContext(Behandling behandling) {
+        Set<BehandlingStatus> beslutningssteg = Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR);
+        BehandlingDel behandlingDel = behandling.getStatus() == BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
         List<TotrinnskontrollSkjermlenkeContextDto> skjermlenkeContext = new ArrayList<>();
-        List<Aksjonspunkt> aksjonspunkter = behandling.getAksjonspunkterMedTotrinnskontroll();
+        List<Aksjonspunkt> aksjonspunkter = behandling.getAksjonspunkterMedTotrinnskontroll()
+            .stream()
+            .filter(ap -> ap.getAksjonspunktDefinisjon().getBehandlingDel() == behandlingDel)
+            .toList();
         Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap = new HashMap<>();
-        Collection<Totrinnsvurdering> ttVurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
+        Collection<Totrinnsvurdering> ttVurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, behandlingDel);
         // Behandling er ikkje i fatte vedtak og har ingen totrinnsvurderinger -> returnerer tom liste
-        if (!BehandlingStatus.FATTER_VEDTAK.equals(behandling.getStatus()) && ttVurderinger.isEmpty()) {
+        if (!beslutningssteg.contains(behandling.getStatus()) && ttVurderinger.isEmpty()) {
             return Collections.emptyList();
         }
         for (var ap : aksjonspunkter) {
             var builder = new Totrinnsvurdering.Builder(behandling, ap.getAksjonspunktDefinisjon());
-            var vurdering = ttVurderinger.stream().filter(v -> v.getAksjonspunktDefinisjon().equals(ap.getAksjonspunktDefinisjon())) .findFirst();
+            var vurdering = ttVurderinger.stream().filter(v -> v.getAksjonspunktDefinisjon().equals(ap.getAksjonspunktDefinisjon())).findFirst();
             vurdering.ifPresent(ttVurdering -> {
                 if (ttVurdering.isGodkjent()) {
                     builder.medGodkjent(ttVurdering.isGodkjent());
@@ -63,20 +69,10 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
         return skjermlenkeContext;
     }
 
-    private void lagTotrinnsaksjonspunkt(Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap,
-                                         Totrinnsvurdering vurdering) {
-        TotrinnskontrollAksjonspunkterDto totrinnsAksjonspunkt = totrinnsaksjonspunktDtoTjeneste.lagTotrinnskontrollAksjonspunktDto(vurdering);
-        SkjermlenkeType skjermlenkeType = SkjermlenkeType.finnSkjermlenkeType(vurdering.getAksjonspunktDefinisjon());
-        if (skjermlenkeType != null && !SkjermlenkeType.UDEFINERT.equals(skjermlenkeType)) {
-            List<TotrinnskontrollAksjonspunkterDto> aksjonspktContextListe = skjermlenkeMap.computeIfAbsent(skjermlenkeType,
-                k -> new ArrayList<>());
-            aksjonspktContextListe.add(totrinnsAksjonspunkt);
-        }
-    }
-
     public List<TotrinnskontrollSkjermlenkeContextDto> hentTotrinnsvurderingSkjermlenkeContext(Behandling behandling) {
         List<TotrinnskontrollSkjermlenkeContextDto> skjermlenkeContext = new ArrayList<>();
-        Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling);
+        BehandlingDel behandlingDel = behandling.getStatus() == BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+        Collection<Totrinnsvurdering> totrinnaksjonspunktvurderinger = totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling, behandlingDel);
         Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap = new HashMap<>();
         for (var vurdering : totrinnaksjonspunktvurderinger) {
             lagTotrinnsaksjonspunkt(skjermlenkeMap, vurdering);
@@ -86,5 +82,14 @@ public class TotrinnskontrollAksjonspunkterTjeneste {
             skjermlenkeContext.add(context);
         }
         return skjermlenkeContext;
+    }
+
+    private void lagTotrinnsaksjonspunkt(Map<SkjermlenkeType, List<TotrinnskontrollAksjonspunkterDto>> skjermlenkeMap, Totrinnsvurdering vurdering) {
+        TotrinnskontrollAksjonspunkterDto totrinnsAksjonspunkt = totrinnsaksjonspunktDtoTjeneste.lagTotrinnskontrollAksjonspunktDto(vurdering);
+        SkjermlenkeType skjermlenkeType = SkjermlenkeType.finnSkjermlenkeType(vurdering.getAksjonspunktDefinisjon());
+        if (skjermlenkeType != null && !SkjermlenkeType.UDEFINERT.equals(skjermlenkeType)) {
+            List<TotrinnskontrollAksjonspunkterDto> aksjonspktContextListe = skjermlenkeMap.computeIfAbsent(skjermlenkeType, _ -> new ArrayList<>());
+            aksjonspktContextListe.add(totrinnsAksjonspunkt);
+        }
     }
 }

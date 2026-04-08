@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
+package no.nav.ung.ytelse.aktivitetspenger.beregnytelse;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -11,13 +11,15 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.behandling.steg.beregnytelse.BeregnYtelseSteg;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.ytelse.*;
+import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
+import no.nav.ung.sak.ytelse.LagTilkjentYtelse;
+import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -26,25 +28,25 @@ import java.util.Map;
 
 @ApplicationScoped
 @BehandlingStegRef(BehandlingStegType.BEREGN_YTELSE)
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @BehandlingTypeRef
-public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
+public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
 
     private static final BigDecimal REDUKSJONSFAKTOR_ARBEIDSINNTEKT = new BigDecimal("0.66");
-    private static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("0.66");
+    private static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("1.00");
 
-    private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
 
-    public UngBeregnYtelseSteg() {
+    public AktivitetspengerBeregnYtelseSteg() {
     }
 
     @Inject
-    public UngBeregnYtelseSteg(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-                               TilkjentYtelseRepository tilkjentYtelseRepository,
-                               MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
-        this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
+    public AktivitetspengerBeregnYtelseSteg(AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
+                                            TilkjentYtelseRepository tilkjentYtelseRepository,
+                                            MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+        this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
     }
@@ -52,8 +54,8 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         // Henter repository data
-        final var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId());
-        if (ungdomsytelseGrunnlag.isEmpty()) {
+        final var aktivitetspengerGrunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(kontekst.getBehandlingId());
+        if (aktivitetspengerGrunnlag.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
         final var månedsvisYtelseTidslinje = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(kontekst.getBehandlingId());
@@ -63,9 +65,9 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
         // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);
 
-        final var satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
-        final var totalsatsTidslinje = TotalbeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
-        final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
+        final var satsTidslinje = aktivitetspengerGrunnlag.get().hentSatsTidslinje();
+        final var totalsatsTidslinje = TotalBeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
+        final var godkjentUttakTidslinje = totalsatsTidslinje.mapValue(_ -> true);
 
         // Utfør reduksjon og map til tilkjent ytelse
         final var konfigurasjon = new InntektsreduksjonKonfigurasjon(REDUKSJONSFAKTOR_ARBEIDSINNTEKT, REDUKSJONSFAKTOR_YTELSE);
@@ -76,7 +78,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
+    private static String lagRegelInput(LocalDateTimeline<AktivitetspengerSatsGrunnlag> satsTidslinje,
                                         LocalDateTimeline<YearMonth> ytelseTidslinje,
                                         LocalDateTimeline<Boolean> godkjentUttakTidslinje,
                                         LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
@@ -100,16 +102,6 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
         final var sporingMap = Map.of("tilkjentYtelsePerioder", list);
         final var sporing = JsonObjectMapper.toJson(sporingMap, LagRegelSporing.JsonMappingFeil.FACTORY::jsonMappingFeil);
         return sporing;
-    }
-
-    private static LocalDateTimeline<Boolean> finnGodkjentUttakstidslinje(UngdomsytelseGrunnlag ungdomsytelseGrunnlag) {
-        return ungdomsytelseGrunnlag.getUttakPerioder()
-            .getPerioder()
-            .stream()
-            .filter(it -> it.getAvslagsårsak() == null)
-            .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true))
-            .reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
     }
 
     private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<KontrollerteInntekter> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {

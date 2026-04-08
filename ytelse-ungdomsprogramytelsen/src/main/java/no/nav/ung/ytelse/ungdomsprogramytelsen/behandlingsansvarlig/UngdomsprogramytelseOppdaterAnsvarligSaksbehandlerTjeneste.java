@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.behandlingsansvarlig;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -34,12 +35,12 @@ public class UngdomsprogramytelseOppdaterAnsvarligSaksbehandlerTjeneste implemen
             return;
         }
         String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
-        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandlingId, saksbehandlerIdent);
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandlingId, BehandlingDel.SENTRAL, saksbehandlerIdent);
     }
 
     @Override
     public void oppdaterAnsvarligBeslutter(AksjonspunktDefinisjon fatteVedtakAksjonspunktDefinisjon, Long behandlingId) {
         String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
-        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandlingId, saksbehandlerIdent);
+        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandlingId, BehandlingDel.SENTRAL, saksbehandlerIdent);
     }
 }

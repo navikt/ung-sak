@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
 import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
@@ -95,7 +96,7 @@ public class AksjonspunktOppdatererTest {
         var foreslaVedtakAksjonspunktOppdaterer = new ForeslåVedtakAksjonspunktOppdaterer(vedtaksbrevHåndterer, oppdaterAnsvarligSaksbehandlerTjenester);
 
         foreslaVedtakAksjonspunktOppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-        assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId())).isEqualTo("hello");
+        assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.SENTRAL)).isEqualTo("hello");
     }
 
     @Test

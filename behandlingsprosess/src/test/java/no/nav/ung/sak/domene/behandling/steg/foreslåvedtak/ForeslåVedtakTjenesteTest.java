@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -158,7 +159,7 @@ public class ForeslåVedtakTjenesteTest {
         tjeneste.foreslåVedtak(behandling, kontekst);
 
         // Assert
-        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())).isTrue();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isTrue();
     }
 
     @Test
@@ -183,7 +184,7 @@ public class ForeslåVedtakTjenesteTest {
         tjeneste.foreslåVedtak(behandling, kontekst);
 
         // Assert
-        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
     }
 
     @Test
@@ -203,7 +204,7 @@ public class ForeslåVedtakTjenesteTest {
 
         // Assert
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
     }
 
     @Test
@@ -232,7 +233,7 @@ public class ForeslåVedtakTjenesteTest {
 
         // Assert
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
     }
 
     @Test
@@ -460,7 +461,7 @@ public class ForeslåVedtakTjenesteTest {
     public void utførerUtenAksjonspunktHvisRevurderingIkkeManueltOpprettetOgIkkeTotrinnskontrollBehandling2TrinnIkkeReset() {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
-        behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId());
+        behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId(), BehandlingDel.SENTRAL);
 
         // Act
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
@@ -480,7 +481,7 @@ public class ForeslåVedtakTjenesteTest {
             .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).medManueltOpprettet(true))
             .build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
-        behandlingAnsvarligRepository.setToTrinnsbehandling(revurdering.getId());
+        behandlingAnsvarligRepository.setToTrinnsbehandling(revurdering.getId(), BehandlingDel.SENTRAL);
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
 
@@ -517,7 +518,7 @@ public class ForeslåVedtakTjenesteTest {
         tjeneste.foreslåVedtak(behandling, kontekst);
 
         // Assert
-        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
         assertThat(behandling.getAksjonspunkter()).hasSize(1);
         assertThat(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FORESLÅ_VEDTAK).getStatus()).isEqualTo(AksjonspunktStatus.AVBRUTT);
     }

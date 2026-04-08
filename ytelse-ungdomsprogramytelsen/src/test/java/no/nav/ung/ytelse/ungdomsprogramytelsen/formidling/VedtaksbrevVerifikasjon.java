@@ -23,7 +23,7 @@ public class VedtaksbrevVerifikasjon {
         På nav.no/kontakt kan du chatte eller skrive til oss. \
         Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
         Med vennlig hilsen \
-        Nav Arbeid og ytelser \
+        Nav Tiltak Oslo \
         %s \
         side av""";
 

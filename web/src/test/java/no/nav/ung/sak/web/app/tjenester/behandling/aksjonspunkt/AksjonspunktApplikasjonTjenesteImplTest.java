@@ -2,6 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 
 import jakarta.inject.Inject;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -96,7 +97,7 @@ public class AksjonspunktApplikasjonTjenesteImplTest {
         aksjonspunktApplikasjonTjenesteImpl.setAnsvarligSaksbehandler(singletonList(dto), behandlingSpy);
 
         // Assert
-        Assertions.assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId())).isNull();
+        Assertions.assertThat(behandlingAnsvarligRepository.hentAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.SENTRAL)).isNull();
     }
 
 //
