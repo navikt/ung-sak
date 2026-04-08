@@ -26,7 +26,7 @@ import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -47,7 +47,7 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
         søknadsperiodeRepository = new UngdomsytelseStartdatoRepository(em);
         behandlingRepository = new BehandlingRepository(em);
         ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(søknadsperiodeRepository,
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(em)),
+            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
             behandlingRepository
             );
 

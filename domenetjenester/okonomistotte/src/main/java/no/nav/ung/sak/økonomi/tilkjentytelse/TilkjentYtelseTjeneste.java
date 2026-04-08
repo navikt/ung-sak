@@ -15,6 +15,7 @@ import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1;
 import no.nav.k9.oppdrag.kontrakt.util.TilkjentYtelseMaskerer;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
@@ -29,6 +30,7 @@ import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingInntrekkEntitet;
 import no.nav.ung.sak.økonomi.tilbakekreving.modell.TilbakekrevingRepository;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -141,7 +143,7 @@ public class TilkjentYtelseTjeneste {
         TilkjentYtelseBehandlingInfoV1 info = new TilkjentYtelseBehandlingInfoV1();
         info.setSaksnummer(new Saksnummer(behandling.getFagsak().getSaksnummer().getVerdi()));
         info.setBehandlingId(behandling.getUuid());
-        info.setYtelseType(YtelseType.fraKode(behandling.getFagsakYtelseType().getKode()));
+        info.setYtelseType(mapYtelseType(behandling));
         info.setAnsvarligSaksbehandler(vedtak != null ? vedtak.getAnsvarligSaksbehandler() : (behandlingAnsvarlig != null ? behandlingAnsvarlig.getAnsvarligSaksbehandler() : null));
         info.setBehandlendeEnhet(behandlingAnsvarlig != null ? behandlingAnsvarlig.getBehandlendeEnhet() : null);
         info.setAktørId(behandling.getAktørId().getId());
@@ -149,6 +151,11 @@ public class TilkjentYtelseTjeneste {
         info.setDødsdatoBruker(dødsdatoBruker);
         behandling.getOriginalBehandlingId().ifPresent(ob -> info.setForrigeBehandlingId(behandlingRepository.hentBehandling(ob).getUuid()));
         return info;
+    }
+
+    private static YtelseType mapYtelseType(Behandling behandling) {
+        // TODO: Fikse mapping når k9-oppdrag fullt ut støtter aktivitetspengerr
+        return behandling.getFagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER ? YtelseType.UNGDOMSYTELSE : YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
     }
 
 

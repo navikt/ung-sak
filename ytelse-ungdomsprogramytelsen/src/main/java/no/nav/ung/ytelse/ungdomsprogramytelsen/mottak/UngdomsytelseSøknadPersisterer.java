@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FagsakperiodeUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;

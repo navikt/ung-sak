@@ -52,6 +52,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandling-prosessering</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>perioder</artifactId>
+        </dependency>
 
     </dependencies>
 

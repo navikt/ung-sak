@@ -304,11 +304,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>ungdomsprogram</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>arbeidsforhold</artifactId>
                 <version>${project.version}</version>
             </dependency>

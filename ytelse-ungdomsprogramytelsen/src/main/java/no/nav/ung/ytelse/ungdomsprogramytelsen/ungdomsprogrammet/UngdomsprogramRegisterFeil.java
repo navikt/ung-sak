@@ -1,4 +1,4 @@
-package no.nav.ung.sak.ungdomsprogram;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet;
 
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;

@@ -4,6 +4,9 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
@@ -12,11 +15,8 @@ import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
+import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
 
 import java.util.List;
 import java.util.function.Function;
@@ -27,26 +27,30 @@ public class InntektkontrollOppgaveOppretter {
 
     private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
     private final RapportertInntektMapper rapportertInntektMapper;
-    private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final ArbeidsgiverTjeneste arbeidsgiverTjeneste;
+    private final RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder;
 
     @Inject
-    public InntektkontrollOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste, RapportertInntektMapper rapportertInntektMapper, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, ArbeidsgiverTjeneste arbeidsgiverTjeneste) {
+    public InntektkontrollOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+                                           RapportertInntektMapper rapportertInntektMapper,
+                                           ArbeidsgiverTjeneste arbeidsgiverTjeneste,
+                                           RelevanteKontrollperioderUtleder relevanteKontrollperioderUtleder) {
         this.delegeringTjeneste = delegeringTjeneste;
         this.rapportertInntektMapper = rapportertInntektMapper;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.arbeidsgiverTjeneste = arbeidsgiverTjeneste;
+        this.relevanteKontrollperioderUtleder = relevanteKontrollperioderUtleder;
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
-        LocalDateTimeline<Boolean> programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+        var relevantKontrolltidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(behandling.getId());
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
-            .map(mapTilDto(behandling.getId(), aktørId, programTidslinje, ytelsetype))
+            .map(mapTilDto(behandling.getId(), aktørId, relevantKontrolltidslinje, ytelsetype))
             .forEach(delegeringTjeneste::opprettOppgave);
     }
 
-    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<Boolean> programTidslinje, OppgaveYtelsetype ytelsetype) {
+    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId,
+                                                                LocalDateTimeline<RelevanteKontrollperioderUtleder.InfoOmRådata> relevantKontrollTidslinje, OppgaveYtelsetype ytelsetype) {
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
             List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger = registerinntekter.stream().map(InntekterForKilde::arbeidsgiver)
@@ -62,18 +66,19 @@ public class InntektkontrollOppgaveOppretter {
                     etterlysning.getPeriode().getFomDato(),
                     etterlysning.getPeriode().getTomDato(),
                     InntektKontrollOppgaveMapper.mapTilRegisterInntekter(registerinntekter, arbeidsgiverOpplysninger),
-                    overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, programTidslinje)
+                    overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, relevantKontrollTidslinje)
                 ),
                 etterlysning.getFrist()
             );
         };
     }
 
-    private static <T> boolean overlapperPeriodeDelvisMedProgramtidslinje(LocalDateInterval periode, LocalDateTimeline<T> programtidslinje) {
-        LocalDateTimeline<Boolean> periodeSomTidslinje = new LocalDateTimeline<>(periode, true);
-        LocalDateTimeline<T> overlapp = programtidslinje.intersection(periode);
-        LocalDateTimeline<Boolean> periodeEtterFjernetOverlapp = periodeSomTidslinje.disjoint(overlapp);
-        return !periodeEtterFjernetOverlapp.isEmpty();
+    private static boolean overlapperPeriodeDelvisMedProgramtidslinje(LocalDateInterval periode, LocalDateTimeline<RelevanteKontrollperioderUtleder.InfoOmRådata> relevantTidslinje) {
+        LocalDateTimeline<RelevanteKontrollperioderUtleder.InfoOmRådata> overlapp = relevantTidslinje.intersection(periode);
+        if (overlapp.size() != 1) {
+            throw new IllegalStateException("Forventer nøyaktig ett segment med overlapp mot etterlysningsperiode");
+        }
+        return !overlapp.toSegments().first().getValue().gjelderHelePerioden();
     }
 
 
