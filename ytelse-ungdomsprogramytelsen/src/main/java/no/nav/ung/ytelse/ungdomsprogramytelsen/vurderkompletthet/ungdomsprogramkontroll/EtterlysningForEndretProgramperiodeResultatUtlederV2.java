@@ -4,11 +4,11 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 import java.util.Optional;
 
-import static no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste.harEndretStartdatoFraOppgittStartdatoer;
+import static no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste.harEndretStartdatoFraOppgittStartdatoer;
 
 public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
 
