@@ -18,8 +18,12 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto;
+import no.nav.ung.sak.web.app.ungdomsytelse.BehandlingAvsluttetTidspunkt;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -32,10 +36,12 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Year;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
@@ -48,10 +54,13 @@ public class AktivitetspengerRestTjeneste {
 
     public static final String AKTIVITETSPENGER_BASE_PATH = "/aktivitetspenger";
     public static final String BEREGNINGSGRUNNLAG_PATH = AKTIVITETSPENGER_BASE_PATH + "/beregningsgrunnlag";
+    public static final String SATS_OG_UTBETALING_PATH = AKTIVITETSPENGER_BASE_PATH + "/sats-og-utbetaling";
 
     private BehandlingRepository behandlingRepository;
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private BeregningTjeneste beregningTjeneste;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
 
     public AktivitetspengerRestTjeneste() {
         // for CDI proxy
@@ -60,10 +69,43 @@ public class AktivitetspengerRestTjeneste {
     @Inject
     public AktivitetspengerRestTjeneste(BehandlingRepository behandlingRepository,
                                         AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
-                                        BeregningTjeneste beregningTjeneste) {
+                                        BeregningTjeneste beregningTjeneste,
+                                        TilkjentYtelseRepository tilkjentYtelseRepository,
+                                        MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
         this.behandlingRepository = behandlingRepository;
         this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.beregningTjeneste = beregningTjeneste;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+    }
+
+    @GET
+    @Operation(description = "Henter månedsvis satser og utbetaling", tags = "avp")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @Path(SATS_OG_UTBETALING_PATH)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<AktivitetspengerUtbetaltMånedDto> getSatsOgUtbetalingPerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        var grunnlagOpt = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId());
+        if (grunnlagOpt.isEmpty() || grunnlagOpt.get().getSatsperioder() == null || grunnlagOpt.get().getBeregningsgrunnlag().isEmpty()) {
+            return Collections.emptyList();
+        }
+        var grunnlag = grunnlagOpt.get();
+        var satsTidslinje = grunnlag.hentAktivitetspengerSatsTidslinje();
+        var månedsvisPeriodisering = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandling.getId());
+        var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId());
+        var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
+        var tidslinjeMap = tilkjentYtelseRepository.hentTidslinjerForFagsak(behandling.getFagsakId());
+        var avsluttetTidTilkjentYtelseMap = tidslinjeMap.entrySet().stream()
+            .collect(Collectors.toMap(e -> BehandlingAvsluttetTidspunkt.fraBehandling(e.getKey()), Map.Entry::getValue));
+
+        return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(
+            BehandlingAvsluttetTidspunkt.fraBehandling(behandling),
+            månedsvisPeriodisering,
+            tilkjentYtelseTidslinje,
+            kontrollertInntektTidslinje,
+            satsTidslinje,
+            avsluttetTidTilkjentYtelseMap);
     }
 
     @GET
