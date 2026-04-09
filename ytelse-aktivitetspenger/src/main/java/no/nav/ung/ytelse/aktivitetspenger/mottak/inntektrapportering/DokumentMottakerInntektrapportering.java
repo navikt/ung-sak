@@ -1,8 +1,8 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak.inntektrapportering;
+package no.nav.ung.ytelse.aktivitetspenger.mottak.inntektrapportering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
+import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Aktivitetspenger;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -16,12 +16,12 @@ import no.nav.ung.sak.typer.JournalpostId;
 import java.util.Collection;
 import java.util.List;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 
 
 @ApplicationScoped
-@FagsakYtelseTypeRef(UNGDOMSYTELSE)
-@DokumentGruppeRef(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING_KODE)
+@FagsakYtelseTypeRef(AKTIVITETSPENGER)
+@DokumentGruppeRef(Brevkode.AKTIVITETSPENGER_INNTEKTRAPPORTERING_KODE)
 public class DokumentMottakerInntektrapportering implements Dokumentmottaker {
 
     private SøknadParser søknadParser;
@@ -52,7 +52,7 @@ public class DokumentMottakerInntektrapportering implements Dokumentmottaker {
                 dokument.setKildesystem(søknad.getKildesystem().get().getKode());
             }
             opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandling.getId(), dokument.getJournalpostId());
-            asyncPersisterer.opprettTaskForPersistering(behandling, dokument, ((Ungdomsytelse) søknad.getYtelse()).getInntekter());
+            asyncPersisterer.opprettTaskForPersistering(behandling, dokument, ((Aktivitetspenger) søknad.getYtelse()).getInntekter());
         }
     }
 
@@ -63,7 +63,7 @@ public class DokumentMottakerInntektrapportering implements Dokumentmottaker {
     @Override
     public List<Trigger> getTriggere(Collection<MottattDokument> mottattDokument) {
         return mottattDokument.stream().map(it -> søknadParser.parseSøknad(it))
-            .map(it -> ((Ungdomsytelse) it.getYtelse()).getInntekter().getMinMaksPeriode())
+            .map(it -> ((Aktivitetspenger) it.getYtelse()).getInntekter().getMinMaksPeriode())
             .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT))
             .toList();
     }
