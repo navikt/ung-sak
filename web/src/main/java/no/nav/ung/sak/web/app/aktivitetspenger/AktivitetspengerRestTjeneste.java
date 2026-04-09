@@ -54,7 +54,7 @@ public class AktivitetspengerRestTjeneste {
 
     public static final String AKTIVITETSPENGER_BASE_PATH = "/aktivitetspenger";
     public static final String BEREGNINGSGRUNNLAG_PATH = AKTIVITETSPENGER_BASE_PATH + "/beregningsgrunnlag";
-    public static final String SATS_OG_UTBETALING_PATH = AKTIVITETSPENGER_BASE_PATH + "/sats-og-utbetaling";
+    public static final String SATS_OG_UTBETALING_PATH = AKTIVITETSPENGER_BASE_PATH + "/månedsvis-sats-og-utbetaling";
 
     private BehandlingRepository behandlingRepository;
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
