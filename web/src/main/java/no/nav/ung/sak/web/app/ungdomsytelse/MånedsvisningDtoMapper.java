@@ -89,7 +89,7 @@ public class MånedsvisningDtoMapper {
 
     private static Optional<BigDecimal> finnRapportertInntekt(LocalDateTimeline<KontrollerteInntekter> kontrollertInntektForMåned) {
         return kontrollertInntektForMåned.toSegments().stream().map(LocalDateSegment::getValue)
-            .map(KontrollerteInntekter::inntekt)
+            .map(KontrollerteInntekter::arbeidsinntektOgYtelse)
             .reduce(BigDecimal::add);
     }
 
