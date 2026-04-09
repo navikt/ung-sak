@@ -3,7 +3,6 @@ package no.nav.ung.ytelse.aktivitetspenger.mottak.inntektrapportering;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.AktivitetspengerSøknadValidator;
-import no.nav.k9.søknad.ytelse.ung.v1.UngdomsytelseSøknadValidator;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
