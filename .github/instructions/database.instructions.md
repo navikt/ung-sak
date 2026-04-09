@@ -16,6 +16,7 @@ applyTo: "migreringer/src/main/resources/db/migration/**/*.sql"
 - Endringer skal vaere framoverkompatible under utrulling.
 
 ## SQL-praksis
+- Skriv all SQL i lowercase (tabellnavn, kolonnenavn, noekkelord, typer).
 - Legg til indekser for nye foreign keys og tunge lese-sporringer.
 - Vaer eksplisitt med `NOT NULL`, defaults og constraints.
 - Unngaa destruktive endringer i samme migrering som introduserer ny struktur.
@@ -23,6 +24,7 @@ applyTo: "migreringer/src/main/resources/db/migration/**/*.sql"
 ## Verification
 - Verifiser lokalt med prosjektets flyt (`mvn test-compile` eller `Databaseskjemainitialisering`).
 - Bekreft at migreringer fungerer paa tomt skjema og ved oppgradering.
+- Hvis en test feiler med VM crash / checksum mismatch etter endring i en migrering som allerede har kjoert lokalt: nullstill skjemaet med `Databaseskjemainitialisering`.
 
 ## Boundaries
 ### Always
