@@ -56,8 +56,8 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
-        assertThat(grunnlag.getForutgåendePeriodeFom()).isEqualTo(fom);
-        assertThat(grunnlag.getForutgåendePeriodeTom()).isEqualTo(tom);
+        assertThat(grunnlag.getPeriode().getFomDato()).isEqualTo(fom);
+        assertThat(grunnlag.getPeriode().getTomDato()).isEqualTo(tom);
         assertThat(grunnlag.getBosteder()).hasSize(2);
         assertThat(grunnlag.isAktiv()).isTrue();
     }
@@ -114,8 +114,8 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
         var kopiert = repository.hentGrunnlag(nyBehandling.getId());
 
-        assertThat(kopiert.getForutgåendePeriodeFom()).isEqualTo(fom);
-        assertThat(kopiert.getForutgåendePeriodeTom()).isEqualTo(tom);
+        assertThat(kopiert.getPeriode().getFomDato()).isEqualTo(fom);
+        assertThat(kopiert.getPeriode().getTomDato()).isEqualTo(tom);
         assertThat(kopiert.getBosteder()).hasSize(1);
         assertThat(kopiert.getBosteder().iterator().next().getLandkode()).isEqualTo("DEU");
     }

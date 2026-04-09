@@ -5,7 +5,7 @@ create table gr_oppgitt_fmedlemskap
 (
     id                      bigint                                 not null primary key,
     behandling_id           bigint references behandling (id)      not null,
-    forutgaaende_periode    daterange                              not null,
+    periode                 daterange                              not null,
     aktiv                   boolean      default true              not null,
     versjon                 bigint       default 0                 not null,
     opprettet_av            varchar(20)  default 'VL'              not null,

@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.medlemskap;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
 import no.nav.ung.sak.domene.typer.tid.Range;
 import org.hibernate.annotations.BatchSize;
@@ -26,8 +27,8 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
     private Long behandlingId;
 
     @Type(PostgreSQLRangeType.class)
-    @Column(name = "forutgaaende_periode", columnDefinition = "daterange")
-    private Range<LocalDate> forutgåendePeriode;
+    @Column(name = "periode", columnDefinition = "daterange")
+    private Range<LocalDate> periode;
 
     @BatchSize(size = 20)
     @JoinColumn(name = "gr_oppgitt_fmedlemskap_id", nullable = false)
@@ -44,12 +45,12 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
     public OppgittForutgåendeMedlemskapGrunnlag() {
     }
 
-    public OppgittForutgåendeMedlemskapGrunnlag(Long behandlingId, LocalDate forutgåendePeriodeFom, LocalDate forutgåendePeriodeTom, Set<OppgittBosted> bosteder) {
+    public OppgittForutgåendeMedlemskapGrunnlag(Long behandlingId, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
         Objects.requireNonNull(behandlingId, "behandlingId");
-        Objects.requireNonNull(forutgåendePeriodeFom, "forutgåendePeriodeFom");
-        Objects.requireNonNull(forutgåendePeriodeTom, "forutgåendePeriodeTom");
+        Objects.requireNonNull(fom, "fom");
+        Objects.requireNonNull(tom, "tom");
         this.behandlingId = behandlingId;
-        this.forutgåendePeriode = Range.closed(forutgåendePeriodeFom, forutgåendePeriodeTom);
+        this.periode = Range.closed(fom, tom);
         this.bosteder = bosteder != null
             ? bosteder.stream().map(OppgittBosted::new).collect(Collectors.toCollection(LinkedHashSet::new))
             : new LinkedHashSet<>();
@@ -57,7 +58,7 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
 
     OppgittForutgåendeMedlemskapGrunnlag(Long nyBehandlingId, OppgittForutgåendeMedlemskapGrunnlag eksisterende) {
         this.behandlingId = nyBehandlingId;
-        this.forutgåendePeriode = eksisterende.forutgåendePeriode;
+        this.periode = eksisterende.periode;
         this.bosteder = eksisterende.bosteder.stream()
             .map(OppgittBosted::new)
             .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -71,16 +72,8 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
         return behandlingId;
     }
 
-    public Range<LocalDate> getForutgåendePeriode() {
-        return forutgåendePeriode;
-    }
-
-    public LocalDate getForutgåendePeriodeFom() {
-        return forutgåendePeriode.lower();
-    }
-
-    public LocalDate getForutgåendePeriodeTom() {
-        return forutgåendePeriode.upper();
+    public DatoIntervallEntitet getPeriode() {
+        return DatoIntervallEntitet.fra(periode);
     }
 
     public Set<OppgittBosted> getBosteder() {
@@ -100,20 +93,20 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OppgittForutgåendeMedlemskapGrunnlag that = (OppgittForutgåendeMedlemskapGrunnlag) o;
-        return Objects.equals(forutgåendePeriode, that.forutgåendePeriode)
+        return Objects.equals(periode, that.periode)
             && Objects.equals(bosteder, that.bosteder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(forutgåendePeriode, bosteder);
+        return Objects.hash(periode, bosteder);
     }
 
     @Override
     public String toString() {
         return "OppgittForutgåendeMedlemskapGrunnlag{" +
             "behandlingId=" + behandlingId +
-            ", forutgåendePeriode=" + forutgåendePeriode +
+            ", periode=" + periode +
             ", bosteder=" + bosteder +
             ", aktiv=" + aktiv +
             '}';

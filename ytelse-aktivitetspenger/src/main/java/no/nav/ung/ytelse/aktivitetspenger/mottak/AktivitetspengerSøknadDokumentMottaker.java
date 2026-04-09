@@ -10,12 +10,8 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
-import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
-import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
-import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
@@ -62,6 +58,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
             søknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiode(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId);
             søknadPersisterer.oppdaterFagsakperiode(new Periode(ytelse.getSøknadsperiode().getFraOgMed(), ytelse.getSøknadsperiode().getTilOgMed()), behandling);
+            søknadPersisterer.lagreForutgåendeMedlemskapGrunnlag(ytelse.getForutgåendeBosteder(), ytelse.getSøknadsperiode(), behandlingId);
 
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandlingId, dokument.getJournalpostId());
         }

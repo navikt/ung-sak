@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.medlemskap;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
 import no.nav.ung.sak.domene.typer.tid.Range;
 import org.hibernate.annotations.Immutable;
@@ -46,16 +47,8 @@ public class OppgittBosted extends BaseEntitet {
         return id;
     }
 
-    public Range<LocalDate> getPeriode() {
-        return periode;
-    }
-
-    public LocalDate getFom() {
-        return periode.lower();
-    }
-
-    public LocalDate getTom() {
-        return periode.upper();
+    public DatoIntervallEntitet getPeriode() {
+        return DatoIntervallEntitet.fra(periode);
     }
 
     public String getLandkode() {
