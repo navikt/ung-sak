@@ -44,6 +44,7 @@ public class StrukturertJournalpost implements Journalpostvurderer {
                 Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING.getOffisiellKode(),
                 Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(),
                 Brevkode.AKTIVITETSPENGER_SOKNAD.getOffisiellKode(),
+                Brevkode.AKTIVITETSPENGER_INNTEKTRAPPORTERING.getOffisiellKode(),
                 Brevkode.AKTIVITETSPENGER_VARSEL_UTTALELSE.getOffisiellKode()
             ) :
             Set.of(
