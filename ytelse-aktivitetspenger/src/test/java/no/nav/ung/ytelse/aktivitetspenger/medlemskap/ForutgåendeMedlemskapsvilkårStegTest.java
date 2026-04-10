@@ -111,11 +111,11 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     }
 
     @Test
-    void skal_returnere_aksjonspunkt_når_bosted_er_utenfor_eøs() {
-        var behandling = lagScenario(Utfall.IKKE_VURDERT);
-        forutgåendeMedlemskapRepository.lagre(behandling.getId(), FOM.minusYears(5), FOM.minusDays(1), Set.of(
-            new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "USA")
-        ));
+    void skal_returnere_aksjonspunkt_når_grunnlag_ikke_dekker_hele_forutgående_periode() {
+        var forskjøvetFom = FOM.minusWeeks(1);
+        var forskjøvetVilkårPeriode = new no.nav.ung.sak.typer.Periode(forskjøvetFom, TOM);
+        var behandling = lagScenario(Utfall.IKKE_VURDERT, forskjøvetVilkårPeriode);
+        forutgåendeMedlemskapRepository.lagre(behandling.getId(), FOM.minusYears(5), FOM.minusDays(1), Set.of());
 
         var resultat = utførSteg(behandling);
 
@@ -144,8 +144,12 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     }
 
     private Behandling lagScenario(Utfall utfall) {
+        return lagScenario(utfall, VILKÅR_PERIODE);
+    }
+
+    private Behandling lagScenario(Utfall utfall, no.nav.ung.sak.typer.Periode vilkårPeriode) {
         return AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, utfall, VILKÅR_PERIODE)
+            .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, utfall, vilkårPeriode)
             .lagre(entityManager);
     }
 
