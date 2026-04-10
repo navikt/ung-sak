@@ -50,7 +50,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         perioderTilVurdering.stream()
             .map(periode -> forutgåendeMedlemskapBuilder
                 .hentBuilderFor(periode)
-                .medUtfall(utfall)
+                .medUtfallManuell(utfall)
                 .medAvslagsårsak(avslagsårsak)
                 .medRegelInput(regelInput)
                 .medBegrunnelse(dto.getBegrunnelse())
