@@ -33,7 +33,7 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "gr_oppgitt_fmedlemskap_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<OppgittBosted> utenlandskeBosteder = new LinkedHashSet<>();
+    private Set<OppgittBosted> bostederUtland = new LinkedHashSet<>();
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
@@ -51,7 +51,7 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
         Objects.requireNonNull(tom, "tom");
         this.behandlingId = behandlingId;
         this.periode = Range.closed(fom, tom);
-        this.utenlandskeBosteder = bosteder != null
+        this.bostederUtland = bosteder != null
             ? bosteder.stream().map(OppgittBosted::new).collect(Collectors.toCollection(LinkedHashSet::new))
             : new LinkedHashSet<>();
     }
@@ -59,7 +59,7 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
     OppgittForutgåendeMedlemskapGrunnlag(Long nyBehandlingId, OppgittForutgåendeMedlemskapGrunnlag eksisterende) {
         this.behandlingId = nyBehandlingId;
         this.periode = eksisterende.periode;
-        this.utenlandskeBosteder = eksisterende.utenlandskeBosteder.stream()
+        this.bostederUtland = eksisterende.bostederUtland.stream()
             .map(OppgittBosted::new)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
@@ -76,8 +76,8 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
         return DatoIntervallEntitet.fra(periode);
     }
 
-    public Set<OppgittBosted> getUtenlandskeBosteder() {
-        return Collections.unmodifiableSet(utenlandskeBosteder);
+    public Set<OppgittBosted> getBostederUtland() {
+        return Collections.unmodifiableSet(bostederUtland);
     }
 
     public boolean isAktiv() {
@@ -94,12 +94,12 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
         if (o == null || getClass() != o.getClass()) return false;
         OppgittForutgåendeMedlemskapGrunnlag that = (OppgittForutgåendeMedlemskapGrunnlag) o;
         return Objects.equals(periode, that.periode)
-            && Objects.equals(utenlandskeBosteder, that.utenlandskeBosteder);
+            && Objects.equals(bostederUtland, that.bostederUtland);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, utenlandskeBosteder);
+        return Objects.hash(periode, bostederUtland);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class OppgittForutgåendeMedlemskapGrunnlag extends BaseEntitet {
         return "OppgittForutgåendeMedlemskapGrunnlag{" +
             "behandlingId=" + behandlingId +
             ", periode=" + periode +
-            ", utenlandskeBosteder=" + utenlandskeBosteder +
+            ", bostederUtland=" + bostederUtland +
             ", aktiv=" + aktiv +
             '}';
     }

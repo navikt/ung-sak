@@ -58,7 +58,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
         assertThat(grunnlag.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(grunnlag.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(grunnlag.getUtenlandskeBosteder()).hasSize(2);
+        assertThat(grunnlag.getBostederUtland()).hasSize(2);
         assertThat(grunnlag.isAktiv()).isTrue();
     }
 
@@ -71,7 +71,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
-        assertThat(grunnlag.getUtenlandskeBosteder()).isEmpty();
+        assertThat(grunnlag.getBostederUtland()).isEmpty();
     }
 
     @Test
@@ -87,8 +87,8 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         repository.lagre(behandling.getId(), fom, tom, bosteder2);
         var nyttGrunnlag = repository.hentGrunnlag(behandling.getId());
 
-        assertThat(nyttGrunnlag.getUtenlandskeBosteder()).hasSize(1);
-        assertThat(nyttGrunnlag.getUtenlandskeBosteder().iterator().next().getLandkode()).isEqualTo("FIN");
+        assertThat(nyttGrunnlag.getBostederUtland()).hasSize(1);
+        assertThat(nyttGrunnlag.getBostederUtland().iterator().next().getLandkode()).isEqualTo("FIN");
         assertThat(nyttGrunnlag.getId()).isNotEqualTo(førstGrunnlag.getId());
     }
 
@@ -116,8 +116,8 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
         assertThat(kopiert.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(kopiert.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(kopiert.getUtenlandskeBosteder()).hasSize(1);
-        assertThat(kopiert.getUtenlandskeBosteder().iterator().next().getLandkode()).isEqualTo("DEU");
+        assertThat(kopiert.getBostederUtland()).hasSize(1);
+        assertThat(kopiert.getBostederUtland().iterator().next().getLandkode()).isEqualTo("DEU");
     }
 
     @Test

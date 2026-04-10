@@ -72,7 +72,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         }
 
         var grunnlag = grunnlagOpt.get();
-        boolean alleBostedITrygdeavtaleLand = grunnlag.getUtenlandskeBosteder().stream()
+        boolean alleBostedITrygdeavtaleLand = grunnlag.getBostederUtland().stream()
             .allMatch(b -> TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(b.getLandkode(), b.getPeriode().getFomDato()));
 
         if (alleBostedITrygdeavtaleLand) {
@@ -89,8 +89,8 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
             .utled(behandlingId, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
 
         var jsonMapper = new VilkårJsonObjectMapper();
-        var input = new RegelInput(grunnlag.getUtenlandskeBosteder().stream()
-            .map(b -> new RegelInput.UtenlandskBosted(b.getLandkode(), b.getPeriode().getFomDato(), b.getPeriode().getTomDato()))
+        var input = new RegelInput(grunnlag.getBostederUtland().stream()
+            .map(b -> new RegelInput.BostedUtland(b.getLandkode(), b.getPeriode().getFomDato(), b.getPeriode().getTomDato()))
             .toList());
         String regelInput = jsonMapper.writeValueAsString(input);
         String regelEvaluering = jsonMapper.writeValueAsString(new RegelEvaluering("OPPFYLT", "Alle bosteder i land med gyldig trygdeavtale"));
@@ -110,8 +110,8 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
     }
 
-    record RegelInput(List<UtenlandskBosted> utenlandskeBosteder) {
-        record UtenlandskBosted(String landkode, LocalDate fom, LocalDate tom) {}
+    record RegelInput(List<BostedUtland> bostederUtland) {
+        record BostedUtland(String landkode, LocalDate fom, LocalDate tom) {}
     }
 
     record RegelEvaluering(String utfall, String begrunnelse) {}
