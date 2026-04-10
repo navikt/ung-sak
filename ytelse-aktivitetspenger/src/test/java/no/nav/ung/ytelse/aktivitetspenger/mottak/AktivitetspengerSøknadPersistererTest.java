@@ -54,8 +54,8 @@ class AktivitetspengerSøknadPersistererTest {
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
         assertThat(grunnlag.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 5, 1));
         assertThat(grunnlag.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2026, 4, 30));
-        assertThat(grunnlag.getBosteder()).hasSize(2);
-        assertThat(grunnlag.getBosteder()).extracting(OppgittBosted::getLandkode)
+        assertThat(grunnlag.getUtenlandskeBosteder()).hasSize(2);
+        assertThat(grunnlag.getUtenlandskeBosteder()).extracting(OppgittBosted::getLandkode)
             .containsExactlyInAnyOrder("DEU", "FIN");
     }
 
@@ -70,7 +70,7 @@ class AktivitetspengerSøknadPersistererTest {
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
         assertThat(grunnlag.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 1, 1));
         assertThat(grunnlag.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2025, 12, 31));
-        assertThat(grunnlag.getBosteder()).isEmpty();
+        assertThat(grunnlag.getUtenlandskeBosteder()).isEmpty();
     }
 
     @Test
@@ -95,7 +95,7 @@ class AktivitetspengerSøknadPersistererTest {
         var andreGrunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
 
         assertThat(andreGrunnlag.getId()).isNotEqualTo(førsteGrunnlag.getId());
-        assertThat(andreGrunnlag.getBosteder()).hasSize(1);
-        assertThat(andreGrunnlag.getBosteder().iterator().next().getLandkode()).isEqualTo("DEU");
+        assertThat(andreGrunnlag.getUtenlandskeBosteder()).hasSize(1);
+        assertThat(andreGrunnlag.getUtenlandskeBosteder().iterator().next().getLandkode()).isEqualTo("DEU");
     }
 }
