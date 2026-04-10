@@ -2051,6 +2051,49 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto" : {
+        "properties" : {
+          "antallBarn" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "antallDager" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "dagsats" : {
+            "type" : "number"
+          },
+          "dagsatsBarnetillegg" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "grunnbeløp" : {
+            "type" : "number"
+          },
+          "grunnbeløpFaktor" : {
+            "type" : "number"
+          },
+          "satsType" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "antallDager", "dagsats", "dagsatsBarnetillegg", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType" : {
+        "enum" : [ "HØY", "LAV", "BEREGNINGSGRUNNLAG" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "HØY", "LAV", "BEREGNINGSGRUNNLAG" ]
+      },
       "ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto" : {
         "properties" : {
           "beregningsgrunnlag" : {
@@ -2149,6 +2192,44 @@
             "type" : "string"
           }
         },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto" : {
+        "properties" : {
+          "antallDager" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "gjelderDelerAvMåned" : {
+            "type" : "boolean"
+          },
+          "måned" : {
+            "format" : "year-month",
+            "type" : "string"
+          },
+          "rapportertInntekt" : {
+            "type" : "number"
+          },
+          "reduksjon" : {
+            "type" : "number"
+          },
+          "reduksjonsgrunnlag" : {
+            "type" : "number"
+          },
+          "satsperioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto"
+            },
+            "type" : "array"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.ytelse.UtbetalingStatus"
+          },
+          "utbetaling" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "antallDager", "gjelderDelerAvMåned", "måned", "satsperioder" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
@@ -5716,6 +5797,38 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "avp" ]
+      }
+    },
+    "/api/aktivitetspenger/månedsvis-sats-og-utbetaling" : {
+      "get" : {
+        "description" : "Henter månedsvis satser og utbetaling",
+        "operationId" : "getSatsOgUtbetalingPerioder",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto"
+                  },
+                  "type" : "array"
                 }
               }
             },
@@ -9475,7 +9588,7 @@
     "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
       "get" : {
         "description" : "Henter månedsvis satser og utbetaling",
-        "operationId" : "getSatsOgUtbetalingPerioder",
+        "operationId" : "getSatsOgUtbetalingPerioder_1",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",
