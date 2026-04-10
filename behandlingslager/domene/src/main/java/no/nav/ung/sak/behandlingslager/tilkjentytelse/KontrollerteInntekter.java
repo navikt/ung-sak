@@ -6,15 +6,16 @@ public record KontrollerteInntekter(
     BigDecimal inntekt,
     BigDecimal ytelse
 ) {
-    public BigDecimal inntekt() {
-        return inntekt != null ? inntekt : BigDecimal.ZERO;
-    }
-
     public BigDecimal arbeidsinntekt() {
-        return inntekt();
+        return inntekt != null ? inntekt : BigDecimal.ZERO;
     }
 
     public BigDecimal ytelse() {
         return ytelse != null ? ytelse : BigDecimal.ZERO;
     }
+
+    public BigDecimal arbeidsinntektOgYtelse() {
+        return arbeidsinntekt().add(ytelse());
+    }
+
 }

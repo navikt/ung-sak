@@ -79,10 +79,10 @@ public class HistorikkinnslagTjeneste {
         if (brevkode == null) {
             return INNSENDING;
         }
-        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)) {
+        if (Brevkode.INNTEKTSRAPPORTERING_TYPER.contains(brevkode)) {
             return INNTEKTSRAPPORTERING;
         }
-        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE)) {
+        if (Brevkode.VARSELUTTALELSE_TYPER.contains(brevkode)) {
             return uttalelseRepository.hentEksisterendeGrunnlag(behandlingId).stream()
                 .map(UttalelseGrunnlag::getUttalelser)
                 .map(Uttalelser::getUttalelser)

@@ -5,12 +5,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
-import no.nav.ung.sak.kontroll.EtterlysningOgRegisterinntekt;
-import no.nav.ung.sak.kontroll.Inntektsresultat;
-import no.nav.ung.sak.kontroll.RapportertInntekt;
-import no.nav.ung.sak.kontroll.RapporterteInntekter;
+import no.nav.ung.sak.kontroll.*;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -79,7 +77,7 @@ public class KontrollerInntektTjeneste {
         // Siden vi tillater et visst avvik her er det ikke sikkert at registerinntekten er nøyaktig lik 0
         var inntektFraBrukerTidslinje = gjeldendeRapporterteInntekter.filterValue(it -> !it.brukerRapporterteInntekter().isEmpty());
         return ingenAvvikTidslinje.disjoint(inntektFraBrukerTidslinje)
-            .mapValue(it -> new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, new Inntektsresultat(BigDecimal.ZERO, KontrollertInntektKilde.BRUKER)));
+            .mapValue(it -> new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, new Inntektsresultat(Collections.emptySet(), KontrollertInntektKilde.BRUKER)));
     }
 
 
@@ -94,7 +92,7 @@ public class KontrollerInntektTjeneste {
             etterlysningTidslinje);
 
         return brukersGodkjenteEllerRapporterteInntekter.intersection(relevantTidslinje)
-            .mapValue(it -> new Inntektsresultat(summerInntekter(it), it.kilde()))
+            .mapValue(it -> new Inntektsresultat(it.inntekter(), it.kilde()))
             .mapValue(it -> new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, it));
     }
 
@@ -117,10 +115,4 @@ public class KontrollerInntektTjeneste {
                         lhs != null ? KontrollertInntektKilde.REGISTER : KontrollertInntektKilde.BRUKER))
         );
     }
-
-    private static BigDecimal summerInntekter(BrukersAvklarteInntekter it) {
-        return it.inntekter().stream()
-            .map(RapportertInntekt::beløp).reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
-    }
-
 }

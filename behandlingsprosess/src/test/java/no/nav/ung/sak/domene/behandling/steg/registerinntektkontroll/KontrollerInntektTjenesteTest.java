@@ -143,11 +143,12 @@ class KontrollerInntektTjenesteTest {
         final var tom = LocalDate.now().plusDays(10);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = lagRapportertInntektTidslinjeMedDiffMotRegister(fom, tom, 2000, 0, 500);
+        RapportertInntekt rapportertInntekt = new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000));
         LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje = new LocalDateTimeline<>(
             fom, tom,
             new EtterlysningOgRegisterinntekt(
                 Set.of(
-                    new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(2000))
+                    rapportertInntekt
                 ),
                 new InntektskontrollEtterlysningInfo(EtterlysningStatus.UTLØPT, null))
         );
@@ -156,7 +157,7 @@ class KontrollerInntektTjenesteTest {
         var resultat = utførMedResultat(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, ikkeGodkjentUttalelseTidslinje);
 
         // Assert
-        Kontrollresultat kontrollresultat = new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, new Inntektsresultat(BigDecimal.valueOf(2000), KontrollertInntektKilde.REGISTER));
+        Kontrollresultat kontrollresultat = new Kontrollresultat(KontrollResultatType.FERDIG_KONTROLLERT, new Inntektsresultat(Set.of(rapportertInntekt), KontrollertInntektKilde.REGISTER));
         LocalDateTimeline<Kontrollresultat> forventet = new LocalDateTimeline<>(fom, tom, kontrollresultat);
         assertEquals(forventet, resultat);
     }
