@@ -30,9 +30,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
 
-import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -75,7 +73,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
         var medlemskap = forutgåendeMedlemskapTjeneste.hentBostederSomDto(behandling.getId());
 
         var vilkår = vilkårResultatRepository.hent(behandling.getId())
-            .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
+            .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET).orElseThrow( () -> new IllegalStateException("Mangler vilkårsvurdering av forutgående medlemskap"));
 
         var utfall = finnUtfall(vilkår);
 
@@ -87,11 +85,9 @@ public class ForutgåendeMedlemskapRestTjeneste {
         return new ForutgåendeMedlemskapResponse(medlemskap, utfall, avslagsårsak);
     }
 
-    private static MedlemskapAvslagsÅrsakType finnAvslagsårsak(Optional<Vilkår> vilkår) {
-        var avslagsårsaker = vilkår
-            .map(Vilkår::getPerioder)
+    private static MedlemskapAvslagsÅrsakType finnAvslagsårsak(Vilkår vilkår) {
+        var avslagsårsaker = vilkår.getPerioder()
             .stream()
-            .flatMap(List::stream)
             .map(VilkårPeriode::getAvslagsårsak)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
@@ -107,19 +103,26 @@ public class ForutgåendeMedlemskapRestTjeneste {
 
     }
 
-    private static Utfall finnUtfall(Optional<Vilkår> vilkår) {
-        Set<Utfall> alleUtfall = vilkår
-            .map(Vilkår::getPerioder)
+    private static Utfall finnUtfall(Vilkår vilkår) {
+        Set<Utfall> alleUtfall = vilkår.getPerioder()
             .stream()
-            .flatMap(List::stream)
             .map(VilkårPeriode::getGjeldendeUtfall)
             .collect(Collectors.toSet());
 
-        if (alleUtfall.size() > 1) {
-            throw new IllegalStateException("Kan ikke ha periodiserte utfall på medlemskap");
+        if (alleUtfall.isEmpty()) {
+            throw new IllegalStateException("Utviklerfeil: Mangler utfall");
         }
 
-        return alleUtfall.stream().findFirst().orElse(Utfall.IKKE_VURDERT);
+        if (alleUtfall.contains(Utfall.IKKE_VURDERT)) {
+            return Utfall.IKKE_VURDERT;
+        }
+
+        if (alleUtfall.size() > 1) {
+            throw new IllegalStateException("Utviklerfeil: Kan ikke ha periodiserte utfall på forutgående medlemskap. Har både oppfylte og ikke oppfylte.");
+        }
+
+
+        return alleUtfall.stream().findFirst().orElseThrow();
     }
 
 }
