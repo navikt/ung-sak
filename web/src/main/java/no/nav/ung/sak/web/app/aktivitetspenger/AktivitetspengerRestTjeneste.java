@@ -84,7 +84,7 @@ public class AktivitetspengerRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(SATS_OG_UTBETALING_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<AktivitetspengerUtbetaltMånedDto> getSatsOgUtbetalingPerioder(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public List<AktivitetspengerUtbetaltMånedDto> getSatsOgUtbetalingPerioderAktivitetspenger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var grunnlagOpt = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId());
         if (grunnlagOpt.isEmpty() || grunnlagOpt.get().getSatsperioder() == null || grunnlagOpt.get().getBeregningsgrunnlag().isEmpty()) {

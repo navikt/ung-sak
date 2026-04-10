@@ -101,7 +101,7 @@ public class MånedsvisningDtoMapper {
         return new AktivitetspengerSatsPeriodeDto(
             periode.getFomDato(),
             periode.getTomDato(),
-            beregnetSats.dagsats(),
+            beregnetSats.dagsats().setScale(0, RoundingMode.HALF_UP),
             satser.satsGrunnlag().grunnbeløpFaktor(),
             satser.satsGrunnlag().grunnbeløp(),
             utledSatsType(satser),
