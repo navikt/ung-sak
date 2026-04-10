@@ -5809,7 +5809,7 @@
     "/api/aktivitetspenger/månedsvis-sats-og-utbetaling" : {
       "get" : {
         "description" : "Henter månedsvis satser og utbetaling",
-        "operationId" : "getSatsOgUtbetalingPerioder",
+        "operationId" : "getSatsOgUtbetalingPerioderAktivitetspenger",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",
@@ -9588,7 +9588,7 @@
     "/api/ungdomsytelse/månedsvis-sats-og-utbetaling" : {
       "get" : {
         "description" : "Henter månedsvis satser og utbetaling",
-        "operationId" : "getSatsOgUtbetalingPerioder_1",
+        "operationId" : "getSatsOgUtbetalingPerioder",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",
