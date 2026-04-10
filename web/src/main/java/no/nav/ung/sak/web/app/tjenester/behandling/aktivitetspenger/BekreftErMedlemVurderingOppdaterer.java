@@ -13,19 +13,24 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftErMedlemVurderingDto.class, adapter = AksjonspunktOppdaterer.class)
 public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdaterer<BekreftErMedlemVurderingDto> {
 
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private final ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste;
 
     @Inject
-    public BekreftErMedlemVurderingOppdaterer(@Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+    public BekreftErMedlemVurderingOppdaterer(@Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                             ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste) {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.forutgåendeMedlemskapTjeneste = forutgåendeMedlemskapTjeneste;
     }
 
     @Override
@@ -39,12 +44,17 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
 
+        var bostederDto = forutgåendeMedlemskapTjeneste.hentBostederSomDto(param.getBehandlingId());
+        String regelInput = new VilkårJsonObjectMapper().writeValueAsString(bostederDto);
+
         perioderTilVurdering.stream()
             .map(periode -> forutgåendeMedlemskapBuilder
                 .hentBuilderFor(periode)
-                .medUtfall(utfall)
+                .medUtfallManuell(utfall)
                 .medAvslagsårsak(avslagsårsak)
-                .medRegelInput("TODO"))
+                .medRegelInput(regelInput)
+                .medBegrunnelse(dto.getBegrunnelse())
+            )
             .forEach(forutgåendeMedlemskapBuilder::leggTil);
 
         resultatBuilder.leggTil(forutgåendeMedlemskapBuilder);

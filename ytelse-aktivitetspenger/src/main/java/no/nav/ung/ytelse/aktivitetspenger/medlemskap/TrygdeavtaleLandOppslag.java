@@ -72,9 +72,14 @@ public final class TrygdeavtaleLandOppslag {
     public static boolean erGyldigTrygdeavtaleLand(Landkode landkode, LocalDate fom) {
         Objects.requireNonNull(landkode, "landkode kan ikke være null");
         Objects.requireNonNull(landkode.getLandkode(), "landkode.getLandkode() kan ikke være null");
+        return erGyldigTrygdeavtaleLand(landkode.getLandkode(), fom);
+    }
+
+    public static boolean erGyldigTrygdeavtaleLand(String landkode, LocalDate fom) {
+        Objects.requireNonNull(landkode, "landkode kan ikke være null");
         Objects.requireNonNull(fom, "fom kan ikke være null");
 
-        LocalDate gyldigFra = GYLDIG_FRA.get(landkode.getLandkode());
+        LocalDate gyldigFra = GYLDIG_FRA.get(landkode);
         if (gyldigFra == null) {
             return false;
         }
