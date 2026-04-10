@@ -2,48 +2,58 @@ package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Aktivitetspenger;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
-import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
+import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto;
+import no.nav.ung.sak.typer.Periode;
 
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.*;
 
 @Dependent
 public class ForutgåendeMedlemskapTjeneste {
 
-    private final MottatteDokumentRepository mottatteDokumentRepository;
-    private final SøknadParser søknadParser;
-
+    private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
 
     @Inject
-    public ForutgåendeMedlemskapTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
-                                         SøknadParser søknadParser) {
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.søknadParser = søknadParser;
+    public ForutgåendeMedlemskapTjeneste(OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository) {
+        this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
     }
 
-    public Optional<Bosteder> utledForutgåendeBosteder(Long fagsakId, Long behandlingId) {
-        return hentNyesteSøknad(fagsakId, behandlingId)
-            .map(søknad -> (Aktivitetspenger) søknad.getYtelse())
-            .map(Aktivitetspenger::getForutgåendeBosteder);
+    public List<MedlemskapsPeriodeDto> hentBostederSomDto(Long behandlingId) {
+        return forutgåendeMedlemskapRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(ForutgåendeMedlemskapTjeneste::mapTilDto)
+            .orElse(List.of());
     }
 
-    private Optional<Søknad> hentNyesteSøknad(Long fagsakId, Long behandlingId) {
-        return mottatteDokumentRepository.hentMottatteDokumentForBehandling(fagsakId, behandlingId, List.of(Brevkode.AKTIVITETSPENGER_SOKNAD), false, DokumentStatus.GYLDIG)
-            .stream()
-            .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt).reversed())
-            .collect(Collectors.toCollection(LinkedHashSet::new))
-            .stream()
-            .findFirst()
-            .map(søknadParser::parseSøknad);
+    private static List<MedlemskapsPeriodeDto> mapTilDto(OppgittForutgåendeMedlemskapGrunnlag grunnlag) {
+        return grunnlag.getBostederUtland().stream().map(bosted -> {
+            var landkode = bosted.getLandkode();
+            var periode = bosted.getPeriode();
+
+            return new MedlemskapsPeriodeDto(
+                new Periode(periode.getFomDato(), periode.getTomDato()),
+                mapLandTilNorskNavn(landkode),
+                landkode,
+                TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(landkode, periode.getFomDato())
+            );
+        }).toList();
+    }
+
+    private static final Map<String, String> LANDKODE_TIL_NORSK_NAVN = lagLandkodeTilNorskNavn();
+
+    private static Map<String, String> lagLandkodeTilNorskNavn() {
+        Map<String, String> result = new HashMap<>();
+        for (String alpha2 : Locale.getISOCountries()) {
+            try {
+                Locale locale = new Locale.Builder().setRegion(alpha2).build();
+                result.put(locale.getISO3Country(), locale.getDisplayCountry(Locale.forLanguageTag("nb-NO")));
+            } catch (MissingResourceException | IllformedLocaleException ignored) {
+            }
+        }
+        return Map.copyOf(result);
+    }
+
+    private static String mapLandTilNorskNavn(String landkodeAlpha3) {
+        return LANDKODE_TIL_NORSK_NAVN.getOrDefault(landkodeAlpha3, landkodeAlpha3);
     }
 }

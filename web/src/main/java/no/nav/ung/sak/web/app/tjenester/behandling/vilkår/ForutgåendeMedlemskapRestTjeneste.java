@@ -15,7 +15,6 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -27,14 +26,14 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
-import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.medlemskap.TrygdeavtaleLandOppslag;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -46,7 +45,6 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 public class ForutgåendeMedlemskapRestTjeneste {
 
     public static final String MEDLEMSKAP = "/behandling/medlemskap";
-    private static final Map<String, String> LANDKODE_TIL_NORSK_NAVN = lagLandkodeTilNorskNavn();
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -74,9 +72,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
     public ForutgåendeMedlemskapResponse medlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
-        var medlemskap = forutgåendeMedlemskapTjeneste.utledForutgåendeBosteder(behandling.getFagsakId(), behandling.getId())
-            .map(this::mapTilDto)
-            .orElse(List.of());
+        var medlemskap = forutgåendeMedlemskapTjeneste.hentBostederSomDto(behandling.getId());
 
         var vilkår = vilkårResultatRepository.hent(behandling.getId())
             .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
@@ -124,38 +120,6 @@ public class ForutgåendeMedlemskapRestTjeneste {
         }
 
         return alleUtfall.stream().findFirst().orElse(Utfall.IKKE_VURDERT);
-    }
-
-    private List<MedlemskapsPeriodeDto> mapTilDto(Bosteder bosteder) {
-        return bosteder.getPerioder().entrySet().stream().map(it ->  {
-            var di = it.getKey();
-            var bosted = it.getValue();
-            var landkode = bosted.getLand().getLandkode();
-
-            return new MedlemskapsPeriodeDto(
-                new Periode(di.getFraOgMed(), di.getTilOgMed()),
-                mapLandTilNorskNavn(landkode),
-                landkode,
-                TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(bosted.getLand(), di.getFraOgMed())
-            );
-            }
-        ).toList();
-    }
-
-    private static Map<String, String> lagLandkodeTilNorskNavn() {
-        Map<String, String> result = new HashMap<>();
-        for (String alpha2 : Locale.getISOCountries()) {
-            try {
-                Locale locale = new Locale.Builder().setRegion(alpha2).build();
-                result.put(locale.getISO3Country(), locale.getDisplayCountry(Locale.forLanguageTag("nb-NO")));
-            } catch (MissingResourceException | IllformedLocaleException ignored) {
-            }
-        }
-        return Map.copyOf(result);
-    }
-
-    private static String mapLandTilNorskNavn(String landkodeAlpha3) {
-        return LANDKODE_TIL_NORSK_NAVN.getOrDefault(landkodeAlpha3, landkodeAlpha3);
     }
 
 }
