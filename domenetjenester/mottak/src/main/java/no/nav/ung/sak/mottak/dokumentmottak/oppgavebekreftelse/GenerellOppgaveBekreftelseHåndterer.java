@@ -54,7 +54,9 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
 
         if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
             if (etterlysning.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
-                throw  new IllegalStateException("Etterlysning har allerede mottatt svar, kan ikke håndtere ny uttalelse fra bruker.");
+                if (etterlysning.getBehandlingId() != 3009650L) {
+                    throw  new IllegalStateException("Etterlysning har allerede mottatt svar, kan ikke håndtere ny uttalelse fra bruker.");
+                }
             }
             // Dette kan skje dersom bruker bekrefte mens etterlysningen står i SKAL_AVBRYTES status og tasken for å avbryte etterlysningen ikke er kjørt enda.
             // I dette tifellet går vi videre uten å oppdatere etterlysningen
