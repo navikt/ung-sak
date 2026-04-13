@@ -19,11 +19,13 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
+import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,6 +37,8 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     private static final LocalDate FOM = LocalDate.of(2024, 7, 1);
     private static final LocalDate TOM = LocalDate.of(2024, 9, 30);
     private static final no.nav.ung.sak.typer.Periode VILKÅR_PERIODE = new no.nav.ung.sak.typer.Periode(FOM, TOM);
+    private static final JournalpostId JP = new JournalpostId("JP1");
+    private static final LocalDateTime MOTTATT = LocalDateTime.of(2026, 1, 1, 12, 0);
 
     @Inject
     private EntityManager entityManager;
@@ -82,7 +86,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     @Test
     void skal_returnere_uten_aksjonspunkter_når_ingen_bosted_oppgitt() {
         var behandling = lagScenario(Utfall.IKKE_VURDERT);
-        forutgåendeMedlemskapRepository.lagre(behandling.getId(), FOM.minusYears(5), FOM.minusDays(1), Set.of());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of());
 
         var resultat = utførSteg(behandling);
 
@@ -93,7 +97,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     @Test
     void skal_returnere_uten_aksjonspunkter_når_bosted_er_eøs_land() {
         var behandling = lagScenario(Utfall.IKKE_VURDERT);
-        forutgåendeMedlemskapRepository.lagre(behandling.getId(), FOM.minusYears(5), FOM.minusDays(1), Set.of(
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of(
             new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "SWE")
         ));
 
@@ -115,7 +119,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var forskjøvetFom = FOM.minusWeeks(1);
         var forskjøvetVilkårPeriode = new no.nav.ung.sak.typer.Periode(forskjøvetFom, TOM);
         var behandling = lagScenario(Utfall.IKKE_VURDERT, forskjøvetVilkårPeriode);
-        forutgåendeMedlemskapRepository.lagre(behandling.getId(), FOM.minusYears(5), FOM.minusDays(1), Set.of());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of());
 
         var resultat = utførSteg(behandling);
 
@@ -125,7 +129,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     @Test
     void skal_returnere_aksjonspunkt_når_ett_bosted_er_utenfor_eøs() {
         var behandling = lagScenario(Utfall.IKKE_VURDERT);
-        forutgåendeMedlemskapRepository.lagre(behandling.getId(), FOM.minusYears(5), FOM.minusDays(1), Set.of(
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of(
             new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2022, 3, 31), "SWE"),
             new OppgittBosted(LocalDate.of(2022, 4, 1), LocalDate.of(2024, 6, 30), "USA")
         ));

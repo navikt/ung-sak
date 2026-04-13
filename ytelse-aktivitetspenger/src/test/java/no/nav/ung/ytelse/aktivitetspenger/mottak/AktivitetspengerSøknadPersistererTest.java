@@ -11,16 +11,21 @@ import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
 import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
+import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @CdiDbAwareTest
 class AktivitetspengerSøknadPersistererTest {
+
+    private static final JournalpostId JP = new JournalpostId("JP1");
+    private static final LocalDateTime MOTTATT = LocalDateTime.of(2026, 1, 1, 12, 0);
 
     @Inject
     private EntityManager entityManager;
@@ -48,15 +53,18 @@ class AktivitetspengerSøknadPersistererTest {
             new BostedPeriodeInfo().medLand(Landkode.of("FIN"))
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, behandling.getId());
-        entityManager.clear();
+        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, MOTTATT, behandling.getId());
+
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
-        assertThat(grunnlag.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 5, 1));
-        assertThat(grunnlag.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2026, 4, 30));
-        assertThat(grunnlag.getBostederUtland()).hasSize(2);
-        assertThat(grunnlag.getBostederUtland()).extracting(OppgittBosted::getLandkode)
+        assertThat(grunnlag.getOppgittePerioder()).hasSize(1);
+        var periode = grunnlag.getOppgittePerioder().iterator().next();
+        assertThat(periode.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 5, 1));
+        assertThat(periode.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2026, 4, 30));
+        assertThat(periode.getBostederUtland()).hasSize(2);
+        assertThat(periode.getBostederUtland()).extracting(OppgittBosted::getLandkode)
             .containsExactlyInAnyOrder("DEU", "FIN");
+        assertThat(periode.getMottattTidspunkt()).isEqualTo(MOTTATT);
     }
 
     @Test
@@ -64,38 +72,39 @@ class AktivitetspengerSøknadPersistererTest {
         var søknadsperiode = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
         var bosteder = new Bosteder();
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, behandling.getId());
-        entityManager.clear();
+        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, MOTTATT, behandling.getId());
+
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
-        assertThat(grunnlag.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 1, 1));
-        assertThat(grunnlag.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2025, 12, 31));
-        assertThat(grunnlag.getBostederUtland()).isEmpty();
+        var periode = grunnlag.getOppgittePerioder().iterator().next();
+        assertThat(periode.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 1, 1));
+        assertThat(periode.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2025, 12, 31));
+        assertThat(periode.getBostederUtland()).isEmpty();
     }
 
     @Test
-    void skal_deaktivere_eldre_grunnlag_ved_ny_søknad() {
+    void skal_legge_til_perioder_ved_ny_søknad_på_samme_behandling() {
         var søknadsperiode = new Periode(LocalDate.of(2026, 7, 1), LocalDate.of(2027, 6, 30));
+        var jp1 = new JournalpostId("JP-FIRST");
+        var jp2 = new JournalpostId("JP-SECOND");
+
         var førsteBosteder = new Bosteder().medPerioder(Map.of(
             new Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2026, 6, 30)),
             new BostedPeriodeInfo().medLand(Landkode.SVERIGE)
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(førsteBosteder, søknadsperiode, behandling.getId());
-        entityManager.clear();
-        var førsteGrunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
+        persister.lagreForutgåendeMedlemskapGrunnlag(førsteBosteder, søknadsperiode, jp1, MOTTATT, behandling.getId());
+
 
         var andreBosteder = new Bosteder().medPerioder(Map.of(
             new Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2026, 6, 30)),
             new BostedPeriodeInfo().medLand(Landkode.of("DEU"))
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(andreBosteder, søknadsperiode, behandling.getId());
-        entityManager.clear();
-        var andreGrunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
+        persister.lagreForutgåendeMedlemskapGrunnlag(andreBosteder, søknadsperiode, jp2, MOTTATT, behandling.getId());
 
-        assertThat(andreGrunnlag.getId()).isNotEqualTo(førsteGrunnlag.getId());
-        assertThat(andreGrunnlag.getBostederUtland()).hasSize(1);
-        assertThat(andreGrunnlag.getBostederUtland().iterator().next().getLandkode()).isEqualTo("DEU");
+
+        var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
+        assertThat(grunnlag.getOppgittePerioder()).hasSize(2);
     }
 }

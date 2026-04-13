@@ -8,6 +8,7 @@ import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto;
 import no.nav.ung.sak.typer.Periode;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Dependent
 public class ForutgåendeMedlemskapTjeneste {
@@ -26,17 +27,20 @@ public class ForutgåendeMedlemskapTjeneste {
     }
 
     private static List<MedlemskapsPeriodeDto> mapTilDto(OppgittForutgåendeMedlemskapGrunnlag grunnlag) {
-        return grunnlag.getBostederUtland().stream().map(bosted -> {
-            var landkode = bosted.getLandkode();
-            var periode = bosted.getPeriode();
+        return grunnlag.getOppgittePerioder().stream()
+            .flatMap(p -> p.getBostederUtland().stream().map(bosted -> {
+                var landkode = bosted.getLandkode();
+                var periode = bosted.getPeriode();
 
-            return new MedlemskapsPeriodeDto(
-                new Periode(periode.getFomDato(), periode.getTomDato()),
-                mapLandTilNorskNavn(landkode),
-                landkode,
-                TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(landkode, periode.getFomDato())
-            );
-        }).toList();
+                return new MedlemskapsPeriodeDto(
+                    new Periode(periode.getFomDato(), periode.getTomDato()),
+                    mapLandTilNorskNavn(landkode),
+                    landkode,
+                    TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(landkode, periode.getFomDato()),
+                    p.getJournalpostId().getVerdi(),
+                    p.getMottattTidspunkt()
+                );
+            })).toList();
     }
 
     private static final Map<String, String> LANDKODE_TIL_NORSK_NAVN = lagLandkodeTilNorskNavn();

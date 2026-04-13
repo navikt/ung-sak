@@ -16,6 +16,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
@@ -27,6 +28,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.Objects;
@@ -153,11 +155,16 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
     }
 
     private static LocalDateTimeline<String> lagBostederTidslinje(OppgittForutgåendeMedlemskapGrunnlag grunnlag) {
-        DatoIntervallEntitet p = grunnlag.getPeriode();
-        var bostedetNorgeTidslinje = new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), Landkode.NORGE.getLandkode());
+        // Bruker kun grunnlag for den nyeste søknaden og antar at den overskriver tidligere oppgitte perioder. Hvis grunnlagene må merges i fremtiden, gjøres det her.
+        var nyestePeriode = grunnlag.getOppgittePerioder().stream()
+            .max(Comparator.comparing(OppgittForutgåendeMedlemskapPeriode::getMottattTidspunkt))
+            .orElseThrow();
 
-        LocalDateTimeline<String> bostederUtlandTidslinje = new LocalDateTimeline<>(
-            grunnlag.getBostederUtland().stream().map(b -> new LocalDateSegment<>(b.getPeriode().getFomDato(), b.getPeriode().getTomDato(), b.getLandkode()))
+        var bostedetNorgeTidslinje = new LocalDateTimeline<>(nyestePeriode.getPeriode().getFomDato(), nyestePeriode.getPeriode().getTomDato(), Landkode.NORGE.getLandkode());
+
+        var bostederUtlandTidslinje = new LocalDateTimeline<>(
+            nyestePeriode.getBostederUtland().stream()
+                .map(b -> new LocalDateSegment<>(b.getPeriode().getFomDato(), b.getPeriode().getTomDato(), b.getLandkode()))
                 .toList());
 
         return bostederUtlandTidslinje.crossJoin(bostedetNorgeTidslinje);

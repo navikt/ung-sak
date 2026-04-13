@@ -4,8 +4,10 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.sak.typer.JournalpostId;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -37,16 +39,23 @@ public class OppgittForutgåendeMedlemskapRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagre(Long behandlingId, LocalDate forutgåendePeriodeFom, LocalDate forutgåendePeriodeTom, Set<OppgittBosted> bosteder) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var nyttGrunnlag = new OppgittForutgåendeMedlemskapGrunnlag(behandlingId, forutgåendePeriodeFom, forutgåendePeriodeTom, bosteder);
+    public void leggTilOppgittPeriode(Long behandlingId, JournalpostId journalpostId, LocalDateTime mottattTidspunkt, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
+        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
+        var nyPeriode = new OppgittForutgåendeMedlemskapPeriode(journalpostId, mottattTidspunkt, fom, tom, bosteder);
 
-        persister(eksisterendeGrunnlag, nyttGrunnlag);
+        OppgittForutgåendeMedlemskapHolder nyHolder;
+        nyHolder = eksisterende.map(
+            it -> new OppgittForutgåendeMedlemskapHolder(it.getHolder()))
+            .orElseGet(OppgittForutgåendeMedlemskapHolder::new);
+        nyHolder.leggTilPeriode(nyPeriode);
+
+        var nyttGrunnlag = new OppgittForutgåendeMedlemskapGrunnlag(behandlingId, nyHolder);
+        persister(eksisterende, nyttGrunnlag);
     }
 
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         hentEksisterendeGrunnlag(gammelBehandlingId).ifPresent(eksisterende -> {
-            var nyttGrunnlag = new OppgittForutgåendeMedlemskapGrunnlag(nyBehandlingId, eksisterende);
+            var nyttGrunnlag = new OppgittForutgåendeMedlemskapGrunnlag(nyBehandlingId, eksisterende.getHolder());
             persister(Optional.empty(), nyttGrunnlag);
         });
     }
