@@ -7,9 +7,9 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.S
 public record SatsOgBeregningDto(
     int aldersgrenseSatsendring,
     boolean harLavSatstype,
-    BeregningDto beregning,
+    BeregningDto beregningsgrunnlag,
     SatsgrunnlagDto minsteYtelsegrunnlag,
-    SatsgrunnlagDto minsteYtelsegrunnlagOvergangTilHøySatsFom,
+    SatsgrunnlagDto minsteYtelsegrunnlagOvergangTilHøySats,
     long grunnbeløp,
     BarnetilleggDto barnetillegg
 ) {

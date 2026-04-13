@@ -17,8 +17,8 @@ import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHelt
 class Satsberegner {
 
 
-    static long beregnDagsatsInklBarnetillegg(AktivitetspengerSatsGrunnlag satser) {
-        return tilHeltall(satser.dagsats().add(BigDecimal.valueOf(satser.dagsatsBarnetillegg())));
+    static long beregnDagsatsInklBarnetillegg(AktivitetspengerSatser satser) {
+        return tilHeltall(satser.hentBeregnetSats().totalDagsats());
     }
 
     static long beregnBarnetilleggSats(AktivitetspengerSatsGrunnlag satser) {
@@ -29,17 +29,12 @@ class Satsberegner {
              .divide(BigDecimal.valueOf(satser.antallBarn()), RoundingMode.HALF_UP));
     }
 
-    static String lagGrunnbeløpFaktorTekst(LocalDateSegment<AktivitetspengerSatsGrunnlag> satssegment) {
+    static String lagGrunnbeløpFaktorTekst(LocalDateSegment<AktivitetspengerSatser> satssegment) {
         BigDecimal faktor = GrunnbeløpfaktorTidslinje
             .finnStandardGrunnbeløpFaktorFor(satssegment.getLocalDateInterval())
             .setScale(3, RoundingMode.HALF_UP);
-        String norskFaktor = NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
+        return NumberFormat.getInstance(Locale.forLanguageTag("no-NO"))
             .format(faktor);
-
-        if (satssegment.getValue().satsType() == UngdomsytelseSatsType.LAV) {
-            return "2/3 av " + norskFaktor;
-        }
-        return norskFaktor;
     }
 
     public static String tallTilNorskHunkjønnTekst(int antall) {

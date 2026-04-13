@@ -9,6 +9,8 @@ import java.util.List;
 public record InnvilgelseDto(
     LocalDate ytelseFom,
     LocalDate ytelseTom,
+    long dagsats,
+    UtbetalingDto utbetaling,
     List<SatsEndringHendelseDto> satsendringer,
     SatsOgBeregningDto satsOgBeregning
 ) implements TemplateInnholdDto {

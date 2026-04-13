@@ -5,6 +5,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -19,16 +21,17 @@ import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.MonthUtils;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.InnvilgelseDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.SatsOgBeregningDto;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.UtbetalingDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.SatsgrunnlagDto;
-import org.slf4j.Logger;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 
-import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
@@ -40,39 +43,69 @@ import static no.nav.ung.ytelse.aktivitetspenger.beregning.GrunnsatsType.MINSTEY
 @Dependent
 public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdBygger {
 
-    private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FørstegangsInnvilgelseInnholdBygger.class);
-
     private final AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
+    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
-    public FørstegangsInnvilgelseInnholdBygger(AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository) {
+    public FørstegangsInnvilgelseInnholdBygger(
+        AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository,
+        TilkjentYtelseRepository tilkjentYtelseRepository,
+        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
+
         this.beregningsgrunnlagRepository = beregningsgrunnlagRepository;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-
         LocalDateTimeline<DetaljertResultat> periode = DetaljertResultat.filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_KUN_VILKÅR);
 
-        var ytelseFom = periode.getMinLocalDate();
-        var ytelseTom = periode.getMaxLocalDate();
+        LocalDate ytelseFom = periode.getMinLocalDate();
+        LocalDate ytelseTom = null;
 
         var aktivitetspengerGrunnlag = beregningsgrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow(
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
         );
 
         var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje();
+        var førsteSegment = satsTidslinje.toSegments().first();
+        var førsteSatser = førsteSegment.getValue();
+        var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
+
+        var utbetalingDto = opprettUtbetalingDto(behandling, detaljertResultatTidslinje, førsteSegment);
+
         var satsendringer = lagSatsEndringHendelser(satsTidslinje);
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
                 ytelseTom,
+                dagsatsFom,
+                utbetalingDto,
                 satsendringer,
                 byggSatsOgBeregning(satsTidslinje.toSegments())
             ));
+    }
+
+    private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, LocalDateSegment<AktivitetspengerSatser> førsteSegment) {
+        var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje);
+        var månedNavn = MonthUtils.getMonthNameInNorwegian(førsteSegment.getFom().getMonth());
+        return new UtbetalingDto(månedNavn, erEtterbetaling);
+    }
+
+    private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+        var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
+        if (tilkjentYtelseTimeline.isEmpty()) {
+            throw new IllegalStateException("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
+        }
+        var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
+        var dagensDato = bestemDagensDato();
+
+        return førsteTilkjentMåned.isBefore(dagensDato.withDayOfMonth(1));
     }
 
 
@@ -84,12 +117,13 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         }
 
     private static SatsEndringUtlederInput tilSatsEndringUtlederInput(LocalDateSegment<AktivitetspengerSatser> segment) {
-        var satser = segment.getValue().satsGrunnlag();
+        var aktivitetspengerSatser = segment.getValue();
+        var satserGrunnlag = aktivitetspengerSatser.satsGrunnlag();
         return new SatsEndringUtlederInput(
-            satser.antallBarn(),
-            satser.satsType() == UngdomsytelseSatsType.HØY,
-            Satsberegner.beregnDagsatsInklBarnetillegg(satser),
-            Satsberegner.beregnBarnetilleggSats(satser),
+            satserGrunnlag.antallBarn(),
+            satserGrunnlag.satsType() == UngdomsytelseSatsType.HØY,
+            Satsberegner.beregnDagsatsInklBarnetillegg(aktivitetspengerSatser),
+            Satsberegner.beregnBarnetilleggSats(satserGrunnlag),
             segment.getFom()
         );
     }
@@ -104,15 +138,16 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         }
         var harLavSatstype = satsTyper.contains(AktivitetspengerSatsType.LAV);
 
-        var tidligsteSegment = beregningOgSatsSegmenter.first().getValue();
-        var grunnsatsType = tidligsteSegment.utledGrunnsatsBenyttet();
+        var tidligsteSegment = beregningOgSatsSegmenter.first();
+        var tidligsteSatsOgBeregning = tidligsteSegment.getValue();
+        var grunnsatsType = tidligsteSatsOgBeregning.utledGrunnsatsBenyttet();
 
         var beregningsgrunnlag = BEREGNINGSGRUNNLAG.equals(grunnsatsType) ?
-            lagBeregningsgrunnlagDto(tidligsteSegment.beregningsgrunnlag()) :
+            lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning.beregningsgrunnlag()) :
             null;
 
         var minsteYtelsegrunnlag = MINSTEYTELSE.equals(grunnsatsType) ?
-            mapTilSatsgrunnlagDto(tidligsteSegment.satsGrunnlag()) :
+            mapTilSatsgrunnlagDto(tidligsteSegment) :
             null;
 
         var senesteSegment = beregningOgSatsSegmenter.last();
@@ -125,7 +160,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             Satsberegner.tallTilNorskHunkjønnTekst(senesteSats.antallBarn()),
             senesteSats.antallBarn() > 1,
             Satsberegner.beregnBarnetilleggSats(senesteSats),
-            Satsberegner.beregnDagsatsInklBarnetillegg(senesteSats))
+            Satsberegner.beregnDagsatsInklBarnetillegg(senesteSegment.getValue()))
             : null;
 
 
@@ -145,14 +180,15 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         if (senesteSats.hentSatsType() != AktivitetspengerSatsType.HØY) {
             throw new IllegalStateException("Forventet at nyeste sats skulle være høy når det er flere satser, men var %s for periode %s".formatted(senesteSats.hentSatsType(), senesteSatsSegment.getLocalDateInterval()));
         }
-        return mapTilSatsgrunnlagDto(senesteSats.satsGrunnlag());
+        return mapTilSatsgrunnlagDto(senesteSatsSegment);
     }
 
-    private static SatsgrunnlagDto mapTilSatsgrunnlagDto(AktivitetspengerSatsGrunnlag sats) {
+    private static SatsgrunnlagDto mapTilSatsgrunnlagDto(LocalDateSegment<AktivitetspengerSatser> satser) {
+        var satsgrunnlag = satser.getValue().satsGrunnlag();
         return new SatsgrunnlagDto(
-            sats.grunnbeløpFaktor().setScale(3, RoundingMode.HALF_UP),
-            tilHeltall(sats.minsteytelse()),
-            tilHeltall(sats.dagsats())
+            Satsberegner.lagGrunnbeløpFaktorTekst(satser),
+            tilHeltall(satsgrunnlag.minsteytelse()),
+            tilHeltall(satsgrunnlag.dagsats())
         );
     }
 
@@ -163,5 +199,9 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             beregningsgrunnlag.getBeregnetPrAar(),
             tilHeltall(beregningsgrunnlag.getDagsats())
         );
+    }
+
+    private LocalDate bestemDagensDato() {
+        return Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
     }
 }

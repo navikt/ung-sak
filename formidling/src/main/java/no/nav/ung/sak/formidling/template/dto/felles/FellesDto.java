@@ -12,12 +12,14 @@ public record FellesDto(
     LocalDate brevDato,
     MottakerDto mottaker,
     String fagsakYtelse,
+    String fagsakYtelseNavn,
     BrevAnsvarligDto brevAnsvarlig) {
-    public static FellesDto lag(MottakerDto mottakerDto, BrevAnsvarligDto brevAnsvarlig) {
+
+    public static FellesDto lag(MottakerDto mottakerDto, BrevAnsvarligDto brevAnsvarlig, FagsakYtelseType fagsakYtelseType) {
         return new FellesDto(LocalDate.now(),
             mottakerDto,
-            FagsakYtelseType.UNGDOMSYTELSE.getKode(),
+            fagsakYtelseType.getKode(),
+            fagsakYtelseType.getNavn().toLowerCase(),
             brevAnsvarlig);
     }
-
 }
