@@ -5051,10 +5051,17 @@
           "harTrygdeavtale" : {
             "type" : "boolean"
           },
+          "journalpostId" : {
+            "type" : "string"
+          },
           "land" : {
             "type" : "string"
           },
           "landkode" : {
+            "type" : "string"
+          },
+          "mottattTidspunkt" : {
+            "format" : "date-time",
             "type" : "string"
           },
           "periode" : {
