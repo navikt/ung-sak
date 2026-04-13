@@ -6,12 +6,16 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringHendelseDto;
+import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtleder;
+import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
@@ -25,6 +29,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.S
 import org.slf4j.Logger;
 
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.NavigableSet;
 import java.util.stream.Collectors;
 
@@ -59,13 +64,34 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
 
         var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje();
+        var satsendringer = lagSatsEndringHendelser(satsTidslinje);
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_INNVILGELSE,
             new InnvilgelseDto(
                 ytelseFom,
                 ytelseTom,
+                satsendringer,
                 byggSatsOgBeregning(satsTidslinje.toSegments())
             ));
+    }
+
+
+    private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<AktivitetspengerSatser> satsTidslinje) {
+        var inputs = satsTidslinje.toSegments().stream()
+            .map(FørstegangsInnvilgelseInnholdBygger::tilSatsEndringUtlederInput)
+            .toList();
+        return new SatsEndringUtleder(inputs).lagSatsEndringHendelser();
+        }
+
+    private static SatsEndringUtlederInput tilSatsEndringUtlederInput(LocalDateSegment<AktivitetspengerSatser> segment) {
+        var satser = segment.getValue().satsGrunnlag();
+        return new SatsEndringUtlederInput(
+            satser.antallBarn(),
+            satser.satsType() == UngdomsytelseSatsType.HØY,
+            Satsberegner.beregnDagsatsInklBarnetillegg(satser),
+            Satsberegner.beregnBarnetilleggSats(satser),
+            segment.getFom()
+        );
     }
 
     private static SatsOgBeregningDto byggSatsOgBeregning(NavigableSet<LocalDateSegment<AktivitetspengerSatser>> beregningOgSatsSegmenter) {

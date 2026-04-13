@@ -7,6 +7,21 @@
             Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du aktivitetspenger utenom lørdag og søndag.
         </p>
 
+        {{#each satsEndringer}}
+            {{#if overgangTilHøySats}}
+                <p>Fordi du fylte {{satsOgBeregning.aldersgrenseSatsendring}} år {{fom}}, får du mer penger fra denne
+                    datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+            {{#if fødselBarn}}
+                <p>Fordi du fikk barn {{fom}}, får du {{> felles/beløp barnetilleggSats}} mer {{#if fikkFlereBarn}}for hvert barn{{/if}} fra denne datoen. Da får
+                    du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+            {{#if dødsfallBarn}}
+                <p>Fordi du mistet barn {{fom}}, får du ikke barnetillegg på {{> felles/beløp barnetilleggSats}} fra denne
+                    datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+        {{/each}}
+
         <h2>Hvorfor får du penger?</h2>
         <p>Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning.</p>
         <p>Pengene får du så lenge du får oppfølging fra Nav, og i inntil ett år.</p>

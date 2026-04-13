@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse;
+package no.nav.ung.sak.formidling.vedtak.satsendring;
 
 import java.time.LocalDate;
 
