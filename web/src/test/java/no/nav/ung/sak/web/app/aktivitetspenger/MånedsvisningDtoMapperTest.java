@@ -281,7 +281,7 @@ class MånedsvisningDtoMapperTest {
         final var antallBarn = 0;
         final var grunnbeløp = BigDecimal.valueOf(124_028);
         final var grunnbeløpFaktor = BigDecimal.valueOf(2);
-        // 280_000 (beregnetRedusertPrAar) > 248_056 (minsteytelse = 124_028 * 2), gir BEREGNINGSGRUNNLAG
+        // 280_000 (beregnetRedusertPrAar) > 248_056 (minsteÅrligeYtelse = 124_028 * 2), gir BEREGNINGSGRUNNLAG
         final var beregnetRedusertPrAar = BigDecimal.valueOf(280_000);
         final var forventetDagsats = BigDecimal.valueOf(1077);
 
