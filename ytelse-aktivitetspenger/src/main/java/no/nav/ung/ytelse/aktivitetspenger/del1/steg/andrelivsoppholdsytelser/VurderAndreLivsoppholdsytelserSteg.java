@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.andrelivsoppholdsytelser;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,33 +18,32 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 
 import java.util.List;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BISTANDSVILKÅR;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANDRE_LIVSHOPPHOLDSYTELSER;
 
 @ApplicationScoped
-@BehandlingStegRef(value = VURDER_BISTANDSVILKÅR)
+@BehandlingStegRef(value = VURDER_ANDRE_LIVSHOPPHOLDSYTELSER)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class BistandsvilkårSteg implements BehandlingSteg {
-
+public class VurderAndreLivsoppholdsytelserSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    BistandsvilkårSteg() {
-        //for CDI proxy
+    VurderAndreLivsoppholdsytelserSteg() {
+        // for CDI proxy
     }
 
     @Inject
-    public BistandsvilkårSteg(BehandlingRepository behandlingRepository,
-                              VilkårResultatRepository vilkårResultatRepository) {
+    public VurderAndreLivsoppholdsytelserSteg(BehandlingRepository behandlingRepository,
+                                              VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR;
-        VilkårType vilkårtype = VilkårType.BISTANDSVILKÅR;
-        VilkårType forrigeVilkårtype = VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR;
+        AksjonspunktDefinisjon aksjonspunktDefinisjon = AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER;
+        VilkårType vilkårtype = VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR;
+        VilkårType forrigeVilkårtype = VilkårType.BOSTEDSVILKÅR;
 
         Long behandlingId = kontekst.getBehandlingId();
         var behandling = behandlingRepository.hentBehandling(behandlingId);
@@ -57,5 +56,6 @@ public class BistandsvilkårSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
     }
+
 
 }

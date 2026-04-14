@@ -20,46 +20,36 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = VurderBehovForBistandDto.class, adapter = AksjonspunktOppdaterer.class)
-public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<VurderBehovForBistandDto> {
+@DtoTilServiceAdapter(dto = VurderAndreLivsoppholdsytelserDto.class, adapter = AksjonspunktOppdaterer.class)
+public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOppdaterer<VurderAndreLivsoppholdsytelserDto> {
 
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private HistorikkinnslagRepository historikkinnslagRepository;
 
-    VurderBehovForBistandOppdaterer() {
+    VurderAndreLivsoppholdsytelserOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderBehovForBistandOppdaterer(BehandlingRepository behandlingRepository,
-                                           @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                           HistorikkinnslagRepository historikkinnslagRepository) {
+    public VurderAndreLivsoppholdsytelserOppdaterer(BehandlingRepository behandlingRepository,
+                                                    @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+                                                    HistorikkinnslagRepository historikkinnslagRepository) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     @Override
-    public OppdateringResultat oppdater(VurderBehovForBistandDto dto, AksjonspunktOppdaterParameter param) {
-        if (dto.getVurdertePerioder() == null || dto.getVurdertePerioder().isEmpty()) {
-            //for å støtte frontend slik det er implementer i dag
-            return oppdaterGammel(dto, param);
-        } else {
-            return oppdaterNy(dto, param);
-        }
-    }
-
-    private OppdateringResultat oppdaterNy(VurderBehovForBistandDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdater(VurderAndreLivsoppholdsytelserDto dto, AksjonspunktOppdaterParameter param) {
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(param.getRef().getFagsakYtelseType(), param.getRef().getBehandlingType());
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BISTANDSVILKÅR);
+        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
         LocalDateTimeline<Boolean> tilVurderingTidslinje = TidslinjeUtil.tilTidslinje(perioderTilVurdering);
         LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
 
@@ -75,7 +65,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         }
 
         var resultatBuilder = param.getVilkårResultatBuilder();
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BISTANDSVILKÅR);
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
         for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
             Utfall utfall = vurdertPeriode.erVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
@@ -92,28 +82,10 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
-            .medTittel(SkjermlenkeType.BISTANDSVILKÅR)
-            .addLinje("Bistandsvikår ble vurdert")
+            .medTittel(SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
+            .addLinje("Det ble vurdert om søker har andre livsoppholdsytelser som ikke er forenelig med denne ytelsen")
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
-
-        return OppdateringResultat.nyttResultat();
-    }
-
-    public OppdateringResultat oppdaterGammel(VurderBehovForBistandDto dto, AksjonspunktOppdaterParameter param) {
-        var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(param.getRef().getFagsakYtelseType(), param.getRef().getBehandlingType());
-
-        var resultatBuilder = param.getVilkårResultatBuilder();
-        var bistandsvilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BISTANDSVILKÅR);
-
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BISTANDSVILKÅR);
-        for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            //FIXME AKT implementer regel for automatisk behandling eller opprett aksjonspunkt her
-            var periodeBuilderOppfylt = bistandsvilkårBuilder.hentBuilderFor(periode).medUtfall(Utfall.OPPFYLT).medRegelInput("TODO");
-            bistandsvilkårBuilder.leggTil(periodeBuilderOppfylt);
-        }
-
-        resultatBuilder.leggTil(bistandsvilkårBuilder);
 
         return OppdateringResultat.nyttResultat();
     }

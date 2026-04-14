@@ -207,4 +207,41 @@ public class VilkårResultatRepository {
         var nyttResultat = builder.build();
         this.lagre(behandlingId, nyttResultat);
     }
+
+    public void settUtfallForPeriode(Long behandlingId, VilkårType vilkårType, NavigableSet<DatoIntervallEntitet> vilkårsPeriode, Utfall utfall) {
+        if (utfall == Utfall.IKKE_OPPFYLT){
+            throw new IllegalArgumentException("Denne funksjonen kan ikke brukes på " + utfall + " fordi det krever input av avslagsårsaker");
+        }
+        Optional<Vilkårene> vilkårResultatOpt = this.hentHvisEksisterer(behandlingId);
+        if (vilkårResultatOpt.isEmpty()) {
+            return;
+        }
+        Vilkårene vilkårene = vilkårResultatOpt.get();
+        Optional<Vilkår> vilkårOpt = vilkårene.getVilkårene().stream()
+            .filter(v -> v.getVilkårType().equals(vilkårType))
+            .findFirst();
+        if (vilkårOpt.isEmpty()) {
+            return;
+        }
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+        for (var periode : vilkårsPeriode) {
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).medUtfall(utfall));
+        }
+
+        builder.leggTil(vilkårBuilder);
+        var nyttResultat = builder.build();
+        this.lagre(behandlingId, nyttResultat);
+    }
+
+     public void settUtfallForAllePerioder(Long behandlingId, VilkårType vilkårType, Utfall utfall) {
+        var vilkårene = hent(behandlingId);
+        NavigableSet<DatoIntervallEntitet> vilkårsperioder = new TreeSet<>(vilkårene.getVilkårTimeline(vilkårType).stream().map(segment -> DatoIntervallEntitet.fra(segment.getLocalDateInterval())).toList());
+        settUtfallForPeriode(behandlingId, vilkårType, vilkårsperioder, utfall);
+    }
+
+     public boolean erNoeInnevilgetFor(Long behandlingId, VilkårType vilkårType) {
+        Vilkårene vilkårene = hent(behandlingId);
+        return vilkårene.getVilkårTimeline(vilkårType).stream().anyMatch(segment -> segment.getValue().getUtfall() == Utfall.OPPFYLT);
+    }
 }

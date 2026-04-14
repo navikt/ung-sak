@@ -8,11 +8,28 @@ import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 import java.time.Period;
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.*;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.*;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AVBRYTES;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.LOKALKONTOR_BESLUTTER_VILKÅR_KODE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_SKJERMLENKE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_VILKÅR;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_ANNET;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_ARBEIDSGIVER;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_SAKSBEHANDLER;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.Ventekategori.AVVENTER_SØKER;
 
 /**
  * Definerer mulige Aksjonspunkter inkludert hvilket Vurderingspunkt de må løses i.
@@ -75,9 +92,16 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST,
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
+    VURDER_BOSTED(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTED,
+        VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
         AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
-        VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
+        VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
+    VURDER_ANDRE_LIVSOPPHOLDSYTELSER(AksjonspunktKodeDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_KODE,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_ANDRE_LIVSHOPPHOLDSYTELSER,
+        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER, TOTRINN, AVVENTER_SAKSBEHANDLER),
+
 
     // Gruppe : 60xx
     OVERSTYRING_AV_SØKNADSFRISTVILKÅRET(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_SØKNADSFRISTVILKÅRET_KODE,
