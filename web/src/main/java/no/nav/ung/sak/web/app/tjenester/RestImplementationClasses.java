@@ -1,5 +1,6 @@
 package no.nav.ung.sak.web.app.tjenester;
 
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.prosesstask.rest.ProsessTaskRestTjeneste;
 import no.nav.ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
@@ -39,6 +40,7 @@ import no.nav.ung.sak.web.app.tjenester.register.RedirectToRegisterRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.InitielleLinksRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.NavAnsattRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.saksbehandler.SaksbehandlerRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.task.ForvaltningTestTaskRestTjeneste;
 import no.nav.ung.sak.web.app.ungdomsytelse.UngdomsytelseRestTjeneste;
 import no.nav.ung.sak.web.server.abac.PipRestTjeneste;
 
@@ -89,10 +91,10 @@ public class RestImplementationClasses {
 
         classes.add(KlageRestTjeneste.class);
 
+
         // Forvaltningstjenester - fjernes løpende
         classes.add(ProsessTaskRestTjeneste.class);
         classes.add(ForvaltningAksjonspunktSammendragRestTjeneste.class);
-        classes.add(ForvaltningTestRestTjeneste.class);
         classes.add(ForvaltningOppdragRestTjeneste.class);
         classes.add(ForvaltningOppgaveRestTjeneste.class);
         classes.add(ForvaltningPersonRestTjeneste.class);
@@ -101,6 +103,12 @@ public class RestImplementationClasses {
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
         classes.add(NotatRestTjeneste.class);
+
+        // Tjenester for å understøtte (verdikjede-)test
+        if (!Environment.current().isProd()) {
+            classes.add(ForvaltningTestRestTjeneste.class);
+            classes.add(ForvaltningTestTaskRestTjeneste.class);
+        }
 
         return Set.copyOf(classes);
     }
