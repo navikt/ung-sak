@@ -11,7 +11,6 @@ import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
@@ -30,9 +29,6 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
     @Column(name = "journalpost_id", nullable = false, updatable = false)
     private String journalpostId;
 
-    @Column(name = "mottatt_tidspunkt", nullable = false, updatable = false)
-    private LocalDateTime mottattTidspunkt;
-
     @Type(PostgreSQLRangeType.class)
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
@@ -45,20 +41,17 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
     public OppgittForutgåendeMedlemskapPeriode() {
     }
 
-    public OppgittForutgåendeMedlemskapPeriode(JournalpostId journalpostId, LocalDateTime mottattTidspunkt, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
+    public OppgittForutgåendeMedlemskapPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
         Objects.requireNonNull(journalpostId, "journalpostId");
-        Objects.requireNonNull(mottattTidspunkt, "mottattTidspunkt");
         Objects.requireNonNull(fom, "fom");
         Objects.requireNonNull(tom, "tom");
         this.journalpostId = journalpostId.getVerdi();
-        this.mottattTidspunkt = mottattTidspunkt;
         this.periode = Range.closed(fom, tom);
         this.bostederUtland = bosteder != null ? new LinkedHashSet<>(bosteder) : new LinkedHashSet<>();
     }
 
     OppgittForutgåendeMedlemskapPeriode(OppgittForutgåendeMedlemskapPeriode other) {
         this.journalpostId = other.journalpostId;
-        this.mottattTidspunkt = other.mottattTidspunkt;
         this.periode = other.periode;
         this.bostederUtland = other.bostederUtland.stream()
             .map(OppgittBosted::new)
@@ -71,10 +64,6 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
 
     public JournalpostId getJournalpostId() {
         return new JournalpostId(journalpostId);
-    }
-
-    public LocalDateTime getMottattTidspunkt() {
-        return mottattTidspunkt;
     }
 
     public DatoIntervallEntitet getPeriode() {

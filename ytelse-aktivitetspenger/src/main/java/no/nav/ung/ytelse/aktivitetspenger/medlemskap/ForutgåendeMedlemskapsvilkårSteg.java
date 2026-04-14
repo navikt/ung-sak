@@ -18,6 +18,8 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -44,6 +46,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
 
     private VilkårResultatRepository vilkårResultatRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
@@ -53,10 +56,12 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
     @Inject
     public ForutgåendeMedlemskapsvilkårSteg(VilkårResultatRepository vilkårResultatRepository,
                                             OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
+                                            MottatteDokumentRepository mottatteDokumentRepository,
                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                             BehandlingRepository behandlingRepository) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
     }
@@ -84,25 +89,24 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        return vurderForutgåendeMedlemskap(perioderTilVurdering, behandlingId, vilkårene);
+        return vurderForutgåendeMedlemskap(perioderTilVurdering, behandlingId, behandling.getFagsakId(), vilkårene);
     }
 
-    private BehandleStegResultat vurderForutgåendeMedlemskap(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, Vilkårene vilkårene) {
-        var tidligsteVirkningsdato = perioderTilVurdering.stream()
-            .map(DatoIntervallEntitet::getFomDato)
-            .min(LocalDate::compareTo)
-            .orElseThrow();
-
-        var forutgåendePeriodeTilVurdering = lagForutgåendePeriodeTilVurdering(tidligsteVirkningsdato);
-
+    private BehandleStegResultat vurderForutgåendeMedlemskap(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, Long fagsakId, Vilkårene vilkårene) {
         var grunnlagOpt = forutgåendeMedlemskapRepository.hentGrunnlagHvisEksisterer(behandlingId);
         if (grunnlagOpt.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
         var grunnlag = grunnlagOpt.get();
+        var bostederTidslinje = lagBostederTidslinje(grunnlag, fagsakId);
 
-        var bostederTidslinje = lagBostederTidslinje(grunnlag);
+        var tidligsteVirkningsdato = perioderTilVurdering.stream()
+            .map(DatoIntervallEntitet::getFomDato)
+            .min(LocalDate::compareTo)
+            .orElseThrow();
+
+        var forutgåendePeriodeTilVurdering = lagForutgåendePeriodeTilVurdering(tidligsteVirkningsdato);
 
         var vurdering = vurderBosteder(forutgåendePeriodeTilVurdering, bostederTidslinje);
 
@@ -154,20 +158,30 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         return new LocalDateSegment<>(intervall, Utfall.IKKE_OPPFYLT);
     }
 
-    private static LocalDateTimeline<String> lagBostederTidslinje(OppgittForutgåendeMedlemskapGrunnlag grunnlag) {
-        // Bruker kun grunnlag for den nyeste søknaden og antar at den overskriver tidligere oppgitte perioder. Hvis grunnlagene må merges i fremtiden, gjøres det her.
-        var nyestePeriode = grunnlag.getOppgittePerioder().stream()
-            .max(Comparator.comparing(OppgittForutgåendeMedlemskapPeriode::getMottattTidspunkt))
+    private LocalDateTimeline<String> lagBostederTidslinje(OppgittForutgåendeMedlemskapGrunnlag grunnlag, Long fagsakId) {
+        var journalpostIder = grunnlag.getOppgittePerioder().stream()
+            .map(OppgittForutgåendeMedlemskapPeriode::getJournalpostId)
+            .toList();
+
+        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIder);
+        var nyesteJournalpostId = mottatteDokumenter.stream()
+            .max(Comparator.comparing(MottattDokument::getMottattTidspunkt))
+            .map(MottattDokument::getJournalpostId)
             .orElseThrow();
 
-        var bostedetNorgeTidslinje = new LocalDateTimeline<>(nyestePeriode.getPeriode().getFomDato(), nyestePeriode.getPeriode().getTomDato(), Landkode.NORGE.getLandkode());
+        var nyestePeriode = grunnlag.getOppgittePerioder().stream()
+            .filter(p -> p.getJournalpostId().equals(nyesteJournalpostId))
+            .findFirst()
+            .orElseThrow();
+
+        var antattBostedNorgeTidslinje = new LocalDateTimeline<>(nyestePeriode.getPeriode().getFomDato(), nyestePeriode.getPeriode().getTomDato(), Landkode.NORGE.getLandkode());
 
         var bostederUtlandTidslinje = new LocalDateTimeline<>(
             nyestePeriode.getBostederUtland().stream()
                 .map(b -> new LocalDateSegment<>(b.getPeriode().getFomDato(), b.getPeriode().getTomDato(), b.getLandkode()))
                 .toList());
 
-        return bostederUtlandTidslinje.crossJoin(bostedetNorgeTidslinje);
+        return bostederUtlandTidslinje.crossJoin(antattBostedNorgeTidslinje);
     }
 
     record RegelInput(LocalDateTimeline<String> bostederLandkodeTidslinje) { }

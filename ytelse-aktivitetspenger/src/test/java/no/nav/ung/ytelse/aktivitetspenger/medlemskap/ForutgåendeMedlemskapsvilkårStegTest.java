@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
@@ -13,6 +14,8 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -38,7 +41,6 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     private static final LocalDate TOM = LocalDate.of(2024, 9, 30);
     private static final no.nav.ung.sak.typer.Periode VILKÅR_PERIODE = new no.nav.ung.sak.typer.Periode(FOM, TOM);
     private static final JournalpostId JP = new JournalpostId("JP1");
-    private static final LocalDateTime MOTTATT = LocalDateTime.of(2026, 1, 1, 12, 0);
 
     @Inject
     private EntityManager entityManager;
@@ -49,6 +51,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
+    private MottatteDokumentRepository mottatteDokumentRepository;
     private ForutgåendeMedlemskapsvilkårSteg steg;
 
     @BeforeEach
@@ -57,9 +60,11 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var repoProvider = new BehandlingRepositoryProvider(entityManager);
         vilkårResultatRepository = repoProvider.getVilkårResultatRepository();
         forutgåendeMedlemskapRepository = new OppgittForutgåendeMedlemskapRepository(entityManager);
+        mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         steg = new ForutgåendeMedlemskapsvilkårSteg(
             vilkårResultatRepository,
             forutgåendeMedlemskapRepository,
+            mottatteDokumentRepository,
             perioderTilVurderingTjenester,
             behandlingRepository
         );
@@ -86,7 +91,8 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     @Test
     void skal_returnere_uten_aksjonspunkter_når_ingen_bosted_oppgitt() {
         var behandling = lagScenario(Utfall.IKKE_VURDERT);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of());
+        lagreMottattDokument(behandling, JP, LocalDateTime.now());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), FOM.minusDays(1), Set.of());
 
         var resultat = utførSteg(behandling);
 
@@ -97,7 +103,8 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     @Test
     void skal_returnere_uten_aksjonspunkter_når_bosted_er_eøs_land() {
         var behandling = lagScenario(Utfall.IKKE_VURDERT);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of(
+        lagreMottattDokument(behandling, JP, LocalDateTime.now());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), FOM.minusDays(1), Set.of(
             new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "SWE")
         ));
 
@@ -119,7 +126,8 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var forskjøvetFom = FOM.minusWeeks(1);
         var forskjøvetVilkårPeriode = new no.nav.ung.sak.typer.Periode(forskjøvetFom, TOM);
         var behandling = lagScenario(Utfall.IKKE_VURDERT, forskjøvetVilkårPeriode);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of());
+        lagreMottattDokument(behandling, JP, LocalDateTime.now());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), FOM.minusDays(1), Set.of());
 
         var resultat = utførSteg(behandling);
 
@@ -129,7 +137,8 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     @Test
     void skal_returnere_aksjonspunkt_når_ett_bosted_er_utenfor_eøs() {
         var behandling = lagScenario(Utfall.IKKE_VURDERT);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, MOTTATT, FOM.minusYears(5), FOM.minusDays(1), Set.of(
+        lagreMottattDokument(behandling, JP, LocalDateTime.now());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), FOM.minusDays(1), Set.of(
             new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2022, 3, 31), "SWE"),
             new OppgittBosted(LocalDate.of(2022, 4, 1), LocalDate.of(2024, 6, 30), "USA")
         ));
@@ -155,6 +164,16 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         return AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, utfall, vilkårPeriode)
             .lagre(entityManager);
+    }
+
+    private void lagreMottattDokument(Behandling behandling, JournalpostId journalpostId, LocalDateTime mottattTidspunkt) {
+        var dokument = new MottattDokument.Builder()
+            .medFagsakId(behandling.getFagsakId())
+            .medBehandlingId(behandling.getId())
+            .medJournalPostId(journalpostId)
+            .medMottattTidspunkt(mottattTidspunkt)
+            .build();
+        mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG);
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {

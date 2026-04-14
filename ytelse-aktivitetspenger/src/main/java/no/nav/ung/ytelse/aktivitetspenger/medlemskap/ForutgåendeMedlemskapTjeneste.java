@@ -8,7 +8,6 @@ import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto;
 import no.nav.ung.sak.typer.Periode;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Dependent
 public class ForutgåendeMedlemskapTjeneste {
@@ -37,8 +36,7 @@ public class ForutgåendeMedlemskapTjeneste {
                     mapLandTilNorskNavn(landkode),
                     landkode,
                     TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(landkode, periode.getFomDato()),
-                    p.getJournalpostId().getVerdi(),
-                    p.getMottattTidspunkt()
+                    p.getJournalpostId().getVerdi()
                 );
             })).toList();
     }

@@ -77,7 +77,7 @@ public class AktivitetspengerSøknadPersisterer {
         return Språkkode.UDEFINERT;
     }
 
-    public void lagreForutgåendeMedlemskapGrunnlag(Bosteder forutgåendeBosteder, no.nav.k9.søknad.felles.type.Periode søknadsperiode, JournalpostId journalpostId, LocalDateTime mottattTidspunkt, Long behandlingId) {
+    public void lagreForutgåendeMedlemskapGrunnlag(Bosteder forutgåendeBosteder, no.nav.k9.søknad.felles.type.Periode søknadsperiode, JournalpostId journalpostId, Long behandlingId) {
         LocalDate søknadsperiodeFom = søknadsperiode.getFraOgMed();
         LocalDate forutgåendeFom = søknadsperiodeFom.minusYears(5);
         LocalDate forutgåendeTom = søknadsperiodeFom.minusDays(1);
@@ -89,6 +89,6 @@ public class AktivitetspengerSøknadPersisterer {
                 entry.getValue().getLand().getLandkode()))
             .collect(Collectors.toSet());
 
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandlingId, journalpostId, mottattTidspunkt, forutgåendeFom, forutgåendeTom, bosteder);
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandlingId, journalpostId, forutgåendeFom, forutgåendeTom, bosteder);
     }
 }

@@ -58,7 +58,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
             søknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiode(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId);
             søknadPersisterer.oppdaterFagsakperiode(new Periode(ytelse.getSøknadsperiode().getFraOgMed(), ytelse.getSøknadsperiode().getTilOgMed()), behandling);
-            søknadPersisterer.lagreForutgåendeMedlemskapGrunnlag(ytelse.getForutgåendeBosteder(), ytelse.getSøknadsperiode(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId);
+            søknadPersisterer.lagreForutgåendeMedlemskapGrunnlag(ytelse.getForutgåendeBosteder(), ytelse.getSøknadsperiode(), dokument.getJournalpostId(), behandlingId);
 
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandlingId, dokument.getJournalpostId());
         }

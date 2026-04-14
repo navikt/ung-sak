@@ -16,7 +16,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AktivitetspengerSøknadPersistererTest {
 
     private static final JournalpostId JP = new JournalpostId("JP1");
-    private static final LocalDateTime MOTTATT = LocalDateTime.of(2026, 1, 1, 12, 0);
 
     @Inject
     private EntityManager entityManager;
@@ -53,7 +51,7 @@ class AktivitetspengerSøknadPersistererTest {
             new BostedPeriodeInfo().medLand(Landkode.of("FIN"))
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, MOTTATT, behandling.getId());
+        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
@@ -64,7 +62,6 @@ class AktivitetspengerSøknadPersistererTest {
         assertThat(periode.getBostederUtland()).hasSize(2);
         assertThat(periode.getBostederUtland()).extracting(OppgittBosted::getLandkode)
             .containsExactlyInAnyOrder("DEU", "FIN");
-        assertThat(periode.getMottattTidspunkt()).isEqualTo(MOTTATT);
     }
 
     @Test
@@ -72,7 +69,7 @@ class AktivitetspengerSøknadPersistererTest {
         var søknadsperiode = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
         var bosteder = new Bosteder();
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, MOTTATT, behandling.getId());
+        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
@@ -93,7 +90,7 @@ class AktivitetspengerSøknadPersistererTest {
             new BostedPeriodeInfo().medLand(Landkode.SVERIGE)
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(førsteBosteder, søknadsperiode, jp1, MOTTATT, behandling.getId());
+        persister.lagreForutgåendeMedlemskapGrunnlag(førsteBosteder, søknadsperiode, jp1, behandling.getId());
 
 
         var andreBosteder = new Bosteder().medPerioder(Map.of(
@@ -101,7 +98,7 @@ class AktivitetspengerSøknadPersistererTest {
             new BostedPeriodeInfo().medLand(Landkode.of("DEU"))
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(andreBosteder, søknadsperiode, jp2, MOTTATT, behandling.getId());
+        persister.lagreForutgåendeMedlemskapGrunnlag(andreBosteder, søknadsperiode, jp2, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());

@@ -7,7 +7,6 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.typer.JournalpostId;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -39,9 +38,9 @@ public class OppgittForutgåendeMedlemskapRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void leggTilOppgittPeriode(Long behandlingId, JournalpostId journalpostId, LocalDateTime mottattTidspunkt, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
+    public void leggTilOppgittPeriode(Long behandlingId, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
         var eksisterende = hentEksisterendeGrunnlag(behandlingId);
-        var nyPeriode = new OppgittForutgåendeMedlemskapPeriode(journalpostId, mottattTidspunkt, fom, tom, bosteder);
+        var nyPeriode = new OppgittForutgåendeMedlemskapPeriode(journalpostId, fom, tom, bosteder);
 
         OppgittForutgåendeMedlemskapHolder nyHolder;
         nyHolder = eksisterende.map(

@@ -19,7 +19,6 @@ create table oppgitt_fmedlemskap
     id                            bigint                                            not null primary key,
     oppgitt_fmedlemskap_holder_id bigint references oppgitt_fmedlemskap_holder (id) not null,
     journalpost_id                varchar(20)                                       not null,
-    mottatt_tidspunkt             timestamp(3)                                      not null,
     periode                       daterange                                         not null,
     opprettet_av                  varchar(20)  default 'VL'                         not null,
     opprettet_tid                 timestamp(3) default current_timestamp            not null,
