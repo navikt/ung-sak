@@ -2197,6 +2197,12 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
+          "brevtekst" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+            "type" : "string"
+          },
           "vurdertePerioder" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto"
@@ -2215,6 +2221,12 @@
             "maxLength" : 4000,
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "brevtekst" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
             "type" : "string"
           },
           "vurdertePerioder" : {
