@@ -15,11 +15,19 @@ public record FellesDto(
     String fagsakYtelseNavn,
     BrevAnsvarligDto brevAnsvarlig) {
 
+    private static String ytelseNavnBruktIBrev(FagsakYtelseType fagsakYtelseType) {
+        return switch (fagsakYtelseType) {
+            case UNGDOMSYTELSE -> "ungdomsprogramytelsen";
+            case AKTIVITETSPENGER -> "aktivitetspenger";
+            default -> fagsakYtelseType.getNavn().toLowerCase();
+        };
+    }
+
     public static FellesDto lag(MottakerDto mottakerDto, BrevAnsvarligDto brevAnsvarlig, FagsakYtelseType fagsakYtelseType) {
         return new FellesDto(LocalDate.now(),
             mottakerDto,
             fagsakYtelseType.getKode(),
-            fagsakYtelseType.getNavn().toLowerCase(),
+            ytelseNavnBruktIBrev(fagsakYtelseType),
             brevAnsvarlig);
     }
 }

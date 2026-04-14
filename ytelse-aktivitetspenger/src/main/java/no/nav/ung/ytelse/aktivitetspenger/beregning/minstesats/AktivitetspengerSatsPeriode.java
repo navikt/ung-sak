@@ -27,7 +27,7 @@ public class AktivitetspengerSatsPeriode extends BaseEntitet {
     @Column(name = "periode", nullable = false, columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
-    @Column(name = "minsteYtelse", nullable = false)
+    @Column(name = "minsteytelse", nullable = false)
     private BigDecimal minsteytelse;
 
     @Column(name = "dagsats", nullable = false)

@@ -1,9 +1,9 @@
-package no.nav.ung.ytelse.aktivitetspenger.beregning;
+package no.nav.ung.sak.formidling.innhold;
 
 import java.time.Month;
 
 public class MonthUtils {
-    public static String getMonthNameInNorwegian(Month month) {
+    public static String navnPåMåned(Month month) {
         return switch (month) {
             case JANUARY -> "januar";
             case FEBRUARY -> "februar";
