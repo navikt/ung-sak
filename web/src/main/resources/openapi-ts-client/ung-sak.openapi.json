@@ -5060,10 +5060,6 @@
           "landkode" : {
             "type" : "string"
           },
-          "mottattTidspunkt" : {
-            "format" : "date-time",
-            "type" : "string"
-          },
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
