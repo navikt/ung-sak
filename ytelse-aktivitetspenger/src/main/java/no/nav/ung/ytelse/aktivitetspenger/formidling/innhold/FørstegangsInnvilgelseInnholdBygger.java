@@ -71,12 +71,12 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
         );
 
-        var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje();
+        var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje().intersection(detaljertResultatTidslinje);
         var førsteSegment = satsTidslinje.toSegments().first();
         var førsteSatser = førsteSegment.getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
-        var utbetalingDto = opprettUtbetalingDto(behandling, detaljertResultatTidslinje, førsteSegment);
+        var utbetalingDto = opprettUtbetalingDto(behandling, detaljertResultatTidslinje);
 
         var satsendringer = lagSatsEndringHendelser(satsTidslinje);
 
@@ -91,13 +91,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             ));
     }
 
-    private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, LocalDateSegment<AktivitetspengerSatser> førsteSegment) {
-        var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje);
-        var månedNavn = MonthUtils.getMonthNameInNorwegian(førsteSegment.getFom().getMonth());
-        return new UtbetalingDto(månedNavn, erEtterbetaling);
-    }
-
-    private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+    private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
         if (tilkjentYtelseTimeline.isEmpty()) {
             throw new IllegalStateException("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
@@ -105,7 +99,11 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
         var dagensDato = bestemDagensDato();
 
-        return førsteTilkjentMåned.isBefore(dagensDato.withDayOfMonth(1));
+        var førstkommendeUtbetalingskjøring = førsteTilkjentMåned.plusMonths(1).plusDays(9);
+        var erEtterbetaling = dagensDato.isAfter(førstkommendeUtbetalingskjøring);
+
+        var månedNavn = MonthUtils.getMonthNameInNorwegian(førstkommendeUtbetalingskjøring.getMonth());
+        return new UtbetalingDto(månedNavn, erEtterbetaling);
     }
 
 

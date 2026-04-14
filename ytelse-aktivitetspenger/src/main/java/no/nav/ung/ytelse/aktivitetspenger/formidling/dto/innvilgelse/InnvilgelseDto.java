@@ -11,7 +11,7 @@ public record InnvilgelseDto(
     LocalDate ytelseTom,
     long dagsats,
     UtbetalingDto utbetaling,
-    List<SatsEndringHendelseDto> satsendringer,
+    List<SatsEndringHendelseDto> satsEndringer,
     SatsOgBeregningDto satsOgBeregning
 ) implements TemplateInnholdDto {
 }
