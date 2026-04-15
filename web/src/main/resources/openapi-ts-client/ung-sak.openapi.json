@@ -5088,7 +5088,7 @@
       },
       "ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto" : {
         "properties" : {
-          "avslagskode" : {
+          "avslagsårsak" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avslagsårsak"
           },
           "begrunnelse" : {
@@ -5097,7 +5097,7 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
-          "erVilkarOk" : {
+          "erVilkårOppfylt" : {
             "type" : "boolean"
           },
           "periode" : {
