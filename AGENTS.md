@@ -41,7 +41,7 @@ dev/generate-openapi-ts-client.sh
 - Flyway-migreringer skal følge eksisterende naming/orden i `migreringer/src/main/resources/db/migration`.
 - Behold pakke- og navnekonvensjoner under `no.nav.ung.sak.<module>...` (`*Repository`, `*Tjeneste`, `*Steg`).
 - Bruk `Range<LocalDate>` med `@Type(PostgreSQLRangeType.class)` og `columnDefinition = "daterange"` for perioder i JPA-entiteter.
-- Skriv all SQL i Flyway-migreringer med lowercase.
+- I nye Flyway-migreringer skal SQL skrives med lowercase. Eksisterende migreringer trenger ikke omskrives kun for casing.
 
 ## Boundaries
 ### Always

@@ -16,7 +16,7 @@ applyTo: "migreringer/src/main/resources/db/migration/**/*.sql"
 - Endringer skal vaere framoverkompatible under utrulling.
 
 ## SQL-praksis
-- Skriv all SQL i lowercase (tabellnavn, kolonnenavn, noekkelord, typer).
+- Foelg etablert SQL-stil i eksisterende migreringer, inkludert casing for noekkelord og typer.
 - Legg til indekser for nye foreign keys og tunge lese-sporringer.
 - Vaer eksplisitt med `NOT NULL`, defaults og constraints.
 - Unngaa destruktive endringer i samme migrering som introduserer ny struktur.
