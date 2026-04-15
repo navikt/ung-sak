@@ -14,10 +14,15 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
+
+import java.util.NavigableSet;
+import java.util.TreeSet;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = BekreftErMedlemVurderingDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -25,12 +30,15 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private final ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste;
+    private final VilkårResultatRepository vilkårResultatRepository;
 
     @Inject
     public BekreftErMedlemVurderingOppdaterer(@Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                             ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste) {
+                                             ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste,
+                                             VilkårResultatRepository vilkårResultatRepository) {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.forutgåendeMedlemskapTjeneste = forutgåendeMedlemskapTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
@@ -41,13 +49,15 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         var forutgåendeMedlemskapBuilder = resultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
+        var relevantePerioder = filtrerBortIkkeRelevantePerioder(param.getBehandlingId(), perioderTilVurdering);
+
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
 
         var bostederDto = forutgåendeMedlemskapTjeneste.hentBostederSomDto(param.getBehandlingId());
         String regelInput = new VilkårJsonObjectMapper().writeValueAsString(bostederDto);
 
-        perioderTilVurdering.stream()
+        relevantePerioder.stream()
             .map(periode -> forutgåendeMedlemskapBuilder
                 .hentBuilderFor(periode)
                 .medUtfallManuell(utfall)
@@ -60,6 +70,22 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         resultatBuilder.leggTil(forutgåendeMedlemskapBuilder);
 
         return OppdateringResultat.nyttResultat();
+    }
+
+    private NavigableSet<DatoIntervallEntitet> filtrerBortIkkeRelevantePerioder(Long behandlingId, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
+        var ikkeRelevantePerioder = vilkårResultatRepository.hent(behandlingId)
+            .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
+            .stream()
+            .flatMap(v -> v.getPerioder().stream())
+            .filter(p -> Utfall.IKKE_RELEVANT.equals(p.getGjeldendeUtfall()))
+            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
+            .toList();
+        if (ikkeRelevantePerioder.isEmpty()) {
+            return perioderTilVurdering;
+        }
+        var resultat = new TreeSet<>(perioderTilVurdering);
+        ikkeRelevantePerioder.forEach(resultat::remove);
+        return resultat;
     }
 
     private Avslagsårsak mapAvslagsårsak(MedlemskapAvslagsÅrsakType medlemskapAvslagsÅrsakType) {
