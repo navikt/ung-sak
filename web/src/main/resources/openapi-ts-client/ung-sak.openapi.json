@@ -2238,6 +2238,7 @@
             "type" : "array"
           }
         },
+        "required" : [ "vurdertePerioder" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto" : {
