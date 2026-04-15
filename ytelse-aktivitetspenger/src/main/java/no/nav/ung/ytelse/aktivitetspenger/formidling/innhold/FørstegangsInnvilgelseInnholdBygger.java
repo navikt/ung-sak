@@ -134,11 +134,11 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         if (satsTyper.size() > 2) {
             throw new IllegalStateException("Brevet støtter ikke beregninger med besteberegning, lav og høy sats samtdig.");
         }
-        var harLavSatstype = satsTyper.contains(AktivitetspengerSatsType.LAV);
 
         var tidligsteSegment = beregningOgSatsSegmenter.first();
         var tidligsteSatsOgBeregning = tidligsteSegment.getValue();
         var grunnsatsType = tidligsteSatsOgBeregning.utledGrunnsatsBenyttet();
+        var harLavSatstype = UngdomsytelseSatsType.LAV.equals(tidligsteSatsOgBeregning.satsGrunnlag().satsType());
 
         var beregningsgrunnlag = BEREGNINGSGRUNNLAG.equals(grunnsatsType) ?
             lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning.beregningsgrunnlag()) :
@@ -150,7 +150,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var senesteSegment = beregningOgSatsSegmenter.last();
         var senesteSats = senesteSegment.getValue().satsGrunnlag();
-        var minsteYtelsegrunnlagOvergangTilHøySats = satsTyper.size() > 1 ? kontrollerOvergangTilHøySats(senesteSegment) :  null;
+        var minsteYtelsegrunnlagOvergangTilHøySats = satsTyper.size() > 1 ? kontrollerOgLagOvergangTilHøySats(senesteSegment) :  null;
         var grunnbeløp = tilHeltall(senesteSats.grunnbeløp());
 
         var barnetillegg = senesteSats.antallBarn() > 0
@@ -173,7 +173,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static SatsgrunnlagDto kontrollerOvergangTilHøySats(LocalDateSegment<AktivitetspengerSatser> senesteSatsSegment) {
+    private static SatsgrunnlagDto kontrollerOgLagOvergangTilHøySats(LocalDateSegment<AktivitetspengerSatser> senesteSatsSegment) {
         var senesteSats = senesteSatsSegment.getValue();
         if (senesteSats.hentSatsType() != AktivitetspengerSatsType.HØY) {
             throw new IllegalStateException("Forventet at nyeste sats skulle være høy når det er flere satser, men var %s for periode %s".formatted(senesteSats.hentSatsType(), senesteSatsSegment.getLocalDateInterval()));
