@@ -1,4 +1,4 @@
-package no.nav.ung.sak.test.util.behandling.aktivitetspenger;
+package no.nav.ung.ytelse.aktivitetspenger.testdata;
 
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -37,6 +37,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.fagsak.*;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsResultat;
 import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
@@ -482,6 +484,14 @@ public class AktivitetspengerTestScenarioBuilder {
     }
 
     private void buildAktivitetspenger(AktivitetspengerTestRepositories repositories, Behandling behandling1) {
+        if (aktivitetspengerTestscenario.satsperioder() != null && repositories.aktivitetspengerGrunnlagRepository() != null) {
+            var satsGrunnlagTidslinje = aktivitetspengerTestscenario.satsperioder().mapValue(AktivitetspengerSatsPeriode::satsGrunnlag);
+            repositories.aktivitetspengerGrunnlagRepository().lagre(behandling1.getId(), new AktivitetspengerSatsResultat(satsGrunnlagTidslinje, "input", "sporing"));
+        }
+        if (aktivitetspengerTestscenario.beregningsgrunnlag() != null && repositories.aktivitetspengerGrunnlagRepository() != null) {
+            aktivitetspengerTestscenario.beregningsgrunnlag().stream().map(LocalDateSegment::getValue).forEach(bg ->
+                repositories.aktivitetspengerGrunnlagRepository().lagreBeregningsgrunnlag(behandling1.getId(), bg));
+        }
 
         if (aktivitetspengerTestscenario.søknadsperioder() != null) {
             for (Periode periode : aktivitetspengerTestscenario.søknadsperioder()) {

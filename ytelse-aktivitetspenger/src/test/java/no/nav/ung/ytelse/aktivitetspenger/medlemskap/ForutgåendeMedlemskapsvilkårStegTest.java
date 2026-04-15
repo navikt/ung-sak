@@ -28,7 +28,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
