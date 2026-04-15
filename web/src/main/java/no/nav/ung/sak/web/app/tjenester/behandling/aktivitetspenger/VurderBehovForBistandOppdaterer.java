@@ -77,11 +77,10 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         var resultatBuilder = param.getVilkårResultatBuilder();
         var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BISTANDSVILKÅR);
         for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
-            Utfall utfall = vurdertPeriode.erVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            Utfall utfall = vurdertPeriode.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
-                .medUtfall(utfall)
                 .medUtfallManuell(utfall)
-                .medAvslagsårsak(vurdertPeriode.avslagskode())
+                .medAvslagsårsak(vurdertPeriode.avslagsårsak())
                 .medBegrunnelse(vurdertPeriode.begrunnelse()));
         }
         resultatBuilder.leggTil(vilkårBuilder);
@@ -93,7 +92,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
             .medTittel(SkjermlenkeType.BISTANDSVILKÅR)
-            .addLinje("Bistandsvikår ble vurdert")
+            .addLinje("Bistandsvilkår ble vurdert")
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
 

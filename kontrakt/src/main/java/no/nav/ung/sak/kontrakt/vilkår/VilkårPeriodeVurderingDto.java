@@ -17,12 +17,12 @@ public record VilkårPeriodeVurderingDto(
     @NotNull
     Periode periode,
 
-    @JsonProperty("erVilkarOk")
-    boolean erVilkarOk,
+    @JsonProperty("erVilkårOppfylt")
+    boolean erVilkårOppfylt,
 
-    @JsonProperty("avslagskode")
+    @JsonProperty("avslagsårsak")
     @Valid
-    Avslagsårsak avslagskode,
+    Avslagsårsak avslagsårsak,
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 5000)

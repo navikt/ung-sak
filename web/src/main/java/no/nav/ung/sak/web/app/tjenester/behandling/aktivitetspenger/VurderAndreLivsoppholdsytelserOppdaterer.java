@@ -67,11 +67,10 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
         var resultatBuilder = param.getVilkårResultatBuilder();
         var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
         for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
-            Utfall utfall = vurdertPeriode.erVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            Utfall utfall = vurdertPeriode.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
-                .medUtfall(utfall)
                 .medUtfallManuell(utfall)
-                .medAvslagsårsak(vurdertPeriode.avslagskode())
+                .medAvslagsårsak(vurdertPeriode.avslagsårsak())
                 .medBegrunnelse(vurdertPeriode.begrunnelse()));
         }
         resultatBuilder.leggTil(vilkårBuilder);
