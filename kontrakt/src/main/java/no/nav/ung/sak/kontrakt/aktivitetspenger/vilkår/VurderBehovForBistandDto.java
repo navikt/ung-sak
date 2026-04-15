@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.validering.InputValideringRegex;
@@ -23,8 +24,7 @@ import java.util.List;
 public class VurderBehovForBistandDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty("vurdertePerioder")
-    //TODO sett not null når frontend er oppdatert
-    //@NotNull
+    @NotNull
     @Size(min = 0, max = 100)
     private List<@Valid VilkårPeriodeVurderingDto> vurdertePerioder;
 
