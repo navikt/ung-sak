@@ -44,8 +44,8 @@ create table gr_oppgitt_fmedlemskap
 );
 
 comment on table gr_oppgitt_fmedlemskap is 'Grunnlag som knytter en behandling til en holder. Kun én aktiv rad per behandling (unik indeks).';
-
 create index idx_gr_oppgitt_fmedlemskap_behandling on gr_oppgitt_fmedlemskap (behandling_id);
+create index idx_gr_oppgitt_fmedlemskap_holder on gr_oppgitt_fmedlemskap (oppgitt_fmedlemskap_holder_id);
 create unique index uidx_gr_oppgitt_fmedlemskap_aktiv on gr_oppgitt_fmedlemskap (behandling_id) where (aktiv = true);
 
 create table oppgitt_fmedlemskap_bosted
