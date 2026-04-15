@@ -1,0 +1,133 @@
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg;
+
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
+import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
+import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
+import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.vilkår.PeriodeTilVurdering;
+import no.nav.ung.sak.vilkår.VilkårPeriodeFilterProvider;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
+
+import java.util.NavigableSet;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.stream.Collectors;
+
+/**
+ * Et steg som utvider denne klassen har en vilkårsvurdering som avhenger av resultatet av tidligere vilkår.
+ * Dersom tidligere vilkår, som det aktuelle vilkåret er avhengig av, har blitt avslått, skal utfallet av det aktuelle
+ * vilkåret settes til uavklart.
+ */
+public abstract class VilkårVurderingSteg implements BehandlingSteg {
+
+    private BehandlingModellRepository behandlingModellRepository;
+    private VilkårTjeneste vilkårTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private BehandlingRepository behandlingRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
+    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
+
+    protected VilkårVurderingSteg() {
+    }
+
+    protected VilkårVurderingSteg(BehandlingModellRepository behandlingModellRepository,
+                                  VilkårResultatRepository vilkårResultatRepository,
+                                  BehandlingRepository behandlingRepository,
+                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
+                                  VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+        this.behandlingModellRepository = behandlingModellRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
+        this.vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårResultatRepository);
+        this.behandlingRepository = behandlingRepository;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+    }
+
+    @Override
+    public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+        // Henter avslåtte perioder
+        var perioder = finnPerioderForVurderingAvVilkår(kontekst);
+        var ikkeRelevantPerioder = finnIkkeRelevantePerioder(kontekst, perioder);
+        vilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, getAktuellVilkårType(), perioder);
+        vilkårResultatRepository.settUtfallForPeriode(kontekst.getBehandlingId(), getAktuellVilkårType(), ikkeRelevantPerioder, Utfall.IKKE_RELEVANT);
+        return utførResten(kontekst);
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnIkkeRelevantePerioder(BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
+        final var vilkår = vilkårTjeneste.hentVilkårResultat(kontekst.getBehandlingId());
+        final var avslåttTidslinjeMedTilleggsPerioder = finnTidslinjeForAvslåtteAvhengigheter(kontekst, vilkår);
+        return perioder.stream().filter(p -> new LocalDateTimeline<>(p.toLocalDateInterval(), true).disjoint(avslåttTidslinjeMedTilleggsPerioder).isEmpty())
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private NavigableSet<DatoIntervallEntitet> finnPerioderForVurderingAvVilkår(BehandlingskontrollKontekst kontekst) {
+        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        var perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
+            .utled(kontekst.getBehandlingId(), getAktuellVilkårType());
+        var filter = vilkårPeriodeFilterProvider.getFilter(BehandlingReferanse.fra(behandling));
+        return filter.filtrerPerioder(perioderTilVurdering, getAktuellVilkårType())
+            .stream()
+            .map(PeriodeTilVurdering::getPeriode)
+            .collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    private LocalDateTimeline<Boolean> finnTidslinjeForAvslåtteAvhengigheter(BehandlingskontrollKontekst kontekst, Vilkårene vilkår) {
+        final var avslåttTidslinje = vilkår.getVilkårene().stream().filter(v -> getVilkårAvhenigheter(kontekst).contains(v.getVilkårType()))
+            .flatMap(v -> v.getPerioder().stream())
+            .filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT))
+            .map(p -> new LocalDateTimeline<>(p.getFom(), p.getTom(), true))
+            .reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
+        return TidslinjeUtil
+            .tilTidslinjeKomprimertMedMuligOverlapp(hentTilleggsPerioderForIkkeRelevantVurdering(kontekst))
+            .crossJoin(avslåttTidslinje);
+    }
+
+    public abstract BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst);
+
+    public abstract VilkårType getAktuellVilkårType();
+
+    /**
+     * Hent vilkår som, dersom de ikke er innvilget, skal markere overlappende perioder for det aktuelle vilkåret under
+     * vurdering som ikke relevant
+     * <p>
+     * Default implentasjon henter alle vilkårtyper fra steg som er før getAktuelLVilkårType
+     */
+    public Set<VilkårType> getVilkårAvhenigheter(BehandlingskontrollKontekst kontekst) {
+        VilkårType aktuellVilkårType = getAktuellVilkårType();
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
+        return modell.getAlleBehandlingStegTyper().stream()
+            .filter(steg -> !steg.getAksjonspunktDefinisjoner().isEmpty())
+            .takeWhile(steg -> !steg.getAksjonspunktDefinisjoner().contains(aktuellVilkårType))
+            .flatMap(steg -> steg.getAksjonspunktDefinisjoner().stream())
+            .map(AksjonspunktDefinisjon::getVilkårType)
+            .collect(Collectors.toSet());
+
+    }
+
+    /**
+     * Hent perioder som skal markeres som ikke relevant, i tillegg til perioder bestemt av vilkåravhengigheter
+     */
+    public Set<DatoIntervallEntitet> hentTilleggsPerioderForIkkeRelevantVurdering(BehandlingskontrollKontekst kontekst) {
+        return Set.of();
+    }
+
+    ;
+
+}

@@ -244,4 +244,9 @@ public class VilkårResultatRepository {
         Vilkårene vilkårene = hent(behandlingId);
         return vilkårene.getVilkårTimeline(vilkårType).stream().anyMatch(segment -> segment.getValue().getUtfall() == Utfall.OPPFYLT);
     }
+
+    public boolean finnesRelevantPeriode(Long behandlingId, VilkårType vilkårType) {
+        Vilkårene vilkårene = hent(behandlingId);
+        return vilkårene.getVilkårTimeline(vilkårType).stream().anyMatch(segment -> segment.getValue().getUtfall() != Utfall.IKKE_RELEVANT);
+    }
 }
