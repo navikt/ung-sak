@@ -1,17 +1,14 @@
-package no.nav.ung.ytelse.aktivitetspenger.del1.steg;
+package no.nav.ung.sak.vilkår;
 
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingModell;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -19,9 +16,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.vilkår.PeriodeTilVurdering;
-import no.nav.ung.sak.vilkår.VilkårPeriodeFilterProvider;
-import no.nav.ung.sak.vilkår.VilkårTjeneste;
 
 import java.util.NavigableSet;
 import java.util.Set;
@@ -35,8 +29,8 @@ import java.util.stream.Collectors;
  */
 public abstract class VilkårVurderingSteg implements BehandlingSteg {
 
-    private BehandlingModellRepository behandlingModellRepository;
     private VilkårTjeneste vilkårTjeneste;
+    private VilkårRekkefølgeTjeneste vilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
@@ -45,12 +39,12 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
     protected VilkårVurderingSteg() {
     }
 
-    protected VilkårVurderingSteg(BehandlingModellRepository behandlingModellRepository,
+    protected VilkårVurderingSteg(VilkårRekkefølgeTjeneste vilkårRekkefølgeTjeneste,
                                   VilkårResultatRepository vilkårResultatRepository,
                                   BehandlingRepository behandlingRepository,
                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                   VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
-        this.behandlingModellRepository = behandlingModellRepository;
+        this.vilkårRekkefølgeTjeneste = vilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårResultatRepository);
@@ -109,16 +103,8 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
      * Default implentasjon henter alle vilkårtyper fra steg som er før getAktuelLVilkårType
      */
     public Set<VilkårType> getVilkårAvhenigheter(BehandlingskontrollKontekst kontekst) {
-        VilkårType aktuellVilkårType = getAktuellVilkårType();
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        BehandlingModell modell = behandlingModellRepository.getModell(behandling.getType(), behandling.getFagsakYtelseType());
-        return modell.getAlleBehandlingStegTyper().stream()
-            .filter(steg -> !steg.getAksjonspunktDefinisjoner().isEmpty())
-            .takeWhile(steg -> !steg.getAksjonspunktDefinisjoner().contains(aktuellVilkårType))
-            .flatMap(steg -> steg.getAksjonspunktDefinisjoner().stream())
-            .map(AksjonspunktDefinisjon::getVilkårType)
-            .collect(Collectors.toSet());
-
+        return vilkårRekkefølgeTjeneste.finnVilkårSomErFør(getAktuellVilkårType(), behandling.getFagsakYtelseType(), behandling.getType());
     }
 
     /**

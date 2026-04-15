@@ -12,12 +12,12 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårPeriodeFilterProvider;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.VilkårVurderingSteg;
+import no.nav.ung.sak.vilkår.VilkårRekkefølgeTjeneste;
+import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 
 import java.util.List;
 
@@ -36,12 +36,12 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
     }
 
     @Inject
-    public BistandsvilkårSteg(BehandlingModellRepository behandlingModellRepository,
+    public BistandsvilkårSteg(VilkårRekkefølgeTjeneste vilkårRekkefølgeTjeneste,
                               VilkårResultatRepository vilkårResultatRepository,
                               BehandlingRepository behandlingRepository,
                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                               VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
-        super(behandlingModellRepository, vilkårResultatRepository, behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårPeriodeFilterProvider);
+        super(vilkårRekkefølgeTjeneste, vilkårResultatRepository, behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårPeriodeFilterProvider);
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
