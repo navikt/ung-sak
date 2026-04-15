@@ -1,7 +1,5 @@
 package no.nav.ung.sak.etterlysning.programperiode;
 
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -10,29 +8,29 @@ import java.util.UUID;
 public class SisteEndringsdatoUtleder {
 
     /**
-     * Finner endret dato (start- eller sluttdato) ved å sammenligne gjeldende grunnlag med tidligere etterlysninger og initielt grunnlag.
+     * Finner endret dato (start- eller sluttdato) ved å sammenligne gjeldende snapshot med tidligere snapshots.
      * <p>
      * Behovet for denne metoden oppstår fordi vi må finne ut om en dato har blitt endret fra det som bruker sist tok stilling til. Dersom vi har flere endringer på perioden der disse er av ulike typer (endring i startdato, endring i sluttdato...),
      * ønsker vi å kunne gi detaljert informasjon om hva som har blitt endret fra forrige etterlysning som enten ble besvart eller utløpt.
      *
-     * @param gjeldendeGrunnlag       Det aktive grunnlaget
-     * @param aktuelleGrunnlagSortert Alle aktuelle grunnlag for sammenligning sortert med nyeste først
+     * @param gjeldendeSnapshot       Snapshot av det aktive grunnlaget
+     * @param aktuelleSnapshotsSortert Alle aktuelle snapshots for sammenligning sortert med nyeste først
      * @param aktuellDatoHenter       Funksjon for å hente aktuell dato (start- eller sluttdato)
      * @return Evt. endret dato informasjon
      */
-    static Optional<EndretDato> finnSistEndretDato(UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag, List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert, AktuellDatoHenter aktuellDatoHenter) {
-        var gjeldendeDato = aktuellDatoHenter.hent(gjeldendeGrunnlag);
+    static Optional<EndretDato> finnSistEndretDato(PeriodeSnapshot gjeldendeSnapshot, List<PeriodeSnapshot> aktuelleSnapshotsSortert, AktuellDatoHenter aktuellDatoHenter) {
+        var gjeldendeDato = aktuellDatoHenter.hent(gjeldendeSnapshot);
         if (gjeldendeDato.isEmpty()) {
             return Optional.empty();
         }
-        var gjeldendeDatoOgGrunnlag = new DatoOgGrunnlag(gjeldendeDato.get(), gjeldendeGrunnlag.getGrunnlagsreferanse());
+        var gjeldendeDatoOgGrunnlag = new DatoOgGrunnlag(gjeldendeDato.get(), gjeldendeSnapshot.grunnlagsreferanse());
         boolean harEndringIDato = false;
         DatoOgGrunnlag forrigeDatoOgGrunnlag = null;
-        for (var grunnlag : aktuelleGrunnlagSortert) {
-            var datoIEtterlysning = aktuellDatoHenter.hent(grunnlag);
-            harEndringIDato = datoIEtterlysning.isEmpty() || !datoIEtterlysning.get().equals(gjeldendeDatoOgGrunnlag.dato);
+        for (var snapshot : aktuelleSnapshotsSortert) {
+            var datoISnapshot = aktuellDatoHenter.hent(snapshot);
+            harEndringIDato = datoISnapshot.isEmpty() || !datoISnapshot.get().equals(gjeldendeDatoOgGrunnlag.dato);
             if (harEndringIDato) {
-                forrigeDatoOgGrunnlag = new DatoOgGrunnlag(datoIEtterlysning.orElse(null), gjeldendeDatoOgGrunnlag.grunnlagsreferanse);
+                forrigeDatoOgGrunnlag = new DatoOgGrunnlag(datoISnapshot.orElse(null), gjeldendeDatoOgGrunnlag.grunnlagsreferanse);
                 break;
             }
         }
@@ -46,7 +44,7 @@ public class SisteEndringsdatoUtleder {
 
     @FunctionalInterface
     interface AktuellDatoHenter {
-        Optional<LocalDate> hent(UngdomsprogramPeriodeGrunnlag grunnlag);
+        Optional<LocalDate> hent(PeriodeSnapshot snapshot);
     }
 
 

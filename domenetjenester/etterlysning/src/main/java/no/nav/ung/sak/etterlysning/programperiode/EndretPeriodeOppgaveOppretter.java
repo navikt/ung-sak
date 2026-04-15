@@ -5,6 +5,8 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -18,9 +20,7 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,14 +37,17 @@ public class EndretPeriodeOppgaveOppretter {
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final EtterlysningRepository etterlysningRepository;
+    private final UngdomsytelseStartdatoRepository startdatoRepository;
 
     @Inject
     public EndretPeriodeOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                          UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                         EtterlysningRepository etterlysningRepository) {
+                                         EtterlysningRepository etterlysningRepository,
+                                         UngdomsytelseStartdatoRepository startdatoRepository) {
         this.oppgaveKlient = oppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.etterlysningRepository = etterlysningRepository;
+        this.startdatoRepository = startdatoRepository;
     }
 
 
@@ -61,23 +64,26 @@ public class EndretPeriodeOppgaveOppretter {
         }
         Etterlysning etterlysning = etterlysninger.getFirst();
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
+        Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId());
 
         // Dette med å finne diff kan potensielt forenkles dersom vi ikkje trenger å vise kva startdato og sluttdato var før endringen.
-        List<UngdomsprogramPeriodeGrunnlag> grunnlagslisteForSammenligning = finnSortertGrunnlagslisteForSammenligning(etterlysning, initieltPeriodeGrunnlag);
+        List<PeriodeSnapshot> snapshotsForSammenligning = finnSortertSnapshotlisteForSammenligning(etterlysning, initieltPeriodeGrunnlag, startdatoGrunnlag);
 
-        log.info("Utleder endringer fra grunnlag med referanse {} basert på følgende grunnlag for sammenligning: {}",
+        PeriodeSnapshot gjeldendeSnapshot = PeriodeSnapshot.fraGrunnlag(gjeldendeGrunnlag);
+
+        log.info("Utleder endringer fra grunnlag med referanse {} basert på følgende snapshots for sammenligning: {}",
             gjeldendeGrunnlag.getGrunnlagsreferanse(),
-            grunnlagslisteForSammenligning.stream().map(UngdomsprogramPeriodeGrunnlag::getGrunnlagsreferanse).toList());
+            snapshotsForSammenligning.stream().map(PeriodeSnapshot::grunnlagsreferanse).toList());
 
         Optional<SisteEndringsdatoUtleder.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
-            gjeldendeGrunnlag,
-            grunnlagslisteForSammenligning,
-            EndretPeriodeOppgaveOppretter::getStartdato);
+            gjeldendeSnapshot,
+            snapshotsForSammenligning,
+            PeriodeSnapshot::fomDato);
 
         Optional<SisteEndringsdatoUtleder.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
-            gjeldendeGrunnlag,
-            grunnlagslisteForSammenligning,
-            EndretPeriodeOppgaveOppretter::getSluttdato);
+            gjeldendeSnapshot,
+            snapshotsForSammenligning,
+            s -> s.tomDato().filter(d -> !d.equals(TIDENES_ENDE)));
 
         if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
             // ENDRING AV STARTDATO
@@ -118,7 +124,10 @@ public class EndretPeriodeOppgaveOppretter {
 
     }
 
-    private List<UngdomsprogramPeriodeGrunnlag> finnSortertGrunnlagslisteForSammenligning(Etterlysning etterlysning, UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag) {
+    private List<PeriodeSnapshot> finnSortertSnapshotlisteForSammenligning(
+            Etterlysning etterlysning,
+            UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag,
+            Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag) {
         List<Etterlysning> sorterteEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(etterlysning.getId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
 
         // Dersom vi treffer en etterlysning som er mottatt svar eller utløpt, betyr det at bruker har tatt stilling til alle endringer før denne. Det er derfor ikke nødvendig å sjekke flere grunnlag.
@@ -126,20 +135,22 @@ public class EndretPeriodeOppgaveOppretter {
             .takeWhile(it -> it.getStatus() != EtterlysningStatus.MOTTATT_SVAR && it.getStatus() != EtterlysningStatus.UTLØPT)
             .filter(it -> it.getStatus() == EtterlysningStatus.AVBRUTT).toList();
 
-        // Henter alle aktuelle grunnlag. Beholder rekkefølge fra etterlysningene
-        List<UngdomsprogramPeriodeGrunnlag> aktuelleGrunnlagSortert = new ArrayList<>(ungdomsprogramPeriodeRepository.hentGrunnlagFraReferanser(
+        // Henter alle aktuelle grunnlag og konverterer til snapshots. Beholder rekkefølge fra etterlysningene.
+        List<PeriodeSnapshot> snapshotsSortert = new ArrayList<>(ungdomsprogramPeriodeRepository.hentGrunnlagFraReferanser(
             tidligereEtterlysningerSomBleAvbruttSortert.stream().map(Etterlysning::getGrunnlagsreferanse).toList()
-        ));
-        aktuelleGrunnlagSortert.add(initieltPeriodeGrunnlag); // Legger til initielt grunnlag sist for sjekk
-        return aktuelleGrunnlagSortert;
-    }
+        ).stream().map(PeriodeSnapshot::fraGrunnlag).toList());
 
-    private static Optional<LocalDate> getStartdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
-        return grunnlag.hentForEksaktEnPeriodeDersomFinnes().map(DatoIntervallEntitet::getFomDato);
-    }
+        snapshotsSortert.add(PeriodeSnapshot.fraGrunnlag(initieltPeriodeGrunnlag)); // Legger til initielt grunnlag for sjekk
 
-    private static Optional<LocalDate> getSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
-        return grunnlag.hentForEksaktEnPeriodeDersomFinnes().filter(it -> !it.getTomDato().equals(TIDENES_ENDE)).map(DatoIntervallEntitet::getTomDato);
+        // Oppgitt startdato (fra søknaden) legges til sist.
+        // Dette håndterer caset der perioden endres mellom søknadstidspunkt og innhenting: kun ett grunnlag finnes, men startdato er endret.
+        startdatoGrunnlag
+            .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
+            .map(startdatoer -> startdatoer.getStartdatoer().iterator().next().getStartdato())
+            .map(PeriodeSnapshot::fraOppgittStartdato)
+            .ifPresent(snapshotsSortert::add);
+
+        return snapshotsSortert;
     }
 
     private OpprettOppgaveDto mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {
