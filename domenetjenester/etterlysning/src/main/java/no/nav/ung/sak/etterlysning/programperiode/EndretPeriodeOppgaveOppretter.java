@@ -183,7 +183,7 @@ public class EndretPeriodeOppgaveOppretter {
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
-            new EndretSluttdatoDataDto(nySluttDato, forrigeSluttDato.equals(TIDENES_ENDE) ? null : forrigeSluttDato),
+            new EndretSluttdatoDataDto(nySluttDato, TIDENES_ENDE.equals(forrigeSluttDato) ? null : forrigeSluttDato),
             etterlysning.getFrist()
         );
     }
