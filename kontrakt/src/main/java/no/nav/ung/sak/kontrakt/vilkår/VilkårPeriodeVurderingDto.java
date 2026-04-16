@@ -27,7 +27,7 @@ public record VilkårPeriodeVurderingDto(
 
     @JsonProperty(value = "begrunnelse", required = true)
     @NotNull
-    @Size(max = 5000)
+    @Size(min = 3, max = 5000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     String begrunnelse
