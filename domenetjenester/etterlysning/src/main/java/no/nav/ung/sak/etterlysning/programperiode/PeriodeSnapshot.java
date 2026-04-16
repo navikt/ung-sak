@@ -1,6 +1,7 @@
 package no.nav.ung.sak.etterlysning.programperiode;
 
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -30,4 +31,12 @@ record PeriodeSnapshot(Optional<LocalDate> fomDato, Optional<LocalDate> tomDato,
     static PeriodeSnapshot fraOppgittStartdato(LocalDate oppgittStartdato) {
         return new PeriodeSnapshot(Optional.ofNullable(oppgittStartdato), Optional.empty(), null);
     }
+
+    public DatoIntervallEntitet tilDatoIntervallEntitet() {
+        if (fomDato.isEmpty()) {
+            throw new IllegalStateException("Kan ikke konvertere til DatoIntervallEntitet dersom fom-dato er tom"); // Pun not intended
+        }
+        return DatoIntervallEntitet.fra(fomDato.get(), tomDato.orElse(null));
+    }
+
 }

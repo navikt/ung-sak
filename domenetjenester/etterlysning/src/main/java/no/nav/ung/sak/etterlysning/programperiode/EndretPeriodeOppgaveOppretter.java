@@ -2,17 +2,6 @@ package no.nav.ung.sak.etterlysning.programperiode;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
-import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
@@ -20,12 +9,25 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.time.Period;
+import java.util.*;
 
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
@@ -110,9 +112,9 @@ public class EndretPeriodeOppgaveOppretter {
             log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
                 etterlysning.getEksternReferanse(),
                 endretSluttDato.get().nyDatoOgGrunnlag(),
-            endretSluttDato.get().forrigeDatoOgGrunnlag(),
-            endretStartDato.get().nyDatoOgGrunnlag(),
-            endretStartDato.get().forrigeDatoOgGrunnlag());
+                endretSluttDato.get().forrigeDatoOgGrunnlag(),
+                endretStartDato.get().nyDatoOgGrunnlag(),
+                endretStartDato.get().forrigeDatoOgGrunnlag());
             PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
@@ -125,9 +127,9 @@ public class EndretPeriodeOppgaveOppretter {
     }
 
     private List<PeriodeSnapshot> finnSortertSnapshotlisteForSammenligning(
-            Etterlysning etterlysning,
-            UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag,
-            Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag) {
+        Etterlysning etterlysning,
+        UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag,
+        Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag) {
         List<Etterlysning> sorterteEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(etterlysning.getId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
 
         // Dersom vi treffer en etterlysning som er mottatt svar eller utløpt, betyr det at bruker har tatt stilling til alle endringer før denne. Det er derfor ikke nødvendig å sjekke flere grunnlag.
@@ -145,8 +147,12 @@ public class EndretPeriodeOppgaveOppretter {
         // Oppgitt startdato (fra søknaden) legges til sist.
         // Dette håndterer caset der perioden endres mellom søknadstidspunkt og innhenting: kun ett grunnlag finnes, men startdato er endret.
         startdatoGrunnlag
+            .stream()
             .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
-            .map(startdatoer -> startdatoer.getStartdatoer().iterator().next().getStartdato())
+            .map(UngdomsytelseStartdatoer::getStartdatoer)
+            .flatMap(Collection::stream)
+            .map(UngdomsytelseSøktStartdato::getStartdato)
+            .min(Comparator.comparing(d -> BigDecimal.valueOf(Period.between(d, etterlysning.getPeriode().getFomDato()).getDays()).abs())) // Finner startdato nærmest aktuell periode
             .map(PeriodeSnapshot::fraOppgittStartdato)
             .ifPresent(snapshotsSortert::add);
 
