@@ -32,11 +32,4 @@ record PeriodeSnapshot(Optional<LocalDate> fomDato, Optional<LocalDate> tomDato,
         return new PeriodeSnapshot(Optional.ofNullable(oppgittStartdato), Optional.empty(), null);
     }
 
-    public DatoIntervallEntitet tilDatoIntervallEntitet() {
-        if (fomDato.isEmpty()) {
-            throw new IllegalStateException("Kan ikke konvertere til DatoIntervallEntitet dersom fom-dato er tom"); // Pun not intended
-        }
-        return DatoIntervallEntitet.fra(fomDato.get(), tomDato.orElse(null));
-    }
-
 }
