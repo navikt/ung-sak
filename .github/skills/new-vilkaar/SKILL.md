@@ -29,6 +29,10 @@ Spørsmål å stille (bruk vscode_askQuestions):
 
 4. header: "Avslagsårsaker"
    question: "Hvilke avslagsårsaker skal vilkåret ha? (oppgi navn og kode for hver, f.eks. 'SØKER_ER_IKKE_MEDLEM / 4001')"
+
+5. header: "IKKE_RELEVANT-håndtering"
+   question: "Skal vilkåret settes til IKKE_RELEVANT for perioder som allerede er avslått av andre vilkår? (relevant når vilkåret kommer etter andre vilkår i prosessmodellen)"
+   options: ["Ja — filtrer bort perioder avslått av andre vilkår", "Nei — vilkåret vurderes uavhengig av andre vilkår"]
 ```
 
 Bruk svarene til å fylle inn konkrete verdier i alle steg under. Ikke bruk placeholder-navn.
@@ -84,8 +88,21 @@ Steget som ble opprettet i `new-aksjonspunkt`-skillen må utvides til å vurdere
 
 **Referansefiler:**
 - Enkel (alltid aksjonspunkt): `ytelse-aktivitetspenger/src/main/java/no/nav/ung/ytelse/aktivitetspenger/del1/steg/bistandsvilkår/BistandsvilkårSteg.java`
-- Kompleks (auto + aksjonspunkt): `ytelse-aktivitetspenger/src/main/java/no/nav/ung/ytelse/aktivitetspenger/medlemskap/ForutgåendeMedlemskapsvilkårSteg.java`
+- Kompleks (auto + aksjonspunkt, IKKE_RELEVANT-filtrering, avslått-tidslinje): `ytelse-aktivitetspenger/src/main/java/no/nav/ung/ytelse/aktivitetspenger/medlemskap/ForutgåendeMedlemskapsvilkårSteg.java`
 - Auto-vurdert (aldersvilkår): `ytelse-aktivitetspenger/src/main/java/no/nav/ung/ytelse/aktivitetspenger/del1/steg/aldersvilkår/VurderAldersvilkåretSteg.java`
+
+#### IKKE_RELEVANT-håndtering i vilkårssteg (kun hvis valgt i steg 0)
+
+Dette er kun relevant hvis brukeren svarte ja på IKKE_RELEVANT-håndtering i steg 0. Hopp over denne seksjonen ellers.
+
+For vilkår som vurderes etter andre vilkår i prosessmodellen, bør steget håndtere perioder som allerede er avslått av andre vilkår:
+
+1. Filtrer bort allerede IKKE_RELEVANT-perioder (fra tidligere kjøring)
+2. Bygg avslått-tidslinje fra alle andre vilkår
+3. Sett heldekkende avslåtte perioder til IKKE_RELEVANT via `vilkårResultatRepository.settPerioderTilIkkeRelevant()`
+4. Vurder bare gjenværende perioder
+
+Se `ForutgåendeMedlemskapsvilkårSteg` for komplett eksempel med `filtrerBortIkkeRelevantePerioder`, `lagAvslåttTidslinje` og `finnAvslåttePerioder`.
 
 ### 6. Utvid oppdatereren med vilkårsoppdatering
 
@@ -113,7 +130,27 @@ resultatBuilder.leggTil(vilkårBuilder);
 
 **Referansefiler:**
 - Enkel: `web/src/main/java/no/nav/ung/sak/web/app/tjenester/behandling/aktivitetspenger/VurderBehovForBistandOppdaterer.java`
-- Med avslagsårsak: `web/src/main/java/no/nav/ung/sak/web/app/tjenester/behandling/aktivitetspenger/BekreftErMedlemVurderingOppdaterer.java`
+- Med avslagsårsak og IKKE_RELEVANT-filtrering: `web/src/main/java/no/nav/ung/sak/web/app/tjenester/behandling/aktivitetspenger/BekreftErMedlemVurderingOppdaterer.java`
+
+#### IKKE_RELEVANT-filtrering i oppdaterer (kun hvis valgt i steg 0)
+
+Dette er kun relevant hvis brukeren svarte ja på IKKE_RELEVANT-håndtering i steg 0. Hopp over denne seksjonen ellers.
+
+Hvis steget setter perioder til IKKE_RELEVANT, må oppdatereren filtrere bort disse slik at saksbehandlers vurdering kun gjelder relevante perioder. Injiser `VilkårResultatRepository` og filtrer perioderTilVurdering:
+
+```java
+var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.MITT_VILKÅR);
+var relevantePerioder = filtrerBortIkkeRelevantePerioder(param.getBehandlingId(), perioderTilVurdering);
+
+relevantePerioder.stream()
+    .map(periode -> vilkårBuilder.hentBuilderFor(periode)
+        .medUtfallManuell(utfall)
+        // ...
+    )
+    .forEach(vilkårBuilder::leggTil);
+```
+
+Se `BekreftErMedlemVurderingOppdaterer` for komplett eksempel.
 
 ### 7. Utvid test med vilkårsassertions
 
@@ -129,7 +166,11 @@ var scenario = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
 - Vilkåret oppfylles automatisk når data tilsier det (hvis relevant)
 - Vilkåret som allerede er vurdert hoppes over
 - Riktig avslagsårsak settes ved avslag
+- Perioder avslått av andre vilkår settes til IKKE_RELEVANT (kun hvis IKKE_RELEVANT-håndtering er valgt)
+- Delvis avslåtte perioder (av andre vilkår) skal fortsatt vurderes (kun hvis IKKE_RELEVANT-håndtering er valgt)
 - Perioder oppdateres korrekt
+
+Bruk eller utvid `AktivitetspengerTestScenarioBuilder` for å bygge testdata. Hvis vilkåret trenger data builderen ikke støtter ennå, **utvid builderen** med nye metoder i stedet for å bygge testdata manuelt.
 
 **Referansetest:** `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/medlemskap/ForutgåendeMedlemskapsvilkårStegTest.java`
 
@@ -155,7 +196,7 @@ vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
 ### AktivitetspengerTestScenarioBuilder
 Bruk **alltid** builderen for testscenarioer. Hvis vilkåret krever data som builderen ikke støtter, **utvid builderen** med nye metoder.
 
-Fil: `behandlingslager/testutil/src/main/java/no/nav/ung/sak/test/util/behandling/aktivitetspenger/AktivitetspengerTestScenarioBuilder.java`
+Fil: `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/testdata/AktivitetspengerTestScenarioBuilder.java`
 
 ## Utenfor scope
 

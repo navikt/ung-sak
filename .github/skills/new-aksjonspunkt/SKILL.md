@@ -167,7 +167,30 @@ Utvid `utførSteg()` i det eksisterende steget til også å returnere det nye ak
 
 **Referansefiler:**
 - Enkel (alltid aksjonspunkt): `ytelse-aktivitetspenger/src/main/java/no/nav/ung/ytelse/aktivitetspenger/del1/steg/bistandsvilkår/BistandsvilkårSteg.java`
-- Kompleks (auto + aksjonspunkt): `ytelse-aktivitetspenger/src/main/java/no/nav/ung/ytelse/aktivitetspenger/medlemskap/ForutgåendeMedlemskapsvilkårSteg.java`
+- Kompleks (auto + aksjonspunkt, IKKE_RELEVANT-filtrering, avslått-tidslinje): `ytelse-aktivitetspenger/src/main/java/no/nav/ung/ytelse/aktivitetspenger/medlemskap/ForutgåendeMedlemskapsvilkårSteg.java`
+
+#### IKKE_RELEVANT-filtrering i steg (valgfritt)
+
+Dette er kun relevant når steget er knyttet til et vilkår og vilkåret kommer etter andre vilkår i prosessmodellen. Sjekk med `new-vilkaar`-skillen om IKKE_RELEVANT-håndtering er valgt.
+
+Når et steg vurderer et vilkår der andre vilkår allerede kan ha avslått perioder, bør steget:
+
+1. **Filtrere bort IKKE_RELEVANT-perioder** — perioder som allerede er satt til IKKE_RELEVANT fra en tidligere kjøring skal ikke vurderes på nytt.
+2. **Sette avslåtte perioder til IKKE_RELEVANT** — hvis et annet vilkår har avslått en hel vilkårsperiode, sett den til IKKE_RELEVANT via `vilkårResultatRepository.settPerioderTilIkkeRelevant()`.
+3. **Per-periode sjekk** — bruk `disjoint()` for å sjekke om hele perioden er dekket av avslått tidslinje (ikke bare delvis overlapp).
+
+Mønster fra `ForutgåendeMedlemskapsvilkårSteg`:
+```java
+var vilkårene = vilkårResultatRepository.hent(behandlingId);
+periodeTilVurdering = filtrerBortIkkeRelevantePerioder(periodeTilVurdering, vilkårene.getVilkår(VilkårType.MITT_VILKÅR));
+
+var avslåttTidslinje = lagAvslåttTidslinje(vilkårene);
+var avslåttePerioder = finnAvslåttePerioder(periodeTilVurdering, avslåttTidslinje);
+if (!avslåttePerioder.isEmpty()) {
+    vilkårResultatRepository.settPerioderTilIkkeRelevant(behandlingId, VilkårType.MITT_VILKÅR, avslåttePerioder);
+    periodeTilVurdering.removeAll(avslåttePerioder);
+}
+```
 
 ### 4. Registrer steg i prosessmodell (kun ved nytt steg)
 
@@ -211,7 +234,22 @@ Klassen skal:
 
 **Referansefiler:**
 - Enkel: `web/src/main/java/no/nav/ung/sak/web/app/tjenester/behandling/aktivitetspenger/VurderBehovForBistandOppdaterer.java`
-- Med vilkår/avslagsårsak: `web/src/main/java/no/nav/ung/sak/web/app/tjenester/behandling/aktivitetspenger/BekreftErMedlemVurderingOppdaterer.java`
+- Med vilkår/avslagsårsak og IKKE_RELEVANT-filtrering: `web/src/main/java/no/nav/ung/sak/web/app/tjenester/behandling/aktivitetspenger/BekreftErMedlemVurderingOppdaterer.java`
+
+#### IKKE_RELEVANT-filtrering i oppdaterer (valgfritt)
+
+Dette er kun relevant hvis IKKE_RELEVANT-håndtering er valgt i `new-vilkaar`-skillen.
+
+Hvis steget setter perioder til IKKE_RELEVANT (fordi andre vilkår har avslått dem), må oppdatereren også filtrere bort disse periodene slik at saksbehandlers vurdering kun gjelder relevante perioder:
+
+```java
+var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.MITT_VILKÅR);
+var relevantePerioder = filtrerBortIkkeRelevantePerioder(param.getBehandlingId(), perioderTilVurdering);
+
+// Bruk relevantePerioder i stedet for perioderTilVurdering videre
+```
+
+Filtreringsmetoden sjekker vilkårets eksisterende IKKE_RELEVANT-perioder via `VilkårResultatRepository`.
 
 ### 6. Test for behandlingssteget
 
@@ -244,19 +282,19 @@ class MittStegTest {
 Bruk **alltid** `AktivitetspengerTestScenarioBuilder` for å bygge testscenarioer:
 
 ```java
-var scenario = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+    .leggTilVilkår(VilkårType.MITT_VILKÅR, Utfall.IKKE_VURDERT, vilkårPeriode)
     .lagre(entityManager);
 
-var behandling = scenario.getBehandling();
 var kontekst = new BehandlingskontrollKontekst(
     behandling.getFagsakId(), behandling.getAktørId(),
-    repositoryProvider.getBehandlingLåsRepository().taLås(behandling.getId()));
+    behandlingRepository.taSkriveLås(behandling.getId()));
 
 var resultat = steg.utførSteg(kontekst);
 assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.MITT_AKSJONSPUNKT);
 ```
 
-Fil: `behandlingslager/testutil/src/main/java/no/nav/ung/sak/test/util/behandling/aktivitetspenger/AktivitetspengerTestScenarioBuilder.java`
+Fil: `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/testdata/AktivitetspengerTestScenarioBuilder.java`
 
 **Viktig:** Hvis det nye aksjonspunktet krever data som builderen ikke støtter ennå (f.eks. nye grunnlagstyper, spesielle søknadsdata), **utvid builderen** med nye metoder i stedet for å bygge testdata manuelt.
 
@@ -264,6 +302,8 @@ Fil: `behandlingslager/testutil/src/main/java/no/nav/ung/sak/test/util/behandlin
 
 - **Aksjonspunkt-produksjon:** Steget returnerer riktig aksjonspunkt
 - **Automatisk løsning:** Steget løser seg selv når mulig (hvis relevant)
+- **IKKE_RELEVANT-perioder:** Perioder avslått av andre vilkår settes til IKKE_RELEVANT (kun hvis IKKE_RELEVANT-håndtering er valgt)
+- **Delvis avslått:** Perioder som kun er delvis avslått av andre vilkår skal fortsatt vurderes (kun hvis IKKE_RELEVANT-håndtering er valgt)
 - **Grenseverdier:** Perioder, datoer og data som treffer kanttilfeller
 
 **Referansetest:** `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/medlemskap/ForutgåendeMedlemskapsvilkårStegTest.java`
