@@ -97,7 +97,7 @@ class TrygdeavtaleLandOppslagTest {
     @Test
     void null_landkode_kaster_exception() {
         assertThatThrownBy(() -> TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(
-            null, LocalDate.of(2020, 1, 1)))
+            (Landkode) null, LocalDate.of(2020, 1, 1)))
             .isInstanceOf(NullPointerException.class);
     }
 

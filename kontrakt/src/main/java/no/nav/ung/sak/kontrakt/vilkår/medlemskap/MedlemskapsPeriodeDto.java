@@ -11,6 +11,8 @@ public record MedlemskapsPeriodeDto(
     @JsonProperty(value = "landkode")
     String landkode,
     @JsonProperty(value = "harTrygdeavtale")
-    Boolean harTrygdeavtale
+    Boolean harTrygdeavtale,
+    @JsonProperty(value = "journalpostId")
+    String journalpostId
 ) {
 }
