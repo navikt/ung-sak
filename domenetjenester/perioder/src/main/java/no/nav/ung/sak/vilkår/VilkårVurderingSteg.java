@@ -56,7 +56,7 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
         // Henter avslåtte perioder
         var perioder = finnPerioderForVurderingAvVilkår(kontekst);
         var ikkeRelevantPerioder = finnIkkeRelevantePerioder(kontekst, perioder);
-        vilkårTjeneste.ryddVedtaksresultatOgVilkår(kontekst, getAktuellVilkårType(), perioder);
+        vilkårTjeneste.nullstillBehandlingsresultat(kontekst);
         vilkårResultatRepository.settUtfallForPeriode(kontekst.getBehandlingId(), getAktuellVilkårType(), ikkeRelevantPerioder, Utfall.IKKE_RELEVANT);
         return utførResten(kontekst);
     }
