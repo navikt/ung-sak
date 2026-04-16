@@ -1,5 +1,7 @@
 package no.nav.ung.sak.etterlysning.programperiode;
 
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
@@ -13,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class SisteEndringsdatoUtlederTest {
 
     private static PeriodeSnapshot snapshot(LocalDate fom, LocalDate tom) {
-        return new PeriodeSnapshot(Optional.ofNullable(fom), Optional.ofNullable(tom), UUID.randomUUID());
+        return new PeriodeSnapshot(Optional.ofNullable(fom), Optional.ofNullable(tom), "en beskrivelse");
     }
 
     @Test
@@ -24,11 +26,12 @@ class SisteEndringsdatoUtlederTest {
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, Collections.emptyList(), PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, Collections.emptyList(), getFomDato());
 
         // Assert
         assertThat(resultat).isEmpty();
     }
+
 
     @Test
     void skal_ikke_finne_endring_når_dato_er_lik_i_alle_grunnlag() {
@@ -40,11 +43,12 @@ class SisteEndringsdatoUtlederTest {
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(snapshot1, snapshot2), PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(snapshot1, snapshot2), getFomDato());
 
         // Assert
         assertThat(resultat).isEmpty();
     }
+
 
     @Test
     void skal_finne_endring_når_dato_er_ulik_i_første_grunnlag() {
@@ -56,12 +60,12 @@ class SisteEndringsdatoUtlederTest {
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(snapshot1), PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(snapshot1), getFomDato());
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isEqualTo(forrigeFom);
+        assertThat(resultat.get().nyDatoOgBeskrivelse().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgBeskrivelse().dato()).isEqualTo(forrigeFom);
     }
 
     @Test
@@ -78,12 +82,12 @@ class SisteEndringsdatoUtlederTest {
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(sameSomGjeldende, forrige, eldste), PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(sameSomGjeldende, forrige, eldste), getFomDato());
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isEqualTo(forrigeFom);
+        assertThat(resultat.get().nyDatoOgBeskrivelse().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgBeskrivelse().dato()).isEqualTo(forrigeFom);
     }
 
     @Test
@@ -99,25 +103,12 @@ class SisteEndringsdatoUtlederTest {
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(sameSomGjeldende1, sameSomGjeldende2, forrige), PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(sameSomGjeldende1, sameSomGjeldende2, forrige), getFomDato());
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isEqualTo(forrigeFom);
-    }
-
-    @Test
-    void skal_ikke_finne_endring_når_det_ikke_finnes_periode_i_gjeldende_grunnlag() {
-        // Arrange
-        PeriodeSnapshot gjeldendeSnapshot = new PeriodeSnapshot(Optional.empty(), Optional.empty(), UUID.randomUUID());
-
-        // Act
-        Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, Collections.emptyList(), PeriodeSnapshot::fomDato);
-
-        // Assert
-        assertThat(resultat).isEmpty();
+        assertThat(resultat.get().nyDatoOgBeskrivelse().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgBeskrivelse().dato()).isEqualTo(forrigeFom);
     }
 
     @Test
@@ -128,17 +119,17 @@ class SisteEndringsdatoUtlederTest {
 
         PeriodeSnapshot gjeldendeSnapshot = snapshot(gjeldendeFom, LocalDate.of(2024, 12, 31));
         PeriodeSnapshot sameSomGjeldende = snapshot(gjeldendeFom, LocalDate.of(2024, 12, 31));
-        PeriodeSnapshot ingenPeriode = new PeriodeSnapshot(Optional.empty(), Optional.empty(), UUID.randomUUID());
+        PeriodeSnapshot ingenPeriode = new PeriodeSnapshot(Optional.empty(), Optional.empty(), "en beskrivelse");
         PeriodeSnapshot forrige = snapshot(forrigeFom, LocalDate.of(2024, 12, 31));
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(sameSomGjeldende, ingenPeriode, forrige), PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, List.of(sameSomGjeldende, ingenPeriode, forrige), getFomDato());
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isNull();
+        assertThat(resultat.get().nyDatoOgBeskrivelse().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgBeskrivelse().dato()).isNull();
     }
 
     @Test
@@ -149,18 +140,18 @@ class SisteEndringsdatoUtlederTest {
 
         PeriodeSnapshot gjeldendeSnapshot = snapshot(gjeldendeFom, LocalDate.of(2024, 12, 31));
         PeriodeSnapshot initiellSnapshot = snapshot(gjeldendeFom, LocalDate.of(2024, 12, 31)); // Identisk med gjeldende
-        PeriodeSnapshot oppgittSnapshot = PeriodeSnapshot.fraOppgittStartdato(oppgittStartdato);
+        PeriodeSnapshot oppgittSnapshot = getOppgittSnapshot(oppgittStartdato);
 
         List<PeriodeSnapshot> sammenligningsliste = List.of(initiellSnapshot, oppgittSnapshot);
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, sammenligningsliste, PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, sammenligningsliste, getFomDato());
 
         // Assert
         assertThat(resultat).isPresent();
-        assertThat(resultat.get().nyDatoOgGrunnlag().dato()).isEqualTo(gjeldendeFom);
-        assertThat(resultat.get().forrigeDatoOgGrunnlag().dato()).isEqualTo(oppgittStartdato);
+        assertThat(resultat.get().nyDatoOgBeskrivelse().dato()).isEqualTo(gjeldendeFom);
+        assertThat(resultat.get().forrigeDatoOgBeskrivelse().dato()).isEqualTo(oppgittStartdato);
     }
 
     @Test
@@ -170,15 +161,25 @@ class SisteEndringsdatoUtlederTest {
 
         PeriodeSnapshot gjeldendeSnapshot = snapshot(fom, LocalDate.of(2024, 12, 31));
         PeriodeSnapshot initiellSnapshot = snapshot(fom, LocalDate.of(2024, 12, 31));
-        PeriodeSnapshot oppgittSnapshot = PeriodeSnapshot.fraOppgittStartdato(fom);
+        PeriodeSnapshot oppgittSnapshot = getOppgittSnapshot(fom);
 
         List<PeriodeSnapshot> sammenligningsliste = List.of(initiellSnapshot, oppgittSnapshot);
 
         // Act
         Optional<SisteEndringsdatoUtleder.EndretDato> resultat =
-            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, sammenligningsliste, PeriodeSnapshot::fomDato);
+            SisteEndringsdatoUtleder.finnSistEndretDato(gjeldendeSnapshot, sammenligningsliste, getFomDato());
 
         // Assert
         assertThat(resultat).isEmpty();
     }
+
+    private static PeriodeSnapshot getOppgittSnapshot(LocalDate fom) {
+        return PeriodeSnapshot.fraOppgittStartdato(new UngdomsytelseSøktStartdato(fom, new JournalpostId("123")));
+    }
+
+
+    private static SisteEndringsdatoUtleder.AktuellDatoHenter getFomDato() {
+        return PeriodeSnapshot::fomDato;
+    }
+
 }

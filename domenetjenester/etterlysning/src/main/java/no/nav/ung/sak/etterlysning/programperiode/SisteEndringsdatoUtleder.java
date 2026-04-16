@@ -3,7 +3,6 @@ package no.nav.ung.sak.etterlysning.programperiode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 public class SisteEndringsdatoUtleder {
 
@@ -23,20 +22,20 @@ public class SisteEndringsdatoUtleder {
         if (gjeldendeDato.isEmpty()) {
             return Optional.empty();
         }
-        var gjeldendeDatoOgGrunnlag = new DatoOgGrunnlag(gjeldendeDato.get(), gjeldendeSnapshot.grunnlagsreferanse());
+        var gjeldendeDatoOgGrunnlag = new DatoOgBeskrivelse(gjeldendeDato.get(), gjeldendeSnapshot.beskrivelse());
         boolean harEndringIDato = false;
-        DatoOgGrunnlag forrigeDatoOgGrunnlag = null;
+        DatoOgBeskrivelse forrigeDatoOgBeskrivelse = null;
         for (var snapshot : aktuelleSnapshotsSortert) {
             var datoISnapshot = aktuellDatoHenter.hent(snapshot);
             harEndringIDato = datoISnapshot.isEmpty() || !datoISnapshot.get().equals(gjeldendeDatoOgGrunnlag.dato);
             if (harEndringIDato) {
-                forrigeDatoOgGrunnlag = new DatoOgGrunnlag(datoISnapshot.orElse(null), gjeldendeDatoOgGrunnlag.grunnlagsreferanse);
+                forrigeDatoOgBeskrivelse = new DatoOgBeskrivelse(datoISnapshot.orElse(null), gjeldendeDatoOgGrunnlag.beskrivelse);
                 break;
             }
         }
 
         if (harEndringIDato) {
-            return Optional.of(new EndretDato(gjeldendeDatoOgGrunnlag, forrigeDatoOgGrunnlag));
+            return Optional.of(new EndretDato(gjeldendeDatoOgGrunnlag, forrigeDatoOgBeskrivelse));
         }
         return Optional.empty();
     }
@@ -48,23 +47,23 @@ public class SisteEndringsdatoUtleder {
     }
 
 
-    public record EndretDato(DatoOgGrunnlag nyDatoOgGrunnlag, DatoOgGrunnlag forrigeDatoOgGrunnlag) {
+    public record EndretDato(DatoOgBeskrivelse nyDatoOgBeskrivelse, DatoOgBeskrivelse forrigeDatoOgBeskrivelse) {
         @Override
         public String toString() {
             return "EndretDato{" +
-                "nyDatoOgGrunnlag=" + nyDatoOgGrunnlag +
-                ", forrigeDatoOgGrunnlag=" + forrigeDatoOgGrunnlag +
+                "nyDatoOgBeskrivelse=" + nyDatoOgBeskrivelse +
+                ", forrigeDatoOgBeskrivelse=" + forrigeDatoOgBeskrivelse +
                 '}';
         }
     }
 
 
-    public record DatoOgGrunnlag(LocalDate dato, UUID grunnlagsreferanse) {
+    public record DatoOgBeskrivelse(LocalDate dato, String beskrivelse) {
         @Override
         public String toString() {
             return "DatoOgGrunnlag{" +
                 "dato=" + dato +
-                ", grunnlagsreferanse=" + grunnlagsreferanse +
+                ", beskrivelse=" + beskrivelse +
                 '}';
         }
     }

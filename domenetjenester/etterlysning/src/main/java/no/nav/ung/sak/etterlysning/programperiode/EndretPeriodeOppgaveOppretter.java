@@ -66,64 +66,74 @@ public class EndretPeriodeOppgaveOppretter {
         }
         Etterlysning etterlysning = etterlysninger.getFirst();
         UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
-        Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId());
 
-        // Dette med å finne diff kan potensielt forenkles dersom vi ikkje trenger å vise kva startdato og sluttdato var før endringen.
-        List<PeriodeSnapshot> snapshotsForSammenligning = finnSortertSnapshotlisteForSammenligning(etterlysning, initieltPeriodeGrunnlag, startdatoGrunnlag);
 
-        PeriodeSnapshot gjeldendeSnapshot = PeriodeSnapshot.fraGrunnlag(gjeldendeGrunnlag);
-
-        log.info("Utleder endringer fra grunnlag med referanse {} basert på følgende snapshots for sammenligning: {}",
-            gjeldendeGrunnlag.getGrunnlagsreferanse(),
-            snapshotsForSammenligning.stream().map(PeriodeSnapshot::grunnlagsreferanse).toList());
-
-        Optional<SisteEndringsdatoUtleder.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
-            gjeldendeSnapshot,
-            snapshotsForSammenligning,
-            PeriodeSnapshot::fomDato);
-
-        Optional<SisteEndringsdatoUtleder.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
-            gjeldendeSnapshot,
-            snapshotsForSammenligning,
-            s -> s.tomDato().filter(d -> !d.equals(TIDENES_ENDE)));
-
-        if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
-            // ENDRING AV STARTDATO
-            log.info("Fant kun endring i startdato for etterlysning {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}",
-                etterlysning.getEksternReferanse(),
-                endretStartDato.get().nyDatoOgGrunnlag(),
-                endretStartDato.get().forrigeDatoOgGrunnlag());
-            var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretStartDato.get().nyDatoOgGrunnlag().dato(), endretStartDato.get().forrigeDatoOgGrunnlag().dato());
-            oppgaveKlient.opprettOppgave(oppgaveDto);
-        } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
-            // ENDRING AV SLUTTDATO
-            log.info("Fant kun endring i sluttdato for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}",
-                etterlysning.getEksternReferanse(),
-                endretSluttDato.get().nyDatoOgGrunnlag(),
-                endretSluttDato.get().forrigeDatoOgGrunnlag());
-            var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretSluttDato.get().nyDatoOgGrunnlag().dato(), endretSluttDato.get().forrigeDatoOgGrunnlag().dato());
-            oppgaveKlient.opprettOppgave(oppgaveDto);
-        } else if (gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty()) {
+        if (erPeriodeFjernet(gjeldendeGrunnlag)) {
             // FJERNET PERIODE
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
             var oppgaveDto = mapTilFjernetPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, forrigePeriode);
             oppgaveKlient.opprettOppgave(oppgaveDto);
-        } else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
-            log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
-                etterlysning.getEksternReferanse(),
-                endretSluttDato.get().nyDatoOgGrunnlag(),
-                endretSluttDato.get().forrigeDatoOgGrunnlag(),
-                endretStartDato.get().nyDatoOgGrunnlag(),
-                endretStartDato.get().forrigeDatoOgGrunnlag());
-            PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
-            PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
-            var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
-            var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, nyPeriode, forrigePeriode, endringer);
-            oppgaveKlient.opprettOppgave(oppgaveDto);
         } else {
-            throw new IllegalStateException("Fant ingen endringer som kunne mappes til oppgave for etterlysning " + etterlysning.getEksternReferanse());
+            Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId());
+
+            // Dette med å finne diff kan potensielt forenkles dersom vi ikkje trenger å vise kva startdato og sluttdato var før endringen.
+            List<PeriodeSnapshot> snapshotsForSammenligning = finnSortertSnapshotlisteForSammenligning(etterlysning, initieltPeriodeGrunnlag, startdatoGrunnlag);
+
+            PeriodeSnapshot gjeldendeSnapshot = PeriodeSnapshot.fraGrunnlag(gjeldendeGrunnlag);
+
+            log.info("Utleder endringer fra grunnlag med referanse {} basert på følgende snapshots for sammenligning: {}",
+                gjeldendeGrunnlag.getGrunnlagsreferanse(),
+                snapshotsForSammenligning.stream().map(PeriodeSnapshot::beskrivelse).toList());
+
+            Optional<SisteEndringsdatoUtleder.EndretDato> endretStartDato = SisteEndringsdatoUtleder.finnSistEndretDato(
+                gjeldendeSnapshot,
+                snapshotsForSammenligning,
+                PeriodeSnapshot::fomDato);
+
+            Optional<SisteEndringsdatoUtleder.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
+                gjeldendeSnapshot,
+                snapshotsForSammenligning,
+                PeriodeSnapshot::fomDato);
+
+            if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
+                // ENDRING AV STARTDATO
+                log.info("Fant kun endring i startdato for etterlysning {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}",
+                    etterlysning.getEksternReferanse(),
+                    endretStartDato.get().nyDatoOgBeskrivelse(),
+                    endretStartDato.get().forrigeDatoOgBeskrivelse());
+                var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretStartDato.get().nyDatoOgBeskrivelse().dato(), endretStartDato.get().forrigeDatoOgBeskrivelse().dato());
+                oppgaveKlient.opprettOppgave(oppgaveDto);
+            } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
+                // ENDRING AV SLUTTDATO
+                log.info("Fant kun endring i sluttdato for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}",
+                    etterlysning.getEksternReferanse(),
+                    endretSluttDato.get().nyDatoOgBeskrivelse(),
+                    endretSluttDato.get().forrigeDatoOgBeskrivelse());
+                var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretSluttDato.get().nyDatoOgBeskrivelse().dato(), endretSluttDato.get().forrigeDatoOgBeskrivelse().dato());
+                oppgaveKlient.opprettOppgave(oppgaveDto);
+            }  else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
+                log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
+                    etterlysning.getEksternReferanse(),
+                    endretSluttDato.get().nyDatoOgBeskrivelse(),
+                    endretSluttDato.get().forrigeDatoOgBeskrivelse(),
+                    endretStartDato.get().nyDatoOgBeskrivelse(),
+                    endretStartDato.get().forrigeDatoOgBeskrivelse());
+                PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
+                PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
+                var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
+                var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, nyPeriode, forrigePeriode, endringer);
+                oppgaveKlient.opprettOppgave(oppgaveDto);
+            } else {
+                throw new IllegalStateException("Fant ingen endringer som kunne mappes til oppgave for etterlysning " + etterlysning.getEksternReferanse());
+            }
+
         }
 
+
+    }
+
+    private static boolean erPeriodeFjernet(UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
+        return gjeldendeGrunnlag.hentForEksaktEnPeriodeDersomFinnes().isEmpty();
     }
 
     private List<PeriodeSnapshot> finnSortertSnapshotlisteForSammenligning(
@@ -151,8 +161,7 @@ public class EndretPeriodeOppgaveOppretter {
             .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
             .map(UngdomsytelseStartdatoer::getStartdatoer)
             .flatMap(Collection::stream)
-            .map(UngdomsytelseSøktStartdato::getStartdato)
-            .min(Comparator.comparing(d -> BigDecimal.valueOf(Period.between(d, etterlysning.getPeriode().getFomDato()).getDays()).abs())) // Finner startdato nærmest aktuell periode
+            .min(Comparator.comparing(s -> BigDecimal.valueOf(Period.between(s.getStartdato(), etterlysning.getPeriode().getFomDato()).getDays()).abs())) // Finner startdato nærmest aktuell periode
             .map(PeriodeSnapshot::fraOppgittStartdato)
             .ifPresent(snapshotsSortert::add);
 
