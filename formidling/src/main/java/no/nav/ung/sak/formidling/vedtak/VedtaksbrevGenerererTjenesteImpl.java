@@ -80,7 +80,9 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
             new TemplateDto(
                 FellesDto.lag(
                     new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()),
-                    brevAnsvarlig),
+                    brevAnsvarlig,
+                    behandling.getFagsakYtelseType()
+                ),
                 resultat.templateInnholdDto()
             )
         );
@@ -139,7 +141,10 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), lagManuellBrevAnsvarlig(behandlingAnsvarlig)),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()),
+                    lagManuellBrevAnsvarlig(behandlingAnsvarlig),
+                    behandling.getFagsakYtelseType()
+                ),
                 resultat.templateInnholdDto()
             )
         );

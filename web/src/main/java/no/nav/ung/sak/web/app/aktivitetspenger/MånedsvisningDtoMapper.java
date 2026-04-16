@@ -104,19 +104,9 @@ public class MånedsvisningDtoMapper {
             beregnetSats.dagsats().setScale(0, RoundingMode.HALF_UP),
             satser.satsGrunnlag().grunnbeløpFaktor(),
             satser.satsGrunnlag().grunnbeløp(),
-            utledSatsType(satser),
+            satser.hentSatsType(),
             satser.satsGrunnlag().antallBarn(),
             beregnetSats.dagsatsBarnetillegg(),
             Virkedager.beregnAntallVirkedager(periode.getFomDato(), periode.getTomDato()));
-    }
-
-    private static AktivitetspengerSatsType utledSatsType(AktivitetspengerSatser satser) {
-        return switch (satser.utledGrunnsatsBenyttet()) {
-            case BEREGNINGSGRUNNLAG -> AktivitetspengerSatsType.BEREGNINGSGRUNNLAG;
-            case MINSTEYTELSE -> switch (satser.satsGrunnlag().satsType()) {
-                case HØY -> AktivitetspengerSatsType.HØY;
-                case LAV -> AktivitetspengerSatsType.LAV;
-            };
-        };
     }
 }

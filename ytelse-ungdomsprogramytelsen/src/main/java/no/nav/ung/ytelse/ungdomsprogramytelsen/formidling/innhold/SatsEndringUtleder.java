@@ -1,11 +1,10 @@
-package no.nav.ung.sak.formidling.vedtak.regler;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
 
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
+import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndring;
 
-public record SatsEndring(boolean fødselBarn, boolean dødsfallBarn, boolean fikkFlereBarn,
-                          boolean overgangTilHøySats, boolean overgangLavSats) {
-
+public class SatsEndringUtleder {
     public static SatsEndring bestemSatsendring(UngdomsytelseSatser currentSatser, UngdomsytelseSatser previousSatser) {
         int gjeldendeAntallBarn = currentSatser.antallBarn();
         int tidligereAntallBarn = previousSatser.antallBarn();
