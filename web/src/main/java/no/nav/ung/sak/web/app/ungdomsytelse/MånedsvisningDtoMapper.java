@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.ungdomsytelse;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
@@ -21,12 +22,14 @@ import java.util.Optional;
 
 public class MånedsvisningDtoMapper {
 
-    public static List<UngdomsytelseUtbetaltMånedDto> mapSatsOgUtbetalingPrMåned(BehandlingAvsluttetTidspunkt aktuellAvsluttetTid,
-                                                                          LocalDateTimeline<YearMonth> månedsvisPeriodisering,
-                                                                          LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje,
-                                                                          LocalDateTimeline<BigDecimal> kontrollertInntektTidslinje,
-                                                                          UngdomsytelseSatsPerioder perioder,
-                                                                          Map<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>> tidslinjeMap) {
+    public static List<UngdomsytelseUtbetaltMånedDto> mapSatsOgUtbetalingPrMåned(
+        BehandlingAvsluttetTidspunkt aktuellAvsluttetTid,
+        LocalDateTimeline<YearMonth> månedsvisPeriodisering,
+        LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje,
+        LocalDateTimeline<KontrollerteInntekter> kontrollertInntektTidslinje,
+        UngdomsytelseSatsPerioder perioder,
+        Map<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>> tidslinjeMap) {
+
         var statusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(aktuellAvsluttetTid, tidslinjeMap, LocalDate.now());
         final var månederMedYtelse = månedsvisPeriodisering.intersection(tilkjentYtelseTidslinje.mapValue(it -> true).compress());
         return månederMedYtelse.toSegments().stream().map(måned -> {
@@ -86,8 +89,9 @@ public class MånedsvisningDtoMapper {
             .reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
-    private static Optional<BigDecimal> finnRapportertInntekt(LocalDateTimeline<BigDecimal> kontrollertInntektForMåned) {
+    private static Optional<BigDecimal> finnRapportertInntekt(LocalDateTimeline<KontrollerteInntekter> kontrollertInntektForMåned) {
         return kontrollertInntektForMåned.toSegments().stream().map(LocalDateSegment::getValue)
+            .map(KontrollerteInntekter::arbeidsinntektOgYtelse)
             .reduce(BigDecimal::add);
     }
 

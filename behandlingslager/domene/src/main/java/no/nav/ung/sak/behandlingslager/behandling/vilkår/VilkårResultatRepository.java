@@ -9,8 +9,8 @@ import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.DiffEntity;
+import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
@@ -178,6 +178,29 @@ public class VilkårResultatRepository {
             .medKantIKantVurderer(kantIKantVurderer);
         for (var periode : vilkårsPeriode) {
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).medUtfall(Utfall.IKKE_VURDERT));
+        }
+
+        builder.leggTil(vilkårBuilder);
+        var nyttResultat = builder.build();
+        this.lagre(behandlingId, nyttResultat);
+    }
+
+    public void settPerioderTilIkkeRelevant(Long behandlingId, VilkårType vilkårType, NavigableSet<DatoIntervallEntitet> vilkårsPeriode) {
+        Optional<Vilkårene> vilkårResultatOpt = this.hentHvisEksisterer(behandlingId);
+        if (vilkårResultatOpt.isEmpty()) {
+            return;
+        }
+        Vilkårene vilkårene = vilkårResultatOpt.get();
+        Optional<Vilkår> vilkårOpt = vilkårene.getVilkårene().stream()
+            .filter(v -> v.getVilkårType().equals(vilkårType))
+            .findFirst();
+        if (vilkårOpt.isEmpty()) {
+            return;
+        }
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(vilkårType);
+        for (var periode : vilkårsPeriode) {
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).medUtfall(Utfall.IKKE_RELEVANT));
         }
 
         builder.leggTil(vilkårBuilder);

@@ -4,65 +4,139 @@
         <h1>Du får aktivitetspenger</h1>
 
         <p>
-            Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du aktivitetspenger utenom lørdag og søndag.
+            Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du aktivitetspenger på {{> felles/beløp dagsats}} utenom lørdag og søndag.
+        </p>
+
+        {{#each satsEndringer}}
+            {{#if overgangTilHøySats}}
+                <p>Fordi du fylte {{satsOgBeregning.aldersgrenseSatsendring}} år {{fom}}, får du mer penger fra denne
+                    datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+            {{#if fødselBarn}}
+                <p>Fordi du fikk barn {{fom}}, får du {{> felles/beløp barnetilleggSats}} mer {{#if fikkFlereBarn}}for hvert barn{{/if}} fra denne datoen. Da får
+                    du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+            {{#if dødsfallBarn}}
+                <p>Fordi du mistet barn {{fom}}, får du ikke barnetillegg på {{> felles/beløp barnetilleggSats}} fra denne
+                    datoen. Da får du {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.</p>
+            {{/if}}
+        {{/each}}
+
+        {{#with utbetaling}}
+            <p>
+                Pengene blir utbetalt én gang i måneden.
+                {{#if erEtterbetaling}}
+                    Den første utbetalingen får du innen fire dager, og deretter får du pengene innen den 12. hver måned.
+                {{else}}
+                    Den første utbetalingen får du innen 12. {{månedNavn}}, og deretter får du pengene innen den 12. hver måned.
+                {{/if}}
+                {{#if sisteUtbetalingsdato}}
+                    Den siste utbetalingen får du før den {{sisteUtbetalingsdato}}.
+                {{/if}}
+            </p>
+            <p>Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt.</p>
+        {{/with}}
+
+        <p>
+            Du finner mer informasjon om utbetalingen hvis du <a href="https://www.nav.no/min-side" title="min side">logger inn på Min
+            side på nav.no</a>.
         </p>
 
         <h2>Hvorfor får du penger?</h2>
         <p>Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning.</p>
         <p>Pengene får du så lenge du får oppfølging fra Nav, og i inntil ett år.</p>
 
-        <p>Vedtaket er gjort etter </p>
+        {{#with satsOgBeregning}}
+            <h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>
 
-        {{#eq grunnsatsType "MINSTEYTELSE"}}
-            <p>
-                {{#if erHøySatstype}}
-                    Fordi du er over 25 år, har du rett på 2,041 ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
-                {{else}}
-                    Fordi du er under 25 år, har du rett på 2/3 av 2,041 ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
+
+
+            {{#with beregningsgrunnlag}}
+                {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
+                    <p>
+                        Fordi du får én dagsats når du er under 25 år og en annen dagsats når du er over 25 år, har vi gjort to ulike beregninger.
+                    </p>
+                    <p>Slik har vi regnet ut satsen som du får før du fylte 25 år.</p>
                 {{/if}}
-                Det vil si at du kan få opptil {{> felles/beløp minsteytelse}} i året.
-            </p>
-            <p>Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.</p>
 
-        {{else}}
-           {{#eq besteBeregningResultat "SNITT_SISTE_TRE_ÅR"}}
+               {{#eq besteBeregningResultat "SNITT_SISTE_TRE_ÅR"}}
+                    <p>
+                        Når vi har regnet ut hvor mye du får i aktivitetspenger,
+                        har vi brukt årsinntektene dine for de tre siste ferdiglignede årene og funnet gjennomsnittet av disse.
+                        Gjennomsnittet er på {{> felles/beløp beregnetPrAar}}.
+                    </p>
+
+                    <p>
+                        Vi har brukt denne summen fordi den er høyere enn minstesatsen for deg som er {{#if harLavSatstype}}under{{else}}over{{/if}} 25 år,
+                        og høyere enn årsinntekten din i {{sisteLignedeÅr}}.
+                        Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
+                    </p>
+                {{else eq besteBeregningResultat "SISTE_ÅR"}}
+                    <p>
+                        Når vi har regnet ut hvor mye du får i aktivitetspenger,
+                        har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{> felles/beløp beregnetPrAar}}.
+                    </p>
+
+                    <p>
+                        Det er fordi denne inntekten er høyere enn minstesatsen for deg som er {{#if harLavSatstype}}under{{else}}over{{/if}} 25 år,
+                        og høyere enn gjennomsnittet av årsinntekten din for de tre siste ferdiglignede årene.
+                        Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
+                    </p>
+                {{/eq}}
                 <p>
-                    Når vi har regnet ut hvor mye du får i aktivitetspenger,
-                    har vi brukt årsinntektene dine for de tre siste ferdiglignede årene og funnet gjennomsnittet av disse.
-                    Gjennomsnittet er på {{> felles/beløp beregnetPrAar}}.
+                    For å finne dagsatsen din, har vi regnet ut hva 66 prosent av {{> felles/beløp beregnetPrAar}} er.
+                    Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager.
                 </p>
+                <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
+            {{/with}}
 
-                <p>
-                    Vi har brukt denne summen fordi den er høyere enn minstesatsen for deg som er {{#if erHøySatstype}}OVER{{else}}UNDER{{/if}} 25 år,
-                    og høyere enn årsinntekten din i {{sisteLignedeÅr}}.
-                    Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
-                </p>
-            {{else eq besteBeregningResultat "SISTE_ÅR"}}
-                <p>
-                    Når vi har regnet ut hvor mye du får i aktivitetspenger,
-                    har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{> felles/beløp beregnetPrAar}}.
-                </p>
+            {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
+                {{#with minsteYtelsegrunnlag}}
+                    {{#if harLavSatstype}}
+                        <p>
+                            Når du er under {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{faktor}}.
+                            Det blir {{> felles/beløp minsteÅrligeYtelse}} i året.
+                            Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.
+                        </p>
+                        <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
+                    {{/if}}
+                {{/with}}
 
-                <p>
-                    Det er fordi denne inntekten er høyere enn minstesatsen for deg som er {{#if erHøySatstype}}OVER{{else}}UNDER{{/if}} 25 år,
-                    og høyere enn gjennomsnittet av årsinntekten din for de tre siste ferdiglignede årene.
-                    Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
-                </p>
-            {{/eq}}
+                {{#if beregningsgrunnlag}}
+                    <p>Slik har vi regnet ut satsen du får etter at du fylte 25 år.</p>
+                {{/if}}
 
-            <p>
-                For å finne dagsatsen din, har vi regnet ut hva 66 prosent av {{> felles/beløp beregnetPrAar}} er.
-                Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager.
-            </p>
-        {{/eq}}
+                {{#with minsteYtelsegrunnlagOvergangTilHøySats}}
+                    <p>
+                        Når du er over {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
+                        ganger {{faktor}} som blir {{> felles/beløp minsteÅrligeYtelse}} i året.
+                    </p>
+                    <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
+                {{/with}}
+            {{else if minsteYtelsegrunnlag}}
+                {{#with minsteYtelsegrunnlag}}
+                    <p>
+                        {{#if harLavSatstype}}
+                            Fordi du er under 25 år, har du rett på 2/3 av {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
+                        {{else}}
+                            Fordi du er over 25 år, har du rett på {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
+                        {{/if}}
+                            Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.
+                    </p>
 
-        <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
-        {{#if dagsatsBarnetillegg}}
-            Fordi du har et barn, får du i tillegg {{> felles/beløp dagsatsBarnetillegg}} per dag i barnetillegg.
-        {{/if}}
+                    <p>Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.</p>
+                    <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
+                {{/with}}
+           {{/if}}
+
+            {{#with barnetillegg}}
+                <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp dagsatsBarnetillegg}} per dag i barnetillegg{{#if harFlereBarn}} for hvert barn{{/if}}.</p>
+            {{/with}}
+        {{/with}}
 
     {{/felles/seksjon/hoved}}
 
-    {{> felles/footer/footer-vedtak }}
+    {{> aktivitetspenger/footer/endringer }}
+    {{> aktivitetspenger/footer/footer-vedtak }}
 
 {{/felles/base}}

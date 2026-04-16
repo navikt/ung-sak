@@ -31,7 +31,7 @@ public class BehandlingAnsvarligRepository {
         return hentBehandlingAnsvarlig(behandlingId, BehandlingDel.SENTRAL);
     }
 
-    private Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
+    public Optional<BehandlingAnsvarlig> hentBehandlingAnsvarlig(Long behandlingId, BehandlingDel behandlingDel) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(behandlingDel, "behandlingDel");
         List<BehandlingAnsvarlig> resultat = entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingDel = :behandlingDel AND ba.behandlingId = :behandlingId", BehandlingAnsvarlig.class)
@@ -47,17 +47,19 @@ public class BehandlingAnsvarligRepository {
         }
     }
 
-    public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder) {
-        return hentBehandlingAnsvarlig(behandlingIder, BehandlingDel.SENTRAL);
+    public Map<BehandlingDel, BehandlingAnsvarlig> hentBehandlingAnsvarlige(Long behandlingId) {
+        return hentBehandlingAnsvarlige(List.of(behandlingId))
+            .getOrDefault(behandlingId, List.of())
+            .stream()
+            .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingDel, Function.identity()));
     }
 
-    public Map<Long, BehandlingAnsvarlig> hentBehandlingAnsvarlig(List<Long> behandlingIder, BehandlingDel behandlingDel) {
-        return entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingDel = :behandlingDel AND ba.behandlingId in (:behandlingId)", BehandlingAnsvarlig.class)
-            .setParameter("behandlingDel", behandlingDel)
+    public Map<Long, List<BehandlingAnsvarlig>> hentBehandlingAnsvarlige(List<Long> behandlingIder) {
+        return entityManager.createQuery("SELECT ba FROM BehandlingAnsvarlig ba WHERE ba.behandlingId in (:behandlingId)", BehandlingAnsvarlig.class)
             .setParameter("behandlingId", behandlingIder)
             .getResultList()
             .stream()
-            .collect(Collectors.toMap(BehandlingAnsvarlig::getBehandlingId, Function.identity()));
+            .collect(Collectors.groupingBy(BehandlingAnsvarlig::getBehandlingId));
     }
 
     public void setBehandlendeEnhet(Long behandlingId, OrganisasjonsEnhet enhet) {
@@ -75,18 +77,10 @@ public class BehandlingAnsvarligRepository {
         lagre(behandlingAnsvarlig);
     }
 
-    public void setAnsvarligBeslutter(Long behandlingId, String ansvarligBeslutterIdent) {
-        setAnsvarligBeslutter(behandlingId, BehandlingDel.SENTRAL, ansvarligBeslutterIdent);
-    }
-
     public void setAnsvarligBeslutter(Long behandlingId, BehandlingDel behandlingDel, String ansvarligBeslutterIdent) {
         BehandlingAnsvarlig behandlingAnsvarlig = hentEllerOpprett(behandlingId, behandlingDel);
         behandlingAnsvarlig.setAnsvarligBeslutter(ansvarligBeslutterIdent);
         lagre(behandlingAnsvarlig);
-    }
-
-    public void setAnsvarligSaksbehandler(Long behandlingId, String ansvarligSaksbehandlerIdent) {
-        setAnsvarligSaksbehandler(behandlingId, BehandlingDel.SENTRAL, ansvarligSaksbehandlerIdent);
     }
 
     public void setAnsvarligSaksbehandler(Long behandlingId, BehandlingDel behandlingDel, String ansvarligSaksbehandlerIdent) {
@@ -95,31 +89,19 @@ public class BehandlingAnsvarligRepository {
         lagre(behandlingAnsvarlig);
     }
 
-    public boolean erTotrinnsBehandling(Long behandlingId) {
-        return erTotrinnsBehandling(behandlingId, BehandlingDel.SENTRAL);
-    }
-
     public boolean erTotrinnsBehandling(Long behandlingId, BehandlingDel behandlingDel) {
         return hentBehandlingAnsvarlig(behandlingId, behandlingDel)
             .map(BehandlingAnsvarlig::erTotrinnsBehandling)
             .orElse(false);
     }
 
-    public String hentAnsvarligSaksbehandler(Long behandlingId) {
-        return hentAnsvarligSaksbehandler(behandlingId, BehandlingDel.SENTRAL);
-    }
-
-    private String hentAnsvarligSaksbehandler(Long behandlingId, BehandlingDel behandlingDel) {
+    public String hentAnsvarligSaksbehandler(Long behandlingId, BehandlingDel behandlingDel) {
         return hentBehandlingAnsvarlig(behandlingId, behandlingDel)
             .map(BehandlingAnsvarlig::getAnsvarligSaksbehandler)
             .orElse(null);
     }
 
-    public void nullstillToTrinnsBehandling(Long behandlingId) {
-        nullstillToTrinnsBehandling(behandlingId, BehandlingDel.SENTRAL);
-    }
-
-    private void nullstillToTrinnsBehandling(Long behandlingId, BehandlingDel behandlingDel) {
+    public void nullstillToTrinnsBehandling(Long behandlingId, BehandlingDel behandlingDel) {
         hentBehandlingAnsvarlig(behandlingId, behandlingDel).ifPresent(
             behandlingAnsvarlig -> {
                 behandlingAnsvarlig.setToTrinnsBehandling(false);
@@ -127,10 +109,6 @@ public class BehandlingAnsvarligRepository {
                 lagre(behandlingAnsvarlig);
             }
         );
-    }
-
-    public void setToTrinnsbehandling(Long behandlingId) {
-        setToTrinnsbehandling(behandlingId, BehandlingDel.SENTRAL);
     }
 
     public void setToTrinnsbehandling(Long behandlingId, BehandlingDel behandlingDel) {

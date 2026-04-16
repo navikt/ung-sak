@@ -11,11 +11,11 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.SatsEndring;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.SatsEndringUtleder;
 
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -65,7 +65,7 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
                     previous = current;
                     continue;
                 }
-                if (SatsEndring.bestemSatsendring(current.getValue(), previous.getValue()).dødsfallBarn()) {
+                if (SatsEndringUtleder.bestemSatsendring(current.getValue(), previous.getValue()).dødsfallBarn()) {
                     return true;
                 }
                 previous = current;

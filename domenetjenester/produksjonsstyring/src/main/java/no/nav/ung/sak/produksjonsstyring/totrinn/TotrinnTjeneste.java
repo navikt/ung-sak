@@ -33,6 +33,13 @@ public class TotrinnTjeneste {
         return totrinnRepository.hentTotrinnaksjonspunktvurderinger(behandling);
     }
 
+    public Collection<Totrinnsvurdering> hentTotrinnaksjonspunktvurderinger(Behandling behandling, BehandlingDel behandlingDel) {
+        return totrinnRepository.hentTotrinnaksjonspunktvurderinger(behandling)
+            .stream()
+            .filter(tt -> tt.getAksjonspunktDefinisjon().getBehandlingDel() == behandlingDel)
+            .toList();
+    }
+
     /** Deaktiverer alle totrinnsvurderinger for en behandlingsDel.  */
 
     public void deaktiverTotrinnaksjonspunktvurderinger(Behandling behandling, BehandlingDel behandlingDel) {

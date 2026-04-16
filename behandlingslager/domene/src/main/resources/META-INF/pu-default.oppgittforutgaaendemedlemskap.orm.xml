@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_2.xsd"
+                 version="3.2">
+
+    <sequence-generator name="SEQ_OPPGITT_FMEDLEMSKAP_HOLDER" allocation-size="50" sequence-name="SEQ_OPPGITT_FMEDLEMSKAP_HOLDER"/>
+    <sequence-generator name="SEQ_OPPGITT_FMEDLEMSKAP" allocation-size="50" sequence-name="SEQ_OPPGITT_FMEDLEMSKAP"/>
+    <sequence-generator name="SEQ_GR_OPPGITT_FMEDLEMSKAP" allocation-size="50" sequence-name="SEQ_GR_OPPGITT_FMEDLEMSKAP"/>
+    <sequence-generator name="SEQ_OPPGITT_FMEDLEMSKAP_BOSTED" allocation-size="50" sequence-name="SEQ_OPPGITT_FMEDLEMSKAP_BOSTED"/>
+
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapHolder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted"/>
+
+</entity-mappings>

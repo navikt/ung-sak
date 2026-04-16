@@ -9,15 +9,14 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.IngenVerdi;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.LagRegelSporing;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlag;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.domene.behandling.steg.beregnytelse.BeregnYtelseSteg;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
-import no.nav.ung.sak.ytelse.BeregnetSats;
-import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
-import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
+import no.nav.ung.sak.ytelse.*;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
 import java.math.BigDecimal;
@@ -30,6 +29,9 @@ import java.util.Map;
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @BehandlingTypeRef
 public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
+
+    private static final BigDecimal REDUKSJONSFAKTOR_ARBEIDSINNTEKT = new BigDecimal("0.66");
+    private static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("0.66");
 
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
@@ -62,24 +64,29 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);
 
         final var satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje();
-        final var totalsatsTidslinje = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
+        final var totalsatsTidslinje = TotalbeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
         final var godkjentUttakTidslinje = finnGodkjentUttakstidslinje(ungdomsytelseGrunnlag.get());
 
         // Utfør reduksjon og map til tilkjent ytelse
-        final var tilkjentYtelseTidslinje = LagTilkjentYtelse.lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        final var konfigurasjon = new InntektsreduksjonKonfigurasjon(REDUKSJONSFAKTOR_ARBEIDSINNTEKT, REDUKSJONSFAKTOR_YTELSE);
+        final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje, LocalDateTimeline<YearMonth> ytelseTidslinje, LocalDateTimeline<Boolean> godkjentUttakTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
+    private static String lagRegelInput(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje,
+                                        LocalDateTimeline<YearMonth> ytelseTidslinje,
+                                        LocalDateTimeline<Boolean> godkjentUttakTidslinje,
+                                        LocalDateTimeline<BeregnetSats> totalsatsTidslinje,
+                                        LocalDateTimeline<KontrollerteInntekter> kontrollertInntektTidslinje) {
         final var sporingsMap = Map.of(
             "satsTidslinje", satsTidslinje,
             "ytelseTidslinje", ytelseTidslinje.mapValue(IngenVerdi::ingenVerdi),
             "godkjentUttakTidslinje", godkjentUttakTidslinje.mapValue(IngenVerdi::ingenVerdi),
             "totalsatsTidslinje", totalsatsTidslinje,
-            "kontrollertInntektTidslinje", rapportertInntektTidslinje
+            "kontrollertInntektTidslinje", kontrollertInntektTidslinje
         );
         final var regelInput = LagRegelSporing.lagRegelSporingFraTidslinjer(sporingsMap);
         return regelInput;
@@ -105,7 +112,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
             .orElse(LocalDateTimeline.empty());
     }
 
-    private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<BigDecimal> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {
+    private static void validerPerioderForRapporterteInntekter(LocalDateTimeline<KontrollerteInntekter> rapportertInntektTidslinje, LocalDateTimeline<YearMonth> månedstidslinjeForYtelse) {
         final var rapporterteInntekterSomIkkeOverlapperYtelsesperiode = rapportertInntektTidslinje.stream().filter(s -> harIkkeOverlappendeYtelseMåned(s, månedstidslinjeForYtelse)).toList();
         if (!rapporterteInntekterSomIkkeOverlapperYtelsesperiode.isEmpty()) {
             throw new IllegalStateException("Rapportert inntekt har perioder som ikke er dekket av månedstidslinjen: " + rapporterteInntekterSomIkkeOverlapperYtelsesperiode.stream().map(LocalDateSegment::getLocalDateInterval).toList());

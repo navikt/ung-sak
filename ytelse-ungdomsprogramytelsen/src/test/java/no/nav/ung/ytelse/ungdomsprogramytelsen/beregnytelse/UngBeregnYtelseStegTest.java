@@ -4,13 +4,13 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
@@ -30,7 +30,8 @@ import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.perioder.UngdomsytelseKvalifiserteYtelsesperioderTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -68,7 +69,8 @@ class UngBeregnYtelseStegTest {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         final var månedsvisTidslinjeUtleder = new MånedsvisTidslinjeUtleder(
-            new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository, new UngdomsytelseStartdatoRepository(entityManager)),
+            new UnitTestLookupInstanceImpl<>(
+                new UngdomsytelseKvalifiserteYtelsesperioderTjeneste(new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository), ungdomsytelseGrunnlagRepository)),
             behandlingRepository);
         beregnYtelseSteg = new UngBeregnYtelseSteg(ungdomsytelseGrunnlagRepository,
             tilkjentYtelseRepository,

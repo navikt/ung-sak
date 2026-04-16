@@ -18,7 +18,7 @@ import java.util.UUID;
 
 @Dependent
 @ScopedRestIntegration(scopeKey = "ung.brukerdialog.api.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-brukerdialog-api/.default")
-public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGrensesnitt {
+public class UngBrukerdialogOppgaveKlient {
 
     private final OidcRestClient restClient;
     private final URI opprettURI;
@@ -43,7 +43,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         this.løsSøkYtelseBaseURI = tilUri(url, "oppgavebehandling/los-sok-ytelse");
     }
 
-    @Override
     public void avbrytOppgave(OppgaveRequest oppgaveRequest) {
         try {
             restClient.post(avbrytURI, oppgaveRequest);
@@ -52,7 +51,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         }
     }
 
-    @Override
     public void opprettOppgave(OpprettOppgaveDto oppgave) {
         try {
             restClient.post(opprettURI, oppgave);
@@ -61,7 +59,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         }
     }
 
-    @Override
     public void oppgaveUtløpt(OppgaveRequest oppgaveRequest) {
         try {
             restClient.post(utløptURI, oppgaveRequest);
@@ -70,7 +67,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         }
     }
 
-    @Override
     public void settOppgaveTilUtløpt(EndreOppgaveStatusDto dto) {
         try {
             restClient.post(utløpForTypeOgPeriodeURI, dto);
@@ -79,7 +75,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         }
     }
 
-    @Override
     public void settOppgaveTilAvbrutt(EndreOppgaveStatusDto dto) {
         try {
             restClient.post(avbrytForTypeOgPeriodeURI, dto);
@@ -88,7 +83,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         }
     }
 
-    @Override
     public void løsSøkYtelseOppgave(AktørId aktørId) {
         try {
             restClient.post(løsSøkYtelseBaseURI, aktørId);
@@ -97,7 +91,6 @@ public class UngBrukerdialogOppgaveKlient implements OppgaveForSaksbehandlingGre
         }
     }
 
-    @Override
     public void endreFrist(AktørId aktørId, UUID eksternReferanse, LocalDateTime frist) {
         try {
             restClient.post(endreFristURI, new EndreFristDto(aktørId, eksternReferanse, frist));

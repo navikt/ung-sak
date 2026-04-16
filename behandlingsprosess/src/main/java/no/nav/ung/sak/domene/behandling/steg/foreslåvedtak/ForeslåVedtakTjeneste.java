@@ -70,7 +70,7 @@ class ForeslåVedtakTjeneste {
 
         if (BehandlingType.KLAGE.equals(behandling.getType())) {
             if (klageVedtakTjeneste.erKlageResultatHjemsendt(behandling)) {
-                behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId());
+                behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL);
                 settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
                 aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS);
                 return BehandleStegResultat.tilbakeførtMedAksjonspunkter(aksjonspunktDefinisjoner);
@@ -79,7 +79,7 @@ class ForeslåVedtakTjeneste {
 
         Optional<Aksjonspunkt> vedtakUtenTotrinnskontroll = behandling.getÅpentAksjonspunktMedDefinisjonOptional(AksjonspunktDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL);
         if (vedtakUtenTotrinnskontroll.isPresent()) {
-            behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId());
+            behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL);
             return BehandleStegResultat.utførtMedAksjonspunkter(aksjonspunktDefinisjoner);
         }
 
@@ -97,15 +97,15 @@ class ForeslåVedtakTjeneste {
     }
 
     private void håndterTotrinn(Behandling behandling, List<AksjonspunktDefinisjon> aksjonspunktDefinisjoner) {
-        if (!behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId())) {
-            behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId());
+        if (!behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)) {
+            behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId(), BehandlingDel.SENTRAL);
             logger.info("To-trinn satt på behandling={}", behandling.getId());
         }
         aksjonspunktDefinisjoner.add(AksjonspunktDefinisjon.FORESLÅ_VEDTAK);
     }
 
     private void håndterUtenTotrinn(Behandling behandling, BehandlingskontrollKontekst kontekst) {
-        behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId());
+        behandlingAnsvarligRepository.nullstillToTrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL);
         logger.info("To-trinn fjernet på behandling={}", behandling.getId());
         settForeslåOgFatterVedtakAksjonspunkterAvbrutt(behandling, kontekst);
     }

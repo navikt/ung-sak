@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -117,7 +118,7 @@ public class KlageScenarioer {
 
 
         BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories.behandlingAnsvarligRepository();
-        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(klageBehandling.getId(), BrevScenarioerUtils.SAKSBEHANDLER1_IDENT);
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(klageBehandling.getId(), BehandlingDel.SENTRAL, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
         behandlingRepository.lagre(klageBehandling, behandlingRepository.taSkriveLås(klageBehandling));

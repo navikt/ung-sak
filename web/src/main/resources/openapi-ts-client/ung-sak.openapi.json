@@ -345,7 +345,7 @@
             "items" : {
               "$ref" : "#/components/schemas/k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelsePeriodeV1"
             },
-            "maxItems" : 800,
+            "maxItems" : 4680,
             "minItems" : 0,
             "type" : "array"
           }
@@ -1889,6 +1889,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto" : {
+        "default" : null,
         "discriminator" : {
           "mapping" : {
             "5015" : "#/components/schemas/ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto",
@@ -1994,6 +1995,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto" : {
+        "default" : null,
         "discriminator" : {
           "mapping" : {
             "6006" : "#/components/schemas/ung.sak.kontrakt.søknadsfrist.aksjonspunkt.OverstyrtSøknadsfristDto"
@@ -2048,6 +2050,49 @@
           }
         },
         "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto" : {
+        "properties" : {
+          "antallBarn" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "antallDager" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "dagsats" : {
+            "type" : "number"
+          },
+          "dagsatsBarnetillegg" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "grunnbeløp" : {
+            "type" : "number"
+          },
+          "grunnbeløpFaktor" : {
+            "type" : "number"
+          },
+          "satsType" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "antallDager", "dagsats", "dagsatsBarnetillegg", "fom", "grunnbeløp", "grunnbeløpFaktor", "satsType", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType" : {
+        "enum" : [ "HØY", "LAV", "BEREGNINGSGRUNNLAG" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "HØY", "LAV", "BEREGNINGSGRUNNLAG" ]
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto" : {
         "properties" : {
@@ -2149,6 +2194,44 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto" : {
+        "properties" : {
+          "antallDager" : {
+            "format" : "int32",
+            "type" : "integer"
+          },
+          "gjelderDelerAvMåned" : {
+            "type" : "boolean"
+          },
+          "måned" : {
+            "format" : "year-month",
+            "type" : "string"
+          },
+          "rapportertInntekt" : {
+            "type" : "number"
+          },
+          "reduksjon" : {
+            "type" : "number"
+          },
+          "reduksjonsgrunnlag" : {
+            "type" : "number"
+          },
+          "satsperioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto"
+            },
+            "type" : "array"
+          },
+          "status" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.ungdomsytelse.ytelse.UtbetalingStatus"
+          },
+          "utbetaling" : {
+            "type" : "number"
+          }
+        },
+        "required" : [ "antallDager", "gjelderDelerAvMåned", "måned", "satsperioder" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
         "properties" : {
           "fødselsdato" : {
@@ -2177,6 +2260,26 @@
               "$ref" : "#/components/schemas/ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto"
             },
             "type" : "object"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.behandling.BehandlingAnsvarligDto" : {
+        "properties" : {
+          "ansvarligBeslutter" : {
+            "type" : "string"
+          },
+          "ansvarligSaksbehandler" : {
+            "type" : "string"
+          },
+          "behandlendeEnhetId" : {
+            "type" : "string"
+          },
+          "behandlendeEnhetNavn" : {
+            "type" : "string"
+          },
+          "toTrinnsBehandling" : {
+            "type" : "boolean"
           }
         },
         "type" : "object"
@@ -2210,6 +2313,12 @@
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{Space}\\p{L}\\p{N}]+$",
             "type" : "string"
+          },
+          "behandlingAnsvarlige" : {
+            "additionalProperties" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.BehandlingAnsvarligDto"
+            },
+            "type" : "object"
           },
           "behandlingHenlagt" : {
             "type" : "boolean"
@@ -2353,7 +2462,7 @@
             "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.BehandlingVisningsnavn"
           }
         },
-        "required" : [ "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
+        "required" : [ "behandlingAnsvarlige", "opprettet", "sakstype", "status", "type", "uuid", "versjon" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.behandling.BehandlingIdListe" : {
@@ -2394,6 +2503,9 @@
             "type" : "boolean"
           },
           "behandlingTilGodkjenning" : {
+            "type" : "boolean"
+          },
+          "behandlingTilGodkjenningVedLokalkontor" : {
             "type" : "boolean"
           },
           "uuid" : {
@@ -3022,6 +3134,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevInnholdDto" : {
+        "default" : null,
         "oneOf" : [ {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto"
         } ],
@@ -3276,6 +3389,7 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.hendelser.Hendelse" : {
+        "default" : null,
         "discriminator" : {
           "mapping" : {
             "DOEDSFALL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.DødsfallHendelse",
@@ -4917,17 +5031,17 @@
       },
       "ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse" : {
         "properties" : {
-          "avslagsårsak" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
-          },
           "medlemskapFraBruker" : {
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto"
             },
             "type" : "array"
           },
-          "vilkårUtfall" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
+          "vilkårsperioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.VilkårsPeriodeResultatDto"
+            },
+            "type" : "array"
           }
         },
         "type" : "object"
@@ -4937,6 +5051,9 @@
           "harTrygdeavtale" : {
             "type" : "boolean"
           },
+          "journalpostId" : {
+            "type" : "string"
+          },
           "land" : {
             "type" : "string"
           },
@@ -4945,6 +5062,23 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.vilkår.medlemskap.VilkårsPeriodeResultatDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
+          },
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "utfall" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
           }
         },
         "type" : "object"
@@ -5683,6 +5817,38 @@
               "application/json" : {
                 "schema" : {
                   "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "avp" ]
+      }
+    },
+    "/api/aktivitetspenger/månedsvis-sats-og-utbetaling" : {
+      "get" : {
+        "description" : "Henter månedsvis satser og utbetaling",
+        "operationId" : "getSatsOgUtbetalingPerioderAktivitetspenger",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto"
+                  },
+                  "type" : "array"
                 }
               }
             },

@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 import java.util.*;
 import java.util.function.Function;

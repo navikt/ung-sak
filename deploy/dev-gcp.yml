@@ -275,9 +275,7 @@ spec:
     - name: ENABLE_BREV_ANSVARLIG
       value: "true"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
-      value: "false"
-    - name: OPPGAVER_I_UNG_DELTAKELSE_ENABLED
-      value: "false"
+      value: "true"
     - name: AKTIVITETSPENGER_ENABLED
       value: "true"
 

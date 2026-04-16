@@ -13,7 +13,7 @@ import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
@@ -49,7 +49,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     public static final String PERIODE_TOM = "tom";
     public static final String OPPGAVE_REF = "oppgave_ref";
 
-    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
@@ -60,13 +60,13 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
     }
 
     @Inject
-    public OpprettOppgaveForInntektsrapporteringTask(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+    public OpprettOppgaveForInntektsrapporteringTask(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                                      FagsakRepository fagsakRepository,
                                                      BehandlingRepository behandlingRepository,
                                                      MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder,
                                                      @KonfigVerdi(value = "INNTEKTSKONTROLL_CRON_EXPRESSION", defaultVerdi = "0 0 7 8 * *") String inntetskontrollCronString) {
 
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
         this.fagsakRepository = fagsakRepository;
         this.behandlingRepository = behandlingRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
@@ -86,7 +86,7 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
         boolean harIkkeYtelseIHelePerioden = harYtelseIDelAvPerioden(fagsak, fom, tom);
         var nesteKontrolltidspunkt = inntektskontrollCronExpression.nextTimeAfter(fom.atStartOfDay(ZoneId.systemDefault()));
         var frist = nesteKontrolltidspunkt.toLocalDateTime().toLocalDate().atStartOfDay();
-        delegeringTjeneste.opprettOppgave(new OpprettOppgaveDto(
+        oppgaveKlient.opprettOppgave(new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(fagsak.getYtelseType()),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),

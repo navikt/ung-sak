@@ -10,5 +10,5 @@ public record SatsEndringHendelseDto(
     long dagsats,
     long barnetilleggSats,
     boolean fikkFlereBarn) {
-
 }
+

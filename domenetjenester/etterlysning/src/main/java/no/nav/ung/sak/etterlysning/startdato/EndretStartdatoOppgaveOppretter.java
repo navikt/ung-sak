@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
@@ -19,13 +19,13 @@ import java.util.List;
 @Dependent
 public class EndretStartdatoOppgaveOppretter {
 
-    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public EndretStartdatoOppgaveOppretter(MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+    public EndretStartdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                            UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
@@ -34,7 +34,7 @@ public class EndretStartdatoOppgaveOppretter {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
             .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode))
-            .forEach(delegeringTjeneste::opprettOppgave);
+            .forEach(oppgaveKlient::opprettOppgave);
     }
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, DatoIntervallEntitet originalPeriode) {

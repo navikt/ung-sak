@@ -16,16 +16,16 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndring;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.InnvilgelseDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.SatsEndringHendelseDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.SatsOgBeregningDto;
-import no.nav.ung.sak.formidling.vedtak.regler.SatsEndring;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
@@ -151,7 +151,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var currentSatser = current.getValue();
         var previousSatser = previous.getValue();
 
-        SatsEndring result = SatsEndring.bestemSatsendring(currentSatser, previousSatser);
+        SatsEndring result = SatsEndringUtleder.bestemSatsendring(currentSatser, previousSatser);
 
         if (result.overgangLavSats()) {
             throw new IllegalStateException("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));

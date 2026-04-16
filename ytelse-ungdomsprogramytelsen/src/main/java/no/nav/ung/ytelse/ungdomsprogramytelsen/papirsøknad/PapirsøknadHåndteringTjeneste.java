@@ -26,7 +26,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -40,7 +40,7 @@ import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramRegisterKlient;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -59,7 +59,7 @@ public class PapirsøknadHåndteringTjeneste {
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private PersoninfoAdapter personinfoAdapter;
     private TilJournalføringTjeneste journalføringTjeneste;
-    private MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
     private SøknadMottakTjeneste ungdomsytelseSøknadMottaker;
     private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
 
@@ -80,7 +80,7 @@ public class PapirsøknadHåndteringTjeneste {
         TilJournalføringTjeneste journalføringTjeneste,
         @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) Instance<SøknadMottakTjeneste> ungdomsytelseSøknadMottaker,
         UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient,
-        MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste
+        UngBrukerdialogOppgaveKlient oppgaveKlient
     ) {
         this.pdfGenKlient = pdfGenKlient;
         this.dokArkivKlient = dokArkivKlient;
@@ -93,7 +93,7 @@ public class PapirsøknadHåndteringTjeneste {
         this.journalføringTjeneste = journalføringTjeneste;
         this.ungdomsytelseSøknadMottaker = ungdomsytelseSøknadMottaker.get();
         this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
     }
 
     public Saksnummer journalførPapirsøknadMotFagsak(String deltakerIdent, JournalpostId journalpostId) {
@@ -135,7 +135,7 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
         //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
-        delegeringTjeneste.løsSøkYtelseOppgave(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()));
+        oppgaveKlient.løsSøkYtelseOppgave(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()));
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 
