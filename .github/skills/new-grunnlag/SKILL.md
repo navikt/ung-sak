@@ -474,20 +474,15 @@ class MittGrunnlagRepositoryTest {
 - Ny innsending etter kopiering gir ny holder (copy-on-write)
 - Henting uten grunnlag returnerer `Optional.empty()`
 
-#### Lagre mottatt dokument via builder
+#### Bruk eller utvid TestScenarioBuilder
 
-Når grunnlaget er knyttet til journalpostId (akkumuleringsmønsteret), bruk `medMottattDokument` for å lagre mottatt dokument som del av testscenarioet:
+Bruk `AktivitetspengerTestScenarioBuilder` for å bygge testscenarioer. Hvis testen trenger data builderen ikke støtter ennå (f.eks. mottatt dokument med journalpostId, nye grunnlagstyper), **utvid builderen** med nye metoder i stedet for å bygge testdata manuelt.
 
 ```java
-import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder.MottattDokumentTestGrunnlag;
-
 var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
     .leggTilVilkår(VilkårType.MITT_VILKÅR, Utfall.IKKE_VURDERT, vilkårPeriode)
-    .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), journalpostId))
     .lagre(entityManager);
 ```
-
-`MottattDokumentTestGrunnlag` er en record med feltene `(Brevkode brevkode, String payload, LocalDateTime mottattTidspunkt, JournalpostId journalpostId)`. Felter som ikke trengs kan settes til `null`. Ikke lag manuelle repository-kall for å lagre mottatt dokument.
 
 **Referanse:** `behandlingslager/domene/src/test/java/no/nav/ung/sak/behandlingslager/behandling/medlemskap/OppgittForutgåendeMedlemskapRepositoryTest.java`
 
