@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -16,10 +17,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårPeriodeFilterProvider;
-import no.nav.ung.sak.vilkår.VilkårRekkefølgeTjeneste;
+import no.nav.ung.sak.vilkår.AksjonspunktVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANDRE_LIVSHOPPHOLDSYTELSER;
 
@@ -28,6 +31,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANDRE_LIV
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
+    private AksjonspunktVilkårRekkefølgeTjeneste aksjonspunktVilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     VurderAndreLivsoppholdsytelserSteg() {
@@ -35,18 +39,28 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
     }
 
     @Inject
-    public VurderAndreLivsoppholdsytelserSteg(VilkårRekkefølgeTjeneste vilkårRekkefølgeTjeneste,
+    public VurderAndreLivsoppholdsytelserSteg(AksjonspunktVilkårRekkefølgeTjeneste aksjonspunktVilkårRekkefølgeTjeneste,
                                               VilkårResultatRepository vilkårResultatRepository,
                                               BehandlingRepository behandlingRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                               VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
-        super(vilkårRekkefølgeTjeneste, vilkårResultatRepository, behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårPeriodeFilterProvider);
+        super(vilkårResultatRepository, behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårPeriodeFilterProvider);
+        this.aksjonspunktVilkårRekkefølgeTjeneste = aksjonspunktVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
     public VilkårType getAktuellVilkårType() {
         return VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR;
+    }
+
+    @Override
+    public Set<VilkårType> getVilkårAvhenigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        EnumSet<VilkårType> avhengigheter = EnumSet.noneOf(VilkårType.class);
+        avhengigheter.add(VilkårType.ALDERSVILKÅR);
+        avhengigheter.add(VilkårType.SØKNADSFRIST);
+        avhengigheter.addAll(aksjonspunktVilkårRekkefølgeTjeneste.finnManuelleVilkårSomErFør(getAktuellVilkårType(), ytelseType, behandlingType));
+        return avhengigheter;
     }
 
     @Override

@@ -13,16 +13,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Dependent
-public class VilkårRekkefølgeTjeneste {
+public class AksjonspunktVilkårRekkefølgeTjeneste {
 
     private final BehandlingModellRepository behandlingModellRepository;
 
     @Inject
-    public VilkårRekkefølgeTjeneste(BehandlingModellRepository behandlingModellRepository) {
+    public AksjonspunktVilkårRekkefølgeTjeneste(BehandlingModellRepository behandlingModellRepository) {
         this.behandlingModellRepository = behandlingModellRepository;
     }
 
-    public Set<VilkårType> finnVilkårSomErFør(VilkårType vilkårType, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+    // finner vilkår som er tidligere i prosessen enn vilkåret som sendes inn som parameter
+    // finner bare vilkår som er knyttet til aksjonspunkt, så helautomatiske vilkår må identifieres på annen måte
+    public Set<VilkårType> finnManuelleVilkårSomErFør(VilkårType vilkårType, FagsakYtelseType ytelseType, BehandlingType behandlingType) {
         BehandlingModell modell = behandlingModellRepository.getModell(behandlingType, ytelseType);
         return modell.getAlleBehandlingStegTyper().stream()
             .filter(steg -> !steg.getAksjonspunktDefinisjoner().isEmpty())

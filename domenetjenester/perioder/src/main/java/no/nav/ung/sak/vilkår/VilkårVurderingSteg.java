@@ -3,6 +3,8 @@ package no.nav.ung.sak.vilkår;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -30,7 +32,6 @@ import java.util.stream.Collectors;
 public abstract class VilkårVurderingSteg implements BehandlingSteg {
 
     private VilkårTjeneste vilkårTjeneste;
-    private VilkårRekkefølgeTjeneste vilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
@@ -39,12 +40,10 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
     protected VilkårVurderingSteg() {
     }
 
-    protected VilkårVurderingSteg(VilkårRekkefølgeTjeneste vilkårRekkefølgeTjeneste,
-                                  VilkårResultatRepository vilkårResultatRepository,
+    protected VilkårVurderingSteg(VilkårResultatRepository vilkårResultatRepository,
                                   BehandlingRepository behandlingRepository,
                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                   VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
-        this.vilkårRekkefølgeTjeneste = vilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårResultatRepository);
@@ -81,7 +80,8 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
     }
 
     private LocalDateTimeline<Boolean> finnTidslinjeForAvslåtteAvhengigheter(BehandlingskontrollKontekst kontekst, Vilkårene vilkår) {
-        final var avslåttTidslinje = vilkår.getVilkårene().stream().filter(v -> getVilkårAvhenigheter(kontekst).contains(v.getVilkårType()))
+        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
+        final var avslåttTidslinje = vilkår.getVilkårene().stream().filter(v -> getVilkårAvhenigheter(behandling.getFagsakYtelseType(), behandling.getType()).contains(v.getVilkårType()))
             .flatMap(v -> v.getPerioder().stream())
             .filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT))
             .map(p -> new LocalDateTimeline<>(p.getFom(), p.getTom(), true))
@@ -102,10 +102,7 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
      * <p>
      * Default implentasjon henter alle vilkårtyper fra steg som er før getAktuelLVilkårType
      */
-    public Set<VilkårType> getVilkårAvhenigheter(BehandlingskontrollKontekst kontekst) {
-        Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        return vilkårRekkefølgeTjeneste.finnVilkårSomErFør(getAktuellVilkårType(), behandling.getFagsakYtelseType(), behandling.getType());
-    }
+    public abstract Set<VilkårType> getVilkårAvhenigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType);
 
     /**
      * Hent perioder som skal markeres som ikke relevant, i tillegg til perioder bestemt av vilkåravhengigheter
