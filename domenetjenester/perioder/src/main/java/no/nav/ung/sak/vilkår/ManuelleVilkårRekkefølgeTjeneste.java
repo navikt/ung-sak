@@ -13,12 +13,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Dependent
-public class AksjonspunktVilkårRekkefølgeTjeneste {
+public class ManuelleVilkårRekkefølgeTjeneste {
 
     private final BehandlingModellRepository behandlingModellRepository;
 
     @Inject
-    public AksjonspunktVilkårRekkefølgeTjeneste(BehandlingModellRepository behandlingModellRepository) {
+    public ManuelleVilkårRekkefølgeTjeneste(BehandlingModellRepository behandlingModellRepository) {
         this.behandlingModellRepository = behandlingModellRepository;
     }
 

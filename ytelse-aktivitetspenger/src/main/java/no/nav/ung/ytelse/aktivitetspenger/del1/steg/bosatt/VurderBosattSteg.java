@@ -17,7 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårPeriodeFilterProvider;
-import no.nav.ung.sak.vilkår.AksjonspunktVilkårRekkefølgeTjeneste;
+import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 
 import java.util.EnumSet;
@@ -32,7 +32,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTED;
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class VurderBosattSteg extends VilkårVurderingSteg {
 
-    private AksjonspunktVilkårRekkefølgeTjeneste aksjonspunktVilkårRekkefølgeTjeneste;
+    private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     VurderBosattSteg() {
@@ -40,13 +40,13 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
     }
 
     @Inject
-    public VurderBosattSteg(AksjonspunktVilkårRekkefølgeTjeneste aksjonspunktVilkårRekkefølgeTjeneste,
+    public VurderBosattSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
                             VilkårResultatRepository vilkårResultatRepository,
                             BehandlingRepository behandlingRepository,
                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                             VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         super(vilkårResultatRepository, behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårPeriodeFilterProvider);
-        this.aksjonspunktVilkårRekkefølgeTjeneste = aksjonspunktVilkårRekkefølgeTjeneste;
+        this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
@@ -60,7 +60,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         EnumSet<VilkårType> avhengigheter = EnumSet.noneOf(VilkårType.class);
         avhengigheter.add(VilkårType.ALDERSVILKÅR);
         avhengigheter.add(VilkårType.SØKNADSFRIST);
-        avhengigheter.addAll(aksjonspunktVilkårRekkefølgeTjeneste.finnManuelleVilkårSomErFør(getAktuellVilkårType(), ytelseType, behandlingType));
+        avhengigheter.addAll(manuelleVilkårRekkefølgeTjeneste.finnManuelleVilkårSomErFør(getAktuellVilkårType(), ytelseType, behandlingType));
         return avhengigheter;
     }
 
