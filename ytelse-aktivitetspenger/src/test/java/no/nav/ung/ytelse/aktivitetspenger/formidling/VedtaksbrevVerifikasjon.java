@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
-import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerBrevScenarioerUtils;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.scenarioer.AktivitetspengerBrevScenarioerUtils;
 
 import java.time.LocalDate;
 
