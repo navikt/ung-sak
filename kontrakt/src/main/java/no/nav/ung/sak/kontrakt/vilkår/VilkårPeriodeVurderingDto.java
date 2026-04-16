@@ -18,6 +18,7 @@ public record VilkårPeriodeVurderingDto(
     Periode periode,
 
     @JsonProperty("erVilkårOppfylt")
+    @NotNull
     boolean erVilkårOppfylt,
 
     @JsonProperty("avslagsårsak")
