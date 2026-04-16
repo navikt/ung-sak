@@ -56,7 +56,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
     }
 
     @Override
-    public Set<VilkårType> getVilkårAvhenigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+    public Set<VilkårType> getVilkårAvhengigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
         EnumSet<VilkårType> avhengigheter = EnumSet.noneOf(VilkårType.class);
         avhengigheter.add(VilkårType.ALDERSVILKÅR);
         avhengigheter.add(VilkårType.SØKNADSFRIST);

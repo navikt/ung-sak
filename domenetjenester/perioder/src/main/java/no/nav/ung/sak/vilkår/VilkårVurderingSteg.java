@@ -81,7 +81,7 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
 
     private LocalDateTimeline<Boolean> finnTidslinjeForAvslåtteAvhengigheter(BehandlingskontrollKontekst kontekst, Vilkårene vilkår) {
         Behandling behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        final var avslåttTidslinje = vilkår.getVilkårene().stream().filter(v -> getVilkårAvhenigheter(behandling.getFagsakYtelseType(), behandling.getType()).contains(v.getVilkårType()))
+        final var avslåttTidslinje = vilkår.getVilkårene().stream().filter(v -> getVilkårAvhengigheter(behandling.getFagsakYtelseType(), behandling.getType()).contains(v.getVilkårType()))
             .flatMap(v -> v.getPerioder().stream())
             .filter(p -> p.getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT))
             .map(p -> new LocalDateTimeline<>(p.getFom(), p.getTom(), true))
@@ -102,7 +102,7 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
      * <p>
      * Default implentasjon henter alle vilkårtyper fra steg som er før getAktuelLVilkårType
      */
-    public abstract Set<VilkårType> getVilkårAvhenigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType);
+    public abstract Set<VilkårType> getVilkårAvhengigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType);
 
     /**
      * Hent perioder som skal markeres som ikke relevant, i tillegg til perioder bestemt av vilkåravhengigheter
