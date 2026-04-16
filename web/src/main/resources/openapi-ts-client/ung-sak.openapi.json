@@ -5105,7 +5105,7 @@
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
-        "required" : [ "periode" ],
+        "required" : [ "erVilkårOppfylt", "periode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.vilkår.VilkårResultatDto" : {
