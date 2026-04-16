@@ -5,10 +5,9 @@ import jakarta.inject.Inject;
 import no.nav.ung.sak.behandling.revurdering.GrunnlagKopierer;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -23,6 +22,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private UttalelseRepository uttalelseRepository;
+    private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
 
     public GrunnlagKopiererAktivitetspenger() {
         // for CDI proxy
@@ -31,11 +31,14 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererAktivitetspenger(BehandlingRepositoryProvider repositoryProvider,
                                             InntektArbeidYtelseTjeneste iayTjeneste,
-                                            TilkjentYtelseRepository tilkjentYtelseRepository, UttalelseRepository uttalelseRepository) {
+                                            TilkjentYtelseRepository tilkjentYtelseRepository,
+                                            UttalelseRepository uttalelseRepository,
+                                            OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.uttalelseRepository = uttalelseRepository;
+        this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
     }
 
 
@@ -44,6 +47,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         Long originalBehandlingId = original.getId();
         Long nyBehandlingId = ny.getId();
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        forutgåendeMedlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
 
