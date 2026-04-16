@@ -32,7 +32,10 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var satstidslinje = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId()).map(AktivitetspengerGrunnlag::hentAktivitetspengerSatsTidslinje);
+        var satstidslinje = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
+            .map(AktivitetspengerGrunnlag::hentAktivitetspengerSatsTidslinje)
+            .map(it -> it.intersection(detaljertResultat));
+
         if (satstidslinje.isEmpty()) {
             return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,
                 "Har ikke tidligere beregnet sats");
