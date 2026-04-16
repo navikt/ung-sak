@@ -5094,7 +5094,7 @@
           },
           "begrunnelse" : {
             "maxLength" : 5000,
-            "minLength" : 0,
+            "minLength" : 3,
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
@@ -5105,7 +5105,7 @@
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
-        "required" : [ "erVilkårOppfylt", "periode" ],
+        "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.vilkår.VilkårResultatDto" : {
