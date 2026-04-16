@@ -1,9 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 
