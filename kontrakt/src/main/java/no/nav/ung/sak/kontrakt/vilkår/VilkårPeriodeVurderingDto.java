@@ -17,7 +17,7 @@ public record VilkårPeriodeVurderingDto(
     @NotNull
     Periode periode,
 
-    @JsonProperty("erVilkårOppfylt")
+    @JsonProperty(value = "erVilkårOppfylt", required = true)
     @NotNull
     boolean erVilkårOppfylt,
 
@@ -25,7 +25,8 @@ public record VilkårPeriodeVurderingDto(
     @Valid
     Avslagsårsak avslagsårsak,
 
-    @JsonProperty(value = "begrunnelse")
+    @JsonProperty(value = "begrunnelse", required = true)
+    @NotNull
     @Size(max = 5000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
