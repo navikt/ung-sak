@@ -820,21 +820,19 @@ public class AktivitetspengerTestScenarioBuilder {
     private void lagreMottatteDokumenter(EntityManager entityManager) {
         var repo = new MottatteDokumentRepository(entityManager);
         for (var grunnlag : mottatteDokumenter) {
-            var dokument = new MottattDokument.Builder()
+            var builder = new MottattDokument.Builder()
                 .medFagsakId(behandling.getFagsakId())
                 .medBehandlingId(behandling.getId())
                 .medType(grunnlag.brevkode())
                 .medPayload(grunnlag.payload())
                 .medMottattTidspunkt(grunnlag.mottattTidspunkt())
-                .build();
+                .medJournalPostId(grunnlag.journalpostId());
+            var dokument = builder.build();
             repo.lagre(dokument, DokumentStatus.GYLDIG);
         }
     }
 
-    public record MottattDokumentTestGrunnlag(Brevkode brevkode, String payload, LocalDateTime mottattTidspunkt) {
-        public MottattDokumentTestGrunnlag(Brevkode brevkode, String payload) {
-            this(brevkode, payload, LocalDateTime.now());
-        }
+    public record MottattDokumentTestGrunnlag(Brevkode brevkode, String payload, LocalDateTime mottattTidspunkt, JournalpostId journalpostId) {
     }
 
     public AktivitetspengerTestScenarioBuilder leggTilVilkår(VilkårType vilkårType, Utfall utfall) {

@@ -88,7 +88,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
     static String meldFraOmArbeidsinntektAvsnitt() {
         return """
             Meld fra til oss hvis du har arbeidsinntekt i tillegg til aktivitetspengene \
-            Hvis du har en arbeidstinntekt i tillegg til aktivitetspengene, er det viktig at du sier fra til oss om det. \
+            Hvis du har en arbeidsinntekt i tillegg til aktivitetspengene, er det viktig at du sier fra til oss om det. \
             Du får en SMS den 1. hver måned. Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all arbeidsinntekt du har hatt måneden før. \
             Når du jobber og har en inntekt, får du mindre aktivitetspenger. \
             Likevel får du til sammen mer penger når du både har en inntekt og får aktivitetspenger enn hvis du bare får aktivitetspenger. \
