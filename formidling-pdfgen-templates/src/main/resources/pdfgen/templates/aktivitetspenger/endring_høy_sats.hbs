@@ -3,12 +3,13 @@
     {{#> felles/seksjon/hoved }}
         <h1>Du får mer i aktivitetspenger fordi du fyller {{aldersgrense}} år</h1>
 
-        <p>Du får mer penger fordi du fyller {{aldersgrense}} år {{fom}}. Fra og med denne
+        <p>
+            Du får mer penger fordi du fyller {{aldersgrense}} år {{fom}}. Fra og med denne
             datoen får du {{> felles/beløp nyDagsats}} per dag, utenom lørdag og søndag (før skatt).
-            {{#if totalBarnetillegg}}
-                Denne summen inkluderer også et barnetillegg på {{> felles/beløp totalBarnetillegg}} per dag fordi du har barn.
-            {{/if}}
         </p>
+        {{#if totalBarnetillegg}}
+            <p>Denne summen inkluderer også et barnetillegg på {{> felles/beløp totalBarnetillegg}} per dag fordi du har barn.</p>
+        {{/if}}
 
     {{/felles/seksjon/hoved}}
 
