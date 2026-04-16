@@ -45,7 +45,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
     @Override
     public OppdateringResultat oppdater(VurderAndreLivsoppholdsytelserDto dto, AksjonspunktOppdaterParameter param) {
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
+        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
         LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
