@@ -1,10 +1,13 @@
-package no.nav.ung.sak.test.util.behandling.aktivitetspenger;
+package no.nav.ung.ytelse.aktivitetspenger.testdata;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
+
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
 
@@ -18,6 +21,8 @@ import java.util.Set;
 public record AktivitetspengerTestScenario(
     String navn,
     List<Periode> søknadsperioder,
+    LocalDateTimeline<AktivitetspengerSatsPeriode> satsperioder,
+    LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlag,
     LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder,
     LocalDateTimeline<Utfall> aldersvilkår,
     LocalDate fødselsdato,
