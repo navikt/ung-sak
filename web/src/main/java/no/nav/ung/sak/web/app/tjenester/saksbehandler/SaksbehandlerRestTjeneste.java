@@ -19,6 +19,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -91,6 +92,11 @@ public class SaksbehandlerRestTjeneste {
             .map(BaseEntitet::getEndretAv)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()));
+
+        unikeIdenter.addAll(behandling.getAksjonspunkter().stream()
+            .map(Aksjonspunkt::getAnsvarligSaksbehandler)
+            .filter(Objects::nonNull)
+            .toList());
 
         unikeIdenter.remove(systembruker);
 
