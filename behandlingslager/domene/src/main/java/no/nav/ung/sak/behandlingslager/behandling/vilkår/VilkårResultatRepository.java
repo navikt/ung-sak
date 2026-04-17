@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -14,6 +15,7 @@ import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +27,9 @@ import java.util.*;
 public class VilkårResultatRepository {
 
     private static final Logger log = LoggerFactory.getLogger(VilkårResultatRepository.class);
-    private EntityManager entityManager;
-    private BehandlingRepository behandlingRepository;
 
-    public VilkårResultatRepository() {
-        // for CDI proxy
-    }
+    private final EntityManager entityManager;
+    private final BehandlingRepository behandlingRepository;
 
     @Inject
     public VilkårResultatRepository(EntityManager entityManager) {
@@ -208,7 +207,11 @@ public class VilkårResultatRepository {
         this.lagre(behandlingId, nyttResultat);
     }
 
-    public void settUtfallForPeriode(Long behandlingId, VilkårType vilkårType, NavigableSet<DatoIntervallEntitet> vilkårsPeriode, Utfall utfall) {
+    public void settUtfallForPeriode(Long behandlingId, VilkårType vilkårType, LocalDateTimeline<?> vilkårTidslinje, Utfall utfall) {
+        settUtfallForPeriode(behandlingId, vilkårType, TidslinjeUtil.tilDatoIntervallEntiteter(vilkårTidslinje), utfall);
+    }
+
+    public void settUtfallForPeriode(Long behandlingId, VilkårType vilkårType, NavigableSet<DatoIntervallEntitet> vilkårsPerioder, Utfall utfall) {
         if (utfall == Utfall.IKKE_OPPFYLT){
             throw new IllegalArgumentException("Denne funksjonen kan ikke brukes på " + utfall + " fordi det krever input av avslagsårsaker");
         }
@@ -225,7 +228,7 @@ public class VilkårResultatRepository {
         }
         VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
         var vilkårBuilder = builder.hentBuilderFor(vilkårType);
-        for (var periode : vilkårsPeriode) {
+        for (var periode : vilkårsPerioder) {
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).medUtfall(utfall));
         }
 

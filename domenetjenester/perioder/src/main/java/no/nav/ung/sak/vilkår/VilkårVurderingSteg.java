@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
@@ -15,14 +14,10 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
-import java.util.NavigableSet;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 /**
  * Et steg som utvider denne klassen har en vilkårsvurdering som avhenger av resultatet av tidligere vilkår.
@@ -59,18 +54,17 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
         return utførResten(kontekst);
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnIkkeRelevantePerioder(BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
+    private LocalDateTimeline<?> finnIkkeRelevantePerioder(BehandlingskontrollKontekst kontekst, LocalDateTimeline<?> perioder) {
         final var vilkår = vilkårTjeneste.hentVilkårResultat(kontekst.getBehandlingId());
         final var avslåttTidslinjeMedTilleggsPerioder = finnTidslinjeForAvslåtteAvhengigheter(kontekst, vilkår);
-        LocalDateTimeline<Boolean> ikkerelevantTidslinje = TidslinjeUtil.tilTidslinje(perioder).intersection(avslåttTidslinjeMedTilleggsPerioder);
-        return TidslinjeUtil.tilDatoIntervallEntiteter(ikkerelevantTidslinje);
+        return perioder.intersection(avslåttTidslinjeMedTilleggsPerioder);
     }
 
-    private NavigableSet<DatoIntervallEntitet> finnPerioderForVurderingAvVilkår(BehandlingskontrollKontekst kontekst) {
+    private LocalDateTimeline<Boolean> finnPerioderForVurderingAvVilkår(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
             .utled(kontekst.getBehandlingId(), getAktuellVilkårType());
-        return perioderTilVurdering;
+        return TidslinjeUtil.tilTidslinje(perioderTilVurdering);
     }
 
     private LocalDateTimeline<Boolean> finnTidslinjeForAvslåtteAvhengigheter(BehandlingskontrollKontekst kontekst, Vilkårene vilkår) {
@@ -81,9 +75,7 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
             .map(p -> new LocalDateTimeline<>(p.getFom(), p.getTom(), true))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
-        return TidslinjeUtil
-            .tilTidslinjeKomprimertMedMuligOverlapp(hentTilleggsPerioderForIkkeRelevantVurdering(kontekst))
-            .crossJoin(avslåttTidslinje);
+        return avslåttTidslinje;
     }
 
     public abstract BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst);
@@ -98,12 +90,6 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
      */
     public abstract Set<VilkårType> getVilkårAvhengigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType);
 
-    /**
-     * Hent perioder som skal markeres som ikke relevant, i tillegg til perioder bestemt av vilkåravhengigheter
-     */
-    public Set<DatoIntervallEntitet> hentTilleggsPerioderForIkkeRelevantVurdering(BehandlingskontrollKontekst kontekst) {
-        return Set.of();
-    }
 
     ;
 
