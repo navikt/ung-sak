@@ -99,7 +99,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
         VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_ANDRE_LIVSOPPHOLDSYTELSER(AksjonspunktKodeDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_ANDRE_LIVSHOPPHOLDSYTELSER,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER,
         VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
 

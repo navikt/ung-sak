@@ -24,10 +24,10 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANDRE_LIVSHOPPHOLDSYTELSER;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER;
 
 @ApplicationScoped
-@BehandlingStegRef(value = VURDER_ANDRE_LIVSHOPPHOLDSYTELSER)
+@BehandlingStegRef(value = VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {

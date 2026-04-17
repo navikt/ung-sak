@@ -29,7 +29,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_SØKNADSFRIST)
             .medSteg(BehandlingStegType.ALDERSVILKÅRET)
             .medSteg(BehandlingStegType.VURDER_BOSTED)
-            .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSHOPPHOLDSYTELSER)
+            .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
