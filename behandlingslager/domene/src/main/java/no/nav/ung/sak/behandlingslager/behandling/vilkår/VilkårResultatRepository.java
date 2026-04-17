@@ -240,10 +240,6 @@ public class VilkårResultatRepository {
         settUtfallForPeriode(behandlingId, vilkårType, vilkårsperioder, utfall);
     }
 
-     public boolean erNoeInnevilgetFor(Long behandlingId, VilkårType vilkårType) {
-        Vilkårene vilkårene = hent(behandlingId);
-        return vilkårene.getVilkårTimeline(vilkårType).stream().anyMatch(segment -> segment.getValue().getUtfall() == Utfall.OPPFYLT);
-    }
 
     public boolean finnesRelevantPeriode(Long behandlingId, VilkårType vilkårType) {
         Vilkårene vilkårene = hent(behandlingId);
