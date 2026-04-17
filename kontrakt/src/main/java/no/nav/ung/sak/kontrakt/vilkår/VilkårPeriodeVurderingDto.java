@@ -3,6 +3,7 @@ package no.nav.ung.sak.kontrakt.vilkår;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertFalse;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -32,4 +33,14 @@ public record VilkårPeriodeVurderingDto(
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     String begrunnelse
 ) {
+
+    @AssertFalse(message = "Avslagsårsak må være satt dersom vilkåret ikke er oppfylt")
+    public boolean isManglerAvslagsårsak(){
+        return !erVilkårOppfylt && avslagsårsak == null;
+    }
+
+    @AssertFalse(message = "Avslagsårsak må ikke være satt dersom vilkåret er oppfylt")
+    public boolean isHarAvslagsårsakSattVedInnvilgelse(){
+        return erVilkårOppfylt && avslagsårsak != null;
+    }
 }
