@@ -19,33 +19,33 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = VurderBehovForBistandDto.class, adapter = AksjonspunktOppdaterer.class)
-public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<VurderBehovForBistandDto> {
+@DtoTilServiceAdapter(dto = VurderAndreLivsoppholdsytelserDto.class, adapter = AksjonspunktOppdaterer.class)
+public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOppdaterer<VurderAndreLivsoppholdsytelserDto> {
 
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    VurderBehovForBistandOppdaterer() {
+    VurderAndreLivsoppholdsytelserOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderBehovForBistandOppdaterer(BehandlingRepository behandlingRepository,
-                                           HistorikkinnslagRepository historikkinnslagRepository, VilkårResultatRepository vilkårResultatRepository) {
+    public VurderAndreLivsoppholdsytelserOppdaterer(BehandlingRepository behandlingRepository,
+                                                    HistorikkinnslagRepository historikkinnslagRepository, VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
-    public OppdateringResultat oppdater(VurderBehovForBistandDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdater(VurderAndreLivsoppholdsytelserDto dto, AksjonspunktOppdaterParameter param) {
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.BISTANDSVILKÅR)
+        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
         LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
@@ -60,7 +60,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         }
 
         var resultatBuilder = param.getVilkårResultatBuilder();
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BISTANDSVILKÅR);
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
         for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
             Utfall utfall = vurdertPeriode.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
@@ -76,8 +76,8 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
-            .medTittel(SkjermlenkeType.BISTANDSVILKÅR)
-            .addLinje("Bistandsvilkår ble vurdert")
+            .medTittel(SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
+            .addLinje("Det ble vurdert om søker har andre livsoppholdsytelser som ikke er forenelig med denne ytelsen")
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
 
