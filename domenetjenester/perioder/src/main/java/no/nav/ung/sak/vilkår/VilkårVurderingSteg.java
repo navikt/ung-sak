@@ -62,8 +62,8 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
     private NavigableSet<DatoIntervallEntitet> finnIkkeRelevantePerioder(BehandlingskontrollKontekst kontekst, NavigableSet<DatoIntervallEntitet> perioder) {
         final var vilkår = vilkårTjeneste.hentVilkårResultat(kontekst.getBehandlingId());
         final var avslåttTidslinjeMedTilleggsPerioder = finnTidslinjeForAvslåtteAvhengigheter(kontekst, vilkår);
-        return perioder.stream().filter(p -> new LocalDateTimeline<>(p.toLocalDateInterval(), true).disjoint(avslåttTidslinjeMedTilleggsPerioder).isEmpty())
-            .collect(Collectors.toCollection(TreeSet::new));
+        LocalDateTimeline<Boolean> ikkerelevantTidslinje = TidslinjeUtil.tilTidslinje(perioder).intersection(avslåttTidslinjeMedTilleggsPerioder);
+        return TidslinjeUtil.tilDatoIntervallEntiteter(ikkerelevantTidslinje);
     }
 
     private NavigableSet<DatoIntervallEntitet> finnPerioderForVurderingAvVilkår(BehandlingskontrollKontekst kontekst) {
