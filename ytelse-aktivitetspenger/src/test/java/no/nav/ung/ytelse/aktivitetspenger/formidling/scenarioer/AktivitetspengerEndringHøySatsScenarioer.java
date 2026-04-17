@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.testdata.scenarioer;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -22,7 +22,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static no.nav.ung.ytelse.aktivitetspenger.testdata.scenarioer.AktivitetspengerBrevScenarioerUtils.*;
+import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerBrevScenarioerUtils.*;
 
 public class AktivitetspengerEndringHøySatsScenarioer {
 

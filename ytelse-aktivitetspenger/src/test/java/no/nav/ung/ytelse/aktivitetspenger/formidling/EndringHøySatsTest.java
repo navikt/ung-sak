@@ -4,9 +4,9 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerEndringHøySatsScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.scenarioer.AktivitetspengerEndringHøySatsScenarioer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

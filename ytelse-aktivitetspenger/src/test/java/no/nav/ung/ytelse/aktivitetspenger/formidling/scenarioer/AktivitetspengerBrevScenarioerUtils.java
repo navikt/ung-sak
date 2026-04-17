@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.testdata.scenarioer;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
