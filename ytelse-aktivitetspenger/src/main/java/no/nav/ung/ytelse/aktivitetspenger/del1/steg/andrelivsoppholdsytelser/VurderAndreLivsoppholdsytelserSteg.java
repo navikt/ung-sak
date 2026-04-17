@@ -18,6 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.VilkårPeriodeFilterProvider;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 
 import java.util.EnumSet;
@@ -41,10 +42,11 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
     @Inject
     public VurderAndreLivsoppholdsytelserSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
                                               VilkårResultatRepository vilkårResultatRepository,
+                                              VilkårTjeneste vilkårTjeneste,
                                               BehandlingRepository behandlingRepository,
                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                               VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
-        super(vilkårResultatRepository, behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårPeriodeFilterProvider);
+        super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårPeriodeFilterProvider);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }

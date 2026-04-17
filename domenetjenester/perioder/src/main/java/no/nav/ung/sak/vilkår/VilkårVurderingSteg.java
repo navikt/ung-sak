@@ -41,12 +41,13 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
     }
 
     protected VilkårVurderingSteg(VilkårResultatRepository vilkårResultatRepository,
+                                  VilkårTjeneste vilkårTjeneste,
                                   BehandlingRepository behandlingRepository,
                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                   VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
-        this.vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjeneste, vilkårResultatRepository);
+        this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
