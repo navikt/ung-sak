@@ -35,7 +35,6 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
     private VilkårResultatRepository vilkårResultatRepository;
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
-    private VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider;
 
     protected VilkårVurderingSteg() {
     }
@@ -43,10 +42,8 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
     protected VilkårVurderingSteg(VilkårResultatRepository vilkårResultatRepository,
                                   VilkårTjeneste vilkårTjeneste,
                                   BehandlingRepository behandlingRepository,
-                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                  VilkårPeriodeFilterProvider vilkårPeriodeFilterProvider) {
+                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.vilkårPeriodeFilterProvider = vilkårPeriodeFilterProvider;
         this.vilkårTjeneste = vilkårTjeneste;
         this.behandlingRepository = behandlingRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
@@ -73,11 +70,7 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
         var perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
             .utled(kontekst.getBehandlingId(), getAktuellVilkårType());
-        var filter = vilkårPeriodeFilterProvider.getFilter(BehandlingReferanse.fra(behandling));
-        return filter.filtrerPerioder(perioderTilVurdering, getAktuellVilkårType())
-            .stream()
-            .map(PeriodeTilVurdering::getPeriode)
-            .collect(Collectors.toCollection(TreeSet::new));
+        return perioderTilVurdering;
     }
 
     private LocalDateTimeline<Boolean> finnTidslinjeForAvslåtteAvhengigheter(BehandlingskontrollKontekst kontekst, Vilkårene vilkår) {

@@ -28,7 +28,7 @@ public class ManuelleVilkårRekkefølgeTjeneste {
         BehandlingModell modell = behandlingModellRepository.getModell(behandlingType, ytelseType);
         return modell.getAlleBehandlingStegTyper().stream()
             .filter(steg -> !steg.getAksjonspunktDefinisjoner().isEmpty())
-            .takeWhile(steg -> !steg.getAksjonspunktDefinisjoner().contains(vilkårType))
+            .takeWhile(steg -> steg.getAksjonspunktDefinisjoner().stream().noneMatch(ap->ap.getVilkårType() == vilkårType))
             .flatMap(steg -> steg.getAksjonspunktDefinisjoner().stream())
             .map(AksjonspunktDefinisjon::getVilkårType)
             .collect(Collectors.toSet());
