@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -30,6 +31,7 @@ public class AksjonspunktDto {
 
     @JsonProperty(value = "aksjonspunktType")
     @Valid
+    @NotNull
     private AksjonspunktType aksjonspunktType;
 
     @JsonProperty(value = "begrunnelse")
@@ -44,6 +46,7 @@ public class AksjonspunktDto {
 
     @JsonProperty(value = "definisjon")
     @Valid
+    @NotNull
     private AksjonspunktDefinisjon definisjon;
 
     @JsonProperty(value = "erAktivt")
