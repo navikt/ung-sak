@@ -5101,6 +5101,12 @@
           "erVilkårOppfylt" : {
             "type" : "boolean"
           },
+          "harAvslagsårsakSattVedInnvilgelse" : {
+            "type" : "boolean"
+          },
+          "manglerAvslagsårsak" : {
+            "type" : "boolean"
+          },
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
