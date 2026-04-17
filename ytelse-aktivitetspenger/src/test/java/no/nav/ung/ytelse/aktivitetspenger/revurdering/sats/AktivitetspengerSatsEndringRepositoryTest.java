@@ -197,7 +197,14 @@ class AktivitetspengerSatsEndringRepositoryTest {
     }
 
     private Long nesteId(String sekvens) {
-        return ((Number) entityManager.createNativeQuery("SELECT nextval('" + sekvens + "')").getSingleResult()).longValue();
+        String query = switch (sekvens) {
+            case "SEQ_AVP_SATS_PERIODER" -> "SELECT nextval('SEQ_AVP_SATS_PERIODER')";
+            case "SEQ_AVP_SATS_PERIODE" -> "SELECT nextval('SEQ_AVP_SATS_PERIODE')";
+            case "SEQ_GR_AVP" -> "SELECT nextval('SEQ_GR_AVP')";
+            case "SEQ_BEHANDLING_ARSAK" -> "SELECT nextval('SEQ_BEHANDLING_ARSAK')";
+            default -> throw new IllegalArgumentException("Ukjent sekvens: " + sekvens);
+        };
+        return ((Number) entityManager.createNativeQuery(query).getSingleResult()).longValue();
     }
 
     private void opprettPersonopplysningGrunnlag(Behandling behandling, LocalDate fødselsdato) {
