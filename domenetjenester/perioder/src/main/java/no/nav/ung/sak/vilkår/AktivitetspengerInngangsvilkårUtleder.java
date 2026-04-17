@@ -19,8 +19,11 @@ import static no.nav.ung.kodeverk.vilkår.VilkårType.*;
 public class AktivitetspengerInngangsvilkårUtleder implements VilkårUtleder {
 
     private static final List<VilkårType> YTELSE_VILKÅR = asList(
+        SØKNADSFRIST,
         ALDERSVILKÅR,
         BOSTEDSVILKÅR,
+        ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
+        BISTANDSVILKÅR,
         FORUTGÅENDE_MEDLEMSKAPSVILKÅRET
     );
 

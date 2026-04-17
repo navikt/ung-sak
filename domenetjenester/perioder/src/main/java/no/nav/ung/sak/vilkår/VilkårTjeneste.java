@@ -257,7 +257,7 @@ public class VilkårTjeneste {
         vilkårResultatRepository.tilbakestillPerioder(behandlingId, vilkårType, vilkårsPerioderTilVurderingTjeneste.getKantIKantVurderer(), vilkårsPerioder);
     }
 
-    private void nullstillBehandlingsresultat(BehandlingskontrollKontekst kontekst) {
+    public void nullstillBehandlingsresultat(BehandlingskontrollKontekst kontekst) {
         Long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = hentBehandling(behandlingId);
         if (Objects.equals(behandling.getBehandlingResultatType(), BehandlingResultatType.IKKE_FASTSATT)) {

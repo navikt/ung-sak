@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.andrelivsoppholdsytelser;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -24,27 +24,26 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTED;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER;
 
 @ApplicationScoped
-@BehandlingStegRef(value = VURDER_BOSTED)
+@BehandlingStegRef(value = VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class VurderBosattSteg extends VilkårVurderingSteg {
-
+public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    VurderBosattSteg() {
+    VurderAndreLivsoppholdsytelserSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderBosattSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
-                            VilkårResultatRepository vilkårResultatRepository,
-                            VilkårTjeneste vilkårTjeneste,
-                            BehandlingRepository behandlingRepository,
-                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
+    public VurderAndreLivsoppholdsytelserSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
+                                              VilkårResultatRepository vilkårResultatRepository,
+                                              VilkårTjeneste vilkårTjeneste,
+                                              BehandlingRepository behandlingRepository,
+                                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -52,7 +51,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
     @Override
     public VilkårType getAktuellVilkårType() {
-        return VilkårType.BOSTEDSVILKÅR;
+        return VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR;
     }
 
     @Override
@@ -67,7 +66,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
     @Override
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
         if (vilkårResultatRepository.finnesRelevantPeriode(kontekst.getBehandlingId(), getAktuellVilkårType())) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER));
         } else {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }

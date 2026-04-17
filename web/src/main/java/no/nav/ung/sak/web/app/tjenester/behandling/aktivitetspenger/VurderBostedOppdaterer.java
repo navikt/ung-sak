@@ -19,33 +19,34 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = VurderBehovForBistandDto.class, adapter = AksjonspunktOppdaterer.class)
-public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<VurderBehovForBistandDto> {
+@DtoTilServiceAdapter(dto = VurderBostedDto.class, adapter = AksjonspunktOppdaterer.class)
+public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBostedDto> {
 
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    VurderBehovForBistandOppdaterer() {
+    VurderBostedOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderBehovForBistandOppdaterer(BehandlingRepository behandlingRepository,
-                                           HistorikkinnslagRepository historikkinnslagRepository, VilkårResultatRepository vilkårResultatRepository) {
+    public VurderBostedOppdaterer(BehandlingRepository behandlingRepository,
+                                  HistorikkinnslagRepository historikkinnslagRepository,
+                                  VilkårResultatRepository vilkårResultatRepository) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
-    public OppdateringResultat oppdater(VurderBehovForBistandDto dto, AksjonspunktOppdaterParameter param) {
-        Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.BISTANDSVILKÅR)
+    public OppdateringResultat oppdater(VurderBostedDto dto, AksjonspunktOppdaterParameter param) {
+                Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
+        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
         LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
@@ -54,19 +55,21 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         if (!uforventedePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
+
         LocalDateTimeline<?> manglendePerioder = perioderTilVurdering.disjoint(inputOppdateres);
         if (!manglendePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);
         }
 
         var resultatBuilder = param.getVilkårResultatBuilder();
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BISTANDSVILKÅR);
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
         for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
             Utfall utfall = vurdertPeriode.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
                 .medUtfallManuell(utfall)
                 .medAvslagsårsak(vurdertPeriode.avslagsårsak())
-                .medBegrunnelse(vurdertPeriode.begrunnelse()));
+                .medBegrunnelse(vurdertPeriode.begrunnelse())
+            );
         }
         resultatBuilder.leggTil(vilkårBuilder);
 
@@ -76,8 +79,8 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
-            .medTittel(SkjermlenkeType.BISTANDSVILKÅR)
-            .addLinje("Bistandsvilkår ble vurdert")
+            .medTittel(SkjermlenkeType.BOSTEDSVILKÅR)
+            .addLinje("Bostedsvilkår ble vurdert")
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
 
