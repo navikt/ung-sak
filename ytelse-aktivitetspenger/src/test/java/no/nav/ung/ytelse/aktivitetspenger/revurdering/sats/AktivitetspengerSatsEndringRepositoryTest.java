@@ -107,6 +107,23 @@ class AktivitetspengerSatsEndringRepositoryTest {
     }
 
     @Test
+    void forventer_ingen_fagsaker_fordi_fagsaken_er_obselete() {
+        var dato = LocalDate.now();
+        Periode fagsakPeriode = new Periode(dato.minusDays(30), dato.plusDays(330));
+        LocalDate fødselsdato = dato.minusYears(25).minusDays(1);
+        Periode søktPeriode = new Periode(fødselsdato.plusMonths(301).withDayOfMonth(1), fagsakPeriode.getTom());
+
+        Fagsak fagsak = opprettFagsak(fagsakPeriode, FagsakYtelseType.OBSOLETE);
+        Behandling behandling = opprettBehandlingFor(fagsak);
+        opprettPersonopplysningGrunnlag(behandling, fødselsdato);
+        opprettSøktPeriode(behandling, søktPeriode);
+
+        Map<Fagsak, LocalDate> fagsakerTilRevurdering = repository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(dato);
+
+        assertThat(fagsakerTilRevurdering).isEmpty();
+    }
+
+    @Test
     void forventer_ingen_fagsaker_fordi_satsen_allerede_er_oppjustert() {
         var dato = LocalDate.now();
         Periode fagsakPeriode = new Periode(dato.minusDays(30), dato.plusDays(330));
@@ -221,8 +238,12 @@ class AktivitetspengerSatsEndringRepositoryTest {
     }
 
     private Fagsak opprettFagsak(Periode periode) {
+        return opprettFagsak(periode, FagsakYtelseType.AKTIVITETSPENGER);
+    }
+
+    private Fagsak opprettFagsak(Periode periode, FagsakYtelseType ytelseType) {
         FagsakRepository fagsakRepository = repositoryProvider.getFagsakRepository();
-        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, AktørId.dummy(), null, periode.getFom(), periode.getTom());
+        Fagsak fagsak = Fagsak.opprettNy(ytelseType, AktørId.dummy(), null, periode.getFom(), periode.getTom());
         Long fagsakId = fagsakRepository.opprettNy(fagsak);
         return fagsakRepository.finnEksaktFagsak(fagsakId);
     }
