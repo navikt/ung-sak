@@ -8,6 +8,7 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 
@@ -28,16 +29,19 @@ public class VurderUttakSteg implements BehandlingSteg {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private PersonopplysningRepository personopplysningRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
     public VurderUttakSteg(VilkårTjeneste vilkårTjeneste,
                            UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
                            UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-                           PersonopplysningRepository personopplysningRepository) {
+                           PersonopplysningRepository personopplysningRepository,
+                           UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.vilkårTjeneste = vilkårTjeneste;
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.personopplysningRepository = personopplysningRepository;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     public VurderUttakSteg() {
@@ -68,10 +72,15 @@ public class VurderUttakSteg implements BehandlingSteg {
             .findFirst()
             .map(PersonopplysningEntitet::getDødsdato);
 
+        var harUtvidetKvote = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .map(gr -> gr.isHarUtvidetKvote())
+            .orElse(false);
+
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(
             godkjentePerioder,
             ungdomsprogramtidslinje,
-            søkersDødsdato
+            søkersDødsdato,
+            harUtvidetKvote
         );
         ungdomsytelseUttakPerioder.ifPresent(it -> ungdomsytelseGrunnlagRepository.lagre(behandlingId, it));
         return BehandleStegResultat.utførtUtenAksjonspunkter();

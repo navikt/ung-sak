@@ -153,8 +153,9 @@ public class UngdomsytelseRestTjeneste {
         }
         final var startDato = programperiodeTidslinje.getMinLocalDate();
         final var opphørsdato = programperiodeTidslinje.getMaxLocalDate().isBefore(TIDENES_ENDE) ? programperiodeTidslinje.getMaxLocalDate() : null;
-        final var maksdato = finnProgramperiodeMaksdato(behandling, programperiodeTidslinje);
-        final var forbrukteDager = finnForbrukteDager(behandling, programperiodeTidslinje);
+        final var harUtvidetKvote = ungdomsprogramPeriodeTjeneste.finnHarUtvidetKvote(behandling.getId());
+        final var maksdato = finnProgramperiodeMaksdato(behandling, programperiodeTidslinje, harUtvidetKvote);
+        final var forbrukteDager = finnForbrukteDager(behandling, programperiodeTidslinje, harUtvidetKvote);
         return new UngdomsprogramInformasjonDto(startDato, maksdato, opphørsdato, forbrukteDager.orElse(null));
     }
 
@@ -177,17 +178,17 @@ public class UngdomsytelseRestTjeneste {
             Virkedager.beregnAntallVirkedager(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()));
     }
 
-    private static LocalDate finnProgramperiodeMaksdato(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje) {
+    private static LocalDate finnProgramperiodeMaksdato(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje, boolean harUtvidetKvote) {
         final var fagsakperiode = behandling.getFagsak().getPeriode();
         final var utvidetProgramperiodeTidslinje = programperiodeTidslinje.crossJoin(new LocalDateTimeline<>(programperiodeTidslinje.getMinLocalDate(), fagsakperiode.getTomDato(), true));
-        final var antallDagerIProgrammetResultat = FinnForbrukteDager.finnForbrukteDager(utvidetProgramperiodeTidslinje);
+        final var antallDagerIProgrammetResultat = FinnForbrukteDager.finnForbrukteDager(utvidetProgramperiodeTidslinje, harUtvidetKvote);
         return antallDagerIProgrammetResultat.tidslinjeNokDager().getMaxLocalDate();
     }
 
-    private Optional<Integer> finnForbrukteDager(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje) {
+    private Optional<Integer> finnForbrukteDager(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje, boolean harUtvidetKvote) {
         final var tilkjentYtelseTidslinje = behandling.getOriginalBehandlingId().map(tilkjentYtelseRepository::hentTidslinje).orElse(LocalDateTimeline.empty());
         if (!tilkjentYtelseTidslinje.isEmpty()) {
-            final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(programperiodeTidslinje.intersection(tilkjentYtelseTidslinje));
+            final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(programperiodeTidslinje.intersection(tilkjentYtelseTidslinje), harUtvidetKvote);
             return Optional.of(vurderAntallDagerResultat.forbrukteDager());
         }
         return Optional.empty();

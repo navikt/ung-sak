@@ -49,6 +49,17 @@ public class UngdomsprogramPeriodeRepository {
         persister(hentEksisterendeGrunnlag(behandlingId), nyttGrunnlag);
     }
 
+    public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder, boolean harUtvidetKvote) {
+        var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
+        nyttGrunnlag.leggTil(ungdomsprogramPerioder);
+
+        var utvidetKvote = new UngdomsprogramUtvidetKvote(null, harUtvidetKvote);
+        entityManager.persist(utvidetKvote);
+        nyttGrunnlag.setUngdomsprogramUtvidetKvote(utvidetKvote);
+
+        persister(hentEksisterendeGrunnlag(behandlingId), nyttGrunnlag);
+    }
+
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(eksisterendeBehandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsprogramPeriodeGrunnlag(nyBehandlingId, it));

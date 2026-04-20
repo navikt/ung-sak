@@ -37,12 +37,15 @@ public class UngdomsprogramTjeneste {
     public void innhentOpplysninger(Behandling behandling) {
         var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(behandling.getFagsak().getAktørId().getAktørId());
 
+        // TODO: Hent harUtvidetKvote fra registerOpplysninger når feltet er tilgjengelig fra ung-deltakelse-opplyser
+        boolean harUtvidetKvote = false;
+
         if (registerOpplysninger.opplysninger().isEmpty()) {
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of());
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harUtvidetKvote);
             LOG.info("Fant ingen opplysninger om ungdomsprogrammet for aktør. ");
         } else {
             var timeline = lagTimeline(registerOpplysninger);
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline));
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harUtvidetKvote);
         }
     }
 

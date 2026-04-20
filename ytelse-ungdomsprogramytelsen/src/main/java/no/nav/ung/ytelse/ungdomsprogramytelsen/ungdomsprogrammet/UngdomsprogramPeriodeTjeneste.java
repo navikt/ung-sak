@@ -53,7 +53,14 @@ public class UngdomsprogramPeriodeTjeneste {
     @WithSpan
     public VurderAntallDagerResultat finnVirkedagerTidslinje(Long behandlingId) {
         var tidslinje = finnPeriodeTidslinje(behandlingId);
-        return FinnForbrukteDager.finnForbrukteDager(tidslinje);
+        var harUtvidetKvote = finnHarUtvidetKvote(behandlingId);
+        return FinnForbrukteDager.finnForbrukteDager(tidslinje, harUtvidetKvote);
+    }
+
+    public boolean finnHarUtvidetKvote(Long behandlingId) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .map(gr -> gr.isHarUtvidetKvote())
+            .orElse(false);
     }
 
     /**

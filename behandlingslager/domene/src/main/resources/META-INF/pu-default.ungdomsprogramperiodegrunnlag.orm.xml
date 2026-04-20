@@ -7,9 +7,11 @@
     <sequence-generator name="SEQ_UNG_GR_UNGDOMSPROGRAMPERIODE" allocation-size="50" sequence-name="SEQ_UNG_GR_UNGDOMSPROGRAMPERIODE"/>
     <sequence-generator name="SEQ_UNG_UNGDOMSPROGRAMPERIODER" allocation-size="50" sequence-name="SEQ_UNG_UNGDOMSPROGRAMPERIODER"/>
     <sequence-generator name="SEQ_UNG_UNGDOMSPROGRAMPERIODE" allocation-size="50" sequence-name="SEQ_UNG_UNGDOMSPROGRAMPERIODE"/>
+    <sequence-generator name="SEQ_UNG_UNGDOMSPROGRAM_UTVIDET_KVOTE_ID" allocation-size="50" sequence-name="SEQ_UNG_UNGDOMSPROGRAM_UTVIDET_KVOTE_ID"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag"/>
     <entity class="no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder"/>
     <entity class="no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode"/>
+    <entity class="no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramUtvidetKvote"/>
 
 </entity-mappings>

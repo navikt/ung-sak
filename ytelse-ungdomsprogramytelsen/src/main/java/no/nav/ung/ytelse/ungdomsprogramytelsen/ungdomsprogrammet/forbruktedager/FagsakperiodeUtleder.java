@@ -35,19 +35,24 @@ public class FagsakperiodeUtleder {
             return fomDato.plusWeeks(52).minusDays(1);
         } else {
             var forrigeBehandlingUngdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(originalBehandlingId.get());
-            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje);
-
+            var harUtvidetKvote = ungdomsprogramPeriodeTjeneste.finnHarUtvidetKvote(originalBehandlingId.get());
+            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje, harUtvidetKvote);
         }
     }
 
     public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje) {
+        return finnTomDato(søknadFom, ungdomsprogramTidslinje, false);
+    }
+
+    public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje, boolean harUtvidetKvote) {
         var tidligerePerioderIProgrammet = ungdomsprogramTidslinje.intersection(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, søknadFom.minusDays(1)));
-        var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet);
+        var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet, harUtvidetKvote);
         var forbrukteDager = vurderAntallDagerResultat.forbrukteDager();
-        if (forbrukteDager >= FinnForbrukteDager.MAKS_ANTALL_DAGER) {
+        var maksAntallDager = FinnForbrukteDager.getMaksAntallDager(harUtvidetKvote);
+        if (forbrukteDager >= maksAntallDager) {
             return søknadFom;
         } else {
-            var resterendeDager = FinnForbrukteDager.MAKS_ANTALL_DAGER - forbrukteDager;
+            var resterendeDager = maksAntallDager - forbrukteDager;
             var weeksToAdd = resterendeDager / VIRKEDAGER_PR_UKE;
             var medHeleAntallUkerLagtTil = søknadFom.plusWeeks(weeksToAdd).minusDays(1);
             var daysToAdd = finnRestDagerÅLeggeTil(medHeleAntallUkerLagtTil, resterendeDager % VIRKEDAGER_PR_UKE);

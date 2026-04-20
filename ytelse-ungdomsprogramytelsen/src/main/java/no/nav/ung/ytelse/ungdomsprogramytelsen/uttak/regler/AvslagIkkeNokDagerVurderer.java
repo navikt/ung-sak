@@ -12,14 +12,16 @@ import java.util.Map;
 public class AvslagIkkeNokDagerVurderer implements UttakRegelVurderer {
 
     private final LocalDateTimeline<Boolean> ungdomsprogramtidslinje;
+    private final boolean harUtvidetKvote;
 
-    public AvslagIkkeNokDagerVurderer(LocalDateTimeline<Boolean> ungdomsprogramtidslinje) {
+    public AvslagIkkeNokDagerVurderer(LocalDateTimeline<Boolean> ungdomsprogramtidslinje, boolean harUtvidetKvote) {
         this.ungdomsprogramtidslinje = ungdomsprogramtidslinje;
+        this.harUtvidetKvote = harUtvidetKvote;
     }
 
     @Override
     public UttakDelResultat vurder(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(ungdomsprogramtidslinje);
+        final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(ungdomsprogramtidslinje, harUtvidetKvote);
         return finnUttaksperioderAvslagEtterDød(tidslinjeTilVurdering, vurderAntallDagerResultat.tidslinjeNokDager());
     }
 
