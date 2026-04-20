@@ -1,8 +1,12 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
@@ -11,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.Aktivitetspeng
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
@@ -34,6 +39,7 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårUtleder inngangsvilkårUtleder;
+    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
 
     AktivitetspengerVilkårsPerioderTilVurderingTjeneste() {
         // for CDI proxy
@@ -43,21 +49,25 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     public AktivitetspengerVilkårsPerioderTilVurderingTjeneste(
         AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository,
         VilkårResultatRepository vilkårResultatRepository,
-        @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD) VilkårUtleder inngangsvilkårUtleder) {
+        @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD) VilkårUtleder inngangsvilkårUtleder,
+        @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
         this.aktivitetspengerSøktPeriodeRepository = aktivitetspengerSøktPeriodeRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
+        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
     }
 
     @Override
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
             return vilkårene.filter(it -> it.getVilkårType().equals(vilkårType))
                 .map(Vilkår::getPerioder)
                 .stream()
                 .flatMap(Collection::stream)
                 .map(VilkårPeriode::getPeriode)
+                .filter(it -> !prosesstriggerTidslinje.intersection(it.toLocalDateInterval()).isEmpty())
                 .collect(Collectors.toCollection(TreeSet::new));
         }
         return TidslinjeUtil.tilDatoIntervallEntiteter(aktivitetspengerSøktPeriodeRepository.hentSøktePerioderTidslinje(behandlingId));

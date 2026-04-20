@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -16,7 +17,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
@@ -27,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,6 +52,9 @@ class VurderBosattStegTest {
 
     @Inject
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
+
+    @Inject
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -74,6 +82,7 @@ class VurderBosattStegTest {
             .leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.OPPFYLT, VILKÅR_PERIODE)
             .leggTilVilkår(VilkårType.SØKNADSFRIST, Utfall.OPPFYLT, VILKÅR_PERIODE)
             .lagre(entityManager);
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
 
         var resultat = utførSteg(behandling);
 
@@ -87,6 +96,7 @@ class VurderBosattStegTest {
             .leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.IKKE_OPPFYLT, VILKÅR_PERIODE)
             .leggTilVilkår(VilkårType.SØKNADSFRIST, Utfall.OPPFYLT, VILKÅR_PERIODE)
             .lagre(entityManager);
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
 
         var resultat = utførSteg(behandling);
 
@@ -109,6 +119,7 @@ class VurderBosattStegTest {
             .leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.OPPFYLT, periode2)
             .leggTilVilkår(VilkårType.BOSTEDSVILKÅR, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
             .lagre(entityManager);
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
 
         var resultat = utførSteg(behandling);
 
