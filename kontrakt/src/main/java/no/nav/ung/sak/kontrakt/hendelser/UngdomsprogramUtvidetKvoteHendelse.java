@@ -27,8 +27,10 @@ public class UngdomsprogramUtvidetKvoteHendelse implements Hendelse {
     }
 
     @JsonCreator
-    public UngdomsprogramUtvidetKvoteHendelse(@JsonProperty("hendelseInfo") @Valid @NotNull HendelseInfo hendelseInfo) {
+    public UngdomsprogramUtvidetKvoteHendelse(@JsonProperty("hendelseInfo") @Valid @NotNull HendelseInfo hendelseInfo,
+                                              @JsonProperty("periode") @Valid @NotNull Periode periode) {
         this.hendelseInfo = hendelseInfo;
+        this.periode = periode;
     }
 
     @Override
