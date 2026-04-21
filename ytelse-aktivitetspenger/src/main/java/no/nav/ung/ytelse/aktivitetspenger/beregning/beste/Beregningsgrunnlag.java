@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.beregning.beste;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.diff.DiffIgnore;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -82,6 +83,9 @@ public class Beregningsgrunnlag {
     }
 
     public BesteBeregningResultatType utledBesteBeregningResultatType() {
+        if (beregnetPrAar.compareTo(BigDecimal.ZERO) <= 0) {
+            return BesteBeregningResultatType.INGEN_BEREGNING;
+        }
         if (beregnetPrAar.compareTo(årsinntektAvkortetOppjustertSisteÅr) == 0) {
             return BesteBeregningResultatType.SISTE_ÅR;
         }

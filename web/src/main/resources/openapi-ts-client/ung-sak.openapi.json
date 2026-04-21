@@ -2125,9 +2125,9 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType" : {
-        "enum" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ],
+        "enum" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR", "INGEN_BEREGNING" ],
         "type" : "string",
-        "x-enum-varnames" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ]
+        "x-enum-varnames" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR", "INGEN_BEREGNING" ]
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto" : {
         "properties" : {
