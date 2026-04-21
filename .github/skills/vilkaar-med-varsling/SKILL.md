@@ -110,14 +110,38 @@ Pakke: `no.nav.ung.sak.behandlingslager.<vilkaar>/`
 
 | Klasse | Annotasjoner | Innhold |
 |--------|-------------|---------|
-| `<Vilkår>Avklaring` | `@Entity @Immutable` | `skjæringstidspunkt: LocalDate`, `<faktafelt>: Boolean`, `begrunnelse: String` |
-| `<Vilkår>AvklaringHolder` | `@Entity` | `@OneToMany List<<Vilkår>Avklaring>` + `equals()` på listen |
-| `<Vilkår>Grunnlag` | `@Entity` | `behandlingId`, `aktiv=true`, `grunnlagsreferanse=UUID.randomUUID()`, `@ManyToOne holder` |
+| `<Vilkår>Avklaring` | `@Entity @Immutable` | `skjæringstidspunkt: LocalDate`, `<faktafelt>: Boolean` — **ingen** `holderId`-felt (styres av `@JoinColumn` i holder) |
+| `<Vilkår>AvklaringHolder` | `@Entity` | `@OneToMany(cascade=ALL) @JoinColumn(name="<vilkaar>_avklaring_holder_id") Set<<Vilkår>Avklaring>` + `equals()` på settet |
+| `<Vilkår>Grunnlag` | `@Entity` | `behandlingId`, `aktiv=true`, `grunnlagsreferanse=UUID`, `@ManyToOne foreslåttHolder` (NOT NULL), `@ManyToOne fastsattHolder` (nullable) |
+
+> **Foreslått vs fastsatt:** Grunnlaget har to holders:
+> - `foreslåttHolder` — saksbehandlers registrering; lagres ved `lagreAvklaringer`
+> - `fastsattHolder` — bekreftet vurdering; kopieres fra foreslåttHolder ved UTLØPT/svar uten uttalelse; brukes til automatisk vilkårsvurdering
+>
+> Dette skillet gjør at saksbehandler **ikke** overskriver fastsatt vurdering ved re-vurdering etter uttalelse.
 
 **`<Vilkår>GrunnlagRepository`:**
 - `hentGrunnlagHvisEksisterer(behandlingId)` → `Optional<<Vilkår>Grunnlag>`
-- `lagreAvklaringer(behandlingId, avklaringer)` — sammenlign med eksisterende; deaktiver gammelt grunnlag og opprett nytt kun ved endring
-- `kopierGrunnlagFraEksisterendeBehandling(gammel, ny)` — pek til samme holder (ingen kopi ved uendret grunnlag)
+- `lagreAvklaringer(behandlingId, avklaringer)` — lagrer til `foreslåttHolder`; `fastsattHolder=null`; deaktiver gammelt grunnlag kun ved endring
+- `fastsettForeslåtteAvklaringer(behandlingId, skjæringstidspunkter)` — kopierer angitte perioder fra `foreslåttHolder` → ny `fastsattHolder`; beholder `grunnlagsreferanse`
+- `kopierGrunnlagFraEksisterendeBehandling(gammel, ny)` — pek til samme holders (ingen kopi)
+
+**ORM-registrering** — opprett `META-INF/pu-default.<vilkaar>.orm.xml`:
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_2.xsd"
+                 version="3.2">
+    <sequence-generator name="SEQ_<VILKAAR>_AVKLARING_HOLDER" allocation-size="50" sequence-name="SEQ_<VILKAAR>_AVKLARING_HOLDER"/>
+    <sequence-generator name="SEQ_<VILKAAR>_AVKLARING" allocation-size="50" sequence-name="SEQ_<VILKAAR>_AVKLARING"/>
+    <sequence-generator name="SEQ_GR_<VILKAAR>_AVKLARING" allocation-size="50" sequence-name="SEQ_GR_<VILKAAR>_AVKLARING"/>
+    <entity class="no.nav.ung.sak.behandlingslager.<vilkaar>.<Vilkår>AvklaringHolder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.<vilkaar>.<Vilkår>Avklaring"/>
+    <entity class="no.nav.ung.sak.behandlingslager.<vilkaar>.<Vilkår>Grunnlag"/>
+</entity-mappings>
+```
+Se `pu-default.bosatt.orm.xml` og `pu-default.etterlysning.orm.xml` som referanser.
 
 ---
 
@@ -139,10 +163,9 @@ create table <vilkaar>_avklaring_holder (
 );
 create table <vilkaar>_avklaring (
     id bigint primary key,
-    holder_id bigint not null references <vilkaar>_avklaring_holder(id),
+    <vilkaar>_avklaring_holder_id bigint not null references <vilkaar>_avklaring_holder(id),
     skaeringstidspunkt date not null,
     <faktafelt> boolean not null,
-    begrunnelse varchar(4000),
     opprettet_av varchar(20) not null default 'VL',
     opprettet_tid timestamp(3) not null default current_timestamp
 );
@@ -150,7 +173,8 @@ create table gr_<vilkaar>_avklaring (
     id bigint primary key,
     behandling_id bigint not null references behandling(id),
     grunnlagsreferanse uuid not null,
-    holder_id bigint not null references <vilkaar>_avklaring_holder(id),
+    foreslatt_avklaring_holder_id bigint not null references <vilkaar>_avklaring_holder(id),
+    fastsatt_avklaring_holder_id bigint null references <vilkaar>_avklaring_holder(id),
     aktiv boolean not null default true,
     versjon bigint not null default 0,
     opprettet_av varchar(20) not null default 'VL',
@@ -158,6 +182,8 @@ create table gr_<vilkaar>_avklaring (
     endret_av varchar(20), endret_tid timestamp(3)
 );
 ```
+
+> **Viktig:** FK-kolonnen i `<vilkaar>_avklaring` heter `<vilkaar>_avklaring_holder_id` (ikke bare `holder_id`). Det er dette `@JoinColumn`-navnet matcher. Ikke legg til et separat `holderId`-felt i entiteten — det vil gi `Duplicate column`-feil fra Hibernate.
 
 ---
 
@@ -206,25 +232,44 @@ OppgavetypeDataDto lagOppgaveData(Etterlysning e) {
 
 ## Steg 8 — Steg (`VurderXxxSteg`)
 
-Tre tilstander for etterlysning (referanse: `VurderBosattSteg.java`):
+**Per-periode logikk** (referanse: `VurderBosattSteg.java`):
 
-```
-etterlysninger tom
-    → returner AP til saksbehandler (VURDER_<VILKÅR>)
-    ↓ saksbehandler bekrefter → grunnlag lagres → Etterlysning(OPPRETTET) + OpprettEtterlysningTask
+Etterlysninger matches mot vilkårsperioder på `fom`-dato:
+```java
+// Hent gjeldende etterlysninger (filtrerer ut AVBRUTT/SKAL_AVBRYTES)
+var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
+    behandlingId, fagsakId, EtterlysningType.UTTALELSE_<VILKÅR>);
 
-OPPRETTET finnes
-    → returner AUTO_SATT_PÅ_VENT_ETTERLYST_<VILKÅR>UTTALELSE (autopunkt)
-    ↓ OpprettEtterlysningTask kjører → status VENTER → brukerdialog-oppgave opprettes
-
-MOTTATT_SVAR med uttalelse
-    → returner AP til saksbehandler igjen (VURDER_<VILKÅR>)
-
-MOTTATT_SVAR uten uttalelse / UTLØPT
-    → autoVurder() basert på <faktafelt> i grunnlaget
+// Map fom → etterlysning
+Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
+    .collect(toMap(e -> e.periode().getFomDato(), Function.identity()));
 ```
 
-**`autoVurder()`:** for hver periode → `OPPFYLT` hvis `<faktafelt>=true`, `IKKE_OPPFYLT` + `Avslagsårsak.<ÅRSAK>` ellers.
+Klassifiser hver periode:
+
+| Tilstand | Handling |
+|----------|---------|
+| Ingen etterlysning | `trengerSaksbehandler` — returner `AP VURDER_<VILKÅR>` |
+| `VENTER` / `OPPRETTET` | `ventende` — sett behandling på vent med autopunkt |
+| `UTLØPT` eller `MOTTATT_SVAR` med `harUttalelse=false` | `skalFastsettes` — kall `fastsettForeslåtteAvklaringer` + `autoVurder` |
+| `MOTTATT_SVAR` med `harUttalelse=true` | `trengerSaksbehandler` — returner `AP VURDER_<VILKÅR>` (saksbehandler re-vurderer) |
+
+```
+// Tilstandsmaskin
+if (!ventende.isEmpty()) → returner autopunkt (SETT PÅ VENT)
+if (!skalFastsettes.isEmpty()) → fastsettForeslåtteAvklaringer + autoVurder
+if (!trengerSaksbehandler.isEmpty()) → returner AP
+else → utførtUtenAksjonspunkter
+```
+
+**`autoVurder()`:** bruk `fastsattHolder` (ikke `foreslåttHolder`) for å sette vilkårsutfall:
+- `<faktafelt>=true` → `OPPFYLT`
+- `<faktafelt>=false` → `IKKE_OPPFYLT` + `Avslagsårsak.<ÅRSAK>`
+
+**`VurderXxxOppdaterer` (aksjonspunkt-håndterer):** skiller mellom initial og re-vurdering:
+- Perioder med mottatt uttalelse (`harUttalelse=true`): kall `fastsettForeslåtteAvklaringer` direkte — ingen ny etterlysning
+- Øvrige perioder: opprett `Etterlysning(UTTALELSE_<VILKÅR>)` + `OpprettEtterlysningTask`
+- Returner alltid `rekjørSteg()` (IKKE bekreft AP)
 
 ---
 
@@ -263,3 +308,7 @@ MOTTATT_SVAR uten uttalelse / UTLØPT
 | Avslag-test bruker ikke `VilkårPeriodeVurderingDto` lenger | Bruk `<Vilkår>AvklaringPeriodeDto` med `<faktafelt>=false` |
 | Beslutter skal ikke godkjenne auto-vurderte vilkår | Fjern AP fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
 | Oppdaterer returnerer `rekjørSteg()`, ikke `bekreftAksjonspunkt()` | Steg re-kjøres og finner ny etterlysning (OPPRETTET) → setter autopunkt |
+| `UnknownEntityException: Could not resolve root entity` i tester | Mangler `pu-default.<vilkaar>.orm.xml` — se Steg 4 |
+| `Duplicate column '<vilkaar>_avklaring_holder_id'` fra Hibernate | `<Vilkår>Avklaring` har et overflødig `holderId`-felt som kolliderer med `@JoinColumn` i holder — fjern feltet |
+| `method does not override` eller `cannot find symbol` i tester | Kjør tester med `-am` slik at avhengige moduler kompileres riktig: `mvn test -pl <modul> -am -Dsurefire.failIfNoSpecifiedTests=false` |
+| `getAksjonspunktDefinisjon()` finnes ikke | `getAksjonspunktListe()` returnerer `List<AksjonspunktDefinisjon>` direkte — sammenlign element, ikke kall metode på det |
