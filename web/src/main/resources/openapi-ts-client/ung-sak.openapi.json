@@ -9461,7 +9461,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
+        "summary" : "Identer hentes fra historikkinnslag og aksjonspunkt.",
         "tags" : [ "nav-ansatt" ]
       }
     },
