@@ -101,6 +101,15 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
+        // Hent allerede fastsatte perioder for å unngå dobbel fastsetting
+        Set<LocalDate> alleredeFastsattFom = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> g.getFastsattHolder() != null
+                ? g.getFastsattHolder().getAvklaringer().stream()
+                    .map(a -> a.getSkjæringstidspunkt())
+                    .collect(Collectors.toCollection(LinkedHashSet::new))
+                : new LinkedHashSet<LocalDate>())
+            .orElseGet(LinkedHashSet::new);
+
         // Klassifiser perioder per fom-dato
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<LocalDate> skalFastsettesFom = new LinkedHashSet<>();
@@ -120,7 +129,9 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                 || (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
                 && etterlysning.uttalelseData() != null
                 && !etterlysning.uttalelseData().harUttalelse())) {
-                skalFastsettesFom.add(fom);
+                if (!alleredeFastsattFom.contains(fom)) {
+                    skalFastsettesFom.add(fom);
+                }
             } else if (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
                 && etterlysning.uttalelseData() != null
                 && etterlysning.uttalelseData().harUttalelse()) {
