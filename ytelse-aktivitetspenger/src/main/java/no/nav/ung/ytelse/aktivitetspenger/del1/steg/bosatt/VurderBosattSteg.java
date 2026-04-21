@@ -150,20 +150,19 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             ));
         }
 
-        // Fastsett perioder som har mottatt tilstrekkelig svar og auto-vurder dem
+        // FASTSETT_BOSTED – saksbehandler bekrefter/korrigerer etter brukerens uttalelse
+        BehandleStegResultat resultat = !trengerFastsettingFom.isEmpty()
+            ? BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED))
+            : BehandleStegResultat.utførtUtenAksjonspunkter();
+
+        // Fastsett perioder med tilstrekkelig svar (etter aksjonspunkt-beslutningen)
         if (!skalFastsettesFom.isEmpty()) {
             bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, skalFastsettesFom);
-            autoVurder(behandlingId);
         }
 
-        // FASTSETT_BOSTED – saksbehandler bekrefter/korrigerer etter brukerens uttalelse
-        if (!trengerFastsettingFom.isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED));
-        }
-
-        // Alle perioder er fastsatt – auto-vurder vilkåret
+        // Auto-vurder alle fastsatte perioder
         autoVurder(behandlingId);
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
+        return resultat;
     }
 
     private void autoVurder(long behandlingId) {
