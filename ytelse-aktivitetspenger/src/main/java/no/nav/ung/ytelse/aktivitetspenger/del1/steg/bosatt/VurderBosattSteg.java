@@ -161,6 +161,8 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED));
         }
 
+        // Alle perioder er fastsatt – auto-vurder vilkåret
+        autoVurder(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
