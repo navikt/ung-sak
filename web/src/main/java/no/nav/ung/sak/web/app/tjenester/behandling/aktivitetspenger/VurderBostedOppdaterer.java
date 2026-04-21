@@ -27,13 +27,15 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringPeriodeDt
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
+
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderBostedDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -75,21 +77,48 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             avklaringerPerSkjæringstidspunkt.put(avklaring.getPeriode().getFom(), avklaring.getErBosattITrondheim());
         }
 
+        // Les eksisterende foreslått avklaring per fom BEFORE lagreAvklaringer
+        Map<LocalDate, Boolean> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> g.getForeslåttHolder().getAvklaringer().stream()
+                .collect(Collectors.toMap(BostedsAvklaring::getSkjæringstidspunkt, BostedsAvklaring::erBosattITrondheim)))
+            .orElse(Map.of());
+
+        // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
+        Set<LocalDate> fomsHvorAktivEtterlysningFinnes = etterlysningRepository
+            .hentEtterlysningerSomVenterPåSvar(behandlingId).stream()
+            .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
+            .map(e -> e.getPeriode().getFomDato())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
         UUID grunnlagsreferanse = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, avklaringerPerSkjæringstidspunkt);
 
-        // Finn perioder som har mottatt uttalelse – disse fastsettes umiddelbart (ingen ny etterlysning)
-        Set<LocalDate> fomsUtenEtterlysning = finnFomerSomMåSendeEtterlysning(behandlingId, dto.getAvklaringer());
-        Set<LocalDate> fomsMedUttalelse = new LinkedHashSet<>(avklaringerPerSkjæringstidspunkt.keySet());
-        fomsMedUttalelse.removeAll(fomsUtenEtterlysning);
+        // Perioder med MOTTATT_SVAR + uttalelse fastsettes umiddelbart (ingen ny etterlysning)
+        Set<LocalDate> fomsMedUttalelse = finnFomerMedMottattUttalelse(behandlingId);
+
+        // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning, ELLER avklaring endret
+        Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
+        for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
+            LocalDate fom = avklaring.getPeriode().getFom();
+            if (fomsMedUttalelse.contains(fom)) {
+                continue; // fastsettes direkte, ikke ny etterlysning
+            }
+            boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(fom);
+            boolean avklaringEndret = !avklaring.getErBosattITrondheim().equals(tidligereAvklaringer.get(fom));
+            if (!harAktivEtterlysning || avklaringEndret) {
+                fomsUtenEtterlysning.add(fom);
+            }
+        }
 
         if (!fomsMedUttalelse.isEmpty()) {
-            // Re-vurdering etter brukerens uttalelse: fastsett umiddelbart
             bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, fomsMedUttalelse);
         }
 
         if (!fomsUtenEtterlysning.isEmpty()) {
-            // Avbryt eksisterende OPPRETTET-etterlysninger og opprett nye
-            var eksisterendeOpprettede = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_BOSTED);
+            // Avbryt eksisterende OPPRETTET-etterlysninger for perioder som skal ha ny etterlysning
+            var eksisterendeOpprettede = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_BOSTED)
+                .stream()
+                .filter(e -> fomsUtenEtterlysning.contains(e.getPeriode().getFomDato()))
+                .toList();
             eksisterendeOpprettede.forEach(Etterlysning::avbryt);
             etterlysningRepository.lagre(eksisterendeOpprettede);
 
@@ -130,10 +159,10 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
     }
 
     /**
-     * Returnerer fom-datoer for perioder som IKKE har MOTTATT_SVAR-etterlysning med uttalelse,
-     * og som dermed skal varsles på nytt via ny etterlysning.
+     * Returnerer fom-datoer for perioder som har mottatt svar med uttalelse.
+     * Disse fastsettes umiddelbart – ingen ny etterlysning sendes.
      */
-    private Set<LocalDate> finnFomerSomMåSendeEtterlysning(long behandlingId, List<BostedAvklaringPeriodeDto> avklaringer) {
+    private Set<LocalDate> finnFomerMedMottattUttalelse(long behandlingId) {
         var mottattSvarEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(behandlingId, EtterlysningType.UTTALELSE_BOSTED)
             .stream()
             .filter(e -> e.getStatus() == EtterlysningStatus.MOTTATT_SVAR)
@@ -141,24 +170,17 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
         var uttalelser = uttalelseRepository.hentUttalelser(behandlingId, EndringType.AVKLAR_BOSTED);
 
-        Set<LocalDate> fomsWithUttalelse = new LinkedHashSet<>();
+        Set<LocalDate> fomsMedUttalelse = new LinkedHashSet<>();
         for (Etterlysning etterlysning : mottattSvarEtterlysninger) {
             boolean harUttalelse = uttalelser.stream()
                 .filter(u -> u.getPeriode().equals(etterlysning.getPeriode())
                     && u.getGrunnlagsreferanse().equals(etterlysning.getGrunnlagsreferanse()))
                 .anyMatch(UttalelseV2::harUttalelse);
             if (harUttalelse) {
-                fomsWithUttalelse.add(etterlysning.getPeriode().getFomDato());
+                fomsMedUttalelse.add(etterlysning.getPeriode().getFomDato());
             }
         }
-
-        Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
-        for (BostedAvklaringPeriodeDto avklaring : avklaringer) {
-            if (!fomsWithUttalelse.contains(avklaring.getPeriode().getFom())) {
-                fomsUtenEtterlysning.add(avklaring.getPeriode().getFom());
-            }
-        }
-        return fomsUtenEtterlysning;
+        return fomsMedUttalelse;
     }
 
 }
