@@ -18,6 +18,7 @@ public enum TemplateType {
     AKTIVITETSPENGER_INNVILGELSE("innvilgelse", "aktivitetspenger", "Førstegangsinnvilgelse"),
     AKTIVITETSPENGER_AVSLAG_INNGANG("avslag_inngang", "aktivitetspenger", "Avslag inngangsvilkår"),
     AKTIVITETSPENGER_ENDRING_HØY_SATS("endring_høy_sats", "aktivitetspenger", "Endring til høy sats"),
+    AKTIVITETSPENGER_ENDRING_BARNETILLEGG("endring_barnetillegg", "aktivitetspenger", "Endring pga barnetillegg"),
 
     KLAGE_AVVIST("avvist", "klage", "Avvist klage grunnet formkrav"),
     KLAGE_MEDHOLD("medhold", "klage", "Medhold i klage - omgjøres"),
