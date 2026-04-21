@@ -128,7 +128,13 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             }
         });
 
-        // Sett behandling på vent hvis noen perioder fortsatt venter på svar
+        // VURDER_BOSTED først – perioder uten etterlysning trenger initial registrering fra saksbehandler.
+        // Vi vil ikke sette behandlingen på vent før alle nødvendige etterlysninger er opprettet.
+        if (!trengerSaksbehandlerFom.isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
+        }
+
+        // Sett behandling på vent hvis alle etterlysninger er opprettet, men ingen svar er mottatt ennå
         if (!ventendeFom.isEmpty()) {
             LocalDateTime frist = ventendeFom.stream()
                 .map(fom -> Optional.ofNullable(etterlysningPerFom.get(fom)).map(EtterlysningData::frist).orElse(null))
@@ -150,14 +156,9 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             autoVurder(behandlingId);
         }
 
-        // FASTSETT_BOSTED har prioritet – saksbehandler bekrefter/korrigerer etter brukerens uttalelse
+        // FASTSETT_BOSTED – saksbehandler bekrefter/korrigerer etter brukerens uttalelse
         if (!trengerFastsettingFom.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED));
-        }
-
-        // VURDER_BOSTED – perioder uten etterlysning trenger initial registrering fra saksbehandler
-        if (!trengerSaksbehandlerFom.isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
