@@ -47,7 +47,7 @@ public class OpprettRevurderingHøySatsTaskTjeneste {
         Set<Map.Entry<Fagsak, LocalDate>> fagsakerTilRevurdering = fagsakerMedEndringsdato.entrySet();
 
         if (prosessTaskData.getSaksnummer() != null) {
-            log.info("Kjører utledelse for enkelt fagsak {}, overstyrer liste med fagsaker som skal ha revurdering", prosessTaskData.getFagsakId());
+            log.info("Kjører utledelse for enkelt fagsak {}, overstyrer liste med fagsaker som skal ha revurdering", prosessTaskData.getSaksnummer());
             fagsakerTilRevurdering = fagsakerTilRevurdering.stream()
                 .filter(it -> it.getKey().getSaksnummer().getVerdi().equals(prosessTaskData.getSaksnummer()))
                 .collect(Collectors.toSet());

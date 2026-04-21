@@ -47,12 +47,10 @@ public class AktivitetspengerSatsEndringRepository {
                     "INNER JOIN PO_PERSONOPPLYSNING personopplysning ON personopplysning.po_informasjon_id = informasjon.id " +
                     "INNER JOIN BEHANDLING b ON gr.behandling_id = b.id " +
                     "INNER JOIN FAGSAK f ON b.fagsak_id = f.id AND f.bruker_aktoer_id = personopplysning.aktoer_id " +
-                    "INNER JOIN AKT_SOEKT_PERIODE søkt_periode ON b.id = søkt_periode.behandling_id " +
                     "WHERE b.opprettet_tid = " + sistOpprettet +
                     "   AND gr.aktiv = true" +
                     "   AND f.ytelse_type = '" + FagsakYtelseType.AKTIVITETSPENGER.getKode() + "'" +
                     "   AND personopplysning.foedselsdato <= :tjuefem_aar_foer_dato " +
-                    "   AND daterange(søkt_periode.fom, søkt_periode.tom, '[]') @> date_trunc('month', foedselsdato + interval '301 months')::date" +
                     "   AND f.periode @> date_trunc('month', foedselsdato + interval '301 months')::date" +
                     "   AND NOT exists " + periodeMedHøySats +
                     "   AND NOT exists " + reTriggerBeregningHøySats,

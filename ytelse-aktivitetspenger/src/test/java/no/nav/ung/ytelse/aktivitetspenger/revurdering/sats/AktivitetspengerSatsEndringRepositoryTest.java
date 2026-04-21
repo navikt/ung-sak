@@ -77,21 +77,6 @@ class AktivitetspengerSatsEndringRepositoryTest {
     }
 
     @Test
-    void forventer_ingen_fagsaker_fordi_søkt_periode_ikke_inneholder_endringsdatoen() {
-        var dato = LocalDate.now();
-        Periode fagsakPeriode = new Periode(dato.minusDays(30), dato.plusDays(330));
-        LocalDate fødselsdato = dato.minusYears(25).minusDays(1);
-        LocalDate endringsdatoIUtvalg = fødselsdato.plusMonths(301).withDayOfMonth(1);
-        Periode søktPeriode = new Periode(dato.minusDays(10), endringsdatoIUtvalg.minusDays(1));
-
-        klargjørDatagrunnlag(fagsakPeriode, søktPeriode, fødselsdato, false, false);
-
-        Map<Fagsak, LocalDate> fagsakerTilRevurdering = repository.hentFagsakerMedBrukereSomFyller25ÅrFraDato(dato);
-
-        assertThat(fagsakerTilRevurdering).isEmpty();
-    }
-
-    @Test
     void forventer_ingen_fagsaker_fordi_fagsakperioden_ikke_inneholder_endringsdatoen() {
         var dato = LocalDate.now();
         LocalDate fødselsdato = dato.minusYears(25).minusDays(1);
