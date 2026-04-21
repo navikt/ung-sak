@@ -16,7 +16,7 @@ import no.nav.ung.sak.typer.Periode;
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_OPPHOER, value = UngdomsprogramOpphørHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_ENDRET_STARTDATO, value = UngdomsprogramEndretStartdatoHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_FJERN_PERIODE, value = UngdomsprogramFjernDeltakelseHendelse.class),
-    @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_UTVIDET_KVOTE, value = UngdomsprogramFjernDeltakelseHendelse.class),
+    @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_UTVIDET_KVOTE, value = UngdomsprogramUtvidetKvoteHendelse.class),
 })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public interface Hendelse {

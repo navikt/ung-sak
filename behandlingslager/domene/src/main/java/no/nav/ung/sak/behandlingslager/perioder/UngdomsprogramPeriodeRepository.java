@@ -53,7 +53,7 @@ public class UngdomsprogramPeriodeRepository {
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
 
-        var utvidetKvote = new UngdomsprogramUtvidetKvote(null, harUtvidetKvote);
+        var utvidetKvote = new UngdomsprogramUtvidetKvote(harUtvidetKvote);
         entityManager.persist(utvidetKvote);
         nyttGrunnlag.setUngdomsprogramUtvidetKvote(utvidetKvote);
 
