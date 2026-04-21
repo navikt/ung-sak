@@ -70,7 +70,7 @@ public class SaksbehandlerRestTjeneste {
     @Operation(
         description = "Returnerer fullt navn for identer som har berørt en fagsak",
         tags = "nav-ansatt",
-        summary = ("Identer hentes fra historikkinnslag og sykdomsvurderinger.")
+        summary = ("Identer hentes fra historikkinnslag og aksjonspunkt.")
     )
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK, auditlogg = false)
     public SaksbehandlerDto getSaksbehandlere(
