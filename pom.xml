@@ -42,7 +42,7 @@
         <felles.version>10.6.1</felles.version>
         <swagger.version>2.2.45</swagger.version>
         <junit.version>6.0.3</junit.version>
-        <k9format.version>12.10.0</k9format.version>
+        <k9format.version>9.0.0-SNAPSHOT</k9format.version>
         <jackson.version>2.21.2</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.20</kotlin-stdlib.version>
@@ -52,7 +52,7 @@
         <confluent.platform.version>8.2.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>
-        <ung-brukerdialog-api.version>0.2.1</ung-brukerdialog-api.version>
+        <ung-brukerdialog-api.version>1.0.0-SNAPSHOT</ung-brukerdialog-api.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>

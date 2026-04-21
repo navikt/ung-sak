@@ -13,7 +13,6 @@ import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 import java.util.List;
 
@@ -23,10 +22,14 @@ import java.util.List;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE)
 public class VurderBostedDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty("vurdertePerioder")
+    /**
+     * Fakta-avklaringer om brukers bosted per periode.
+     * Saksbehandler fyller inn om bruker er bosatt i Trondheim for hvert skjæringstidspunkt.
+     */
+    @JsonProperty("avklaringer")
     @NotNull
-    @Size(min = 0, max = 100)
-    private List<@Valid VilkårPeriodeVurderingDto> vurdertePerioder;
+    @Size(min = 1, max = 100)
+    private List<@Valid BostedAvklaringPeriodeDto> avklaringer;
 
     @Valid
     @Size(max = 1000)
@@ -38,16 +41,16 @@ public class VurderBostedDto extends BekreftetAksjonspunktDto {
     }
 
     @JsonCreator
-    public VurderBostedDto(@JsonProperty("vurdertePerioder") List<VilkårPeriodeVurderingDto> vurderinger,
+    public VurderBostedDto(@JsonProperty("avklaringer") List<BostedAvklaringPeriodeDto> avklaringer,
                            @JsonProperty("brevtekst") String brevtekst,
                            @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
-        this.vurdertePerioder = vurderinger;
+        this.avklaringer = avklaringer;
         this.brevtekst = brevtekst;
     }
 
-    public List<VilkårPeriodeVurderingDto> getVurdertePerioder() {
-        return vurdertePerioder;
+    public List<BostedAvklaringPeriodeDto> getAvklaringer() {
+        return avklaringer;
     }
 
     public String getBrevtekst() {

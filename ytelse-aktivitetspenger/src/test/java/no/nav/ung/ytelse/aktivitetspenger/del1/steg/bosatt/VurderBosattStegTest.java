@@ -16,6 +16,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -56,6 +59,15 @@ class VurderBosattStegTest {
     @Inject
     private ProsessTriggereRepository prosessTriggereRepository;
 
+    @Inject
+    private EtterlysningRepository etterlysningRepository;
+
+    @Inject
+    private UttalelseRepository uttalelseRepository;
+
+    @Inject
+    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private VurderBosattSteg steg;
@@ -71,6 +83,9 @@ class VurderBosattStegTest {
             vilkårResultatRepository,
             vilkårTjeneste,
             behandlingRepository,
+            etterlysningRepository,
+            uttalelseRepository,
+            bostedsGrunnlagRepository,
             perioderTilVurderingTjenester
         );
     }

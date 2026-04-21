@@ -19,6 +19,7 @@ public class AksjonspunktKodeDefinisjon {
     public static final String AUTO_VENT_PÅ_INNTEKT_RAPPORTERINGSFRIST_KODE = "7014";
 
     public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKT_UTTALELSE_KODE = "7040";
+    public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTED_UTTALELSE_KODE = "7041";
 
 
     public static final String FATTER_VEDTAK_KODE = "5016";

@@ -28,8 +28,8 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
 
     private VilkårTjeneste vilkårTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private BehandlingRepository behandlingRepository;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
+    protected BehandlingRepository behandlingRepository;
+    protected Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
 
     protected VilkårVurderingSteg() {
     }
@@ -52,6 +52,12 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
         vilkårTjeneste.nullstillBehandlingsresultat(kontekst);
         vilkårResultatRepository.settUtfallForPeriode(kontekst.getBehandlingId(), getAktuellVilkårType(), ikkeRelevantPerioder, Utfall.IKKE_RELEVANT);
         return utførResten(kontekst);
+    }
+
+    protected LocalDateTimeline<Boolean> finnPerioderSomSkalVurderes(BehandlingskontrollKontekst kontekst) {
+        var perioder = finnPerioderForVurderingAvVilkår(kontekst);
+        var ikkeRelevantPerioder = finnIkkeRelevantePerioder(kontekst, perioder);
+        return perioder.disjoint(ikkeRelevantPerioder);
     }
 
     private LocalDateTimeline<?> finnIkkeRelevantePerioder(BehandlingskontrollKontekst kontekst, LocalDateTimeline<?> perioder) {

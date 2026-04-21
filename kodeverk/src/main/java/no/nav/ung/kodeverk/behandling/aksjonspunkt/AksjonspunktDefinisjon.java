@@ -139,6 +139,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         "Satt på vent etter kontroll av inntekt til rapporteringsfrist har passert", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
+    AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTED_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
+        "Satt på vent i påvente av brukers svar på bostedavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTED, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
+
     // Gruppe: 80xx
     KONTROLLER_INNTEKT(
         AksjonspunktKodeDefinisjon.KONTROLLER_INNTEKT_KODE, AksjonspunktType.MANUELL, "Kontroller inntekt",
