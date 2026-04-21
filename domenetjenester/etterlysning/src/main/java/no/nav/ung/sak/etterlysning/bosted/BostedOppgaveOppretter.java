@@ -34,7 +34,7 @@ public class BostedOppgaveOppretter {
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsgrunnlag for behandling: " + behandling.getId()));
 
-        Map<java.time.LocalDate, Boolean> bosattPerSkjæringstidspunkt = grunnlag.getHolder().getAvklaringer().stream()
+        Map<java.time.LocalDate, Boolean> bosattPerSkjæringstidspunkt = grunnlag.getForeslåttHolder().getAvklaringer().stream()
             .collect(Collectors.toMap(BostedsAvklaring::getSkjæringstidspunkt, BostedsAvklaring::erBosattITrondheim));
 
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());

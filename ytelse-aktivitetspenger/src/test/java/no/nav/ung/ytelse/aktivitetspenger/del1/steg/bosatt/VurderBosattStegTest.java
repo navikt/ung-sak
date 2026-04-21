@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
@@ -17,10 +18,11 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
@@ -35,6 +37,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -63,7 +66,7 @@ class VurderBosattStegTest {
     private EtterlysningRepository etterlysningRepository;
 
     @Inject
-    private UttalelseRepository uttalelseRepository;
+    private EtterlysningTjeneste etterlysningTjeneste;
 
     @Inject
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
@@ -83,10 +86,9 @@ class VurderBosattStegTest {
             vilkårResultatRepository,
             vilkårTjeneste,
             behandlingRepository,
-            etterlysningRepository,
-            uttalelseRepository,
             bostedsGrunnlagRepository,
-            perioderTilVurderingTjenester
+            perioderTilVurderingTjenester,
+            etterlysningTjeneste
         );
     }
 
@@ -148,6 +150,75 @@ class VurderBosattStegTest {
         assertThat(perioder).hasSize(2);
         assertThat(perioder.get(0).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_RELEVANT);
         assertThat(perioder.get(1).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+    }
+
+    @Test
+    void skal_sette_behandling_på_vent_når_etterlysning_venter() {
+        var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .leggTilVilkår(VilkårType.BOSTEDSVILKÅR, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
+            .leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.OPPFYLT, VILKÅR_PERIODE)
+            .leggTilVilkår(VilkårType.SØKNADSFRIST, Utfall.OPPFYLT, VILKÅR_PERIODE)
+            .lagre(entityManager);
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
+
+        // Lagre foreslått vurdering og oppretter en ventende etterlysning
+        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, true));
+        var grunnlagsreferanse = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
+            .orElseThrow().getGrunnlagsreferanse();
+        var etterlysning = Etterlysning.opprettForType(
+            behandling.getId(), grunnlagsreferanse, UUID.randomUUID(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), EtterlysningType.UTTALELSE_BOSTED);
+        etterlysning.vent(java.time.LocalDateTime.now().plusDays(14));
+        etterlysningRepository.lagre(etterlysning);
+        entityManager.flush();
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe()).hasSize(1);
+        assertThat(resultat.getAksjonspunktListe().get(0))
+            .isEqualTo(EtterlysningType.UTTALELSE_BOSTED.tilAutopunktDefinisjon());
+    }
+
+    @Test
+    void skal_fastsette_og_auto_vurdere_periode_ved_utløpt_etterlysning() {
+        var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .leggTilVilkår(VilkårType.BOSTEDSVILKÅR, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
+            .leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.OPPFYLT, VILKÅR_PERIODE)
+            .leggTilVilkår(VilkårType.SØKNADSFRIST, Utfall.OPPFYLT, VILKÅR_PERIODE)
+            .lagre(entityManager);
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
+
+        // Lagre foreslått vurdering (bosatt i Trondheim = true)
+        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, true));
+        var grunnlagsreferanse = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
+            .orElseThrow().getGrunnlagsreferanse();
+
+        // Opprett en utløpt etterlysning for perioden
+        var etterlysning = Etterlysning.opprettForType(
+            behandling.getId(), grunnlagsreferanse, UUID.randomUUID(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), EtterlysningType.UTTALELSE_BOSTED);
+        etterlysning.vent(java.time.LocalDateTime.now().minusDays(1));
+        etterlysning.utløpt();
+        etterlysningRepository.lagre(etterlysning);
+        entityManager.flush();
+
+        var resultat = utførSteg(behandling);
+
+        // Ingen aksjonspunkt – auto-vurdert
+        assertThat(resultat.getAksjonspunktListe()).isEmpty();
+
+        // Vilkåret skal nå være OPPFYLT (bosatt i Trondheim = true)
+        var vilkår = vilkårResultatRepository.hent(behandling.getId())
+            .getVilkår(VilkårType.BOSTEDSVILKÅR).orElseThrow();
+        assertThat(vilkår.getPerioder()).allSatisfy(p ->
+            assertThat(p.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT)
+        );
+
+        // Fastsatt holder skal nå være satt
+        var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
+        assertThat(grunnlag.getFastsattHolder()).isNotNull();
+        assertThat(grunnlag.getFastsattHolder().getAvklaringer()).hasSize(1);
+        assertThat(grunnlag.getFastsattHolder().getAvklaringer().iterator().next().erBosattITrondheim()).isTrue();
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {

@@ -8,7 +8,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -20,17 +19,12 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
-import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
-import no.nav.ung.sak.etterlysning.EtterlysningOgUttalelseTjeneste;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -39,6 +33,7 @@ import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -55,7 +50,6 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
-    private UttalelseRepository uttalelseRepository;
     private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
 
@@ -68,15 +62,12 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                             VilkårResultatRepository vilkårResultatRepository,
                             VilkårTjeneste vilkårTjeneste,
                             BehandlingRepository behandlingRepository,
-                            EtterlysningRepository etterlysningRepository,
-                            UttalelseRepository uttalelseRepository,
                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                             EtterlysningTjeneste etterlysningTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
-        this.uttalelseRepository = uttalelseRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
     }
@@ -99,17 +90,50 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
         long behandlingId = kontekst.getBehandlingId();
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
-        List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_BOSTED);
-        // Aktiv etterlysning (OPPRETTET/VENTER) → sett behandling på vent
-        var ventendeEtterlysninger = etterlysninger.stream()
-            .filter(it ->
-                it.status() == EtterlysningStatus.OPPRETTET ||
-                    it.status() == EtterlysningStatus.VENTER)
-            .toList();
-        if (!ventendeEtterlysninger.isEmpty()) {
-            LocalDateTime frist = ventendeEtterlysninger.stream().map(EtterlysningData::frist)
+
+        if (tidslinjeTilVurdering.isEmpty()) {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
+        }
+
+        // Hent gjeldende etterlysninger og bygg fom-dato-oppslag
+        List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
+            behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_BOSTED);
+        Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
+            .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
+
+        // Klassifiser perioder per fom-dato
+        Set<LocalDate> ventendeFom = new LinkedHashSet<>();
+        Set<LocalDate> skalFastsettesFom = new LinkedHashSet<>();
+        Set<LocalDate> trengerSaksbehandlerFom = new LinkedHashSet<>();
+
+        tidslinjeTilVurdering.stream().forEach(segment -> {
+            LocalDate fom = segment.getFom();
+            EtterlysningData etterlysning = etterlysningPerFom.get(fom);
+
+            if (etterlysning == null) {
+                trengerSaksbehandlerFom.add(fom);
+            } else if (etterlysning.status() == EtterlysningStatus.OPPRETTET
+                || etterlysning.status() == EtterlysningStatus.VENTER) {
+                ventendeFom.add(fom);
+            } else if (etterlysning.status() == EtterlysningStatus.UTLØPT
+                || (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
+                && etterlysning.uttalelseData() != null
+                && !etterlysning.uttalelseData().harUttalelse())) {
+                skalFastsettesFom.add(fom);
+            } else if (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
+                && etterlysning.uttalelseData() != null
+                && etterlysning.uttalelseData().harUttalelse()) {
+                trengerSaksbehandlerFom.add(fom);
+            }
+        });
+
+        // Sett behandling på vent hvis noen perioder fortsatt venter på svar
+        if (!ventendeFom.isEmpty()) {
+            LocalDateTime frist = ventendeFom.stream()
+                .map(fom -> Optional.ofNullable(etterlysningPerFom.get(fom)).map(EtterlysningData::frist).orElse(null))
                 .filter(Objects::nonNull)
-                .max(Comparator.naturalOrder()).orElse(LocalDateTime.now().plus(DEFAULT_VENTEFRIST));
+                .max(Comparator.naturalOrder())
+                .orElse(LocalDateTime.now().plus(DEFAULT_VENTEFRIST));
             return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
                 AksjonspunktResultat.opprettForAksjonspunktMedFrist(
                     EtterlysningType.UTTALELSE_BOSTED.tilAutopunktDefinisjon(),
@@ -119,24 +143,14 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             ));
         }
 
-        // Etterlysning avsluttet (MOTTATT_SVAR eller UTLØPT) → sjekk utfall
-        var sisteEtterlysning = etterlysninger.stream()
-            .filter(it -> it.status() == EtterlysningStatus.MOTTATT_SVAR)
-            .toList();
-        if (!sisteEtterlysning.isEmpty()) {
-            boolean harUttalelse = uttalelseRepository.hentUttalelser(behandlingId, EndringType.AVKLAR_BOSTED)
-                .stream().anyMatch(UttalelseV2::harUttalelse);
-            if (harUttalelse) {
-                // Bruker har sendt uttalelse → saksbehandler må ta stilling
-                return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
-            }
-            // UTLØPT eller MOTTATT_SVAR uten uttalelse → automatisk vurdering
+        // Fastsett perioder som har mottatt tilstrekkelig svar og auto-vurder dem
+        if (!skalFastsettesFom.isEmpty()) {
+            bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, skalFastsettesFom);
             autoVurder(behandlingId);
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        // Ingen etterlysning ennå → saksbehandler registrerer faktagrunnlag
-        if (vilkårResultatRepository.finnesRelevantPeriode(behandlingId, getAktuellVilkårType())) {
+        // Returner aksjonspunkt for perioder som trenger saksbehandler
+        if (!trengerSaksbehandlerFom.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
         }
 
@@ -147,7 +161,12 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer bostedsgrunnlag for automatisk vurdering, behandlingId=" + behandlingId));
 
-        Map<java.time.LocalDate, Boolean> bosattPerSkjæringstidspunkt = grunnlag.getHolder().getAvklaringer().stream()
+        var fastsattHolder = grunnlag.getFastsattHolder();
+        if (fastsattHolder == null) {
+            return;
+        }
+
+        Map<LocalDate, Boolean> bosattPerSkjæringstidspunkt = fastsattHolder.getAvklaringer().stream()
             .collect(Collectors.toMap(BostedsAvklaring::getSkjæringstidspunkt, BostedsAvklaring::erBosattITrondheim));
 
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
@@ -158,12 +177,10 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
         vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR).stream()
             .filter(s -> s.getValue().getUtfall() != Utfall.IKKE_RELEVANT)
+            .filter(s -> bosattPerSkjæringstidspunkt.containsKey(s.getFom()))
             .forEach(s -> {
                 var fom = s.getFom();
-                Boolean erBosattITrondheim = bosattPerSkjæringstidspunkt.get(fom);
-                if (erBosattITrondheim == null) {
-                    throw new IllegalStateException("Mangler bostedsavklaring for skjæringstidspunkt " + fom + " i behandling " + behandlingId);
-                }
+                boolean erBosattITrondheim = bosattPerSkjæringstidspunkt.get(fom);
                 var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fom, s.getTom()));
                 if (erBosattITrondheim) {
                     periodeBuilder.medUtfall(Utfall.OPPFYLT);

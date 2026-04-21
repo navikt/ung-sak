@@ -22,8 +22,12 @@ public class BostedsGrunnlag extends BaseEntitet {
     private Long behandlingId;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "bosatt_avklaring_holder_id", nullable = false, updatable = false)
-    private BostedsAvklaringHolder holder;
+    @JoinColumn(name = "foreslatt_avklaring_holder_id", nullable = false, updatable = false)
+    private BostedsAvklaringHolder foreslåttHolder;
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "fastsatt_avklaring_holder_id", updatable = false)
+    private BostedsAvklaringHolder fastsattHolder;
 
     @Column(name = "grunnlag_ref", nullable = false, updatable = false)
     private UUID grunnlagsreferanse;
@@ -38,12 +42,13 @@ public class BostedsGrunnlag extends BaseEntitet {
     public BostedsGrunnlag() {
     }
 
-    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder holder, UUID grunnlagsreferanse) {
+    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder foreslåttHolder, BostedsAvklaringHolder fastsattHolder, UUID grunnlagsreferanse) {
         Objects.requireNonNull(behandlingId, "behandlingId");
-        Objects.requireNonNull(holder, "holder");
+        Objects.requireNonNull(foreslåttHolder, "foreslåttHolder");
         Objects.requireNonNull(grunnlagsreferanse, "grunnlagsreferanse");
         this.behandlingId = behandlingId;
-        this.holder = holder;
+        this.foreslåttHolder = foreslåttHolder;
+        this.fastsattHolder = fastsattHolder;
         this.grunnlagsreferanse = grunnlagsreferanse;
     }
 
@@ -55,8 +60,12 @@ public class BostedsGrunnlag extends BaseEntitet {
         return behandlingId;
     }
 
-    public BostedsAvklaringHolder getHolder() {
-        return holder;
+    public BostedsAvklaringHolder getForeslåttHolder() {
+        return foreslåttHolder;
+    }
+
+    public BostedsAvklaringHolder getFastsattHolder() {
+        return fastsattHolder;
     }
 
     public UUID getGrunnlagsreferanse() {
@@ -74,18 +83,20 @@ public class BostedsGrunnlag extends BaseEntitet {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsGrunnlag that)) return false;
-        return Objects.equals(holder, that.holder);
+        return Objects.equals(foreslåttHolder, that.foreslåttHolder)
+            && Objects.equals(fastsattHolder, that.fastsattHolder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(holder);
+        return Objects.hash(foreslåttHolder, fastsattHolder);
     }
 
     @Override
     public String toString() {
         return "BostedsGrunnlag{behandlingId=" + behandlingId
             + ", grunnlagsreferanse=" + grunnlagsreferanse
+            + ", harFastsatt=" + (fastsattHolder != null)
             + ", aktiv=" + aktiv + '}';
     }
 }

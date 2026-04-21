@@ -20,9 +20,6 @@ public class BostedsAvklaring extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSATT_AVKLARING")
     private Long id;
 
-    @Column(name = "bosatt_avklaring_holder_id", nullable = false, updatable = false)
-    private Long holderId;
-
     @Column(name = "skjaeringstidspunkt", nullable = false, updatable = false)
     private LocalDate skjæringstidspunkt;
 
