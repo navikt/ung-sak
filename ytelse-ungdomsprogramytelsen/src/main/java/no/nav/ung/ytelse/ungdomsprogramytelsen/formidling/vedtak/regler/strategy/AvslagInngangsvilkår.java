@@ -13,6 +13,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbygger
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -43,5 +44,4 @@ public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStra
         var resultater = new ResultatHelper(resultatInfo);
         return resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
     }
-
 }
