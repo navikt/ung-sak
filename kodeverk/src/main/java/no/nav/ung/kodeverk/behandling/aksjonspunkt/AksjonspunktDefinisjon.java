@@ -461,10 +461,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     }
 
     public boolean validerGyldigStatusEndring(AksjonspunktStatus aksjonspunktStatus, BehandlingStatus status) {
-        return behandlingStatus.contains(status) || isBesluttningspunkt(aksjonspunktStatus, status);
+        return behandlingStatus.contains(status) || isBeslutningspunkt(aksjonspunktStatus, status);
     }
 
-    private boolean isBesluttningspunkt(AksjonspunktStatus aksjonspunktStatus, BehandlingStatus status) {
+    private boolean isBeslutningspunkt(AksjonspunktStatus aksjonspunktStatus, BehandlingStatus status) {
         // I FatterVedtak/LokalkontorBeslutter kan beslutter reåpne (derav OPPRETTET) eksisterende aksjonspunkter før det sendes tilbake til saksbehandler
         return Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR).contains(status)
             && Objects.equals(aksjonspunktStatus, AksjonspunktStatus.OPPRETTET);
