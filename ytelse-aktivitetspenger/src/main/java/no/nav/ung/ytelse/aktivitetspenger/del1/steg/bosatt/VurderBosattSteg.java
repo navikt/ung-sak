@@ -104,6 +104,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         // Klassifiser perioder per fom-dato
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<LocalDate> skalFastsettesFom = new LinkedHashSet<>();
+        Set<LocalDate> trengerFastsettingFom = new LinkedHashSet<>();
         Set<LocalDate> trengerSaksbehandlerFom = new LinkedHashSet<>();
 
         tidslinjeTilVurdering.stream().forEach(segment -> {
@@ -123,7 +124,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             } else if (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
                 && etterlysning.uttalelseData() != null
                 && etterlysning.uttalelseData().harUttalelse()) {
-                trengerSaksbehandlerFom.add(fom);
+                trengerFastsettingFom.add(fom);
             }
         });
 
@@ -149,7 +150,12 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             autoVurder(behandlingId);
         }
 
-        // Returner aksjonspunkt for perioder som trenger saksbehandler
+        // FASTSETT_BOSTED har prioritet – saksbehandler bekrefter/korrigerer etter brukerens uttalelse
+        if (!trengerFastsettingFom.isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED));
+        }
+
+        // VURDER_BOSTED – perioder uten etterlysning trenger initial registrering fra saksbehandler
         if (!trengerSaksbehandlerFom.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
         }

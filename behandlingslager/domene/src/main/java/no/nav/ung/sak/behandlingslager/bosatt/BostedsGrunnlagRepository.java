@@ -56,6 +56,25 @@ public class BostedsGrunnlagRepository {
     }
 
     /**
+     * Fastsetter avklaringer direkte for angitte skjæringstidspunkter med gitte verdier.
+     * Beholder foreslåttHolder og grunnlagsreferanse uendret.
+     * Brukes av FASTSETT_BOSTED-aksjonspunktet der saksbehandler kan overstyre foreslått verdi.
+     */
+    public void fastsettAvklaringerDirekte(Long behandlingId, Map<LocalDate, Boolean> avklaringer) {
+        var eksisterende = hentGrunnlagHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Forventer bostedsgrunnlag ved fastsetting, behandlingId=" + behandlingId));
+
+        var nyFastsattHolder = new BostedsAvklaringHolder();
+        avklaringer.forEach((skjæringstidspunkt, erBosattITrondheim) ->
+            nyFastsattHolder.leggTilAvklaring(new BostedsAvklaring(skjæringstidspunkt, erBosattITrondheim)));
+
+        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, eksisterende.getForeslåttHolder(), nyFastsattHolder, eksisterende.getGrunnlagsreferanse());
+        deaktiverEksisterende(eksisterende);
+        entityManager.persist(nyttGrunnlag);
+        entityManager.flush();
+    }
+
+    /**
      * Fastsetter foreslåtte avklaringer for angitte skjæringstidspunkter.
      * Kopierer de aktuelle avklaringene fra foreslåttHolder til en ny fastsattHolder.
      * Grunnlagsreferansen beholdes slik at eksisterende etterlysningslenker er intakte.

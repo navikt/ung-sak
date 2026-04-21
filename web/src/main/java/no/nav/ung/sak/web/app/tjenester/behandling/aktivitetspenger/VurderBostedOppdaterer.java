@@ -6,8 +6,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.kodeverk.varsel.EndringType;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -17,17 +15,14 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
-import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -45,7 +40,6 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
     private HistorikkinnslagRepository historikkinnslagRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private EtterlysningRepository etterlysningRepository;
-    private UttalelseRepository uttalelseRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
     VurderBostedOppdaterer() {
@@ -57,13 +51,11 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                                   HistorikkinnslagRepository historikkinnslagRepository,
                                   BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                   EtterlysningRepository etterlysningRepository,
-                                  UttalelseRepository uttalelseRepository,
                                   ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
-        this.uttalelseRepository = uttalelseRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
@@ -92,25 +84,15 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
         UUID grunnlagsreferanse = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, avklaringerPerSkjæringstidspunkt);
 
-        // Perioder med MOTTATT_SVAR + uttalelse fastsettes umiddelbart (ingen ny etterlysning)
-        Set<LocalDate> fomsMedUttalelse = finnFomerMedMottattUttalelse(behandlingId);
-
         // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning, ELLER avklaring endret
         Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate fom = avklaring.getPeriode().getFom();
-            if (fomsMedUttalelse.contains(fom)) {
-                continue; // fastsettes direkte, ikke ny etterlysning
-            }
             boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(fom);
             boolean avklaringEndret = !avklaring.getErBosattITrondheim().equals(tidligereAvklaringer.get(fom));
             if (!harAktivEtterlysning || avklaringEndret) {
                 fomsUtenEtterlysning.add(fom);
             }
-        }
-
-        if (!fomsMedUttalelse.isEmpty()) {
-            bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, fomsMedUttalelse);
         }
 
         if (!fomsUtenEtterlysning.isEmpty()) {
@@ -147,40 +129,13 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandlingId)
             .medTittel(SkjermlenkeType.BOSTEDSVILKÅR)
-            .addLinje(fomsUtenEtterlysning.isEmpty()
-                ? "Bostedsavklaring oppdatert etter brukerens uttalelse"
-                : "Bostedsavklaring registrert – bruker varsles")
+            .addLinje("Bostedsavklaring registrert – bruker varsles")
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
 
         var resultat = OppdateringResultat.nyttResultat();
         resultat.rekjørSteg();
         return resultat;
-    }
-
-    /**
-     * Returnerer fom-datoer for perioder som har mottatt svar med uttalelse.
-     * Disse fastsettes umiddelbart – ingen ny etterlysning sendes.
-     */
-    private Set<LocalDate> finnFomerMedMottattUttalelse(long behandlingId) {
-        var mottattSvarEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(behandlingId, EtterlysningType.UTTALELSE_BOSTED)
-            .stream()
-            .filter(e -> e.getStatus() == EtterlysningStatus.MOTTATT_SVAR)
-            .toList();
-
-        var uttalelser = uttalelseRepository.hentUttalelser(behandlingId, EndringType.AVKLAR_BOSTED);
-
-        Set<LocalDate> fomsMedUttalelse = new LinkedHashSet<>();
-        for (Etterlysning etterlysning : mottattSvarEtterlysninger) {
-            boolean harUttalelse = uttalelser.stream()
-                .filter(u -> u.getPeriode().equals(etterlysning.getPeriode())
-                    && u.getGrunnlagsreferanse().equals(etterlysning.getGrunnlagsreferanse()))
-                .anyMatch(UttalelseV2::harUttalelse);
-            if (harUttalelse) {
-                fomsMedUttalelse.add(etterlysning.getPeriode().getFomDato());
-            }
-        }
-        return fomsMedUttalelse;
     }
 
 }
