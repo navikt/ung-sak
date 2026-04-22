@@ -13,21 +13,16 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingskontroll.AksjonspunktResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
@@ -101,15 +96,6 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
-        // Hent allerede fastsatte perioder for å unngå dobbel fastsetting
-        Set<LocalDate> alleredeFastsattFom = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getFastsattHolder() != null
-                ? g.getFastsattHolder().getAvklaringer().stream()
-                    .map(a -> a.getSkjæringstidspunkt())
-                    .collect(Collectors.toCollection(LinkedHashSet::new))
-                : new LinkedHashSet<LocalDate>())
-            .orElseGet(LinkedHashSet::new);
-
         // Klassifiser perioder per fom-dato
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<LocalDate> skalFastsettesFom = new LinkedHashSet<>();
@@ -129,9 +115,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                 || (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
                 && etterlysning.uttalelseData() != null
                 && !etterlysning.uttalelseData().harUttalelse())) {
-                if (!alleredeFastsattFom.contains(fom)) {
-                    skalFastsettesFom.add(fom);
-                }
+                skalFastsettesFom.add(fom);
             } else if (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
                 && etterlysning.uttalelseData() != null
                 && etterlysning.uttalelseData().harUttalelse()) {
@@ -162,9 +146,9 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         }
 
         // FASTSETT_BOSTED – saksbehandler bekrefter/korrigerer etter brukerens uttalelse
-        BehandleStegResultat resultat = !trengerFastsettingFom.isEmpty()
-            ? BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED))
-            : BehandleStegResultat.utførtUtenAksjonspunkter();
+        if (!trengerFastsettingFom.isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED));
+        }
 
         // Fastsett perioder med tilstrekkelig svar (etter aksjonspunkt-beslutningen)
         if (!skalFastsettesFom.isEmpty()) {
@@ -173,7 +157,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
         // Auto-vurder alle fastsatte perioder
         autoVurder(behandlingId);
-        return resultat;
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     private void autoVurder(long behandlingId) {
