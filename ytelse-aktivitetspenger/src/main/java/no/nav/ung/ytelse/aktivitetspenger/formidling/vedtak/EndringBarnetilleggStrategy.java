@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -12,28 +12,30 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringBarnetilleggInnholdBygger;
 
 @Dependent
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnholdbyggerStrategy {
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
+public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger;
+    private final EndringBarnetilleggInnholdBygger endringBarnetilleggInnholdBygger;
 
     @Inject
-    public FørstegangsInnvilgelseStrategy(FørstegangsInnvilgelseInnholdBygger førstegangsInnvilgelseInnholdBygger) {
-        this.førstegangsInnvilgelseInnholdBygger = førstegangsInnvilgelseInnholdBygger;
+    public EndringBarnetilleggStrategy(EndringBarnetilleggInnholdBygger endringBarnetilleggInnholdBygger) {
+        this.endringBarnetilleggInnholdBygger = endringBarnetilleggInnholdBygger;
     }
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.INNVILGELSE_DOK, førstegangsInnvilgelseInnholdBygger, "Automatisk brev ved ny innvilgelse. ");
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_BARNETILLEGG, endringBarnetilleggInnholdBygger, "Automatisk brev ved fødsel av barn.");
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.INNVILGELSE_UTBETALING);
+        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
+            && resultater.innholderIkke(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)
+            && resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL);
     }
 }

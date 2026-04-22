@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -8,29 +8,28 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.SatsEndringUtleder;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 
 @Dependent
-@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
+    private final AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private final boolean enableAutoBrevVedBarnDødsfall;
 
     @Inject
     public EndringBarnDødsfallStrategy(
-        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
+        AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
         @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall
     ) {
-        this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
+        this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
     }
 
@@ -56,17 +55,17 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
     }
 
     private boolean harSatsendringenDødsfall(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId());
-        if (ungdomsytelseGrunnlag.isPresent()) {
-            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje().intersection(detaljertResultat);
+        var grunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId());
+        if (grunnlag.isPresent()) {
+            LocalDateTimeline<AktivitetspengerSatser> satsTidslinje = grunnlag.get().hentAktivitetspengerSatsTidslinje().intersection(detaljertResultat);
             var satsSegments = satsTidslinje.toSegments();
-            LocalDateSegment<UngdomsytelseSatser> previous = null;
-            for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
+            LocalDateSegment<AktivitetspengerSatser> previous = null;
+            for (LocalDateSegment<AktivitetspengerSatser> current : satsSegments) {
                 if (previous == null) {
                     previous = current;
                     continue;
                 }
-                if (SatsEndringUtleder.bestemSatsendring(current.getValue(), previous.getValue()).dødsfallBarn()) {
+                if (current.getValue().satsGrunnlag().antallBarn() < previous.getValue().satsGrunnlag().antallBarn()) {
                     return true;
                 }
                 previous = current;
