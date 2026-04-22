@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -134,6 +135,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         historikkinnslagRepository.lagre(historikkinnslag);
 
         var resultat = OppdateringResultat.nyttResultat();
+        resultat.setSteg(BehandlingStegType.VURDER_BOSTED);
         resultat.rekjørSteg();
         return resultat;
     }

@@ -31,6 +31,7 @@ public class ManuelleVilkårRekkefølgeTjeneste {
             .takeWhile(steg -> steg.getAksjonspunktDefinisjoner().stream().noneMatch(ap->ap.getVilkårType() == vilkårType))
             .flatMap(steg -> steg.getAksjonspunktDefinisjoner().stream())
             .map(AksjonspunktDefinisjon::getVilkårType)
+            .filter(v -> v != null)
             .collect(Collectors.toSet());
     }
 }

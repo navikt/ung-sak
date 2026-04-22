@@ -71,14 +71,13 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
         for (FastsettBostedPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate fom = avklaring.getPeriode().getFom();
 
-            // Valider at perioden har mottatt uttalelse
+            // Valider at perioden har mottatt svar
             var etterlysning = etterlysningPerFom.get(fom);
             if (etterlysning == null
                 || etterlysning.status() != EtterlysningStatus.MOTTATT_SVAR
-                || etterlysning.uttalelseData() == null
-                || !etterlysning.uttalelseData().harUttalelse()) {
+                || etterlysning.uttalelseData() == null) {
                 throw new IllegalArgumentException(
-                    "Periode " + fom + " har ikke mottatt uttalelse og kan ikke fastsettes via FASTSETT_BOSTED");
+                    "Periode " + fom + " har ikke mottatt svar og kan ikke fastsettes via FASTSETT_BOSTED");
             }
 
             boolean erBosattITrondheim;
@@ -106,6 +105,7 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
         historikkinnslagRepository.lagre(historikkinnslag);
 
         var resultat = OppdateringResultat.nyttResultat();
+        resultat.setSteg(no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTED);
         resultat.rekjørSteg();
         return resultat;
     }
