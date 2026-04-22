@@ -12,10 +12,9 @@ import java.util.Objects;
 public class OppgaveBekreftelseParser {
 
     public OppgaveBekreftelse parseOppgaveBekreftelse(MottattDokument mottattDokument) {
-        var payload = mottattDokument.getPayload();
-        var jsonReader = JsonUtils.getObjectMapper().readerFor(OppgaveBekreftelse.class);
+        var payload = Objects.requireNonNull(mottattDokument.getPayload(), "mangler payload");
         try {
-            return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
+            return JsonUtils.fromString(payload, OppgaveBekreftelse.class);
         } catch (Exception e) {
             throw new DokumentValideringException("Parsefeil i søknad", e);
         }
