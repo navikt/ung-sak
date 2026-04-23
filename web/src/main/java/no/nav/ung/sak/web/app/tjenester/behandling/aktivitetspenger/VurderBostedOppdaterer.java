@@ -22,8 +22,6 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto;
 
@@ -34,7 +32,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderBostedDto.class, adapter = AksjonspunktOppdaterer.class)
 public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBostedDto> {
@@ -44,7 +41,6 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private AktivitetspengerSøktPeriodeRepository søktPeriodeRepository;
 
     VurderBostedOppdaterer() {
         // for CDI proxy
@@ -55,14 +51,12 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                                   HistorikkinnslagRepository historikkinnslagRepository,
                                   BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                   EtterlysningRepository etterlysningRepository,
-                                  ProsessTaskTjeneste prosessTaskTjeneste,
-                                  AktivitetspengerSøktPeriodeRepository søktPeriodeRepository) {
+                                  ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.søktPeriodeRepository = søktPeriodeRepository;
     }
 
     @Override
@@ -91,10 +85,13 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
         UUID grunnlagsreferanse = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
 
-        // Hent søknadens erBosattITrondheim per fom (for sammenligning med saksbehandlerens vurdering)
-        Map<LocalDate, Boolean> søknadErBosattPerFom = søktPeriodeRepository.hentSøktePerioder(behandlingId).stream()
-            .filter(p -> p.getErBosattITrondheim() != null)
-            .collect(Collectors.toMap(p -> p.getPeriode().getFomDato(), AktivitetspengerSøktPeriode::getErBosattITrondheim));
+        // Hent søknadens bosted fra grunnlaget (for sammenligning med saksbehandlerens vurdering)
+        Map<LocalDate, Boolean> søknadErBosattPerFom = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> g.getSøknadHolder() != null
+                ? g.getSøknadHolder().getAvklaringer().stream()
+                    .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim))
+                : Map.<LocalDate, Boolean>of())
+            .orElse(Map.of());
 
         // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning OG søknad stemmer ikke, ELLER avklaring endret
         Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();

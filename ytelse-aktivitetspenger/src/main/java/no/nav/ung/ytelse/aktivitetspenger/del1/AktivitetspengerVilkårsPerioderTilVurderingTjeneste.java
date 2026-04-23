@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -40,6 +41,7 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårUtleder inngangsvilkårUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private BehandlingRepository behandlingRepository;
 
     AktivitetspengerVilkårsPerioderTilVurderingTjeneste() {
         // for CDI proxy
@@ -50,11 +52,13 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
         AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository,
         VilkårResultatRepository vilkårResultatRepository,
         @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD) VilkårUtleder inngangsvilkårUtleder,
-        @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
+        @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
+        BehandlingRepository behandlingRepository) {
         this.aktivitetspengerSøktPeriodeRepository = aktivitetspengerSøktPeriodeRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @Override
@@ -63,7 +67,8 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
         if (vilkårene.isPresent()) {
             LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
 
-            if (vilkårType == VilkårType.BOSTEDSVILKÅR) {
+            if (vilkårType == VilkårType.BOSTEDSVILKÅR
+                && behandlingRepository.hentBehandling(behandlingId).getType() == BehandlingType.REVURDERING) {
                 // Revurdering: kun vurdere bosted for perioder med ENDRET_BOSTED-trigger
                 LocalDateTimeline<Boolean> endretBostedTidslinje = prosesstriggerTidslinje
                     .filterValue(årsaker -> årsaker.contains(BehandlingÅrsakType.ENDRET_BOSTED))
