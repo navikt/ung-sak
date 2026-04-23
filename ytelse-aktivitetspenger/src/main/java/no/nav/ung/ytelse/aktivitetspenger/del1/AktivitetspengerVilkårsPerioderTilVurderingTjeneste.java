@@ -61,7 +61,22 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
-        LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
+            LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
+
+            if (vilkårType == VilkårType.BOSTEDSVILKÅR) {
+                // Revurdering: kun vurdere bosted for perioder med ENDRET_BOSTED-trigger
+                LocalDateTimeline<Boolean> endretBostedTidslinje = prosesstriggerTidslinje
+                    .filterValue(årsaker -> årsaker.contains(BehandlingÅrsakType.ENDRET_BOSTED))
+                    .mapValue(årsaker -> Boolean.TRUE);
+                return vilkårene.filter(it -> it.getVilkårType().equals(vilkårType))
+                    .map(Vilkår::getPerioder)
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .map(VilkårPeriode::getPeriode)
+                    .filter(it -> !endretBostedTidslinje.intersection(it.toLocalDateInterval()).isEmpty())
+                    .collect(Collectors.toCollection(TreeSet::new));
+            }
+
             return vilkårene.filter(it -> it.getVilkårType().equals(vilkårType))
                 .map(Vilkår::getPerioder)
                 .stream()
