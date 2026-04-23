@@ -3,8 +3,10 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -12,7 +14,6 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -39,38 +40,41 @@ public class UngdomsprogramTjeneste {
     public void innhentOpplysninger(Behandling behandling) {
         var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(behandling.getFagsak().getAktørId().getAktørId());
 
-        boolean harUtvidetKvote = registerOpplysninger.opplysninger().stream()
+        // Utvidet kvote gjelder dersom registeret returnerer flagget ELLER behandlingen ble trigget av
+        // utvidet kvote-hendelse. Sistnevnte håndterer tilfeller der registeret ennå ikke har oppdatert flagget.
+        boolean harUtvidetKvoteFraRegister = registerOpplysninger.opplysninger().stream()
             .anyMatch(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::harUtvidetKvote);
+        boolean harUtvidetKvoteFraBehandlingsårsak = behandling.getBehandlingÅrsakerTyper()
+            .contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
+        boolean harUtvidetKvote = harUtvidetKvoteFraRegister || harUtvidetKvoteFraBehandlingsårsak;
+
+        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harUtvidetKvoteFraRegister={}, harUtvidetKvoteFraBehandlingsårsak={}, harUtvidetKvote={}",
+            behandling.getId(), harUtvidetKvoteFraRegister, harUtvidetKvoteFraBehandlingsårsak, harUtvidetKvote);
 
         if (registerOpplysninger.opplysninger().isEmpty()) {
             ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harUtvidetKvote);
             LOG.info("Fant ingen opplysninger om ungdomsprogrammet for aktør. ");
         } else {
             var timeline = lagTimeline(registerOpplysninger);
+            LOG.info("Programperiode fra register: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
             if (harUtvidetKvote) {
                 timeline = utvidProgramperiodeTilMaksKvote(timeline);
+                LOG.info("Programperiode utvidet til: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
             }
             ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harUtvidetKvote);
         }
     }
 
     /**
-     * Utvider programperiode-tidslinjen til maksimalt antall dager med utvidet kvote (300 virkedager).
-     * Når NAV-veileder innvilger utvidet kvote, skal programperioden strekkes til å dekke
-     * 300 virkedager fra programstart, slik at vilkårsperiodene og uttaksberegningen
-     * reflekterer den utvidede kvoten.
+     * Klipper programperiode-tidslinjen til maksimalt antall virkedager med utvidet kvote (300 virkedager).
+     * Når NAV-veileder innvilger utvidet kvote skal programperioden dekke nøyaktig 300 virkedager fra
+     * programstart. Registeret returnerer ofte en åpen tidslinje (tom=9999-12-31), så vi klipper den
+     * her slik at vilkårsperiodene og uttaksberegningen reflekterer den utvidede kvoten korrekt.
      */
     private static LocalDateTimeline<Boolean> utvidProgramperiodeTilMaksKvote(LocalDateTimeline<Boolean> timeline) {
         var fom = timeline.getMinLocalDate();
         var utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true);
-        var currentTom = timeline.getMaxLocalDate();
-        if (!utvidetTom.isAfter(currentTom)) {
-            return timeline;
-        }
-        // Legg til et ekstra segment for å dekke de gjenstående virkedagene
-        var segments = new ArrayList<>(timeline.stream().map(s -> new LocalDateSegment<>(s.getFom(), s.getTom(), s.getValue())).toList());
-        segments.add(new LocalDateSegment<>(currentTom.plusDays(1), utvidetTom, Boolean.TRUE));
-        return new LocalDateTimeline<>(segments);
+        return timeline.intersection(new LocalDateInterval(fom, utvidetTom));
     }
 
     private static LocalDateTimeline<Boolean> lagTimeline(UngdomsprogramRegisterKlient.DeltakerOpplysningerDTO registerOpplysninger) {

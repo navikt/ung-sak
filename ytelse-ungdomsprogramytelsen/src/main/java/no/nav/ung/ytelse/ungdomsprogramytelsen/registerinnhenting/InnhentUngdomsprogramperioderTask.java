@@ -49,7 +49,11 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
         final var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
         if (!periodeTidslinje.isEmpty()) {
             var harUtvidetKvote = ungdomsprogramPeriodeTjeneste.finnHarUtvidetKvote(behandling.getId());
-            fagsakRepository.utvidPeriode(behandling.getFagsakId(), periodeTidslinje.getMinLocalDate(), FagsakperiodeUtleder.finnTomDato(periodeTidslinje.getMinLocalDate(), periodeTidslinje, harUtvidetKvote));
+            var fom = periodeTidslinje.getMinLocalDate();
+            var tom = FagsakperiodeUtleder.finnTomDato(fom, periodeTidslinje, harUtvidetKvote);
+            LOGGER.info("Utvider fagsakperiode for behandling={}: fom={}, tom={}, harUtvidetKvote={}",
+                behandling.getId(), fom, tom, harUtvidetKvote);
+            fagsakRepository.utvidPeriode(behandling.getFagsakId(), fom, tom);
         }
     }
 }

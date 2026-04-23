@@ -64,6 +64,21 @@ public class VurderUttakSteg implements BehandlingSteg {
             // Fjerner deler av programperiode som er etter søkte perioder.
             .intersection(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, godkjentePerioder.getMaxLocalDate(), true));
 
+        var harUtvidetKvote = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .map(gr -> gr.isHarUtvidetKvote())
+            .orElse(false);
+
+        LOGGER.info(() -> String.format(
+            "VurderUttakSteg behandling=%d: harUtvidetKvote=%s, samletVilkårsresultat=[%s..%s], godkjentePerioder=[%s..%s], ungdomsprogramtidslinje=[%s..%s]",
+            behandlingId,
+            harUtvidetKvote,
+            samletVilkårResultatTidslinje.isEmpty() ? "tom" : samletVilkårResultatTidslinje.getMinLocalDate(),
+            samletVilkårResultatTidslinje.isEmpty() ? "tom" : samletVilkårResultatTidslinje.getMaxLocalDate(),
+            godkjentePerioder.getMinLocalDate(),
+            godkjentePerioder.getMaxLocalDate(),
+            ungdomsprogramtidslinje.isEmpty() ? "tom" : ungdomsprogramtidslinje.getMinLocalDate(),
+            ungdomsprogramtidslinje.isEmpty() ? "tom" : ungdomsprogramtidslinje.getMaxLocalDate()));
+
         var søkersDødsdato = personopplysningRepository.hentPersonopplysninger(behandlingId)
             .getGjeldendeVersjon()
             .getPersonopplysninger()
@@ -72,9 +87,6 @@ public class VurderUttakSteg implements BehandlingSteg {
             .findFirst()
             .map(PersonopplysningEntitet::getDødsdato);
 
-        var harUtvidetKvote = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
-            .map(gr -> gr.isHarUtvidetKvote())
-            .orElse(false);
 
         var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(
             godkjentePerioder,
