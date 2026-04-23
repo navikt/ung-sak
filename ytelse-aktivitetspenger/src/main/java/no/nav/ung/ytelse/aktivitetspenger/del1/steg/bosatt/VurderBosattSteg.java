@@ -4,21 +4,25 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTED;
 
@@ -26,48 +30,47 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTED;
 @BehandlingStegRef(value = VURDER_BOSTED)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class VurderBosattSteg implements BehandlingSteg {
+public class VurderBosattSteg extends VilkårVurderingSteg {
 
-    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-    private BehandlingRepository behandlingRepository;
+    private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
 
     VurderBosattSteg() {
-        // for proxy
+        // for CDI proxy
     }
 
     @Inject
-    public VurderBosattSteg(@Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
+    public VurderBosattSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
+                            VilkårResultatRepository vilkårResultatRepository,
+                            VilkårTjeneste vilkårTjeneste,
                             BehandlingRepository behandlingRepository,
-                            VilkårResultatRepository vilkårResultatRepository) {
-        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.behandlingRepository = behandlingRepository;
+                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
+        super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
+        this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
-    public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        var vilkårene = vilkårResultatRepository.hent(kontekst.getBehandlingId());
+    public VilkårType getAktuellVilkårType() {
+        return VilkårType.BOSTEDSVILKÅR;
+    }
 
-        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
+    @Override
+    public Set<VilkårType> getVilkårAvhengigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        EnumSet<VilkårType> avhengigheter = EnumSet.noneOf(VilkårType.class);
+        avhengigheter.add(VilkårType.ALDERSVILKÅR);
+        avhengigheter.add(VilkårType.SØKNADSFRIST);
+        avhengigheter.addAll(manuelleVilkårRekkefølgeTjeneste.finnManuelleVilkårSomErFør(getAktuellVilkårType(), ytelseType, behandlingType));
+        return avhengigheter;
+    }
 
-        //TODO om det er tidligere vilkår, og disse har endt med avslag, så trener vi ikke å vurdere her også
-        var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling);
-
-        var perioderTilVurdering = perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
-        for (DatoIntervallEntitet periode : perioderTilVurdering) {
-            //FIXME AKT implementer regel for automatisk behandling eller opprett aksjonspunkt her
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode).medUtfall(Utfall.OPPFYLT).medRegelInput("TODO"));
+    @Override
+    public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
+        if (vilkårResultatRepository.finnesRelevantPeriode(kontekst.getBehandlingId(), getAktuellVilkårType())) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
+        } else {
+            return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
-        resultatBuilder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), resultatBuilder.build());
-
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(Behandling behandling) {
-        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
-    }
 }

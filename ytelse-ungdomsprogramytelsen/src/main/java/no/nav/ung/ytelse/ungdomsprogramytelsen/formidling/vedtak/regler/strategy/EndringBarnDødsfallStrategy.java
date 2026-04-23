@@ -15,6 +15,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbygger
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.SatsEndringUtleder;
 
 @Dependent
