@@ -65,16 +65,17 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        Map<LocalDate, Boolean> avklaringerPerSkjæringstidspunkt = new LinkedHashMap<>();
-        for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            avklaringerPerSkjæringstidspunkt.put(avklaring.getPeriode().getFom(), avklaring.getErBosattITrondheim());
-        }
-
-        // Les eksisterende foreslått avklaring per fom BEFORE lagreAvklaringer
+        // Les eksisterende foreslåtte avklaringer per fomDato BEFORE lagreAvklaringer
         Map<LocalDate, Boolean> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g -> g.getForeslåttHolder().getAvklaringer().stream()
-                .collect(Collectors.toMap(BostedsAvklaring::getSkjæringstidspunkt, BostedsAvklaring::erBosattITrondheim)))
+                .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim)))
             .orElse(Map.of());
+
+        // Bygg nye avklaringer med splitt basert på fraflyttingsDato
+        Map<LocalDate, Boolean> nyeAvklaringer = new LinkedHashMap<>();
+        for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
+            nyeAvklaringer.putAll(splittAvklaring(avklaring));
+        }
 
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
         Set<LocalDate> fomsHvorAktivEtterlysningFinnes = etterlysningRepository
@@ -83,16 +84,23 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .map(e -> e.getPeriode().getFomDato())
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        UUID grunnlagsreferanse = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, avklaringerPerSkjæringstidspunkt);
+        UUID grunnlagsreferanse = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
 
         // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning, ELLER avklaring endret
         Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            LocalDate fom = avklaring.getPeriode().getFom();
-            boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(fom);
-            boolean avklaringEndret = !avklaring.getErBosattITrondheim().equals(tidligereAvklaringer.get(fom));
+            LocalDate periodesFom = avklaring.getPeriode().getFom();
+            LocalDate periodesTom = avklaring.getPeriode().getTom();
+            boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(periodesFom);
+
+            Map<LocalDate, Boolean> nyeForPeriode = splittAvklaring(avklaring);
+            Map<LocalDate, Boolean> gamleForPeriode = tidligereAvklaringer.entrySet().stream()
+                .filter(e -> !e.getKey().isBefore(periodesFom) && !e.getKey().isAfter(periodesTom))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            boolean avklaringEndret = !nyeForPeriode.equals(gamleForPeriode);
+
             if (!harAktivEtterlysning || avklaringEndret) {
-                fomsUtenEtterlysning.add(fom);
+                fomsUtenEtterlysning.add(periodesFom);
             }
         }
 
@@ -140,4 +148,25 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         return resultat;
     }
 
-}
+    /**
+     * Splitter én BostedAvklaringPeriodeDto til en map med fomDato → erBosattITrondheim.
+     * <ul>
+     *   <li>Ingen fraflyttingsDato → én avklaring (periode.fom, true)</li>
+     *   <li>fraflyttingsDato etter periode.fom → to avklaringer: (periode.fom, true) + (fraflyttingsDato, false)</li>
+     *   <li>fraflyttingsDato ≤ periode.fom → én avklaring (periode.fom, false)</li>
+     * </ul>
+     */
+    private static Map<LocalDate, Boolean> splittAvklaring(BostedAvklaringPeriodeDto avklaring) {
+        LocalDate fom = avklaring.getPeriode().getFom();
+        LocalDate fraflyttingsDato = avklaring.getFraflyttingsDato();
+        if (fraflyttingsDato == null) {
+            return Map.of(fom, true);
+        } else if (fraflyttingsDato.isAfter(fom)) {
+            var resultat = new LinkedHashMap<LocalDate, Boolean>();
+            resultat.put(fom, true);
+            resultat.put(fraflyttingsDato, false);
+            return resultat;
+        } else {
+            return Map.of(fom, false);
+        }
+    }}

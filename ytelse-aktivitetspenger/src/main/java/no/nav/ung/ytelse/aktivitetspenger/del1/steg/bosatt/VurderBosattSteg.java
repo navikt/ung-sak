@@ -98,7 +98,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
         // Klassifiser perioder per fom-dato
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
-        Set<LocalDate> skalFastsettesFom = new LinkedHashSet<>();
+        Set<DatoIntervallEntitet> skalFastsettePerioder = new LinkedHashSet<>();
         Set<LocalDate> trengerFastsettingFom = new LinkedHashSet<>();
         Set<LocalDate> trengerSaksbehandlerFom = new LinkedHashSet<>();
 
@@ -115,7 +115,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                 || (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
                 && etterlysning.uttalelseData() != null
                 && !etterlysning.uttalelseData().harUttalelse())) {
-                skalFastsettesFom.add(fom);
+                skalFastsettePerioder.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
             } else if (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
                 && etterlysning.uttalelseData() != null
                 && etterlysning.uttalelseData().harUttalelse()) {
@@ -151,8 +151,8 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         }
 
         // Fastsett perioder med tilstrekkelig svar (etter aksjonspunkt-beslutningen)
-        if (!skalFastsettesFom.isEmpty()) {
-            bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, skalFastsettesFom);
+        if (!skalFastsettePerioder.isEmpty()) {
+            bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, skalFastsettePerioder);
         }
 
         // Auto-vurder alle fastsatte perioder
@@ -169,8 +169,9 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             return;
         }
 
-        Map<LocalDate, Boolean> bosattPerSkjæringstidspunkt = fastsattHolder.getAvklaringer().stream()
-            .collect(Collectors.toMap(BostedsAvklaring::getSkjæringstidspunkt, BostedsAvklaring::erBosattITrondheim));
+        List<BostedsAvklaring> avklaringerSortert = fastsattHolder.getAvklaringer().stream()
+            .sorted(Comparator.comparing(BostedsAvklaring::getFomDato))
+            .toList();
 
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer vilkårresultat for behandling " + behandlingId));
@@ -180,18 +181,35 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
         vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR).stream()
             .filter(s -> s.getValue().getUtfall() != Utfall.IKKE_RELEVANT)
-            .filter(s -> bosattPerSkjæringstidspunkt.containsKey(s.getFom()))
             .forEach(s -> {
-                var fom = s.getFom();
-                boolean erBosattITrondheim = bosattPerSkjæringstidspunkt.get(fom);
-                var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fom, s.getTom()));
-                if (erBosattITrondheim) {
-                    periodeBuilder.medUtfall(Utfall.OPPFYLT);
-                } else {
-                    periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
-                        .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                LocalDate segmentFom = s.getFom();
+                LocalDate segmentTom = s.getTom();
+
+                // Finn alle avklaringer med fomDato innenfor dette segmentet, sortert
+                List<BostedsAvklaring> avklaringerISegment = avklaringerSortert.stream()
+                    .filter(a -> !a.getFomDato().isBefore(segmentFom) && !a.getFomDato().isAfter(segmentTom))
+                    .toList();
+
+                if (avklaringerISegment.isEmpty()) {
+                    return;
                 }
-                vilkårBuilder.leggTil(periodeBuilder);
+
+                for (int i = 0; i < avklaringerISegment.size(); i++) {
+                    var avklaring = avklaringerISegment.get(i);
+                    LocalDate fom = avklaring.getFomDato();
+                    LocalDate tom = (i + 1 < avklaringerISegment.size())
+                        ? avklaringerISegment.get(i + 1).getFomDato().minusDays(1)
+                        : segmentTom;
+
+                    var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+                    if (avklaring.erBosattITrondheim()) {
+                        periodeBuilder.medUtfall(Utfall.OPPFYLT);
+                    } else {
+                        periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
+                            .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                    }
+                    vilkårBuilder.leggTil(periodeBuilder);
+                }
             });
 
         builder.leggTil(vilkårBuilder);

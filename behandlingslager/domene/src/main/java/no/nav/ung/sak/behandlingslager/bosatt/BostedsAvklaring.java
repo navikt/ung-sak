@@ -8,8 +8,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 /**
- * Fakta-avklaring om brukers bosted for ett skjæringstidspunkt.
- * Skjæringstidspunktet er fom-datoen i den tilhørende vilkårsperioden.
+ * Fakta-avklaring om brukers bosted for én periode.
+ * {@code fomDato} er startdatoen for avklaringsperioden (vilkårsperiodens fom, eller fraflyttingsdato ved delt periode).
  */
 @Entity(name = "BostedsAvklaring")
 @Table(name = "BOSATT_AVKLARING")
@@ -20,8 +20,8 @@ public class BostedsAvklaring extends BaseEntitet {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSATT_AVKLARING")
     private Long id;
 
-    @Column(name = "skjaeringstidspunkt", nullable = false, updatable = false)
-    private LocalDate skjæringstidspunkt;
+    @Column(name = "fom_dato", nullable = false, updatable = false)
+    private LocalDate fomDato;
 
     @Column(name = "er_bosatt_i_trondheim", nullable = false, updatable = false)
     private boolean erBosattITrondheim;
@@ -30,8 +30,8 @@ public class BostedsAvklaring extends BaseEntitet {
         // Hibernate
     }
 
-    public BostedsAvklaring(LocalDate skjæringstidspunkt, boolean erBosattITrondheim) {
-        this.skjæringstidspunkt = skjæringstidspunkt;
+    public BostedsAvklaring(LocalDate fomDato, boolean erBosattITrondheim) {
+        this.fomDato = fomDato;
         this.erBosattITrondheim = erBosattITrondheim;
     }
 
@@ -39,8 +39,8 @@ public class BostedsAvklaring extends BaseEntitet {
         return id;
     }
 
-    public LocalDate getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
+    public LocalDate getFomDato() {
+        return fomDato;
     }
 
     public boolean erBosattITrondheim() {
@@ -51,17 +51,17 @@ public class BostedsAvklaring extends BaseEntitet {
     public boolean equals(Object o) {
         if (!(o instanceof BostedsAvklaring that)) return false;
         return erBosattITrondheim == that.erBosattITrondheim
-            && Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt);
+            && Objects.equals(fomDato, that.fomDato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skjæringstidspunkt, erBosattITrondheim);
+        return Objects.hash(fomDato, erBosattITrondheim);
     }
 
     @Override
     public String toString() {
-        return "BostedsAvklaring{skjæringstidspunkt=" + skjæringstidspunkt
+        return "BostedsAvklaring{fomDato=" + fomDato
             + ", erBosattITrondheim=" + erBosattITrondheim + '}';
     }
 }

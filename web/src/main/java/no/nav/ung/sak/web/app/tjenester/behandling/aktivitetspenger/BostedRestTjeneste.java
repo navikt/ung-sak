@@ -80,10 +80,10 @@ public class BostedRestTjeneste {
             ? mapAvklaringer(grunnlag.getFastsattHolder())
             : Map.<LocalDate, Boolean>of();
 
-        // Bygg liste med én DTO per skjæringstidspunkt
+        // Bygg liste med én DTO per avklaringsperiode
         var perioder = new ArrayList<BostedGrunnlagPeriodeDto>();
         for (BostedsAvklaring avklaring : grunnlag.getForeslåttHolder().getAvklaringer()) {
-            var fom = avklaring.getSkjæringstidspunkt();
+            var fom = avklaring.getFomDato();
             var fastsatt = fastsatte.get(fom);
             perioder.add(new BostedGrunnlagPeriodeDto(fom, avklaring.erBosattITrondheim(), fastsatt));
         }
@@ -93,6 +93,6 @@ public class BostedRestTjeneste {
 
     private static Map<LocalDate, Boolean> mapAvklaringer(BostedsAvklaringHolder holder) {
         return holder.getAvklaringer().stream()
-            .collect(Collectors.toMap(BostedsAvklaring::getSkjæringstidspunkt, BostedsAvklaring::erBosattITrondheim));
+            .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim));
     }
 }

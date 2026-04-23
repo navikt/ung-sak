@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import java.time.LocalDate;
 import java.util.Map;
 import java.util.Optional;
@@ -65,8 +66,8 @@ public class BostedsGrunnlagRepository {
             .orElseThrow(() -> new IllegalStateException("Forventer bostedsgrunnlag ved fastsetting, behandlingId=" + behandlingId));
 
         var nyFastsattHolder = new BostedsAvklaringHolder();
-        avklaringer.forEach((skjæringstidspunkt, erBosattITrondheim) ->
-            nyFastsattHolder.leggTilAvklaring(new BostedsAvklaring(skjæringstidspunkt, erBosattITrondheim)));
+        avklaringer.forEach((fomDato, erBosattITrondheim) ->
+            nyFastsattHolder.leggTilAvklaring(new BostedsAvklaring(fomDato, erBosattITrondheim)));
 
         var nyttGrunnlag = new BostedsGrunnlag(behandlingId, eksisterende.getForeslåttHolder(), nyFastsattHolder, eksisterende.getGrunnlagsreferanse());
         deaktiverEksisterende(eksisterende);
@@ -75,28 +76,29 @@ public class BostedsGrunnlagRepository {
     }
 
     /**
-     * Fastsetter foreslåtte avklaringer for angitte skjæringstidspunkter.
-     * Kopierer de aktuelle avklaringene fra foreslåttHolder til en ny fastsattHolder.
+     * Fastsetter foreslåtte avklaringer for angitte perioder.
+     * Kopierer alle avklaringer med fomDato innenfor en av de angitte periodene fra foreslåttHolder til en ny fastsattHolder.
      * Grunnlagsreferansen beholdes slik at eksisterende etterlysningslenker er intakte.
      */
-    public void fastsettForeslåtteAvklaringer(Long behandlingId, Set<LocalDate> skjæringstidspunkter) {
+    public void fastsettForeslåtteAvklaringer(Long behandlingId, Set<DatoIntervallEntitet> perioder) {
         var eksisterende = hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer bostedsgrunnlag ved fastsetting, behandlingId=" + behandlingId));
 
-        var nyFastsattHolder = byggFastsattHolder(eksisterende, skjæringstidspunkter);
+        var nyFastsattHolder = byggFastsattHolder(eksisterende, perioder);
         var nyttGrunnlag = new BostedsGrunnlag(behandlingId, eksisterende.getForeslåttHolder(), nyFastsattHolder, eksisterende.getGrunnlagsreferanse());
         deaktiverEksisterende(eksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
 
-    private BostedsAvklaringHolder byggFastsattHolder(BostedsGrunnlag eksisterende, Set<LocalDate> skjæringstidspunkter) {
+    private BostedsAvklaringHolder byggFastsattHolder(BostedsGrunnlag eksisterende, Set<DatoIntervallEntitet> perioder) {
         var eksisterendeFastsatt = eksisterende.getFastsattHolder();
         var nyHolder = eksisterendeFastsatt != null ? new BostedsAvklaringHolder(eksisterendeFastsatt) : new BostedsAvklaringHolder();
 
         eksisterende.getForeslåttHolder().getAvklaringer().stream()
-            .filter(a -> skjæringstidspunkter.contains(a.getSkjæringstidspunkt()))
-            .map(a -> new BostedsAvklaring(a.getSkjæringstidspunkt(), a.erBosattITrondheim()))
+            .filter(a -> perioder.stream().anyMatch(p ->
+                !a.getFomDato().isBefore(p.getFomDato()) && !a.getFomDato().isAfter(p.getTomDato())))
+            .map(a -> new BostedsAvklaring(a.getFomDato(), a.erBosattITrondheim()))
             .forEach(nyHolder::leggTilAvklaring);
 
         return nyHolder;

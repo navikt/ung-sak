@@ -11,9 +11,15 @@ import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.sak.typer.Periode;
 
+import java.time.LocalDate;
+
 /**
  * Saksbehandlers fakta-avklaring for én vilkårsperiode om brukers bosted.
- * Skjæringstidspunktet er fom-datoen i perioden.
+ * <p>
+ * Dersom {@code fraflyttingsDato} er {@code null}, er bruker bosatt i Trondheim hele perioden.
+ * Dersom {@code fraflyttingsDato} er satt og etter {@code periode.fom}, deles perioden:
+ * [{@code periode.fom}, {@code fraflyttingsDato} - 1] → bosatt, [{@code fraflyttingsDato}, {@code periode.tom}] → ikke bosatt.
+ * Dersom {@code fraflyttingsDato} er satt og ≤ {@code periode.fom}, er bruker aldri bosatt i perioden.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -25,9 +31,8 @@ public class BostedAvklaringPeriodeDto {
     @Valid
     private Periode periode;
 
-    @JsonProperty("erBosattITrondheim")
-    @NotNull
-    private Boolean erBosattITrondheim;
+    @JsonProperty("fraflyttingsDato")
+    private LocalDate fraflyttingsDato;
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
@@ -38,9 +43,9 @@ public class BostedAvklaringPeriodeDto {
         // for jackson
     }
 
-    public BostedAvklaringPeriodeDto(Periode periode, Boolean erBosattITrondheim, String begrunnelse) {
+    public BostedAvklaringPeriodeDto(Periode periode, LocalDate fraflyttingsDato, String begrunnelse) {
         this.periode = periode;
-        this.erBosattITrondheim = erBosattITrondheim;
+        this.fraflyttingsDato = fraflyttingsDato;
         this.begrunnelse = begrunnelse;
     }
 
@@ -48,8 +53,8 @@ public class BostedAvklaringPeriodeDto {
         return periode;
     }
 
-    public Boolean getErBosattITrondheim() {
-        return erBosattITrondheim;
+    public LocalDate getFraflyttingsDato() {
+        return fraflyttingsDato;
     }
 
     public String getBegrunnelse() {

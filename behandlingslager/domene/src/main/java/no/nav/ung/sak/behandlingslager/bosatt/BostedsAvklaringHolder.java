@@ -32,12 +32,12 @@ public class BostedsAvklaringHolder extends BaseEntitet {
 
     BostedsAvklaringHolder(BostedsAvklaringHolder other) {
         this.avklaringer = other.avklaringer.stream()
-            .map(a -> new BostedsAvklaring(a.getSkjæringstidspunkt(), a.erBosattITrondheim()))
+            .map(a -> new BostedsAvklaring(a.getFomDato(), a.erBosattITrondheim()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     void leggTilAvklaring(BostedsAvklaring avklaring) {
-        avklaringer.removeIf(a -> a.getSkjæringstidspunkt().equals(avklaring.getSkjæringstidspunkt()));
+        avklaringer.removeIf(a -> a.getFomDato().equals(avklaring.getFomDato()));
         avklaringer.add(avklaring);
     }
 
