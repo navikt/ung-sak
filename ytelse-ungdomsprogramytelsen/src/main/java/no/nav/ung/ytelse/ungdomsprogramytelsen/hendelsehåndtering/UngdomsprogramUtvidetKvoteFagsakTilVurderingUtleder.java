@@ -64,9 +64,25 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
             }
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), hendelseId)) {
                 var utvidetPeriode = utledUtvidetPeriode(relevantFagsak.get());
-                fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(
+                var årsakOgPerioder = new ArrayList<ÅrsakOgPerioder>();
+                årsakOgPerioder.add(new ÅrsakOgPerioder(
                     BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM,
-                    Set.of(utvidetPeriode))));
+                    Set.of(utvidetPeriode)));
+
+                // TODO: avklar om det finnes en annen måte å gjøre dette på. Nå blir kontroll av inntekt en del av den nye viderebehandlingen.
+                // Legg til trigger for inntektskontroll av de nye månedene som nå blir del av
+                // ytelsesperioden. Uten dette blir ikke kontrollperioder generert for månedene
+                // som kommer med utvidet kvote.
+                var eksisterendeTom = relevantFagsak.get().getPeriode().getTomDato();
+                if (utvidetPeriode.getTomDato().isAfter(eksisterendeTom)) {
+                    var nyeMåneder = DatoIntervallEntitet.fraOgMedTilOgMed(
+                        eksisterendeTom.plusDays(1), utvidetPeriode.getTomDato());
+                    årsakOgPerioder.add(new ÅrsakOgPerioder(
+                        BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
+                        Set.of(nyeMåneder)));
+                }
+
+                fagsaker.put(relevantFagsak.get(), årsakOgPerioder);
             }
         }
 
