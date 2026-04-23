@@ -14,6 +14,7 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
@@ -66,15 +67,33 @@ public class UngdomsprogramTjeneste {
     }
 
     /**
-     * Klipper programperiode-tidslinjen til maksimalt antall virkedager med utvidet kvote (300 virkedager).
-     * Når NAV-veileder innvilger utvidet kvote skal programperioden dekke nøyaktig 300 virkedager fra
-     * programstart. Registeret returnerer ofte en åpen tidslinje (tom=9999-12-31), så vi klipper den
-     * her slik at vilkårsperiodene og uttaksberegningen reflekterer den utvidede kvoten korrekt.
+     * Utvider programperiode-tidslinjen til maksimalt antall virkedager ved utvidet kvote (300 virkedager).
+     *
+     * <p>To scenarioer håndteres kant-i-kant:
+     * <ul>
+     *     <li>Åpen programperiode (tom=9999-12-31, løpende): klippes til 300 virkedager fra fom.</li>
+     *     <li>Klippet programperiode (opphør satt, eller 260 virkedager allerede forbrukt):
+     *         legges til de resterende virkedagene (opp til 300 totalt) kant-i-kant etter eksisterende tom.</li>
+     * </ul>
+     *
+     * <p>Prinsippet er at utvidelsen alltid skal være kant-i-kant, slik at de nye dagene kan behandles
+     * som en vanlig ytelsesperiode (kontroll av inntekt, aldersovergang, g-regulering osv.).
      */
     private static LocalDateTimeline<Boolean> utvidProgramperiodeTilMaksKvote(LocalDateTimeline<Boolean> timeline) {
         var fom = timeline.getMinLocalDate();
-        var utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true);
-        return timeline.intersection(new LocalDateInterval(fom, utvidetTom));
+        var tom = timeline.getMaxLocalDate();
+        var erÅpen = tom.equals(LocalDate.of(9999, 12, 31));
+        if (erÅpen) {
+            var utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true);
+            return timeline.intersection(new LocalDateInterval(fom, utvidetTom));
+        }
+        var nyFom = tom.plusDays(1);
+        var utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, timeline, true);
+        if (!utvidetTom.isAfter(tom)) {
+            return timeline;
+        }
+        var utvidelse = new LocalDateTimeline<>(nyFom, utvidetTom, true);
+        return timeline.crossJoin(utvidelse);
     }
 
     private static LocalDateTimeline<Boolean> lagTimeline(UngdomsprogramRegisterKlient.DeltakerOpplysningerDTO registerOpplysninger) {

@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.hendelsehåndtering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
@@ -63,17 +64,18 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
                 continue;
             }
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), hendelseId)) {
-                var utvidetPeriode = utledUtvidetPeriode(relevantFagsak.get());
+                var fagsak = relevantFagsak.get();
+                var utvidetPeriode = utledUtvidetPeriode(fagsak);
                 var årsakOgPerioder = new ArrayList<ÅrsakOgPerioder>();
                 årsakOgPerioder.add(new ÅrsakOgPerioder(
                     BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM,
                     Set.of(utvidetPeriode)));
 
-                // TODO: avklar om det finnes en annen måte å gjøre dette på. Nå blir kontroll av inntekt en del av den nye viderebehandlingen.
-                // Legg til trigger for inntektskontroll av de nye månedene som nå blir del av
-                // ytelsesperioden. Uten dette blir ikke kontrollperioder generert for månedene
-                // som kommer med utvidet kvote.
-                var eksisterendeTom = relevantFagsak.get().getPeriode().getTomDato();
+                // Legg til RE_KONTROLL_REGISTER_INNTEKT for de nye (kant-i-kant) dagene slik at
+                // kontrollperioder genereres og tilkjent ytelse dekker dem. De nye dagene er alltid
+                // fremtidige (kant-i-kant etter eksisterende fagsakperiode), så dette trigger ikke
+                // feilutbetaling mot allerede utbetalte perioder.
+                var eksisterendeTom = fagsak.getPeriode().getTomDato();
                 if (utvidetPeriode.getTomDato().isAfter(eksisterendeTom)) {
                     var nyeMåneder = DatoIntervallEntitet.fraOgMedTilOgMed(
                         eksisterendeTom.plusDays(1), utvidetPeriode.getTomDato());
@@ -82,7 +84,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
                         Set.of(nyeMåneder)));
                 }
 
-                fagsaker.put(relevantFagsak.get(), årsakOgPerioder);
+                fagsaker.put(fagsak, årsakOgPerioder);
             }
         }
 
@@ -90,21 +92,40 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
     }
 
     /**
-     * Utleder fagsakperiode utvidet med 300 virkedager (utvidet kvote) basert på programperiodene
-     * fra siste behandling. Trigger-perioden må dekke hele den utvidede perioden slik at
-     * vilkårsperiodene for de ekstra 40 virkedagene også evalueres.
+     * Utleder trigger-periode for revurdering ved utvidet kvote.
+     *
+     * <p>To scenarioer, begge håndteres kant-i-kant:
+     * <ul>
+     *   <li>Åpen programperiode (tom=9999-12-31, løpende): trigger-perioden strekker seg til
+     *       300 virkedager fra fom.</li>
+     *   <li>Klippet programperiode (opphør satt, eller 260 virkedager forbrukt): trigger-perioden
+     *       strekkes med resterende virkedager (opp til 300 totalt) kant-i-kant etter eksisterende tom.</li>
+     * </ul>
      */
     private DatoIntervallEntitet utledUtvidetPeriode(Fagsak fagsak) {
         var eksisterendePeriode = fagsak.getPeriode();
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
-        if (sisteBehandling.isPresent()) {
-            var programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(sisteBehandling.get().getId());
-            if (!programTidslinje.isEmpty()) {
-                var utvidetTom = FagsakperiodeUtleder.finnTomDato(programTidslinje.getMinLocalDate(), programTidslinje, true);
-                return DatoIntervallEntitet.fraOgMedTilOgMed(eksisterendePeriode.getFomDato(), utvidetTom);
+        if (sisteBehandling.isEmpty()) {
+            return eksisterendePeriode;
+        }
+        var programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(sisteBehandling.get().getId());
+        if (programTidslinje.isEmpty()) {
+            return eksisterendePeriode;
+        }
+        var fom = programTidslinje.getMinLocalDate();
+        var tom = programTidslinje.getMaxLocalDate();
+        LocalDate utvidetTom;
+        if (tom.equals(LocalDate.of(9999, 12, 31))) {
+            utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true);
+        } else {
+            var nyFom = tom.plusDays(1);
+            utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, programTidslinje, true);
+            if (!utvidetTom.isAfter(tom)) {
+                // 300 virkedager allerede forbrukt – ingen utvidelse mulig
+                return eksisterendePeriode;
             }
         }
-        return eksisterendePeriode;
+        return DatoIntervallEntitet.fraOgMedTilOgMed(eksisterendePeriode.getFomDato(), utvidetTom);
     }
 
     /**
