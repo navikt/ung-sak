@@ -96,17 +96,6 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
-        // Hent allerede fastsatte avklaringer for å unngå å re-klassifisere perioder som er ferdige
-        Set<LocalDate> alleredeFastsattFom = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> {
-                var holder = g.getFastsattHolder();
-                return holder == null ? new java.util.HashSet<LocalDate>() :
-                    holder.getAvklaringer().stream()
-                        .map(BostedsAvklaring::getSkjæringstidspunkt)
-                        .collect(Collectors.toCollection(LinkedHashSet::new));
-            })
-            .orElse(new LinkedHashSet<>());
-
         // Klassifiser perioder per fom-dato
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<LocalDate> skalFastsettesFom = new LinkedHashSet<>();
@@ -115,12 +104,6 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
         tidslinjeTilVurdering.stream().forEach(segment -> {
             LocalDate fom = segment.getFom();
-
-            // Perioder som allerede er fastsatt via FASTSETT_BOSTED hoppes over – de autoVurderes til slutt
-            if (alleredeFastsattFom.contains(fom)) {
-                return;
-            }
-
             EtterlysningData etterlysning = etterlysningPerFom.get(fom);
 
             if (etterlysning == null) {
@@ -128,10 +111,14 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             } else if (etterlysning.status() == EtterlysningStatus.OPPRETTET
                 || etterlysning.status() == EtterlysningStatus.VENTER) {
                 ventendeFom.add(fom);
-            } else if (etterlysning.status() == EtterlysningStatus.UTLØPT) {
+            } else if (etterlysning.status() == EtterlysningStatus.UTLØPT
+                || (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
+                && etterlysning.uttalelseData() != null
+                && !etterlysning.uttalelseData().harUttalelse())) {
                 skalFastsettesFom.add(fom);
             } else if (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
-                && etterlysning.uttalelseData() != null) {
+                && etterlysning.uttalelseData() != null
+                && etterlysning.uttalelseData().harUttalelse()) {
                 trengerFastsettingFom.add(fom);
             }
         });

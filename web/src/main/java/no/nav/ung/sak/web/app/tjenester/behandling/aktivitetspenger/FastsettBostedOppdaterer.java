@@ -71,13 +71,14 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
         for (FastsettBostedPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate fom = avklaring.getPeriode().getFom();
 
-            // Valider at perioden har mottatt svar
+            // Valider at perioden har mottatt uttalelse
             var etterlysning = etterlysningPerFom.get(fom);
             if (etterlysning == null
                 || etterlysning.status() != EtterlysningStatus.MOTTATT_SVAR
-                || etterlysning.uttalelseData() == null) {
+                || etterlysning.uttalelseData() == null
+                || !etterlysning.uttalelseData().harUttalelse()) {
                 throw new IllegalArgumentException(
-                    "Periode " + fom + " har ikke mottatt svar og kan ikke fastsettes via FASTSETT_BOSTED");
+                    "Periode " + fom + " har ikke mottatt uttalelse og kan ikke fastsettes via FASTSETT_BOSTED");
             }
 
             boolean erBosattITrondheim;
