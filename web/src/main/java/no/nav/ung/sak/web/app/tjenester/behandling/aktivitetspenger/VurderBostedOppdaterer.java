@@ -22,6 +22,8 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
+import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto;
 
@@ -42,6 +44,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private AktivitetspengerSøktPeriodeRepository søktPeriodeRepository;
 
     VurderBostedOppdaterer() {
         // for CDI proxy
@@ -52,12 +55,14 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                                   HistorikkinnslagRepository historikkinnslagRepository,
                                   BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                   EtterlysningRepository etterlysningRepository,
-                                  ProsessTaskTjeneste prosessTaskTjeneste) {
+                                  ProsessTaskTjeneste prosessTaskTjeneste,
+                                  AktivitetspengerSøktPeriodeRepository søktPeriodeRepository) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.søktPeriodeRepository = søktPeriodeRepository;
     }
 
     @Override
@@ -86,7 +91,12 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
         UUID grunnlagsreferanse = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
 
-        // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning, ELLER avklaring endret
+        // Hent søknadens erBosattITrondheim per fom (for sammenligning med saksbehandlerens vurdering)
+        Map<LocalDate, Boolean> søknadErBosattPerFom = søktPeriodeRepository.hentSøktePerioder(behandlingId).stream()
+            .filter(p -> p.getErBosattITrondheim() != null)
+            .collect(Collectors.toMap(p -> p.getPeriode().getFomDato(), AktivitetspengerSøktPeriode::getErBosattITrondheim));
+
+        // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning OG søknad stemmer ikke, ELLER avklaring endret
         Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate periodesFom = avklaring.getPeriode().getFom();
@@ -99,7 +109,9 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             boolean avklaringEndret = !nyeForPeriode.equals(gamleForPeriode);
 
-            if (!harAktivEtterlysning || avklaringEndret) {
+            Boolean søknadErBosatt = søknadErBosattPerFom.get(periodesFom);
+            boolean søknadStemmerOverens = søknadErBosatt != null && nyeForPeriode.equals(Map.of(periodesFom, søknadErBosatt));
+            if ((!harAktivEtterlysning && !søknadStemmerOverens) || avklaringEndret) {
                 fomsUtenEtterlysning.add(periodesFom);
             }
         }
@@ -138,7 +150,9 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandlingId)
             .medTittel(SkjermlenkeType.BOSTEDSVILKÅR)
-            .addLinje("Bostedsavklaring registrert – bruker varsles")
+            .addLinje(fomsUtenEtterlysning.isEmpty()
+                ? "Bostedsavklaring registrert"
+                : "Bostedsavklaring registrert – bruker varsles")
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
 

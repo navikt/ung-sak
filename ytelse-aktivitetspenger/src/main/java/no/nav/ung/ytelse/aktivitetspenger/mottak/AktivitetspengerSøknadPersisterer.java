@@ -60,8 +60,8 @@ public class AktivitetspengerSøknadPersisterer {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    public void lagreSøknadsperioder(no.nav.k9.søknad.felles.type.Periode periode, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId) {
-        AktivitetspengerSøktPeriode søktPeriodeEntity = new AktivitetspengerSøktPeriode(behandlingId, journalpostId, mottattTid, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()));
+    public void lagreSøknadsperioder(no.nav.k9.søknad.felles.type.Periode periode, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId, Boolean erBosattITrondheim) {
+        AktivitetspengerSøktPeriode søktPeriodeEntity = new AktivitetspengerSøktPeriode(behandlingId, journalpostId, mottattTid, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()), erBosattITrondheim);
         søktPeriodeRepository.lagreNyPeriode(søktPeriodeEntity);
     }
 

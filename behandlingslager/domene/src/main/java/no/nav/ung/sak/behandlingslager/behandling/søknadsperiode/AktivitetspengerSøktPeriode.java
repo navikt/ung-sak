@@ -46,6 +46,9 @@ public class AktivitetspengerSøktPeriode extends BaseEntitet implements Vurdert
     })
     private DatoIntervallEntitet periode;
 
+    @Column(name = "er_bosatt_i_trondheim")
+    private Boolean erBosattITrondheim;
+
     protected AktivitetspengerSøktPeriode() {
         //brukes av JPA/Hibernate
     }
@@ -55,6 +58,11 @@ public class AktivitetspengerSøktPeriode extends BaseEntitet implements Vurdert
         this.journalpostId = journalpostId.getVerdi();
         this.journalpostMottattTid = journalpostMottattTid;
         this.periode = periode;
+    }
+
+    public AktivitetspengerSøktPeriode(Long behandlingId, JournalpostId journalpostId, LocalDateTime journalpostMottattTid, DatoIntervallEntitet periode, Boolean erBosattITrondheim) {
+        this(behandlingId, journalpostId, journalpostMottattTid, periode);
+        this.erBosattITrondheim = erBosattITrondheim;
     }
 
     public Long getBehandlingId() {
@@ -67,6 +75,10 @@ public class AktivitetspengerSøktPeriode extends BaseEntitet implements Vurdert
 
     public DatoIntervallEntitet getPeriode() {
         return periode;
+    }
+
+    public Boolean getErBosattITrondheim() {
+        return erBosattITrondheim;
     }
 
     @Override

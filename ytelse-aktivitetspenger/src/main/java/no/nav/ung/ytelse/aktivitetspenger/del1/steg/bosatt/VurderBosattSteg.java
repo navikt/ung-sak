@@ -96,6 +96,11 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
+        // Hent foreslåtte avklaringer for å sjekke om saksbehandler allerede har vurdert (og var enig med søknaden)
+        Collection<BostedsAvklaring> foreslåtteAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> g.getForeslåttHolder() != null ? g.getForeslåttHolder().getAvklaringer() : List.<BostedsAvklaring>of())
+            .orElse(List.of());
+
         // Klassifiser perioder per fom-dato
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<DatoIntervallEntitet> skalFastsettePerioder = new LinkedHashSet<>();
@@ -107,7 +112,14 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             EtterlysningData etterlysning = etterlysningPerFom.get(fom);
 
             if (etterlysning == null) {
-                trengerSaksbehandlerFom.add(fom);
+                // Saksbehandler er enig med søknaden → foreslåtte avklaringer ble lagret uten etterlysning
+                boolean harForeslåttAvklaring = foreslåtteAvklaringer.stream()
+                    .anyMatch(a -> !a.getFomDato().isBefore(fom) && !a.getFomDato().isAfter(segment.getTom()));
+                if (harForeslåttAvklaring) {
+                    skalFastsettePerioder.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
+                } else {
+                    trengerSaksbehandlerFom.add(fom);
+                }
             } else if (etterlysning.status() == EtterlysningStatus.OPPRETTET
                 || etterlysning.status() == EtterlysningStatus.VENTER) {
                 ventendeFom.add(fom);
