@@ -79,13 +79,17 @@ public class BostedRestTjeneste {
         var fastsatte = grunnlag.getFastsattHolder() != null
             ? mapAvklaringer(grunnlag.getFastsattHolder())
             : Map.<LocalDate, Boolean>of();
+        var søknadOppgitte = grunnlag.getSøknadHolder() != null
+            ? mapAvklaringer(grunnlag.getSøknadHolder())
+            : Map.<LocalDate, Boolean>of();
 
         // Bygg liste med én DTO per avklaringsperiode
         var perioder = new ArrayList<BostedGrunnlagPeriodeDto>();
         for (BostedsAvklaring avklaring : grunnlag.getForeslåttHolder().getAvklaringer()) {
             var fom = avklaring.getFomDato();
             var fastsatt = fastsatte.get(fom);
-            perioder.add(new BostedGrunnlagPeriodeDto(fom, avklaring.erBosattITrondheim(), fastsatt));
+            var søknadOppgitt = søknadOppgitte.get(fom);
+            perioder.add(new BostedGrunnlagPeriodeDto(fom, avklaring.erBosattITrondheim(), fastsatt, søknadOppgitt));
         }
 
         return new BostedGrunnlagResponseDto(perioder);

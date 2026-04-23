@@ -31,6 +31,10 @@ public class BostedGrunnlagPeriodeDto {
     @JsonProperty("fastsattErBosattITrondheim")
     private Boolean fastsattErBosattITrondheim;
 
+    /** Hva bruker oppga i søknaden. Null dersom ikke oppgitt. */
+    @JsonProperty("søknadOppgittErBosattITrondheim")
+    private Boolean søknadOppgittErBosattITrondheim;
+
     public BostedGrunnlagPeriodeDto() {
         // for jackson
     }
@@ -39,6 +43,11 @@ public class BostedGrunnlagPeriodeDto {
         this.fom = fom;
         this.foreslåttErBosattITrondheim = foreslåttErBosattITrondheim;
         this.fastsattErBosattITrondheim = fastsattErBosattITrondheim;
+    }
+
+    public BostedGrunnlagPeriodeDto(LocalDate fom, Boolean foreslåttErBosattITrondheim, Boolean fastsattErBosattITrondheim, Boolean søknadOppgittErBosattITrondheim) {
+        this(fom, foreslåttErBosattITrondheim, fastsattErBosattITrondheim);
+        this.søknadOppgittErBosattITrondheim = søknadOppgittErBosattITrondheim;
     }
 
     public LocalDate getFom() {
@@ -51,5 +60,9 @@ public class BostedGrunnlagPeriodeDto {
 
     public Boolean getFastsattErBosattITrondheim() {
         return fastsattErBosattITrondheim;
+    }
+
+    public Boolean getSøknadOppgittErBosattITrondheim() {
+        return søknadOppgittErBosattITrondheim;
     }
 }
