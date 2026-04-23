@@ -16,8 +16,10 @@ import java.time.LocalDate;
 /**
  * Saksbehandlers fakta-avklaring for én vilkårsperiode om brukers bosted.
  * <p>
- * Dersom {@code fraflyttingsDato} er {@code null}, er bruker bosatt i Trondheim hele perioden.
- * Dersom {@code fraflyttingsDato} er satt og etter {@code periode.fom}, deles perioden:
+ * Dersom {@code borITrondheimIHelePerioden} er {@code true}, er bruker bosatt i Trondheim hele perioden
+ * og det skal kun finnes ett BostedAvklaring-innslag fra starten av perioden.
+ * Dersom {@code borITrondheimIHelePerioden} er {@code false} og {@code fraflyttingsDato} er satt
+ * og etter {@code periode.fom}, deles perioden:
  * [{@code periode.fom}, {@code fraflyttingsDato} - 1] → bosatt, [{@code fraflyttingsDato}, {@code periode.tom}] → ikke bosatt.
  * Dersom {@code fraflyttingsDato} er satt og ≤ {@code periode.fom}, er bruker aldri bosatt i perioden.
  */
@@ -31,6 +33,10 @@ public class BostedAvklaringPeriodeDto {
     @Valid
     private Periode periode;
 
+    @JsonProperty("borITrondheimIHelePerioden")
+    @NotNull
+    private Boolean borITrondheimIHelePerioden;
+
     @JsonProperty("fraflyttingsDato")
     private LocalDate fraflyttingsDato;
 
@@ -43,14 +49,19 @@ public class BostedAvklaringPeriodeDto {
         // for jackson
     }
 
-    public BostedAvklaringPeriodeDto(Periode periode, LocalDate fraflyttingsDato, String begrunnelse) {
+    public BostedAvklaringPeriodeDto(Periode periode, Boolean borITrondheimIHelePerioden, LocalDate fraflyttingsDato, String begrunnelse) {
         this.periode = periode;
+        this.borITrondheimIHelePerioden = borITrondheimIHelePerioden;
         this.fraflyttingsDato = fraflyttingsDato;
         this.begrunnelse = begrunnelse;
     }
 
     public Periode getPeriode() {
         return periode;
+    }
+
+    public Boolean getBorITrondheimIHelePerioden() {
+        return borITrondheimIHelePerioden;
     }
 
     public LocalDate getFraflyttingsDato() {
