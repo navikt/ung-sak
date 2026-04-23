@@ -56,7 +56,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             List.of(new Periode(fom, p.getTomDato())),
             satsperioder,
             beregningsgrunnlag,
-            tilkjentYtelsePerioder(satsGrunnlagTidslinje, tilkjentPeriode),
+            tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode),
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
             fødselsdato,
             Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
