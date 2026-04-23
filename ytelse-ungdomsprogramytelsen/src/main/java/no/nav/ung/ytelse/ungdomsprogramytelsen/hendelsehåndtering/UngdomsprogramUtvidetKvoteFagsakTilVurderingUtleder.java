@@ -9,11 +9,14 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +32,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     public UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder() {
         // For CDI
@@ -37,10 +41,12 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
     @Inject
     public UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                                UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                                               FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
+                                                               FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
+                                                               UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
     }
 
     @Override
@@ -57,13 +63,32 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
                 continue;
             }
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), hendelseId)) {
+                var utvidetPeriode = utledUtvidetPeriode(relevantFagsak.get());
                 fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(
                     BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM,
-                    Set.of(relevantFagsak.get().getPeriode()))));
+                    Set.of(utvidetPeriode))));
             }
         }
 
         return fagsaker;
+    }
+
+    /**
+     * Utleder fagsakperiode utvidet med 300 virkedager (utvidet kvote) basert på programperiodene
+     * fra siste behandling. Trigger-perioden må dekke hele den utvidede perioden slik at
+     * vilkårsperiodene for de ekstra 40 virkedagene også evalueres.
+     */
+    private DatoIntervallEntitet utledUtvidetPeriode(Fagsak fagsak) {
+        var eksisterendePeriode = fagsak.getPeriode();
+        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        if (sisteBehandling.isPresent()) {
+            var programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(sisteBehandling.get().getId());
+            if (!programTidslinje.isEmpty()) {
+                var utvidetTom = FagsakperiodeUtleder.finnTomDato(programTidslinje.getMinLocalDate(), programTidslinje, true);
+                return DatoIntervallEntitet.fraOgMedTilOgMed(eksisterendePeriode.getFomDato(), utvidetTom);
+            }
+        }
+        return eksisterendePeriode;
     }
 
     /**

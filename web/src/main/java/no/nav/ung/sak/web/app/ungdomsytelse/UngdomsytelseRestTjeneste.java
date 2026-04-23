@@ -112,7 +112,7 @@ public class UngdomsytelseRestTjeneste {
         final var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId());
         final var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
         var tidslinjeMap = tilkjentYtelseRepository.hentTidslinjerForFagsak(behandling.getFagsakId());
-        var avsluttetTidTilkjentYtelseMap = tidslinjeMap.entrySet().stream().collect(Collectors.toMap(e -> BehandlingAvsluttetTidspunkt.fraBehandling(e.getKey()), Map.Entry::getValue));
+        var avsluttetTidTilkjentYtelseMap = tidslinjeMap.entrySet().stream().collect(Collectors.toMap(e -> BehandlingAvsluttetTidspunkt.fraBehandling(e.getKey()), Map.Entry::getValue, (v1, v2) -> v2));
         return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(
             BehandlingAvsluttetTidspunkt.fraBehandling(behandling),
             månedsvisPeriodisering,
