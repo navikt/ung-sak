@@ -39,6 +39,11 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
+    @ManyToOne
+    @Immutable
+    @ChangeTracked
+    @JoinColumn(name = "ung_ungdomsprogramp_utvidet_kvote_id", nullable = true, updatable = false)
+    private UngdomsprogramUtvidetKvote ungdomsprogramUtvidetKvote;
 
     public UngdomsprogramPeriodeGrunnlag() {
     }
@@ -46,6 +51,7 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     UngdomsprogramPeriodeGrunnlag(Long behandlingId, UngdomsprogramPeriodeGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.ungdomsprogramPerioder = grunnlag.ungdomsprogramPerioder;
+        this.ungdomsprogramUtvidetKvote = grunnlag.ungdomsprogramUtvidetKvote;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -114,6 +120,18 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
 
     public void setAktiv(boolean aktiv) {
         this.aktiv = aktiv;
+    }
+
+    public Optional<UngdomsprogramUtvidetKvote> getUngdomsprogramUtvidetKvote() {
+        return Optional.ofNullable(ungdomsprogramUtvidetKvote);
+    }
+
+    public void setUngdomsprogramUtvidetKvote(UngdomsprogramUtvidetKvote ungdomsprogramUtvidetKvote) {
+        this.ungdomsprogramUtvidetKvote = ungdomsprogramUtvidetKvote;
+    }
+
+    public boolean isHarUtvidetKvote() {
+        return ungdomsprogramUtvidetKvote != null && ungdomsprogramUtvidetKvote.isHarUtvidetKvote();
     }
 
     @Override

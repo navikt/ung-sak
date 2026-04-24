@@ -56,6 +56,9 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
         }
 
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM)) {
+            resultater.add(utvidetKvoteDetaljertResultat(avslåtteVilkår));
+        }
         relevanteÅrsaker.stream()
             .filter(ÅRSAK_RESULTAT_INNVILGELSE_MAP::containsKey)
             .map(årsak -> behandlingsårsakDetaljertResultat(årsak, avslåtteVilkår))
@@ -82,6 +85,14 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
         }
 
         return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår, med behandlingsårsak %s".formatted(key));
+    }
+
+    private static DetaljertResultatInfo utvidetKvoteDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
+        if (avslåtteVilkår.isEmpty()) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_UTVIDET_KVOTE);
+        } else {
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår ved utvidet kvote");
+        }
     }
 
     private static DetaljertResultatInfo endretSluttdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {

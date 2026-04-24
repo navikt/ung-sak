@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
@@ -32,6 +33,7 @@ class VurderUttakStegTest {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository = mock(UngdomsytelseGrunnlagRepository.class);
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
     private PersonopplysningRepository personopplysningRepository = mock(PersonopplysningRepository.class);
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = mock(UngdomsprogramPeriodeRepository.class);
     private InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste = mock(InntektArbeidYtelseTjeneste.class);
 
     @Test
@@ -45,7 +47,7 @@ class VurderUttakStegTest {
         BehandlingskontrollKontekst kontekst = new BehandlingskontrollKontekst(fagsak.getId(), fagsak.getAktørId(), behandlingLås);
 
         VurderUttakSteg steg = new VurderUttakSteg(vilkårTjeneste, ungdomsytelseGrunnlagRepository,
-            ungdomsprogramPeriodeTjeneste, personopplysningRepository
+            ungdomsprogramPeriodeTjeneste, personopplysningRepository, ungdomsprogramPeriodeRepository
         );
         LocalDate fom = LocalDate.parse("2024-01-01");
         LocalDate tom = LocalDate.parse("2024-01-31");

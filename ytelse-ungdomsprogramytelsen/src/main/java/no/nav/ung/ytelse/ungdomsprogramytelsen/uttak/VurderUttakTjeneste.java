@@ -15,6 +15,13 @@ class VurderUttakTjeneste {
     static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
                                                             LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
                                                             Optional<LocalDate> søkersDødsdato) {
+        return vurderUttak(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato, false);
+    }
+
+    static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
+                                                            LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
+                                                            Optional<LocalDate> søkersDødsdato,
+                                                            boolean harUtvidetKvote) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
@@ -23,7 +30,7 @@ class VurderUttakTjeneste {
 
         var delresultater = List.of(
             new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
-            new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder),
+            new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje, harUtvidetKvote).vurder(godkjentePerioder),
             new InnvilgHelePeriodenVurderer().vurder(godkjentePerioder) // innvilger hele perioden og prioriterer så avslag i mapping dersom det finnes
         );
 
