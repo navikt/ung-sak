@@ -15,6 +15,7 @@ import no.nav.ung.sak.ytelse.BeregnetSats;
 import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
 import no.nav.ung.sak.ytelse.ReduksjonBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningInput;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
@@ -63,13 +64,24 @@ public class AktivitetspengerBrevScenarioerUtils {
             .medBarnetilleggDagsats(beregnDagsatsBarnetillegg(antallBarn, barneTillegg).intValue());
     }
 
+    public static LocalDateTimeline<AktivitetspengerSatser> lagSatserTidslinje(
+        LocalDateTimeline<AktivitetspengerSatsGrunnlag> satsGrunnlagTidslinje,
+        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlagTidslinje) {
+        return beregningsgrunnlagTidslinje.combine(
+            satsGrunnlagTidslinje,
+            (interval, bg, satser) -> new LocalDateSegment<>(interval, new AktivitetspengerSatser(satser.getValue(), bg.getValue())),
+            LocalDateTimeline.JoinStyle.INNER_JOIN
+        );
+    }
+
     public static Beregningsgrunnlag lagBeregningsgrunnlag(LocalDate skjæringstidspunkt) {
         var input = new BeregningInput(new Beløp(0), new Beløp(0), new Beløp(0), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
         return new Beregningsgrunnlag(input, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "test-sporing");
     }
 
     public static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(
-        LocalDateTimeline<AktivitetspengerSatsGrunnlag> satser, LocalDateInterval tilkjentPeriode) {
+        LocalDateTimeline<AktivitetspengerSatser> satser,
+        LocalDateInterval tilkjentPeriode) {
 
         LocalDateTimeline<YearMonth> ytelseTidslinje = splitPrMåned(new LocalDateTimeline<>(tilkjentPeriode, true))
             .map(s -> List.of(new LocalDateSegment<>(s.getLocalDateInterval(), YearMonth.of(s.getFom().getYear(), s.getFom().getMonthValue()))));

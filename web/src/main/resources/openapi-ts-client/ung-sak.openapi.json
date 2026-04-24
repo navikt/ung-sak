@@ -1768,6 +1768,12 @@
           "aksjonspunktType" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType"
           },
+          "ansvarligSaksbehandler" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
           "begrunnelse" : {
             "maxLength" : 5000,
             "minLength" : 0,
@@ -9566,7 +9572,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
+        "summary" : "Identer hentes fra historikkinnslag og aksjonspunkt.",
         "tags" : [ "nav-ansatt" ]
       }
     },

@@ -39,7 +39,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>10.6.1</felles.version>
+        <felles.version>11.0.2</felles.version>
         <swagger.version>2.2.48</swagger.version>
         <junit.version>6.0.3</junit.version>
         <k9format.version>12.10.0</k9format.version>
@@ -48,7 +48,7 @@
         <kotlin-stdlib.version>2.3.20</kotlin-stdlib.version>
         <jandex.version>3.5.3</jandex.version>
         <pdfgen-core.version>1.1.79</pdfgen-core.version>
-        <flyway.version>12.3.0</flyway.version>
+        <flyway.version>12.4.0</flyway.version>
         <confluent.platform.version>8.2.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>

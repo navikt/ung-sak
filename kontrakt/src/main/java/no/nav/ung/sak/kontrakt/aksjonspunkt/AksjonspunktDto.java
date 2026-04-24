@@ -87,6 +87,11 @@ public class AksjonspunktDto {
     @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String opprettetAv;
 
+    @JsonProperty(value = "ansvarligSaksbehandler")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String ansvarligSaksbehandler;
+
     public AksjonspunktDto() {
     }
 
@@ -208,6 +213,14 @@ public class AksjonspunktDto {
 
     public void setOpprettetAv(String opprettetAv) {
         this.opprettetAv = opprettetAv;
+    }
+
+    public String getAnsvarligSaksbehandler() {
+        return ansvarligSaksbehandler;
+    }
+
+    public void setAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
+        this.ansvarligSaksbehandler = ansvarligSaksbehandler;
     }
 
     @Override
