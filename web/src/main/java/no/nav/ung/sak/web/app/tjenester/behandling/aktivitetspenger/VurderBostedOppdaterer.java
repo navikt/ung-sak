@@ -70,10 +70,10 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                 .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim)))
             .orElse(Map.of());
 
-        // Bygg nye avklaringer med splitt basert på fraflyttingsDato
+        // Bygg nye avklaringer med splitt basert på vurdering
         Map<LocalDate, Boolean> nyeAvklaringer = new LinkedHashMap<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            nyeAvklaringer.putAll(splittAvklaring(avklaring));
+            nyeAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(avklaring.getPeriode().getFom(), avklaring.getVurdering()));
         }
 
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
@@ -100,7 +100,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             LocalDate periodesTom = avklaring.getPeriode().getTom();
             boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(periodesFom);
 
-            Map<LocalDate, Boolean> nyeForPeriode = splittAvklaring(avklaring);
+            Map<LocalDate, Boolean> nyeForPeriode = BostedAvklaringUtil.splittAvklaring(avklaring.getPeriode().getFom(), avklaring.getVurdering());
             Map<LocalDate, Boolean> gamleForPeriode = tidligereAvklaringer.entrySet().stream()
                 .filter(e -> !e.getKey().isBefore(periodesFom) && !e.getKey().isAfter(periodesTom))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -159,25 +159,4 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         return resultat;
     }
 
-    /**
-     * Splitter én BostedAvklaringPeriodeDto til en map med fomDato → erBosattITrondheim.
-     * <ul>
-     *   <li>Ingen fraflyttingsDato → én avklaring (periode.fom, true)</li>
-     *   <li>fraflyttingsDato etter periode.fom → to avklaringer: (periode.fom, true) + (fraflyttingsDato, false)</li>
-     *   <li>fraflyttingsDato ≤ periode.fom → én avklaring (periode.fom, false)</li>
-     * </ul>
-     */
-    private static Map<LocalDate, Boolean> splittAvklaring(BostedAvklaringPeriodeDto avklaring) {
-        LocalDate fom = avklaring.getPeriode().getFom();
-        LocalDate fraflyttingsDato = avklaring.getFraflyttingsDato();
-        if (fraflyttingsDato == null) {
-            return Map.of(fom, true);
-        } else if (fraflyttingsDato.isAfter(fom)) {
-            var resultat = new LinkedHashMap<LocalDate, Boolean>();
-            resultat.put(fom, true);
-            resultat.put(fraflyttingsDato, false);
-            return resultat;
-        } else {
-            return Map.of(fom, false);
-        }
-    }}
+}

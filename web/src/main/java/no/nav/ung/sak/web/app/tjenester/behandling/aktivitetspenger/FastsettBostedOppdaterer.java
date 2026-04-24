@@ -81,17 +81,15 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
                     "Periode " + fom + " har ikke mottatt uttalelse og kan ikke fastsettes via FASTSETT_BOSTED");
             }
 
-            boolean erBosattITrondheim;
             if (Boolean.TRUE.equals(avklaring.getForeslåttVurderingErGyldig())) {
-                erBosattITrondheim = foreslåtteAvklaringer.getOrDefault(fom, false);
+                fastsatteAvklaringer.put(fom, foreslåtteAvklaringer.getOrDefault(fom, false));
             } else {
-                if (avklaring.getNyErBosattITrondheim() == null) {
+                if (avklaring.getNyVurdering() == null) {
                     throw new IllegalArgumentException(
-                        "nyErBosattITrondheim må oppgis når foreslåttVurderingErGyldig=false for periode " + fom);
+                        "nyVurdering må oppgis når foreslåttVurderingErGyldig=false for periode " + fom);
                 }
-                erBosattITrondheim = avklaring.getNyErBosattITrondheim();
+                fastsatteAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(fom, avklaring.getNyVurdering()));
             }
-            fastsatteAvklaringer.put(fom, erBosattITrondheim);
         }
 
         bostedsGrunnlagRepository.fastsettAvklaringerDirekte(behandlingId, fastsatteAvklaringer);

@@ -26,17 +26,18 @@ public class FastsettBostedPeriodeDto {
     private Boolean foreslåttVurderingErGyldig;
 
     /** Ny vurdering brukes kun dersom {@code foreslåttVurderingErGyldig == false}. */
-    @JsonProperty("nyErBosattITrondheim")
-    private Boolean nyErBosattITrondheim;
+    @JsonProperty("nyVurdering")
+    @Valid
+    private BostedVurderingDto nyVurdering;
 
     public FastsettBostedPeriodeDto() {
         // for jackson
     }
 
-    public FastsettBostedPeriodeDto(Periode periode, Boolean foreslåttVurderingErGyldig, Boolean nyErBosattITrondheim) {
+    public FastsettBostedPeriodeDto(Periode periode, Boolean foreslåttVurderingErGyldig, BostedVurderingDto nyVurdering) {
         this.periode = periode;
         this.foreslåttVurderingErGyldig = foreslåttVurderingErGyldig;
-        this.nyErBosattITrondheim = nyErBosattITrondheim;
+        this.nyVurdering = nyVurdering;
     }
 
     public Periode getPeriode() {
@@ -47,7 +48,7 @@ public class FastsettBostedPeriodeDto {
         return foreslåttVurderingErGyldig;
     }
 
-    public Boolean getNyErBosattITrondheim() {
-        return nyErBosattITrondheim;
+    public BostedVurderingDto getNyVurdering() {
+        return nyVurdering;
     }
 }
