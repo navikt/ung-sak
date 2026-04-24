@@ -32,8 +32,8 @@ import java.util.Map;
 @BehandlingTypeRef
 public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
 
-    private static final BigDecimal REDUKSJONSFAKTOR_ARBEIDSINNTEKT = new BigDecimal("0.66");
-    private static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("1.00");
+    public static final BigDecimal REDUKSJONSFAKTOR_ARBEIDSINNTEKT = new BigDecimal("0.66");
+    public static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("0.66");
 
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;

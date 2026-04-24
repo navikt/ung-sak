@@ -26,14 +26,16 @@ import java.util.Comparator;
 import java.util.Objects;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
+import static no.nav.ung.ytelse.aktivitetspenger.beregnytelse.AktivitetspengerBeregnYtelseSteg.REDUKSJONSFAKTOR_ARBEIDSINNTEKT;
+import static no.nav.ung.ytelse.aktivitetspenger.beregnytelse.AktivitetspengerBeregnYtelseSteg.REDUKSJONSFAKTOR_YTELSE;
 
 @Dependent
 public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
-    public static final BigDecimal REDUKSJONS_FAKTOR = BigDecimal.valueOf(0.66);
-    private static final int REDUSJON_PROSENT = REDUKSJONS_FAKTOR.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
+    public static final int REDUKSJON_ARBEID_PROSENT = REDUKSJONSFAKTOR_ARBEIDSINNTEKT.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
+    public static final int REDUKSJON_YTELSE_PROSENT = REDUKSJONSFAKTOR_YTELSE.multiply(BigDecimal.valueOf(100)).setScale(0, RoundingMode.HALF_UP).intValue();
 
     @Inject
     public EndringInntektReduksjonInnholdBygger(TilkjentYtelseRepository tilkjentYtelseRepository) {
@@ -73,7 +75,7 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         var harIngenUtbetalingsperioder = !ingenUtbetalingsperioder.isEmpty();
 
         var dto = new EndringInntektReduksjonDto(
-            REDUSJON_PROSENT,
+            REDUKSJON_ARBEID_PROSENT,
             utbetalingsperioder,
             ingenUtbetalingsperioder,
             harFlereUtbetalingsperioder,
