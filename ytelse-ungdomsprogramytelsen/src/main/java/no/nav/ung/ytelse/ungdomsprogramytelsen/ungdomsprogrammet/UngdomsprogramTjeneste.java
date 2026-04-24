@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,16 +84,21 @@ public class UngdomsprogramTjeneste {
         var fom = timeline.getMinLocalDate();
         var tom = timeline.getMaxLocalDate();
         var erÅpen = tom.equals(LocalDate.of(9999, 12, 31));
+        boolean harUtvidetKvote = true;
         if (erÅpen) {
-            var utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true);
+            var utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), harUtvidetKvote);
             return timeline.intersection(new LocalDateInterval(fom, utvidetTom));
         }
-        var nyFom = tom.plusDays(1);
-        var utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, timeline, true);
-        if (!utvidetTom.isAfter(tom)) {
+        // Beregn eksplisitt gjenstående virkedager for å unngå feil ved grenseverdier.
+        // finnTomDato returnerer nyFom både når det gjenstår 1 virkedag og når kvoten er oppbrukt,
+        var forbrukteDager = FinnForbrukteDager.finnForbrukteDager(timeline, harUtvidetKvote).forbrukteDager();
+        var gjenståendeDager = FinnForbrukteDager.getMaksAntallDager(harUtvidetKvote) - forbrukteDager;
+        if (gjenståendeDager <= 0) {
             return timeline;
         }
-        var utvidelse = new LocalDateTimeline<>(nyFom, utvidetTom, true);
+        var nyFom = tom.plusDays(1);
+        var utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, timeline, harUtvidetKvote);
+        var utvidelse = new LocalDateTimeline<>(nyFom, utvidetTom, harUtvidetKvote);
         return timeline.crossJoin(utvidelse);
     }
 
