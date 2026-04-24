@@ -42,7 +42,7 @@
         <felles.version>11.0.2</felles.version>
         <swagger.version>2.2.48</swagger.version>
         <junit.version>6.0.3</junit.version>
-        <k9format.version>12.10.0</k9format.version>
+        <k9format.version>13.0.0</k9format.version>
         <jackson.version>2.21.2</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.20</kotlin-stdlib.version>
@@ -349,7 +349,7 @@
 
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
+                <artifactId>soknad-jackson2</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>

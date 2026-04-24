@@ -29,8 +29,8 @@ public class SøknadPayload {
             return null;
         }
         try {
-            return JsonUtils.getObjectMapper().writeValueAsString(payload);
-        } catch (JsonProcessingException e) {
+            return JsonUtils.toString(payload);
+        } catch (Exception e) {
             throw new IllegalStateException("Ugyldig payload", e);
         }
     }

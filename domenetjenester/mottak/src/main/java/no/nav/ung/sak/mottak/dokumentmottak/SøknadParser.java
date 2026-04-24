@@ -11,10 +11,9 @@ import java.util.Objects;
 public class SøknadParser {
 
     public Søknad parseSøknad(MottattDokument mottattDokument) {
-        var payload = mottattDokument.getPayload();
-        var jsonReader = JsonUtils.getObjectMapper().readerFor(Søknad.class);
+        var payload = Objects.requireNonNull( mottattDokument.getPayload(), "mangler payload");
         try {
-            return jsonReader.readValue(Objects.requireNonNull(payload, "mangler payload"));
+            return JsonUtils.fromString(payload, Søknad.class);
         } catch (Exception e) {
             throw new DokumentValideringException("Parsefeil i søknad", e);
         }
