@@ -35,6 +35,14 @@ public class BostedGrunnlagPeriodeDto {
     @JsonProperty("søknadOppgittErBosattITrondheim")
     private Boolean søknadOppgittErBosattITrondheim;
 
+    /** Om bruker har avgitt uttalelse om bosted. False dersom etterlysning ikke er besvart. */
+    @JsonProperty("harUttalelse")
+    private boolean harUttalelse;
+
+    /** Brukerens uttalelsetekst. Null dersom bruker ikke har svart. */
+    @JsonProperty("uttalelseTekst")
+    private String uttalelseTekst;
+
     public BostedGrunnlagPeriodeDto() {
         // for jackson
     }
@@ -64,5 +72,19 @@ public class BostedGrunnlagPeriodeDto {
 
     public Boolean getSøknadOppgittErBosattITrondheim() {
         return søknadOppgittErBosattITrondheim;
+    }
+
+    public boolean isHarUttalelse() {
+        return harUttalelse;
+    }
+
+    public String getUttalelseTekst() {
+        return uttalelseTekst;
+    }
+
+    public BostedGrunnlagPeriodeDto medUttalelse(boolean harUttalelse, String uttalelseTekst) {
+        this.harUttalelse = harUttalelse;
+        this.uttalelseTekst = uttalelseTekst;
+        return this;
     }
 }
