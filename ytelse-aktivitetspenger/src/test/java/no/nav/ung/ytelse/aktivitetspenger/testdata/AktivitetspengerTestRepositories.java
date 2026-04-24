@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.testdata;
 
 import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
@@ -23,7 +24,8 @@ public record AktivitetspengerTestRepositories(
     VedtaksbrevValgRepository vedtaksbrevValgRepository,
     KlageRepository klageRepository,
     FritekstRepository fritekstRepository,
-    AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository) {
+    AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
+    BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
 
     public static AktivitetspengerTestRepositories lagAlleAktivitetspengerTestRepositoriesOgAbakusTjeneste(EntityManager entityManager, InntektArbeidYtelseTjeneste inntektArbeidYtelseTjeneste) {
         return lagAlle(entityManager, inntektArbeidYtelseTjeneste, null, null);
@@ -36,7 +38,8 @@ public record AktivitetspengerTestRepositories(
         var prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         var vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
         var aktivitetspengerGrunnlagRepository = new AktivitetspengerGrunnlagRepository(entityManager);
-        return new AktivitetspengerTestRepositories(repositoryProvider, aktivitetspengerSøktPeriodeRepository, tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste, vedtaksbrevValgRepository, klageRepository, fritekstRepository, aktivitetspengerGrunnlagRepository);
+        var behandlingAnsvarligRepository = new BehandlingAnsvarligRepository(entityManager, repositoryProvider.getBehandlingRepository());
+        return new AktivitetspengerTestRepositories(repositoryProvider, aktivitetspengerSøktPeriodeRepository, tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste, vedtaksbrevValgRepository, klageRepository, fritekstRepository, aktivitetspengerGrunnlagRepository, behandlingAnsvarligRepository);
     }
 
 }
