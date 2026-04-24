@@ -39,10 +39,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>11.0.2</felles.version>
+        <felles.version>11.1.1</felles.version>
         <swagger.version>2.2.48</swagger.version>
         <junit.version>6.0.3</junit.version>
-        <k9format.version>13.0.0</k9format.version>
+        <k9format.version>13.0.1</k9format.version>
         <jackson.version>2.21.2</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.20</kotlin-stdlib.version>
@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>6.0.9</version>
+                <version>6.0.10</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
