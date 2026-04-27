@@ -42,7 +42,7 @@
         <felles.version>11.0.2</felles.version>
         <swagger.version>2.2.48</swagger.version>
         <junit.version>6.0.3</junit.version>
-        <k9format.version>12.10.0</k9format.version>
+        <k9format.version>13.0.0</k9format.version>
         <jackson.version>2.21.2</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.20</kotlin-stdlib.version>
@@ -54,7 +54,7 @@
         <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>
         <ung-brukerdialog-api.version>1.0.0</ung-brukerdialog-api.version>
         <handlebars.version>4.5.0</handlebars.version>
-        <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
+        <validation-model-jakarta.version>1.30.1</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
         <jsoup.version>1.22.1</jsoup.version>
         <commonmark.version>0.28.0</commonmark.version>
@@ -349,7 +349,7 @@
 
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
+                <artifactId>soknad-jackson2</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>

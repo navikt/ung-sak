@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import no.nav.k9.søknad.JsonUtils;
+import no.nav.k9.søknad.JsonUtilsJackson2;
 
 public enum Søknadsformat {
     NY,
@@ -16,7 +17,7 @@ public enum Søknadsformat {
         if (jsonGuess) {
             JsonNode jsonNode;
             try {
-                jsonNode = JsonUtils.getObjectMapper().readTree(payload);
+                jsonNode = JsonUtilsJackson2.getObjectMapper().readTree(payload);
             } catch (JsonProcessingException e) {
                 throw new RuntimeException("Parsing av melding feilet", e);
             }
