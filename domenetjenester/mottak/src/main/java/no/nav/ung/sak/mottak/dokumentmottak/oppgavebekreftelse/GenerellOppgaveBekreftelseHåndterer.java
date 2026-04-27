@@ -27,7 +27,7 @@ import java.util.UUID;
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_SLUTTDATO)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_AVVIK_REGISTERINNTEKT)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PERIODE)
-@OppgaveTypeRef(Bekreftelse.Type.UNG_BOSTED_AVKLARING)
+@OppgaveTypeRef(Bekreftelse.Type.AVP_BOSTED_AVKLARING)
 public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndterer {
 
     private static final Logger log = LoggerFactory.getLogger(GenerellOppgaveBekreftelseHåndterer.class);
