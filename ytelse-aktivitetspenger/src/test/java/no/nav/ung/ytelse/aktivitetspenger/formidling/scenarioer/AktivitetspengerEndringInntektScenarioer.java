@@ -90,6 +90,26 @@ public class AktivitetspengerEndringInntektScenarioer {
     }
 
     /**
+     * Reduksjon kun for siste 10 dager av en måned (ufullstendig måned).
+     */
+    public static AktivitetspengerTestScenario endringInntektSisteMåned_10dager(LocalDate fom, int inntektSisteMåned) {
+        LocalDate førsteI3Måned = fom.plusMonths(3).withDayOfMonth(1);
+        LocalDate tom = førsteI3Måned.plusDays(9);
+        var registerInntektTimeline = new LocalDateTimeline<>(
+            List.of(
+                new LocalDateSegment<>(
+                    førsteI3Måned,
+                    tom,
+                    BigDecimal.valueOf(inntektSisteMåned))
+            ));
+
+        var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
+            KontrollerInntektHolder::forRegisterInntekt);
+
+        return endringMedKontrollertInntekt(fom, tom, kontrollertInntektTidslinje);
+    }
+
+    /**
      * Full utbetaling uten reduksjon: rapportert inntekt 10 000 kr men register og fastsatt er 0 kr.
      */
     public static AktivitetspengerTestScenario endring10000KrInntekt0KrRegisterInntekt_0krFastsatt(LocalDate fom) {

@@ -113,6 +113,29 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
             );
     }
 
+    @DisplayName("Endringsbrev for reduksjon av inntekt siste måned")
+    @Test
+    void endring_inntekt_siste_måned() {
+        LocalDate fom = LocalDate.of(2025, 12, 1);
+        int inntektSisteMåned = 10000;
+        var behandling = lagScenario(AktivitetspengerEndringInntektScenarioer.endringInntektSisteMåned_10dager(fom, inntektSisteMåned));
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            "Vi har endret aktivitetspengene dine " +
+                "Du får 2 667 kroner i aktivitetspenger for perioden fra 1. mars 2026 til 10. mars 2026. " +
+                "Pengene får du utbetalt innen fire dager. " +
+                "Siden du bare hadde aktivitetspenger for en del av måneden, " +
+                "brukte vi bare en del av inntekten din på 10 000 kroner i mars til å regne ut hvor mye penger du får for perioden fra 1. mars 2026 til 10. mars 2026. ");
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_INNTEKT);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret aktivitetspengene dine</h1>"
+            );
+    }
+
     private static String standardTekstIngenUtbetalingEndringInntekt() {
         return "Hvorfor får du ingen utbetaling? " +
             "Når du har en inntekt, får du mindre penger i aktivitetspenger. " +

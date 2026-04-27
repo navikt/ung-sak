@@ -40,7 +40,7 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
 
-        var harManueltFastsattInntekt = harManueltFastsattInntekt(behandling, detaljertResultat, kontrollertInntektPerioderTidslinje);
+        var harManueltFastsattInntekt = harManueltFastsattInntekt(detaljertResultat, kontrollertInntektPerioderTidslinje);
 
         if (harManueltFastsattInntekt) {
             return new VedtaksbrevStrategyResultat(
@@ -58,7 +58,7 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
     }
 
     private boolean harManueltFastsattInntekt(
-        Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat,
+        LocalDateTimeline<DetaljertResultat> detaljertResultat,
         LocalDateTimeline<KontrollertInntektPeriode> kontrollertInntektPerioderTidslinje) {
 
         return DetaljertResultat
