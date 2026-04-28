@@ -12,22 +12,22 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringProgramPeriodeInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.UtvidetKvoteInnholdBygger;
 
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class UtvidetKvoteStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger;
+    private final UtvidetKvoteInnholdBygger utvidetKvoteInnholdBygger;
 
     @Inject
-    public UtvidetKvoteStrategy(EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger) {
-        this.endringProgramPeriodeInnholdBygger = endringProgramPeriodeInnholdBygger;
+    public UtvidetKvoteStrategy(UtvidetKvoteInnholdBygger utvidetKvoteInnholdBygger) {
+        this.utvidetKvoteInnholdBygger = utvidetKvoteInnholdBygger;
     }
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_UTVIDET_KVOTE, endringProgramPeriodeInnholdBygger, "Automatisk brev ved utvidet kvote");
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_UTVIDET_KVOTE, utvidetKvoteInnholdBygger, "Automatisk brev ved utvidet kvote");
     }
 
     @Override
