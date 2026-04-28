@@ -71,19 +71,6 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
                     BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM,
                     Set.of(utvidetPeriode)));
 
-                // Legg til RE_KONTROLL_REGISTER_INNTEKT for de nye (kant-i-kant) dagene slik at
-                // kontrollperioder genereres og tilkjent ytelse dekker dem. De nye dagene er alltid
-                // fremtidige (kant-i-kant etter eksisterende fagsakperiode), så dette trigger ikke
-                // feilutbetaling mot allerede utbetalte perioder.
-                var eksisterendeTom = fagsak.getPeriode().getTomDato();
-                if (utvidetPeriode.getTomDato().isAfter(eksisterendeTom)) {
-                    var nyeMåneder = DatoIntervallEntitet.fraOgMedTilOgMed(
-                        eksisterendeTom.plusDays(1), utvidetPeriode.getTomDato());
-                    årsakOgPerioder.add(new ÅrsakOgPerioder(
-                        BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
-                        Set.of(nyeMåneder)));
-                }
-
                 fagsaker.put(fagsak, årsakOgPerioder);
             }
         }
