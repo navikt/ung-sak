@@ -106,7 +106,8 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
             Map<LocalDate, Boolean> nyeForPeriode = BostedAvklaringUtil.splittAvklaring(avklaring.periode().getFom(), avklaring.vurdering());
             Map<LocalDate, Boolean> gamleForPeriode = tidligereAvklaringer.getOrDefault(periodesFom, Map.of());
-            boolean avklaringEndret = !nyeForPeriode.equals(gamleForPeriode);
+            boolean harTidligereAvklaring = tidligereAvklaringer.containsKey(periodesFom);
+            boolean avklaringEndret = harTidligereAvklaring && !nyeForPeriode.equals(gamleForPeriode);
 
             Boolean søknadErBosatt = søknadErBosattPerFom.get(periodesFom);
             boolean søknadStemmerOverens = søknadErBosatt != null && nyeForPeriode.equals(Map.of(periodesFom, søknadErBosatt));
@@ -141,12 +142,13 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                                        Set<LocalDate> fomsMedBehovForEtterlysning,
                                        Map<LocalDate, UUID> periodeReferanser,
                                        List<BostedAvklaringPeriodeDto> avklaringer) {
-        var eksisterendeOpprettede = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_BOSTED)
+        var eksisterendeAktive = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(behandlingId)
             .stream()
+            .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
             .filter(e -> fomsMedBehovForEtterlysning.contains(e.getPeriode().getFomDato()))
             .toList();
-        eksisterendeOpprettede.forEach(Etterlysning::avbryt);
-        etterlysningRepository.lagre(eksisterendeOpprettede);
+        eksisterendeAktive.forEach(Etterlysning::skalAvbrytes);
+        etterlysningRepository.lagre(eksisterendeAktive);
 
         for (BostedAvklaringPeriodeDto avklaring : avklaringer) {
             if (!fomsMedBehovForEtterlysning.contains(avklaring.periode().getFom())) {
