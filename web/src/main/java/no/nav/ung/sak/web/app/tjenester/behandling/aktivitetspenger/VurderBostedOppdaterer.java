@@ -28,6 +28,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -115,32 +116,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         }
 
         if (!fomsMedBehovForEtterlysning.isEmpty()) {
-            // Avbryt eksisterende OPPRETTET-etterlysninger for perioder som skal ha ny etterlysning
-            var eksisterendeOpprettede = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_BOSTED)
-                .stream()
-                .filter(e -> fomsMedBehovForEtterlysning.contains(e.getPeriode().getFomDato()))
-                .toList();
-            eksisterendeOpprettede.forEach(Etterlysning::avbryt);
-            etterlysningRepository.lagre(eksisterendeOpprettede);
-
-            for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-                if (!fomsMedBehovForEtterlysning.contains(avklaring.periode().getFom())) {
-                    continue;
-                }
-                var etterlysning = Etterlysning.opprettForType(
-                    behandlingId,
-                    periodeReferanser.get(avklaring.periode().getFom()),
-                    UUID.randomUUID(),
-                    DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.periode().getFom(), avklaring.periode().getTom()),
-                    EtterlysningType.UTTALELSE_BOSTED
-                );
-                etterlysningRepository.lagre(etterlysning);
-            }
-
-            var task = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
-            task.setBehandling(behandling.getFagsakId(), behandlingId);
-            task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_BOSTED.getKode());
-            prosessTaskTjeneste.lagre(task);
+            opprettEtterlysninger(behandling, behandlingId, fomsMedBehovForEtterlysning, periodeReferanser, dto.getAvklaringer());
         }
 
         var historikkinnslag = new Historikkinnslag.Builder()
@@ -158,6 +134,38 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         resultat.setSteg(BehandlingStegType.VURDER_BOSTED);
         resultat.rekjørSteg();
         return resultat;
+    }
+
+    private void opprettEtterlysninger(Behandling behandling,
+                                       long behandlingId,
+                                       Set<LocalDate> fomsMedBehovForEtterlysning,
+                                       Map<LocalDate, UUID> periodeReferanser,
+                                       List<BostedAvklaringPeriodeDto> avklaringer) {
+        var eksisterendeOpprettede = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_BOSTED)
+            .stream()
+            .filter(e -> fomsMedBehovForEtterlysning.contains(e.getPeriode().getFomDato()))
+            .toList();
+        eksisterendeOpprettede.forEach(Etterlysning::avbryt);
+        etterlysningRepository.lagre(eksisterendeOpprettede);
+
+        for (BostedAvklaringPeriodeDto avklaring : avklaringer) {
+            if (!fomsMedBehovForEtterlysning.contains(avklaring.periode().getFom())) {
+                continue;
+            }
+            var etterlysning = Etterlysning.opprettForType(
+                behandlingId,
+                periodeReferanser.get(avklaring.periode().getFom()),
+                UUID.randomUUID(),
+                DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.periode().getFom(), avklaring.periode().getTom()),
+                EtterlysningType.UTTALELSE_BOSTED
+            );
+            etterlysningRepository.lagre(etterlysning);
+        }
+
+        var task = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
+        task.setBehandling(behandling.getFagsakId(), behandlingId);
+        task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_BOSTED.getKode());
+        prosessTaskTjeneste.lagre(task);
     }
 
 }
