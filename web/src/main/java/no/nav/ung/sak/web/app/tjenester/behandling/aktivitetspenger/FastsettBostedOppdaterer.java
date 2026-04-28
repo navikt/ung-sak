@@ -13,7 +13,7 @@ import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
@@ -60,14 +60,17 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
             .stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
-        // Hent eksisterende foreslåtte avklaringer for oppslag av verdi ved foreslåttVurderingErGyldig=true
-        Map<LocalDate, Boolean> foreslåtteAvklaringer = bostedsGrunnlagRepository
+        // Hent eksisterende foreslåtte avklaringer per skjæringstidspunkt for oppslag ved foreslåttVurderingErGyldig=true
+        Map<LocalDate, Map<LocalDate, Boolean>> foreslåtteAvklaringer = bostedsGrunnlagRepository
             .hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getForeslåttHolder().getAvklaringer().stream()
-                .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim)))
+            .map(g -> g.getForeslåttHolder().getPeriodeAvklaringer().stream()
+                .collect(Collectors.toMap(
+                    BostedsPeriodeAvklaring::getSkjæringstidspunkt,
+                    p -> p.getAvklaringer().stream()
+                        .collect(Collectors.toMap(a -> a.getFomDato(), a -> a.erBosattITrondheim())))))
             .orElse(Map.of());
 
-        Map<LocalDate, Boolean> fastsatteAvklaringer = new LinkedHashMap<>();
+        Map<LocalDate, Map<LocalDate, Boolean>> fastsatteAvklaringer = new LinkedHashMap<>();
         for (FastsettBostedPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate fom = avklaring.periode().getFom();
 
@@ -82,13 +85,18 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
             }
 
             if (Boolean.TRUE.equals(avklaring.foreslåttVurderingErGyldig())) {
-                fastsatteAvklaringer.put(fom, foreslåtteAvklaringer.getOrDefault(fom, false));
+                var existing = foreslåtteAvklaringer.get(fom);
+                if (existing == null) {
+                    throw new IllegalArgumentException(
+                        "Finner ikke foreslåtte avklaringer for periode " + fom + " — kan ikke bekrefte som gyldig");
+                }
+                fastsatteAvklaringer.put(fom, existing);
             } else {
                 if (avklaring.nyVurdering() == null) {
                     throw new IllegalArgumentException(
                         "nyVurdering må oppgis når foreslåttVurderingErGyldig=false for periode " + fom);
                 }
-                fastsatteAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(fom, avklaring.nyVurdering()));
+                fastsatteAvklaringer.put(fom, BostedAvklaringUtil.splittAvklaring(fom, avklaring.nyVurdering()));
             }
         }
 

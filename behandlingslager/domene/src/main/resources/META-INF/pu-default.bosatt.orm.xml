@@ -5,10 +5,12 @@
                  version="3.2">
 
     <sequence-generator name="SEQ_BOSATT_AVKLARING_HOLDER" allocation-size="50" sequence-name="SEQ_BOSATT_AVKLARING_HOLDER"/>
+    <sequence-generator name="SEQ_BOSATT_PERIODE_AVKLARING" allocation-size="50" sequence-name="SEQ_BOSATT_PERIODE_AVKLARING"/>
     <sequence-generator name="SEQ_BOSATT_AVKLARING" allocation-size="50" sequence-name="SEQ_BOSATT_AVKLARING"/>
     <sequence-generator name="SEQ_GR_BOSATT_AVKLARING" allocation-size="50" sequence-name="SEQ_GR_BOSATT_AVKLARING"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag"/>
 

@@ -21,6 +21,7 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagPeriodeDto;
@@ -32,6 +33,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -88,10 +90,14 @@ public class BostedRestTjeneste {
             ? mapAvklaringer(grunnlag.getSøknadHolder())
             : Map.<LocalDate, Boolean>of();
 
-        // Hent bosteduttalelser og indekser dem på periode fom-dato
+        // Hent bosteduttalelser og indekser dem på periode fom-dato.
+        // Uttalelser refererer til BostedsPeriodeAvklaring.referanse (per periode), ikke global grunnlagsreferanse.
+        var periodeReferanser = grunnlag.getForeslåttHolder().getPeriodeAvklaringer().stream()
+            .map(BostedsPeriodeAvklaring::getReferanse)
+            .collect(Collectors.toSet());
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
         var uttalelseByFom = uttalelser.stream()
-            .filter(u -> grunnlag.getGrunnlagsreferanse().equals(u.getGrunnlagsreferanse()))
+            .filter(u -> periodeReferanser.contains(u.getGrunnlagsreferanse()))
             .collect(Collectors.toMap(u -> u.getPeriode().getFomDato(), u -> u, (a, b) -> a));
 
         // Bygg liste med én DTO per avklaringsperiode

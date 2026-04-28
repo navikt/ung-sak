@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 /**
  * Aggregat/holder for bostedsavklaringer. Kan deles mellom behandlinger
  * ved revurdering uten endringer i grunnlaget.
+ * Inneholder ett {@link BostedsPeriodeAvklaring} per vilkårsperiode.
  */
 @Entity(name = "BostedsAvklaringHolder")
 @Table(name = "BOSATT_AVKLARING_HOLDER")
@@ -25,38 +26,51 @@ public class BostedsAvklaringHolder extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "bosatt_avklaring_holder_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BostedsAvklaring> avklaringer = new LinkedHashSet<>();
+    private Set<BostedsPeriodeAvklaring> periodeAvklaringer = new LinkedHashSet<>();
 
     public BostedsAvklaringHolder() {
     }
 
     BostedsAvklaringHolder(BostedsAvklaringHolder other) {
-        this.avklaringer = other.avklaringer.stream()
-            .map(a -> new BostedsAvklaring(a.getFomDato(), a.erBosattITrondheim()))
+        this.periodeAvklaringer = other.periodeAvklaringer.stream()
+            .map(p -> new BostedsPeriodeAvklaring(
+                p.getSkjæringstidspunkt(),
+                p.getAvklaringer().stream()
+                    .map(a -> new BostedsAvklaring(a.getFomDato(), a.erBosattITrondheim()))
+                    .collect(Collectors.toCollection(LinkedHashSet::new))))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    void leggTilAvklaring(BostedsAvklaring avklaring) {
-        avklaringer.removeIf(a -> a.getFomDato().equals(avklaring.getFomDato()));
-        avklaringer.add(avklaring);
+    void leggTilPeriodeAvklaring(BostedsPeriodeAvklaring periodeAvklaring) {
+        periodeAvklaringer.removeIf(p -> p.getSkjæringstidspunkt().equals(periodeAvklaring.getSkjæringstidspunkt()));
+        periodeAvklaringer.add(periodeAvklaring);
     }
 
     public Long getId() {
         return id;
     }
 
+    public Set<BostedsPeriodeAvklaring> getPeriodeAvklaringer() {
+        return Collections.unmodifiableSet(periodeAvklaringer);
+    }
+
+    /**
+     * Returnerer alle sub-avklaringer på tvers av vilkårsperioder som en flat mengde.
+     */
     public Set<BostedsAvklaring> getAvklaringer() {
-        return Collections.unmodifiableSet(avklaringer);
+        return periodeAvklaringer.stream()
+            .flatMap(p -> p.getAvklaringer().stream())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsAvklaringHolder that)) return false;
-        return Objects.equals(avklaringer, that.avklaringer);
+        return Objects.equals(periodeAvklaringer, that.periodeAvklaringer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(avklaringer);
+        return Objects.hashCode(periodeAvklaringer);
     }
 }

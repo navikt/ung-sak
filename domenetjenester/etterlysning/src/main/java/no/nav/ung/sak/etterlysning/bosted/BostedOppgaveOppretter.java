@@ -32,15 +32,15 @@ public class BostedOppgaveOppretter {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
 
         for (Etterlysning etterlysning : etterlysninger) {
-            var grunnlag = bostedsGrunnlagRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse())
-                .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsgrunnlag for grunnlagsreferanse: " + etterlysning.getGrunnlagsreferanse()));
+            var periodeAvklaring = bostedsGrunnlagRepository.hentPeriodeAvklaringFraReferanse(etterlysning.getGrunnlagsreferanse())
+                .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
 
             var fom = etterlysning.getPeriode().getFomDato();
-            Boolean erBosattITrondheim = grunnlag.getForeslåttHolder().getAvklaringer().stream()
+            Boolean erBosattITrondheim = periodeAvklaring.getAvklaringer().stream()
                 .filter(a -> a.getFomDato().equals(fom))
                 .findFirst()
                 .map(BostedsAvklaring::erBosattITrondheim)
-                .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsavklaring for fom-dato " + fom + " i grunnlag med referanse " + etterlysning.getGrunnlagsreferanse()));
+                .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsavklaring for fom-dato " + fom + " i periodeAvklaring med referanse " + etterlysning.getGrunnlagsreferanse()));
 
             var oppgaveDto = new OpprettOppgaveDto(
                 new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),

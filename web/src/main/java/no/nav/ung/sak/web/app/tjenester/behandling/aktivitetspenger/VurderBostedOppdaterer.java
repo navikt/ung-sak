@@ -16,7 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
@@ -64,16 +64,20 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        // Les eksisterende foreslåtte avklaringer per fomDato BEFORE lagreAvklaringer
-        Map<LocalDate, Boolean> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getForeslåttHolder().getAvklaringer().stream()
-                .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim)))
+        // Les eksisterende foreslåtte avklaringer per skjæringstidspunkt BEFORE lagreAvklaringer
+        Map<LocalDate, Map<LocalDate, Boolean>> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> g.getForeslåttHolder().getPeriodeAvklaringer().stream()
+                .collect(Collectors.toMap(
+                    BostedsPeriodeAvklaring::getSkjæringstidspunkt,
+                    p -> p.getAvklaringer().stream()
+                        .collect(Collectors.toMap(a -> a.getFomDato(), a -> a.erBosattITrondheim())))))
             .orElse(Map.of());
 
-        // Bygg nye avklaringer med splitt basert på vurdering
-        Map<LocalDate, Boolean> nyeAvklaringer = new LinkedHashMap<>();
+        // Bygg nye avklaringer med splitt basert på vurdering (ytre nøkkel = vilkårsperiode fom)
+        Map<LocalDate, Map<LocalDate, Boolean>> nyeAvklaringer = new LinkedHashMap<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            nyeAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(avklaring.periode().getFom(), avklaring.vurdering()));
+            nyeAvklaringer.put(avklaring.periode().getFom(),
+                BostedAvklaringUtil.splittAvklaring(avklaring.periode().getFom(), avklaring.vurdering()));
         }
 
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
@@ -83,13 +87,13 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .map(e -> e.getPeriode().getFomDato())
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        UUID grunnlagsreferanse = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
+        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
 
         // Hent søknadens bosted fra grunnlaget (for sammenligning med saksbehandlerens vurdering)
         Map<LocalDate, Boolean> søknadErBosattPerFom = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g -> g.getSøknadHolder() != null
                 ? g.getSøknadHolder().getAvklaringer().stream()
-                    .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim))
+                    .collect(Collectors.toMap(a -> a.getFomDato(), a -> a.erBosattITrondheim()))
                 : Map.<LocalDate, Boolean>of())
             .orElse(Map.of());
 
@@ -97,13 +101,10 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate periodesFom = avklaring.periode().getFom();
-            LocalDate periodesTom = avklaring.periode().getTom();
             boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(periodesFom);
 
             Map<LocalDate, Boolean> nyeForPeriode = BostedAvklaringUtil.splittAvklaring(avklaring.periode().getFom(), avklaring.vurdering());
-            Map<LocalDate, Boolean> gamleForPeriode = tidligereAvklaringer.entrySet().stream()
-                .filter(e -> !e.getKey().isBefore(periodesFom) && !e.getKey().isAfter(periodesTom))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            Map<LocalDate, Boolean> gamleForPeriode = tidligereAvklaringer.getOrDefault(periodesFom, Map.of());
             boolean avklaringEndret = !nyeForPeriode.equals(gamleForPeriode);
 
             Boolean søknadErBosatt = søknadErBosattPerFom.get(periodesFom);
@@ -128,7 +129,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                 }
                 var etterlysning = Etterlysning.opprettForType(
                     behandlingId,
-                    grunnlagsreferanse,
+                    periodeReferanser.get(avklaring.periode().getFom()),
                     UUID.randomUUID(),
                     DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.periode().getFom(), avklaring.periode().getTom()),
                     EtterlysningType.UTTALELSE_BOSTED
