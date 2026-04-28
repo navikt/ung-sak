@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.task.UnderBehandlingProsessTask;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,7 +49,8 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
         final var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
         if (!periodeTidslinje.isEmpty()) {
             var fom = periodeTidslinje.getMinLocalDate();
-            var tom = periodeTidslinje.getMaxLocalDate();
+            var harUtvidetKvote = ungdomsprogramPeriodeTjeneste.finnHarUtvidetKvote(behandling.getId());
+            var tom = FagsakperiodeUtleder.finnTomDato(fom, periodeTidslinje, harUtvidetKvote);
             fagsakRepository.utvidPeriode(behandling.getFagsakId(), fom, tom);
         }
     }
