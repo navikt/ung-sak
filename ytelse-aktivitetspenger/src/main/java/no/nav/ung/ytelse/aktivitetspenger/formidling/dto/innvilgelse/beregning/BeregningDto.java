@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning;
 
-import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BesteBeregningResultatType;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType;
 
 import java.math.BigDecimal;
 

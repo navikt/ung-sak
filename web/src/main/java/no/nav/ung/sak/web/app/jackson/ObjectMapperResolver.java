@@ -1,7 +1,7 @@
 package no.nav.ung.sak.web.app.jackson;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import no.nav.k9.søknad.JsonUtils;
+import no.nav.k9.søknad.JsonUtilsJackson2;
 import no.nav.k9.søknad.Søknad;
 import no.nav.openapi.spec.utils.jackson.DynamicObjectMapperResolver;
 import no.nav.openapi.spec.utils.jackson.OpenapiCompatObjectMapperModifier;
@@ -54,7 +54,7 @@ public class ObjectMapperResolver extends DynamicObjectMapperResolver {
     private ObjectMapper overrideMapperForSøknad(Class<?> type, final ObjectMapper resolved) {
         // TODO Dette bør gjøres bedre slik at registrering av ObjectMapper gjøres lokalt i Rest-tjenesten.
         if (type.isAssignableFrom(Søknad.class)) {
-            return JsonUtils.getObjectMapper();
+            return JsonUtilsJackson2.getObjectMapper();
         }
         return resolved;
     }

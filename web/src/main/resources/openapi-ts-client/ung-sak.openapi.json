@@ -1768,6 +1768,12 @@
           "aksjonspunktType" : {
             "$ref" : "#/components/schemas/ung.kodeverk.behandling.aksjonspunkt.AksjonspunktType"
           },
+          "ansvarligSaksbehandler" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$",
+            "type" : "string"
+          },
           "begrunnelse" : {
             "maxLength" : 5000,
             "minLength" : 0,
@@ -1889,7 +1895,6 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto" : {
-        "default" : null,
         "discriminator" : {
           "mapping" : {
             "5015" : "#/components/schemas/ung.sak.kontrakt.vedtak.ForeslaVedtakAksjonspunktDto",
@@ -2001,7 +2006,6 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto" : {
-        "default" : null,
         "discriminator" : {
           "mapping" : {
             "6006" : "#/components/schemas/ung.sak.kontrakt.søknadsfrist.aksjonspunkt.OverstyrtSøknadsfristDto"
@@ -2125,9 +2129,9 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType" : {
-        "enum" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ],
+        "enum" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR", "INGEN_BEREGNING" ],
         "type" : "string",
-        "x-enum-varnames" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR" ]
+        "x-enum-varnames" : [ "SISTE_ÅR", "SNITT_SISTE_TRE_ÅR", "INGEN_BEREGNING" ]
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto" : {
         "properties" : {
@@ -2200,7 +2204,7 @@
           "brevtekst" : {
             "maxLength" : 1000,
             "minLength" : 0,
-            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
           "vurdertePerioder" : {
@@ -2226,7 +2230,7 @@
           "brevtekst" : {
             "maxLength" : 1000,
             "minLength" : 0,
-            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
           "vurdertePerioder" : {
@@ -2252,7 +2256,7 @@
           "brevtekst" : {
             "maxLength" : 1000,
             "minLength" : 0,
-            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
           "vurdertePerioder" : {
@@ -3207,7 +3211,6 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevInnholdDto" : {
-        "default" : null,
         "oneOf" : [ {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto"
         } ],
@@ -3462,7 +3465,6 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.hendelser.Hendelse" : {
-        "default" : null,
         "discriminator" : {
           "mapping" : {
             "DOEDSFALL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.DødsfallHendelse",
@@ -5320,7 +5322,7 @@
           "begrunnelse" : {
             "maxLength" : 1000,
             "minLength" : 0,
-            "pattern" : "^[0-9a-zA-ZæøåÆØÅAaÁáBbCcČčDdĐđEeFfGgHhIiJjKkLlMmNnŊŋOoPpRrSsŠšTtŦŧUuVvZzŽžéôèÉöüäÖÜÄ .'\\-/\n%§\\!?@_()+:;,=\"&]*$",
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
           "gyldigAktørId" : {
@@ -9555,7 +9557,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "Identer hentes fra historikkinnslag og sykdomsvurderinger.",
+        "summary" : "Identer hentes fra historikkinnslag og aksjonspunkt.",
         "tags" : [ "nav-ansatt" ]
       }
     },

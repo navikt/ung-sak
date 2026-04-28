@@ -19,7 +19,7 @@ import no.nav.ung.sak.ytelse.LagTilkjentYtelse;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
@@ -32,8 +32,8 @@ import java.util.Map;
 @BehandlingTypeRef
 public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
 
-    private static final BigDecimal REDUKSJONSFAKTOR_ARBEIDSINNTEKT = new BigDecimal("0.66");
-    private static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("1.00");
+    public static final BigDecimal REDUKSJONSFAKTOR_ARBEIDSINNTEKT = new BigDecimal("0.66");
+    public static final BigDecimal REDUKSJONSFAKTOR_YTELSE = new BigDecimal("0.66");
 
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
@@ -65,20 +65,20 @@ public class AktivitetspengerBeregnYtelseSteg implements BeregnYtelseSteg {
         // Validerer at periodene for rapporterte inntekter er konsistent med ytelsetidslinje
         validerPerioderForRapporterteInntekter(kontrollertInntektperiodeTidslinje, månedsvisYtelseTidslinje);
 
-        final var satsTidslinje = aktivitetspengerGrunnlag.get().hentSatsTidslinje();
-        final var totalsatsTidslinje = TotalBeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(satsTidslinje, månedsvisYtelseTidslinje);
+        final var aktivSatsTidslinje = aktivitetspengerGrunnlag.get().hentAktivitetspengerSatsTidslinje();
+        final var totalsatsTidslinje = TotalBeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(aktivSatsTidslinje, månedsvisYtelseTidslinje);
         final var godkjentUttakTidslinje = totalsatsTidslinje.mapValue(_ -> true);
 
         // Utfør reduksjon og map til tilkjent ytelse
         final var konfigurasjon = new InntektsreduksjonKonfigurasjon(REDUKSJONSFAKTOR_ARBEIDSINNTEKT, REDUKSJONSFAKTOR_YTELSE);
         final var tilkjentYtelseTidslinje = new LagTilkjentYtelse(konfigurasjon).lagTidslinje(månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
-        final var regelInput = lagRegelInput(satsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
+        final var regelInput = lagRegelInput(aktivSatsTidslinje, månedsvisYtelseTidslinje, godkjentUttakTidslinje, totalsatsTidslinje, kontrollertInntektperiodeTidslinje);
         final var regelSporing = lagSporing(tilkjentYtelseTidslinje);
         tilkjentYtelseRepository.lagre(kontekst.getBehandlingId(), tilkjentYtelseTidslinje.mapValue(TilkjentYtelsePeriodeResultat::verdi), regelInput, regelSporing);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static String lagRegelInput(LocalDateTimeline<AktivitetspengerSatsGrunnlag> satsTidslinje,
+    private static String lagRegelInput(LocalDateTimeline<AktivitetspengerSatser> satsTidslinje,
                                         LocalDateTimeline<YearMonth> ytelseTidslinje,
                                         LocalDateTimeline<Boolean> godkjentUttakTidslinje,
                                         LocalDateTimeline<BeregnetSats> totalsatsTidslinje,

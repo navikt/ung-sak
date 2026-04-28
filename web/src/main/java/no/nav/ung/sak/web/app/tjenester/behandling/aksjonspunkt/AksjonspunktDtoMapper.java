@@ -53,6 +53,7 @@ class AksjonspunktDtoMapper {
         dto.setVenteårsak(aksjonspunkt.getVenteårsak());
         dto.setVenteårsakVariant(aksjonspunkt.getVenteårsakVariant());
         dto.setOpprettetAv(aksjonspunkt.getOpprettetAv());
+        dto.setAnsvarligSaksbehandler(aksjonspunkt.getAnsvarligSaksbehandler());
 
         if (ttVurderinger != null && !ttVurderinger.isEmpty()) {
             Optional<Totrinnsvurdering> vurdering = ttVurderinger.stream().filter(v -> v.getAksjonspunktDefinisjon() == aksjonspunkt.getAksjonspunktDefinisjon()).findFirst();

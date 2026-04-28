@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.IdType;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
@@ -83,7 +84,7 @@ public class JournalføringOgDistribusjonsTjeneste {
     }
 
     private OpprettJournalpostRequest opprettJournalpostRequest(UUID brevbestillingUuid, GenerertBrev generertBrev, Behandling behandling) {
-        String tittel = utledTittel(generertBrev.malType());
+        String tittel = utledTittel(generertBrev.malType(), behandling.getFagsakYtelseType());
 
         var avsenderMottaker = new OpprettJournalpostRequest.AvsenderMottaker(
             generertBrev.mottaker().fnr(),
@@ -124,8 +125,13 @@ public class JournalføringOgDistribusjonsTjeneste {
             .build();
     }
 
-    private String utledTittel(DokumentMalType dokumentMalType) {
-        var prefix = "Ungdomsprogramytelse ";
+    private String utledTittel(DokumentMalType dokumentMalType, FagsakYtelseType fagsakYtelseType) {
+        var prefix = switch (fagsakYtelseType) {
+            case UNGDOMSYTELSE -> "Ungdomsprogramytelse";
+            case AKTIVITETSPENGER -> "Aktivitetspenger";
+            default -> fagsakYtelseType.getNavn().toLowerCase();
+        };
+
         String fraMal = switch (dokumentMalType) {
             case HENLEGG_BEHANDLING_DOK -> "Henleggelse";
             case INNVILGELSE_DOK -> "Innvilgelse";
@@ -141,9 +147,9 @@ public class JournalføringOgDistribusjonsTjeneste {
             case KLAGE_AVVIST_DOK -> "Vedtaksbrev for avvist klage";
             case KLAGE_VEDTAK_MEDHOLD -> "Vedtaksbrev for medhold klage";
             case KLAGE_OVERSENDT_KLAGEINSTANS -> "Brev om oversendelse til klageinstans";
-
         };
-        return prefix + fraMal;
+
+        return prefix + " " + fraMal;
     }
 
 }
