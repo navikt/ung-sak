@@ -39,10 +39,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>11.0.2</felles.version>
+        <felles.version>11.1.1</felles.version>
         <swagger.version>2.2.48</swagger.version>
         <junit.version>6.0.3</junit.version>
-        <k9format.version>13.0.0</k9format.version>
+        <k9format.version>13.0.1</k9format.version>
         <jackson.version>2.21.2</jackson.version>
         <asm.version>9.9.1</asm.version>
         <kotlin-stdlib.version>2.3.20</kotlin-stdlib.version>
@@ -52,11 +52,11 @@
         <confluent.platform.version>8.2.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>
-        <ung-brukerdialog-api.version>1.0.0</ung-brukerdialog-api.version>
+        <ung-brukerdialog-api.version>1.0.1</ung-brukerdialog-api.version>
         <handlebars.version>4.5.0</handlebars.version>
         <validation-model-jakarta.version>1.30.1</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
-        <jsoup.version>1.22.1</jsoup.version>
+        <jsoup.version>1.22.2</jsoup.version>
         <commonmark.version>0.28.0</commonmark.version>
         <tms-mikrofrontend-builder.version>3.0.0</tms-mikrofrontend-builder.version>
         <tms-java-builder.version>2.2.0</tms-java-builder.version>
@@ -141,7 +141,7 @@
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>6.0.9</version>
+                <version>6.0.10</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -519,13 +519,13 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.21.0</version>
+                <version>2.22.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.21.0</version>
+                <version>1.22.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -592,7 +592,7 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.30.2-GA</version>
+                <version>3.31.0-GA</version>
             </dependency>
 
             <!-- Database -->
