@@ -98,7 +98,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .orElse(Map.of());
 
         // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning OG søknad stemmer ikke, ELLER avklaring endret
-        Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
+        Set<LocalDate> fomsMedBehovForEtterlysning = new LinkedHashSet<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate periodesFom = avklaring.periode().getFom();
             boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(periodesFom);
@@ -110,21 +110,21 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             Boolean søknadErBosatt = søknadErBosattPerFom.get(periodesFom);
             boolean søknadStemmerOverens = søknadErBosatt != null && nyeForPeriode.equals(Map.of(periodesFom, søknadErBosatt));
             if ((!harAktivEtterlysning && !søknadStemmerOverens) || avklaringEndret) {
-                fomsUtenEtterlysning.add(periodesFom);
+                fomsMedBehovForEtterlysning.add(periodesFom);
             }
         }
 
-        if (!fomsUtenEtterlysning.isEmpty()) {
+        if (!fomsMedBehovForEtterlysning.isEmpty()) {
             // Avbryt eksisterende OPPRETTET-etterlysninger for perioder som skal ha ny etterlysning
             var eksisterendeOpprettede = etterlysningRepository.hentOpprettetEtterlysninger(behandlingId, EtterlysningType.UTTALELSE_BOSTED)
                 .stream()
-                .filter(e -> fomsUtenEtterlysning.contains(e.getPeriode().getFomDato()))
+                .filter(e -> fomsMedBehovForEtterlysning.contains(e.getPeriode().getFomDato()))
                 .toList();
             eksisterendeOpprettede.forEach(Etterlysning::avbryt);
             etterlysningRepository.lagre(eksisterendeOpprettede);
 
             for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-                if (!fomsUtenEtterlysning.contains(avklaring.periode().getFom())) {
+                if (!fomsMedBehovForEtterlysning.contains(avklaring.periode().getFom())) {
                     continue;
                 }
                 var etterlysning = Etterlysning.opprettForType(
@@ -148,7 +148,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandlingId)
             .medTittel(SkjermlenkeType.BOSTEDSVILKÅR)
-            .addLinje(fomsUtenEtterlysning.isEmpty()
+            .addLinje(fomsMedBehovForEtterlysning.isEmpty()
                 ? "Bostedsavklaring registrert"
                 : "Bostedsavklaring registrert – bruker varsles")
             .build();
