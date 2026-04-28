@@ -34,8 +34,7 @@ public final class UtvidetKvoteStrategy implements VedtaksbrevInnholdbyggerStrat
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
-            && (resultater.innholder(DetaljertResultatType.ENDRING_UTVIDET_KVOTE));
+        return resultater.innholder(DetaljertResultatType.ENDRING_UTVIDET_KVOTE);
     }
 
 }
