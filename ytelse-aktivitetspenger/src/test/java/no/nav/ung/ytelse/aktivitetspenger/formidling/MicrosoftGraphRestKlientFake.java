@@ -18,8 +18,8 @@ import java.util.Optional;
 public class MicrosoftGraphRestKlientFake extends MicrosoftGraphRestKlient {
 
     @Inject
-    public MicrosoftGraphRestKlientFake(SystemUserOidcRestClient sysemuserRestClient, @KonfigVerdi(value = "microsoft.graph.url", defaultVerdi = "https://graph.microsoft.com/v1.0") URI endpoint) {
-        super(sysemuserRestClient, endpoint);
+    public MicrosoftGraphRestKlientFake(SystemUserOidcRestClient systemUserRestClient, @KonfigVerdi(value = "microsoft.graph.url", defaultVerdi = "https://graph.microsoft.com/v1.0") URI endpoint) {
+        super(systemUserRestClient, endpoint);
     }
 
     @Override

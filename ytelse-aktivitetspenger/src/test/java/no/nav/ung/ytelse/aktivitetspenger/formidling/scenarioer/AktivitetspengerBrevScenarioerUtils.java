@@ -151,7 +151,7 @@ public class AktivitetspengerBrevScenarioerUtils {
 
     public static LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektFraHolder(LocalDateInterval programperiode, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektTimeline) {
         var kontrollertInntektPeriodes = kontrollerInntektTimeline.stream()
-            .filter(it -> it.getFom() != programperiode.getFomDato())
+            .filter(it -> !it.getFom().isEqual(programperiode.getFomDato()))
             .map(it -> {
                 KontrollerInntektHolder value = it.getValue();
                 return new LocalDateSegment<>(it.getLocalDateInterval(), KontrollertInntektPeriode.ny()
