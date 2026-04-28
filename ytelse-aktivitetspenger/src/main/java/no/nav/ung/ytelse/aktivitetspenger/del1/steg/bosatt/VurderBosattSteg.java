@@ -120,17 +120,11 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                 } else {
                     trengerSaksbehandlerFom.add(fom);
                 }
-            } else if (etterlysning.status() == EtterlysningStatus.OPPRETTET
-                || etterlysning.status() == EtterlysningStatus.VENTER) {
+            } else if (erVentende(etterlysning)) {
                 ventendeFom.add(fom);
-            } else if (etterlysning.status() == EtterlysningStatus.UTLØPT
-                || (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
-                && etterlysning.uttalelseData() != null
-                && !etterlysning.uttalelseData().harUttalelse())) {
+            } else if (erFerdigUtenUttalelse(etterlysning)) {
                 skalFastsettePerioder.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
-            } else if (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
-                && etterlysning.uttalelseData() != null
-                && etterlysning.uttalelseData().harUttalelse()) {
+            } else if (harMottattSvarMedUttalelse(etterlysning)) {
                 trengerFastsettingFom.add(fom);
             }
         });
@@ -170,6 +164,24 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         // Auto-vurder alle fastsatte perioder
         autoVurder(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private static boolean erVentende(EtterlysningData etterlysning) {
+        return etterlysning.status() == EtterlysningStatus.OPPRETTET
+            || etterlysning.status() == EtterlysningStatus.VENTER;
+    }
+
+    private static boolean erFerdigUtenUttalelse(EtterlysningData etterlysning) {
+        return etterlysning.status() == EtterlysningStatus.UTLØPT
+            || (etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
+            && etterlysning.uttalelseData() != null
+            && !etterlysning.uttalelseData().harUttalelse());
+    }
+
+    private static boolean harMottattSvarMedUttalelse(EtterlysningData etterlysning) {
+        return etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
+            && etterlysning.uttalelseData() != null
+            && etterlysning.uttalelseData().harUttalelse();
     }
 
     private void autoVurder(long behandlingId) {
