@@ -23,7 +23,12 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
         BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS),
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL),
         BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_DELTAKER_DØDSFALL),
-        BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_FJERNE_PERIODE)
+        BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_FJERNE_PERIODE),
+        BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_UTVIDET_KVOTE)
+    );
+
+    private static final Set<BehandlingÅrsakType> ÅRSAKER_SOM_GIR_AVSLAG_ANNET = Set.of(
+        BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM
     );
 
     @Override
@@ -56,9 +61,6 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM)) {
-            resultater.add(utvidetKvoteDetaljertResultat(avslåtteVilkår));
-        }
         relevanteÅrsaker.stream()
             .filter(ÅRSAK_RESULTAT_INNVILGELSE_MAP::containsKey)
             .map(årsak -> behandlingsårsakDetaljertResultat(årsak, avslåtteVilkår))
@@ -83,17 +85,12 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
         if (avslåtteVilkår.isEmpty()) {
             return ÅRSAK_RESULTAT_INNVILGELSE_MAP.get(key);
         }
-
+        if (ÅRSAKER_SOM_GIR_AVSLAG_ANNET.contains(key)) {
+            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Uventet avslått vilkår ved behandlingsårsak %s".formatted(key));
+        }
         return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår, med behandlingsårsak %s".formatted(key));
     }
 
-    private static DetaljertResultatInfo utvidetKvoteDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
-        if (avslåtteVilkår.isEmpty()) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_UTVIDET_KVOTE);
-        } else {
-            return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår ved utvidet kvote");
-        }
-    }
 
     private static DetaljertResultatInfo endretSluttdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
         if (harAvslåttVilkår(avslåtteVilkår, VilkårType.UNGDOMSPROGRAMVILKÅRET)) {
