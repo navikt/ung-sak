@@ -90,20 +90,17 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        // Hent gjeldende etterlysninger og bygg fom-dato-oppslag
         List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
             behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_BOSTED);
         Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
-        // Hent foreslåtte avklaringer for å sjekke om saksbehandler allerede har vurdert (og var enig med søknaden)
         Collection<BostedsAvklaring> foreslåtteAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g -> g.getForeslåttHolder() != null ? g.getForeslåttHolder().getAvklaringer() : List.<BostedsAvklaring>of())
             .orElse(List.of());
 
-        // Klassifiser perioder per fom-dato
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
-        Set<DatoIntervallEntitet> skalFastsettePerioder = new LinkedHashSet<>();
+        Set<DatoIntervallEntitet> perioderSomKanFastsettes = new LinkedHashSet<>();
         Set<LocalDate> trengerFastsettingFom = new LinkedHashSet<>();
         Set<LocalDate> trengerSaksbehandlerFom = new LinkedHashSet<>();
 
@@ -112,56 +109,65 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             EtterlysningData etterlysning = etterlysningPerFom.get(fom);
 
             if (etterlysning == null) {
-                // Saksbehandler er enig med søknaden → foreslåtte avklaringer ble lagret uten etterlysning
                 boolean harForeslåttAvklaring = foreslåtteAvklaringer.stream()
                     .anyMatch(a -> !a.getFomDato().isBefore(fom) && !a.getFomDato().isAfter(segment.getTom()));
                 if (harForeslåttAvklaring) {
-                    skalFastsettePerioder.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
+                    perioderSomKanFastsettes.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
                 } else {
                     trengerSaksbehandlerFom.add(fom);
                 }
             } else if (erVentende(etterlysning)) {
                 ventendeFom.add(fom);
             } else if (erFerdigUtenUttalelse(etterlysning)) {
-                skalFastsettePerioder.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
+                perioderSomKanFastsettes.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
             } else if (harMottattSvarMedUttalelse(etterlysning)) {
                 trengerFastsettingFom.add(fom);
             }
         });
 
-        // VURDER_BOSTED først – perioder uten etterlysning trenger initial registrering fra saksbehandler.
-        // Vi vil ikke sette behandlingen på vent før alle nødvendige etterlysninger er opprettet.
+        // Perioder uten foreslått avklaring trenger VURDER_BOSTED-aksjonspunkt før vi kan sende etterlysning
         if (!trengerSaksbehandlerFom.isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
+            return vurderBosted();
         }
-
-        // Sett behandling på vent hvis alle etterlysninger er opprettet, men ingen svar er mottatt ennå
+        // Etterlysning er sendt, men svar er ikke mottatt ennå – sett behandlingen på vent
         if (!ventendeFom.isEmpty()) {
-            LocalDateTime frist = ventendeFom.stream()
-                .map(fom -> Optional.ofNullable(etterlysningPerFom.get(fom)).map(EtterlysningData::frist).orElse(null))
-                .filter(Objects::nonNull)
-                .max(Comparator.naturalOrder())
-                .orElse(LocalDateTime.now().plus(DEFAULT_VENTEFRIST));
-            return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
-                AksjonspunktResultat.opprettForAksjonspunktMedFrist(
-                    EtterlysningType.UTTALELSE_BOSTED.tilAutopunktDefinisjon(),
-                    EtterlysningType.UTTALELSE_BOSTED.mapTilVenteårsak(),
-                    frist
-                )
-            ));
+            return settPåVent(ventendeFom, etterlysningPerFom);
         }
-
-        // FASTSETT_BOSTED – saksbehandler bekrefter/korrigerer etter brukerens uttalelse
+        // Bruker har svart med uttalelse – saksbehandler må bekrefte/korrigere via FASTSETT_BOSTED
         if (!trengerFastsettingFom.isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED));
+            return fastsettBosted();
         }
+        // Ingen utestående svar – fastsett avklaringer og vurder vilkåret automatisk
+        return fastsettOgVurderVilkår(behandlingId, perioderSomKanFastsettes);
+    }
 
-        // Fastsett perioder med tilstrekkelig svar (etter aksjonspunkt-beslutningen)
-        if (!skalFastsettePerioder.isEmpty()) {
-            bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, skalFastsettePerioder);
+    private static BehandleStegResultat vurderBosted() {
+        return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
+    }
+
+    private static BehandleStegResultat settPåVent(Set<LocalDate> ventendeFom, Map<LocalDate, EtterlysningData> etterlysningPerFom) {
+        LocalDateTime frist = ventendeFom.stream()
+            .map(fom -> Optional.ofNullable(etterlysningPerFom.get(fom)).map(EtterlysningData::frist).orElse(null))
+            .filter(Objects::nonNull)
+            .max(Comparator.naturalOrder())
+            .orElse(LocalDateTime.now().plus(DEFAULT_VENTEFRIST));
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
+            AksjonspunktResultat.opprettForAksjonspunktMedFrist(
+                EtterlysningType.UTTALELSE_BOSTED.tilAutopunktDefinisjon(),
+                EtterlysningType.UTTALELSE_BOSTED.mapTilVenteårsak(),
+                frist
+            )
+        ));
+    }
+
+    private static BehandleStegResultat fastsettBosted() {
+        return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.FASTSETT_BOSTED));
+    }
+
+    private BehandleStegResultat fastsettOgVurderVilkår(long behandlingId, Set<DatoIntervallEntitet> perioderSomKanFastsettes) {
+        if (!perioderSomKanFastsettes.isEmpty()) {
+            bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, perioderSomKanFastsettes);
         }
-
-        // Auto-vurder alle fastsatte perioder
         autoVurder(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
