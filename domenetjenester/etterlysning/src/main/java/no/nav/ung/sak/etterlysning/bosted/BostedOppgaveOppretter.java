@@ -14,8 +14,6 @@ import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Dependent
 public class BostedOppgaveOppretter {
@@ -31,20 +29,19 @@ public class BostedOppgaveOppretter {
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
-        var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
-            .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsgrunnlag for behandling: " + behandling.getId()));
-
-        Map<java.time.LocalDate, Boolean> bosattPerFomDato = grunnlag.getForeslåttHolder().getAvklaringer().stream()
-            .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim));
-
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
 
         for (Etterlysning etterlysning : etterlysninger) {
+            var grunnlag = bostedsGrunnlagRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse())
+                .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsgrunnlag for grunnlagsreferanse: " + etterlysning.getGrunnlagsreferanse()));
+
             var fom = etterlysning.getPeriode().getFomDato();
-            Boolean erBosattITrondheim = bosattPerFomDato.get(fom);
-            if (erBosattITrondheim == null) {
-                throw new IllegalStateException("Fant ikke bostedsavklaring for skjæringstidspunkt " + fom + " i behandling " + behandling.getId());
-            }
+            Boolean erBosattITrondheim = grunnlag.getForeslåttHolder().getAvklaringer().stream()
+                .filter(a -> a.getFomDato().equals(fom))
+                .findFirst()
+                .map(BostedsAvklaring::erBosattITrondheim)
+                .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsavklaring for fom-dato " + fom + " i grunnlag med referanse " + etterlysning.getGrunnlagsreferanse()));
+
             var oppgaveDto = new OpprettOppgaveDto(
                 new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
                 ytelsetype,

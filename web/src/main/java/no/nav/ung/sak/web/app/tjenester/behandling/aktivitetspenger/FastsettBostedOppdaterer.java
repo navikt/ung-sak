@@ -69,7 +69,7 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
 
         Map<LocalDate, Boolean> fastsatteAvklaringer = new LinkedHashMap<>();
         for (FastsettBostedPeriodeDto avklaring : dto.getAvklaringer()) {
-            LocalDate fom = avklaring.getPeriode().getFom();
+            LocalDate fom = avklaring.periode().getFom();
 
             // Valider at perioden har mottatt uttalelse
             var etterlysning = etterlysningPerFom.get(fom);
@@ -81,14 +81,14 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
                     "Periode " + fom + " har ikke mottatt uttalelse og kan ikke fastsettes via FASTSETT_BOSTED");
             }
 
-            if (Boolean.TRUE.equals(avklaring.getForeslåttVurderingErGyldig())) {
+            if (Boolean.TRUE.equals(avklaring.foreslåttVurderingErGyldig())) {
                 fastsatteAvklaringer.put(fom, foreslåtteAvklaringer.getOrDefault(fom, false));
             } else {
-                if (avklaring.getNyVurdering() == null) {
+                if (avklaring.nyVurdering() == null) {
                     throw new IllegalArgumentException(
                         "nyVurdering må oppgis når foreslåttVurderingErGyldig=false for periode " + fom);
                 }
-                fastsatteAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(fom, avklaring.getNyVurdering()));
+                fastsatteAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(fom, avklaring.nyVurdering()));
             }
         }
 

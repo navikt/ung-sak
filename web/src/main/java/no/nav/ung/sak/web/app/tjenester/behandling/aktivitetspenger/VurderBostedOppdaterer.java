@@ -73,7 +73,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         // Bygg nye avklaringer med splitt basert på vurdering
         Map<LocalDate, Boolean> nyeAvklaringer = new LinkedHashMap<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            nyeAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(avklaring.getPeriode().getFom(), avklaring.getVurdering()));
+            nyeAvklaringer.putAll(BostedAvklaringUtil.splittAvklaring(avklaring.periode().getFom(), avklaring.vurdering()));
         }
 
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
@@ -96,11 +96,11 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         // Perioder som skal ha ny etterlysning: ingen aktiv etterlysning OG søknad stemmer ikke, ELLER avklaring endret
         Set<LocalDate> fomsUtenEtterlysning = new LinkedHashSet<>();
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            LocalDate periodesFom = avklaring.getPeriode().getFom();
-            LocalDate periodesTom = avklaring.getPeriode().getTom();
+            LocalDate periodesFom = avklaring.periode().getFom();
+            LocalDate periodesTom = avklaring.periode().getTom();
             boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(periodesFom);
 
-            Map<LocalDate, Boolean> nyeForPeriode = BostedAvklaringUtil.splittAvklaring(avklaring.getPeriode().getFom(), avklaring.getVurdering());
+            Map<LocalDate, Boolean> nyeForPeriode = BostedAvklaringUtil.splittAvklaring(avklaring.periode().getFom(), avklaring.vurdering());
             Map<LocalDate, Boolean> gamleForPeriode = tidligereAvklaringer.entrySet().stream()
                 .filter(e -> !e.getKey().isBefore(periodesFom) && !e.getKey().isAfter(periodesTom))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
@@ -123,14 +123,14 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             etterlysningRepository.lagre(eksisterendeOpprettede);
 
             for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-                if (!fomsUtenEtterlysning.contains(avklaring.getPeriode().getFom())) {
+                if (!fomsUtenEtterlysning.contains(avklaring.periode().getFom())) {
                     continue;
                 }
                 var etterlysning = Etterlysning.opprettForType(
                     behandlingId,
                     grunnlagsreferanse,
                     UUID.randomUUID(),
-                    DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.getPeriode().getFom(), avklaring.getPeriode().getTom()),
+                    DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.periode().getFom(), avklaring.periode().getTom()),
                     EtterlysningType.UTTALELSE_BOSTED
                 );
                 etterlysningRepository.lagre(etterlysning);

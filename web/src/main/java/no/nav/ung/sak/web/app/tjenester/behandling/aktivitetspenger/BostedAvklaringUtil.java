@@ -23,10 +23,10 @@ class BostedAvklaringUtil {
      * </ul>
      */
     static Map<LocalDate, Boolean> splittAvklaring(LocalDate fom, BostedVurderingDto vurdering) {
-        if (Boolean.TRUE.equals(vurdering.getBorITrondheimIHelePerioden())) {
+        if (Boolean.TRUE.equals(vurdering.borITrondheimIHelePerioden())) {
             return Map.of(fom, true);
         }
-        LocalDate fraflyttingsDato = vurdering.getFraflyttingsDato();
+        LocalDate fraflyttingsDato = vurdering.fraflyttingsDato();
         if (fraflyttingsDato != null && fraflyttingsDato.isAfter(fom)) {
             var resultat = new LinkedHashMap<LocalDate, Boolean>();
             resultat.put(fom, true);

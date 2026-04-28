@@ -46,15 +46,14 @@ public class BostedsGrunnlag extends BaseEntitet {
     public BostedsGrunnlag() {
     }
 
-    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder foreslåttHolder, BostedsAvklaringHolder fastsattHolder, BostedsAvklaringHolder søknadHolder, UUID grunnlagsreferanse) {
+    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder foreslåttHolder, BostedsAvklaringHolder fastsattHolder, BostedsAvklaringHolder søknadHolder) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(foreslåttHolder, "foreslåttHolder");
-        Objects.requireNonNull(grunnlagsreferanse, "grunnlagsreferanse");
         this.behandlingId = behandlingId;
         this.foreslåttHolder = foreslåttHolder;
         this.fastsattHolder = fastsattHolder;
         this.søknadHolder = søknadHolder;
-        this.grunnlagsreferanse = grunnlagsreferanse;
+        this.grunnlagsreferanse = UUID.randomUUID();
     }
 
     public Long getId() {

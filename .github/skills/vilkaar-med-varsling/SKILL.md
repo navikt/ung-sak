@@ -110,11 +110,12 @@ Pakke: `no.nav.ung.sak.behandlingslager.<vilkaar>/`
 
 | Klasse | Annotasjoner | Innhold |
 |--------|-------------|---------|
-| `<Vilkår>Avklaring` | `@Entity @Immutable` | `skjæringstidspunkt: LocalDate`, `<faktafelt>: Boolean` — **ingen** `holderId`-felt (styres av `@JoinColumn` i holder) |
+| `<Vilkår>Avklaring` | `@Entity @Immutable` | `fomDato: LocalDate`, `<faktafelt>: Boolean` — **ingen** `holderId`-felt (styres av `@JoinColumn` i holder) |
 | `<Vilkår>AvklaringHolder` | `@Entity` | `@OneToMany(cascade=ALL) @JoinColumn(name="<vilkaar>_avklaring_holder_id") Set<<Vilkår>Avklaring>` + `equals()` på settet |
-| `<Vilkår>Grunnlag` | `@Entity` | `behandlingId`, `aktiv=true`, `grunnlagsreferanse=UUID`, `@ManyToOne foreslåttHolder` (NOT NULL), `@ManyToOne fastsattHolder` (nullable) |
+| `<Vilkår>Grunnlag` | `@Entity` | `behandlingId`, `aktiv=true`, `grunnlagsreferanse=UUID` (alltid ny per rad — aldri kopiert), `@ManyToOne foreslåttHolder` (NOT NULL), `@ManyToOne fastsattHolder` (nullable), `@ManyToOne søknadHolder` (nullable) |
 
-> **Foreslått vs fastsatt:** Grunnlaget har to holders:
+> **Tre holders:** Grunnlaget har tre holders:
+> - `søknadHolder` — opplysninger fra brukerens søknad; lagres ved `lagreSøknadBosted`
 > - `foreslåttHolder` — saksbehandlers registrering; lagres ved `lagreAvklaringer`
 > - `fastsattHolder` — bekreftet vurdering; kopieres fra foreslåttHolder ved UTLØPT/svar uten uttalelse; brukes til automatisk vilkårsvurdering
 >
@@ -122,8 +123,10 @@ Pakke: `no.nav.ung.sak.behandlingslager.<vilkaar>/`
 
 **`<Vilkår>GrunnlagRepository`:**
 - `hentGrunnlagHvisEksisterer(behandlingId)` → `Optional<<Vilkår>Grunnlag>`
-- `lagreAvklaringer(behandlingId, avklaringer)` — lagrer til `foreslåttHolder`; `fastsattHolder=null`; deaktiver gammelt grunnlag kun ved endring
-- `fastsettForeslåtteAvklaringer(behandlingId, skjæringstidspunkter)` — kopierer angitte perioder fra `foreslåttHolder` → ny `fastsattHolder`; beholder `grunnlagsreferanse`
+- `hentGrunnlagFraGrunnlagsReferanse(grunnlagsreferanse)` → `Optional<<Vilkår>Grunnlag>` — slår opp historisk grunnlag for å opprette oppgave med korrekte data
+- `lagreSøknadBosted(behandlingId, fomDato, <faktafelt>)` — lagrer søknadsopplysninger til `søknadHolder`; beholder foreslåttHolder og fastsattHolder
+- `lagreAvklaringer(behandlingId, avklaringerPerFomDato)` — lagrer til `foreslåttHolder`; `fastsattHolder=null`; deaktiver gammelt grunnlag kun ved endring
+- `fastsettForeslåtteAvklaringer(behandlingId, perioder)` — kopierer angitte perioder fra `foreslåttHolder` → ny `fastsattHolder`
 - `kopierGrunnlagFraEksisterendeBehandling(gammel, ny)` — pek til samme holders (ingen kopi)
 
 **ORM-registrering** — opprett `META-INF/pu-default.<vilkaar>.orm.xml`:

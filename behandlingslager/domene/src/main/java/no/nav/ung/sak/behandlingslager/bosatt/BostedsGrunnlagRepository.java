@@ -32,17 +32,17 @@ public class BostedsGrunnlagRepository {
     }
 
     /**
-     * Lagrer saksbehandlers foreslåtte bostedsavklaringer for en behandling (én per skjæringstidspunkt).
+     * Lagrer saksbehandlers foreslåtte bostedsavklaringer for en behandling (én per fom-dato).
      * Fastsatt holder settes alltid til null – bruk {@link #fastsettForeslåtteAvklaringer} for å fastsette.
      * SøknadHolder beholdes fra eksisterende grunnlag dersom det finnes.
      *
      * @return Grunnlagsreferansen (ny ved endring, eksisterende ved uendret foreslått-holder)
      */
-    public UUID lagreAvklaringer(Long behandlingId, Map<LocalDate, Boolean> avklaringerPerSkjæringstidspunkt) {
+    public UUID lagreAvklaringer(Long behandlingId, Map<LocalDate, Boolean> avklaringerPerFomDato) {
         var eksisterende = hentGrunnlagHvisEksisterer(behandlingId);
 
         var nyForeslåttHolder = new BostedsAvklaringHolder();
-        for (var entry : avklaringerPerSkjæringstidspunkt.entrySet()) {
+        for (var entry : avklaringerPerFomDato.entrySet()) {
             nyForeslåttHolder.leggTilAvklaring(new BostedsAvklaring(entry.getKey(), entry.getValue()));
         }
 
@@ -51,7 +51,7 @@ public class BostedsGrunnlagRepository {
         }
 
         var søknadHolder = eksisterende.map(BostedsGrunnlag::getSøknadHolder).orElse(null);
-        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, nyForeslåttHolder, null, søknadHolder, UUID.randomUUID());
+        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, nyForeslåttHolder, null, søknadHolder);
         eksisterende.ifPresent(this::deaktiverEksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
@@ -73,17 +73,16 @@ public class BostedsGrunnlagRepository {
 
         var foreslåttHolder = eksisterende.map(BostedsGrunnlag::getForeslåttHolder).orElseGet(BostedsAvklaringHolder::new);
         var fastsattHolder = eksisterende.map(BostedsGrunnlag::getFastsattHolder).orElse(null);
-        var grunnlagsreferanse = eksisterende.map(BostedsGrunnlag::getGrunnlagsreferanse).orElseGet(UUID::randomUUID);
 
-        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, foreslåttHolder, fastsattHolder, nySøknadHolder, grunnlagsreferanse);
+        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, foreslåttHolder, fastsattHolder, nySøknadHolder);
         eksisterende.ifPresent(this::deaktiverEksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
 
     /**
-     * Fastsetter avklaringer direkte for angitte skjæringstidspunkter med gitte verdier.
-     * Beholder foreslåttHolder og grunnlagsreferanse uendret.
+     * Fastsetter avklaringer direkte for angitte fom-datoer med gitte verdier.
+     * Beholder foreslåttHolder uendret.
      * Brukes av FASTSETT_BOSTED-aksjonspunktet der saksbehandler kan overstyre foreslått verdi.
      */
     public void fastsettAvklaringerDirekte(Long behandlingId, Map<LocalDate, Boolean> avklaringer) {
@@ -94,7 +93,7 @@ public class BostedsGrunnlagRepository {
         avklaringer.forEach((fomDato, erBosattITrondheim) ->
             nyFastsattHolder.leggTilAvklaring(new BostedsAvklaring(fomDato, erBosattITrondheim)));
 
-        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, eksisterende.getForeslåttHolder(), nyFastsattHolder, eksisterende.getSøknadHolder(), eksisterende.getGrunnlagsreferanse());
+        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, eksisterende.getForeslåttHolder(), nyFastsattHolder, eksisterende.getSøknadHolder());
         deaktiverEksisterende(eksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
@@ -103,14 +102,13 @@ public class BostedsGrunnlagRepository {
     /**
      * Fastsetter foreslåtte avklaringer for angitte perioder.
      * Kopierer alle avklaringer med fomDato innenfor en av de angitte periodene fra foreslåttHolder til en ny fastsattHolder.
-     * Grunnlagsreferansen beholdes slik at eksisterende etterlysningslenker er intakte.
      */
     public void fastsettForeslåtteAvklaringer(Long behandlingId, Set<DatoIntervallEntitet> perioder) {
         var eksisterende = hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer bostedsgrunnlag ved fastsetting, behandlingId=" + behandlingId));
 
         var nyFastsattHolder = byggFastsattHolder(eksisterende, perioder);
-        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, eksisterende.getForeslåttHolder(), nyFastsattHolder, eksisterende.getSøknadHolder(), eksisterende.getGrunnlagsreferanse());
+        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, eksisterende.getForeslåttHolder(), nyFastsattHolder, eksisterende.getSøknadHolder());
         deaktiverEksisterende(eksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
@@ -135,10 +133,18 @@ public class BostedsGrunnlagRepository {
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         hentGrunnlagHvisEksisterer(gammelBehandlingId).ifPresent(eksisterende -> {
-            var nyttGrunnlag = new BostedsGrunnlag(nyBehandlingId, eksisterende.getForeslåttHolder(), eksisterende.getFastsattHolder(), eksisterende.getSøknadHolder(), eksisterende.getGrunnlagsreferanse());
+            var nyttGrunnlag = new BostedsGrunnlag(nyBehandlingId, eksisterende.getForeslåttHolder(), eksisterende.getFastsattHolder(), eksisterende.getSøknadHolder());
             entityManager.persist(nyttGrunnlag);
             entityManager.flush();
         });
+    }
+
+    public Optional<BostedsGrunnlag> hentGrunnlagFraGrunnlagsReferanse(UUID grunnlagsreferanse) {
+        var query = entityManager.createQuery(
+            "SELECT g FROM BostedsGrunnlag g WHERE g.grunnlagsreferanse = :grunnlagsreferanse",
+            BostedsGrunnlag.class);
+        query.setParameter("grunnlagsreferanse", grunnlagsreferanse);
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     private void deaktiverEksisterende(BostedsGrunnlag gr) {

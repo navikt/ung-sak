@@ -100,15 +100,13 @@ public class BostedRestTjeneste {
             var fom = avklaring.getFomDato();
             var fastsatt = fastsatte.get(fom);
             var søknadOppgitt = søknadOppgitte.get(fom);
-            var dto = new BostedGrunnlagPeriodeDto(fom, avklaring.erBosattITrondheim(), fastsatt, søknadOppgitt);
 
             // Legg ved uttalelse fra bruker dersom den finnes for perioden
             var uttalelse = finnUttalelseForDato(uttalelseByFom, fom);
-            if (uttalelse != null) {
-                dto.medUttalelse(uttalelse.harUttalelse(), uttalelse.getUttalelseBegrunnelse());
-            }
+            boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
+            String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
-            perioder.add(dto);
+            perioder.add(new BostedGrunnlagPeriodeDto(fom, avklaring.erBosattITrondheim(), fastsatt, søknadOppgitt, harUttalelse, uttalelseTekst));
         }
 
         return new BostedGrunnlagResponseDto(perioder);
