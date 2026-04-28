@@ -38,5 +38,15 @@ public class VedtaksbrevVerifikasjon {
                 body,
                 "Dette er et automatisk behandlet vedtak.");
     }
-}
 
+    public static String medHeaderOgFooterManuell(String fnr, String body) {
+        LocalDate brevdato = LocalDate.now();
+        return STANDARD_HEADER_FOOTER
+            .formatted(
+                BrevTestUtils.brevDatoString(brevdato),
+                AktivitetspengerBrevScenarioerUtils.DEFAULT_NAVN,
+                fnr,
+                body,
+                AktivitetspengerBrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN + " " + AktivitetspengerBrevScenarioerUtils.DEFAULT_BESLUTTER_NAVN);
+    }
+}
