@@ -43,10 +43,13 @@ public class UngdomsprogramPeriodeRepository {
 
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder) {
+        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
-
-        persister(hentEksisterendeGrunnlag(behandlingId), nyttGrunnlag);
+        // Bevar eksisterende utvidet kvote – kan ikke trekkes tilbake etter innvilgelse
+        eksisterende.flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramUtvidetKvote)
+            .ifPresent(nyttGrunnlag::setUngdomsprogramUtvidetKvote);
+        persister(eksisterende, nyttGrunnlag);
     }
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder, boolean harUtvidetKvote) {

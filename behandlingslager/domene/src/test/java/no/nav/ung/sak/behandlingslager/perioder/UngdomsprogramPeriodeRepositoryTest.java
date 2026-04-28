@@ -94,6 +94,35 @@ class UngdomsprogramPeriodeRepositoryTest {
         assertThat(harDiff).isEqualTo(false);
     }
 
+    @Test
+    void lagre_uten_harUtvidetKvote_bevarer_eksisterende_utvidet_kvote() {
+        // Arrange: lagre med utvidet kvote = true
+        repository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(LocalDate.now(), LocalDate.now())), true);
+        assertThat(repository.hentGrunnlag(behandling.getId()).map(g -> g.isHarUtvidetKvote())).contains(true);
+
+        // Act: lagre perioder uten å oppgi harUtvidetKvote
+        repository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(LocalDate.now().plusDays(1), LocalDate.now().plusDays(1))));
+
+        // Assert: utvidet kvote skal fortsatt være true
+        var grunnlag = repository.hentGrunnlag(behandling.getId());
+        assertThat(grunnlag).isPresent();
+        assertThat(grunnlag.get().isHarUtvidetKvote()).isTrue();
+    }
+
+    @Test
+    void lagre_uten_harUtvidetKvote_beholder_false_når_ikke_satt() {
+        // Arrange: lagre uten utvidet kvote
+        repository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(LocalDate.now(), LocalDate.now())));
+
+        // Act: lagre igjen uten å oppgi harUtvidetKvote
+        repository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(LocalDate.now().plusDays(1), LocalDate.now().plusDays(1))));
+
+        // Assert: utvidet kvote skal fortsatt være false
+        var grunnlag = repository.hentGrunnlag(behandling.getId());
+        assertThat(grunnlag).isPresent();
+        assertThat(grunnlag.get().isHarUtvidetKvote()).isFalse();
+    }
+
     private UngdomsprogramPeriodeGrunnlag lagreUngdomsprogramGrunnlag(LocalDate dato) {
         final var ungdomsprogramPeriodeGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandling.getId());
         ungdomsprogramPeriodeGrunnlag.leggTil(List.of(new UngdomsprogramPeriode(dato, dato)));
