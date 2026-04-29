@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
@@ -58,6 +59,11 @@ public class FagsakperiodeUtleder {
             var daysToAdd = finnRestDagerÅLeggeTil(medHeleAntallUkerLagtTil, resterendeDager % VIRKEDAGER_PR_UKE);
             return medHeleAntallUkerLagtTil.plusDays(daysToAdd);
         }
+    }
+
+    public static LocalDate finnTomDato(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag) {
+        LocalDateTimeline<Boolean> periodeTidslinje = UngdomsprogramPeriodeTjeneste.lagPeriodeTidslinje(Optional.of(ungdomsprogramPeriodeGrunnlag));
+        return finnTomDato(periodeTidslinje.getMinLocalDate(), periodeTidslinje, ungdomsprogramPeriodeGrunnlag.isHarUtvidetKvote());
     }
 
     private static long finnRestDagerÅLeggeTil(LocalDate fraDato, long virkedagerSomLeggesTil) {

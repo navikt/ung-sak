@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.*;
 
+import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
+
 @ApplicationScoped
 @HendelseTypeRef("UNGDOMSPROGRAM_UTVIDET_KVOTE")
 public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
@@ -102,7 +104,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
         var fom = programTidslinje.getMinLocalDate();
         var tom = programTidslinje.getMaxLocalDate();
         LocalDate utvidetTom;
-        if (tom.equals(LocalDate.of(9999, 12, 31))) {
+        if (tom.equals(TIDENES_ENDE)) {
             utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true);
         } else {
             var nyFom = tom.plusDays(1);

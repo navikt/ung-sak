@@ -6,11 +6,12 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringUtvidetKvoteDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringUtvidetKvoteDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 
@@ -32,14 +33,13 @@ public class UtvidetKvoteInnholdBygger implements VedtaksbrevInnholdBygger {
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         var nyProgramperiode = hentSisteProgramperiode(behandling.getId());
-        LocalDate fom = nyProgramperiode.getFom();
         LocalDate nyMaksDato = nyProgramperiode.getTom();
 
         var originalBehandlingId = behandling.getOriginalBehandlingId()
             .orElseThrow(() -> new IllegalStateException("Trenger forrige behandling ved utvidelse av kvote"));
 
-        var originalProgramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(originalBehandlingId);
-        LocalDate opprinneligMaksDato = FagsakperiodeUtleder.finnTomDato(fom, originalProgramTidslinje, false);
+        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(originalBehandlingId).orElseThrow();
+        LocalDate opprinneligMaksDato = FagsakperiodeUtleder.finnTomDato(ungdomsprogramPeriodeGrunnlag);
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_UTVIDET_KVOTE,
             new EndringUtvidetKvoteDto(opprinneligMaksDato, nyMaksDato));
