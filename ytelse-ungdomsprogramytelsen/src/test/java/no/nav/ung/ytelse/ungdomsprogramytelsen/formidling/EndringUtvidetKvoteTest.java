@@ -39,7 +39,7 @@ class EndringUtvidetKvoteTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
                 Kvoten din i ungdomsprogrammet er utvidet \
                 Du var planlagt å delta i ungdomsprogrammet til og med 30. desember 2025. \
                 Kvoten din er nå utvidet, og du kan fortsette til og med 28. januar 2026. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 6. \
                 """);
 
         assertThatHtml(generertBrev.dokument().html())
@@ -63,7 +63,7 @@ class EndringUtvidetKvoteTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
                 Kvoten din i ungdomsprogrammet er utvidet \
                 Du var planlagt å delta i ungdomsprogrammet til og med 30. desember 2025. \
                 Kvoten din er nå utvidet, og du kan fortsette til og med 31. mars 2026. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 6. \
                 """);
 
         assertThatHtml(generertBrev.dokument().html())
