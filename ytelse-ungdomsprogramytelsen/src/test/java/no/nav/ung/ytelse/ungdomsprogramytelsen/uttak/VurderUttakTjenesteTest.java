@@ -360,4 +360,58 @@ class VurderUttakTjenesteTest {
 
     }
 
+    @Test
+    void skal_gi_en_periode_oppfylt_med_utvidet_kvote_selv_om_perioden_overskrider_260_virkedager() {
+        // Uten utvidet kvote gir 52 uker fra torsdag avslag på siste dag (261. virkedag).
+        // Med utvidet kvote (300 virkedager) skal hele perioden innvilges som én periode.
+        var fom = LocalDate.of(2024, 10, 3);
+        var tom = fom.plusWeeks(52); // 261 virkedager
+
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, true)
+        ));
+
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(
+            new LocalDateTimeline<>(fom, tom, Boolean.TRUE),
+            ungdomsprogramtidslinje,
+            INGEN_DØDSDATO,
+            true
+        );
+
+        assertThat(ungdomsytelseUttakPerioder).isPresent();
+        assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(1);
+        var periode = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
+        assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
+        assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
+    }
+
+    @Test
+    void skal_gi_to_perioder_med_utvidet_kvote_naar_perioden_overskrider_300_virkedager() {
+        // 60 uker fra torsdag = 300 virkedager. +1 dag gir 301 → avslag på siste dag.
+        var fom = LocalDate.of(2024, 10, 3);
+        var tom = fom.plusWeeks(60); // 301 virkedager
+
+        var ungdomsprogramtidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, true)
+        ));
+
+        var ungdomsytelseUttakPerioder = VurderUttakTjeneste.vurderUttak(
+            new LocalDateTimeline<>(fom, tom, Boolean.TRUE),
+            ungdomsprogramtidslinje,
+            INGEN_DØDSDATO,
+            true
+        );
+
+        assertThat(ungdomsytelseUttakPerioder).isPresent();
+        assertThat(ungdomsytelseUttakPerioder.get().getPerioder().size()).isEqualTo(2);
+
+        var innvilget = ungdomsytelseUttakPerioder.get().getPerioder().getFirst();
+        assertThat(innvilget.getPeriode().getFomDato()).isEqualTo(fom);
+        assertThat(innvilget.getPeriode().getTomDato()).isEqualTo(tom.minusDays(1));
+
+        var avslatt = ungdomsytelseUttakPerioder.get().getPerioder().getLast();
+        assertThat(avslatt.getPeriode().getFomDato()).isEqualTo(tom);
+        assertThat(avslatt.getPeriode().getTomDato()).isEqualTo(tom);
+        assertThat(avslatt.getAvslagsårsak()).isEqualTo(UngdomsytelseUttakAvslagsårsak.IKKE_NOK_DAGER);
+    }
 }

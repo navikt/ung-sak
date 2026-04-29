@@ -49,7 +49,13 @@ public class UngdomsprogramRegisterKlient {
     public record DeltakerOpplysningerDTO(List<DeltakerProgramOpplysningDTO> opplysninger) {
     }
 
-    public record DeltakerProgramOpplysningDTO(UUID id, String deltakerIdent, LocalDate fraOgMed, LocalDate tilOgMed) {
+    public record DeltakerProgramOpplysningDTO(
+        UUID id,
+        String deltakerIdent,
+        LocalDate fraOgMed,
+        LocalDate tilOgMed,
+        boolean harUtvidetKvote
+    ) {
     }
 }
 

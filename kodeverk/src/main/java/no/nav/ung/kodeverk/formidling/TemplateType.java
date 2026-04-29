@@ -12,6 +12,7 @@ public enum TemplateType {
     MANUELT_VEDTAKSBREV("manuelt_vedtaksbrev", "ungdomsprogramytelse", "Manuelt vedtaksbrev"),
     OPPHØR("opphør", "ungdomsprogramytelse", "Opphør av ungdomsprogramytelse"),
     ENDRING_PROGRAMPERIODE("endring_programperiode", "ungdomsprogramytelse","Endring av programperiode"),
+    ENDRING_UTVIDET_KVOTE("endring_utvidet_kvote", "ungdomsprogramytelse", "Endring utvidet kvote"),
     GENERELT_FRITEKSTBREV("generelt_fritekstbrev", "ungdomsprogramytelse", "Generelt fritekstbrev"),
 
     //TODO finne bedre måte å skille ytelsene på

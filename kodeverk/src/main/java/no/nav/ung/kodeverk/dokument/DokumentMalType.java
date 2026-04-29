@@ -22,6 +22,7 @@ public enum DokumentMalType implements Kodeverdi {
     ENDRING_INNTEKT("ENDRING_INNTEKT", "Kontroll av inntekt", true),
     ENDRING_INNTEKT_UTEN_REDUKSJON("ENDRING_INNTEKT_UTEN_REDUKSJON", "Kontroll av inntekt uten reduksjon", true),
     ENDRING_HØY_SATS("ENDRING_HØY_SATS", "Endring høy sats", true),
+    ENDRING_UTVIDET_KVOTE("ENDRING_UTVIDET_KVOTE", "Endring utvidet kvote", true),
     OPPHØR_DOK("OPPHOR", "Opphør", true),
     AVSLAG__DOK("AVSLAG", "Avslag", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekstvedtak", true),
