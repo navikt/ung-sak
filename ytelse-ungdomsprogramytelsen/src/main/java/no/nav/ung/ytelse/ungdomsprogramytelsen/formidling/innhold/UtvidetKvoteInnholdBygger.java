@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -32,7 +31,7 @@ public class UtvidetKvoteInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        var nyProgramperiode = hentSisteProgramperiode(behandling.getId());
+        var nyProgramperiode = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId()).toSegments().last();
         LocalDate nyMaksDato = nyProgramperiode.getTom();
 
         var originalBehandlingId = behandling.getOriginalBehandlingId()
@@ -43,18 +42,5 @@ public class UtvidetKvoteInnholdBygger implements VedtaksbrevInnholdBygger {
 
         return new TemplateInnholdResultat(TemplateType.ENDRING_UTVIDET_KVOTE,
             new EndringUtvidetKvoteDto(opprinneligMaksDato, nyMaksDato));
-    }
-
-    private LocalDateSegment<Boolean> hentSisteProgramperiode(Long behandlingId) {
-        var tidslinje = new LocalDateTimeline<>(
-            ungdomsprogramPeriodeRepository
-                .hentGrunnlag(behandlingId)
-                .orElseThrow(() -> new IllegalStateException("Finner ikke grunnlag for behandling " + behandlingId))
-                .getUngdomsprogramPerioder()
-                .getPerioder().stream()
-                .map(it -> new LocalDateSegment<>(it.getPeriode().toLocalDateInterval(), true))
-                .toList()
-        );
-        return tidslinje.toSegments().last();
     }
 }
