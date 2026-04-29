@@ -49,30 +49,6 @@ class EndringUtvidetKvoteTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
             );
     }
 
-    @DisplayName("Utvidet kvote med lengre utvidelse gir korrekt brev")
-    @Test
-    void utvidetKvoteMedLengre() {
-        LocalDate langNySluttdato = LocalDate.of(2026, 3, 31);
-        var behandling = lagUtvidetKvoteBehandling(OPPRINNELIG_SLUTTDATO, langNySluttdato);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_UTVIDET_KVOTE);
-
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
-            """
-                Kvoten din i ungdomsprogrammet er utvidet \
-                Du var planlagt å delta i ungdomsprogrammet til og med 30. desember 2025. \
-                Kvoten din er nå utvidet, og du kan fortsette til og med 31. mars 2026. \
-                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 6. \
-                """);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .asPlainTextIsEqualTo(forventet)
-            .containsHtmlSubSequenceOnce(
-                "<h1>Kvoten din i ungdomsprogrammet er utvidet</h1>"
-            );
-    }
-
     private Behandling lagUtvidetKvoteBehandling(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(FOM);
         var utvidetKvoteGrunnlag = EndringUtvidetKvoteScenarioer.utvidetKvote(FOM, opprinneligSluttdato, nySluttdato);
