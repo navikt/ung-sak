@@ -6,7 +6,6 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
@@ -35,21 +34,14 @@ public class BostedOppgaveOppretter {
             var periodeAvklaring = bostedsGrunnlagRepository.hentPeriodeAvklaringFraReferanse(etterlysning.getGrunnlagsreferanse())
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
 
-            var fom = etterlysning.getPeriode().getFomDato();
-            Boolean erBosattITrondheim = periodeAvklaring.getAvklaringer().stream()
-                .filter(a -> a.getFomDato().equals(fom))
-                .findFirst()
-                .map(BostedsAvklaring::erBosattITrondheim)
-                .orElseThrow(() -> new IllegalStateException("Fant ikke bostedsavklaring for fom-dato " + fom + " i periodeAvklaring med referanse " + etterlysning.getGrunnlagsreferanse()));
-
             var oppgaveDto = new OpprettOppgaveDto(
                 new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
                 ytelsetype,
                 etterlysning.getEksternReferanse(),
                 new BekreftBostedOppgavetypeDataDto(
-                    fom,
+                    etterlysning.getPeriode().getFomDato(),
                     etterlysning.getPeriode().getTomDato(),
-                    erBosattITrondheim
+                    periodeAvklaring.isErBosattITrondheim()
                 ),
                 etterlysning.getFrist()
             );

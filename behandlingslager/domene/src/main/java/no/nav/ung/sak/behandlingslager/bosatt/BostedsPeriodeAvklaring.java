@@ -2,21 +2,18 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
- * Aggregat for bostedsavklaringer knyttet til én vilkårsperiode.
+ * Aggregat for bostedsavklaring knyttet til én vilkårsperiode.
  * {@code skjæringstidspunkt} tilsvarer fom-dato for vilkårsperioden og matcher
- * fom-dato til tilhørende {@link Etterlysning} og {@link UttalelseV2}.
+ * fom-dato til tilhørende Etterlysning og UttalelseV2.
  * {@code referanse} brukes som {@code grunnlagsreferanse} i etterlysning og uttalelse.
+ * {@code erBosattITrondheim} angir om bruker er bosatt ved skjæringstidspunktet.
+ * {@code fraflyttingsDato} angir eventuell dato for utflytting fra Trondheim (null dersom bruker ikke har flyttet ut).
  */
 @Entity(name = "BostedsPeriodeAvklaring")
 @Table(name = "BOSATT_PERIODE_AVKLARING")
@@ -32,18 +29,20 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Column(name = "skaeringstidspunkt", nullable = false, updatable = false)
     private LocalDate skjæringstidspunkt;
 
-    @BatchSize(size = 20)
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "bosatt_periode_avklaring_id", nullable = false)
-    private Set<BostedsAvklaring> avklaringer = new LinkedHashSet<>();
+    @Column(name = "er_bosatt_i_trondheim", nullable = false, updatable = false)
+    private boolean erBosattITrondheim;
+
+    @Column(name = "fraflyttings_dato", updatable = false)
+    private LocalDate fraflyttingsDato;
 
     public BostedsPeriodeAvklaring() {
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaring(LocalDate skjæringstidspunkt, Set<BostedsAvklaring> avklaringer) {
+    public BostedsPeriodeAvklaring(LocalDate skjæringstidspunkt, boolean erBosattITrondheim, LocalDate fraflyttingsDato) {
         this.skjæringstidspunkt = skjæringstidspunkt;
-        this.avklaringer.addAll(avklaringer);
+        this.erBosattITrondheim = erBosattITrondheim;
+        this.fraflyttingsDato = fraflyttingsDato;
     }
 
     public Long getId() {
@@ -58,26 +57,32 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return skjæringstidspunkt;
     }
 
-    public Set<BostedsAvklaring> getAvklaringer() {
-        return Collections.unmodifiableSet(avklaringer);
+    public boolean isErBosattITrondheim() {
+        return erBosattITrondheim;
+    }
+
+    public LocalDate getFraflyttingsDato() {
+        return fraflyttingsDato;
     }
 
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
-        return Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt)
-            && Objects.equals(avklaringer, that.avklaringer);
+        return erBosattITrondheim == that.erBosattITrondheim
+            && Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt)
+            && Objects.equals(fraflyttingsDato, that.fraflyttingsDato);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skjæringstidspunkt, avklaringer);
+        return Objects.hash(skjæringstidspunkt, erBosattITrondheim, fraflyttingsDato);
     }
 
     @Override
     public String toString() {
         return "BostedsPeriodeAvklaring{skjæringstidspunkt=" + skjæringstidspunkt
             + ", referanse=" + referanse
-            + ", avklaringer=" + avklaringer + '}';
+            + ", erBosattITrondheim=" + erBosattITrondheim
+            + ", fraflyttingsDato=" + fraflyttingsDato + '}';
     }
 }

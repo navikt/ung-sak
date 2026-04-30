@@ -33,11 +33,7 @@ public class BostedsAvklaringHolder extends BaseEntitet {
 
     BostedsAvklaringHolder(BostedsAvklaringHolder other) {
         this.periodeAvklaringer = other.periodeAvklaringer.stream()
-            .map(p -> new BostedsPeriodeAvklaring(
-                p.getSkjæringstidspunkt(),
-                p.getAvklaringer().stream()
-                    .map(a -> new BostedsAvklaring(a.getFomDato(), a.erBosattITrondheim()))
-                    .collect(Collectors.toCollection(LinkedHashSet::new))))
+            .map(p -> new BostedsPeriodeAvklaring(p.getSkjæringstidspunkt(), p.isErBosattITrondheim(), p.getFraflyttingsDato()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -52,15 +48,6 @@ public class BostedsAvklaringHolder extends BaseEntitet {
 
     public Set<BostedsPeriodeAvklaring> getPeriodeAvklaringer() {
         return Collections.unmodifiableSet(periodeAvklaringer);
-    }
-
-    /**
-     * Returnerer alle sub-avklaringer på tvers av vilkårsperioder som en flat mengde.
-     */
-    public Set<BostedsAvklaring> getAvklaringer() {
-        return periodeAvklaringer.stream()
-            .flatMap(p -> p.getAvklaringer().stream())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     @Override

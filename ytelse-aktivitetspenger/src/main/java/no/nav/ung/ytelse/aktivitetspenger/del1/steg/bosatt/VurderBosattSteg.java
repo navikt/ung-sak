@@ -17,8 +17,8 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
@@ -95,9 +95,12 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
-        Collection<BostedsAvklaring> foreslåtteAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getForeslåttHolder() != null ? g.getForeslåttHolder().getAvklaringer() : List.<BostedsAvklaring>of())
-            .orElse(List.of());
+        Map<LocalDate, BostedsPeriodeAvklaring> foreslåttePeriodeAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> g.getForeslåttHolder() != null
+                ? g.getForeslåttHolder().getPeriodeAvklaringer().stream()
+                    .collect(Collectors.toMap(BostedsPeriodeAvklaring::getSkjæringstidspunkt, p -> p))
+                : Map.<LocalDate, BostedsPeriodeAvklaring>of())
+            .orElse(Map.of());
 
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<DatoIntervallEntitet> perioderSomKanFastsettes = new LinkedHashSet<>();
@@ -109,8 +112,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             EtterlysningData etterlysning = etterlysningPerFom.get(fom);
 
             if (etterlysning == null) {
-                boolean harForeslåttAvklaring = foreslåtteAvklaringer.stream()
-                    .anyMatch(a -> !a.getFomDato().isBefore(fom) && !a.getFomDato().isAfter(segment.getTom()));
+                boolean harForeslåttAvklaring = foreslåttePeriodeAvklaringer.containsKey(fom);
                 if (harForeslåttAvklaring) {
                     perioderSomKanFastsettes.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
                 } else {
@@ -199,9 +201,8 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             return;
         }
 
-        List<BostedsAvklaring> avklaringerSortert = fastsattHolder.getAvklaringer().stream()
-            .sorted(Comparator.comparing(BostedsAvklaring::getFomDato))
-            .toList();
+        Map<LocalDate, BostedsPeriodeAvklaring> periodeAvklaringPerFom = fastsattHolder.getPeriodeAvklaringer().stream()
+            .collect(Collectors.toMap(BostedsPeriodeAvklaring::getSkjæringstidspunkt, p -> p));
 
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer vilkårresultat for behandling " + behandlingId));
@@ -215,30 +216,54 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                 LocalDate segmentFom = s.getFom();
                 LocalDate segmentTom = s.getTom();
 
-                // Finn alle avklaringer med fomDato innenfor dette segmentet, sortert
-                List<BostedsAvklaring> avklaringerISegment = avklaringerSortert.stream()
-                    .filter(a -> !a.getFomDato().isBefore(segmentFom) && !a.getFomDato().isAfter(segmentTom))
-                    .toList();
+                var periodeAvklaring = periodeAvklaringPerFom.get(segmentFom);
+                if (periodeAvklaring == null) {
+                    // Fallback: finn periodeAvklaring med skjæringstidspunkt innenfor segmentet
+                    periodeAvklaring = periodeAvklaringPerFom.entrySet().stream()
+                        .filter(e -> !e.getKey().isBefore(segmentFom) && !e.getKey().isAfter(segmentTom))
+                        .map(Map.Entry::getValue)
+                        .findFirst()
+                        .orElse(null);
+                }
 
-                if (avklaringerISegment.isEmpty()) {
+                if (periodeAvklaring == null) {
                     return;
                 }
 
-                for (int i = 0; i < avklaringerISegment.size(); i++) {
-                    var avklaring = avklaringerISegment.get(i);
-                    LocalDate fom = avklaring.getFomDato();
-                    LocalDate tom = (i + 1 < avklaringerISegment.size())
-                        ? avklaringerISegment.get(i + 1).getFomDato().minusDays(1)
-                        : segmentTom;
-
-                    var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
-                    if (avklaring.erBosattITrondheim()) {
-                        periodeBuilder.medUtfall(Utfall.OPPFYLT);
-                    } else {
+                if (!periodeAvklaring.isErBosattITrondheim()) {
+                    var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
+                    periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
+                        .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                    vilkårBuilder.leggTil(periodeBuilder);
+                } else if (periodeAvklaring.getFraflyttingsDato() == null) {
+                    var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
+                    periodeBuilder.medUtfall(Utfall.OPPFYLT);
+                    vilkårBuilder.leggTil(periodeBuilder);
+                } else {
+                    // Split: (fom → fraflyttingsDato-1) = OPPFYLT, (fraflyttingsDato → tom) = IKKE_OPPFYLT
+                    LocalDate fraflyttingsDato = periodeAvklaring.getFraflyttingsDato();
+                    if (!fraflyttingsDato.isAfter(segmentFom)) {
+                        // Fraflytting allerede skjedd før eller på segmentstart → hele segmentet IKKE_OPPFYLT
+                        var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
                         periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
                             .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                        vilkårBuilder.leggTil(periodeBuilder);
+                    } else if (fraflyttingsDato.isAfter(segmentTom)) {
+                        // Fraflytting etter segmentslutt → hele segmentet OPPFYLT
+                        var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
+                        periodeBuilder.medUtfall(Utfall.OPPFYLT);
+                        vilkårBuilder.leggTil(periodeBuilder);
+                    } else {
+                        // Fraflytting innenfor segmentet → splitt
+                        var oppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, fraflyttingsDato.minusDays(1)));
+                        oppfyltBuilder.medUtfall(Utfall.OPPFYLT);
+                        vilkårBuilder.leggTil(oppfyltBuilder);
+
+                        var ikkeOppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fraflyttingsDato, segmentTom));
+                        ikkeOppfyltBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
+                            .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                        vilkårBuilder.leggTil(ikkeOppfyltBuilder);
                     }
-                    vilkårBuilder.leggTil(periodeBuilder);
                 }
             });
 

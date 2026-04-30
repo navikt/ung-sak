@@ -17,8 +17,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaring;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder;
+import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -33,7 +32,6 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -51,6 +49,7 @@ public class BostedRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
     private UttalelseRepository uttalelseRepository;
 
     public BostedRestTjeneste() {
@@ -60,9 +59,11 @@ public class BostedRestTjeneste {
     @Inject
     public BostedRestTjeneste(BehandlingRepository behandlingRepository,
                                BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                               BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
                                UttalelseRepository uttalelseRepository) {
         this.behandlingRepository = behandlingRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
+        this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
         this.uttalelseRepository = uttalelseRepository;
     }
 
@@ -83,15 +84,17 @@ public class BostedRestTjeneste {
         }
 
         var grunnlag = grunnlagOpt.get();
-        var fastsatte = grunnlag.getFastsattHolder() != null
-            ? mapAvklaringer(grunnlag.getFastsattHolder())
-            : Map.<LocalDate, Boolean>of();
-        var søknadOppgitte = grunnlag.getSøknadHolder() != null
-            ? mapAvklaringer(grunnlag.getSøknadHolder())
-            : Map.<LocalDate, Boolean>of();
+
+        // Bygg map fra skjæringstidspunkt til fastsatt periodeAvklaring
+        Map<LocalDate, BostedsPeriodeAvklaring> fastsattePerFom = grunnlag.getFastsattHolder() != null
+            ? grunnlag.getFastsattHolder().getPeriodeAvklaringer().stream()
+                .collect(Collectors.toMap(BostedsPeriodeAvklaring::getSkjæringstidspunkt, p -> p))
+            : Map.of();
+
+        // Hent søknadsdata fra separat aggregat
+        Map<LocalDate, Boolean> søknadErBosattPerFom = bosattSøknadGrunnlagRepository.hentSøknadBostedPerFom(behandling.getId());
 
         // Hent bosteduttalelser og indekser dem på periode fom-dato.
-        // Uttalelser refererer til BostedsPeriodeAvklaring.referanse (per periode), ikke global grunnlagsreferanse.
         var periodeReferanser = grunnlag.getForeslåttHolder().getPeriodeAvklaringer().stream()
             .map(BostedsPeriodeAvklaring::getReferanse)
             .collect(Collectors.toSet());
@@ -100,42 +103,33 @@ public class BostedRestTjeneste {
             .filter(u -> periodeReferanser.contains(u.getGrunnlagsreferanse()))
             .collect(Collectors.toMap(u -> u.getPeriode().getFomDato(), u -> u, (a, b) -> a));
 
-        // Bygg liste med én DTO per avklaringsperiode
+        // Bygg liste med én DTO per vilkårsperiode (skjæringstidspunkt)
         var perioder = new ArrayList<BostedGrunnlagPeriodeDto>();
-        for (BostedsAvklaring avklaring : grunnlag.getForeslåttHolder().getAvklaringer()) {
-            var fom = avklaring.getFomDato();
-            var fastsatt = fastsatte.get(fom);
-            var søknadOppgitt = søknadOppgitte.get(fom);
+        for (BostedsPeriodeAvklaring foreslåttPeriode : grunnlag.getForeslåttHolder().getPeriodeAvklaringer()) {
+            LocalDate fom = foreslåttPeriode.getSkjæringstidspunkt();
 
-            // Legg ved uttalelse fra bruker dersom den finnes for perioden
-            var uttalelse = finnUttalelseForDato(uttalelseByFom, fom);
+            var fastsatt = fastsattePerFom.get(fom);
+            Boolean fastsattErBosatt = fastsatt != null ? fastsatt.isErBosattITrondheim() : null;
+            LocalDate fastsattFraflyttingsDato = fastsatt != null ? fastsatt.getFraflyttingsDato() : null;
+
+            Boolean søknadOppgitt = søknadErBosattPerFom.get(fom);
+
+            var uttalelse = uttalelseByFom.get(fom);
             boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
             String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
-            perioder.add(new BostedGrunnlagPeriodeDto(fom, avklaring.erBosattITrondheim(), fastsatt, søknadOppgitt, harUttalelse, uttalelseTekst));
+            perioder.add(new BostedGrunnlagPeriodeDto(
+                fom,
+                foreslåttPeriode.isErBosattITrondheim(),
+                foreslåttPeriode.getFraflyttingsDato(),
+                fastsattErBosatt,
+                fastsattFraflyttingsDato,
+                søknadOppgitt,
+                harUttalelse,
+                uttalelseTekst
+            ));
         }
 
         return new BostedGrunnlagResponseDto(perioder);
-    }
-
-    /**
-     * Finner uttalelse der gitt dato er innenfor uttalelsens periode.
-     * Brukes for å håndtere at en vilkårperiode kan ha split avklaringer med ulike fom-datoer.
-     */
-    private static UttalelseV2 finnUttalelseForDato(Map<LocalDate, UttalelseV2> uttalelseByFom, LocalDate dato) {
-        // Sjekk eksakt treff først
-        if (uttalelseByFom.containsKey(dato)) {
-            return uttalelseByFom.get(dato);
-        }
-        // Finn uttalelse der dato faller innenfor perioden (for splittet avklaring)
-        return uttalelseByFom.values().stream()
-            .filter(u -> !dato.isBefore(u.getPeriode().getFomDato()) && !dato.isAfter(u.getPeriode().getTomDato()))
-            .findFirst()
-            .orElse(null);
-    }
-
-    private static Map<LocalDate, Boolean> mapAvklaringer(BostedsAvklaringHolder holder) {
-        return holder.getAvklaringer().stream()
-            .collect(Collectors.toMap(BostedsAvklaring::getFomDato, BostedsAvklaring::erBosattITrondheim));
     }
 }

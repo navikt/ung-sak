@@ -162,7 +162,7 @@ class VurderBosattStegTest {
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
 
         // Lagre foreslått vurdering og oppretter en ventende etterlysning
-        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, java.util.Map.of(FOM, true)));
+        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, new no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData(true, null)));
         var grunnlagsreferanse = periodeReferanser.get(FOM);
         var etterlysning = Etterlysning.opprettForType(
             behandling.getId(), grunnlagsreferanse, UUID.randomUUID(),
@@ -188,7 +188,7 @@ class VurderBosattStegTest {
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
 
         // Lagre foreslått vurdering (bosatt i Trondheim = true)
-        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, java.util.Map.of(FOM, true)));
+        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, new no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData(true, null)));
         var grunnlagsreferanse = periodeReferanser.get(FOM);
 
         // Opprett en utløpt etterlysning for perioden
@@ -215,8 +215,8 @@ class VurderBosattStegTest {
         // Fastsatt holder skal nå være satt
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
         assertThat(grunnlag.getFastsattHolder()).isNotNull();
-        assertThat(grunnlag.getFastsattHolder().getAvklaringer()).hasSize(1);
-        assertThat(grunnlag.getFastsattHolder().getAvklaringer().iterator().next().erBosattITrondheim()).isTrue();
+        assertThat(grunnlag.getFastsattHolder().getPeriodeAvklaringer()).hasSize(1);
+        assertThat(grunnlag.getFastsattHolder().getPeriodeAvklaringer().iterator().next().isErBosattITrondheim()).isTrue();
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {

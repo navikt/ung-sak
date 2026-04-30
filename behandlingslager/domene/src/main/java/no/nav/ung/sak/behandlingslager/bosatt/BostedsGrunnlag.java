@@ -29,10 +29,6 @@ public class BostedsGrunnlag extends BaseEntitet {
     @JoinColumn(name = "fastsatt_avklaring_holder_id", updatable = false)
     private BostedsAvklaringHolder fastsattHolder;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "soknad_avklaring_holder_id", updatable = false)
-    private BostedsAvklaringHolder søknadHolder;
-
     @Column(name = "grunnlag_ref", nullable = false, updatable = false)
     private UUID grunnlagsreferanse;
 
@@ -46,13 +42,12 @@ public class BostedsGrunnlag extends BaseEntitet {
     public BostedsGrunnlag() {
     }
 
-    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder foreslåttHolder, BostedsAvklaringHolder fastsattHolder, BostedsAvklaringHolder søknadHolder) {
+    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder foreslåttHolder, BostedsAvklaringHolder fastsattHolder) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         Objects.requireNonNull(foreslåttHolder, "foreslåttHolder");
         this.behandlingId = behandlingId;
         this.foreslåttHolder = foreslåttHolder;
         this.fastsattHolder = fastsattHolder;
-        this.søknadHolder = søknadHolder;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -72,10 +67,6 @@ public class BostedsGrunnlag extends BaseEntitet {
         return fastsattHolder;
     }
 
-    public BostedsAvklaringHolder getSøknadHolder() {
-        return søknadHolder;
-    }
-
     public UUID getGrunnlagsreferanse() {
         return grunnlagsreferanse;
     }
@@ -92,13 +83,12 @@ public class BostedsGrunnlag extends BaseEntitet {
     public boolean equals(Object o) {
         if (!(o instanceof BostedsGrunnlag that)) return false;
         return Objects.equals(foreslåttHolder, that.foreslåttHolder)
-            && Objects.equals(fastsattHolder, that.fastsattHolder)
-            && Objects.equals(søknadHolder, that.søknadHolder);
+            && Objects.equals(fastsattHolder, that.fastsattHolder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(foreslåttHolder, fastsattHolder, søknadHolder);
+        return Objects.hash(foreslåttHolder, fastsattHolder);
     }
 
     @Override
