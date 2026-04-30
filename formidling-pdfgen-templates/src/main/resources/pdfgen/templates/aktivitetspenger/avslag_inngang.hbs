@@ -3,9 +3,27 @@
     {{#> felles/seksjon/hoved }}
         <h1>Vi har avslått din søknad om aktivitetspenger</h1>
 
+        {{#if avslåttBosted.ytelseIkkeTilgjengeligPåBosted}}
         <p>
-            Du søkte om aktivitetspenger fra {{fom}}. Du har ikke bodd i et EØS-land eller et land Norge har trygdeavtale med de siste fem årene. Derfor avslås søknaden din.
+            Du søkte om aktivitetspenger fra {{fom}}. Du bor ikke i Trondheim. Derfor avslås søknaden din.
         </p>
+        {{#if avslåttBosted.fritekstBrev}}
+        <p>
+            {{avslåttBosted.fritekstBrev}}
+        </p>
+        {{/if}}
+        {{/if}}
+
+        {{#if avslåttBistand.harIkke14aVedtak}}
+        <p>
+            Du søkte om aktivitetspenger fra {{fom}}. Du har ikke et oppfølgingsvedtak etter NAV-loven § 14a. Derfor avslås søknaden din.
+        </p>
+        {{#if avslåttBistand.fritekstBrev}}
+        <p>
+            {{avslåttBistand.fritekstBrev}}
+        </p>
+        {{/if}}
+        {{/if}}
 
     {{/felles/seksjon/hoved}}
 

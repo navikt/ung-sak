@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -722,9 +723,16 @@ public class AktivitetspengerTestScenarioBuilder {
         VilkårResultatBuilder inngangsvilkårBuilder = Vilkårene.builder();
 
         vilkår.forEach(v -> {
-            inngangsvilkårBuilder.leggTil(inngangsvilkårBuilder.hentBuilderFor(v.getVilkårType()).leggTil(new VilkårPeriodeBuilder()
+            var periodeBuilder = new VilkårPeriodeBuilder()
                 .medPeriode(DatoIntervallEntitet.fra(v.getPeriode()))
-                .medUtfall(v.getUtfall())));
+                .medUtfall(v.getUtfall());
+            if (v.getAvslagsårsak() != null) {
+                periodeBuilder.medAvslagsårsak(v.getAvslagsårsak());
+            }
+            if (v.getFritekstBrev() != null) {
+                periodeBuilder.medFritekstBrev(v.getFritekstBrev());
+            }
+            inngangsvilkårBuilder.leggTil(inngangsvilkårBuilder.hentBuilderFor(v.getVilkårType()).leggTil(periodeBuilder));
         });
 
         final var build = inngangsvilkårBuilder.build();
@@ -844,6 +852,11 @@ public class AktivitetspengerTestScenarioBuilder {
         return this;
     }
 
+    public AktivitetspengerTestScenarioBuilder leggTilVilkår(VilkårType vilkårType, Utfall utfall, Periode periode, Avslagsårsak avslagsårsak, String fritekstBrev) {
+        vilkår.add(new VilkårData(vilkårType, utfall, periode, avslagsårsak, fritekstBrev));
+        return this;
+    }
+
     public AktivitetspengerTestScenarioBuilder leggTilAksjonspunkt(AksjonspunktDefinisjon apDef, BehandlingStegType stegType) {
         aksjonspunktDefinisjoner.put(apDef, stegType);
         return this;
@@ -916,12 +929,20 @@ public class AktivitetspengerTestScenarioBuilder {
         private Periode periode;
         private Utfall utfall;
         private VilkårType vilkårType;
+        private Avslagsårsak avslagsårsak;
+        private String fritekstBrev;
 
         VilkårData(VilkårType vilkårType, Utfall utfall, Periode periode) {
+            this(vilkårType, utfall, periode, null, null);
+        }
+
+        VilkårData(VilkårType vilkårType, Utfall utfall, Periode periode, Avslagsårsak avslagsårsak, String fritekstBrev) {
             super();
             this.periode = periode;
             this.utfall = utfall;
             this.vilkårType = vilkårType;
+            this.avslagsårsak = avslagsårsak;
+            this.fritekstBrev = fritekstBrev;
         }
 
         Periode getPeriode() {
@@ -934,6 +955,14 @@ public class AktivitetspengerTestScenarioBuilder {
 
         VilkårType getVilkårType() {
             return vilkårType;
+        }
+
+        Avslagsårsak getAvslagsårsak() {
+            return avslagsårsak;
+        }
+
+        String getFritekstBrev() {
+            return fritekstBrev;
         }
 
     }

@@ -64,5 +64,68 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             null,
             null);
     }
+
+    /**
+     * Avslag pga bostedsvilkåret ikke oppfylt.
+     * Bruker er 20 år, har søkt fra fom, men bor utenfor EØS.
+     */
+    public static AvslagScenario avslåttBosted(LocalDate fom) {
+        LocalDate fødselsdato = fom.minusYears(20);
+        var tom = fom.plusWeeks(52).minusDays(1);
+        var p = new LocalDateInterval(fom, tom);
+
+        return new AvslagScenario(
+            new AktivitetspengerTestScenario(
+                DEFAULT_NAVN,
+                List.of(new Periode(fom, tom)),
+                null,
+                null,
+                null,
+                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+                fødselsdato,
+                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
+                Collections.emptyList(),
+                null,
+                null),
+            new Periode(fom, tom),
+            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
+            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED
+        );
+    }
+
+    /**
+     * Avslag pga bistandsvilkåret ikke oppfylt.
+     * Bruker er 20 år, har søkt fra fom, men mangler 14a-vedtak.
+     */
+    public static AvslagScenario avslåttBistand(LocalDate fom) {
+        LocalDate fødselsdato = fom.minusYears(20);
+        var tom = fom.plusWeeks(52).minusDays(1);
+        var p = new LocalDateInterval(fom, tom);
+
+        return new AvslagScenario(
+            new AktivitetspengerTestScenario(
+                DEFAULT_NAVN,
+                List.of(new Periode(fom, tom)),
+                null,
+                null,
+                null,
+                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+                fødselsdato,
+                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
+                Collections.emptyList(),
+                null,
+                null),
+            new Periode(fom, tom),
+            no.nav.ung.kodeverk.vilkår.VilkårType.BISTANDSVILKÅR,
+            no.nav.ung.kodeverk.vilkår.Avslagsårsak.IKKE_14A_VEDTAK
+        );
+    }
+
+    public record AvslagScenario(
+        AktivitetspengerTestScenario testScenario,
+        Periode vilkårPeriode,
+        no.nav.ung.kodeverk.vilkår.VilkårType vilkårType,
+        no.nav.ung.kodeverk.vilkår.Avslagsårsak avslagsårsak
+    ) {}
 }
 
