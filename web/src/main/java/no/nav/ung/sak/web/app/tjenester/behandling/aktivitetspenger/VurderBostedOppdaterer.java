@@ -76,8 +76,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .map(g -> g.getForeslåttHolder().getPeriodeAvklaringer().stream()
                 .collect(Collectors.toMap(
                     BostedsPeriodeAvklaring::getSkjæringstidspunkt,
-                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getFraflyttingsDato()))))
-            .orElse(Map.of());
+                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak()))))            .orElse(Map.of());
 
         // Bygg nye avklaringer basert på vurdering (nøkkel = vilkårsperiode fom)
         Map<LocalDate, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();

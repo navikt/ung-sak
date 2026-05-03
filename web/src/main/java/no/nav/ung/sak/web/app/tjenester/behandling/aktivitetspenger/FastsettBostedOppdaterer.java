@@ -67,7 +67,7 @@ public class FastsettBostedOppdaterer implements AksjonspunktOppdaterer<Fastsett
             .map(g -> g.getForeslåttHolder().getPeriodeAvklaringer().stream()
                 .collect(Collectors.toMap(
                     BostedsPeriodeAvklaring::getSkjæringstidspunkt,
-                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getFraflyttingsDato()))))
+                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak()))))
             .orElse(Map.of());
 
         Map<LocalDate, BostedAvklaringData> fastsatteAvklaringer = new LinkedHashMap<>();

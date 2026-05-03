@@ -162,7 +162,7 @@ class VurderBosattStegTest {
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
 
         // Lagre foreslått vurdering og oppretter en ventende etterlysning
-        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, new no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData(true, null)));
+        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, new no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData(true, null, null)));
         var grunnlagsreferanse = periodeReferanser.get(FOM);
         var etterlysning = Etterlysning.opprettForType(
             behandling.getId(), grunnlagsreferanse, UUID.randomUUID(),
@@ -188,10 +188,8 @@ class VurderBosattStegTest {
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(VILKÅR_PERIODE))));
 
         // Lagre foreslått vurdering (bosatt i Trondheim = true)
-        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, new no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData(true, null)));
+        var periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), java.util.Map.of(FOM, new no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData(true, null, null)));
         var grunnlagsreferanse = periodeReferanser.get(FOM);
-
-        // Opprett en utløpt etterlysning for perioden
         var etterlysning = Etterlysning.opprettForType(
             behandling.getId(), grunnlagsreferanse, UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), EtterlysningType.UTTALELSE_BOSTED);

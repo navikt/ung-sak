@@ -105,7 +105,7 @@ public class BostedsGrunnlagRepository {
             .filter(p -> perioder.stream().anyMatch(periode ->
                 !p.getSkjæringstidspunkt().isBefore(periode.getFomDato())
                     && !p.getSkjæringstidspunkt().isAfter(periode.getTomDato())))
-            .map(p -> new BostedsPeriodeAvklaring(p.getSkjæringstidspunkt(), p.isErBosattITrondheim(), p.getFraflyttingsDato()))
+            .map(p -> new BostedsPeriodeAvklaring(p.getSkjæringstidspunkt(), p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak()))
             .forEach(nyHolder::leggTilPeriodeAvklaring);
 
         return nyHolder;
@@ -117,7 +117,7 @@ public class BostedsGrunnlagRepository {
             var skjæringstidspunkt = entry.getKey();
             var data = entry.getValue();
             holder.leggTilPeriodeAvklaring(new BostedsPeriodeAvklaring(
-                skjæringstidspunkt, data.erBosattITrondheim(), data.fraflyttingsDato()));
+                skjæringstidspunkt, data.erBosattITrondheim(), data.fraflyttingsDato(), data.fraflyttingsÅrsak()));
         }
         return holder;
     }
@@ -140,6 +140,24 @@ public class BostedsGrunnlagRepository {
             BostedsPeriodeAvklaring.class);
         query.setParameter("referanse", referanse);
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    /**
+     * Lagrer manuell fritekstvurdering for perioder med årsak ANNET.
+     * Oppdaterer {@code begrunnelseVedAnnet} på eksisterende fastsatte periodeAvklaringer.
+     * Forutsetter at fastsattHolder finnes.
+     */
+    public void lagreBegrunnelseVedAnnet(Long behandlingId, Map<LocalDate, String> begrunnelserPerFom) {
+        var grunnlag = hentGrunnlagHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Forventer bostedsgrunnlag ved lagring av begrunnelse, behandlingId=" + behandlingId));
+        var fastsattHolder = grunnlag.getFastsattHolder();
+        if (fastsattHolder == null) {
+            throw new IllegalStateException("Forventer fastsattHolder ved lagring av begrunnelse, behandlingId=" + behandlingId);
+        }
+        fastsattHolder.getPeriodeAvklaringer().stream()
+            .filter(p -> begrunnelserPerFom.containsKey(p.getSkjæringstidspunkt()))
+            .forEach(p -> p.setBegrunnelseVedAnnet(begrunnelserPerFom.get(p.getSkjæringstidspunkt())));
+        entityManager.flush();
     }
 
     private void deaktiverEksisterende(BostedsGrunnlag gr) {

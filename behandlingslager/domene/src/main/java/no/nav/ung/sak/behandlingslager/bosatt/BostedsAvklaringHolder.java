@@ -33,7 +33,7 @@ public class BostedsAvklaringHolder extends BaseEntitet {
 
     BostedsAvklaringHolder(BostedsAvklaringHolder other) {
         this.periodeAvklaringer = other.periodeAvklaringer.stream()
-            .map(p -> new BostedsPeriodeAvklaring(p.getSkjæringstidspunkt(), p.isErBosattITrondheim(), p.getFraflyttingsDato()))
+            .map(p -> new BostedsPeriodeAvklaring(p.getSkjæringstidspunkt(), p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 

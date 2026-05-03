@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -170,8 +171,29 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         if (!perioderSomKanFastsettes.isEmpty()) {
             bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, perioderSomKanFastsettes);
         }
+        // Dersom noen fastsatte perioder har årsak ANNET uten begrunnelse, kreves manuell vurdering
+        if (!finnAnnetPerioderUtenBegrunnelse(behandlingId).isEmpty()) {
+            return manuellVurderingBosted();
+        }
         autoVurder(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private static BehandleStegResultat manuellVurderingBosted() {
+        return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR));
+    }
+
+    private Set<LocalDate> finnAnnetPerioderUtenBegrunnelse(long behandlingId) {
+        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> {
+                if (g.getFastsattHolder() == null) return Set.<LocalDate>of();
+                return g.getFastsattHolder().getPeriodeAvklaringer().stream()
+                    .filter(p -> FraflyttingsÅrsak.ANNET.equals(p.getFraflyttingsÅrsak()))
+                    .filter(p -> p.getBegrunnelseVedAnnet() == null)
+                    .map(BostedsPeriodeAvklaring::getSkjæringstidspunkt)
+                    .collect(Collectors.toSet());
+            })
+            .orElse(Set.of());
     }
 
     private static boolean erVentende(EtterlysningData etterlysning) {
@@ -232,8 +254,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
                 if (!periodeAvklaring.isErBosattITrondheim()) {
                     var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
-                    periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
-                        .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                    settIkkeOppfylt(periodeBuilder, periodeAvklaring);
                     vilkårBuilder.leggTil(periodeBuilder);
                 } else if (periodeAvklaring.getFraflyttingsDato() == null) {
                     var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
@@ -245,8 +266,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                     if (!fraflyttingsDato.isAfter(segmentFom)) {
                         // Fraflytting allerede skjedd før eller på segmentstart → hele segmentet IKKE_OPPFYLT
                         var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
-                        periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
-                            .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                        settIkkeOppfylt(periodeBuilder, periodeAvklaring);
                         vilkårBuilder.leggTil(periodeBuilder);
                     } else if (fraflyttingsDato.isAfter(segmentTom)) {
                         // Fraflytting etter segmentslutt → hele segmentet OPPFYLT
@@ -260,8 +280,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                         vilkårBuilder.leggTil(oppfyltBuilder);
 
                         var ikkeOppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fraflyttingsDato, segmentTom));
-                        ikkeOppfyltBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
-                            .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+                        settIkkeOppfylt(ikkeOppfyltBuilder, periodeAvklaring);
                         vilkårBuilder.leggTil(ikkeOppfyltBuilder);
                     }
                 }
@@ -269,6 +288,16 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
         builder.leggTil(vilkårBuilder);
         vilkårResultatRepository.lagre(behandlingId, builder.build());
+    }
+
+    private static void settIkkeOppfylt(no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder periodeBuilder,
+                                          BostedsPeriodeAvklaring periodeAvklaring) {
+        periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
+            .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+        if (FraflyttingsÅrsak.ANNET.equals(periodeAvklaring.getFraflyttingsÅrsak())
+            && periodeAvklaring.getBegrunnelseVedAnnet() != null) {
+            periodeBuilder.medBegrunnelse(periodeAvklaring.getBegrunnelseVedAnnet());
+        }
     }
 
 }

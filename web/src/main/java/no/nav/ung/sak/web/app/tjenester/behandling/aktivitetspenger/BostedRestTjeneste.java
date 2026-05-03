@@ -111,6 +111,7 @@ public class BostedRestTjeneste {
             var fastsatt = fastsattePerFom.get(fom);
             Boolean fastsattErBosatt = fastsatt != null ? fastsatt.isErBosattITrondheim() : null;
             LocalDate fastsattFraflyttingsDato = fastsatt != null ? fastsatt.getFraflyttingsDato() : null;
+            var fastsattFraflyttingsÅrsak = fastsatt != null ? fastsatt.getFraflyttingsÅrsak() : null;
 
             Boolean søknadOppgitt = søknadErBosattPerFom.get(fom);
 
@@ -122,8 +123,10 @@ public class BostedRestTjeneste {
                 fom,
                 foreslåttPeriode.isErBosattITrondheim(),
                 foreslåttPeriode.getFraflyttingsDato(),
+                foreslåttPeriode.getFraflyttingsÅrsak(),
                 fastsattErBosatt,
                 fastsattFraflyttingsDato,
+                fastsattFraflyttingsÅrsak,
                 søknadOppgitt,
                 harUttalelse,
                 uttalelseTekst
