@@ -58,11 +58,14 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPengerAvsnitt() + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
-                Når du er under 25 år, bruker vi grunnbeløpet ganger 2,041. \
+                Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
+                Fordi minstesatsen er høyere enn inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over 25 år. \
+                Minstesatsen når du er under 25 år, er grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
-                Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
+                Minstesatsen når du er over 25 år, er grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraOmArbeidsinntektAvsnitt()
         );
