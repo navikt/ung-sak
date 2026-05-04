@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -20,6 +21,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -135,7 +137,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         // Auto-vurder alle ferdigperioder (ingen etterlysning, utløpt, eller svar uten uttalelse)
         autoVurder(behandlingId, ferdigePerioder);
         // Finn perioder som krever manuell vurdering av vilkåret
-        Set<LocalDate> trengerManuell = finnPerioderSomTrengerManuellVurdering(behandlingId, trengerManuellVurderingFom);
+        LocalDateTimeline<Boolean> trengerManuell = finnPerioderSomTrengerManuellVurdering(behandlingId, tidslinjeTilVurdering, trengerManuellVurderingFom);
         if (!trengerManuell.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR));
         }
@@ -181,48 +183,21 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
     /**
      * Finn perioder som krever manuell vilkårsvurdering:
-     * - Mottatt uttalelse fra bruker (trengerManuellVurderingFom)
-     * - Fastsatt årsak=ANNET uten eksisterende manuell vurdering
-     * - Kilde=SØKNAD uten eksisterende manuell vurdering
+     * - Mottatt uttalelse fra bruker (harMottattUttalelseFom)
+     * - Fastsatt årsak=ANNET
+     * - Kilde=SØKNAD
      */
-    private Set<LocalDate> finnPerioderSomTrengerManuellVurdering(long behandlingId, Set<LocalDate> fomsHvorUttalelseMotatt) {
-        var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId).orElse(null);
-        if (grunnlag == null) {
-            return fomsHvorUttalelseMotatt;
-        }
-
-        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
-        var vilkårTimeline = vilkårene != null ? vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR) : null;
-
-        Set<LocalDate> perioder = new LinkedHashSet<>(fomsHvorUttalelseMotatt);
-
-        for (BostedsPeriodeAvklaring avklaring : grunnlag.getHolder().getPeriodeAvklaringer()) {
-            LocalDate fom = avklaring.getSkjæringstidspunkt();
-            boolean erAnnet = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
-            boolean erFraSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
-
-            if (!erAnnet && !erFraSøknad) {
-                continue;
-            }
-
-            if (vilkårTimeline == null) {
-                perioder.add(fom);
-                continue;
-            }
-
-            LocalDate ikkeOppfyltStart = (avklaring.isErBosattITrondheim() && avklaring.getFraflyttingsDato() != null)
-                ? avklaring.getFraflyttingsDato()
-                : fom;
-
-            boolean harManuellVurdering = vilkårTimeline.stream()
-                .anyMatch(s -> s.getFom().equals(ikkeOppfyltStart) && s.getValue().getErManueltVurdert());
-
-            if (!harManuellVurdering) {
-                perioder.add(fom);
-            }
-        }
-
-        return perioder;
+    private LocalDateTimeline<Boolean> finnPerioderSomTrengerManuellVurdering(long behandlingId, LocalDateTimeline<Boolean> tidslinjeTilVurdering, Set<LocalDate> harMottattUttalelseFom) {
+        var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
+        BostedsAvklaringHolder holder = grunnlag.getHolder();
+        List<LocalDateSegment<Boolean>> segmenterMedManuellVilkårsvurdering = tidslinjeTilVurdering.stream().filter(segment -> {
+            BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(segment.getFom()).orElseThrow(() -> new IllegalStateException("Forventer å finne en bostedsperiodeavklaring for "));
+            boolean erÅrsakSomSkalVurderesManuelt = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
+            boolean erKildeSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
+            boolean harUttalelseFraBruker = harMottattUttalelseFom.contains(segment.getFom());
+            return erÅrsakSomSkalVurderesManuelt || erKildeSøknad || harUttalelseFraBruker;
+        }).toList();
+        return new LocalDateTimeline<>(segmenterMedManuellVilkårsvurdering);
     }
 
     private static boolean erVentende(EtterlysningData etterlysning) {

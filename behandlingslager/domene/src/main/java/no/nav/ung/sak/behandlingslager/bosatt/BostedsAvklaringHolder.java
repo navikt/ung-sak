@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import org.hibernate.annotations.BatchSize;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -48,6 +46,10 @@ public class BostedsAvklaringHolder extends BaseEntitet {
 
     public Set<BostedsPeriodeAvklaring> getPeriodeAvklaringer() {
         return Collections.unmodifiableSet(periodeAvklaringer);
+    }
+
+    public Optional<BostedsPeriodeAvklaring> getPeriodeAvklaring(LocalDate skjæringstidspunkt) {
+        return periodeAvklaringer.stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
     }
 
     @Override
