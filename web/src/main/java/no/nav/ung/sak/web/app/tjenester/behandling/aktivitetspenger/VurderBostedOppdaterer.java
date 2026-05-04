@@ -71,12 +71,12 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        // Les eksisterende foreslåtte avklaringer per skjæringstidspunkt BEFORE lagreAvklaringer
+        // Les eksisterende avklaringer per skjæringstidspunkt BEFORE lagreAvklaringer
         Map<LocalDate, BostedAvklaringData> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getForeslåttHolder().getPeriodeAvklaringer().stream()
+            .map(g -> g.getHolder().getPeriodeAvklaringer().stream()
                 .collect(Collectors.toMap(
                     BostedsPeriodeAvklaring::getSkjæringstidspunkt,
-                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak()))))            .orElse(Map.of());
+                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak(), p.getKilde()))))            .orElse(Map.of());
 
         // Bygg nye avklaringer basert på vurdering (nøkkel = vilkårsperiode fom)
         Map<LocalDate, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
@@ -88,6 +88,13 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
         Set<LocalDate> fomsHvorAktivEtterlysningFinnes = etterlysningRepository
             .hentEtterlysningerSomVenterPåSvar(behandlingId).stream()
+            .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
+            .map(e -> e.getPeriode().getFomDato())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        // Hent besvarte etterlysninger (MOTTATT_SVAR) per fom — skal ikke sende ny etterlysning for disse
+        Set<LocalDate> fomsHvorBesvartEtterlysningFinnes = etterlysningRepository
+            .hentBesvartEtterlysninger(behandlingId).stream()
             .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
             .map(e -> e.getPeriode().getFomDato())
             .collect(Collectors.toCollection(LinkedHashSet::new));
@@ -104,6 +111,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
             LocalDate periodesFom = avklaring.periode().getFom();
             boolean harAktivEtterlysning = fomsHvorAktivEtterlysningFinnes.contains(periodesFom);
+            boolean harBesvartEtterlysning = fomsHvorBesvartEtterlysningFinnes.contains(periodesFom);
 
             BostedAvklaringData nyAvklaring = nyeAvklaringer.get(periodesFom);
             BostedAvklaringData gammelAvklaring = tidligereAvklaringer.get(periodesFom);
@@ -116,7 +124,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
                 && søknadErBosatt == nyAvklaring.erBosattITrondheim()
                 && nyAvklaring.fraflyttingsDato() == null;
 
-            if ((!harAktivEtterlysning && !søknadStemmerOverens) || avklaringEndret) {
+            if ((!harAktivEtterlysning && !harBesvartEtterlysning && !søknadStemmerOverens) || avklaringEndret) {
                 fomsMedBehovForEtterlysning.add(periodesFom);
             }
         }

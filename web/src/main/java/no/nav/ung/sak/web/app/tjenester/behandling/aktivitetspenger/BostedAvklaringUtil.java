@@ -1,6 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
+import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto;
 
@@ -15,7 +16,7 @@ class BostedAvklaringUtil {
     }
 
     /**
-     * Konverterer én {@link BostedVurderingDto} til {@link BostedAvklaringData}.
+     * Konverterer én {@link BostedVurderingDto} til {@link BostedAvklaringData} med kilde=SAKSBEHANDLER.
      * <ul>
      *   <li>borITrondheimIHelePerioden = true → (erBosattITrondheim=true, fraflyttingsDato=null, årsak=null)</li>
      *   <li>borITrondheimIHelePerioden = false og fraflyttingsDato etter fom → (true, fraflyttingsDato, årsak)</li>
@@ -25,13 +26,13 @@ class BostedAvklaringUtil {
     static BostedAvklaringData tilAvklaringData(LocalDate fom, BostedVurderingDto vurdering) {
         FraflyttingsÅrsak årsak = vurdering.fraflyttingsÅrsak();
         if (Boolean.TRUE.equals(vurdering.borITrondheimIHelePerioden())) {
-            return new BostedAvklaringData(true, null, null);
+            return new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER);
         }
         LocalDate fraflyttingsDato = vurdering.fraflyttingsDato();
         if (fraflyttingsDato != null && fraflyttingsDato.isAfter(fom)) {
-            return new BostedAvklaringData(true, fraflyttingsDato, årsak);
+            return new BostedAvklaringData(true, fraflyttingsDato, årsak, Kilde.SAKSBEHANDLER);
         }
-        return new BostedAvklaringData(false, null, årsak);
+        return new BostedAvklaringData(false, null, årsak, Kilde.SAKSBEHANDLER);
     }
 }
 

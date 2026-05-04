@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
+import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 import java.time.LocalDate;
@@ -41,15 +42,20 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Column(name = "fraflyttings_aarsak", updatable = false)
     private FraflyttingsÅrsak fraflyttingsÅrsak;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "kilde", nullable = false, updatable = false)
+    private Kilde kilde;
+
     public BostedsPeriodeAvklaring() {
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaring(LocalDate skjæringstidspunkt, boolean erBosattITrondheim, LocalDate fraflyttingsDato, FraflyttingsÅrsak fraflyttingsÅrsak) {
+    public BostedsPeriodeAvklaring(LocalDate skjæringstidspunkt, boolean erBosattITrondheim, LocalDate fraflyttingsDato, FraflyttingsÅrsak fraflyttingsÅrsak, Kilde kilde) {
         this.skjæringstidspunkt = skjæringstidspunkt;
         this.erBosattITrondheim = erBosattITrondheim;
         this.fraflyttingsDato = fraflyttingsDato;
         this.fraflyttingsÅrsak = fraflyttingsÅrsak;
+        this.kilde = kilde;
     }
 
     public Long getId() {
@@ -76,18 +82,23 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return fraflyttingsÅrsak;
     }
 
+    public Kilde getKilde() {
+        return kilde;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
         return erBosattITrondheim == that.erBosattITrondheim
             && Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt)
             && Objects.equals(fraflyttingsDato, that.fraflyttingsDato)
-            && fraflyttingsÅrsak == that.fraflyttingsÅrsak;
+            && fraflyttingsÅrsak == that.fraflyttingsÅrsak
+            && kilde == that.kilde;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skjæringstidspunkt, erBosattITrondheim, fraflyttingsDato, fraflyttingsÅrsak);
+        return Objects.hash(skjæringstidspunkt, erBosattITrondheim, fraflyttingsDato, fraflyttingsÅrsak, kilde);
     }
 
     @Override
@@ -96,6 +107,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             + ", referanse=" + referanse
             + ", erBosattITrondheim=" + erBosattITrondheim
             + ", fraflyttingsDato=" + fraflyttingsDato
-            + ", fraflyttingsÅrsak=" + fraflyttingsÅrsak + '}';
+            + ", fraflyttingsÅrsak=" + fraflyttingsÅrsak
+            + ", kilde=" + kilde + '}';
     }
 }

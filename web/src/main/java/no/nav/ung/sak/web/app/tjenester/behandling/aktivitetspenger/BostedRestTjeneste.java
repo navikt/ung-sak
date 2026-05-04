@@ -18,11 +18,9 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
-import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -37,7 +35,7 @@ import java.util.stream.Collectors;
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 
 /**
- * REST-tjeneste for å hente bostedsgrunnlag til bruk i VURDER_BOSTED og FASTSETT_BOSTED.
+ * REST-tjeneste for å hente bostedsgrunnlag til bruk i VURDER_BOSTED og MANUELL_VURDERING_BOSTEDSVILKÅR.
  */
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
@@ -69,7 +67,7 @@ public class BostedRestTjeneste {
 
     @GET
     @Path(BOSATT_PATH)
-    @Operation(description = "Hent bostedsgrunnlag (foreslåtte og fastsatte avklaringer per periode)", tags = "aktivitetspenger")
+    @Operation(description = "Hent bostedsgrunnlag (avklaringer per periode)", tags = "aktivitetspenger")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public BostedGrunnlagResponseDto hentBostedGrunnlag(
@@ -85,17 +83,11 @@ public class BostedRestTjeneste {
 
         var grunnlag = grunnlagOpt.get();
 
-        // Bygg map fra skjæringstidspunkt til fastsatt periodeAvklaring
-        Map<LocalDate, BostedsPeriodeAvklaring> fastsattePerFom = grunnlag.getFastsattHolder() != null
-            ? grunnlag.getFastsattHolder().getPeriodeAvklaringer().stream()
-                .collect(Collectors.toMap(BostedsPeriodeAvklaring::getSkjæringstidspunkt, p -> p))
-            : Map.of();
-
         // Hent søknadsdata fra separat aggregat
         Map<LocalDate, Boolean> søknadErBosattPerFom = bosattSøknadGrunnlagRepository.hentSøknadBostedPerFom(behandling.getId());
 
-        // Hent bosteduttalelser og indekser dem på periode fom-dato.
-        var periodeReferanser = grunnlag.getForeslåttHolder().getPeriodeAvklaringer().stream()
+        // Hent bosteduttalelser og indekser dem på periode fom-dato
+        var periodeReferanser = grunnlag.getHolder().getPeriodeAvklaringer().stream()
             .map(BostedsPeriodeAvklaring::getReferanse)
             .collect(Collectors.toSet());
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
@@ -105,13 +97,8 @@ public class BostedRestTjeneste {
 
         // Bygg liste med én DTO per vilkårsperiode (skjæringstidspunkt)
         var perioder = new ArrayList<BostedGrunnlagPeriodeDto>();
-        for (BostedsPeriodeAvklaring foreslåttPeriode : grunnlag.getForeslåttHolder().getPeriodeAvklaringer()) {
-            LocalDate fom = foreslåttPeriode.getSkjæringstidspunkt();
-
-            var fastsatt = fastsattePerFom.get(fom);
-            Boolean fastsattErBosatt = fastsatt != null ? fastsatt.isErBosattITrondheim() : null;
-            LocalDate fastsattFraflyttingsDato = fastsatt != null ? fastsatt.getFraflyttingsDato() : null;
-            var fastsattFraflyttingsÅrsak = fastsatt != null ? fastsatt.getFraflyttingsÅrsak() : null;
+        for (BostedsPeriodeAvklaring periodeAvklaring : grunnlag.getHolder().getPeriodeAvklaringer()) {
+            LocalDate fom = periodeAvklaring.getSkjæringstidspunkt();
 
             Boolean søknadOppgitt = søknadErBosattPerFom.get(fom);
 
@@ -121,12 +108,10 @@ public class BostedRestTjeneste {
 
             perioder.add(new BostedGrunnlagPeriodeDto(
                 fom,
-                foreslåttPeriode.isErBosattITrondheim(),
-                foreslåttPeriode.getFraflyttingsDato(),
-                foreslåttPeriode.getFraflyttingsÅrsak(),
-                fastsattErBosatt,
-                fastsattFraflyttingsDato,
-                fastsattFraflyttingsÅrsak,
+                periodeAvklaring.isErBosattITrondheim(),
+                periodeAvklaring.getFraflyttingsDato(),
+                periodeAvklaring.getFraflyttingsÅrsak(),
+                periodeAvklaring.getKilde(),
                 søknadOppgitt,
                 harUttalelse,
                 uttalelseTekst

@@ -23,11 +23,7 @@ public class BostedsGrunnlag extends BaseEntitet {
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "foreslatt_avklaring_holder_id", nullable = false, updatable = false)
-    private BostedsAvklaringHolder foreslåttHolder;
-
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "fastsatt_avklaring_holder_id", updatable = false)
-    private BostedsAvklaringHolder fastsattHolder;
+    private BostedsAvklaringHolder holder;
 
     @Column(name = "grunnlag_ref", nullable = false, updatable = false)
     private UUID grunnlagsreferanse;
@@ -42,12 +38,11 @@ public class BostedsGrunnlag extends BaseEntitet {
     public BostedsGrunnlag() {
     }
 
-    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder foreslåttHolder, BostedsAvklaringHolder fastsattHolder) {
+    BostedsGrunnlag(Long behandlingId, BostedsAvklaringHolder holder) {
         Objects.requireNonNull(behandlingId, "behandlingId");
-        Objects.requireNonNull(foreslåttHolder, "foreslåttHolder");
+        Objects.requireNonNull(holder, "holder");
         this.behandlingId = behandlingId;
-        this.foreslåttHolder = foreslåttHolder;
-        this.fastsattHolder = fastsattHolder;
+        this.holder = holder;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -59,12 +54,8 @@ public class BostedsGrunnlag extends BaseEntitet {
         return behandlingId;
     }
 
-    public BostedsAvklaringHolder getForeslåttHolder() {
-        return foreslåttHolder;
-    }
-
-    public BostedsAvklaringHolder getFastsattHolder() {
-        return fastsattHolder;
+    public BostedsAvklaringHolder getHolder() {
+        return holder;
     }
 
     public UUID getGrunnlagsreferanse() {
@@ -82,20 +73,18 @@ public class BostedsGrunnlag extends BaseEntitet {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsGrunnlag that)) return false;
-        return Objects.equals(foreslåttHolder, that.foreslåttHolder)
-            && Objects.equals(fastsattHolder, that.fastsattHolder);
+        return Objects.equals(holder, that.holder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(foreslåttHolder, fastsattHolder);
+        return Objects.hash(holder);
     }
 
     @Override
     public String toString() {
         return "BostedsGrunnlag{behandlingId=" + behandlingId
             + ", grunnlagsreferanse=" + grunnlagsreferanse
-            + ", harFastsatt=" + (fastsattHolder != null)
             + ", aktiv=" + aktiv + '}';
     }
 }

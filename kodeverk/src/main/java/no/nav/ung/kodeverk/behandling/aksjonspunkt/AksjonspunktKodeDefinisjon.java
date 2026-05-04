@@ -47,7 +47,6 @@ public class AksjonspunktKodeDefinisjon {
     public static final String KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE = "5077";
 
     public static final String VURDER_BOSTEDVILKÅR_KODE = "5140";
-    public static final String FASTSETT_BOSTEDVILKÅR_KODE = "5143";
     public static final String MANUELL_VURDERING_BOSTEDSVILKÅR_KODE = "5144";
     public static final String VURDER_BISTANDSVILKÅR_KODE = "5141";
     public static final String VURDER_ANDRE_LIVSOPPHOLDSYTELSER_KODE = "5142";

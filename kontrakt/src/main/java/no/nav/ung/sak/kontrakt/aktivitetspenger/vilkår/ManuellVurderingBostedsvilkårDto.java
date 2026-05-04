@@ -1,6 +1,9 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.Valid;
@@ -8,33 +11,37 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 import java.util.List;
 
 /**
- * DTO for aksjonspunkt 5144 – manuell vurdering av bostedsvilkåret der saksbehandler har valgt årsak ANNET.
- * Saksbehandler oppgir en fritekstvurdering for IKKE_OPPFYLT-delen av perioden.
+ * DTO for aksjonspunkt 5144 – manuell vurdering av bostedsvilkåret.
+ * Brukes ved årsak ANNET, mottatt uttalelse fra bruker, eller auto-fakta fra søknad.
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonFormat(shape = JsonFormat.Shape.OBJECT)
+@JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR_KODE)
 public class ManuellVurderingBostedsvilkårDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty("perioder")
+    @JsonProperty("vurdertePerioder")
     @NotNull
     @Size(min = 1, max = 100)
-    private List<@Valid ManuellBostedPeriodeDto> perioder;
+    private List<@Valid VilkårPeriodeVurderingDto> vurdertePerioder;
 
     public ManuellVurderingBostedsvilkårDto() {
         // for Jackson
     }
 
     @JsonCreator
-    public ManuellVurderingBostedsvilkårDto(@JsonProperty("perioder") List<ManuellBostedPeriodeDto> perioder,
+    public ManuellVurderingBostedsvilkårDto(@JsonProperty("vurdertePerioder") List<VilkårPeriodeVurderingDto> vurdertePerioder,
                                              @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
-        this.perioder = perioder;
+        this.vurdertePerioder = vurdertePerioder;
     }
 
-    public List<ManuellBostedPeriodeDto> getPerioder() {
-        return perioder;
+    public List<VilkårPeriodeVurderingDto> getVurdertePerioder() {
+        return vurdertePerioder;
     }
 }
