@@ -18,6 +18,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     HENDELSE_FØDSEL_BARN("HENDELSE_FØDSEL_BARN", "Fødsel barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
     ENDRET_STARTDATO_UNGDOMSPROGRAM("ENDRET_STARTDATO_UNGDOMSPROGRAM", "Endret startdato for ungdomsprogram"),
+    UTVIDET_KVOTE_UNGDOMSPROGRAM("UTVIDET_KVOTE_UNGDOMSPROGRAM", "Utvidet kvote for ungdomsprogram"),
     KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll og rapportering av inntekt"),
     OVERGANG_HØY_SATS("OVERGANG_HØY_SATS", "Overgang til høy sats"),
 
@@ -36,6 +37,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, HENDELSE_FØDSEL_BARN);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, OPPHØR_UNGDOMSPROGRAM);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, ENDRET_STARTDATO_UNGDOMSPROGRAM);
+        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM, UTVIDET_KVOTE_UNGDOMSPROGRAM);
         sammenheng.put(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, KONTROLL_AV_INNTEKT);
         sammenheng.put(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, KONTROLL_AV_INNTEKT);
         sammenheng.put(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, OVERGANG_HØY_SATS);
