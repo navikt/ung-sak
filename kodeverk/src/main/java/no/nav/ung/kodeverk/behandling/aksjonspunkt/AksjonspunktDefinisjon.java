@@ -94,7 +94,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     VURDER_BOSTED(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE,
         AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTED,
-        VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
+        UTEN_VILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     MANUELL_VURDERING_BOSTEDSVILKÅR(AksjonspunktKodeDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR_KODE,
         AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret (årsak: Annet)", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTED,
         VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
