@@ -49,36 +49,40 @@
         {{#with satsOgBeregning}}
             <h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>
 
-
-
             {{#with beregningsgrunnlag}}
                 {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
                     <p>
-                        Fordi du får én dagsats når du er under 25 år og en annen dagsats når du er over 25 år, har vi gjort to ulike beregninger.
+                        Fordi du får én dagsats når du er under {{aldersgrenseSatsendring}} år og en annen dagsats når du er over {{aldersgrenseSatsendring}} år, har vi gjort to ulike beregninger.
                     </p>
-                    <p>Slik har vi regnet ut satsen som du får før du fylte 25 år.</p>
+                    <h3>Slik har vi regnet ut satsen som du får før du fylte {{aldersgrenseSatsendring}} år.</h3>
                 {{/if}}
 
                {{#eq besteBeregningResultat "SNITT_SISTE_TRE_ÅR"}}
                     <p>
-                        Når vi har regnet ut hvor mye du får i aktivitetspenger,
-                        har vi brukt årsinntektene dine for de tre siste ferdiglignede årene og funnet gjennomsnittet av disse.
+                        {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger før du fylte {{aldersgrenseSatsendring}} år
+                        {{else~}}
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger
+                        {{/if~}}, har vi brukt årsinntektene dine for de tre siste ferdiglignede årene og funnet gjennomsnittet av disse.
                         Gjennomsnittet er på {{> felles/beløp beregnetPrAar}}.
                     </p>
 
                     <p>
-                        Vi har brukt denne summen fordi den er høyere enn minstesatsen for deg som er {{#if harLavSatstype}}under{{else}}over{{/if}} 25 år,
+                        Vi har brukt denne summen fordi den er høyere enn minstesatsen for deg som er {{#if harLavSatstype}}under{{else}}over{{/if}} {{aldersgrenseSatsendring}} år,
                         og høyere enn årsinntekten din i {{sisteLignedeÅr}}.
                         Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
                     </p>
                 {{else eq besteBeregningResultat "SISTE_ÅR"}}
                     <p>
-                        Når vi har regnet ut hvor mye du får i aktivitetspenger,
-                        har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{> felles/beløp beregnetPrAar}}.
+                        {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger før du fylte {{aldersgrenseSatsendring}} år
+                        {{else~}}
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger
+                        {{/if~}}, har vi brukt årsinntekten din for {{sisteLignedeÅr}} på {{> felles/beløp beregnetPrAar}}.
                     </p>
 
                     <p>
-                        Det er fordi denne inntekten er høyere enn minstesatsen for deg som er {{#if harLavSatstype}}under{{else}}over{{/if}} 25 år,
+                        Det er fordi denne inntekten er høyere enn minstesatsen for deg som er {{#if harLavSatstype}}under{{else}}over{{/if}} {{aldersgrenseSatsendring}} år,
                         og høyere enn gjennomsnittet av årsinntekten din for de tre siste ferdiglignede årene.
                         Vi bruker den høyeste summen i beregningen vår slik at du får mer i aktivitetspenger.
                     </p>
@@ -90,44 +94,71 @@
                 <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
             {{/with}}
 
+            <!-- Under OG over aldersgrense -->
             {{#if minsteYtelsegrunnlagOvergangTilHøySats}}
-                {{#with minsteYtelsegrunnlag}}
-                    {{#if harLavSatstype}}
+                {{#if minsteYtelsegrunnlag}}
+                    {{#with minsteYtelsegrunnlag}}
                         <p>
-                            Når du er under {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet ganger {{faktor}}.
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene.
+                            Fordi minstesatsen er høyere enn inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over {{aldersgrenseSatsendring}} år.
+                        <p>
+
+                        <p>
+                            Minstesatsen når du er under {{aldersgrenseSatsendring}} år, er grunnbeløpet ganger 2/3 av {{faktor}}.
                             Det blir {{> felles/beløp minsteÅrligeYtelse}} i året.
                             Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.
+                        </p>
+                        <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
+                    {{/with}}
+
+                    {{#with minsteYtelsegrunnlagOvergangTilHøySats}}
+                        <p>
+                            Minstesatsen når du er over {{aldersgrenseSatsendring}} år, er grunnbeløpet ganger {{faktor}}, som blir {{> felles/beløp minsteÅrligeYtelse}} i året.
+                            Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.
+                        </p>
+                        <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
+                    {{/with}}
+                {{else}}
+                    {{#if beregningsgrunnlag}}
+                        <h3>Slik har vi regnet ut satsen du får etter at du fylte {{aldersgrenseSatsendring}} år.</h3>
+
+                        <p>
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger etter at du fylte {{aldersgrenseSatsendring}}, har vi sett på inntekten din de tre siste årene.
+                            Fordi minstesatsen for deg som er over {{aldersgrenseSatsendring}} år, er høyere enn inntekten din de tre siste årene, får du minstesatsen.
+                        <p/>
+                        <p>
+                            Minstesatsen er {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}} kroner. Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.
+                            Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
                         </p>
                         <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
                     {{/if}}
                 {{/with}}
 
-                {{#if beregningsgrunnlag}}
-                    <p>Slik har vi regnet ut satsen du får etter at du fylte 25 år.</p>
-                {{/if}}
-
-                {{#with minsteYtelsegrunnlagOvergangTilHøySats}}
-                    <p>
-                        Når du er over {{aldersgrenseSatsendring}} år, bruker vi grunnbeløpet
-                        ganger {{faktor}} som blir {{> felles/beløp minsteÅrligeYtelse}} i året.
-                    </p>
-                    <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
-                {{/with}}
+            <!-- Kun under ELLER over aldersgrense -->
             {{else if minsteYtelsegrunnlag}}
                 {{#with minsteYtelsegrunnlag}}
-                    <p>
-                        {{#if harLavSatstype}}
-                            Fordi du er under 25 år, har du rett på 2/3 av {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
-                        {{else}}
-                            Fordi du er over 25 år, har du rett på {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}.
-                        {{/if}}
-                            Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.
-                    </p>
-
-                    <p>Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.</p>
+                    {{#if harLavSatstype}}
+                        <p>
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene.
+                            Fordi minstesatsen for deg som er under {{aldersgrenseSatsendring}} år, er høyere enn inntekten din de tre siste årene, får du minstesatsen.
+                        <p/>
+                        <p>
+                            Minstesatsen er 2/3 av {{faktor}} ganger grunnbeløpet som er på {{> felles/beløp grunnbeløp}} kroner. Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.
+                            Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager.
+                        <p/>
+                    {{else}}
+                        <p>
+                            Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene.
+                            Fordi minstesatsen for deg som er over {{aldersgrenseSatsendring}} år, er høyere enn inntekten din de tre siste årene, får du minstesatsen.
+                        <p/>
+                        <p>
+                            Minstesatsen er {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}} kroner. Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.
+                            Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager.
+                        </p>
+                    {{/if}}
                     <p>Det vil si at du har rett på {{> felles/beløp minstesats}} per dag.</p>
                 {{/with}}
-           {{/if}}
+            {{/if}}
 
             {{#with barnetillegg}}
                 <p>Fordi du har {{antall}} barn, får du i tillegg {{> felles/beløp dagsatsBarnetillegg}} per dag i barnetillegg{{#if harFlereBarn}} for hvert barn{{/if}}.</p>
