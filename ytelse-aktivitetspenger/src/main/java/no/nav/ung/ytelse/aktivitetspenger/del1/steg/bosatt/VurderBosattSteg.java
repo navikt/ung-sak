@@ -101,11 +101,6 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
             .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
-        Map<LocalDate, BostedsPeriodeAvklaring> periodeAvklaringPerFom = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getHolder().getPeriodeAvklaringer().stream()
-                .collect(Collectors.toMap(BostedsPeriodeAvklaring::getSkjæringstidspunkt, p -> p)))
-            .orElse(Map.of());
-
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<DatoIntervallEntitet> ferdigePerioder = new LinkedHashSet<>();
         Set<LocalDate> trengerManuellVurderingFom = new LinkedHashSet<>();
@@ -288,7 +283,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
                 if (!periodeAvklaring.isErBosattITrondheim()) {
                     var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
-                    settIkkeOppfylt(periodeBuilder, periodeAvklaring);
+                    settIkkeOppfylt(periodeBuilder);
                     vilkårBuilder.leggTil(periodeBuilder);
                 } else if (periodeAvklaring.getFraflyttingsDato() == null) {
                     var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
@@ -298,7 +293,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                     LocalDate fraflyttingsDato = periodeAvklaring.getFraflyttingsDato();
                     if (!fraflyttingsDato.isAfter(segmentFom)) {
                         var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
-                        settIkkeOppfylt(periodeBuilder, periodeAvklaring);
+                        settIkkeOppfylt(periodeBuilder);
                         vilkårBuilder.leggTil(periodeBuilder);
                     } else if (fraflyttingsDato.isAfter(segmentTom)) {
                         var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(segmentFom, segmentTom));
@@ -310,7 +305,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                         vilkårBuilder.leggTil(oppfyltBuilder);
 
                         var ikkeOppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fraflyttingsDato, segmentTom));
-                        settIkkeOppfylt(ikkeOppfyltBuilder, periodeAvklaring);
+                        settIkkeOppfylt(ikkeOppfyltBuilder);
                         vilkårBuilder.leggTil(ikkeOppfyltBuilder);
                     }
                 }
@@ -320,8 +315,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         vilkårResultatRepository.lagre(behandlingId, builder.build());
     }
 
-    private static void settIkkeOppfylt(no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder periodeBuilder,
-                                        BostedsPeriodeAvklaring periodeAvklaring) {
+    private static void settIkkeOppfylt(no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder periodeBuilder) {
         periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
             .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
     }
