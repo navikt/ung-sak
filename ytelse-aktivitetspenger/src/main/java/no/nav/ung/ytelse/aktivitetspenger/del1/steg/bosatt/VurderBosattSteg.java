@@ -106,46 +106,18 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                 .collect(Collectors.toMap(BostedsPeriodeAvklaring::getSkjæringstidspunkt, p -> p)))
             .orElse(Map.of());
 
-        // Søknadsdata for å auto-sette fakta for perioder uten grunnlag
-        Map<LocalDate, Boolean> søknadErBosattPerFom = bosattSøknadGrunnlagRepository.hentSøknadBostedPerFom(behandlingId);
-
         Set<LocalDate> ventendeFom = new LinkedHashSet<>();
         Set<DatoIntervallEntitet> ferdigePerioder = new LinkedHashSet<>();
         Set<LocalDate> trengerManuellVurderingFom = new LinkedHashSet<>();
         Set<LocalDate> trengerSaksbehandlerFom = new LinkedHashSet<>();
 
-        // Auto-sett fakta fra søknad for perioder uten grunnlag
-        Map<LocalDate, Boolean> nyeSøknadAvklaringer = new LinkedHashMap<>();
-        final Map<LocalDate, BostedsPeriodeAvklaring> initialAvklaringLookup = periodeAvklaringPerFom;
-        tidslinjeTilVurdering.stream().forEach(segment -> {
-            LocalDate fom = segment.getFom();
-            if (!initialAvklaringLookup.containsKey(fom)) {
-                Boolean søknadVerdi = søknadErBosattPerFom.get(fom);
-                if (søknadVerdi != null) {
-                    nyeSøknadAvklaringer.put(fom, søknadVerdi);
-                }
-            }
-        });
-        if (!nyeSøknadAvklaringer.isEmpty()) {
-            bostedsGrunnlagRepository.lagreAvklaringerFraSøknad(behandlingId, nyeSøknadAvklaringer);
-            // Oppdater lokal map etter lagring
-            var oppdatertGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId);
-            var oppdatertAvklaringer = oppdatertGrunnlag
-                .map(g -> g.getHolder().getPeriodeAvklaringer().stream()
-                    .collect(Collectors.toMap(BostedsPeriodeAvklaring::getSkjæringstidspunkt, p -> p)))
-                .orElse(Map.of());
-            periodeAvklaringPerFom = oppdatertAvklaringer;
-        }
+        initierFaktaFraSøknadsdata(behandlingId, tidslinjeTilVurdering);
 
-        final Map<LocalDate, BostedsPeriodeAvklaring> avklaringLookup = periodeAvklaringPerFom;
         tidslinjeTilVurdering.stream().forEach(segment -> {
             LocalDate fom = segment.getFom();
             EtterlysningData etterlysning = etterlysningPerFom.get(fom);
 
-            if (!avklaringLookup.containsKey(fom)) {
-                // Ingen grunnlag og ingen søknadsdata → saksbehandler må vurdere
-                trengerSaksbehandlerFom.add(fom);
-            } else if (etterlysning == null) {
+            if (etterlysning == null) {
                 // Grunnlag finnes, ingen etterlysning → ferdig (auto-vurdering)
                 ferdigePerioder.add(DatoIntervallEntitet.fraOgMedTilOgMed(fom, segment.getTom()));
             } else if (erVentende(etterlysning)) {
@@ -173,6 +145,28 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR));
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    // Dette kan vurderes å flyttes til persistering av søknad. Ulempen er at vi må då må ta stilling til vilkårsperioder tidlig
+    private void initierFaktaFraSøknadsdata(long behandlingId, LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        Map<LocalDate, Boolean> søknadErBosattPerFom = bosattSøknadGrunnlagRepository.hentSøknadBostedPerFom(behandlingId);
+        // Auto-sett fakta fra søknad for perioder uten grunnlag
+        Map<LocalDate, Boolean> nyeSøknadAvklaringer = new LinkedHashMap<>();
+        tidslinjeTilVurdering.stream().forEach(segment -> {
+            LocalDate fom = segment.getFom();
+            Boolean søknadVerdi = finnSøknadverdi(søknadErBosattPerFom, fom);
+            if (søknadVerdi != null) {
+                nyeSøknadAvklaringer.put(fom, søknadVerdi);
+            }
+        });
+        if (!nyeSøknadAvklaringer.isEmpty()) {
+            bostedsGrunnlagRepository.lagreAvklaringerFraSøknad(behandlingId, nyeSøknadAvklaringer);
+        }
+    }
+
+    private static Boolean finnSøknadverdi(Map<LocalDate, Boolean> søknadErBosattPerFom, LocalDate fom) {
+        // Kan vi forvente eksakte datoer her?
+        return søknadErBosattPerFom.get(fom);
     }
 
     private static BehandleStegResultat settPåVent(Set<LocalDate> ventendeFom, Map<LocalDate, EtterlysningData> etterlysningPerFom) {
@@ -327,7 +321,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
     }
 
     private static void settIkkeOppfylt(no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder periodeBuilder,
-                                          BostedsPeriodeAvklaring periodeAvklaring) {
+                                        BostedsPeriodeAvklaring periodeAvklaring) {
         periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
             .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
     }
