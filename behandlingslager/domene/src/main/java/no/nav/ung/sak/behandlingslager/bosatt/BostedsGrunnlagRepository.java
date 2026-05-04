@@ -142,24 +142,6 @@ public class BostedsGrunnlagRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    /**
-     * Lagrer manuell fritekstvurdering for perioder med årsak ANNET.
-     * Oppdaterer {@code begrunnelseVedAnnet} på eksisterende fastsatte periodeAvklaringer.
-     * Forutsetter at fastsattHolder finnes.
-     */
-    public void lagreBegrunnelseVedAnnet(Long behandlingId, Map<LocalDate, String> begrunnelserPerFom) {
-        var grunnlag = hentGrunnlagHvisEksisterer(behandlingId)
-            .orElseThrow(() -> new IllegalStateException("Forventer bostedsgrunnlag ved lagring av begrunnelse, behandlingId=" + behandlingId));
-        var fastsattHolder = grunnlag.getFastsattHolder();
-        if (fastsattHolder == null) {
-            throw new IllegalStateException("Forventer fastsattHolder ved lagring av begrunnelse, behandlingId=" + behandlingId);
-        }
-        fastsattHolder.getPeriodeAvklaringer().stream()
-            .filter(p -> begrunnelserPerFom.containsKey(p.getSkjæringstidspunkt()))
-            .forEach(p -> p.setBegrunnelseVedAnnet(begrunnelserPerFom.get(p.getSkjæringstidspunkt())));
-        entityManager.flush();
-    }
-
     private void deaktiverEksisterende(BostedsGrunnlag gr) {
         gr.deaktiver();
         entityManager.persist(gr);

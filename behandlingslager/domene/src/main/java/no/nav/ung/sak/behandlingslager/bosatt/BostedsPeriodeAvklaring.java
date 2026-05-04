@@ -16,7 +16,6 @@ import java.util.UUID;
  * {@code erBosattITrondheim} angir om bruker er bosatt ved skjæringstidspunktet.
  * {@code fraflyttingsDato} angir eventuell dato for utflytting fra Trondheim (null dersom bruker ikke har flyttet ut).
  * {@code fraflyttingsÅrsak} angir årsaken til fraflytting (null dersom bruker er bosatt hele perioden).
- * {@code begrunnelseVedAnnet} er fritekstvurdering fra saksbehandler, påkrevd når årsak er ANNET.
  */
 @Entity(name = "BostedsPeriodeAvklaring")
 @Table(name = "BOSATT_PERIODE_AVKLARING")
@@ -41,9 +40,6 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Enumerated(EnumType.STRING)
     @Column(name = "fraflyttings_aarsak", updatable = false)
     private FraflyttingsÅrsak fraflyttingsÅrsak;
-
-    @Column(name = "begrunnelse_ved_annet", length = 4000)
-    private String begrunnelseVedAnnet;
 
     public BostedsPeriodeAvklaring() {
         // Hibernate
@@ -78,14 +74,6 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
 
     public FraflyttingsÅrsak getFraflyttingsÅrsak() {
         return fraflyttingsÅrsak;
-    }
-
-    public String getBegrunnelseVedAnnet() {
-        return begrunnelseVedAnnet;
-    }
-
-    public void setBegrunnelseVedAnnet(String begrunnelseVedAnnet) {
-        this.begrunnelseVedAnnet = begrunnelseVedAnnet;
     }
 
     @Override

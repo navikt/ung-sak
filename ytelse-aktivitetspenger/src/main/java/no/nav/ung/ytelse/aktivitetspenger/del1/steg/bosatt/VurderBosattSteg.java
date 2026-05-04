@@ -171,11 +171,11 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         if (!perioderSomKanFastsettes.isEmpty()) {
             bostedsGrunnlagRepository.fastsettForeslåtteAvklaringer(behandlingId, perioderSomKanFastsettes);
         }
-        // Dersom noen fastsatte perioder har årsak ANNET uten begrunnelse, kreves manuell vurdering
-        if (!finnAnnetPerioderUtenBegrunnelse(behandlingId).isEmpty()) {
+        autoVurder(behandlingId);
+        // Dersom noen fastsatte perioder har årsak ANNET uten manuell vurdering i vilkårene, kreves manuell vurdering
+        if (!finnAnnetPerioderUtenManuellVurdering(behandlingId).isEmpty()) {
             return manuellVurderingBosted();
         }
-        autoVurder(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
@@ -183,17 +183,38 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR));
     }
 
-    private Set<LocalDate> finnAnnetPerioderUtenBegrunnelse(long behandlingId) {
-        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+    private Set<LocalDate> finnAnnetPerioderUtenManuellVurdering(long behandlingId) {
+        var fastsatteAnnetPerioder = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g -> {
-                if (g.getFastsattHolder() == null) return Set.<LocalDate>of();
+                if (g.getFastsattHolder() == null) return Set.<BostedsPeriodeAvklaring>of();
                 return g.getFastsattHolder().getPeriodeAvklaringer().stream()
                     .filter(p -> FraflyttingsÅrsak.ANNET.equals(p.getFraflyttingsÅrsak()))
-                    .filter(p -> p.getBegrunnelseVedAnnet() == null)
-                    .map(BostedsPeriodeAvklaring::getSkjæringstidspunkt)
                     .collect(Collectors.toSet());
             })
             .orElse(Set.of());
+
+        if (fastsatteAnnetPerioder.isEmpty()) {
+            return Set.of();
+        }
+
+        var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
+        if (vilkårene == null) {
+            return fastsatteAnnetPerioder.stream()
+                .map(BostedsPeriodeAvklaring::getSkjæringstidspunkt)
+                .collect(Collectors.toSet());
+        }
+
+        var vilkårTimeline = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR);
+        return fastsatteAnnetPerioder.stream()
+            .filter(p -> {
+                LocalDate ikkeOppfyltStart = (p.isErBosattITrondheim() && p.getFraflyttingsDato() != null)
+                    ? p.getFraflyttingsDato()
+                    : p.getSkjæringstidspunkt();
+                return vilkårTimeline.stream()
+                    .noneMatch(s -> s.getFom().equals(ikkeOppfyltStart) && s.getValue().getErManueltVurdert());
+            })
+            .map(BostedsPeriodeAvklaring::getSkjæringstidspunkt)
+            .collect(Collectors.toSet());
     }
 
     private static boolean erVentende(EtterlysningData etterlysning) {
@@ -234,6 +255,7 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
 
         vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR).stream()
             .filter(s -> s.getValue().getUtfall() != Utfall.IKKE_RELEVANT)
+            .filter(s -> !s.getValue().getErManueltVurdert())
             .forEach(s -> {
                 LocalDate segmentFom = s.getFom();
                 LocalDate segmentTom = s.getTom();
@@ -294,10 +316,6 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
                                           BostedsPeriodeAvklaring periodeAvklaring) {
         periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
             .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
-        if (FraflyttingsÅrsak.ANNET.equals(periodeAvklaring.getFraflyttingsÅrsak())
-            && periodeAvklaring.getBegrunnelseVedAnnet() != null) {
-            periodeBuilder.medBegrunnelse(periodeAvklaring.getBegrunnelseVedAnnet());
-        }
     }
 
 }
