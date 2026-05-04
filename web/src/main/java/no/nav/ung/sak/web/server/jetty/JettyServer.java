@@ -131,9 +131,10 @@ public class JettyServer {
         System.setProperty("task.manager.polling.tasks.size", "10");
         System.setProperty("task.manager.polling.scrolling.select.size", "10");
 
+        /* TODO fiks - feiler i dev
         if (ENV.isDev()) {
             System.setProperty("task.manager.auto.traceparent", "true");
-        }
+        }*/
     }
 
     private void konfigurerJndi() throws Exception {

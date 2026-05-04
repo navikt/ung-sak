@@ -11,8 +11,18 @@ import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
 public class FinnForbrukteDager {
 
     public static final long MAKS_ANTALL_DAGER = 260;
+    public static final long MAKS_ANTALL_DAGER_UTVIDET = 300;
+
+    public static long getMaksAntallDager(boolean harUtvidetKvote) {
+        return harUtvidetKvote ? MAKS_ANTALL_DAGER_UTVIDET : MAKS_ANTALL_DAGER;
+    }
 
     public static VurderAntallDagerResultat finnForbrukteDager(LocalDateTimeline<Boolean> ungdomsprogramperiode) {
+        return finnForbrukteDager(ungdomsprogramperiode, false);
+    }
+
+    public static VurderAntallDagerResultat finnForbrukteDager(LocalDateTimeline<Boolean> ungdomsprogramperiode, boolean harUtvidetKvote) {
+        long maksAntallDager = getMaksAntallDager(harUtvidetKvote);
 
         var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(ungdomsprogramperiode);
 
@@ -25,19 +35,19 @@ public class FinnForbrukteDager {
             if (antallDagerISegment > 5) {
                 throw new IllegalStateException("Kan ikke ha en sammenhengende periode av virkedager på mer enn 5 dager");
             }
-            if (antallDagerISegment + antallDager < MAKS_ANTALL_DAGER) {
+            if (antallDagerISegment + antallDager < maksAntallDager) {
                 resultatTidslinje = resultatTidslinje.crossJoin(new LocalDateTimeline<>(List.of(virkedagSegment)));
                 antallDager += (int) antallDagerISegment;
             } else {
-                var delAvPeriode = finnDelAvPeriodeSomInnvilges(virkedagSegment, antallDager);
+                var delAvPeriode = finnDelAvPeriodeSomInnvilges(virkedagSegment, antallDager, maksAntallDager);
                 resultatTidslinje = resultatTidslinje.crossJoin(delAvPeriode);
                 antallDager += delAvPeriode.getLocalDateIntervals().stream().map(LocalDateInterval::totalDays).reduce(Long::sum).orElse(0L);
                 break;
             }
         }
 
-        if (antallDager > MAKS_ANTALL_DAGER) {
-            throw new IllegalStateException("Skal ikke innvilge mer enn " + MAKS_ANTALL_DAGER + " virkedager");
+        if (antallDager > maksAntallDager) {
+            throw new IllegalStateException("Skal ikke innvilge mer enn " + maksAntallDager + " virkedager");
         }
 
         if (!resultatTidslinje.isEmpty()) {
@@ -48,8 +58,8 @@ public class FinnForbrukteDager {
         return new VurderAntallDagerResultat(LocalDateTimeline.empty(), antallDager);
     }
 
-    private static LocalDateTimeline<Boolean> finnDelAvPeriodeSomInnvilges(LocalDateSegment<Boolean> virkedagSegment, int antallDager) {
-        var dagerSomGjenstår = MAKS_ANTALL_DAGER - antallDager;
+    private static LocalDateTimeline<Boolean> finnDelAvPeriodeSomInnvilges(LocalDateSegment<Boolean> virkedagSegment, int antallDager, long maksAntallDager) {
+        var dagerSomGjenstår = maksAntallDager - antallDager;
 
         if (dagerSomGjenstår < 1) {
             throw new IllegalStateException("Skal ha minst en dag igjen");
