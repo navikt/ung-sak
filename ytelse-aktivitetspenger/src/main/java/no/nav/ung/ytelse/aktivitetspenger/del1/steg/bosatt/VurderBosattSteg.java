@@ -192,12 +192,16 @@ public class VurderBosattSteg extends VilkårVurderingSteg {
         BostedsAvklaringHolder holder = grunnlag.getHolder();
         List<LocalDateSegment<Boolean>> segmenterMedManuellVilkårsvurdering = tidslinjeTilVurdering.stream().filter(segment -> {
             BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(segment.getFom()).orElseThrow(() -> new IllegalStateException("Forventer å finne en bostedsperiodeavklaring for "));
-            boolean erÅrsakSomSkalVurderesManuelt = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
-            boolean erKildeSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
-            boolean harUttalelseFraBruker = harMottattUttalelseFom.contains(segment.getFom());
-            return erÅrsakSomSkalVurderesManuelt || erKildeSøknad || harUttalelseFraBruker;
+            return skalVurderesManuelt(harMottattUttalelseFom, segment, avklaring);
         }).toList();
         return new LocalDateTimeline<>(segmenterMedManuellVilkårsvurdering);
+    }
+
+    private static boolean skalVurderesManuelt(Set<LocalDate> harMottattUttalelseFom, LocalDateSegment<Boolean> segment, BostedsPeriodeAvklaring avklaring) {
+        boolean erÅrsakSomSkalVurderesManuelt = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
+        boolean erKildeSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
+        boolean harUttalelseFraBruker = harMottattUttalelseFom.contains(segment.getFom());
+        return erÅrsakSomSkalVurderesManuelt || erKildeSøknad || harUttalelseFraBruker;
     }
 
     private static boolean erVentende(EtterlysningData etterlysning) {

@@ -79,18 +79,40 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             nyeAvklaringer.put(avklaring.periode().getFom(),
                 BostedAvklaringUtil.tilAvklaringData(avklaring.periode().getFom(), avklaring.vurdering()));
         }
+        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
 
+        opprettEtterlysning(dto, behandlingId, nyeAvklaringer, tidligereAvklaringer, periodeReferanser, behandling.getFagsakId());
+
+        var historikkinnslag = new Historikkinnslag.Builder()
+            .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
+            .medFagsakId(behandling.getFagsakId())
+            .medBehandlingId(behandlingId)
+            .medTittel(SkjermlenkeType.BOSTEDSVILKÅR)
+            .addLinje("Bostedsavklaring registrert")
+            .build();
+        historikkinnslagRepository.lagre(historikkinnslag);
+
+        var resultat = OppdateringResultat.nyttResultat();
+        resultat.setSteg(BehandlingStegType.VURDER_BOSTED);
+        resultat.rekjørSteg();
+        return resultat;
+    }
+
+    private void opprettEtterlysning(VurderBostedDto dto, long behandlingId,
+                                     Map<LocalDate, BostedAvklaringData> nyeAvklaringer,
+                                     Map<LocalDate, BostedAvklaringData> tidligereAvklaringer,
+                                     Map<LocalDate, UUID> periodeReferanser, Long fagsakId) {
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
         List<Etterlysning> etterlysningerSomVenterSvar = etterlysningRepository
             .hentEtterlysningerSomVenterPåSvar(behandlingId).stream()
             .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
             .toList();
 
-        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
 
         boolean skalAvbryte = false;
         boolean skalOpprette = false;
-        for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
+        List<BostedAvklaringPeriodeDto> avklaringerSomKreverVarselVedEndring = dto.getAvklaringer().stream().filter(BostedAvklaringPeriodeDto::skalSendeVarsel).toList();
+        for (BostedAvklaringPeriodeDto avklaring : avklaringerSomKreverVarselVedEndring) {
             LocalDate stp = avklaring.periode().getFom();
 
             BostedAvklaringData nyAvklaring = nyeAvklaringer.get(stp);
@@ -122,29 +144,15 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
         if (skalAvbryte) {
             var task = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
-            task.setBehandling(behandling.getFagsakId(), behandlingId);
+            task.setBehandling(fagsakId, behandlingId);
             prosessTaskTjeneste.lagre(task);
         }
         if (skalOpprette) {
             var task = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
-            task.setBehandling(behandling.getFagsakId(), behandlingId);
+            task.setBehandling(fagsakId, behandlingId);
             task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_BOSTED.getKode());
             prosessTaskTjeneste.lagre(task);
         }
-
-        var historikkinnslag = new Historikkinnslag.Builder()
-            .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .medFagsakId(behandling.getFagsakId())
-            .medBehandlingId(behandlingId)
-            .medTittel(SkjermlenkeType.BOSTEDSVILKÅR)
-            .addLinje("Bostedsavklaring registrert")
-            .build();
-        historikkinnslagRepository.lagre(historikkinnslag);
-
-        var resultat = OppdateringResultat.nyttResultat();
-        resultat.setSteg(BehandlingStegType.VURDER_BOSTED);
-        resultat.rekjørSteg();
-        return resultat;
     }
 
 }

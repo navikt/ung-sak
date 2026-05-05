@@ -9,6 +9,12 @@ import no.nav.ung.sak.typer.Periode;
  */
 public record BostedAvklaringPeriodeDto(
     @NotNull @Valid Periode periode,
-    @NotNull @Valid BostedVurderingDto vurdering
+    @NotNull @Valid BostedVurderingDto vurdering,
+    boolean skalIkkeSendeVarsel
 ) {
+
+    public boolean skalSendeVarsel() {
+        return !skalIkkeSendeVarsel;
+    }
+
 }
