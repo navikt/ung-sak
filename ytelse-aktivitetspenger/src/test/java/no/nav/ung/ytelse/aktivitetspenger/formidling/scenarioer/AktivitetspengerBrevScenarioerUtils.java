@@ -93,6 +93,15 @@ public class AktivitetspengerBrevScenarioerUtils {
         return new Beregningsgrunnlag(input, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, "test-sporing");
     }
 
+    /**
+     * Beregningsgrunnlag der siste år-inntekt (300 000) er høyest → SISTE_ÅR.
+     * Redusert (198 000) er høyere enn lav minsteytelse (~177 104) men lavere enn høy minsteytelse (~265 657).
+     */
+    public static Beregningsgrunnlag lagBeregningsgrunnlagHøyereEnnLavMinstesats(LocalDate skjæringstidspunkt) {
+        var input = new BeregningInput(new Beløp(200_000), new Beløp(200_000), new Beløp(300_000), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
+        return new Beregningsgrunnlag(input, BigDecimal.valueOf(300_000), BigDecimal.valueOf(233_333), BigDecimal.valueOf(300_000), BigDecimal.valueOf(198_000), "test-sporing");
+    }
+
     public static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(
         LocalDateTimeline<AktivitetspengerSatser> satser,
         LocalDateInterval tilkjentPeriode) {
