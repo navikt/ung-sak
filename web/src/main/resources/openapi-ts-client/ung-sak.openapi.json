@@ -2181,6 +2181,9 @@
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
+          "skalIkkeSendeVarsel" : {
+            "type" : "boolean"
+          },
           "vurdering" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto"
           }
