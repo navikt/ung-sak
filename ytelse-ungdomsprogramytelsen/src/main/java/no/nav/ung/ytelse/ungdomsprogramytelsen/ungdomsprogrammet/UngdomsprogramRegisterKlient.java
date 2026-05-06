@@ -54,7 +54,8 @@ public class UngdomsprogramRegisterKlient {
         String deltakerIdent,
         LocalDate fraOgMed,
         LocalDate tilOgMed,
-        boolean harUtvidetKvote
+        boolean harUtvidetKvote,
+        LocalDate kvoteMaksDato
     ) {
     }
 }

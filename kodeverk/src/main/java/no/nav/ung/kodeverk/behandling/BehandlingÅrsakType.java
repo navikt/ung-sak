@@ -26,6 +26,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM("RE-HENDELSE-ENDRET-STARTDATO-UNG", "Melding om endret startdato av ungdomsprogram for deltaker"),
     RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM("RE-HENDELSE-FJERN-PERIODE-UNG", "Melding om fjerning av deltakelse i ungdomsprogrammet"),
     RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM("RE-HENDELSE-UTVIDET-KVOTE-UNG", "Melding om utvidet kvote av ungdomsprogram for deltaker"),
+    RE_VARSEL_AUTOMATISK_OPPHOR("RE-VARSEL-AUTO-OPPHOR", "Varsel om automatisk opphør ved maksdato"),
 
     RE_REGISTEROPPLYSNING("RE-REGISTEROPPL", "Nye registeropplysninger"),
     RE_INNTEKTSOPPLYSNING("RE-INNTEKTOPPL", "Nye opplysninger om inntekt"),

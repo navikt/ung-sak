@@ -16,6 +16,7 @@ import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +31,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
+    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
 
     public UngdomsprogramOpphørFagsakTilVurderingUtleder() {
         // For CDI
@@ -38,10 +40,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     @Inject
     public UngdomsprogramOpphørFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
+                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
+                                                         UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
+        this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
     }
 
     @Override
@@ -55,6 +59,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         for (AktørId aktør : aktører) {
             var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, opphørsdatoFraHendelse);
             if (relevantFagsak.isEmpty()) {
+                continue;
+            }
+
+            // Scenario 4: Ignorer opphørshendelse dersom opphørsdato == maksdato (naturlig avslutning).
+            // Deltaker-appen setter sluttdato = maksdato automatisk. Ung-sak trenger ikke opprette revurdering.
+            if (erNaturligAvslutningVedMaksdato(aktør, opphørsdatoFraHendelse, hendelseId)) {
                 continue;
             }
 
@@ -126,4 +136,26 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         return true;
     }
 
+    /**
+     * Sjekker om opphørshendelsen er en naturlig avslutning ved maksdato.
+     * Dersom opphørsdato == kvoteMaksDato fra registeret, er dette en automatisk avslutning
+     * fra deltaker-appen og ung-sak trenger ikke å opprette ny behandling.
+     */
+    private boolean erNaturligAvslutningVedMaksdato(AktørId aktør, LocalDate opphørsdato, String hendelseId) {
+        try {
+            var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(aktør.getAktørId());
+            var maksdato = registerOpplysninger.opplysninger().stream()
+                .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::kvoteMaksDato)
+                .filter(Objects::nonNull)
+                .filter(opphørsdato::equals)
+                .findFirst();
+            if (maksdato.isPresent()) {
+                logger.info("Opphørsdato {} == kvoteMaksDato fra register. Naturlig avslutning — ignorerer hendelse {}.", opphørsdato, hendelseId);
+                return true;
+            }
+        } catch (Exception e) {
+            logger.warn("Kunne ikke hente maksdato fra register for aktør. Fortsetter med normal opphørshåndtering. Hendelse: {}", hendelseId, e);
+        }
+        return false;
+    }
 }

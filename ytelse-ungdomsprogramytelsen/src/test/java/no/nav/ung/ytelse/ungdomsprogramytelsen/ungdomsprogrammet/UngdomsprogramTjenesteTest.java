@@ -58,7 +58,7 @@ class UngdomsprogramTjenesteTest {
         // Behandling trigget av utvidet kvote-hendelse, ingen tidligere utvidelse lagret
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
         // Register sender åpen periode med utvidet kvote-flagg
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -85,7 +85,7 @@ class UngdomsprogramTjenesteTest {
 
         // Register sender opphørt periode (klippet tom) med utvidet kvote-flagg
         var opphørTom = LocalDate.of(2026, 1, 15);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -101,7 +101,7 @@ class UngdomsprogramTjenesteTest {
     void uten_utvidet_kvote_lagrer_registerets_periode_uendret() {
         var behandling = lagBehandling(null);
         var registerTom = LocalDate.of(2025, 11, 30);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, registerTom, false));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, registerTom, false, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -132,8 +132,8 @@ class UngdomsprogramTjenesteTest {
         var tom = LocalDate.of(2025, 11, 30);
         when(registerKlient.hentForAktørId(anyString()))
             .thenReturn(new DeltakerOpplysningerDTO(List.of(
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, midt, false),
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", midt.plusDays(1), tom, false)
+                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, midt, false, null),
+                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", midt.plusDays(1), tom, false, null)
             )));
 
         tjeneste.innhentOpplysninger(behandling);

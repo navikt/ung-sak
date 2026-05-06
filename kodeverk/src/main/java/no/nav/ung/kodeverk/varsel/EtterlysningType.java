@@ -19,6 +19,7 @@ public enum EtterlysningType implements Kodeverdi {
     UTTALELSE_ENDRET_STARTDATO("UTTALELSE_ENDRET_STARTDATO", "Svar på varsel: Endret startdato"),
     UTTALELSE_ENDRET_SLUTTDATO("UTTALELSE_ENDRET_SLUTTDATO", "Svar på varsel: Endret sluttdato"),
     UTTALELSE_ENDRET_PERIODE("UTTALELSE_ENDRET_PERIODE", "Svar på varsel: Endret programperiode"),
+    UTTALELSE_AUTOMATISK_OPPHOR("UTTALELSE_AUTOMATISK_OPPHOR", "Svar på varsel: Automatisk opphør ved maksdato"),
 
     ;
 
@@ -76,7 +77,7 @@ public enum EtterlysningType implements Kodeverdi {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
             }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE, UTTALELSE_AUTOMATISK_OPPHOR -> {
                 return AUTO_SATT_PÅ_VENT_REVURDERING;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + this);
@@ -88,7 +89,7 @@ public enum EtterlysningType implements Kodeverdi {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE;
             }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE, UTTALELSE_AUTOMATISK_OPPHOR -> {
                 return Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + this);

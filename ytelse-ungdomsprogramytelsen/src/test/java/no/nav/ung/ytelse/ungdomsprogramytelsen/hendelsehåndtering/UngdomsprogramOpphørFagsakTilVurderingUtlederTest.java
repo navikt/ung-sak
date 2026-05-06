@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +50,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     @Inject
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient = mock(UngdomsprogramRegisterKlient.class);
     private TestScenarioBuilder scenarioBuilder;
 
     @BeforeEach
@@ -57,7 +59,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
             new BehandlingRepository(entityManager),
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
-            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository)
+            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository),
+            ungdomsprogramRegisterKlient
         );
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
