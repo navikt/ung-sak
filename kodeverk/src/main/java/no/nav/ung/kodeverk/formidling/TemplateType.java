@@ -11,6 +11,7 @@ public enum TemplateType {
     ENDRING_BARNETILLEGG("endring_barnetillegg", "ungdomsprogramytelse", "Endring pga barnetillegg"),
     MANUELT_VEDTAKSBREV("manuelt_vedtaksbrev", "ungdomsprogramytelse", "Manuelt vedtaksbrev"),
     OPPHØR("opphør", "ungdomsprogramytelse", "Opphør av ungdomsprogramytelse"),
+    AUTOMATISK_OPPHOR("automatisk_opphor", "ungdomsprogramytelse", "Automatisk opphør ved maksdato"),
     ENDRING_PROGRAMPERIODE("endring_programperiode", "ungdomsprogramytelse","Endring av programperiode"),
     ENDRING_UTVIDET_KVOTE("endring_utvidet_kvote", "ungdomsprogramytelse", "Endring utvidet kvote"),
     GENERELT_FRITEKSTBREV("generelt_fritekstbrev", "ungdomsprogramytelse", "Generelt fritekstbrev"),

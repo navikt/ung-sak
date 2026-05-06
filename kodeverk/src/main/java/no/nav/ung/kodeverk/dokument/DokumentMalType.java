@@ -24,6 +24,7 @@ public enum DokumentMalType implements Kodeverdi {
     ENDRING_HØY_SATS("ENDRING_HØY_SATS", "Endring høy sats", true),
     ENDRING_UTVIDET_KVOTE("ENDRING_UTVIDET_KVOTE", "Endring utvidet kvote", true),
     OPPHØR_DOK("OPPHOR", "Opphør", true),
+    AUTOMATISK_OPPHOR_DOK("AUTOMATISK_OPPHOR", "Automatisk opphør ved maksdato", true),
     AVSLAG__DOK("AVSLAG", "Avslag", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekstvedtak", true),
     GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt", false),
