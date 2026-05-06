@@ -92,10 +92,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
 
-        var resultat = OppdateringResultat.nyttResultat();
-        resultat.setSteg(BehandlingStegType.VURDER_BOSTED);
-        resultat.rekjørSteg();
-        return resultat;
+        return OppdateringResultat.nyttResultat();
     }
 
     private void opprettEtterlysning(VurderBostedDto dto, long behandlingId,

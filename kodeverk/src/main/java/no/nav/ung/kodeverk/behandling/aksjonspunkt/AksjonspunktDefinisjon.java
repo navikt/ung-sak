@@ -93,10 +93,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     VURDER_BOSTED(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTED,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BOSTED,
         UTEN_VILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     MANUELL_VURDERING_BOSTEDSVILKÅR(AksjonspunktKodeDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret (årsak: Annet)", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTED,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret (årsak: Annet)", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BOSTED,
         VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
         AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
@@ -143,7 +143,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
     AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTED_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
-        "Satt på vent i påvente av brukers svar på bostedavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTED, UTEN_VILKÅR,
+        "Satt på vent i påvente av brukers svar på bostedavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BOSTED, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
     // Gruppe: 80xx
