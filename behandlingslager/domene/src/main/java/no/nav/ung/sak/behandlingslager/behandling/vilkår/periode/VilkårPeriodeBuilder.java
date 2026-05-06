@@ -80,6 +80,11 @@ public class VilkårPeriodeBuilder {
         return this;
     }
 
+    public VilkårPeriodeBuilder medFritekstVurderingBrev(String fritekstVurderingBrev) {
+        this.entitet.setFritekstVurderingBrev(fritekstVurderingBrev);
+        return this;
+    }
+
     public VilkårPeriodeBuilder tilbakestillManuellVurdering() {
         this.entitet.setManueltVurdert(false);
         return this;
@@ -94,6 +99,7 @@ public class VilkårPeriodeBuilder {
         this.entitet.setUtfall(eksisteredeVurdering.getUtfall());
         this.entitet.setOverstyrtUtfall(eksisteredeVurdering.getOverstyrtUtfall());
         this.entitet.setBegrunnelse(eksisteredeVurdering.getBegrunnelse());
+        this.entitet.setFritekstVurderingBrev(eksisteredeVurdering.getFritekstVurderingBrev());
         this.entitet.setUtfallMerknad(eksisteredeVurdering.getMerknad());
         return this;
     }

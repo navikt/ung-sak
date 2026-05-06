@@ -83,6 +83,9 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     @Column(name = "BEGRUNNELSE")
     private String begrunnelse;
 
+    @Column(name = "fritekst_vurdering_brev")
+    private String fritekstVurderingBrev;
+
     @Lob
     @Column(name = "regel_evaluering_oid")
     @DiffIgnore
@@ -121,6 +124,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         this.regelEvaluering = vilkårPeriode.regelEvaluering;
 
         this.begrunnelse = vilkårPeriode.begrunnelse;
+        this.fritekstVurderingBrev = vilkårPeriode.fritekstVurderingBrev;
     }
 
     private static String getPayload(Clob payload, AtomicReference<String> payloadStringRef) {
@@ -235,6 +239,14 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
 
     void setBegrunnelse(String begrunnelse) {
         this.begrunnelse = begrunnelse;
+    }
+
+    public String getFritekstVurderingBrev() {
+        return fritekstVurderingBrev;
+    }
+
+    void setFritekstVurderingBrev(String fritekstVurderingBrev) {
+        this.fritekstVurderingBrev = fritekstVurderingBrev;
     }
 
     public VilkårUtfallMerknad getMerknad() {
