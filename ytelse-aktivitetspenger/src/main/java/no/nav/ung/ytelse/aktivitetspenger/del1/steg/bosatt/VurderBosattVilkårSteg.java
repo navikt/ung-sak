@@ -127,10 +127,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
         boolean erÅrsakSomSkalVurderesManuelt = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
         boolean erKildeSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
 
-        if (etterlysning == null) {
-            // Grunnlag finnes, ingen etterlysning → ferdig (auto-vurdering)
-            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VILKÅR_VURDERES_AUTOMATISK));
-        } else if (erVentende(etterlysning)) {
+        if (erVentende(etterlysning)) {
             return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER));
         } else if (harMottattSvarMedUttalelse(etterlysning) || erÅrsakSomSkalVurderesManuelt || erKildeSøknad) {
             return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VILKÅR_VURDERES_MANUELT));
@@ -157,8 +154,9 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
     }
 
     private static boolean erVentende(EtterlysningData etterlysning) {
-        return etterlysning.status() == EtterlysningStatus.OPPRETTET
-            || etterlysning.status() == EtterlysningStatus.VENTER;
+        return etterlysning != null
+            && (etterlysning.status() == EtterlysningStatus.OPPRETTET
+            || etterlysning.status() == EtterlysningStatus.VENTER);
     }
 
     private static boolean harMottattSvarMedUttalelse(EtterlysningData etterlysning) {
