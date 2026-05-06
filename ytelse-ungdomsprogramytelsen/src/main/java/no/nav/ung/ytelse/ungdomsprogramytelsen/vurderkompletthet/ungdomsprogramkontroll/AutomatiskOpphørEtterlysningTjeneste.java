@@ -77,6 +77,7 @@ public class AutomatiskOpphørEtterlysningTjeneste {
         // Opprett task for å sende etterlysningen
         var prosessTaskGruppe = new ProsessTaskGruppe();
         var opprettEtterlysningTask = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
+        opprettEtterlysningTask.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR.getKode());
         opprettEtterlysningTask.setBehandling(behandlingReferanse.getFagsakId(), behandlingId);
         prosessTaskGruppe.addNesteSekvensiell(opprettEtterlysningTask);
         prosessTaskTjeneste.lagre(prosessTaskGruppe);
