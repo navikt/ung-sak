@@ -31,7 +31,6 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
-import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -121,7 +120,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static @NonNull List<LocalDateSegment<StegUtfall>> vurder(LocalDateSegment<Boolean> segment, Map<LocalDate, EtterlysningData> etterlysningPerFom, BostedsAvklaringHolder holder) {
+    private static List<LocalDateSegment<StegUtfall>> vurder(LocalDateSegment<Boolean> segment, Map<LocalDate, EtterlysningData> etterlysningPerFom, BostedsAvklaringHolder holder) {
         LocalDate fom = segment.getFom();
         EtterlysningData etterlysning = etterlysningPerFom.get(fom);
         BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(segment.getFom()).orElseThrow(() -> new IllegalStateException("Forventer å finne en bostedsperiodeavklaring for "));
