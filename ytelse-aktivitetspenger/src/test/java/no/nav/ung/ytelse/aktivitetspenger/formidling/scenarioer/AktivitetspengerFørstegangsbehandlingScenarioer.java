@@ -121,6 +121,62 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         );
     }
 
+    /**
+     * Avslag pga bostedsvilkåret ikke oppfylt - folkeregistrert eller bostedsadresse.
+     * Bruker er 20 år, men har verken bosted eller folkeregistrert adresse i Trondheim.
+     */
+    public static AvslagScenario avslåttBostedFolkeregistrertEllerBostedsadresse(LocalDate fom) {
+        LocalDate fødselsdato = fom.minusYears(20);
+        var tom = fom.plusWeeks(52).minusDays(1);
+        var p = new LocalDateInterval(fom, tom);
+
+        return new AvslagScenario(
+            new AktivitetspengerTestScenario(
+                DEFAULT_NAVN,
+                List.of(new Periode(fom, tom)),
+                null,
+                null,
+                null,
+                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+                fødselsdato,
+                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
+                Collections.emptyList(),
+                null,
+                null),
+            new Periode(fom, tom),
+            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
+            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE
+        );
+    }
+
+    /**
+     * Avslag pga bostedsvilkåret ikke oppfylt - arbeidssted eller studiested.
+     * Bruker er 20 år, men studie- eller arbeidsstedet er utenfor Trondheim.
+     */
+    public static AvslagScenario avslåttArbeidsstedStudiested(LocalDate fom) {
+        LocalDate fødselsdato = fom.minusYears(20);
+        var tom = fom.plusWeeks(52).minusDays(1);
+        var p = new LocalDateInterval(fom, tom);
+
+        return new AvslagScenario(
+            new AktivitetspengerTestScenario(
+                DEFAULT_NAVN,
+                List.of(new Periode(fom, tom)),
+                null,
+                null,
+                null,
+                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+                fødselsdato,
+                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
+                Collections.emptyList(),
+                null,
+                null),
+            new Periode(fom, tom),
+            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
+            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED
+        );
+    }
+
     public record AvslagScenario(
         AktivitetspengerTestScenario testScenario,
         Periode vilkårPeriode,

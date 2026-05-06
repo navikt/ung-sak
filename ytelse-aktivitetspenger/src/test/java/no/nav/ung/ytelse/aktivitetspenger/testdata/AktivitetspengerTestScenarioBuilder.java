@@ -730,7 +730,7 @@ public class AktivitetspengerTestScenarioBuilder {
                 periodeBuilder.medAvslagsårsak(v.getAvslagsårsak());
             }
             if (v.getFritekstBrev() != null) {
-                periodeBuilder.medFritekstBrev(v.getFritekstBrev());
+                periodeBuilder.medFritekstVurderingBrev(v.getFritekstBrev());
             }
             inngangsvilkårBuilder.leggTil(inngangsvilkårBuilder.hentBuilderFor(v.getVilkårType()).leggTil(periodeBuilder));
         });
