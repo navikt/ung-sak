@@ -7,27 +7,21 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.automatiskopphor.BekreftAutomatiskOpphorOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 @Dependent
 public class AutomatiskOpphørOppgaveOppretter {
 
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
-    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public AutomatiskOpphørOppgaveOppretter(
-        UngBrukerdialogOppgaveKlient oppgaveKlient,
-        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public AutomatiskOpphørOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient) {
         this.oppgaveKlient = oppgaveKlient;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
@@ -38,7 +32,7 @@ public class AutomatiskOpphørOppgaveOppretter {
     }
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype) {
-        LocalDate sluttdato = hentSluttdato(etterlysning.getGrunnlagsreferanse());
+        LocalDate sluttdato = etterlysning.getPeriode().getTomDato();
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
@@ -46,11 +40,6 @@ public class AutomatiskOpphørOppgaveOppretter {
             new BekreftAutomatiskOpphorOppgavetypeDataDto(sluttdato, sluttdato),
             etterlysning.getFrist()
         );
-    }
-
-    private LocalDate hentSluttdato(UUID grunnlagsreferanse) {
-        return ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(grunnlagsreferanse)
-            .getUngdomsprogramPerioder().getPerioder().iterator().next().getPeriode().getTomDato();
     }
 }
 

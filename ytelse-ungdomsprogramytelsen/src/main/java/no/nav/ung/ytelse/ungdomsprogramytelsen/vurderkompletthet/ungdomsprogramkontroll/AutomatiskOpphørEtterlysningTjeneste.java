@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -14,6 +15,8 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +34,7 @@ public class AutomatiskOpphørEtterlysningTjeneste {
     private EtterlysningRepository etterlysningRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     public AutomatiskOpphørEtterlysningTjeneste() {
     }
@@ -38,10 +42,12 @@ public class AutomatiskOpphørEtterlysningTjeneste {
     @Inject
     public AutomatiskOpphørEtterlysningTjeneste(EtterlysningRepository etterlysningRepository,
                                                 UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                                ProsessTaskTjeneste prosessTaskTjeneste) {
+                                                ProsessTaskTjeneste prosessTaskTjeneste,
+                                                ProsessTriggereRepository prosessTriggereRepository) {
         this.etterlysningRepository = etterlysningRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     public void opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse behandlingReferanse) {
@@ -63,11 +69,21 @@ public class AutomatiskOpphørEtterlysningTjeneste {
         var periode = grunnlag.hentForEksaktEnPeriodeDersomFinnes()
             .orElseThrow(() -> new IllegalStateException("Skal ha minst én programperiode for behandling " + behandlingId));
 
+        // Hent maksdato fra prosess-triggere (satt av VarselAutomatiskOpphørTask)
+        var maksdato = prosessTriggereRepository.hentGrunnlag(behandlingId)
+            .stream()
+            .flatMap(pt -> pt.getTriggere().stream())
+            .filter(t -> t.getÅrsak() == BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR)
+            .map(Trigger::getPeriode)
+            .map(DatoIntervallEntitet::getFomDato)
+            .findFirst()
+            .orElse(periode.getTomDato());
+
         var etterlysning = Etterlysning.opprettForType(
             behandlingId,
             grunnlag.getGrunnlagsreferanse(),
             UUID.randomUUID(),
-            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), periode.getTomDato()),
+            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato),
             EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR
         );
 
