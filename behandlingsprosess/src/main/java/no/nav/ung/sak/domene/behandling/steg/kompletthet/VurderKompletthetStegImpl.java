@@ -6,6 +6,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -108,8 +109,11 @@ public class VurderKompletthetStegImpl implements VurderKompletthetSteg {
         rapporteringsfristAutopunktUtleder.utledAutopunktForRapporteringsfrist(behandlingReferanse)
             .ifPresent(aksjonspunktResultater::add);
 
-        // Sjekker etterlysninger opprettet i steg 1
-        final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId());
+        // Sjekker etterlysninger opprettet i steg 1 (ekskluderer ikke-blokkerende etterlysninger)
+        final var etterlysningerSomVenterPåSvar = etterlysningRepository.hentEtterlysningerSomVenterPåSvar(kontekst.getBehandlingId())
+            .stream()
+            .filter(e -> !e.getType().equals(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR))
+            .toList();
         aksjonspunktResultater.addAll(utledFraEtterlysninger(etterlysningerSomVenterPåSvar));
 
         return BehandleStegResultat.utførtMedAksjonspunktResultater(aksjonspunktResultater);
