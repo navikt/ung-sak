@@ -53,10 +53,10 @@ public class AutomatiskOpphørEtterlysningTjeneste {
     public void opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse behandlingReferanse) {
         var behandlingId = behandlingReferanse.getBehandlingId();
 
-        // Sjekk om det allerede finnes en aktiv etterlysning
+        // Sjekk om det allerede finnes en aktiv eller besvart etterlysning
         var eksisterende = etterlysningRepository.hentSisteEtterlysning(
             behandlingId, EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR,
-            EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
+            EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
 
         if (eksisterende.isPresent()) {
             logger.info("Etterlysning for automatisk opphør finnes allerede for behandling {}, oppretter ikke ny", behandlingId);
