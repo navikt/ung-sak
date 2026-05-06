@@ -107,7 +107,7 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
             .map(p -> {
                 if (p.getPeriode().getTomDato().isAfter(maksdato)) {
                     LOGGER.info("Klipper programperiode for behandling {} fra tom={} til maksdato={}", behandling.getId(), p.getPeriode().getTomDato(), maksdato);
-                    return new UngdomsprogramPeriode(p.getFomDato(), maksdato);
+                    return new UngdomsprogramPeriode(p.getPeriode().getFomDato(), maksdato);
                 }
                 return p;
             })
