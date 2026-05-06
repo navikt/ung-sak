@@ -30,7 +30,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FAKTA_OM_
 @BehandlingStegRef(value = VURDER_FAKTA_OM_BOSTED)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class VurderBosattSteg implements BehandlingSteg {
+public class VurderFaktaBostedSteg implements BehandlingSteg {
 
 
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
@@ -39,16 +39,16 @@ public class VurderBosattSteg implements BehandlingSteg {
     private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
     private BehandlingRepository behandlingRepository;
 
-    VurderBosattSteg() {
+    VurderFaktaBostedSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderBosattSteg(BehandlingRepository behandlingRepository,
-                            BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                            BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
-                            @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                            @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere) {
+    public VurderFaktaBostedSteg(BehandlingRepository behandlingRepository,
+                                 BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                 BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
+                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
+                                 @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere) {
 
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
