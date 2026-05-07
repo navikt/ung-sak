@@ -1,17 +1,38 @@
 ---
 name: vilkaar-med-varsling
-description: "Implementer et nytt vilkår i aktivitetspenger med faktaavklaring av saksbehandler, varsling av bruker via Etterlysning, håndtering av brukerens uttalelse, og automatisk vilkårsvurdering. USE FOR: opprette faktaavklaring-grunnlag, Etterlysning-type, OppgaveType i ung-brukerdialog-api, Bekreftelse-subtype i k9-format, aksjonspunkt, steg med etterlysningslogikk, auto-vurdering basert på grunnlag. DO NOT USE FOR: vilkår som ikke trenger faktaavklaring fra saksbehandler (bruk new-grunnlag), inntektskontroll (bruk inntektskontroll-skillen)."
+description: "Implementer et nytt vilkår i aktivitetspenger med faktaavklaring av saksbehandler, varsling av bruker via Etterlysning, håndtering av brukerens uttalelse, og automatisk eller manuell vilkårsvurdering. USE FOR: opprette faktaavklaring-grunnlag, Etterlysning-type, OppgaveType i ung-brukerdialog-api, Bekreftelse-subtype i k9-format, aksjonspunkt, steg med etterlysningslogikk, auto-vurdering basert på grunnlag. DO NOT USE FOR: vilkår som ikke trenger faktaavklaring fra saksbehandler (bruk new-grunnlag), inntektskontroll (bruk inntektskontroll-skillen)."
 ---
 
-# Vilkår med faktaavklaring, varsling og automatisk vurdering
+# Vilkår med faktaavklaring, varsling og automatisk/manuell vurdering
 
 Dette mønsteret brukes når et vilkår krever:
-1. **Faktaavklaring** — saksbehandler registrerer fakta per vilkårsperiode (f.eks. bor bruker i Trondheim?)
-2. **Varsling** — bruker varsles via `Etterlysning` → `OppgaveType` i ung-brukerdialog-api
+1. **Faktaavklaring** — saksbehandler registrerer fakta per vilkårsperiode (f.eks. bor bruker i Trondheim?), eller fakta settes automatisk fra søknad
+2. **Varsling** (valgfritt) — bruker varsles via `Etterlysning` → `OppgaveType` i ung-brukerdialog-api
 3. **Uttalelse** — bruker kan svare med kommentar (eller ikke svare innen frist)
-4. **Automatisk vilkårsvurdering** — vilkåret vurderes automatisk basert på grunnlag og svar
+4. **Vilkårsvurdering** — automatisk basert på fakta, eller manuell av saksbehandler med begrunnelse
 
-**Referanseimplementasjon:** BOSTEDSVILKÅR — se `VurderBosattSteg`, `BostedsGrunnlag*`, `VurderBostedOppdaterer`, `BostedOppgaveOppretter`.
+**Referanseimplementasjon:** BOSTEDSVILKÅR — se `VurderBosattSteg`, `BostedsGrunnlag*`, `VurderBostedOppdaterer`, `ManuellVurderingBostedsvilkårOppdaterer`, `BostedOppgaveOppretter`.
+
+---
+
+## Arkitekturmønster
+
+```
+Fakta-steg (VURDER_<VILKÅR>)          Vilkår-vurdering
+─────────────────────────────          ──────────────────────────────
+Søknadsdata → auto-fakta (SØKNAD)  →   auto-vurder → AP MANUELL_VURDERING
+Saksbehandler → fakta (SAKSBEHANDLER)
+  ├─ varsle bruker (etterlysning)   →   vent → utløpt/svar uten uttalelse → auto-vurder
+  └─ ikke varsle (åpenbar grunn)    →   auto-vurder / AP MANUELL_VURDERING
+Bruker svarer med uttalelse        →   AP MANUELL_VURDERING_<VILKÅR>
+```
+
+**Sentrale prinsipper:**
+- Faktagrunnlaget har én holder med `Kilde`-felt (`SØKNAD` / `SAKSBEHANDLER`)
+- Det er **ett** aksjonspunkt for faktaregistrering, **ikke** et separat fastsett-steg
+- Fakta fra søknad settes automatisk — de trenger aldri saksbehandlerbekreftelse
+- Vilkårsvurdering er alltid manuell dersom: kilde=SØKNAD, bruker har avgitt uttalelse, eller vilkår-spesifikk årsak krever det (f.eks. årsak=ANNET)
+- Saksbehandler kan ved faktaregistrering velge å ikke varsle bruker dersom det foreligger åpenbar grunn
 
 ---
 
@@ -24,7 +45,8 @@ Ikke anta verdier. Still disse spørsmålene:
 3. **Felt i grunnlag** — hva lagres per skjæringstidspunkt? (eks. `erBosattITrondheim: Boolean`)
 4. **Auto-avslags-logikk** — hvilken feltverdi gir avslag + hvilken `Avslagsårsak`?
 5. **Autopunkt-kode** — neste ledige `70xx`-kode (sjekk `AksjonspunktKodeDefinisjon.java`)
-6. **Manuelt aksjonspunkt** — gjenbruk eksisterende (f.eks. `5140 VURDER_BOSTED`) eller ny kode?
+6. **Manuelt vilkårsvurdering-aksjonspunkt** — gjenbruk eksisterende (f.eks. `5144 MANUELL_VURDERING_BOSTEDSVILKÅR`) eller ny kode?
+7. **Manuell vilkårsbetingelse** — finnes det vilkår-spesifikke årsaker utover kilde=SØKNAD og uttalelse som utløser manuell vurdering?
 
 ---
 
@@ -51,6 +73,7 @@ VENTER_PÅ_ETTERLYST_<VILKÅR>UTTALELSE("<VILKÅR>UTTALELSE", "Venter på uttale
 ### `AksjonspunktKodeDefinisjon.java`
 ```java
 public static final String AUTO_SATT_PÅ_VENT_ETTERLYST_<VILKÅR>_UTTALELSE_KODE = "<70xx>";
+public static final String MANUELL_VURDERING_<VILKÅR>VILKÅR_KODE = "<51xx>";
 ```
 
 ### `AksjonspunktDefinisjon.java`
@@ -60,6 +83,10 @@ AUTO_SATT_PÅ_VENT_ETTERLYST_<VILKÅR>UTTALELSE(
         AksjonspunktType.AUTOPUNKT, BehandlingStegType.VURDER_<VILKÅR>,
         VurderingspunktType.UT, Venteårsak.VENTER_PÅ_ETTERLYST_<VILKÅR>UTTALELSE,
         Duration.ofWeeks(2))),
+MANUELL_VURDERING_<VILKÅR>VILKÅR(
+    new AksjonspunktData(MANUELL_VURDERING_<VILKÅR>VILKÅR_KODE,
+        AksjonspunktType.MANUELL, BehandlingStegType.VURDER_<VILKÅR>,
+        VurderingspunktType.UT)),
 ```
 
 ---
@@ -108,26 +135,45 @@ Oppdater i `ung-sak/pom.xml`: `<ung-brukerdialog-api.version>X.X.X-SNAPSHOT</ung
 Pakke: `no.nav.ung.sak.behandlingslager.<vilkaar>/`  
 **Viktig:** bruk `no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet`, IKKE `no.nav.ung.sak.typer`.
 
+### Faktagrunnlag — enkelt holder med Kilde
+
 | Klasse | Annotasjoner | Innhold |
 |--------|-------------|---------|
-| `<Vilkår>Avklaring` | `@Entity @Immutable` | `fomDato: LocalDate`, `<faktafelt>: Boolean` — **ingen** `holderId`-felt (styres av `@JoinColumn` i holder) |
+| `<Vilkår>Avklaring` | `@Entity @Immutable` | `fomDato: LocalDate`, `<faktafelt>: Boolean`, `kilde: Kilde` — **ingen** `holderId`-felt (styres av `@JoinColumn` i holder) |
 | `<Vilkår>AvklaringHolder` | `@Entity` | `@OneToMany(cascade=ALL) @JoinColumn(name="<vilkaar>_avklaring_holder_id") Set<<Vilkår>Avklaring>` + `equals()` på settet |
-| `<Vilkår>Grunnlag` | `@Entity` | `behandlingId`, `aktiv=true`, `grunnlagsreferanse=UUID` (alltid ny per rad — aldri kopiert), `@ManyToOne foreslåttHolder` (NOT NULL), `@ManyToOne fastsattHolder` (nullable), `@ManyToOne søknadHolder` (nullable) |
+| `<Vilkår>Grunnlag` | `@Entity` | `behandlingId`, `aktiv=true`, `grunnlagsreferanse=UUID`, `@ManyToOne holder` (NOT NULL) |
 
-> **Tre holders:** Grunnlaget har tre holders:
-> - `søknadHolder` — opplysninger fra brukerens søknad; lagres ved `lagreSøknadBosted`
-> - `foreslåttHolder` — saksbehandlers registrering; lagres ved `lagreAvklaringer`
-> - `fastsattHolder` — bekreftet vurdering; kopieres fra foreslåttHolder ved UTLØPT/svar uten uttalelse; brukes til automatisk vilkårsvurdering
+> **Enkelt holder:** Grunnlaget har ett holder-felt med en `kilde`-kolonne per avklaring:
+> - `kilde = SØKNAD` — fakta satt automatisk fra brukerens søknad; alltid manuell vilkårsvurdering
+> - `kilde = SAKSBEHANDLER` — fakta registrert manuelt av saksbehandler
 >
-> Dette skillet gjør at saksbehandler **ikke** overskriver fastsatt vurdering ved re-vurdering etter uttalelse.
+> Det er **ikke** lenger separate foreslåttHolder/fastsattHolder. All fakta lagres i samme holder og er umiddelbart gjeldende.
+
+### Separat søknadsaggregat
+
+Søknadsdata skal ligge i et **eget aggregat** som ikke er koblet til vilkårsperiode/skjæringstidspunkt. Dette gjør at søknadsopplysninger kan persisteres uavhengig av hvordan vilkårsperiodene ser ut:
+
+```java
+// BosattSøknadGrunnlag / <Vilkår>SøknadGrunnlag
+// Inneholder List<BostedsinformasjonFraSøknad> med:
+//   journalpostId, fomDato, erBosattITrondheim (eller tilsvarende faktafelt)
+```
+
+`lagreAvklaringerFraSøknad(behandlingId, Map<LocalDate, Boolean>)` — bruker kilde=SØKNAD, ingen fraflyttingsDato/årsak.
+
+### `Kilde`-enum (`kodeverk/`)
+```java
+public enum Kilde {
+    SØKNAD,       // Fakta satt automatisk fra brukerens søknad
+    SAKSBEHANDLER // Fakta registrert manuelt av saksbehandler
+}
+```
 
 **`<Vilkår>GrunnlagRepository`:**
 - `hentGrunnlagHvisEksisterer(behandlingId)` → `Optional<<Vilkår>Grunnlag>`
-- `hentGrunnlagFraGrunnlagsReferanse(grunnlagsreferanse)` → `Optional<<Vilkår>Grunnlag>` — slår opp historisk grunnlag for å opprette oppgave med korrekte data
-- `lagreSøknadBosted(behandlingId, fomDato, <faktafelt>)` — lagrer søknadsopplysninger til `søknadHolder`; beholder foreslåttHolder og fastsattHolder
-- `lagreAvklaringer(behandlingId, avklaringerPerFomDato)` — lagrer til `foreslåttHolder`; `fastsattHolder=null`; deaktiver gammelt grunnlag kun ved endring
-- `fastsettForeslåtteAvklaringer(behandlingId, perioder)` — kopierer angitte perioder fra `foreslåttHolder` → ny `fastsattHolder`
-- `kopierGrunnlagFraEksisterendeBehandling(gammel, ny)` — pek til samme holders (ingen kopi)
+- `lagreAvklaringer(behandlingId, Map<LocalDate, AvklaringData>)` — lagrer til holder med kilde fra data; deaktiver gammelt grunnlag kun ved endring
+- `lagreAvklaringerFraSøknad(behandlingId, Map<LocalDate, Boolean>)` — kilde=SØKNAD automatisk; ingen årsak/fraflyttingsDato
+- `kopierGrunnlagFraEksisterendeBehandling(gammel, ny)` — pek til samme holder (ingen kopi)
 
 **ORM-registrering** — opprett `META-INF/pu-default.<vilkaar>.orm.xml`:
 ```xml
@@ -169,6 +215,7 @@ create table <vilkaar>_avklaring (
     <vilkaar>_avklaring_holder_id bigint not null references <vilkaar>_avklaring_holder(id),
     skaeringstidspunkt date not null,
     <faktafelt> boolean not null,
+    kilde varchar(50) not null default 'SAKSBEHANDLER',
     opprettet_av varchar(20) not null default 'VL',
     opprettet_tid timestamp(3) not null default current_timestamp
 );
@@ -176,8 +223,7 @@ create table gr_<vilkaar>_avklaring (
     id bigint primary key,
     behandling_id bigint not null references behandling(id),
     grunnlagsreferanse uuid not null,
-    foreslatt_avklaring_holder_id bigint not null references <vilkaar>_avklaring_holder(id),
-    fastsatt_avklaring_holder_id bigint null references <vilkaar>_avklaring_holder(id),
+    avklaring_holder_id bigint not null references <vilkaar>_avklaring_holder(id),
     aktiv boolean not null default true,
     versjon bigint not null default 0,
     opprettet_av varchar(20) not null default 'VL',
@@ -186,16 +232,26 @@ create table gr_<vilkaar>_avklaring (
 );
 ```
 
-> **Viktig:** FK-kolonnen i `<vilkaar>_avklaring` heter `<vilkaar>_avklaring_holder_id` (ikke bare `holder_id`). Det er dette `@JoinColumn`-navnet matcher. Ikke legg til et separat `holderId`-felt i entiteten — det vil gi `Duplicate column`-feil fra Hibernate.
+> **Viktige merknader:**
+> - FK-kolonnen i `<vilkaar>_avklaring` heter `<vilkaar>_avklaring_holder_id` — det er dette `@JoinColumn`-navnet i holder matcher. Ikke legg til et separat `holderId`-felt i entiteten — det vil gi `Duplicate column`-feil fra Hibernate.
+> - `kilde`-kolonnen settes til `SAKSBEHANDLER` som default; `lagreAvklaringerFraSøknad()` setter `SØKNAD` eksplisitt.
+> - `gr_<vilkaar>_avklaring` har kun én holder-kolonne (ingen `fastsatt_avklaring_holder_id`).
 
 ---
 
-## Steg 6 — Kontrakt DTO + Oppdaterer
+## Steg 6 — Kontrakt DTO + Oppdaterere
+
+### Fakta-DTO (aksjonspunkt `VURDER_<VILKÅR>`)
 
 **Kontrakt (`kontrakt/`, Java 21):**
 ```java
 // <Vilkår>AvklaringPeriodeDto.java
-public record <Vilkår>AvklaringPeriodeDto(Periode periode, Boolean <faktafelt>, String begrunnelse) {}
+public record <Vilkår>AvklaringPeriodeDto(
+    Periode periode,
+    Boolean <faktafelt>,
+    String begrunnelse,
+    boolean ikkeVarsle   // saksbehandler velger å ikke sende etterlysning
+) {}
 
 // Vurder<Vilkår>Dto.java
 public class Vurder<Vilkår>Dto extends BekreftetAksjonspunktDto {
@@ -204,10 +260,37 @@ public class Vurder<Vilkår>Dto extends BekreftetAksjonspunktDto {
 ```
 
 **`Vurder<Vilkår>Oppdaterer` (`web/`):**
-1. Lagre grunnlag via repository — detekter om grunnlag faktisk endret
-2. Hent relevante perioder fra `AktivitetspengerVilkårsPerioderTilVurderingTjeneste`
-3. Opprett `Etterlysning(UTTALELSE_<VILKÅR>)` per periode + planlegg `OpprettEtterlysningTask`
-4. Returner **`rekjørSteg()`** (IKKE bekreft AP — steg håndterer tilstandsmaskin)
+1. Lagre fakta via `lagreAvklaringer()` med `kilde=SAKSBEHANDLER`
+2. For perioder der `ikkeVarsle=false` **og** ingen aktiv/besvart etterlysning finnes: opprett `Etterlysning(UTTALELSE_<VILKÅR>)` + planlegg `OpprettEtterlysningTask`
+3. For perioder der `ikkeVarsle=true`: hopp over etterlysning
+4. Sjekk `hentBesvartEtterlysninger()` — ikke send ny etterlysning for perioder som allerede har `MOTTATT_SVAR`
+5. Returner **`rekjørSteg()`** (IKKE bekreft AP — steg håndterer tilstandsmaskin)
+
+### Manuell vilkårsvurdering-DTO (aksjonspunkt `MANUELL_VURDERING_<VILKÅR>VILKÅR`)
+
+```java
+// Manuell<Vilkår>VilkårDto.java — bruker VilkårPeriodeVurderingDto
+@JsonTypeName(AksjonspunktKodeDefinisjon.MANUELL_VURDERING_<VILKÅR>VILKÅR_KODE)
+public class Manuell<Vilkår>VilkårDto extends BekreftetAksjonspunktDto {
+    @NotNull @Size(min=1, max=100)
+    private List<@Valid VilkårPeriodeVurderingDto> vurdertePerioder;
+}
+```
+
+**`Manuell<Vilkår>VilkårOppdaterer` (`web/`):** følg `VurderAndreLivsoppholdsytelserOppdaterer`-mønsteret:
+```java
+for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
+    Utfall utfall = vurdertPeriode.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+    vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(fom, tom)
+        .medUtfallManuell(utfall)
+        .medAvslagsårsak(vurdertPeriode.avslagsårsak())
+        .medBegrunnelse(vurdertPeriode.begrunnelse())); // tekst inkluderes i brevet
+}
+return OppdateringResultat.nyttResultat(); // IKKE rekjørSteg()
+```
+
+`VilkårPeriodeVurderingDto`-felter: `periode (fom/tom)`, `erVilkårOppfylt`, `avslagsårsak`, `begrunnelse`.
+Begrunnelse-teksten inkluderes i brevet.
 
 ---
 
@@ -216,9 +299,9 @@ public class Vurder<Vilkår>Dto extends BekreftetAksjonspunktDto {
 **Ny klasse** `<Vilkår>OppgaveOppretter` med `@OppgaveTypeRef(UNG_<VILKÅR>_AVKLARING)`:
 ```java
 OppgavetypeDataDto lagOppgaveData(Etterlysning e) {
-    var grunnlag = repo.hentGrunnlagHvisEksisterer(e.getBehandlingId())
+    var avklaring = repo.hentGrunnlagHvisEksisterer(e.getBehandlingId())
         .orElseThrow().getHolder().finnAvklaring(e.getPeriode().getFomDato());
-    return new Bekreft<Vilkår>OppgavetypeDataDto(fom, tom, grunnlag.get<Faktafelt>());
+    return new Bekreft<Vilkår>OppgavetypeDataDto(fom, tom, avklaring.get<Faktafelt>());
 }
 ```
 
@@ -235,44 +318,95 @@ OppgavetypeDataDto lagOppgaveData(Etterlysning e) {
 
 ## Steg 8 — Steg (`VurderXxxSteg`)
 
-**Per-periode logikk** (referanse: `VurderBosattSteg.java`):
+Steget håndterer **både** fakta-aksjonspunkt og etterlysningslogikk og vilkårsvurdering i `utførResten()`.
+**Referanse:** `VurderBosattSteg.java`.
+
+### Fase 1 — Auto-sett fakta fra søknad
+
+```java
+// For perioder uten grunnlag: sjekk søknadsaggregat
+Map<LocalDate, Boolean> søknadData = søknadGrunnlagRepository.hentSøknadBostedPerFom(behandlingId);
+Map<LocalDate, Boolean> nyeSøknadAvklaringer = new LinkedHashMap<>();
+tidslinje.stream().forEach(segment -> {
+    LocalDate fom = segment.getFom();
+    if (!eksisterendeAvklaringer.containsKey(fom) && søknadData.containsKey(fom)) {
+        nyeSøknadAvklaringer.put(fom, søknadData.get(fom));
+    }
+});
+if (!nyeSøknadAvklaringer.isEmpty()) {
+    grunnlagRepository.lagreAvklaringerFraSøknad(behandlingId, nyeSøknadAvklaringer);
+    // Oppdater lokal map — bruk final-variabel for lambda-bruk
+}
+```
+
+### Fase 2 — Klassifiser perioder
 
 Etterlysninger matches mot vilkårsperioder på `fom`-dato:
+
 ```java
-// Hent gjeldende etterlysninger (filtrerer ut AVBRUTT/SKAL_AVBRYTES)
 var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
     behandlingId, fagsakId, EtterlysningType.UTTALELSE_<VILKÅR>);
-
-// Map fom → etterlysning
 Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
     .collect(toMap(e -> e.periode().getFomDato(), Function.identity()));
 ```
 
-Klassifiser hver periode:
+| Tilstand | Klassifisering |
+|----------|---------------|
+| Ingen avklaring og ingen søknadsdata | `trengerSaksbehandler` |
+| Avklaring finnes, ingen etterlysning | `ferdig` — auto-vurder direkte |
+| `VENTER` / `OPPRETTET` | `ventende` — sett på vent |
+| `UTLØPT` eller `MOTTATT_SVAR` med `harUttalelse=false` | `ferdig` — auto-vurder |
+| `MOTTATT_SVAR` med `harUttalelse=true` | `trengerManuellVurdering` |
 
-| Tilstand | Handling |
-|----------|---------|
-| Ingen etterlysning | `trengerSaksbehandler` — returner `AP VURDER_<VILKÅR>` |
-| `VENTER` / `OPPRETTET` | `ventende` — sett behandling på vent med autopunkt |
-| `UTLØPT` eller `MOTTATT_SVAR` med `harUttalelse=false` | `skalFastsettes` — kall `fastsettForeslåtteAvklaringer` + `autoVurder` |
-| `MOTTATT_SVAR` med `harUttalelse=true` | `trengerSaksbehandler` — returner `AP VURDER_<VILKÅR>` (saksbehandler re-vurderer) |
+### Fase 3 — Tilstandsmaskin (prioritert rekkefølge)
 
+```java
+// 1. Saksbehandler må registrere fakta (prioritert foran alt)
+if (!trengerSaksbehandlerFom.isEmpty()) {
+    return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AP.VURDER_<VILKÅR>));
+}
+// 2. Etterlysning sendt, venter på svar
+if (!ventendeFom.isEmpty()) {
+    return settPåVent(ventendeFom, etterlysningPerFom);
+}
+// 3. Auto-vurder ferdigperioder (ingen etterlysning, utløpt, svar uten uttalelse)
+autoVurder(behandlingId, ferdigePerioder);
+// 4. Finn perioder som trenger manuell vurdering
+Set<LocalDate> trengerManuell = finnPerioderSomTrengerManuellVurdering(
+    behandlingId, trengerManuellVurderingFom);
+if (!trengerManuell.isEmpty()) {
+    return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AP.MANUELL_VURDERING_<VILKÅR>VILKÅR));
+}
+return BehandleStegResultat.utførtUtenAksjonspunkter();
 ```
-// Tilstandsmaskin
-if (!ventende.isEmpty()) → returner autopunkt (SETT PÅ VENT)
-if (!skalFastsettes.isEmpty()) → fastsettForeslåtteAvklaringer + autoVurder
-if (!trengerSaksbehandler.isEmpty()) → returner AP
-else → utførtUtenAksjonspunkter
+
+### `finnPerioderSomTrengerManuellVurdering()`
+
+Perioder som krever manuell vilkårsvurdering (AP for manuell vurdering):
+1. Perioder med mottatt uttalelse (`trengerManuellVurderingFom`)
+2. Perioder med `kilde=SØKNAD` uten eksisterende manuell vurdering
+3. Vilkår-spesifikke betingelser (f.eks. årsak=ANNET uten eksisterende manuell vurdering)
+
+```java
+// Sjekk om manuell vurdering allerede er satt:
+boolean harManuellVurdering = vilkårTimeline.stream()
+    .anyMatch(s -> s.getFom().equals(ikkeOppfyltStart) && s.getValue().getErManueltVurdert());
 ```
 
-**`autoVurder()`:** bruk `fastsattHolder` (ikke `foreslåttHolder`) for å sette vilkårsutfall:
-- `<faktafelt>=true` → `OPPFYLT`
-- `<faktafelt>=false` → `IKKE_OPPFYLT` + `Avslagsårsak.<ÅRSAK>`
+### `autoVurder(behandlingId, Set<DatoIntervallEntitet> ferdigePerioder)`
 
-**`VurderXxxOppdaterer` (aksjonspunkt-håndterer):** skiller mellom initial og re-vurdering:
-- Perioder med mottatt uttalelse (`harUttalelse=true`): kall `fastsettForeslåtteAvklaringer` direkte — ingen ny etterlysning
-- Øvrige perioder: opprett `Etterlysning(UTTALELSE_<VILKÅR>)` + `OpprettEtterlysningTask`
-- Returner alltid `rekjørSteg()` (IKKE bekreft AP)
+```java
+// Filtrer til kun ferdigperioder (viktig — enkelt holder, ingen fastsattHolder å filtrere på)
+vilkårene.getVilkårTimeline(VilkårType.<VILKÅR>).stream()
+    .filter(s -> s.getValue().getUtfall() != Utfall.IKKE_RELEVANT)
+    .filter(s -> !s.getValue().getErManueltVurdert())
+    .filter(s -> ferdigePerioder.stream().anyMatch(
+        p -> !s.getFom().isBefore(p.getFomDato()) && !s.getTom().isAfter(p.getTomDato())))
+    .forEach(s -> {
+        // bruk holder.finnAvklaring(fom) — ingen fastsattHolder
+        // sett OPPFYLT eller IKKE_OPPFYLT basert på faktafelt
+    });
+```
 
 ---
 
@@ -281,9 +415,11 @@ else → utførtUtenAksjonspunkter
 **`GrunnlagKopiererAktivitetspenger.java`:**
 ```java
 @Inject <Vilkår>GrunnlagRepository <vilkaar>GrunnlagRepository;
+@Inject <Vilkår>SøknadGrunnlagRepository <vilkaar>SøknadGrunnlagRepository;
 
 // I begge kopier()-metoder:
 <vilkaar>GrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(gammel, ny);
+<vilkaar>SøknadGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(gammel, ny);
 ```
 
 ---
@@ -308,10 +444,14 @@ else → utførtUtenAksjonspunkter
 | `DatoIntervallEntitet` ikke funnet | Bruk `no.nav.ung.sak.domene.typer.tid`, IKKE `no.nav.ung.sak.typer` |
 | k9-format/brukerdialog-api ikke oppdatert | Sjekk `<k9format.version>` og `<ung-brukerdialog-api.version>` i root `pom.xml` |
 | Switch-exhaustiveness-feil | `EtterlysningType`-switch finnes i minst 4 filer — søk etter eksisterende `UTTALELSE_*` |
-| Avslag-test bruker ikke `VilkårPeriodeVurderingDto` lenger | Bruk `<Vilkår>AvklaringPeriodeDto` med `<faktafelt>=false` |
+| Beslutte AP for manuell vurdering feil | Bruk `VilkårPeriodeVurderingDto` med `erVilkårOppfylt=false` og `avslagsårsak` for avslag |
 | Beslutter skal ikke godkjenne auto-vurderte vilkår | Fjern AP fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
-| Oppdaterer returnerer `rekjørSteg()`, ikke `bekreftAksjonspunkt()` | Steg re-kjøres og finner ny etterlysning (OPPRETTET) → setter autopunkt |
+| Oppdaterer for fakta returnerer `rekjørSteg()` | Steg re-kjøres og finner ny etterlysning (OPPRETTET) → setter autopunkt |
+| Oppdaterer for manuell vilkårsvurdering returnerer `nyttResultat()` | Ikke `rekjørSteg()` — vilkåret er allerede satt via `param.getVilkårResultatBuilder()` |
 | `UnknownEntityException: Could not resolve root entity` i tester | Mangler `pu-default.<vilkaar>.orm.xml` — se Steg 4 |
 | `Duplicate column '<vilkaar>_avklaring_holder_id'` fra Hibernate | `<Vilkår>Avklaring` har et overflødig `holderId`-felt som kolliderer med `@JoinColumn` i holder — fjern feltet |
 | `method does not override` eller `cannot find symbol` i tester | Kjør tester med `-am` slik at avhengige moduler kompileres riktig: `mvn test -pl <modul> -am -Dsurefire.failIfNoSpecifiedTests=false` |
 | `getAksjonspunktDefinisjon()` finnes ikke | `getAksjonspunktListe()` returnerer `List<AksjonspunktDefinisjon>` direkte — sammenlign element, ikke kall metode på det |
+| Lambda-kompileringsfeil: "must be final or effectively final" | Variabel re-assignes etter søknads-lagring — bruk `final`-kopi før lambda: `final Map<...> avklaringLookup = periodeAvklaringPerFom;` |
+| Duplikat etterlysning sendt for MOTTATT_SVAR | Sjekk `hentBesvartEtterlysninger()` i tillegg til `hentEtterlysningerSomVenterPåSvar()` — ikke send ny etterlysning for perioder som allerede har svar |
+| Søknadsdata må persisteres uavhengig av vilkårsperioder | Bruk eget søknadsaggregat (f.eks. `BosattSøknadGrunnlag`) — ikke koble søknadsdata direkte til holder |
