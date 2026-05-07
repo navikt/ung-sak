@@ -31,7 +31,10 @@ public class BostedOppgaveOppretter {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
 
         for (Etterlysning etterlysning : etterlysninger) {
-            var periodeAvklaring = bostedsGrunnlagRepository.hentPeriodeAvklaringFraReferanse(etterlysning.getGrunnlagsreferanse())
+            var periodeAvklaring = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
+                .stream()
+                .flatMap(g -> g.getHolder().getPeriodeAvklaring(etterlysning.getGrunnlagsreferanse()).stream())
+                .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
 
             var oppgaveDto = new OpprettOppgaveDto(

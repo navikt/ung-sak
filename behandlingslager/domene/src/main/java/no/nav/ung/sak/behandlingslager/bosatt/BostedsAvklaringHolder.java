@@ -52,6 +52,11 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         return periodeAvklaringer.stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
     }
 
+
+    public Optional<BostedsPeriodeAvklaring> getPeriodeAvklaring(UUID ref) {
+        return periodeAvklaringer.stream().filter(it -> it.getReferanse().equals(ref)).findFirst();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsAvklaringHolder that)) return false;

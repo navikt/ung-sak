@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -12,14 +13,14 @@ import java.util.UUID;
 /**
  * Aggregat for bostedsavklaring knyttet til én vilkårsperiode.
  * {@code skjæringstidspunkt} tilsvarer fom-dato for vilkårsperioden og matcher
- * fom-dato til tilhørende Etterlysning og UttalelseV2.
- * {@code referanse} brukes som {@code grunnlagsreferanse} i etterlysning og uttalelse.
+ * {@code referanse} referanse for å kunne garantere at etterlysning/uttalelse linkes til riktig vurdering
  * {@code erBosattITrondheim} angir om bruker er bosatt ved skjæringstidspunktet.
  * {@code fraflyttingsDato} angir eventuell dato for utflytting fra Trondheim (null dersom bruker ikke har flyttet ut).
  * {@code fraflyttingsÅrsak} angir årsaken til fraflytting (null dersom bruker er bosatt hele perioden).
  */
 @Entity(name = "BostedsPeriodeAvklaring")
 @Table(name = "BOSATT_PERIODE_AVKLARING")
+@Immutable
 public class BostedsPeriodeAvklaring extends BaseEntitet {
 
     @Id

@@ -107,14 +107,6 @@ public class BostedsGrunnlagRepository {
         });
     }
 
-    public Optional<BostedsPeriodeAvklaring> hentPeriodeAvklaringFraReferanse(UUID referanse) {
-        var query = entityManager.createQuery(
-            "SELECT p FROM BostedsPeriodeAvklaring p WHERE p.referanse = :referanse",
-            BostedsPeriodeAvklaring.class);
-        query.setParameter("referanse", referanse);
-        return HibernateVerktøy.hentUniktResultat(query);
-    }
-
     private static BostedsAvklaringHolder byggHolder(Map<LocalDate, BostedAvklaringData> avklaringerPerSkjæringstidspunkt) {
         var holder = new BostedsAvklaringHolder();
         for (var entry : avklaringerPerSkjæringstidspunkt.entrySet()) {
