@@ -40,7 +40,7 @@ public class UtvidetKvoteInnholdBygger implements VedtaksbrevInnholdBygger {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(originalBehandlingId).orElseThrow();
         LocalDate opprinneligMaksDato = FagsakperiodeUtleder.finnTomDato(ungdomsprogramPeriodeGrunnlag);
 
-        return new TemplateInnholdResultat(TemplateType.ENDRING_UTVIDET_KVOTE,
+        return new TemplateInnholdResultat(TemplateType.FORLENGET_PERIODE,
             new EndringUtvidetKvoteDto(opprinneligMaksDato, nyMaksDato));
     }
 }

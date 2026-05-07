@@ -50,7 +50,7 @@ public class UngdomsprogramTjeneste {
         boolean harUtvidetKvoteFraRegister = registerOpplysninger.opplysninger().stream()
             .anyMatch(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::harUtvidetKvote);
         boolean harUtvidetKvoteFraBehandlingsårsak = behandling.getBehandlingÅrsakerTyper()
-            .contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
+            .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         boolean harUtvidetKvote = harUtvidetKvoteFraRegister || harUtvidetKvoteFraBehandlingsårsak;
 
         // Sjekk om utvidet kvote allerede er materialisert (beregnet til konkret tom-dato) i et tidligere

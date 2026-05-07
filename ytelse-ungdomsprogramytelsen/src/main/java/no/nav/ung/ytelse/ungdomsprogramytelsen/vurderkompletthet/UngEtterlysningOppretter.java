@@ -41,6 +41,6 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
 
     private boolean erKvoteutvidelse(BehandlingReferanse behandlingReferanse) {
         var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
-        return behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
+        return behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
     }
 }

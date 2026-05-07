@@ -56,7 +56,7 @@ class UngdomsprogramTjenesteTest {
     @Test
     void første_gangs_utvidelse_klipper_åpen_periode_til_300_virkedager() {
         // Behandling trigget av utvidet kvote-hendelse, ingen tidligere utvidelse lagret
-        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
+        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         // Register sender åpen periode med utvidet kvote-flagg
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true));
 
@@ -114,7 +114,7 @@ class UngdomsprogramTjenesteTest {
 
     @Test
     void tomme_register_opplysninger_lagrer_tomt_grunnlag_med_utvidet_kvote_flagg_fra_behandlingsårsak() {
-        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
+        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         when(registerKlient.hentForAktørId(anyString()))
             .thenReturn(new DeltakerOpplysningerDTO(List.of()));
 

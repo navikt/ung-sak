@@ -32,7 +32,7 @@ class EndringUtvidetKvoteTest extends AbstractUngdomsytelseVedtaksbrevInnholdByg
         var behandling = lagUtvidetKvoteBehandling(OPPRINNELIG_SLUTTDATO, NY_SLUTTDATO);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.ENDRING_UTVIDET_KVOTE);
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.FORLENGET_PERIODE);
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """

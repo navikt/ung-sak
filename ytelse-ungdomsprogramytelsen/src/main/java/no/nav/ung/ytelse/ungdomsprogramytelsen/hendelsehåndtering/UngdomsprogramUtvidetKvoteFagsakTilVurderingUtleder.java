@@ -70,7 +70,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
                 var utvidetPeriode = utledUtvidetPeriode(fagsak);
                 var årsakOgPerioder = new ArrayList<ÅrsakOgPerioder>();
                 årsakOgPerioder.add(new ÅrsakOgPerioder(
-                    BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM,
+                    BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
                     Set.of(utvidetPeriode)));
 
                 fagsaker.put(fagsak, årsakOgPerioder);
@@ -129,7 +129,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
         }
 
         Behandling behandling = behandlingOpt.get();
-        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM)) {
+        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)) {
             var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
             boolean harUtvidetKvoteAllerede = grunnlag
                 .map(gr -> gr.isHarUtvidetKvote())

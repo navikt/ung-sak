@@ -45,7 +45,7 @@ public class EndringUtvidetKvoteScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(fom),
             Set.of(
-                new Trigger(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM,
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
                     DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato))
             ),
             Collections.emptyList(),

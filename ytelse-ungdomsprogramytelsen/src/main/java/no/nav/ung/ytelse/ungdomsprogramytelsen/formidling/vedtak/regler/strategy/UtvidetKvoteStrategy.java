@@ -27,14 +27,14 @@ public final class UtvidetKvoteStrategy implements VedtaksbrevInnholdbyggerStrat
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_UTVIDET_KVOTE, utvidetKvoteInnholdBygger, "Automatisk brev ved utvidet kvote");
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.FORLENGET_PERIODE, utvidetKvoteInnholdBygger, "Automatisk brev ved utvidet kvote");
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.ENDRING_UTVIDET_KVOTE);
+        return resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE);
     }
 
 }
