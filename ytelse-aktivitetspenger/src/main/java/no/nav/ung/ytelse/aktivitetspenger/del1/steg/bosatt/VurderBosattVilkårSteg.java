@@ -123,7 +123,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
     private static List<LocalDateSegment<StegUtfall>> vurder(LocalDateSegment<Boolean> segment, Map<LocalDate, EtterlysningData> etterlysningPerFom, BostedsAvklaringHolder holder) {
         LocalDate fom = segment.getFom();
         EtterlysningData etterlysning = etterlysningPerFom.get(fom);
-        BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(segment.getFom()).orElseThrow(() -> new IllegalStateException("Forventer å finne en bostedsperiodeavklaring for "));
+        BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(segment.getFom()).orElseThrow(() -> new IllegalStateException("Forventer å finne en bostedsperiodeavklaring for stp " + segment.getFom()));
         boolean erÅrsakSomSkalVurderesManuelt = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
         boolean erKildeSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
 
