@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringUtvidetKvoteDto;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.ForlengetPeriodeDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 
@@ -35,12 +35,12 @@ public class UtvidetKvoteInnholdBygger implements VedtaksbrevInnholdBygger {
         LocalDate nyMaksDato = nyProgramperiode.getTom();
 
         var originalBehandlingId = behandling.getOriginalBehandlingId()
-            .orElseThrow(() -> new IllegalStateException("Trenger forrige behandling ved utvidelse av kvote"));
+            .orElseThrow(() -> new IllegalStateException("Trenger forrige behandling ved forlenget periode"));
 
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(originalBehandlingId).orElseThrow();
         LocalDate opprinneligMaksDato = FagsakperiodeUtleder.finnTomDato(ungdomsprogramPeriodeGrunnlag);
 
         return new TemplateInnholdResultat(TemplateType.FORLENGET_PERIODE,
-            new EndringUtvidetKvoteDto(opprinneligMaksDato, nyMaksDato));
+            new ForlengetPeriodeDto(opprinneligMaksDato, nyMaksDato));
     }
 }

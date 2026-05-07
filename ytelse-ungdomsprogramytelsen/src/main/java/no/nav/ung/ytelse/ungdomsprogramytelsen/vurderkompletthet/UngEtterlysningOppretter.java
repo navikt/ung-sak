@@ -34,12 +34,12 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
     @Override
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
         kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
-        if (!erKvoteutvidelse(behandlingReferanse)) {
+        if (!erForlengetPeriode(behandlingReferanse)) {
             programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         }
     }
 
-    private boolean erKvoteutvidelse(BehandlingReferanse behandlingReferanse) {
+    private boolean erForlengetPeriode(BehandlingReferanse behandlingReferanse) {
         var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
         return behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
     }

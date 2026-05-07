@@ -83,7 +83,7 @@ class UngdomsprogramTjenesteTest {
             List.of(new UngdomsprogramPeriode(FOM, utvidetTom)),
             true);
 
-        // Register sender opphørt periode (klippet tom) med utvidet kvote-flagg
+        // Register sender opphørt periode (klippet tom) med flagg for forlenget periode
         var opphørTom = LocalDate.of(2026, 1, 15);
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true));
 
