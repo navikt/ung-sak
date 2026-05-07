@@ -55,7 +55,7 @@ class UngdomsprogramTjenesteTest {
 
     @Test
     void første_gangs_utvidelse_klipper_åpen_periode_til_300_virkedager() {
-        // Behandling trigget av utvidet kvote-hendelse, ingen tidligere utvidelse lagret
+        // Behandling trigget av forlenget periode-hendelse, ingen tidligere utvidelse lagret
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         // Register sender åpen periode med utvidet kvote-flagg
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true));
