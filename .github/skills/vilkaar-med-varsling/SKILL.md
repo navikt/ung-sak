@@ -316,96 +316,130 @@ OppgavetypeDataDto lagOppgaveData(Etterlysning e) {
 
 ---
 
-## Steg 8 — Steg (`VurderXxxSteg`)
+## Steg 8 — To separate behandlingssteg
 
-Steget håndterer **både** fakta-aksjonspunkt og etterlysningslogikk og vilkårsvurdering i `utførResten()`.
-**Referanse:** `VurderBosattSteg.java`.
+Prosessen er delt i **to steg**: et faktasteg og et vilkårsvurderingssteg.
+**Referanse:** `VurderFaktaBostedSteg.java` og `VurderBosattVilkårSteg.java`.
 
-### Fase 1 — Auto-sett fakta fra søknad
+---
+
+### Steg 8a — Faktasteg (`VURDER_FAKTA_OM_<VILKÅR>`)
+
+Klasse: `VurderFakta<Vilkår>Steg implements BehandlingSteg` (ikke `VilkårVurderingSteg`).
+
+**Ansvar:** Auto-initiere fakta fra søknad, og returnere AP for manuell faktaregistrering dersom nødvendig.
 
 ```java
-// For perioder uten grunnlag: sjekk søknadsaggregat
-Map<LocalDate, Boolean> søknadData = søknadGrunnlagRepository.hentSøknadBostedPerFom(behandlingId);
-Map<LocalDate, Boolean> nyeSøknadAvklaringer = new LinkedHashMap<>();
-tidslinje.stream().forEach(segment -> {
-    LocalDate fom = segment.getFom();
-    if (!eksisterendeAvklaringer.containsKey(fom) && søknadData.containsKey(fom)) {
-        nyeSøknadAvklaringer.put(fom, søknadData.get(fom));
+@Override
+public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+    long behandlingId = kontekst.getBehandlingId();
+    NavigableSet<DatoIntervallEntitet> perioderTilVurdering =
+        VilkårsPerioderTilVurderingTjeneste.finnTjeneste(...)
+            .utled(behandlingId, VilkårType.<VILKÅR>);
+
+    // Auto-sett fakta fra søknad for perioder til vurdering
+    initierFaktaFraSøknadsdata(behandlingId, perioderTilVurdering);
+
+    // Sjekk om manuell faktavurdering er nødvendig (basert på prosess-trigger)
+    LocalDateTimeline<Boolean> tidslinjeForManuellFaktavurdering =
+        finnTidslinjeForManuellFaktavurdering(behandling, behandlingId);
+    if (!tidslinjeForManuellFaktavurdering.isEmpty()) {
+        return BehandleStegResultat.utførtMedAksjonspunkter(
+            List.of(AksjonspunktDefinisjon.VURDER_FAKTA_OM_<VILKÅR>));
     }
-});
-if (!nyeSøknadAvklaringer.isEmpty()) {
-    grunnlagRepository.lagreAvklaringerFraSøknad(behandlingId, nyeSøknadAvklaringer);
-    // Oppdater lokal map — bruk final-variabel for lambda-bruk
+    return BehandleStegResultat.utførtUtenAksjonspunkter();
 }
 ```
 
-### Fase 2 — Klassifiser perioder
-
-Etterlysninger matches mot vilkårsperioder på `fom`-dato:
-
+Manuell faktavurdering trigges av prosess-trigger `BehandlingÅrsakType.ENDRET_<VILKÅR>`:
 ```java
-var etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
-    behandlingId, fagsakId, EtterlysningType.UTTALELSE_<VILKÅR>);
-Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
-    .collect(toMap(e -> e.periode().getFomDato(), Function.identity()));
+private LocalDateTimeline<Boolean> finnTidslinjeForManuellFaktavurdering(...) {
+    return ProsessTriggerPeriodeUtleder.finnTjeneste(...)
+        .utledTidslinje(behandlingId)
+        .filterValue(it -> it.contains(BehandlingÅrsakType.ENDRET_<VILKÅR>))
+        .mapValue(_ -> true);
+}
 ```
 
-| Tilstand | Klassifisering |
-|----------|---------------|
-| Ingen avklaring og ingen søknadsdata | `trengerSaksbehandler` |
-| Avklaring finnes, ingen etterlysning | `ferdig` — auto-vurder direkte |
-| `VENTER` / `OPPRETTET` | `ventende` — sett på vent |
-| `UTLØPT` eller `MOTTATT_SVAR` med `harUttalelse=false` | `ferdig` — auto-vurder |
-| `MOTTATT_SVAR` med `harUttalelse=true` | `trengerManuellVurdering` |
+**`Vurder<Vilkår>Oppdaterer` (AP `VURDER_FAKTA_OM_<VILKÅR>`):**
+1. Lagre fakta med `kilde=SAKSBEHANDLER`
+2. Opprette `Etterlysning(UTTALELSE_<VILKÅR>)` per periode — **med mindre** `ikkeVarsle=true` i DTO-en, eller det allerede finnes en aktiv (`OPPRETTET`/`VENTER`) eller besvart (`MOTTATT_SVAR`) etterlysning
+3. Returnere `rekjørSteg()` — steg re-kjøres og går videre til neste steg uten AP
 
-### Fase 3 — Tilstandsmaskin (prioritert rekkefølge)
+---
+
+### Steg 8b — Vilkårsvurderingssteg (`VURDER_<VILKÅR>VILKÅR`)
+
+Klasse: `Vurder<Vilkår>VilkårSteg extends VilkårVurderingSteg`.
+
+**Ansvar:** Lese eksisterende etterlysninger, klassifisere perioder, auto-vurdere, og returnere AP for manuell vurdering.
+
+#### Klassifisering med `StegUtfall`-enum
 
 ```java
-// 1. Saksbehandler må registrere fakta (prioritert foran alt)
-if (!trengerSaksbehandlerFom.isEmpty()) {
-    return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AP.VURDER_<VILKÅR>));
+private enum StegUtfall {
+    VILKÅR_VURDERES_AUTOMATISK,
+    VILKÅR_VURDERES_MANUELT,
+    VENTER_PÅ_UTTALELSE_FRA_BRUKER
 }
-// 2. Etterlysning sendt, venter på svar
-if (!ventendeFom.isEmpty()) {
-    return settPåVent(ventendeFom, etterlysningPerFom);
+```
+
+Etterlysninger matches mot perioder på `fom`-dato. Per periode:
+
+| Tilstand | `StegUtfall` |
+|----------|-------------|
+| Aktiv etterlysning (`OPPRETTET`/`VENTER`) | `VENTER_PÅ_UTTALELSE_FRA_BRUKER` |
+| `MOTTATT_SVAR` med `harUttalelse=true` | `VILKÅR_VURDERES_MANUELT` |
+| `kilde=SØKNAD` | `VILKÅR_VURDERES_MANUELT` |
+| Vilkår-spesifikk årsak (f.eks. `årsak=ANNET`) | `VILKÅR_VURDERES_MANUELT` |
+| Alle andre (inkl. utløpt, svar uten uttalelse) | `VILKÅR_VURDERES_AUTOMATISK` |
+
+```java
+private LocalDateTimeline<StegUtfall> stegutfallTidslinje =
+    tidslinjeTilVurdering.map(segment -> vurder(segment, etterlysningPerFom, holder));
+```
+
+#### Tilstandsmaskin i `utførResten()`
+
+```java
+// 1. Sett på vent dersom noen perioder venter på svar
+if (!stegutfallTidslinje.filterValue(VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
+    return settPåVent(stegutfallTidslinje, etterlysningPerFom);
 }
-// 3. Auto-vurder ferdigperioder (ingen etterlysning, utløpt, svar uten uttalelse)
-autoVurder(behandlingId, ferdigePerioder);
-// 4. Finn perioder som trenger manuell vurdering
-Set<LocalDate> trengerManuell = finnPerioderSomTrengerManuellVurdering(
-    behandlingId, trengerManuellVurderingFom);
-if (!trengerManuell.isEmpty()) {
-    return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AP.MANUELL_VURDERING_<VILKÅR>VILKÅR));
+// 2. Auto-vurder alle VILKÅR_VURDERES_AUTOMATISK-perioder
+autoVurder(behandlingId, stegutfallTidslinje, holder);
+// 3. Manuell vurdering for VILKÅR_VURDERES_MANUELT-perioder
+if (!stegutfallTidslinje.filterValue(VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
+    return BehandleStegResultat.utførtMedAksjonspunkter(
+        List.of(AksjonspunktDefinisjon.VURDER_<VILKÅR>VILKÅR));
 }
 return BehandleStegResultat.utførtUtenAksjonspunkter();
 ```
 
-### `finnPerioderSomTrengerManuellVurdering()`
-
-Perioder som krever manuell vilkårsvurdering (AP for manuell vurdering):
-1. Perioder med mottatt uttalelse (`trengerManuellVurderingFom`)
-2. Perioder med `kilde=SØKNAD` uten eksisterende manuell vurdering
-3. Vilkår-spesifikke betingelser (f.eks. årsak=ANNET uten eksisterende manuell vurdering)
+#### `autoVurder()` — itererer tidslinje, ikke råperioder
 
 ```java
-// Sjekk om manuell vurdering allerede er satt:
-boolean harManuellVurdering = vilkårTimeline.stream()
-    .anyMatch(s -> s.getFom().equals(ikkeOppfyltStart) && s.getValue().getErManueltVurdert());
+private void autoVurder(long behandlingId,
+                        LocalDateTimeline<StegUtfall> stegutfallTidslinje,
+                        <Vilkår>AvklaringHolder holder) {
+    stegutfallTidslinje.filterValue(VILKÅR_VURDERES_AUTOMATISK::equals)
+        .toSegments()
+        .forEach(s -> {
+            var avklaring = holder.getPeriodeAvklaring(s.getFom()).orElseThrow(...);
+            // sett OPPFYLT eller IKKE_OPPFYLT basert på faktafelt
+            // ved fraflyttingsDato: splitt periode
+            // inkluder regelInput (JSON av faktaopplysningene) for sporbarhet
+        });
+}
 ```
 
-### `autoVurder(behandlingId, Set<DatoIntervallEntitet> ferdigePerioder)`
-
+Legg til `medRegelInput(regelInput)` for sporbarhet — serialiser faktaopplysningene til JSON:
 ```java
-// Filtrer til kun ferdigperioder (viktig — enkelt holder, ingen fastsattHolder å filtrere på)
-vilkårene.getVilkårTimeline(VilkårType.<VILKÅR>).stream()
-    .filter(s -> s.getValue().getUtfall() != Utfall.IKKE_RELEVANT)
-    .filter(s -> !s.getValue().getErManueltVurdert())
-    .filter(s -> ferdigePerioder.stream().anyMatch(
-        p -> !s.getFom().isBefore(p.getFomDato()) && !s.getTom().isAfter(p.getTomDato())))
-    .forEach(s -> {
-        // bruk holder.finnAvklaring(fom) — ingen fastsattHolder
-        // sett OPPFYLT eller IKKE_OPPFYLT basert på faktafelt
-    });
+private static String lagRegelInput(<Vilkår>Avklaring avklaring) {
+    return VILKAR_JSON_OBJECT_MAPPER.writeValueAsString(new RegelInput(...));
+}
+private record RegelInput(UUID referanse, LocalDate skjaeringstidspunkt,
+                          boolean <faktafelt>, ..., Kilde kilde) {}
 ```
 
 ---
