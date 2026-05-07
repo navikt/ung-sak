@@ -16,8 +16,8 @@ import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 import java.util.List;
 
 /**
- * DTO for aksjonspunkt 5144 – manuell vurdering av bostedsvilkåret.
- * Brukes ved årsak ANNET, mottatt uttalelse fra bruker, eller auto-fakta fra søknad.
+ * DTO for aksjonspunkt 5140 – manuell vurdering av bostedsvilkåret.
+ * Brukes ved årsak ANNET, mottatt uttalelse fra bruker, eller fakta fra søknad.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
