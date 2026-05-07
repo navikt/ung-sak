@@ -19,8 +19,8 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE)
-public class VurderBostedDto extends BekreftetAksjonspunktDto {
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_FAKTA_OM_BOSTED)
+public class VurderFaktaOmBostedDto extends BekreftetAksjonspunktDto {
 
     /**
      * Fakta-avklaringer om brukers bosted per periode.
@@ -29,27 +29,27 @@ public class VurderBostedDto extends BekreftetAksjonspunktDto {
     @JsonProperty("avklaringer")
     @NotNull
     @Size(min = 1, max = 100)
-    private List<@Valid BostedAvklaringPeriodeDto> avklaringer;
+    private List<@Valid BostedFaktaavklaringPeriodeDto> avklaringer;
 
     @Valid
     @Size(max = 1000)
     @Pattern(regexp = InputValideringRegex.FRITEKST)
     private String brevtekst;
 
-    public VurderBostedDto() {
+    public VurderFaktaOmBostedDto() {
         //for jackson
     }
 
     @JsonCreator
-    public VurderBostedDto(@JsonProperty("avklaringer") List<BostedAvklaringPeriodeDto> avklaringer,
-                           @JsonProperty("brevtekst") String brevtekst,
-                           @JsonProperty("begrunnelse") String begrunnelse) {
+    public VurderFaktaOmBostedDto(@JsonProperty("avklaringer") List<BostedFaktaavklaringPeriodeDto> avklaringer,
+                                  @JsonProperty("brevtekst") String brevtekst,
+                                  @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
         this.avklaringer = avklaringer;
         this.brevtekst = brevtekst;
     }
 
-    public List<BostedAvklaringPeriodeDto> getAvklaringer() {
+    public List<BostedFaktaavklaringPeriodeDto> getAvklaringer() {
         return avklaringer;
     }
 

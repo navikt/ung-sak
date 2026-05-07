@@ -7,7 +7,7 @@ import no.nav.ung.sak.typer.Periode;
 /**
  * Saksbehandlers fakta-avklaring for én vilkårsperiode om brukers bosted.
  */
-public record BostedAvklaringPeriodeDto(
+public record BostedFaktaavklaringPeriodeDto(
     @NotNull @Valid Periode periode,
     @NotNull @Valid BostedVurderingDto vurdering,
     boolean skalIkkeSendeVarsel

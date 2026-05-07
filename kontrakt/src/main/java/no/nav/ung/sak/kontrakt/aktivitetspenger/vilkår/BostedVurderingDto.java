@@ -10,7 +10,7 @@ import java.time.LocalDate;
 
 /**
  * Saksbehandlers vurdering av brukers bosted for én periode.
- * Brukes som felles undertype i {@link BostedAvklaringPeriodeDto} og {@link FastsettBostedPeriodeDto}.
+ * Brukes som felles undertype i {@link BostedFaktaavklaringPeriodeDto} og {@link FastsettBostedPeriodeDto}.
  * <p>
  * Dersom {@code borITrondheimIHelePerioden} er {@code true}, er bruker bosatt i Trondheim hele perioden.
  * Dersom {@code borITrondheimIHelePerioden} er {@code false} og {@code fraflyttingsDato} er satt og etter

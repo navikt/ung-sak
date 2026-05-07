@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -24,8 +23,8 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringPeriodeDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -35,8 +34,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = VurderBostedDto.class, adapter = AksjonspunktOppdaterer.class)
-public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBostedDto> {
+@DtoTilServiceAdapter(dto = VurderFaktaOmBostedDto.class, adapter = AksjonspunktOppdaterer.class)
+public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderFaktaOmBostedDto> {
 
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
@@ -62,7 +61,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
     }
 
     @Override
-    public OppdateringResultat oppdater(VurderBostedDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdater(VurderFaktaOmBostedDto dto, AksjonspunktOppdaterParameter param) {
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
@@ -75,7 +74,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
         // Bygg nye avklaringer basert på vurdering (nøkkel = vilkårsperiode fom)
         Map<LocalDate, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
-        for (BostedAvklaringPeriodeDto avklaring : dto.getAvklaringer()) {
+        for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer()) {
             nyeAvklaringer.put(avklaring.periode().getFom(),
                 BostedAvklaringUtil.tilAvklaringData(avklaring.periode().getFom(), avklaring.vurdering()));
         }
@@ -95,7 +94,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
         return OppdateringResultat.nyttResultat();
     }
 
-    private void opprettEtterlysning(VurderBostedDto dto, long behandlingId,
+    private void opprettEtterlysning(VurderFaktaOmBostedDto dto, long behandlingId,
                                      Map<LocalDate, BostedAvklaringData> nyeAvklaringer,
                                      Map<LocalDate, BostedAvklaringData> tidligereAvklaringer,
                                      Map<LocalDate, UUID> periodeReferanser, Long fagsakId) {
@@ -108,8 +107,8 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderBost
 
         boolean skalAvbryte = false;
         boolean skalOpprette = false;
-        List<BostedAvklaringPeriodeDto> avklaringerSomKreverVarselVedEndring = dto.getAvklaringer().stream().filter(BostedAvklaringPeriodeDto::skalSendeVarsel).toList();
-        for (BostedAvklaringPeriodeDto avklaring : avklaringerSomKreverVarselVedEndring) {
+        List<BostedFaktaavklaringPeriodeDto> avklaringerSomKreverVarselVedEndring = dto.getAvklaringer().stream().filter(BostedFaktaavklaringPeriodeDto::skalSendeVarsel).toList();
+        for (BostedFaktaavklaringPeriodeDto avklaring : avklaringerSomKreverVarselVedEndring) {
             LocalDate stp = avklaring.periode().getFom();
 
             BostedAvklaringData nyAvklaring = nyeAvklaringer.get(stp);
