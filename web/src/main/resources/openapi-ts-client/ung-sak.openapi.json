@@ -1921,7 +1921,8 @@
             "5085" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto",
             "5090" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto",
             "5100" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorForeslåVilkårAksjonspunktDto",
-            "5140" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto",
+            "5130" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto",
+            "5140" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.ManuellVurderingBostedsvilkårDto",
             "5141" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto",
             "5142" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto",
             "5200" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto",
@@ -1943,7 +1944,7 @@
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollAvManueltOpprettetRevurderingsbehandlingDto"
         }, {
@@ -2175,7 +2176,7 @@
         "type" : "string",
         "x-enum-varnames" : [ "SØKER_IKKE_MEDLEM" ]
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringPeriodeDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto" : {
         "properties" : {
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
@@ -2346,11 +2347,11 @@
         "required" : [ "vurdertePerioder" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBostedDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto" : {
         "properties" : {
           "avklaringer" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringPeriodeDto"
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto"
             },
             "maxItems" : 100,
             "minItems" : 1,
