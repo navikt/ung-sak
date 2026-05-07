@@ -108,7 +108,7 @@ class VurderBosattVilkårStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         var fraflyttingsDato = FOM.plusDays(10);
         bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, fraflyttingsDato, FraflyttingsÅrsak.ANNET, Kilde.SAKSBEHANDLER)
+            FOM, new BostedAvklaringData(true, fraflyttingsDato, FraflyttingsÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, Kilde.SAKSBEHANDLER)
         ));
 
         var resultat = utførSteg(behandling);
@@ -126,7 +126,7 @@ class VurderBosattVilkårStegTest {
         assertThat(sortert.get(1).getTom()).isEqualTo(TOM);
         assertThat(sortert.get(1).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(sortert.get(1).getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
-        assertThat(sortert.get(1).getRegelInput()).contains("\"fraflyttingsAarsak\" : \"ANNET\"");
+        assertThat(sortert.get(1).getRegelInput()).contains("\"fraflyttingsAarsak\" : \"IKKE_BOSATTADRESSE_I_TRONDHEIM\"");
     }
 
     @Test
