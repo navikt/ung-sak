@@ -115,7 +115,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
         autoVurder(behandlingId, stegutfallTidslinje, holder);
         // Finn perioder som krever manuell vurdering av vilkåret
         if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR));
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
         }
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

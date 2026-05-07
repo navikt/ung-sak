@@ -22,7 +22,7 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR_KODE)
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE)
 public class ManuellVurderingBostedsvilkårDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty("vurdertePerioder")

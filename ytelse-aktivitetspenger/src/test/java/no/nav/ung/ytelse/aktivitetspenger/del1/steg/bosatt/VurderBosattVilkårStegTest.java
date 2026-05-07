@@ -185,7 +185,7 @@ class VurderBosattVilkårStegTest {
         assertThat(resultat.getAksjonspunktListe())
             .containsExactly(EtterlysningType.UTTALELSE_BOSTED.tilAutopunktDefinisjon());
         assertThat(resultat.getAksjonspunktListe())
-            .doesNotContain(AksjonspunktDefinisjon.MANUELL_VURDERING_BOSTEDSVILKÅR);
+            .doesNotContain(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
     }
 
     private Behandling opprettBehandlingMedVilkårOgPeriode() {

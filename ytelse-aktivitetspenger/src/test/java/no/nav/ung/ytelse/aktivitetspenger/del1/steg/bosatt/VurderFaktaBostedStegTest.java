@@ -83,7 +83,7 @@ class VurderFaktaBostedStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe())
-            .containsExactly(AksjonspunktDefinisjon.VURDER_BOSTED);
+            .containsExactly(AksjonspunktDefinisjon.VURDER_FAKTA_OM_BOSTED);
     }
 
     @Test

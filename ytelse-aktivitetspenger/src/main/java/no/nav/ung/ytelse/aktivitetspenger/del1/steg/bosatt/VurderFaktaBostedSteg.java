@@ -68,7 +68,7 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
         LocalDateTimeline<Boolean> tidslinjeForManuellFaktavurdering = finnTidslinjeForManuellFaktavurdering(behandling, behandlingId);
         // Saksbehandler må vurdere bosted for perioder uten grunnlag — prioritert over vent
         if (!tidslinjeForManuellFaktavurdering.isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTED));
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_FAKTA_OM_BOSTED));
         }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
