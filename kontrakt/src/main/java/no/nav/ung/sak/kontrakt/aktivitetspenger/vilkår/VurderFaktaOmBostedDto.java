@@ -1,16 +1,9 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 
@@ -31,10 +24,6 @@ public class VurderFaktaOmBostedDto extends BekreftetAksjonspunktDto {
     @Size(min = 1, max = 100)
     private List<@Valid BostedFaktaavklaringPeriodeDto> avklaringer;
 
-    @Valid
-    @Size(max = 1000)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
-    private String brevtekst;
 
     public VurderFaktaOmBostedDto() {
         //for jackson
@@ -42,18 +31,13 @@ public class VurderFaktaOmBostedDto extends BekreftetAksjonspunktDto {
 
     @JsonCreator
     public VurderFaktaOmBostedDto(@JsonProperty("avklaringer") List<BostedFaktaavklaringPeriodeDto> avklaringer,
-                                  @JsonProperty("brevtekst") String brevtekst,
                                   @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
         this.avklaringer = avklaringer;
-        this.brevtekst = brevtekst;
     }
 
     public List<BostedFaktaavklaringPeriodeDto> getAvklaringer() {
         return avklaringer;
     }
 
-    public String getBrevtekst() {
-        return brevtekst;
-    }
 }
