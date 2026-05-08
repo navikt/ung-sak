@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderFaktaOmBostedDto.class, adapter = AksjonspunktOppdaterer.class)
-public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderFaktaOmBostedDto> {
+public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<VurderFaktaOmBostedDto> {
 
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
@@ -43,16 +43,16 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderFakt
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
-    VurderBostedOppdaterer() {
+    VurderFaktaOmBostedOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderBostedOppdaterer(BehandlingRepository behandlingRepository,
-                                  HistorikkinnslagRepository historikkinnslagRepository,
-                                  BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                  EtterlysningRepository etterlysningRepository,
-                                  ProsessTaskTjeneste prosessTaskTjeneste) {
+    public VurderFaktaOmBostedOppdaterer(BehandlingRepository behandlingRepository,
+                                         HistorikkinnslagRepository historikkinnslagRepository,
+                                         BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                         EtterlysningRepository etterlysningRepository,
+                                         ProsessTaskTjeneste prosessTaskTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
@@ -113,7 +113,7 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderFakt
 
             BostedAvklaringData nyAvklaring = nyeAvklaringer.get(stp);
             BostedAvklaringData gammelAvklaring = tidligereAvklaringer.get(stp);
-            boolean avklaringEndret = !nyAvklaring.equals(gammelAvklaring);
+            boolean avklaringEndret = erAvklaringEndret(nyAvklaring, gammelAvklaring);
 
             if (avklaringEndret) {
                 // Avbryt aktiv
@@ -149,6 +149,12 @@ public class VurderBostedOppdaterer implements AksjonspunktOppdaterer<VurderFakt
             task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_BOSTED.getKode());
             prosessTaskTjeneste.lagre(task);
         }
+    }
+
+    private static boolean erAvklaringEndret(BostedAvklaringData nyAvklaring, BostedAvklaringData gammelAvklaring) {
+        return nyAvklaring.erBosattITrondheim() != gammelAvklaring.erBosattITrondheim() ||
+            nyAvklaring.fraflyttingsDato() != gammelAvklaring.fraflyttingsDato() ||
+            nyAvklaring.fraflyttingsÅrsak() != gammelAvklaring.fraflyttingsÅrsak();
     }
 
 }
