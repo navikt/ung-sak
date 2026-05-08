@@ -195,7 +195,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
                 } else {
                     LocalDate fraflyttingsDato = periodeAvklaring.getFraflyttingsDato();
                     if (!fraflyttingsDato.isAfter(s.getFom())) {
-                        throw new IllegalStateException("Forventer ar fraflyttingsdato er etter skjæringstidspunkt: " + periodeAvklaring);
+                        throw new IllegalStateException("Forventer at fraflyttingsdato er etter skjæringstidspunkt: " + periodeAvklaring);
                     } else if (fraflyttingsDato.isAfter(s.getTom())) {
                         // Vilkårsperioden er endret og fraflyttingsdato ligger utenfor perioden (etter sluttdato), vilkåret er oppfylt i hele perioden
                         var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(s.getLocalDateInterval()));
