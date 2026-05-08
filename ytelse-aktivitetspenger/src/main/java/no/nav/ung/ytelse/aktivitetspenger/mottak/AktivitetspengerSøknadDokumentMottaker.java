@@ -56,7 +56,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             LocalDate startdato = ytelse.getSøknadsperiode().getFraOgMed();
             //TODO mulig søknad entitet bør utvides med tom dersom det blir fom/tom i søknaden
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
-            søknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiode(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId);
+            søknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiode(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId, ytelse.getErBosattITrondheim());
             søknadPersisterer.oppdaterFagsakperiode(new Periode(ytelse.getSøknadsperiode().getFraOgMed(), ytelse.getSøknadsperiode().getTilOgMed()), behandling);
             søknadPersisterer.lagreForutgåendeMedlemskapGrunnlag(ytelse.getForutgåendeBosteder(), ytelse.getSøknadsperiode(), dokument.getJournalpostId(), behandlingId);
 

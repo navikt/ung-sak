@@ -124,7 +124,7 @@ class BehandlingsoppretterTjenesteTest {
     @Test
     void skalReturnerePerioderMedGjennomfortKontroll() {
         Fagsak fagsak = behandling.getFagsak();
-        var perioderMedGjennomfortKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
+        var perioderMedGjennomfortKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsak);
         assertNotNull(perioderMedGjennomfortKontroll);
         assertTrue(perioderMedGjennomfortKontroll.stream().anyMatch(it -> it.årsak() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
     }
