@@ -2362,12 +2362,6 @@
             "minLength" : 0,
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
-          },
-          "brevtekst" : {
-            "maxLength" : 1000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
-            "type" : "string"
           }
         },
         "required" : [ "avklaringer" ],
