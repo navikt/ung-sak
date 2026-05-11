@@ -6500,6 +6500,35 @@
         "tags" : [ "aktivitetspenger" ]
       }
     },
+    "/api/behandling/bosatt-fakta" : {
+      "get" : {
+        "description" : "Hent bostedsgrunnlag (avklaringer per periode)",
+        "operationId" : "hentBosattFakta",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "aktivitetspenger" ]
+      }
+    },
     "/api/behandling/etterlysninger" : {
       "get" : {
         "operationId" : "hentEtterlysninger",
