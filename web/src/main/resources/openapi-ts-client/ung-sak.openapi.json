@@ -6471,35 +6471,6 @@
         "tags" : [ "beregningsresultat" ]
       }
     },
-    "/api/behandling/bosatt" : {
-      "get" : {
-        "description" : "Hent bostedsgrunnlag (avklaringer per periode)",
-        "operationId" : "hentBostedGrunnlag",
-        "parameters" : [ {
-          "description" : "behandlingUUID",
-          "in" : "query",
-          "name" : "behandlingUuid",
-          "required" : true,
-          "schema" : {
-            "format" : "uuid",
-            "type" : "string"
-          }
-        } ],
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json" : {
-                "schema" : {
-                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDto"
-                }
-              }
-            },
-            "description" : "default response"
-          }
-        },
-        "tags" : [ "aktivitetspenger" ]
-      }
-    },
     "/api/behandling/etterlysninger" : {
       "get" : {
         "operationId" : "hentEtterlysninger",
@@ -7503,6 +7474,35 @@
         },
         "summary" : "Returnerer link til enten samme (hvis ikke ferdig) eller redirecter til /behandlinger dersom asynkrone operasjoner er ferdig.",
         "tags" : [ "behandlinger" ]
+      }
+    },
+    "/api/bosatt-fakta" : {
+      "get" : {
+        "description" : "Hent bostedsgrunnlag (avklaringer per periode)",
+        "operationId" : "hentBostedGrunnlag",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "aktivitetspenger" ]
       }
     },
     "/api/diagnostikk/sak" : {
