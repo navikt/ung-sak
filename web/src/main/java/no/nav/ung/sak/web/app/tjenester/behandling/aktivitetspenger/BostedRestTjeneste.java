@@ -43,7 +43,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 @Transactional
 public class BostedRestTjeneste {
 
-    public static final String BOSATT_PATH = "/bosatt-fakta";
+    public static final String BOSATT_PATH = "/behandling/bosatt";
+    public static final String BOSATT_FAKTA_PATH = "/bosatt-fakta";
 
     private BehandlingRepository behandlingRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
