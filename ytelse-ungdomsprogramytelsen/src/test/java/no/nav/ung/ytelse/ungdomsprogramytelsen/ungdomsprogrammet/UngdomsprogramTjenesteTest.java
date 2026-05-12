@@ -55,9 +55,9 @@ class UngdomsprogramTjenesteTest {
 
     @Test
     void første_gangs_utvidelse_klipper_åpen_periode_til_300_virkedager() {
-        // Behandling trigget av forlenget periode-hendelse, ingen tidligere utvidelse lagret
+        // Behandling trigget av forlenget periode-hendelse, ingen tidligere forlengelse lagret
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        // Register sender åpen periode med utvidet kvote-flagg
+        // Register sender åpen periode med forlenget periode-flagg
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true));
 
         tjeneste.innhentOpplysninger(behandling);
@@ -69,13 +69,13 @@ class UngdomsprogramTjenesteTest {
         // Skal være klippet til en konkret dato før TIDENES_ENDE
         assertThat(periode.getPeriode().getTomDato()).isBefore(TIDENES_ENDE);
         assertThat(periode.getPeriode().getTomDato()).isAfter(FOM.plusWeeks(52));
-        assertThat(harUtvidetKvoteLagret(behandling)).isTrue();
+        assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
     }
 
     @Test
     void opphør_etter_utvidelse_lagrer_kun_registerets_periode_uten_å_re_derive_utvidelsen() {
-        // Pre-betingelse: behandling har allerede et grunnlag der utvidet kvote er materialisert
-        // (simulerer at grunnlaget ble kopiert over fra forrige behandling som utvidet kvoten).
+        // Pre-betingelse: behandling har allerede et grunnlag der forlenget periode er materialisert
+        // (simulerer at grunnlaget ble kopiert over fra forrige behandling som forlenget perioden).
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         var utvidetTom = LocalDate.of(2026, 1, 25);
         ungdomsprogramPeriodeRepository.lagre(
@@ -90,15 +90,15 @@ class UngdomsprogramTjenesteTest {
         tjeneste.innhentOpplysninger(behandling);
 
         var perioder = hentLagredePerioder(behandling);
-        // Skal lagre nøyaktig én periode lik registerets, IKKE legge på resterende kvote kant-i-kant
+        // Skal lagre nøyaktig én periode lik registerets, IKKE legge på resterende dager kant-i-kant
         assertThat(perioder).hasSize(1);
         assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(opphørTom);
-        assertThat(harUtvidetKvoteLagret(behandling)).isTrue();
+        assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
     }
 
     @Test
-    void uten_utvidet_kvote_lagrer_registerets_periode_uendret() {
+    void uten_forlenget_periode_lagrer_registerets_periode_uendret() {
         var behandling = lagBehandling(null);
         var registerTom = LocalDate.of(2025, 11, 30);
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, registerTom, false));
@@ -109,11 +109,11 @@ class UngdomsprogramTjenesteTest {
         assertThat(perioder).hasSize(1);
         assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(registerTom);
-        assertThat(harUtvidetKvoteLagret(behandling)).isFalse();
+        assertThat(harForlengetPeriodeLagret(behandling)).isFalse();
     }
 
     @Test
-    void tomme_register_opplysninger_lagrer_tomt_grunnlag_med_utvidet_kvote_flagg_fra_behandlingsårsak() {
+    void tomme_register_opplysninger_lagrer_tomt_grunnlag_med_forlenget_periode_flagg_fra_behandlingsårsak() {
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         when(registerKlient.hentForAktørId(anyString()))
             .thenReturn(new DeltakerOpplysningerDTO(List.of()));
@@ -121,7 +121,7 @@ class UngdomsprogramTjenesteTest {
         tjeneste.innhentOpplysninger(behandling);
 
         assertThat(hentLagredePerioder(behandling)).isEmpty();
-        assertThat(harUtvidetKvoteLagret(behandling)).isTrue();
+        assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
     }
 
     @Test
@@ -165,10 +165,10 @@ class UngdomsprogramTjenesteTest {
             .orElse(List.of());
     }
 
-    private boolean harUtvidetKvoteLagret(Behandling behandling) {
+    private boolean harForlengetPeriodeLagret(Behandling behandling) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .flatMap(g -> g.getUngdomsprogramUtvidetKvote())
-            .map(k -> k.isHarUtvidetKvote())
+            .flatMap(g -> g.getUngdomsprogramForlengetPeriode())
+            .map(k -> k.harForlengetPeriode())
             .orElse(false);
     }
 }

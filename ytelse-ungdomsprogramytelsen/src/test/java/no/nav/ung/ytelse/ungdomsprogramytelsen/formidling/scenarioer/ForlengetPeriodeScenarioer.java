@@ -15,16 +15,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-public class EndringUtvidetKvoteScenarioer {
+public class ForlengetPeriodeScenarioer {
 
     /**
-     * Scenario der kvoten er utvidet fra opprinnlig sluttdato til ny sluttdato.
+     * Scenario der perioden er forlenget fra opprinnlig sluttdato til ny sluttdato.
      *
      * @param fom               - startdato for programmet
      * @param opprinneligSluttdato - opprinnlig sluttdato (slik det var i forrige behandling)
-     * @param nySluttdato       - ny sluttdato etter utvidelse
+     * @param nySluttdato       - ny sluttdato etter forlengelse
      */
-    public static UngTestScenario utvidetKvote(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+    public static UngTestScenario forlengetPeriode(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
             throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
         }
@@ -52,4 +52,3 @@ public class EndringUtvidetKvoteScenarioer {
             null, null);
     }
 }
-

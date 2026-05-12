@@ -27,25 +27,25 @@ import java.util.*;
 import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 
 @ApplicationScoped
-@HendelseTypeRef("UNGDOMSPROGRAM_UTVIDET_KVOTE")
-public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
+@HendelseTypeRef("UNGDOMSPROGRAM_FORLENGET_PERIODE")
+public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements FagsakerTilVurderingUtleder {
 
-    private static final Logger logger = LoggerFactory.getLogger(UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder.class);
+    private static final Logger logger = LoggerFactory.getLogger(UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder.class);
 
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
-    public UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder() {
+    public UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder() {
         // For CDI
     }
 
     @Inject
-    public UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
-                                                               UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                                               FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
-                                                               UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+    public UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
+                                                                   UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
+                                                                   FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
+                                                                   UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
@@ -67,11 +67,11 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
             }
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), hendelseId)) {
                 var fagsak = relevantFagsak.get();
-                var utvidetPeriode = utledUtvidetPeriode(fagsak);
+                var forlengetPeriode = utledForlengetPeriode(fagsak);
                 var årsakOgPerioder = new ArrayList<ÅrsakOgPerioder>();
                 årsakOgPerioder.add(new ÅrsakOgPerioder(
                     BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
-                    Set.of(utvidetPeriode)));
+                    Set.of(forlengetPeriode)));
 
                 fagsaker.put(fagsak, årsakOgPerioder);
             }
@@ -81,7 +81,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
     }
 
     /**
-     * Utleder trigger-periode for revurdering ved utvidet kvote.
+     * Utleder trigger-periode for revurdering ved forlenget periode.
      *
      * <p>To scenarioer, begge håndteres kant-i-kant:
      * <ul>
@@ -91,7 +91,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
      *       strekkes med resterende virkedager (opp til 300 totalt) kant-i-kant etter eksisterende tom.</li>
      * </ul>
      */
-    private DatoIntervallEntitet utledUtvidetPeriode(Fagsak fagsak) {
+    private DatoIntervallEntitet utledForlengetPeriode(Fagsak fagsak) {
         var eksisterendePeriode = fagsak.getPeriode();
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (sisteBehandling.isEmpty()) {
@@ -119,7 +119,7 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
 
     /**
      * Idempotens-sjekk for å hindre at det opprettes flere revurderinger fra samme hendelse.
-     * Hindrer også revurdering hvis hendelsen kommer etter at behandlingen allerede er oppdatert med utvidet kvote.
+     * Hindrer også revurdering hvis hendelsen kommer etter at behandlingen allerede er oppdatert med forlenget periode.
      */
     private boolean erNyInformasjonIHendelsen(Fagsak fagsak, String hendelseId) {
         Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
@@ -131,12 +131,12 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
         Behandling behandling = behandlingOpt.get();
         if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)) {
             var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId());
-            boolean harUtvidetKvoteAllerede = grunnlag
-                .map(gr -> gr.isHarUtvidetKvote())
+            boolean harForlengetPeriodeAllerede = grunnlag
+                .map(gr -> gr.harForlengetPeriode())
                 .orElse(false);
 
-            if (harUtvidetKvoteAllerede) {
-                logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert med utvidet kvote. Ignorer hendelse {}", hendelseId);
+            if (harForlengetPeriodeAllerede) {
+                logger.info("Behandling har allerede behandlingsårsak for hendelse og grunnlagsdata er oppdatert med forlenget periode. Ignorer hendelse {}", hendelseId);
                 return false;
             }
         }
