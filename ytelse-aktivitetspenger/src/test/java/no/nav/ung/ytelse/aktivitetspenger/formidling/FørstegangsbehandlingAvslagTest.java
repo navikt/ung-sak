@@ -41,7 +41,8 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "Du bor ikke i Trondheim"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim. " +
+                    "Fordi du ikke har bostedsadresse i Trondheim, har vi avslått søknaden din."
             );
     }
 
