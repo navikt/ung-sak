@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -21,7 +20,6 @@ import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioB
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
@@ -162,20 +160,14 @@ public class AktivitetspengerEndringInntektScenarioer {
         var triggere = new HashSet<Trigger>();
         triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode.getFomDato(), tilkjentPeriode.getTomDato().with(TemporalAdjusters.lastDayOfMonth()))));
 
-        LocalDate fødselsdato = fom.minusYears(20);
-
-        return new AktivitetspengerTestScenario(
-            DEFAULT_NAVN,
-            List.of(new Periode(fom, tom)),
-            satsperioder,
-            beregningsgrunnlag,
-            tilkjentYtelsePerioder,
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdato,
-            triggere,
-            Collections.emptyList(),
-            null,
-            kontrollerInntektPerioder);
+        return AktivitetspengerTestScenario.builder(fom)
+            .medTom(tom)
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelsePerioder(tilkjentYtelsePerioder)
+            .medTriggere(triggere)
+            .medKontrollerInntektPerioder(kontrollerInntektPerioder)
+            .build();
     }
 
     public static Behandling lagBehandlingMedAksjonspunktKontrollerInntekt(
