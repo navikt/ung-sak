@@ -196,7 +196,7 @@ public class AktivitetspengerTestScenarioBuilder {
     }
 
     private VilkårResultatRepository mockVilkårResultatRepository() {
-        return new VilkårResultatRepository() {
+        return new VilkårResultatRepository(null) {
             private Map<Long, VilkårsResultat> entiteter = new HashMap<>();
 
             @Override

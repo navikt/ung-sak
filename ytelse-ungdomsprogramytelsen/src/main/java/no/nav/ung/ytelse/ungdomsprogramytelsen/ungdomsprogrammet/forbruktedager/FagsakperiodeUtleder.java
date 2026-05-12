@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
@@ -35,24 +36,34 @@ public class FagsakperiodeUtleder {
             return fomDato.plusWeeks(52).minusDays(1);
         } else {
             var forrigeBehandlingUngdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(originalBehandlingId.get());
-            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje);
-
+            var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(originalBehandlingId.get());
+            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje, harForlengetPeriode);
         }
     }
 
     public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje) {
+        return finnTomDato(søknadFom, ungdomsprogramTidslinje, false);
+    }
+
+    public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje, boolean harForlengetPeriode) {
         var tidligerePerioderIProgrammet = ungdomsprogramTidslinje.intersection(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, søknadFom.minusDays(1)));
-        var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet);
+        var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet, harForlengetPeriode);
         var forbrukteDager = vurderAntallDagerResultat.forbrukteDager();
-        if (forbrukteDager >= FinnForbrukteDager.MAKS_ANTALL_DAGER) {
+        var maksAntallDager = FinnForbrukteDager.getMaksAntallDager(harForlengetPeriode);
+        if (forbrukteDager >= maksAntallDager) {
             return søknadFom;
         } else {
-            var resterendeDager = FinnForbrukteDager.MAKS_ANTALL_DAGER - forbrukteDager;
+            var resterendeDager = maksAntallDager - forbrukteDager;
             var weeksToAdd = resterendeDager / VIRKEDAGER_PR_UKE;
             var medHeleAntallUkerLagtTil = søknadFom.plusWeeks(weeksToAdd).minusDays(1);
             var daysToAdd = finnRestDagerÅLeggeTil(medHeleAntallUkerLagtTil, resterendeDager % VIRKEDAGER_PR_UKE);
             return medHeleAntallUkerLagtTil.plusDays(daysToAdd);
         }
+    }
+
+    public static LocalDate finnTomDato(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag) {
+        LocalDateTimeline<Boolean> periodeTidslinje = UngdomsprogramPeriodeTjeneste.lagPeriodeTidslinje(Optional.of(ungdomsprogramPeriodeGrunnlag));
+        return finnTomDato(periodeTidslinje.getMinLocalDate(), periodeTidslinje, ungdomsprogramPeriodeGrunnlag.harForlengetPeriode());
     }
 
     private static long finnRestDagerÅLeggeTil(LocalDate fraDato, long virkedagerSomLeggesTil) {

@@ -158,7 +158,7 @@ public class AktivitetspengerRestTjeneste {
             grunnlag.getBeregnetRedusertPrAar().setScale(0, RoundingMode.HALF_UP),
             grunnlag.getDagsats().setScale(0, RoundingMode.HALF_UP).intValueExact(),
             pgiÅrsinntekter,
-            mapBesteBeregningResultatType(grunnlag.utledBesteBeregningResultatType())
+            grunnlag.utledBesteBeregningResultatType()
         );
     }
 
@@ -166,12 +166,5 @@ public class AktivitetspengerRestTjeneste {
         return typer.stream()
             .map(type -> pgiInntektstyper.getOrDefault(type, Beløp.ZERO).getVerdi())
             .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    private static BesteBeregningResultatType mapBesteBeregningResultatType(no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BesteBeregningResultatType type) {
-        return switch (type) {
-            case SISTE_ÅR -> BesteBeregningResultatType.SISTE_ÅR;
-            case SNITT_SISTE_TRE_ÅR -> BesteBeregningResultatType.SNITT_SISTE_TRE_ÅR;
-        };
     }
 }

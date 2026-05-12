@@ -78,8 +78,15 @@ public class AktivitetspengerGrunnlag {
     }
 
     public LocalDateTimeline<AktivitetspengerSatser> hentAktivitetspengerSatsTidslinje() {
-        return hentBeregningsgrunnlagTidslinje().combine(
-            hentSatsTidslinje(),
+        var beregningsgrunnlagTidslinje = hentBeregningsgrunnlagTidslinje();
+        var satsTidslinje = hentSatsTidslinje();
+
+        if (!satsTidslinje.disjoint(beregningsgrunnlagTidslinje).isEmpty()) {
+            throw new IllegalStateException("Satsperioder finnes utenfor beregningsgrunnlagperioder — beregningsgrunnlagTidslinje må forlenges!");
+        }
+
+        return beregningsgrunnlagTidslinje.combine(
+            satsTidslinje,
             (interval, bg, satser) ->
                 new LocalDateSegment<>(interval, new AktivitetspengerSatser(satser.getValue(), bg.getValue())),
             LocalDateTimeline.JoinStyle.INNER_JOIN

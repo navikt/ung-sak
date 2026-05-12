@@ -2,10 +2,12 @@ package no.nav.ung.ytelse.aktivitetspenger.vilkår.søknadsfrist;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -31,19 +33,18 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(AKTIVITETSPENGER)
-public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<AktivitetspengerSøktPeriode> {
+public class AktivitetspengerVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<AktivitetspengerSøktPeriode> {
 
     private MottatteDokumentRepository mottatteDokumentRepository;
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
 
-
-    UngdomsytelseVurdererSøknadsfristTjeneste() {
-        // CDI
+    AktivitetspengerVurdererSøknadsfristTjeneste() {
+        // for CDI proxy
     }
 
     @Inject
-    public UngdomsytelseVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
-                                                     AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository) {
+    public AktivitetspengerVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
+                                                        AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.aktivitetspengerSøktPeriodeRepository = aktivitetspengerSøktPeriodeRepository;
     }
@@ -87,7 +88,6 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
     public Map<KravDokument, List<VurdertSøktPeriode<AktivitetspengerSøktPeriode>>> vurderSøknadsfrist(Long behandlingId, Map<KravDokument, List<SøktPeriode<AktivitetspengerSøktPeriode>>> søknaderMedPerioder) {
         var result = new HashMap<KravDokument, List<VurdertSøktPeriode<AktivitetspengerSøktPeriode>>>();
 
-        //TODO legge inn ordentlige regler her for vurdering av søknadsfrist, nå vurders alt til oppfylt
         søknaderMedPerioder.forEach((kravDokument, søktPerioder) -> {
             result.put(kravDokument, søktPerioder.stream()
                 .map(it -> new VurdertSøktPeriode<>(it.getPeriode(), Utfall.OPPFYLT, it.getRaw()))

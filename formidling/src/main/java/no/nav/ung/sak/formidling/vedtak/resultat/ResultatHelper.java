@@ -1,28 +1,25 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
-
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-class ResultatHelper {
+public class ResultatHelper {
     private final Set<DetaljertResultatInfo> resultatInfo;
     private final Set<DetaljertResultatType> resultatTyper;
 
-    ResultatHelper(Set<DetaljertResultatInfo> resultatInfo) {
+    public ResultatHelper(Set<DetaljertResultatInfo> resultatInfo) {
         this.resultatInfo = resultatInfo;
         this.resultatTyper = resultatInfo.stream()
             .map(DetaljertResultatInfo::detaljertResultatType)
             .collect(Collectors.toSet());
     }
 
-    boolean innholderBare(DetaljertResultatType... typer) {
+    public boolean innholderBare(DetaljertResultatType... typer) {
         return resultatTyper.equals(Arrays.stream(typer).collect(Collectors.toSet()));
     }
 
-    ResultatHelper utenom(DetaljertResultatType... typer) {
+    public ResultatHelper utenom(DetaljertResultatType... typer) {
         var typerSet = Arrays.stream(typer).collect(Collectors.toSet());
         var filtrert = resultatInfo.stream()
             .filter(it -> !typerSet.contains(it.detaljertResultatType()))
@@ -38,3 +35,4 @@ class ResultatHelper {
         return !resultatTyper.contains(detaljertResultatType);
     }
 }
+

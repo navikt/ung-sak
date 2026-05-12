@@ -191,7 +191,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     private VilkårResultatRepository mockVilkårResultatRepository() {
-        return new VilkårResultatRepository() {
+        return new VilkårResultatRepository(null) {
             private Map<Long, VilkårsResultat> entiteter = new HashMap<>();
 
             @Override

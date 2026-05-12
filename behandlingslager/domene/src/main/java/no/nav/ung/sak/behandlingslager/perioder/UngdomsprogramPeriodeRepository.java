@@ -43,8 +43,22 @@ public class UngdomsprogramPeriodeRepository {
 
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder) {
+        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
+        // Bevar eksisterende forlenget periode – kan ikke trekkes tilbake etter innvilgelse
+        eksisterende.flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramForlengetPeriode)
+            .ifPresent(nyttGrunnlag::setUngdomsprogramForlengetPeriode);
+        persister(eksisterende, nyttGrunnlag);
+    }
+
+    public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder, boolean harForlengetPeriode) {
+        var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
+        nyttGrunnlag.leggTil(ungdomsprogramPerioder);
+
+        var forlengetPeriode = new UngdomsprogramForlengetPeriode(harForlengetPeriode);
+        entityManager.persist(forlengetPeriode);
+        nyttGrunnlag.setUngdomsprogramForlengetPeriode(forlengetPeriode);
 
         persister(hentEksisterendeGrunnlag(behandlingId), nyttGrunnlag);
     }

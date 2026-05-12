@@ -19,6 +19,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -46,6 +47,7 @@ public class SaksbehandlerRestTjeneste {
 
     private String systembruker;
 
+    private String appName;
     private HistorikkinnslagRepository historikkRepository;
     private BehandlingRepository behandlingRepository;
 
@@ -55,11 +57,14 @@ public class SaksbehandlerRestTjeneste {
 
     @Inject
     public SaksbehandlerRestTjeneste(
-        MicrosoftGraphTjeneste microsoftGraphTjeneste, @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
+        MicrosoftGraphTjeneste microsoftGraphTjeneste,
+        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
+        @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
         HistorikkinnslagRepository historikkRepository,
         BehandlingRepository behandlingRepository) {
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
         this.systembruker = systembruker;
+        this.appName = appName;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
     }
@@ -69,7 +74,7 @@ public class SaksbehandlerRestTjeneste {
     @Operation(
         description = "Returnerer fullt navn for identer som har berørt en fagsak",
         tags = "nav-ansatt",
-        summary = ("Identer hentes fra historikkinnslag og sykdomsvurderinger.")
+        summary = ("Identer hentes fra historikkinnslag og aksjonspunkt.")
     )
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK, auditlogg = false)
     public SaksbehandlerDto getSaksbehandlere(
@@ -92,7 +97,13 @@ public class SaksbehandlerRestTjeneste {
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()));
 
-        unikeIdenter.remove(systembruker);
+        unikeIdenter.addAll(behandling.getAksjonspunkter().stream()
+            .map(Aksjonspunkt::getAnsvarligSaksbehandler)
+            .filter(Objects::nonNull)
+            .toList());
+
+        unikeIdenter.remove(systembruker); //bare relevant lokat
+        unikeIdenter.remove(appName);
 
         Map<String, String> identTilNavn = microsoftGraphTjeneste.navnPåNavAnsatte(unikeIdenter);
 

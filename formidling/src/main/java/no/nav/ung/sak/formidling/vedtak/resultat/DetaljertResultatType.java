@@ -11,6 +11,7 @@ public enum DetaljertResultatType {
     ENDRING_STARTDATO("Endring startdato"),
     ENDRING_SLUTTDATO("Opphør eller endring sluttdato"),
     ENDRING_FJERNE_PERIODE("Fjerne periode"),
+    FORLENGET_PERIODE("Forlenget periode i ungdomsprogrammet"),
     IKKE_VURDERT("Ikke vurdert"),
     INNVILGELSE_KUN_VILKÅR("Innvilgelse av vilkår uten utbetaling"),
     INNVILGELSE_UTBETALING("Innvilgelse med utbetaling"),

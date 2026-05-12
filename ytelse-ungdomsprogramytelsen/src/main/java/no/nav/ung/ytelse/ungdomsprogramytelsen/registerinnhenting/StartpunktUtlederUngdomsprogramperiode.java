@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,20 +39,28 @@ class StartpunktUtlederUngdomsprogramperiode implements EndringStartpunktUtleder
 
     @Override
     public StartpunktType utledStartpunkt(BehandlingReferanse ref, Object nyeste, Object eldste) {
-        var eldstePerioder = hentPerioder((Long) eldste);
-        var nyestePerioder = hentPerioder((Long) nyeste);
+        var eldsteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagBasertPåId((Long) eldste);
+        var nyesteGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagBasertPåId((Long) nyeste);
 
-        if (nyestePerioder.equals(eldstePerioder)) {
+        var eldstePerioder = hentPerioder(eldsteGrunnlag);
+        var nyestePerioder = hentPerioder(nyesteGrunnlag);
+
+        // Forlenget periode kan kun innvilges, aldri trekkes tilbake. Vi sjekker derfor kun overgangen false→true.
+        boolean harNyligFåttForlengetPeriode = !eldsteGrunnlag.map(UngdomsprogramPeriodeGrunnlag::harForlengetPeriode).orElse(false)
+            && nyesteGrunnlag.map(UngdomsprogramPeriodeGrunnlag::harForlengetPeriode).orElse(false);
+
+        if (nyestePerioder.equals(eldstePerioder) && !harNyligFåttForlengetPeriode) {
             return StartpunktType.UDEFINERT;
         }
 
-        log.info("Fant endringer i ungdomsprogramperioder. Flytter til init perioder.");
+        log.info("Fant endringer i ungdomsprogramperioder{}. Flytter til init perioder.",
+            harNyligFåttForlengetPeriode ? " (forlenget periode innvilget)" : "");
 
         return StartpunktType.INIT_PERIODER;
     }
 
-    private Set<DatoIntervallEntitet> hentPerioder(Long nyeste) {
-        return ungdomsprogramPeriodeRepository.hentGrunnlagBasertPåId(nyeste)
+    private Set<DatoIntervallEntitet> hentPerioder(Optional<UngdomsprogramPeriodeGrunnlag> grunnlag) {
+        return grunnlag
             .stream()
             .map(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramPerioder)
             .map(UngdomsprogramPerioder::getPerioder)

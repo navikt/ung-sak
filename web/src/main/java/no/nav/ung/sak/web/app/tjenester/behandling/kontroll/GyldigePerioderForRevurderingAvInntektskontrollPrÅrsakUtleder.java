@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.behandling.kontroll;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -13,6 +14,7 @@ import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 import java.util.List;
 
 @ApplicationScoped
+@FagsakYtelseTypeRef
 public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder implements GyldigePerioderForRevurderingPrÅrsakUtleder {
 
     private TilkjentYtelseRepository tilkjentYtelseRepository;

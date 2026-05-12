@@ -28,6 +28,7 @@ class UtledStatusForPerioderPåBehandling {
     public static final Set<BehandlingÅrsakType> RELEVANTE_ÅRSAKER = Set.of(
         BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
         BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
         BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
         BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
