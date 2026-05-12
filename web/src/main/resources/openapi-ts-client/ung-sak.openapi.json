@@ -4585,6 +4585,9 @@
           },
           "journalpostId" : {
             "type" : "string"
+          },
+          "ytelseTypeKode" : {
+            "type" : "string"
           }
         },
         "required" : [ "deltakerIdent", "journalpostId" ],
@@ -4599,6 +4602,9 @@
             "type" : "string"
           },
           "journalpostIdForPapirsøknad" : {
+            "type" : "string"
+          },
+          "ytelseTypeKode" : {
             "type" : "string"
           }
         },
