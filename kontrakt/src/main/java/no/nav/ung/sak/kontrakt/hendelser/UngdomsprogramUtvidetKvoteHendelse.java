@@ -15,7 +15,7 @@ import no.nav.ung.sak.typer.Periode;
 @Deprecated
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
-@JsonTypeName("UNGDOMSPROGRAM_UTVIDET_KVOTE")
+@JsonTypeName(Hendelse.UNGDOMSPROGRAM_UTVIDET_KVOTE)
 public class UngdomsprogramUtvidetKvoteHendelse implements Hendelse {
 
     @JsonProperty(value = "hendelseInfo", required = true)
