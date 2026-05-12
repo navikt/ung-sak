@@ -27,6 +27,7 @@ import java.util.UUID;
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_SLUTTDATO)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_AVVIK_REGISTERINNTEKT)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PERIODE)
+@OppgaveTypeRef(Bekreftelse.Type.AVP_BOSTED_AVKLARING)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_AUTOMATISK_OPPHOR)
 public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndterer {
 
@@ -96,6 +97,7 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             case UTTALELSE_ENDRET_SLUTTDATO -> EndringType.ENDRET_SLUTTDATO;
             case UTTALELSE_ENDRET_PERIODE -> EndringType.ENDRET_PERIODE;
             case UTTALELSE_AUTOMATISK_OPPHOR -> EndringType.AUTOMATISK_OPPHOR;
+            case UTTALELSE_BOSTED -> EndringType.AVKLAR_BOSTED;
         };
     }
 

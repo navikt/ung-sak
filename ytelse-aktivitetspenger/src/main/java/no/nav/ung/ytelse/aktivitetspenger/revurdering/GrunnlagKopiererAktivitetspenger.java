@@ -8,6 +8,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -23,6 +25,8 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private UttalelseRepository uttalelseRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
+    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
 
     public GrunnlagKopiererAktivitetspenger() {
         // for CDI proxy
@@ -33,12 +37,16 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
                                             InntektArbeidYtelseTjeneste iayTjeneste,
                                             TilkjentYtelseRepository tilkjentYtelseRepository,
                                             UttalelseRepository uttalelseRepository,
-                                            OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository) {
+                                            OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
+                                            BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                            BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.uttalelseRepository = uttalelseRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
+        this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
+        this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
     }
 
 
@@ -50,6 +58,8 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         forutgåendeMedlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
+        bostedsGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        bosattSøknadGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);

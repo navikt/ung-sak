@@ -38,19 +38,20 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
 
     @Override
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
+        kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
         var årsaker = behandling.getBehandlingÅrsakerTyper();
 
         boolean harVarselAutomatiskOpphør = årsaker.contains(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR);
-        boolean harUtvidetKvote = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
+        boolean harForlengetPeriode = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         boolean harOpphør = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
 
         // Scenario 2 & 3: Utvidet kvote eller manuelt opphør avbryter varsel om automatisk opphør
-        if (harVarselAutomatiskOpphør && (harUtvidetKvote || harOpphør)) {
+        if (harVarselAutomatiskOpphør && (harForlengetPeriode || harOpphør)) {
             automatiskOpphørEtterlysningTjeneste.avbrytEtterlysningForAutomatiskOpphør(behandlingReferanse);
             // Fortsett med normal etterlysningsflyt for den nye årsaken
             kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
-            if (!harUtvidetKvote) {
+            if (!harForlengetPeriode) {
                 programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
             }
         } else if (harVarselAutomatiskOpphør) {
@@ -59,7 +60,7 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
         } else {
             // Normal flyt
             kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
-            if (!harUtvidetKvote) {
+            if (!harForlengetPeriode) {
                 programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
             }
         }

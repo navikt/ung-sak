@@ -10,37 +10,30 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringUtvidetKvoteDto;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.ForlengetPeriodeDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 
 import java.time.LocalDate;
 
 @Dependent
-public class UtvidetKvoteInnholdBygger implements VedtaksbrevInnholdBygger {
+public class ForlengetPeriodeInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     @Inject
-    public UtvidetKvoteInnholdBygger(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                     UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+    public ForlengetPeriodeInnholdBygger(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
     }
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        var nyProgramperiode = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId()).toSegments().last();
-        LocalDate nyMaksDato = nyProgramperiode.getTom();
-
         var originalBehandlingId = behandling.getOriginalBehandlingId()
-            .orElseThrow(() -> new IllegalStateException("Trenger forrige behandling ved utvidelse av kvote"));
+            .orElseThrow(() -> new IllegalStateException("Trenger forrige behandling ved forlenget periode"));
 
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(originalBehandlingId).orElseThrow();
-        LocalDate opprinneligMaksDato = FagsakperiodeUtleder.finnTomDato(ungdomsprogramPeriodeGrunnlag);
+        LocalDate forlengetPeriodeFraOgMedDato = FagsakperiodeUtleder.finnTomDato(ungdomsprogramPeriodeGrunnlag).plusDays(1);
 
-        return new TemplateInnholdResultat(TemplateType.ENDRING_UTVIDET_KVOTE,
-            new EndringUtvidetKvoteDto(opprinneligMaksDato, nyMaksDato));
+        return new TemplateInnholdResultat(TemplateType.FORLENGET_PERIODE,
+            new ForlengetPeriodeDto(forlengetPeriodeFraOgMedDato));
     }
 }

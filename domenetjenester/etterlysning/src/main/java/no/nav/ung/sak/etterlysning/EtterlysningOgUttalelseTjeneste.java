@@ -78,6 +78,7 @@ public class EtterlysningOgUttalelseTjeneste {
             case UTTALELSE_ENDRET_SLUTTDATO -> EndringType.ENDRET_SLUTTDATO;
             case UTTALELSE_ENDRET_PERIODE -> EndringType.ENDRET_PERIODE;
             case UTTALELSE_AUTOMATISK_OPPHOR -> EndringType.AUTOMATISK_OPPHOR;
+            case UTTALELSE_BOSTED -> EndringType.AVKLAR_BOSTED;
         };
     }
 }

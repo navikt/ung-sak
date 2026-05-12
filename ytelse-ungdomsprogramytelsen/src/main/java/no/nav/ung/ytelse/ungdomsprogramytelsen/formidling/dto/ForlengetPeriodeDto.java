@@ -4,7 +4,6 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdDto;
 
 import java.time.LocalDate;
 
-public record EndringUtvidetKvoteDto(
-    LocalDate opprinneligMaksDato,
-    LocalDate nyMaksDato) implements TemplateInnholdDto {
+public record ForlengetPeriodeDto(
+    LocalDate fom) implements TemplateInnholdDto {
 }

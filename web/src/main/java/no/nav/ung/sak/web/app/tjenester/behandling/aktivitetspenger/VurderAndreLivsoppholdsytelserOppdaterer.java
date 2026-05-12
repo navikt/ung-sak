@@ -66,7 +66,8 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
                 .medUtfallManuell(utfall)
                 .medAvslagsårsak(vurdertPeriode.avslagsårsak())
-                .medBegrunnelse(vurdertPeriode.begrunnelse()));
+                .medBegrunnelse(vurdertPeriode.begrunnelse())
+                .medFritekstVurderingBrev(vurdertPeriode.fritekstVurderingBrev()));
         }
         resultatBuilder.leggTil(vilkårBuilder);
 

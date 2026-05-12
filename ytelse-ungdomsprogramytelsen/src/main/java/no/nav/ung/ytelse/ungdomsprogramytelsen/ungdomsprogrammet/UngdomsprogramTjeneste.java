@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramUtvidetKvote;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramForlengetPeriode;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
@@ -45,50 +45,50 @@ public class UngdomsprogramTjeneste {
     public void innhentOpplysninger(Behandling behandling) {
         var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(behandling.getFagsak().getAktørId().getAktørId());
 
-        // Utvidet kvote gjelder dersom registeret returnerer flagget ELLER behandlingen ble trigget av
-        // utvidet kvote-hendelse. Sistnevnte håndterer tilfeller der registeret ennå ikke har oppdatert flagget.
-        boolean harUtvidetKvoteFraRegister = registerOpplysninger.opplysninger().stream()
-            .anyMatch(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::harUtvidetKvote);
-        boolean harUtvidetKvoteFraBehandlingsårsak = behandling.getBehandlingÅrsakerTyper()
-            .contains(BehandlingÅrsakType.RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM);
-        boolean harUtvidetKvote = harUtvidetKvoteFraRegister || harUtvidetKvoteFraBehandlingsårsak;
+        // Forlenget periode gjelder dersom registeret returnerer flagget ELLER behandlingen ble trigget av
+        // forlenget-periode-hendelse. Sistnevnte håndterer tilfeller der registeret ennå ikke har oppdatert flagget.
+        boolean harForlengetPeriodeFraRegister = registerOpplysninger.opplysninger().stream()
+            .anyMatch(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::harForlengetPeriode);
+        boolean harForlengetPeriodeFraBehandlingsårsak = behandling.getBehandlingÅrsakerTyper()
+            .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+        boolean harForlengetPeriode = harForlengetPeriodeFraRegister || harForlengetPeriodeFraBehandlingsårsak;
 
-        // Sjekk om utvidet kvote allerede er materialisert (beregnet til konkret tom-dato) i et tidligere
+        // Sjekk om forlenget periode allerede er materialisert (beregnet til konkret tom-dato) i et tidligere
         // grunnlag. Grunnlag kopieres til nye revurderinger via UngdomsprogramPeriodeRepository.kopier(),
         // så det aktive grunnlaget på behandlingen reflekterer forrige tilstand før vi skriver på nytt.
         //
-        // NB: Ideelt sett burde ung-deltakelse-opplyser (registeret) ikke sende inn utvidet periode ved utvidet
-        // kvote i det hele tatt – ung-sak burde i stedet beregne perioden selv basert på kvote-flagget der det er
-        // nødvendig (f.eks. ved første gangs utvidelse). Inntil registeret er endret håndterer vi det her ved å
-        // beregne utvidelsen kun én gang, og deretter stole på registerets perioder for å unngå at utvidelsen
+        // NB: Ideelt sett burde ung-deltakelse-opplyser (registeret) ikke sende inn forlenget periode-flagg
+        // i det hele tatt – ung-sak burde i stedet beregne perioden selv basert på flagget der det er
+        // nødvendig (f.eks. ved første gangs forlengelse). Inntil registeret er endret håndterer vi det her ved å
+        // beregne forlengelsen kun én gang, og deretter stole på registerets perioder for å unngå at forlengelsen
         // re-deriveres ved senere innhentinger (f.eks. opphør, der register sender klippet tom – da ville en
         // re-derivering ført til to disjunkte segmenter og brutt valideringen om nøyaktig én programperiode).
-        boolean alleredeUtvidetIEttTidligereGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramUtvidetKvote)
-            .map(UngdomsprogramUtvidetKvote::isHarUtvidetKvote)
+        boolean alleredeForlengetIEttTidligereGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramForlengetPeriode)
+            .map(UngdomsprogramForlengetPeriode::harForlengetPeriode)
             .orElse(false);
 
-        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harUtvidetKvoteFraRegister={}, harUtvidetKvoteFraBehandlingsårsak={}, harUtvidetKvote={}, alleredeUtvidetIEttTidligereGrunnlag={}",
-            behandling.getId(), harUtvidetKvoteFraRegister, harUtvidetKvoteFraBehandlingsårsak, harUtvidetKvote, alleredeUtvidetIEttTidligereGrunnlag);
+        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harForlengetPeriodeFraRegister={}, harForlengetPeriodeFraBehandlingsårsak={}, harForlengetPeriode={}, alleredeForlengetIEttTidligereGrunnlag={}",
+            behandling.getId(), harForlengetPeriodeFraRegister, harForlengetPeriodeFraBehandlingsårsak, harForlengetPeriode, alleredeForlengetIEttTidligereGrunnlag);
 
         if (registerOpplysninger.opplysninger().isEmpty()) {
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harUtvidetKvote);
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harForlengetPeriode);
             LOG.info("Fant ingen opplysninger om ungdomsprogrammet for aktør. ");
         } else {
             var timeline = lagTimeline(registerOpplysninger);
             LOG.info("Programperiode fra register: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
-            if (harUtvidetKvote && !alleredeUtvidetIEttTidligereGrunnlag) {
-                // Materialiser utvidelsen én gang. Etterpå er konkret tom-dato lagret i grunnlaget,
+            if (harForlengetPeriode && !alleredeForlengetIEttTidligereGrunnlag) {
+                // Materialiser forlengelsen én gang. Etterpå er konkret tom-dato lagret i grunnlaget,
                 // og registerets perioder skal være sannhetskilden ved senere innhentinger.
-                timeline = utvidProgramperiodeTilMaksKvote(timeline);
-                LOG.info("Programperiode utvidet til: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
+                timeline = forlengProgramperiodeTilMaksdato(timeline);
+                LOG.info("Programperiode forlenget til: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
             }
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harUtvidetKvote);
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harForlengetPeriode);
         }
     }
 
     /**
-     * Utvider programperiode-tidslinjen til maksimalt antall virkedager ved utvidet kvote (300 virkedager).
+     * Forlenger programperiode-tidslinjen til maksimalt antall virkedager ved forlenget periode (300 virkedager).
      *
      * <p>To scenarioer håndteres kant-i-kant:
      * <ul>
@@ -97,28 +97,28 @@ public class UngdomsprogramTjeneste {
      *         legges til de resterende virkedagene (opp til 300 totalt) kant-i-kant etter eksisterende tom.</li>
      * </ul>
      *
-     * <p>Prinsippet er at utvidelsen alltid skal være kant-i-kant, slik at de nye dagene kan behandles
+     * <p>Prinsippet er at forlengelsen alltid skal være kant-i-kant, slik at de nye dagene kan behandles
      * som en vanlig ytelsesperiode (kontroll av inntekt, aldersovergang, g-regulering osv.).
      */
-    private static LocalDateTimeline<Boolean> utvidProgramperiodeTilMaksKvote(LocalDateTimeline<Boolean> timeline) {
+    private static LocalDateTimeline<Boolean> forlengProgramperiodeTilMaksdato(LocalDateTimeline<Boolean> timeline) {
         var fom = timeline.getMinLocalDate();
         var tom = timeline.getMaxLocalDate();
         var erÅpen = tom.equals(TIDENES_ENDE);
-        boolean harUtvidetKvote = true;
+        boolean harForlengetPeriode = true;
         if (erÅpen) {
-            var utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), harUtvidetKvote);
+            var utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), harForlengetPeriode);
             return timeline.intersection(new LocalDateInterval(fom, utvidetTom));
         }
         // Beregn eksplisitt gjenstående virkedager for å unngå feil ved grenseverdier.
-        // finnTomDato returnerer nyFom både når det gjenstår 1 virkedag og når kvoten er oppbrukt,
-        var forbrukteDager = FinnForbrukteDager.finnForbrukteDager(timeline, harUtvidetKvote).forbrukteDager();
-        var gjenståendeDager = FinnForbrukteDager.getMaksAntallDager(harUtvidetKvote) - forbrukteDager;
+        // finnTomDato returnerer nyFom både når det gjenstår 1 virkedag og når maks antall dager er oppbrukt,
+        var forbrukteDager = FinnForbrukteDager.finnForbrukteDager(timeline, harForlengetPeriode).forbrukteDager();
+        var gjenståendeDager = FinnForbrukteDager.getMaksAntallDager(harForlengetPeriode) - forbrukteDager;
         if (gjenståendeDager <= 0) {
             return timeline;
         }
         var nyFom = tom.plusDays(1);
-        var utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, timeline, harUtvidetKvote);
-        var utvidelse = new LocalDateTimeline<>(nyFom, utvidetTom, harUtvidetKvote);
+        var utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, timeline, harForlengetPeriode);
+        var utvidelse = new LocalDateTimeline<>(nyFom, utvidetTom, harForlengetPeriode);
         return timeline.crossJoin(utvidelse);
     }
 

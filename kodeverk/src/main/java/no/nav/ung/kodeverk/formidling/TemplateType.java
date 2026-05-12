@@ -13,7 +13,7 @@ public enum TemplateType {
     OPPHØR("opphør", "ungdomsprogramytelse", "Opphør av ungdomsprogramytelse"),
     AUTOMATISK_OPPHOR("automatisk_opphor", "ungdomsprogramytelse", "Automatisk opphør ved maksdato"),
     ENDRING_PROGRAMPERIODE("endring_programperiode", "ungdomsprogramytelse","Endring av programperiode"),
-    ENDRING_UTVIDET_KVOTE("endring_utvidet_kvote", "ungdomsprogramytelse", "Endring utvidet kvote"),
+    FORLENGET_PERIODE("forlenget_periode", "ungdomsprogramytelse", "Forlenget periode"),
     GENERELT_FRITEKSTBREV("generelt_fritekstbrev", "ungdomsprogramytelse", "Generelt fritekstbrev"),
 
     //TODO finne bedre måte å skille ytelsene på

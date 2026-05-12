@@ -9,6 +9,7 @@ import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
 
@@ -20,6 +21,7 @@ public enum EtterlysningType implements Kodeverdi {
     UTTALELSE_ENDRET_SLUTTDATO("UTTALELSE_ENDRET_SLUTTDATO", "Svar på varsel: Endret sluttdato"),
     UTTALELSE_ENDRET_PERIODE("UTTALELSE_ENDRET_PERIODE", "Svar på varsel: Endret programperiode"),
     UTTALELSE_AUTOMATISK_OPPHOR("UTTALELSE_AUTOMATISK_OPPHOR", "Svar på varsel: Automatisk opphør ved maksdato"),
+    UTTALELSE_BOSTED("UTTALELSE_BOSTED", "Svar på varsel: Bostedavklaring"),
 
     ;
 
@@ -80,6 +82,9 @@ public enum EtterlysningType implements Kodeverdi {
             case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE, UTTALELSE_AUTOMATISK_OPPHOR -> {
                 return AUTO_SATT_PÅ_VENT_REVURDERING;
             }
+            case UTTALELSE_BOSTED -> {
+                return AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE;
+            }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + this);
         }
     }
@@ -91,6 +96,9 @@ public enum EtterlysningType implements Kodeverdi {
             }
             case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE, UTTALELSE_AUTOMATISK_OPPHOR -> {
                 return Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
+            }
+            case UTTALELSE_BOSTED -> {
+                return Venteårsak.VENTER_PÅ_ETTERLYST_BOSTEDUTTALELSE;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + this);
         }
