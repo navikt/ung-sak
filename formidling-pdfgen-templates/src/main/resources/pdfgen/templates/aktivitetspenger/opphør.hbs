@@ -1,0 +1,40 @@
+{{#> felles/base}}
+
+    {{#> felles/seksjon/hoved }}
+        <h1>Du får ikke lenger aktivitetspenger </h1>
+
+        <p>Fra DATO får du ikke lenger aktivitetspenger.</p>
+        <p>Den siste utbetalingen får du før DATO.</p>
+
+        <h2>Hvorfor får du ikke aktivitetspenger?</h2>
+        {{#with avslåttBosted}}
+            {{#if ytelseIkkeTilgjengeligPåBosted}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i Trondheim.
+                    Fordi du ikke lenger har bostedsadresse i Trondheim, stanser vi aktivitetspengene dine.
+                </p>
+            {{/if}}
+            {{#if ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i eller være folkeregistrert i Trondheim.
+                    Fordi du ikke lenger har bostedsadresse eller er folkeregistrert i Trondheim, stanser vi aktivitetspengene dine.
+                </p>
+            {{/if}}
+            {{#if ytelseIkkePåArbeidsstedStudiested}}
+                <p>
+                    For å ha rett på aktivitetspenger må du studere eller jobbe i Trondheim.
+                    Fordi studie- eller arbeidsstedet ditt er utenfor Trondheim, har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+        {{/with}}
+
+    {{/felles/seksjon/hoved}}
+
+    {{> aktivitetspenger/footer/footer-vedtak }}
+
+{{/felles/base}}
