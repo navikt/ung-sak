@@ -17,7 +17,6 @@ import no.nav.ung.sak.behandling.revurdering.RevurderingTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -144,8 +143,8 @@ public class BehandlingsoppretterTjeneste {
         }
     }
 
-    public List<ÅrsakOgPerioderDto> finnGyldigeVurderingsperioderPrÅrsak(Long fagsakId) {
-        return gyldigePerioderForRevurderingUtledere.stream().map(utleder -> utleder.utledPerioder(fagsakId))
+    public List<ÅrsakOgPerioderDto> finnGyldigeVurderingsperioderPrÅrsak(Fagsak fagsak) {
+        return FagsakYtelseTypeRef.Lookup.find(gyldigePerioderForRevurderingUtledere,  fagsak.getYtelseType()).stream().map(utleder -> utleder.utledPerioder(fagsak.getId()))
             .toList();
     }
 
@@ -185,7 +184,7 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
-        var gyldigePerioderForRevurderingPrÅrsak = finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
+        var gyldigePerioderForRevurderingPrÅrsak = finnGyldigeVurderingsperioderPrÅrsak(fagsak);
         boolean skalSjekkeGyldighetAvPeriode = gyldigePerioderForRevurderingPrÅrsak.stream().anyMatch(dto -> dto.årsak() == behandlingÅrsakType);
         //Dersom det ikke er utledet gyldige perioder for årsak så aksepteres alle perioder, også ingen periode.
         if (!skalSjekkeGyldighetAvPeriode) {

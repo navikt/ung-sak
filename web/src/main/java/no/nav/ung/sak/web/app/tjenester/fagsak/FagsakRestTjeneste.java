@@ -238,7 +238,7 @@ public class FagsakRestTjeneste {
             return Response.status(Status.NOT_FOUND).build();
         }
         var fagsakId = fagsak.map(Fagsak::getId).orElseThrow();
-        var perioderMedGjennomførtKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsakId);
+        var perioderMedGjennomførtKontroll = behandlingsoppretterTjeneste.finnGyldigeVurderingsperioderPrÅrsak(fagsak.get());
         var oppretting = BehandlingType.getYtelseBehandlingTyper().stream()
             .map(bt -> new BehandlingOpprettingDto(bt, behandlingsoppretterTjeneste.kanOppretteNyBehandlingAvType(fagsakId, bt), perioderMedGjennomførtKontroll))
             .collect(Collectors.toList());

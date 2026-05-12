@@ -31,7 +31,13 @@ public record VilkårPeriodeVurderingDto(
     @Size(min = 3, max = 5000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
-    String begrunnelse
+    String begrunnelse,
+
+    @JsonProperty("fritekstVurderingBrev")
+    @Size(max = 10000)
+    @Valid
+    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    String fritekstVurderingBrev
 ) {
 
     @AssertFalse(message = "Avslagsårsak må være satt dersom vilkåret ikke er oppfylt")
