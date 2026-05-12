@@ -22,6 +22,7 @@ public enum TemplateType {
     AKTIVITETSPENGER_ENDRING_BARNETILLEGG("endring_barnetillegg", "aktivitetspenger", "Endring pga barnetillegg"),
     AKTIVITETSPENGER_ENDRING_INNTEKT("endring_inntekt", "aktivitetspenger", "Endring av inntekt"),
     AKTIVITETSPENGER_ENDRING_INNTEKT_UTEN_REDUKSJON("endring_inntekt_uten_reduksjon", "aktivitetspenger", "Endring av inntekt uten reduksjon"),
+    AKTIVITETSPENGER_OPPHØR("opphør", "aktivitetspenger", "Opphør av aktivitetspenger"),
 
     KLAGE_AVVIST("avvist", "klage", "Avvist klage grunnet formkrav"),
     KLAGE_MEDHOLD("medhold", "klage", "Medhold i klage - omgjøres"),
