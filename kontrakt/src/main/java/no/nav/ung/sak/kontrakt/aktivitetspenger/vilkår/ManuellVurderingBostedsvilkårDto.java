@@ -8,49 +8,40 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 import java.util.List;
 
+/**
+ * DTO for aksjonspunkt 5140 – manuell vurdering av bostedsvilkåret.
+ * Brukes ved årsak ANNET, mottatt uttalelse fra bruker, eller fakta fra søknad.
+ */
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE)
-public class VurderBostedDto extends BekreftetAksjonspunktDto {
+public class ManuellVurderingBostedsvilkårDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty("vurdertePerioder")
     @NotNull
-    @Size(min = 0, max = 100)
+    @Size(min = 1, max = 100)
     private List<@Valid VilkårPeriodeVurderingDto> vurdertePerioder;
 
-    @Valid
-    @Size(max = 1000)
-    @Pattern(regexp = InputValideringRegex.FRITEKST)
-    private String brevtekst;
-
-    public VurderBostedDto() {
-        //for jackson
+    public ManuellVurderingBostedsvilkårDto() {
+        // for Jackson
     }
 
     @JsonCreator
-    public VurderBostedDto(@JsonProperty("vurdertePerioder") List<VilkårPeriodeVurderingDto> vurderinger,
-                           @JsonProperty("brevtekst") String brevtekst,
-                           @JsonProperty("begrunnelse") String begrunnelse) {
+    public ManuellVurderingBostedsvilkårDto(@JsonProperty("vurdertePerioder") List<VilkårPeriodeVurderingDto> vurdertePerioder,
+                                             @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
-        this.vurdertePerioder = vurderinger;
-        this.brevtekst = brevtekst;
+        this.vurdertePerioder = vurdertePerioder;
     }
 
     public List<VilkårPeriodeVurderingDto> getVurdertePerioder() {
         return vurdertePerioder;
-    }
-
-    public String getBrevtekst() {
-        return brevtekst;
     }
 }

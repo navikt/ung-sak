@@ -23,6 +23,7 @@ import no.nav.ung.sak.vilkår.VilkårUtleder;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
 
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Map;
 import java.util.NavigableSet;
 import java.util.Set;
@@ -61,16 +62,30 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     public NavigableSet<DatoIntervallEntitet> utled(Long behandlingId, VilkårType vilkårType) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).flatMap(it -> it.getVilkår(vilkårType));
         if (vilkårene.isPresent()) {
-        LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
+            LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje = prosessTriggerPeriodeUtleder.utledTidslinje(behandlingId);
+
+            Set<BehandlingÅrsakType> relevanteÅrsaker = hentRelevanteÅrsaker(vilkårType);
+            LocalDateTimeline<Boolean> relevantePerioderTidslinje = prosesstriggerTidslinje
+                .filterValue(årsaker -> årsaker.stream().anyMatch(relevanteÅrsaker::contains))
+                .mapValue(årsaker -> Boolean.TRUE);
+
             return vilkårene.filter(it -> it.getVilkårType().equals(vilkårType))
                 .map(Vilkår::getPerioder)
                 .stream()
                 .flatMap(Collection::stream)
                 .map(VilkårPeriode::getPeriode)
-                .filter(it -> !prosesstriggerTidslinje.intersection(it.toLocalDateInterval()).isEmpty())
+                .filter(it -> !relevantePerioderTidslinje.intersection(it.toLocalDateInterval()).isEmpty())
                 .collect(Collectors.toCollection(TreeSet::new));
         }
         return TidslinjeUtil.tilDatoIntervallEntiteter(aktivitetspengerSøktPeriodeRepository.hentSøktePerioderTidslinje(behandlingId));
+    }
+
+    private Set<BehandlingÅrsakType> hentRelevanteÅrsaker(VilkårType vilkårType) {
+        EnumSet<BehandlingÅrsakType> årsaker = EnumSet.of(BehandlingÅrsakType.NY_SØKT_PERIODE);
+        if (vilkårType == VilkårType.BOSTEDSVILKÅR) {
+            årsaker.add(BehandlingÅrsakType.ENDRET_BOSTED);
+        }
+        return årsaker;
     }
 
     @Override
