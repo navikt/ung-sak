@@ -65,7 +65,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 For å finne dagsatsen din, har vi regnet ut hva 66 prosent av 300 000 kroner er. Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager. \
                 Det vil si at du har rett på 762 kroner per dag. \
                 Slik har vi regnet ut satsen du får etter at du fylte 25 år. \
-                Når vi har regnet ut hvor mye du får i aktivitetspenger etter at du fylte 25, har vi sett på inntekten din de tre siste årene. Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
+                Når vi har regnet ut hvor mye du får i aktivitetspenger etter at du fylte 25 år, har vi sett på inntekten din de tre siste årene. Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraOmArbeidsinntektAvsnitt()
