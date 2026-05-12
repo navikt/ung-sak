@@ -33,7 +33,7 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
             opphørInnholdBygger,
             new VedtaksbrevEgenskaper(true, true, true, true),
             null,
-            "Opphørsbrev ved opphør pga inngangsvilkår"
+            "Opphørsbrev ved opphør"
         );
     }
 
@@ -41,8 +41,8 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)
-            && resultater.innholder(DetaljertResultatType.INNVILGELSE_UTBETALING);
+        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
+            && resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
     }
 }
 
