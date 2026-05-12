@@ -31,9 +31,9 @@ public class ForlengetPeriodeInnholdBygger implements VedtaksbrevInnholdBygger {
             .orElseThrow(() -> new IllegalStateException("Trenger forrige behandling ved forlenget periode"));
 
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(originalBehandlingId).orElseThrow();
-        LocalDate fom = FagsakperiodeUtleder.finnTomDato(ungdomsprogramPeriodeGrunnlag).plusDays(1);
+        LocalDate forlengetPeriodeFraOgMedDato = FagsakperiodeUtleder.finnTomDato(ungdomsprogramPeriodeGrunnlag).plusDays(1);
 
         return new TemplateInnholdResultat(TemplateType.FORLENGET_PERIODE,
-            new ForlengetPeriodeDto(fom));
+            new ForlengetPeriodeDto(forlengetPeriodeFraOgMedDato));
     }
 }
