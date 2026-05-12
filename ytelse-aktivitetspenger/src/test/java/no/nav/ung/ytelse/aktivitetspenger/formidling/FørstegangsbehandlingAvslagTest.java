@@ -68,13 +68,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     @Test
     void avslagBistand_fritekst() {
         var fom = LocalDate.of(2025, 8, 1);
-
-        var scenario = new AktivitetspengerFørstegangsbehandlingScenarioer.AvslagScenario(
-            AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBosted(fom).testScenario(),
-            AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBosted(fom).vilkårPeriode(),
-            VilkårType.BISTANDSVILKÅR,
-            Avslagsårsak.UDEFINERT
-        );
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom);
 
         var behandling = lagAvslagScenario(scenario, FRITEKST_BISTAND);
 
@@ -126,16 +120,11 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             );
     }
 
-    @DisplayName("Avslag med fritekst pga UDEFINERT avslagsårsak på bostedsvilkåret")
+    @DisplayName("Avslag med fritekst uavhengig av avslagsårsak på bostedsvilkåret")
     @Test
     void avslagBostedFritekst() {
         var fom = LocalDate.of(2025, 8, 1);
-        var scenario = new AktivitetspengerFørstegangsbehandlingScenarioer.AvslagScenario(
-            AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBosted(fom).testScenario(),
-            AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBosted(fom).vilkårPeriode(),
-            VilkårType.BOSTEDSVILKÅR,
-            Avslagsårsak.UDEFINERT
-        );
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttArbeidsstedStudiested(fom);
 
         var behandling = lagAvslagScenario(scenario, FRITEKST_BOSTED);
 

@@ -68,12 +68,12 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
 
     private AvslåttBosted lagAvslåttBosted(Set<DetaljertVilkårResultat> alleAvslåtteVilkår, Behandling behandling, LocalDateTimeline<DetaljertResultat> vurdertPeriode) {
         Avslagsårsak årsak = finnAvslagsårsak(alleAvslåtteVilkår, VilkårType.BOSTEDSVILKÅR);
-        if (årsak == Avslagsårsak.UDEFINERT) {
-            Vilkårene vilkårene = vilkårResultatRepository.hent(behandling.getId());
-            return AvslåttBosted.medKunFritekst(
-                hentAvslåttVilkår(vilkårene, VilkårType.BOSTEDSVILKÅR, vurdertPeriode).getFritekstVurderingBrev()
-            );
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandling.getId());
+        var fritekst = hentAvslåttVilkår(vilkårene, VilkårType.BOSTEDSVILKÅR, vurdertPeriode).getFritekstVurderingBrev();
+        if (fritekst != null) {
+            return AvslåttBosted.medKunFritekst(fritekst);
         }
+
         return new AvslåttBosted(
             årsak == Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
             årsak == Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE,
@@ -83,12 +83,12 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
 
     private AvslåttBistand lagAvslåttBistand(Set<DetaljertVilkårResultat> alleAvslåtteVilkår, Behandling behandling, LocalDateTimeline<DetaljertResultat> vurdertPeriode) {
         Avslagsårsak årsak = finnAvslagsårsak(alleAvslåtteVilkår, VilkårType.BISTANDSVILKÅR);
-        if (årsak == Avslagsårsak.UDEFINERT) {
-            Vilkårene vilkårene = vilkårResultatRepository.hent(behandling.getId());
-            return AvslåttBistand.medKunFritekst(
-                hentAvslåttVilkår(vilkårene, VilkårType.BISTANDSVILKÅR, vurdertPeriode).getFritekstVurderingBrev()
-            );
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandling.getId());
+        var fritekst = hentAvslåttVilkår(vilkårene, VilkårType.BISTANDSVILKÅR, vurdertPeriode).getFritekstVurderingBrev();
+        if (fritekst != null) {
+            return AvslåttBistand.medKunFritekst(fritekst);
         }
+
         return new AvslåttBistand(
             årsak == Avslagsårsak.IKKE_14A_VEDTAK,
             null
@@ -100,7 +100,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
             .filter(v -> v.vilkårType() == vilkårType)
             .map(DetaljertVilkårResultat::avslagsårsak)
             .findFirst()
-            .orElse(Avslagsårsak.UDEFINERT);
+            .orElseThrow(() -> new IllegalStateException("Fant ikke avslagsårsak for vilkårType "+ vilkårType));
     }
 
     private static VilkårPeriode hentAvslåttVilkår(Vilkårene vilkårene, VilkårType vilkårType, LocalDateTimeline<DetaljertResultat> vurdertPeriode) {
