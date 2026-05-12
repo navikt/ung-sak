@@ -95,7 +95,7 @@ public class AktivitetspengerBrevScenarioerUtils {
 
     /**
      * Beregningsgrunnlag der siste år-inntekt (300 000) er høyest → SISTE_ÅR.
-     * Redusert (198 000) er høyere enn lav minsteytelse (~177 104) men lavere enn høy minsteytelse (~265 657).
+     * Redusert (198 000) er høyere enn lav minsteytelse (~177 104) men lavere enn høy minsteytelse (~265 657) (tall for 2025).
      */
     public static Beregningsgrunnlag lagBeregningsgrunnlagHøyereEnnLavMinstesats(LocalDate skjæringstidspunkt) {
         var input = new BeregningInput(new Beløp(200_000), new Beløp(200_000), new Beløp(300_000), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
