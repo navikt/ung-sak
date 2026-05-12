@@ -60,5 +60,24 @@ class UtledStatusForPerioderPåBehandlingTest {
         assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.OPPHØR_UNGDOMSPROGRAM));
     }
 
+    @Test
+    void skal_utlede_status_fra_forlenget_periode_av_ungdomsprogram() {
+        var startdato = LocalDate.now();
+        var fomNyPeriode = startdato.plusWeeks(52);
+        var tomNyPeriode = fomNyPeriode.plusWeeks(8).minusDays(1);
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(fomNyPeriode, tomNyPeriode);
+
+        var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
+            Map.of(),
+            List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, periodeTilVurdering))
+        );
+
+        var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
+        assertThat(perioderMedÅrsak.size()).isEqualTo(1);
+        var periode = perioderMedÅrsak.get(0);
+        assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
+        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
+    }
+
 
 }

@@ -45,16 +45,16 @@ class StartpunktUtlederUngdomsprogramperiode implements EndringStartpunktUtleder
         var eldstePerioder = hentPerioder(eldsteGrunnlag);
         var nyestePerioder = hentPerioder(nyesteGrunnlag);
 
-        // Utvidet kvote kan kun innvilges, aldri trekkes tilbake. Vi sjekker derfor kun overgangen false→true.
-        boolean harNyligFåttUtvidetKvote = !eldsteGrunnlag.map(UngdomsprogramPeriodeGrunnlag::isHarUtvidetKvote).orElse(false)
-            && nyesteGrunnlag.map(UngdomsprogramPeriodeGrunnlag::isHarUtvidetKvote).orElse(false);
+        // Forlenget periode kan kun innvilges, aldri trekkes tilbake. Vi sjekker derfor kun overgangen false→true.
+        boolean harNyligFåttForlengetPeriode = !eldsteGrunnlag.map(UngdomsprogramPeriodeGrunnlag::harForlengetPeriode).orElse(false)
+            && nyesteGrunnlag.map(UngdomsprogramPeriodeGrunnlag::harForlengetPeriode).orElse(false);
 
-        if (nyestePerioder.equals(eldstePerioder) && !harNyligFåttUtvidetKvote) {
+        if (nyestePerioder.equals(eldstePerioder) && !harNyligFåttForlengetPeriode) {
             return StartpunktType.UDEFINERT;
         }
 
         log.info("Fant endringer i ungdomsprogramperioder{}. Flytter til init perioder.",
-            harNyligFåttUtvidetKvote ? " (utvidet kvote innvilget)" : "");
+            harNyligFåttForlengetPeriode ? " (forlenget periode innvilget)" : "");
 
         return StartpunktType.INIT_PERIODER;
     }

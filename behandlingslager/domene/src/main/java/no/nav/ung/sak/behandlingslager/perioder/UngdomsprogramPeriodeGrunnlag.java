@@ -42,8 +42,8 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @ChangeTracked
-    @JoinColumn(name = "ung_ungdomsprogramp_utvidet_kvote_id", nullable = true, updatable = false)
-    private UngdomsprogramUtvidetKvote ungdomsprogramUtvidetKvote;
+    @JoinColumn(name = "ung_ungdomsprogramp_forlenget_periode_id", nullable = true, updatable = false)
+    private UngdomsprogramForlengetPeriode ungdomsprogramForlengetPeriode;
 
     public UngdomsprogramPeriodeGrunnlag() {
     }
@@ -51,7 +51,7 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     UngdomsprogramPeriodeGrunnlag(Long behandlingId, UngdomsprogramPeriodeGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.ungdomsprogramPerioder = grunnlag.ungdomsprogramPerioder;
-        this.ungdomsprogramUtvidetKvote = grunnlag.ungdomsprogramUtvidetKvote;
+        this.ungdomsprogramForlengetPeriode = grunnlag.ungdomsprogramForlengetPeriode;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -122,16 +122,16 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    public Optional<UngdomsprogramUtvidetKvote> getUngdomsprogramUtvidetKvote() {
-        return Optional.ofNullable(ungdomsprogramUtvidetKvote);
+    public Optional<UngdomsprogramForlengetPeriode> getUngdomsprogramForlengetPeriode() {
+        return Optional.ofNullable(ungdomsprogramForlengetPeriode);
     }
 
-    public void setUngdomsprogramUtvidetKvote(UngdomsprogramUtvidetKvote ungdomsprogramUtvidetKvote) {
-        this.ungdomsprogramUtvidetKvote = ungdomsprogramUtvidetKvote;
+    public void setUngdomsprogramForlengetPeriode(UngdomsprogramForlengetPeriode ungdomsprogramForlengetPeriode) {
+        this.ungdomsprogramForlengetPeriode = ungdomsprogramForlengetPeriode;
     }
 
-    public boolean isHarUtvidetKvote() {
-        return ungdomsprogramUtvidetKvote != null && ungdomsprogramUtvidetKvote.isHarUtvidetKvote();
+    public boolean harForlengetPeriode() {
+        return ungdomsprogramForlengetPeriode != null && ungdomsprogramForlengetPeriode.harForlengetPeriode();
     }
 
     @Override

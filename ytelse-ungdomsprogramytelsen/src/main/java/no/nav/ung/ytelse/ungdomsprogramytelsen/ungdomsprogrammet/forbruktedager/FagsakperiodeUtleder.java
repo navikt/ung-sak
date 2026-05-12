@@ -36,8 +36,8 @@ public class FagsakperiodeUtleder {
             return fomDato.plusWeeks(52).minusDays(1);
         } else {
             var forrigeBehandlingUngdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(originalBehandlingId.get());
-            var harUtvidetKvote = ungdomsprogramPeriodeTjeneste.finnHarUtvidetKvote(originalBehandlingId.get());
-            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje, harUtvidetKvote);
+            var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(originalBehandlingId.get());
+            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje, harForlengetPeriode);
         }
     }
 
@@ -45,11 +45,11 @@ public class FagsakperiodeUtleder {
         return finnTomDato(søknadFom, ungdomsprogramTidslinje, false);
     }
 
-    public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje, boolean harUtvidetKvote) {
+    public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje, boolean harForlengetPeriode) {
         var tidligerePerioderIProgrammet = ungdomsprogramTidslinje.intersection(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, søknadFom.minusDays(1)));
-        var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet, harUtvidetKvote);
+        var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet, harForlengetPeriode);
         var forbrukteDager = vurderAntallDagerResultat.forbrukteDager();
-        var maksAntallDager = FinnForbrukteDager.getMaksAntallDager(harUtvidetKvote);
+        var maksAntallDager = FinnForbrukteDager.getMaksAntallDager(harForlengetPeriode);
         if (forbrukteDager >= maksAntallDager) {
             return søknadFom;
         } else {
@@ -63,7 +63,7 @@ public class FagsakperiodeUtleder {
 
     public static LocalDate finnTomDato(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag) {
         LocalDateTimeline<Boolean> periodeTidslinje = UngdomsprogramPeriodeTjeneste.lagPeriodeTidslinje(Optional.of(ungdomsprogramPeriodeGrunnlag));
-        return finnTomDato(periodeTidslinje.getMinLocalDate(), periodeTidslinje, ungdomsprogramPeriodeGrunnlag.isHarUtvidetKvote());
+        return finnTomDato(periodeTidslinje.getMinLocalDate(), periodeTidslinje, ungdomsprogramPeriodeGrunnlag.harForlengetPeriode());
     }
 
     private static long finnRestDagerÅLeggeTil(LocalDate fraDato, long virkedagerSomLeggesTil) {
