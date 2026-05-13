@@ -46,6 +46,9 @@ public class AktivitetspengerDetaljertResultatForPeriodeUtleder implements Detal
             resultater.add(DetaljertResultatForPeriodeUtleder.nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
 
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+            resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphør av aktivitetspenger"));
+        }
 
         relevanteÅrsaker.stream()
             .filter(ÅRSAK_RESULTAT_INNVILGELSE_MAP::containsKey)
