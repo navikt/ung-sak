@@ -115,7 +115,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
             .distinct()
             .count();
         if (antallDistinkte > 1) {
-            LOG.warn("Fant {} ulike kombinasjoner av avslagsårsak og fritekst for {}, bruker første periode", antallDistinkte, vilkårType);
+            throw new IllegalStateException("Fant "+antallDistinkte+" ulike kombinasjoner av avslagsårsak og fritekst for "+vilkårType);
         }
         return perioder.getFirst().getValue();
     }
