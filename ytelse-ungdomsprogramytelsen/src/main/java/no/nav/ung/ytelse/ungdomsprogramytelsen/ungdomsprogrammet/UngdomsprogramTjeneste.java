@@ -50,18 +50,18 @@ public class UngdomsprogramTjeneste {
             .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         boolean harForlengetPeriode = harForlengetPeriodeFraRegister || harForlengetPeriodeFraBehandlingsårsak;
 
-        // Maks-dato sendes alltid fra registeret når harForlengetPeriode er true.
-        LocalDate forlengetPeriodeMaksDato = registerOpplysninger.opplysninger().stream()
-            .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::forlengetPeriodeMaksDato)
+        // Maks-dato sendes alltid fra registeret (260 virkedager ved normal kvote, 300 ved forlenget periode).
+        LocalDate periodeMaksDato = registerOpplysninger.opplysninger().stream()
+            .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::periodeMaksDato)
             .filter(Objects::nonNull)
             .findFirst()
             .orElse(null);
 
-        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harForlengetPeriodeFraRegister={}, harForlengetPeriodeFraBehandlingsårsak={}, harForlengetPeriode={}, forlengetPeriodeMaksDato={}",
-            behandling.getId(), harForlengetPeriodeFraRegister, harForlengetPeriodeFraBehandlingsårsak, harForlengetPeriode, forlengetPeriodeMaksDato);
+        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harForlengetPeriodeFraRegister={}, harForlengetPeriodeFraBehandlingsårsak={}, harForlengetPeriode={}, periodeMaksDato={}",
+            behandling.getId(), harForlengetPeriodeFraRegister, harForlengetPeriodeFraBehandlingsårsak, harForlengetPeriode, periodeMaksDato);
 
         if (registerOpplysninger.opplysninger().isEmpty()) {
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harForlengetPeriode, forlengetPeriodeMaksDato);
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harForlengetPeriode, periodeMaksDato);
             LOG.info("Fant ingen opplysninger om ungdomsprogrammet for aktør.");
             return;
         }
@@ -73,10 +73,10 @@ public class UngdomsprogramTjeneste {
         // via FagsakperiodeUtleder.finnTomDato.
         // Klippet periode fra register (opphør) beholdes alltid uendret.
         if (harForlengetPeriode && timeline.getMaxLocalDate().equals(TIDENES_ENDE)) {
-            LOG.info("Forlenget periode er aktiv med forlengetPeriodeMaksDato={}. Bevarer åpen programperiode.", forlengetPeriodeMaksDato);
+            LOG.info("Forlenget periode er aktiv med periodeMaksDato={}. Bevarer åpen programperiode.", periodeMaksDato);
         }
 
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harForlengetPeriode, forlengetPeriodeMaksDato);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harForlengetPeriode, periodeMaksDato);
     }
 
     private static LocalDateTimeline<Boolean> lagTimeline(UngdomsprogramRegisterKlient.DeltakerOpplysningerDTO registerOpplysninger) {

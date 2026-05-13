@@ -50,7 +50,7 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
         if (!periodeTidslinje.isEmpty()) {
             var fom = periodeTidslinje.getMinLocalDate();
             var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(behandling.getId());
-            var maksDato = ungdomsprogramPeriodeTjeneste.finnForlengetPeriodeMaksDato(behandling.getId()).orElse(null);
+            var maksDato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
             var tom = FagsakperiodeUtleder.finnTomDato(fom, periodeTidslinje, harForlengetPeriode, maksDato);
             fagsakRepository.utvidPeriode(behandling.getFagsakId(), fom, tom);
         }

@@ -198,7 +198,7 @@ class FagsakperiodeUtlederTest {
     }
 
     @Test
-    void bruker_forlengetPeriodeMaksDato_direkte_når_den_er_satt() {
+    void bruker_periodeMaksDato_direkte_når_den_er_satt() {
         // Maks-dato fra registeret brukes direkte uten virkedagsberegning
         var fom = LocalDate.of(2025, 1, 1);
         var maksDato = LocalDate.of(2026, 2, 27); // fredag
@@ -207,7 +207,7 @@ class FagsakperiodeUtlederTest {
     }
 
     @Test
-    void justerer_forlengetPeriodeMaksDato_til_fredag_hvis_lørdag() {
+    void justerer_periodeMaksDato_til_fredag_hvis_lørdag() {
         var fom = LocalDate.of(2025, 1, 1);
         var maksDatoPåLørdag = LocalDate.of(2026, 2, 28); // lørdag
         var forventetFredag = LocalDate.of(2026, 2, 27);
@@ -216,7 +216,7 @@ class FagsakperiodeUtlederTest {
     }
 
     @Test
-    void justerer_forlengetPeriodeMaksDato_til_fredag_hvis_søndag() {
+    void justerer_periodeMaksDato_til_fredag_hvis_søndag() {
         var fom = LocalDate.of(2025, 1, 1);
         var maksDatoPåSøndag = LocalDate.of(2026, 3, 1); // søndag
         var forventetFredag = LocalDate.of(2026, 2, 27);

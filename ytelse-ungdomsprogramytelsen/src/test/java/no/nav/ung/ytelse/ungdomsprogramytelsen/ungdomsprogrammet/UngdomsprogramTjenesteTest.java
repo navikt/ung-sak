@@ -55,7 +55,7 @@ class UngdomsprogramTjenesteTest {
 
     @Test
     void åpen_periode_med_forlenget_periode_bevares_og_maks_dato_lagres() {
-        // Registeret sender forlengetPeriodeMaksDato – åpen periode skal bevares, ikke klippes
+        // Registeret sender periodeMaksDato – åpen periode skal bevares, ikke klippes
         var maksDato = LocalDate.of(2026, 2, 27); // fredag
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, maksDato));
@@ -160,7 +160,7 @@ class UngdomsprogramTjenesteTest {
 
     private java.util.Optional<LocalDate> hentMaksDato(Behandling behandling) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .flatMap(g -> g.getForlengetPeriodeMaksDato());
+            .flatMap(g -> g.getPeriodeMaksDato());
     }
 
     private Behandling lagBehandling(BehandlingÅrsakType årsak) {        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE, AKTØR);

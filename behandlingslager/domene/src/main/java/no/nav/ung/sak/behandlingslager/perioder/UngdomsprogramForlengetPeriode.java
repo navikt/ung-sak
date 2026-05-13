@@ -23,8 +23,8 @@ public class UngdomsprogramForlengetPeriode {
     @Column(name = "har_forlenget_periode", nullable = false)
     private boolean harForlengetPeriode;
 
-    @Column(name = "forlenget_periode_maks_dato")
-    private LocalDate forlengetPeriodeMaksDato;
+    @Column(name = "periode_maks_dato")
+    private LocalDate periodeMaksDato;
 
     @Convert(converter = HjemmelKodeverdiConverter.class)
     @Column(name = "hjemmel")
@@ -37,14 +37,14 @@ public class UngdomsprogramForlengetPeriode {
         this.harForlengetPeriode = harForlengetPeriode;
     }
 
-    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate forlengetPeriodeMaksDato) {
+    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate periodeMaksDato) {
         this.harForlengetPeriode = harForlengetPeriode;
-        this.forlengetPeriodeMaksDato = forlengetPeriodeMaksDato;
+        this.periodeMaksDato = periodeMaksDato;
     }
 
-    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate forlengetPeriodeMaksDato, Hjemmel hjemmel) {
+    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate periodeMaksDato, Hjemmel hjemmel) {
         this.harForlengetPeriode = harForlengetPeriode;
-        this.forlengetPeriodeMaksDato = forlengetPeriodeMaksDato;
+        this.periodeMaksDato = periodeMaksDato;
         this.hjemmel = hjemmel;
     }
 
@@ -61,8 +61,8 @@ public class UngdomsprogramForlengetPeriode {
         return harForlengetPeriode;
     }
 
-    public Optional<LocalDate> getForlengetPeriodeMaksDato() {
-        return Optional.ofNullable(forlengetPeriodeMaksDato);
+    public Optional<LocalDate> getPeriodeMaksDato() {
+        return Optional.ofNullable(periodeMaksDato);
     }
 
     public Hjemmel getHjemmel() {

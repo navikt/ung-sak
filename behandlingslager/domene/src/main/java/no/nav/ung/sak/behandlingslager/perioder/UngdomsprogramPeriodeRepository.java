@@ -60,11 +60,11 @@ public class UngdomsprogramPeriodeRepository {
     public void lagre(Long behandlingId,
                       Collection<UngdomsprogramPeriode> ungdomsprogramPerioder,
                       boolean harForlengetPeriode,
-                      LocalDate forlengetPeriodeMaksDato) {
+                      LocalDate periodeMaksDato) {
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
 
-        var forlengetPeriode = new UngdomsprogramForlengetPeriode(harForlengetPeriode, forlengetPeriodeMaksDato);
+        var forlengetPeriode = new UngdomsprogramForlengetPeriode(harForlengetPeriode, periodeMaksDato);
         entityManager.persist(forlengetPeriode);
         nyttGrunnlag.setUngdomsprogramForlengetPeriode(forlengetPeriode);
 

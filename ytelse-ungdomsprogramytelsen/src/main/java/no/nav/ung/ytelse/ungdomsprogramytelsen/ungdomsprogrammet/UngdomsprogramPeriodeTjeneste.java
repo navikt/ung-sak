@@ -63,9 +63,9 @@ public class UngdomsprogramPeriodeTjeneste {
             .orElse(false);
     }
 
-    public Optional<LocalDate> finnForlengetPeriodeMaksDato(Long behandlingId) {
+    public Optional<LocalDate> finnPeriodeMaksDato(Long behandlingId) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
-            .flatMap(gr -> gr.getForlengetPeriodeMaksDato());
+            .flatMap(gr -> gr.getPeriodeMaksDato());
     }
 
     /**

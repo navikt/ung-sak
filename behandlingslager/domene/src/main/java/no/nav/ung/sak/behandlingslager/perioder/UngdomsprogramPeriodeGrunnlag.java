@@ -135,9 +135,9 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
         return ungdomsprogramForlengetPeriode != null && ungdomsprogramForlengetPeriode.harForlengetPeriode();
     }
 
-    public Optional<LocalDate> getForlengetPeriodeMaksDato() {
+    public Optional<LocalDate> getPeriodeMaksDato() {
         return Optional.ofNullable(ungdomsprogramForlengetPeriode)
-            .flatMap(UngdomsprogramForlengetPeriode::getForlengetPeriodeMaksDato);
+            .flatMap(UngdomsprogramForlengetPeriode::getPeriodeMaksDato);
     }
 
     @Override

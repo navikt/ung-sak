@@ -37,7 +37,7 @@ public class FagsakperiodeUtleder {
         } else {
             var forrigeBehandlingUngdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(originalBehandlingId.get());
             var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(originalBehandlingId.get());
-            var maksDato = ungdomsprogramPeriodeTjeneste.finnForlengetPeriodeMaksDato(originalBehandlingId.get()).orElse(null);
+            var maksDato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(originalBehandlingId.get()).orElse(null);
             return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje, harForlengetPeriode, maksDato);
         }
     }
@@ -53,19 +53,20 @@ public class FagsakperiodeUtleder {
     /**
      * Beregner siste dato i fagsakperioden.
      *
-     * <p>Hvis {@code harForlengetPeriode} er true og {@code forlengetPeriodeMaksDato} er satt, brukes
-     * maks-datoen fra registeret direkte (justert til siste virkedag). Dette unngår materialisering
-     * av en lukket programperiode.
+     * <p>Hvis {@code periodeMaksDato} er satt, brukes maks-datoen fra registeret direkte
+     * (justert til siste virkedag). Dette unngår materialisering av en lukket programperiode.
+     * Maks-dato sendes alltid fra ung-deltakelse-opplyser: 260 virkedager ved normal kvote,
+     * 300 ved forlenget periode.
      *
      * <p>Ellers beregnes tom-dato fra antall gjenværende virkedager.
      */
     public static LocalDate finnTomDato(LocalDate søknadFom,
                                         LocalDateTimeline<Boolean> ungdomsprogramTidslinje,
                                         boolean harForlengetPeriode,
-                                        LocalDate forlengetPeriodeMaksDato) {
-        if (harForlengetPeriode && forlengetPeriodeMaksDato != null) {
+                                        LocalDate periodeMaksDato) {
+        if (periodeMaksDato != null) {
             // Bruk maks-dato direkte fra registeret, justert til siste virkedag.
-            return justerTilSisteVirkedag(forlengetPeriodeMaksDato);
+            return justerTilSisteVirkedag(periodeMaksDato);
         }
         var tidligerePerioderIProgrammet = ungdomsprogramTidslinje.intersection(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, søknadFom.minusDays(1)));
         var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet, harForlengetPeriode);
@@ -88,7 +89,7 @@ public class FagsakperiodeUtleder {
             periodeTidslinje.getMinLocalDate(),
             periodeTidslinje,
             ungdomsprogramPeriodeGrunnlag.harForlengetPeriode(),
-            ungdomsprogramPeriodeGrunnlag.getForlengetPeriodeMaksDato().orElse(null));
+            ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElse(null));
     }
 
     /**

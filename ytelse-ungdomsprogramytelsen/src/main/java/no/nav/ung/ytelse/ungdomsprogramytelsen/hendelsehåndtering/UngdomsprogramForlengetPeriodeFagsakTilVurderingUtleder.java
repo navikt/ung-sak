@@ -104,7 +104,7 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
         }
         var fom = programTidslinje.getMinLocalDate();
         var tom = programTidslinje.getMaxLocalDate();
-        var maksDato = ungdomsprogramPeriodeTjeneste.finnForlengetPeriodeMaksDato(behandlingId).orElse(null);
+        var maksDato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandlingId).orElse(null);
 
         LocalDate utvidetTom;
         if (tom.equals(TIDENES_ENDE)) {
