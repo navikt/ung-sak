@@ -36,7 +36,7 @@ public class ManuellVurderingBostedsvilkårDto extends BekreftetAksjonspunktDto 
 
     @JsonCreator
     public ManuellVurderingBostedsvilkårDto(@JsonProperty("vurdertePerioder") List<VilkårPeriodeVurderingDto> vurdertePerioder,
-                                             @JsonProperty("begrunnelse") String begrunnelse) {
+                                            @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
         this.vurdertePerioder = vurdertePerioder;
     }
