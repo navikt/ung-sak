@@ -103,6 +103,17 @@ public class FagsakperiodeUtleder {
         };
     }
 
+    /**
+     * Justerer datoen til neste virkedag (mandag) dersom den lander på lørdag eller søndag.
+     */
+    public static LocalDate justerTilNesteVirkedag(LocalDate dato) {
+        return switch (dato.getDayOfWeek()) {
+            case SATURDAY -> dato.plusDays(2);
+            case SUNDAY -> dato.plusDays(1);
+            default -> dato;
+        };
+    }
+
     private static long finnRestDagerÅLeggeTil(LocalDate fraDato, long virkedagerSomLeggesTil) {
         if (virkedagerSomLeggesTil >= VIRKEDAGER_PR_UKE) {
             throw new IllegalArgumentException("Forventet mindre enn en uke i resterende dager");

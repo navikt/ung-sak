@@ -83,12 +83,14 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
     /**
      * Utleder trigger-periode for revurdering ved forlenget periode.
      *
-     * <p>To scenarioer, begge håndteres kant-i-kant:
+     * <p>Trigger-perioden skal kun dekke de nye dagene (typisk 8 uker / 40 virkedager) som
+     * forlengelsen tilfører – ikke hele programperioden fra opprinnelig startdato.
+     *
      * <ul>
-     *   <li>Åpen programperiode (tom=9999-12-31, løpende): trigger-perioden strekker seg til
-     *       300 virkedager fra fom.</li>
-     *   <li>Klippet programperiode (opphør satt, eller 260 virkedager forbrukt): trigger-perioden
-     *       strekkes med resterende virkedager (opp til 300 totalt) kant-i-kant etter eksisterende tom.</li>
+     *   <li>Åpen programperiode (tom=9999-12-31): originalMaksDato beregnes som 260 virkedager fra fom.
+     *       Trigger-periode = [originalMaksDato + 1 (justert til neste virkedag) .. periodeMaksDato].</li>
+     *   <li>Klippet programperiode (tom satt): originalMaksDato = tom.
+     *       Trigger-periode = [tom + 1 (justert til neste virkedag) .. periodeMaksDato].</li>
      * </ul>
      */
     private DatoIntervallEntitet utledForlengetPeriode(Fagsak fagsak) {
@@ -106,18 +108,23 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
         var tom = programTidslinje.getMaxLocalDate();
         var maksDato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandlingId).orElse(null);
 
-        LocalDate utvidetTom;
+        // Beregn opprinnelig maks-dato (260 virkedager fra fom) – før forlengelsen.
+        // For klippet programperiode brukes faktisk tom som opprinnelig maks-dato.
+        LocalDate originalMaksDato;
         if (tom.equals(TIDENES_ENDE)) {
-            utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true, maksDato);
+            originalMaksDato = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), false, null);
         } else {
-            var nyFom = tom.plusDays(1);
-            utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, programTidslinje, true, maksDato);
-            if (!utvidetTom.isAfter(tom)) {
-                // 300 virkedager allerede forbrukt – ingen utvidelse mulig
-                return eksisterendePeriode;
-            }
+            originalMaksDato = tom;
         }
-        return DatoIntervallEntitet.fraOgMedTilOgMed(eksisterendePeriode.getFomDato(), utvidetTom);
+
+        var nyFom = FagsakperiodeUtleder.justerTilNesteVirkedag(originalMaksDato.plusDays(1));
+        var utvidetTom = FagsakperiodeUtleder.finnTomDato(originalMaksDato.plusDays(1), programTidslinje, true, maksDato);
+        if (!utvidetTom.isAfter(originalMaksDato)) {
+            // 300 virkedager allerede forbrukt – ingen utvidelse mulig
+            return eksisterendePeriode;
+        }
+        // Trigger-periode dekker kun de nye dagene fra forlengelsen.
+        return DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, utvidetTom);
     }
 
     /**
