@@ -57,8 +57,8 @@ class UngdomsprogramTjenesteTest {
     void første_gangs_utvidelse_klipper_åpen_periode_til_300_virkedager() {
         // Behandling trigget av forlenget periode-hendelse, ingen tidligere forlengelse lagret
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        // Register sender åpen periode med forlenget periode-flagg
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true));
+        // Register sender åpen periode med forlenget periode-flagg, men uten maks-dato (fallback)
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -85,7 +85,7 @@ class UngdomsprogramTjenesteTest {
 
         // Register sender opphørt periode (klippet tom) med flagg for forlenget periode
         var opphørTom = LocalDate.of(2026, 1, 15);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -101,7 +101,7 @@ class UngdomsprogramTjenesteTest {
     void uten_forlenget_periode_lagrer_registerets_periode_uendret() {
         var behandling = lagBehandling(null);
         var registerTom = LocalDate.of(2025, 11, 30);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, registerTom, false));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, registerTom, false, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -125,15 +125,14 @@ class UngdomsprogramTjenesteTest {
     }
 
     @Test
-    void tilstøtende_register_segmenter_komprimeres_til_én_periode() {
-        // Verifiserer at lagTimeline.compress() faktisk slår sammen kant-i-kant segmenter
+    void tilstøtende_register_segmenter_komprimeres_til_én_periode() {        // Verifiserer at lagTimeline.compress() faktisk slår sammen kant-i-kant segmenter
         var behandling = lagBehandling(null);
         var midt = LocalDate.of(2025, 6, 30);
         var tom = LocalDate.of(2025, 11, 30);
         when(registerKlient.hentForAktørId(anyString()))
             .thenReturn(new DeltakerOpplysningerDTO(List.of(
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, midt, false),
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", midt.plusDays(1), tom, false)
+                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, midt, false, null),
+                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", midt.plusDays(1), tom, false, null)
             )));
 
         tjeneste.innhentOpplysninger(behandling);
@@ -144,8 +143,62 @@ class UngdomsprogramTjenesteTest {
         assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(tom);
     }
 
-    private Behandling lagBehandling(BehandlingÅrsakType årsak) {
-        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE, AKTØR);
+    @Test
+    void åpen_periode_med_forlenget_periode_og_maks_dato_klippes_ikke() {
+        // Registeret sender forlengetPeriodeMaksDato – perioden skal bevares åpen
+        var maksDato = LocalDate.of(2026, 2, 27); // fredag
+        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, maksDato));
+
+        tjeneste.innhentOpplysninger(behandling);
+
+        var perioder = hentLagredePerioder(behandling);
+        assertThat(perioder).hasSize(1);
+        // Åpen periode skal IKKE klippes
+        assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(TIDENES_ENDE);
+        // Maks-dato skal lagres på grunnlaget
+        assertThat(hentMaksDato(behandling)).contains(maksDato);
+        assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
+    }
+
+    @Test
+    void åpen_periode_uten_maks_dato_materialiserer_via_fallback_og_klippes() {
+        // Registeret sender IKKE forlengetPeriodeMaksDato (null) – fallback: materialiser
+        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, null));
+
+        tjeneste.innhentOpplysninger(behandling);
+
+        var perioder = hentLagredePerioder(behandling);
+        assertThat(perioder).hasSize(1);
+        // Skal være klippet (ikke åpen)
+        assertThat(perioder.get(0).getPeriode().getTomDato()).isBefore(TIDENES_ENDE);
+        // Maks-dato er ikke satt
+        assertThat(hentMaksDato(behandling)).isEmpty();
+    }
+
+    @Test
+    void klippet_periode_fra_register_lagres_uendret_selv_med_maks_dato() {
+        // Registeret sender klippet periode (opphør) + maks-dato – klippet periode skal beholdes uendret
+        var maksDato = LocalDate.of(2026, 2, 27);
+        var opphørTom = LocalDate.of(2026, 1, 15);
+        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true, maksDato));
+
+        tjeneste.innhentOpplysninger(behandling);
+
+        var perioder = hentLagredePerioder(behandling);
+        assertThat(perioder).hasSize(1);
+        assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(opphørTom);
+        assertThat(hentMaksDato(behandling)).contains(maksDato);
+    }
+
+    private java.util.Optional<LocalDate> hentMaksDato(Behandling behandling) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .flatMap(g -> g.getForlengetPeriodeMaksDato());
+    }
+
+    private Behandling lagBehandling(BehandlingÅrsakType årsak) {        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE, AKTØR);
         if (årsak != null) {
             scenario.medBehandlingÅrsak(årsak);
         }

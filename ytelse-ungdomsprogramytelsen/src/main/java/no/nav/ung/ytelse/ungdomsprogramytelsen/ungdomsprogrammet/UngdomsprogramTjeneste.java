@@ -8,17 +8,19 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramForlengetPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramForlengetPeriode;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 
@@ -53,6 +55,22 @@ public class UngdomsprogramTjeneste {
             .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         boolean harForlengetPeriode = harForlengetPeriodeFraRegister || harForlengetPeriodeFraBehandlingsårsak;
 
+        // Maks-dato fra registeret (kan være null i overgangsperioden).
+        LocalDate forlengetPeriodeMaksDatoFraRegister = registerOpplysninger.opplysninger().stream()
+            .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::forlengetPeriodeMaksDato)
+            .filter(Objects::nonNull)
+            .findFirst()
+            .orElse(null);
+
+        // Bevar tidligere maks-dato dersom registeret ikke sender den (typisk i overgangsperioden eller
+        // ved hendelses-trigget revurdering der registeret enda ikke har oppdatert opplysningene).
+        LocalDate eksisterendeMaksDato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .flatMap(UngdomsprogramPeriodeGrunnlag::getForlengetPeriodeMaksDato)
+            .orElse(null);
+        LocalDate forlengetPeriodeMaksDato = forlengetPeriodeMaksDatoFraRegister != null
+            ? forlengetPeriodeMaksDatoFraRegister
+            : eksisterendeMaksDato;
+
         // Sjekk om forlenget periode allerede er materialisert (beregnet til konkret tom-dato) i et tidligere
         // grunnlag. Grunnlag kopieres til nye revurderinger via UngdomsprogramPeriodeRepository.kopier(),
         // så det aktive grunnlaget på behandlingen reflekterer forrige tilstand før vi skriver på nytt.
@@ -68,23 +86,35 @@ public class UngdomsprogramTjeneste {
             .map(UngdomsprogramForlengetPeriode::harForlengetPeriode)
             .orElse(false);
 
-        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harForlengetPeriodeFraRegister={}, harForlengetPeriodeFraBehandlingsårsak={}, harForlengetPeriode={}, alleredeForlengetIEttTidligereGrunnlag={}",
-            behandling.getId(), harForlengetPeriodeFraRegister, harForlengetPeriodeFraBehandlingsårsak, harForlengetPeriode, alleredeForlengetIEttTidligereGrunnlag);
+        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harForlengetPeriodeFraRegister={}, harForlengetPeriodeFraBehandlingsårsak={}, harForlengetPeriode={}, alleredeForlengetIEttTidligereGrunnlag={}, forlengetPeriodeMaksDato={}",
+            behandling.getId(), harForlengetPeriodeFraRegister, harForlengetPeriodeFraBehandlingsårsak, harForlengetPeriode, alleredeForlengetIEttTidligereGrunnlag, forlengetPeriodeMaksDato);
 
         if (registerOpplysninger.opplysninger().isEmpty()) {
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harForlengetPeriode);
-            LOG.info("Fant ingen opplysninger om ungdomsprogrammet for aktør. ");
-        } else {
-            var timeline = lagTimeline(registerOpplysninger);
-            LOG.info("Programperiode fra register: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
-            if (harForlengetPeriode && !alleredeForlengetIEttTidligereGrunnlag) {
-                // Materialiser forlengelsen én gang. Etterpå er konkret tom-dato lagret i grunnlaget,
-                // og registerets perioder skal være sannhetskilden ved senere innhentinger.
-                timeline = forlengProgramperiodeTilMaksdato(timeline);
-                LOG.info("Programperiode forlenget til: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
-            }
-            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harForlengetPeriode);
+            ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harForlengetPeriode, forlengetPeriodeMaksDato);
+            LOG.info("Fant ingen opplysninger om ungdomsprogrammet for aktør.");
+            return;
         }
+
+        var timeline = lagTimeline(registerOpplysninger);
+        LOG.info("Programperiode fra register: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
+
+        boolean erÅpenPeriode = timeline.getMaxLocalDate().equals(TIDENES_ENDE);
+
+        if (harForlengetPeriode && erÅpenPeriode) {
+            if (forlengetPeriodeMaksDato != null) {
+                // Maks-dato er kjent fra registeret – bevar åpen periode og bruk maks-dato til beregning downstream.
+                LOG.info("Forlenget periode er aktiv med forlengetPeriodeMaksDato={}. Bevarer åpen programperiode.", forlengetPeriodeMaksDato);
+            } else if (!alleredeForlengetIEttTidligereGrunnlag) {
+                // Overgangsfallback: registeret har ikke sendt maks-dato ennå. Materialiser én gang slik vi
+                // tidligere gjorde, og logg WARN. Skal fjernes når registeret alltid sender feltet.
+                // TODO: Fjern fallback når ung-deltakelse-opplyser alltid sender forlengetPeriodeMaksDato.
+                LOG.warn("Forlenget periode er aktiv for behandling={}, men registeret har ikke sendt forlengetPeriodeMaksDato. Bruker midlertidig materialisering.", behandling.getId());
+                timeline = forlengProgramperiodeTilMaksdato(timeline);
+                LOG.info("Programperiode forlenget (fallback) til: fom={}, tom={}", timeline.getMinLocalDate(), timeline.getMaxLocalDate());
+            }
+        }
+
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), mapPerioder(timeline), harForlengetPeriode, forlengetPeriodeMaksDato);
     }
 
     /**
@@ -110,7 +140,6 @@ public class UngdomsprogramTjeneste {
             return timeline.intersection(new LocalDateInterval(fom, utvidetTom));
         }
         // Beregn eksplisitt gjenstående virkedager for å unngå feil ved grenseverdier.
-        // finnTomDato returnerer nyFom både når det gjenstår 1 virkedag og når maks antall dager er oppbrukt,
         var forbrukteDager = FinnForbrukteDager.finnForbrukteDager(timeline, harForlengetPeriode).forbrukteDager();
         var gjenståendeDager = FinnForbrukteDager.getMaksAntallDager(harForlengetPeriode) - forbrukteDager;
         if (gjenståendeDager <= 0) {

@@ -1,5 +1,6 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.ung.sak.diff.ChangeTracked;
@@ -132,6 +133,11 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
 
     public boolean harForlengetPeriode() {
         return ungdomsprogramForlengetPeriode != null && ungdomsprogramForlengetPeriode.harForlengetPeriode();
+    }
+
+    public Optional<LocalDate> getForlengetPeriodeMaksDato() {
+        return Optional.ofNullable(ungdomsprogramForlengetPeriode)
+            .flatMap(UngdomsprogramForlengetPeriode::getForlengetPeriodeMaksDato);
     }
 
     @Override

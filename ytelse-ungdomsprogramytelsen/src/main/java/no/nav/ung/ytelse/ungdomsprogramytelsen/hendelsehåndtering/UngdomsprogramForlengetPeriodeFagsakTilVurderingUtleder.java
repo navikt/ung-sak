@@ -97,18 +97,21 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
         if (sisteBehandling.isEmpty()) {
             return eksisterendePeriode;
         }
-        var programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(sisteBehandling.get().getId());
+        Long behandlingId = sisteBehandling.get().getId();
+        var programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
         if (programTidslinje.isEmpty()) {
             return eksisterendePeriode;
         }
         var fom = programTidslinje.getMinLocalDate();
         var tom = programTidslinje.getMaxLocalDate();
+        var maksDato = ungdomsprogramPeriodeTjeneste.finnForlengetPeriodeMaksDato(behandlingId).orElse(null);
+
         LocalDate utvidetTom;
         if (tom.equals(TIDENES_ENDE)) {
-            utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true);
+            utvidetTom = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), true, maksDato);
         } else {
             var nyFom = tom.plusDays(1);
-            utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, programTidslinje, true);
+            utvidetTom = FagsakperiodeUtleder.finnTomDato(nyFom, programTidslinje, true, maksDato);
             if (!utvidetTom.isAfter(tom)) {
                 // 300 virkedager allerede forbrukt – ingen utvidelse mulig
                 return eksisterendePeriode;

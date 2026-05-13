@@ -5,6 +5,9 @@ import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
 import org.hibernate.annotations.Immutable;
 
+import java.time.LocalDate;
+import java.util.Optional;
+
 /**
  * Angir om bruker har forlenget periode i ungdomsprogrammet (300 virkedager i stedet for 260).
  */
@@ -20,6 +23,9 @@ public class UngdomsprogramForlengetPeriode {
     @Column(name = "har_forlenget_periode", nullable = false)
     private boolean harForlengetPeriode;
 
+    @Column(name = "forlenget_periode_maks_dato")
+    private LocalDate forlengetPeriodeMaksDato;
+
     @Convert(converter = HjemmelKodeverdiConverter.class)
     @Column(name = "hjemmel")
     private Hjemmel hjemmel = Hjemmel.UNG_FORSKRIFT_PARAGRAF_6;
@@ -29,6 +35,17 @@ public class UngdomsprogramForlengetPeriode {
 
     public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode) {
         this.harForlengetPeriode = harForlengetPeriode;
+    }
+
+    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate forlengetPeriodeMaksDato) {
+        this.harForlengetPeriode = harForlengetPeriode;
+        this.forlengetPeriodeMaksDato = forlengetPeriodeMaksDato;
+    }
+
+    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate forlengetPeriodeMaksDato, Hjemmel hjemmel) {
+        this.harForlengetPeriode = harForlengetPeriode;
+        this.forlengetPeriodeMaksDato = forlengetPeriodeMaksDato;
+        this.hjemmel = hjemmel;
     }
 
     public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, Hjemmel hjemmel) {
@@ -42,6 +59,10 @@ public class UngdomsprogramForlengetPeriode {
 
     public boolean harForlengetPeriode() {
         return harForlengetPeriode;
+    }
+
+    public Optional<LocalDate> getForlengetPeriodeMaksDato() {
+        return Optional.ofNullable(forlengetPeriodeMaksDato);
     }
 
     public Hjemmel getHjemmel() {

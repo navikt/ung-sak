@@ -54,7 +54,10 @@ public class UngdomsprogramRegisterKlient {
         String deltakerIdent,
         LocalDate fraOgMed,
         LocalDate tilOgMed,
-        boolean harForlengetPeriode
+        boolean harForlengetPeriode,
+        // TODO: Fjern fallback i UngdomsprogramTjeneste når ung-deltakelse-opplyser alltid sender forlengetPeriodeMaksDato.
+        // Nullable for bakoverkompatibel utrulling.
+        LocalDate forlengetPeriodeMaksDato
     ) {
     }
 }

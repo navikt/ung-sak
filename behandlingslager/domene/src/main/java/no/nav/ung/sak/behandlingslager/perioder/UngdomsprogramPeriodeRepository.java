@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.diff.DiffResult;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Dependent
@@ -53,10 +54,17 @@ public class UngdomsprogramPeriodeRepository {
     }
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder, boolean harForlengetPeriode) {
+        lagre(behandlingId, ungdomsprogramPerioder, harForlengetPeriode, null);
+    }
+
+    public void lagre(Long behandlingId,
+                      Collection<UngdomsprogramPeriode> ungdomsprogramPerioder,
+                      boolean harForlengetPeriode,
+                      LocalDate forlengetPeriodeMaksDato) {
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
 
-        var forlengetPeriode = new UngdomsprogramForlengetPeriode(harForlengetPeriode);
+        var forlengetPeriode = new UngdomsprogramForlengetPeriode(harForlengetPeriode, forlengetPeriodeMaksDato);
         entityManager.persist(forlengetPeriode);
         nyttGrunnlag.setUngdomsprogramForlengetPeriode(forlengetPeriode);
 

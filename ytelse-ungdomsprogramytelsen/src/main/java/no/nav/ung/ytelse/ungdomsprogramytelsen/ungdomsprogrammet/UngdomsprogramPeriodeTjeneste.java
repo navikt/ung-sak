@@ -63,6 +63,11 @@ public class UngdomsprogramPeriodeTjeneste {
             .orElse(false);
     }
 
+    public Optional<LocalDate> finnForlengetPeriodeMaksDato(Long behandlingId) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .flatMap(gr -> gr.getForlengetPeriodeMaksDato());
+    }
+
     /**
      * Utleder tidslinje for endringer i perioder fra grunnlaget i forrige behandling og det aktive. I førstegangsbehandlinger vil alle perioder returnerers som endring.
      *

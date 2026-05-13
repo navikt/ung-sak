@@ -197,5 +197,42 @@ class FagsakperiodeUtlederTest {
         assertThat(periode.getTomDato()).isEqualTo(nySøknadFom.plusWeeks(51).plusDays(3));
     }
 
+    @Test
+    void bruker_forlengetPeriodeMaksDato_direkte_når_den_er_satt() {
+        // Maks-dato fra registeret brukes direkte uten virkedagsberegning
+        var fom = LocalDate.of(2025, 1, 1);
+        var maksDato = LocalDate.of(2026, 2, 27); // fredag
+        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDato);
+        assertThat(tom).isEqualTo(maksDato);
+    }
+
+    @Test
+    void justerer_forlengetPeriodeMaksDato_til_fredag_hvis_lørdag() {
+        var fom = LocalDate.of(2025, 1, 1);
+        var maksDatoPåLørdag = LocalDate.of(2026, 2, 28); // lørdag
+        var forventetFredag = LocalDate.of(2026, 2, 27);
+        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDatoPåLørdag);
+        assertThat(tom).isEqualTo(forventetFredag);
+    }
+
+    @Test
+    void justerer_forlengetPeriodeMaksDato_til_fredag_hvis_søndag() {
+        var fom = LocalDate.of(2025, 1, 1);
+        var maksDatoPåSøndag = LocalDate.of(2026, 3, 1); // søndag
+        var forventetFredag = LocalDate.of(2026, 2, 27);
+        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDatoPåSøndag);
+        assertThat(tom).isEqualTo(forventetFredag);
+    }
+
+    @Test
+    void uten_maks_dato_beregnes_tom_fra_virkedager() {
+        // Uten maksDato skal vanlig virkedagsberegning brukes
+        var fom = LocalDate.of(2025, 1, 1); // onsdag
+        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, null);
+        // 300 virkedager fra 01.01.2025 (onsdag) uten tidligere perioder
+        assertThat(tom).isAfter(fom.plusWeeks(52));
+        assertThat(tom.getDayOfWeek()).isNotEqualTo(java.time.DayOfWeek.SATURDAY);
+        assertThat(tom.getDayOfWeek()).isNotEqualTo(java.time.DayOfWeek.SUNDAY);
+    }
 
 }

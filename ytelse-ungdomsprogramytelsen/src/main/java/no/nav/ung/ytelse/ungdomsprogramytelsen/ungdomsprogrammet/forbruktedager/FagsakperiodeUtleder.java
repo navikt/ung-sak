@@ -27,25 +27,46 @@ public class FagsakperiodeUtleder {
 
     public DatoIntervallEntitet utledNyPeriodeForFagsak(Behandling behandling, LocalDate startdato) {
         var originalBehandlingId = behandling.getOriginalBehandlingId();
-        var utledetTom = finnTomDato(startdato, originalBehandlingId, startdato);
+        var utledetTom = finnTomDatoInstans(startdato, originalBehandlingId, startdato);
         return DatoIntervallEntitet.fraOgMedTilOgMed(startdato, utledetTom);
     }
 
-    private LocalDate finnTomDato(LocalDate søknadFom, Optional<Long> originalBehandlingId, LocalDate fomDato) {
+    private LocalDate finnTomDatoInstans(LocalDate søknadFom, Optional<Long> originalBehandlingId, LocalDate fomDato) {
         if (originalBehandlingId.isEmpty()) {
             return fomDato.plusWeeks(52).minusDays(1);
         } else {
             var forrigeBehandlingUngdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(originalBehandlingId.get());
             var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(originalBehandlingId.get());
-            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje, harForlengetPeriode);
+            var maksDato = ungdomsprogramPeriodeTjeneste.finnForlengetPeriodeMaksDato(originalBehandlingId.get()).orElse(null);
+            return finnTomDato(søknadFom, forrigeBehandlingUngdomsprogramTidslinje, harForlengetPeriode, maksDato);
         }
     }
 
     public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje) {
-        return finnTomDato(søknadFom, ungdomsprogramTidslinje, false);
+        return finnTomDato(søknadFom, ungdomsprogramTidslinje, false, null);
     }
 
     public static LocalDate finnTomDato(LocalDate søknadFom, LocalDateTimeline<Boolean> ungdomsprogramTidslinje, boolean harForlengetPeriode) {
+        return finnTomDato(søknadFom, ungdomsprogramTidslinje, harForlengetPeriode, null);
+    }
+
+    /**
+     * Beregner siste dato i fagsakperioden.
+     *
+     * <p>Hvis {@code harForlengetPeriode} er true og {@code forlengetPeriodeMaksDato} er satt, brukes
+     * maks-datoen fra registeret direkte (justert til siste virkedag). Dette unngår materialisering
+     * av en lukket programperiode.
+     *
+     * <p>Ellers beregnes tom-dato fra antall gjenværende virkedager.
+     */
+    public static LocalDate finnTomDato(LocalDate søknadFom,
+                                        LocalDateTimeline<Boolean> ungdomsprogramTidslinje,
+                                        boolean harForlengetPeriode,
+                                        LocalDate forlengetPeriodeMaksDato) {
+        if (harForlengetPeriode && forlengetPeriodeMaksDato != null) {
+            // Bruk maks-dato direkte fra registeret, justert til siste virkedag.
+            return justerTilSisteVirkedag(forlengetPeriodeMaksDato);
+        }
         var tidligerePerioderIProgrammet = ungdomsprogramTidslinje.intersection(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, søknadFom.minusDays(1)));
         var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet, harForlengetPeriode);
         var forbrukteDager = vurderAntallDagerResultat.forbrukteDager();
@@ -63,7 +84,22 @@ public class FagsakperiodeUtleder {
 
     public static LocalDate finnTomDato(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag) {
         LocalDateTimeline<Boolean> periodeTidslinje = UngdomsprogramPeriodeTjeneste.lagPeriodeTidslinje(Optional.of(ungdomsprogramPeriodeGrunnlag));
-        return finnTomDato(periodeTidslinje.getMinLocalDate(), periodeTidslinje, ungdomsprogramPeriodeGrunnlag.harForlengetPeriode());
+        return finnTomDato(
+            periodeTidslinje.getMinLocalDate(),
+            periodeTidslinje,
+            ungdomsprogramPeriodeGrunnlag.harForlengetPeriode(),
+            ungdomsprogramPeriodeGrunnlag.getForlengetPeriodeMaksDato().orElse(null));
+    }
+
+    /**
+     * Justerer datoen til siste virkedag (fredag) dersom den lander på lørdag eller søndag.
+     */
+    public static LocalDate justerTilSisteVirkedag(LocalDate dato) {
+        return switch (dato.getDayOfWeek()) {
+            case SATURDAY -> dato.minusDays(1);
+            case SUNDAY -> dato.minusDays(2);
+            default -> dato;
+        };
     }
 
     private static long finnRestDagerÅLeggeTil(LocalDate fraDato, long virkedagerSomLeggesTil) {
