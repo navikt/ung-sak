@@ -6,7 +6,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramUtvidetKvote;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -38,8 +37,8 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
 
     @Test
     void ingen_endringer_gir_udefinert() {
-        var eldste = grunnlagMedKvote(false);
-        var nyeste = grunnlagMedKvote(false);
+        var eldste = grunnlagMedForlengetPeriode(false);
+        var nyeste = grunnlagMedForlengetPeriode(false);
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -49,9 +48,9 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
     }
 
     @Test
-    void utvidet_kvote_innvilget_første_gang_gir_init_perioder() {
-        var eldste = grunnlagMedKvote(false);
-        var nyeste = grunnlagMedKvote(true);
+    void forlenget_periode_innvilget_første_gang_gir_init_perioder() {
+        var eldste = grunnlagMedForlengetPeriode(false);
+        var nyeste = grunnlagMedForlengetPeriode(true);
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -61,9 +60,9 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
     }
 
     @Test
-    void utvidet_kvote_allerede_innvilget_ingen_endring_gir_udefinert() {
-        var eldste = grunnlagMedKvote(true);
-        var nyeste = grunnlagMedKvote(true);
+    void forlenget_periode_allerede_innvilget_ingen_endring_gir_udefinert() {
+        var eldste = grunnlagMedForlengetPeriode(true);
+        var nyeste = grunnlagMedForlengetPeriode(true);
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -73,11 +72,11 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
     }
 
     @Test
-    void utvidet_kvote_tilbaketrukket_ignoreres_og_gir_udefinert() {
-        // Forretningsregel: utvidet kvote kan ikke fjernes etter innvilgelse.
+    void forlenget_periode_tilbaketrukket_ignoreres_og_gir_udefinert() {
+        // Forretningsregel: forlenget periode kan ikke fjernes etter innvilgelse.
         // Startpunktet skal ikke trigges selv om verdien mot formodning endres fra true til false.
-        var eldste = grunnlagMedKvote(true);
-        var nyeste = grunnlagMedKvote(false);
+        var eldste = grunnlagMedForlengetPeriode(true);
+        var nyeste = grunnlagMedForlengetPeriode(false);
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -87,9 +86,9 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
     }
 
     @Test
-    void endrede_perioder_uten_kvoteendring_gir_init_perioder() {
-        var eldste = grunnlagMedKvoteOgPeriode(false, FOM, TOM);
-        var nyeste = grunnlagMedKvoteOgPeriode(false, FOM, TOM.plusDays(30));
+    void endrede_perioder_uten_forlenget_periode_gir_init_perioder() {
+        var eldste = grunnlagMedForlengetPeriodeOgPeriode(false, FOM, TOM);
+        var nyeste = grunnlagMedForlengetPeriodeOgPeriode(false, FOM, TOM.plusDays(30));
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -98,13 +97,13 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
         assertThat(resultat).isEqualTo(StartpunktType.INIT_PERIODER);
     }
 
-    private UngdomsprogramPeriodeGrunnlag grunnlagMedKvote(boolean harUtvidetKvote) {
-        return grunnlagMedKvoteOgPeriode(harUtvidetKvote, FOM, TOM);
+    private UngdomsprogramPeriodeGrunnlag grunnlagMedForlengetPeriode(boolean harForlengetPeriode) {
+        return grunnlagMedForlengetPeriodeOgPeriode(harForlengetPeriode, FOM, TOM);
     }
 
-    private UngdomsprogramPeriodeGrunnlag grunnlagMedKvoteOgPeriode(boolean harUtvidetKvote, LocalDate fom, LocalDate tom) {
+    private UngdomsprogramPeriodeGrunnlag grunnlagMedForlengetPeriodeOgPeriode(boolean harForlengetPeriode, LocalDate fom, LocalDate tom) {
         var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag.isHarUtvidetKvote()).thenReturn(harUtvidetKvote);
+        when(grunnlag.harForlengetPeriode()).thenReturn(harForlengetPeriode);
         var periode = mock(UngdomsprogramPeriode.class);
         when(periode.getPeriode()).thenReturn(no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         var perioder = mock(UngdomsprogramPerioder.class);

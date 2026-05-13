@@ -1269,9 +1269,9 @@
         "x-enum-varnames" : [ "FØRSTEGANGSSØKNAD", "REVURDERING", "KLAGE", "ANKE", "TILBAKEKREVING", "REVURDERING_TILBAKEKREVING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.BehandlingÅrsakType" : {
-        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-HENDELSE-UTVIDET-KVOTE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "ENDRET-BOSTED", "UTTALELSE-FRA-BRUKER", "-" ],
+        "enum" : [ "RE-END-FRA-BRUKER", "RE-ANNET", "RE-SATS-REGULERING", "RE-SATS-ENDRING", "RE-DØD", "ETTER_KLAGE", "RE-HENDELSE-FØDSEL", "RE-HENDELSE-DØD-F", "RE-HENDELSE-DØD-B", "RE-HENDELSE-OPPHØR-UNG", "RE-HENDELSE-ENDRET-STARTDATO-UNG", "RE-HENDELSE-FJERN-PERIODE-UNG", "RE-HENDELSE-FORLENGET-PERIODE-UNG", "RE-REGISTEROPPL", "RE-INNTEKTOPPL", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE-RAPPORTERING-INNTEKT", "RE-KONTROLL-REGISTER-INNTEKT", "ENDRET-BOSTED", "UTTALELSE-FRA-BRUKER", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "NY_SØKT_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM", "RE_HENDELSE_UTVIDET_KVOTE_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "ENDRET_BOSTED", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
+        "x-enum-varnames" : [ "NY_SØKT_PERIODE", "RE_ANNET", "RE_SATS_REGULERING", "RE_SATS_ENDRING", "RE_OPPLYSNINGER_OM_DØD", "ETTER_KLAGE", "RE_HENDELSE_FØDSEL", "RE_HENDELSE_DØD_FORELDER", "RE_HENDELSE_DØD_BARN", "RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM", "RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM", "RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM", "RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM", "RE_REGISTEROPPLYSNING", "RE_INNTEKTSOPPLYSNING", "RE_TRIGGER_BEREGNING_HØY_SATS", "RE_RAPPORTERING_INNTEKT", "RE_KONTROLL_REGISTER_INNTEKT", "ENDRET_BOSTED", "UTTALELSE_FRA_BRUKER", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.FagsakStatus" : {
         "enum" : [ "OPPR", "UBEH", "LOP", "AVSLU" ],
@@ -1329,9 +1329,9 @@
         "x-enum-varnames" : [ "SØKNAD", "SAKSBEHANDLER" ]
       },
       "ung.kodeverk.dokument.DokumentMalType" : {
-        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_INNTEKT_UTEN_REDUKSJON", "ENDRING_HØY_SATS", "ENDRING_UTVIDET_KVOTE", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV", "KLAGAV", "KLAGOV", "VEDMED" ],
+        "enum" : [ "HENLEG", "INNVILGELSE", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_INNTEKT_UTEN_REDUKSJON", "ENDRING_HØY_SATS", "FORLENGET_PERIODE", "OPPHOR", "AVSLAG", "MANUELL", "GENERELT_FRITEKSTBREV", "KLAGAV", "KLAGOV", "VEDMED" ],
         "type" : "string",
-        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_INNTEKT_UTEN_REDUKSJON", "ENDRING_HØY_SATS", "ENDRING_UTVIDET_KVOTE", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV", "KLAGE_AVVIST_DOK", "KLAGE_OVERSENDT_KLAGEINSTANS", "KLAGE_VEDTAK_MEDHOLD" ]
+        "x-enum-varnames" : [ "HENLEGG_BEHANDLING_DOK", "INNVILGELSE_DOK", "ENDRING_BARNETILLEGG", "ENDRING_PROGRAMPERIODE", "ENDRING_INNTEKT", "ENDRING_INNTEKT_UTEN_REDUKSJON", "ENDRING_HØY_SATS", "FORLENGET_PERIODE", "OPPHØR_DOK", "AVSLAG__DOK", "MANUELT_VEDTAK_DOK", "GENERELT_FRITEKSTBREV", "KLAGE_AVVIST_DOK", "KLAGE_OVERSENDT_KLAGEINSTANS", "KLAGE_VEDTAK_MEDHOLD" ]
       },
       "ung.kodeverk.dokument.Kommunikasjonsretning" : {
         "enum" : [ "I", "U", "N" ],
@@ -3567,6 +3567,7 @@
             "FOEDSEL_V1" : "#/components/schemas/ung.sak.kontrakt.hendelser.FødselHendelse",
             "UNGDOMSPROGRAM_ENDRET_STARTDATO" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramEndretStartdatoHendelse",
             "UNGDOMSPROGRAM_FJERN_PERIODE" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramFjernDeltakelseHendelse",
+            "UNGDOMSPROGRAM_FORLENGET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramForlengetPeriodeHendelse",
             "UNGDOMSPROGRAM_OPPHOER" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse",
             "UNGDOMSPROGRAM_UTVIDET_KVOTE" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramUtvidetKvoteHendelse"
           },
@@ -3580,6 +3581,8 @@
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramEndretStartdatoHendelse"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramFjernDeltakelseHendelse"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramForlengetPeriodeHendelse"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse"
         }, {
@@ -3657,6 +3660,18 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.hendelser.UngdomsprogramFjernDeltakelseHendelse" : {
+        "properties" : {
+          "hendelseInfo" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.HendelseInfo"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          }
+        },
+        "required" : [ "hendelseInfo", "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.hendelser.UngdomsprogramForlengetPeriodeHendelse" : {
         "properties" : {
           "hendelseInfo" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.HendelseInfo"
@@ -4280,9 +4295,9 @@
         "type" : "object"
       },
       "ung.sak.kontrakt.krav.ÅrsakTilVurdering" : {
-        "enum" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UTVIDET_KVOTE_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
+        "enum" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "FORLENGET_PERIODE_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ],
         "type" : "string",
-        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "UTVIDET_KVOTE_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ]
+        "x-enum-varnames" : [ "HENDELSE_DØD_BRUKER", "HENDELSE_DØD_BARN", "HENDELSE_FØDSEL_BARN", "OPPHØR_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "FORLENGET_PERIODE_UNGDOMSPROGRAM", "KONTROLL_AV_INNTEKT", "OVERGANG_HØY_SATS", "G_REGULERING", "FØRSTEGANGSVURDERING" ]
       },
       "ung.sak.kontrakt.mottak.FinnSak" : {
         "properties" : {
@@ -6481,6 +6496,35 @@
       "get" : {
         "description" : "Hent bostedsgrunnlag (avklaringer per periode)",
         "operationId" : "hentBostedGrunnlag",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "aktivitetspenger" ]
+      }
+    },
+    "/api/behandling/bosatt-fakta" : {
+      "get" : {
+        "description" : "Hent bostedsgrunnlag (avklaringer per periode)",
+        "operationId" : "hentBosattFakta",
         "parameters" : [ {
           "description" : "behandlingUUID",
           "in" : "query",

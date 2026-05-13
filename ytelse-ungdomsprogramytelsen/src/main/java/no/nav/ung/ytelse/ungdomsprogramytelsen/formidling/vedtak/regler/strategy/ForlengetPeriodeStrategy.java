@@ -12,29 +12,29 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.UtvidetKvoteInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.ForlengetPeriodeInnholdBygger;
 
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public final class UtvidetKvoteStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final UtvidetKvoteInnholdBygger utvidetKvoteInnholdBygger;
+    private final ForlengetPeriodeInnholdBygger forlengetPeriodeInnholdBygger;
 
     @Inject
-    public UtvidetKvoteStrategy(UtvidetKvoteInnholdBygger utvidetKvoteInnholdBygger) {
-        this.utvidetKvoteInnholdBygger = utvidetKvoteInnholdBygger;
+    public ForlengetPeriodeStrategy(ForlengetPeriodeInnholdBygger forlengetPeriodeInnholdBygger) {
+        this.forlengetPeriodeInnholdBygger = forlengetPeriodeInnholdBygger;
     }
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_UTVIDET_KVOTE, utvidetKvoteInnholdBygger, "Automatisk brev ved utvidet kvote");
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger, "Automatisk brev ved forlenget periode");
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.ENDRING_UTVIDET_KVOTE);
+        return resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE);
     }
 
 }
