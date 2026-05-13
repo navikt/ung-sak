@@ -54,21 +54,20 @@ class UngdomsprogramTjenesteTest {
     }
 
     @Test
-    void første_gangs_utvidelse_klipper_åpen_periode_til_300_virkedager() {
-        // Behandling trigget av forlenget periode-hendelse, ingen tidligere forlengelse lagret
+    void åpen_periode_med_forlenget_periode_bevares_og_maks_dato_lagres() {
+        // Registeret sender forlengetPeriodeMaksDato – åpen periode skal bevares, ikke klippes
+        var maksDato = LocalDate.of(2026, 2, 27); // fredag
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        // Register sender åpen periode med forlenget periode-flagg, men uten maks-dato (fallback)
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, null));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, maksDato));
 
         tjeneste.innhentOpplysninger(behandling);
 
         var perioder = hentLagredePerioder(behandling);
         assertThat(perioder).hasSize(1);
-        var periode = perioder.get(0);
-        assertThat(periode.getPeriode().getFomDato()).isEqualTo(FOM);
-        // Skal være klippet til en konkret dato før TIDENES_ENDE
-        assertThat(periode.getPeriode().getTomDato()).isBefore(TIDENES_ENDE);
-        assertThat(periode.getPeriode().getTomDato()).isAfter(FOM.plusWeeks(52));
+        assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
+        // Åpen periode skal IKKE klippes
+        assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(TIDENES_ENDE);
+        assertThat(hentMaksDato(behandling)).contains(maksDato);
         assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
     }
 
@@ -141,40 +140,6 @@ class UngdomsprogramTjenesteTest {
         assertThat(perioder).hasSize(1);
         assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(tom);
-    }
-
-    @Test
-    void åpen_periode_med_forlenget_periode_og_maks_dato_klippes_ikke() {
-        // Registeret sender forlengetPeriodeMaksDato – perioden skal bevares åpen
-        var maksDato = LocalDate.of(2026, 2, 27); // fredag
-        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, maksDato));
-
-        tjeneste.innhentOpplysninger(behandling);
-
-        var perioder = hentLagredePerioder(behandling);
-        assertThat(perioder).hasSize(1);
-        // Åpen periode skal IKKE klippes
-        assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(TIDENES_ENDE);
-        // Maks-dato skal lagres på grunnlaget
-        assertThat(hentMaksDato(behandling)).contains(maksDato);
-        assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
-    }
-
-    @Test
-    void åpen_periode_uten_maks_dato_materialiserer_via_fallback_og_klippes() {
-        // Registeret sender IKKE forlengetPeriodeMaksDato (null) – fallback: materialiser
-        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, null));
-
-        tjeneste.innhentOpplysninger(behandling);
-
-        var perioder = hentLagredePerioder(behandling);
-        assertThat(perioder).hasSize(1);
-        // Skal være klippet (ikke åpen)
-        assertThat(perioder.get(0).getPeriode().getTomDato()).isBefore(TIDENES_ENDE);
-        // Maks-dato er ikke satt
-        assertThat(hentMaksDato(behandling)).isEmpty();
     }
 
     @Test
