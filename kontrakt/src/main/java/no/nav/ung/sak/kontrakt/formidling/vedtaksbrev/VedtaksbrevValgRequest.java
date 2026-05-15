@@ -25,7 +25,7 @@ public record VedtaksbrevValgRequest(
     Boolean hindret,
     Boolean redigert,
 
-    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String redigertHtml,
 
     @NotNull
