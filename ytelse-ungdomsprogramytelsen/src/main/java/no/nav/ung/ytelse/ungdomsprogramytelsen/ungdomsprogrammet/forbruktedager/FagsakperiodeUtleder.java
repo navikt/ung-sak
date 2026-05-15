@@ -55,7 +55,7 @@ public class FagsakperiodeUtleder {
      *
      * <p>Hvis {@code periodeMaksDato} er satt, brukes maks-datoen fra registeret direkte
      * (justert til siste virkedag). Dette unngår materialisering av en lukket programperiode.
-     * Maks-dato sendes alltid fra ung-deltakelse-opplyser: 260 virkedager ved normal kvote,
+     * Maks-dato sendes alltid fra ung-deltakelse-opplyser: 260 virkedager ved normal periode,
      * 300 ved forlenget periode.
      *
      * <p>Ellers beregnes tom-dato fra antall gjenværende virkedager.

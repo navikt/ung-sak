@@ -50,7 +50,7 @@ public class UngdomsprogramTjeneste {
             .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         boolean harForlengetPeriode = harForlengetPeriodeFraRegister || harForlengetPeriodeFraBehandlingsårsak;
 
-        // Maks-dato sendes alltid fra registeret (260 virkedager ved normal kvote, 300 ved forlenget periode).
+        // Maks-dato sendes alltid fra registeret (260 virkedager ved normal periode, 300 ved forlenget periode).
         LocalDate periodeMaksDato = registerOpplysninger.opplysninger().stream()
             .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::periodeMaksDato)
             .filter(Objects::nonNull)
