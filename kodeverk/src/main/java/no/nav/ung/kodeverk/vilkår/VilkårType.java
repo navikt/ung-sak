@@ -36,7 +36,9 @@ public enum VilkårType implements Kodeverdi {
         "AKT_VK_1",
         "Bostedsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
-        Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED
+        Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
+        Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE,
+        Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED
     ),
     ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR(
         "AKT_VK_4",

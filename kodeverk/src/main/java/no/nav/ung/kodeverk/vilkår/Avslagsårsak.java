@@ -33,6 +33,12 @@ public enum Avslagsårsak implements Kodeverdi {
     SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE("3003", "Søker har livsoppholdsytelse som ikke er forenelig med ytelsen.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
+    YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE("3004", "Søker har verken bosted eller folkeregistrert adresse som er forenlig med ytelsen.",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
+    YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED("3005", "Søker har arbeidssted eller studiested som ikke er forenlig med ytelsen.",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
     IKKE_14A_VEDTAK("3002", "Søker har ikke oppfølgingsvedtak etter Navloven §14a.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 

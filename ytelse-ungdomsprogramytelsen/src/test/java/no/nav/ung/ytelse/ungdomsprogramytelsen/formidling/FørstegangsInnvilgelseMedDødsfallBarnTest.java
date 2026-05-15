@@ -81,7 +81,7 @@ public class FørstegangsInnvilgelseMedDødsfallBarnTest {
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 """ + FørstegangsInnvilgelseTest.meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
