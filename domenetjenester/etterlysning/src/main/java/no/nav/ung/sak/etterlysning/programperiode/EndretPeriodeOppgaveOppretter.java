@@ -93,7 +93,7 @@ public class EndretPeriodeOppgaveOppretter {
             Optional<SisteEndringsdatoUtleder.EndretDato> endretSluttDato = SisteEndringsdatoUtleder.finnSistEndretDato(
                 gjeldendeSnapshot,
                 snapshotsForSammenligning,
-                PeriodeSnapshot::fomDato);
+                PeriodeSnapshot::tomDato);
 
             if (endretStartDato.isPresent() && endretSluttDato.isEmpty()) {
                 // ENDRING AV STARTDATO

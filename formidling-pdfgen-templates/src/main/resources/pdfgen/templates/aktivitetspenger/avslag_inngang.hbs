@@ -3,9 +3,47 @@
     {{#> felles/seksjon/hoved }}
         <h1>Vi har avslått din søknad om aktivitetspenger</h1>
 
-        <p>
-            Du søkte om aktivitetspenger fra {{fom}}. Du har ikke bodd i et EØS-land eller et land Norge har trygdeavtale med de siste fem årene. Derfor avslås søknaden din.
-        </p>
+        <p>Du har ikke rett på aktivitetspenger.</p>
+
+        <h2>Hvorfor får du ikke aktivitetspenger?</h2>
+        {{#with avslåttBosted}}
+            {{#if ytelseIkkeTilgjengeligPåBosted}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i Trondheim.
+                    Fordi du ikke har bostedsadresse i Trondheim, har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#if ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo eller være folkeregistrert i Trondheim.
+                    Fordi du ikke har bostedsadresse eller er folkeregistrert i Trondheim, har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#if ytelseIkkePåArbeidsstedStudiested}}
+                <p>
+                    For å ha rett til aktivitetspenger må du studere eller jobbe i Trondheim.
+                    Fordi studie- eller arbeidsstedet ditt er utenfor Trondheim, har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+        {{/with}}
+
+        {{#with avslåttBistand}}
+            {{#if harIkke14aVedtak}}
+                <p>
+                    For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. Fordi du ikke har et slikt vedtak, har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+        {{/with}}
 
     {{/felles/seksjon/hoved}}
 
