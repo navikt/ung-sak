@@ -124,7 +124,8 @@ class UngdomsprogramTjenesteTest {
     }
 
     @Test
-    void tilstøtende_register_segmenter_komprimeres_til_én_periode() {        // Verifiserer at lagTimeline.compress() faktisk slår sammen kant-i-kant segmenter
+    // Verifiserer at lagTimeline.compress() faktisk slår sammen kant-i-kant segmenter
+    void tilstøtende_register_segmenter_komprimeres_til_én_periode() {
         var behandling = lagBehandling(null);
         var midt = LocalDate.of(2025, 6, 30);
         var tom = LocalDate.of(2025, 11, 30);
