@@ -39,7 +39,7 @@ public class AksjonspunktGodkjenningDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String begrunnelse;
 
     @JsonProperty(value = "godkjent", required = true)

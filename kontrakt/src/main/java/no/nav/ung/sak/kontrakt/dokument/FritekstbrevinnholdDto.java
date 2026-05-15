@@ -20,8 +20,8 @@ import no.nav.ung.sak.kontrakt.Patterns;
 )
 @Deprecated
 public record FritekstbrevinnholdDto(
-    @Valid @NotNull @Size(max = 200) @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String overskrift,
-    @Valid @NotNull @Size(max = 100000) @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String brødtekst) {
+    @Valid @NotNull @Size(max = 200) @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING) String overskrift,
+    @Valid @NotNull @Size(max = 100000) @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING) String brødtekst) {
 
     @JsonCreator
     public FritekstbrevinnholdDto(@JsonProperty("overskrift") String overskrift, @JsonProperty("brødtekst") String brødtekst) {
