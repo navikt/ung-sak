@@ -23,13 +23,11 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartda
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.KravDokumentType;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
 import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 
 @ApplicationScoped
@@ -40,17 +38,19 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
 
     private MottatteDokumentRepository mottatteDokumentRepository;
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     UngdomsytelseVurdererSøknadsfristTjeneste() {
         // CDI
     }
 
     @Inject
-    public UngdomsytelseVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public UngdomsytelseVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
+                                                     UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
+                                                     UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
     }
 
 
@@ -74,20 +74,24 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
             return result;
         }
 
-        var ungdomsprogramperioder = ungdomsprogramPeriodeRepository.hentGrunnlag(referanse.getBehandlingId())
-            .stream()
-            .map(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramPerioder)
-            .map(UngdomsprogramPerioder::getPerioder)
-            .flatMap(Collection::stream)
-            .collect(Collectors.toSet());
+        var ungdomsprogramperioder = ungdomsprogramPeriodeTjeneste.finnPerioderKappetMotMaksdato(referanse.getBehandlingId());
 
-        ungdomsytelseStartdatoRepository.hentGrunnlag(referanse.getBehandlingId())
-            .stream()
-            .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
+        var startdatoGrunnlag = ungdomsytelseStartdatoRepository.hentGrunnlag(referanse.getBehandlingId());
+        // Bruk startdatoer som er markert som relevante for inneværende behandling. Faller tilbake
+        // til alle oppgitte startdatoer dersom ingen relevante er satt (typisk førstegangsbehandling
+        // før InitierPerioderSteg har kjørt).
+        var startdatoer = startdatoGrunnlag
+            .map(UngdomsytelseStartdatoGrunnlag::getRelevanteStartdatoer)
             .map(UngdomsytelseStartdatoer::getStartdatoer)
-            .flatMap(Collection::stream)
+            .filter(s -> !s.isEmpty())
+            .orElseGet(() -> startdatoGrunnlag
+                .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
+                .map(UngdomsytelseStartdatoer::getStartdatoer)
+                .orElse(Set.of()));
+
+        startdatoer.stream()
             .filter(it -> mottatteDokumenter.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
-            .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, ungdomsprogramperioder, dokument ));
+            .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, ungdomsprogramperioder, dokument));
 
         return result;
     }

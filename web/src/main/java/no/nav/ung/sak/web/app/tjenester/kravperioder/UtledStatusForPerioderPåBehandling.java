@@ -38,7 +38,22 @@ class UtledStatusForPerioderPåBehandling {
 
     static StatusForPerioderPåBehandling utledStatus(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
                                                      List<Trigger> prosesstriggere) {
-        var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere);
+        // Behold bakoverkompatibilitet for eksisterende kallsteder/tester: behandler kall uten
+        // behandlingstype som førstegangsbehandling (inkluderer søknadsperioden i tidslinjen).
+        return utledStatus(kravdokumenterTilBehandling, prosesstriggere, true);
+    }
+
+    /**
+     * Utleder status for perioder på en behandling.
+     *
+     * <p>For revurderinger ({@code erFørstegangsbehandling = false}) utelates søknadsperioden fra
+     * kravdokumentene. Søknaden hører til førstegangsbehandlingen og skal ikke vises som
+     * "ny periode" på revurderinger som typisk trigges av en hendelse (f.eks. forlenget periode).
+     */
+    static StatusForPerioderPåBehandling utledStatus(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
+                                                     List<Trigger> prosesstriggere,
+                                                     boolean erFørstegangsbehandling) {
+        var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere, erFørstegangsbehandling);
         var periodeMedÅrsaker = mapPeriodeMedÅrsaker(årsakstidslinje);
         var årsakerMedPerioder = finnÅrsakerMedPerioder(periodeMedÅrsaker);
         return new StatusForPerioderPåBehandling(
@@ -55,9 +70,16 @@ class UtledStatusForPerioderPåBehandling {
             .toList();
     }
 
-    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling, List<Trigger> prosesstriggere) {
-        var søknadtidslinje = finnFørsteSøknadTidslinje(kravdokumenterTilBehandling);
+    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
+                                                                                List<Trigger> prosesstriggere,
+                                                                                boolean erFørstegangsbehandling) {
         var årsakerFraTriggere = finnÅrsakerFraTriggereTidslinje(prosesstriggere);
+        if (!erFørstegangsbehandling) {
+            // Søknadsperioden hører til førstegangsbehandlingen og skal ikke vises som
+            // "ny periode" på revurderinger.
+            return årsakerFraTriggere;
+        }
+        var søknadtidslinje = finnFørsteSøknadTidslinje(kravdokumenterTilBehandling);
         return søknadtidslinje.crossJoin(årsakerFraTriggere, StandardCombinators::union);
     }
 

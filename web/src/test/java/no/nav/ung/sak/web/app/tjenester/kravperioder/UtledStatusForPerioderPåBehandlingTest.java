@@ -79,5 +79,29 @@ class UtledStatusForPerioderPåBehandlingTest {
         assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
     }
 
+    @Test
+    void revurdering_skal_ikke_inkludere_soknadsperiode_som_forstegangsvurdering() {
+        // Revurdering for forlenget periode skal kun vise trigger-perioden, ikke den opprinnelige
+        // søknadsperioden fra førstegangsbehandlingen.
+        var startdato = LocalDate.now();
+        var opprinneligProgramperiode = DatoIntervallEntitet.fraOgMedTilOgMed(startdato, startdato.plusWeeks(52).minusDays(1));
+        var fomForlenget = opprinneligProgramperiode.getTomDato().plusDays(1);
+        var tomForlenget = fomForlenget.plusWeeks(8).minusDays(1);
+        var forlengetPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fomForlenget, tomForlenget);
+
+        var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
+            Map.of(new KravDokument(new JournalpostId(12345L), LocalDateTime.now(), KravDokumentType.SØKNAD, Kildesystem.SØKNADSDIALOG.getKode()),
+                List.of(new SøktPeriode<>(opprinneligProgramperiode, null))),
+            List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode)),
+            false
+        );
+
+        var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
+        assertThat(perioderMedÅrsak.size()).isEqualTo(1);
+        var periode = perioderMedÅrsak.get(0);
+        assertThat(periode.getPeriode()).isEqualTo(new Periode(forlengetPeriode.getFomDato(), forlengetPeriode.getTomDato()));
+        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
+    }
+
 
 }

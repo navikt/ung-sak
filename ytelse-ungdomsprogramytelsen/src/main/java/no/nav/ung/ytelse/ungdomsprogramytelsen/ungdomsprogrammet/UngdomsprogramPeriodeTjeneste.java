@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.VurderAntallDagerResultat;
 
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UngdomsprogramPeriodeTjeneste {
@@ -66,6 +68,39 @@ public class UngdomsprogramPeriodeTjeneste {
     public Optional<LocalDate> finnPeriodeMaksDato(Long behandlingId) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
             .flatMap(gr -> gr.getPeriodeMaksDato());
+    }
+
+    /**
+     * Returnerer ungdomsprogramperiodene for en behandling der hver periode sin {@code tom}-dato
+     * er kappet mot {@code periodeMaksDato} (justert til siste virkedag) fra grunnlaget.
+     *
+     * <p>For hver periode brukes {@code min(opprinnelig tom, justerTilSisteVirkedag(periodeMaksDato))}.
+     * Dersom {@code periodeMaksDato} ikke er satt på grunnlaget beholdes opprinnelig {@code tom} uendret.
+     * Perioder som ligger helt etter maksdato filtreres bort.
+     *
+     * @param behandlingId Behandling som det skal hentes perioder for
+     * @return Perioder kappet mot maksdato, eller tom mengde dersom grunnlag mangler
+     */
+    public Set<UngdomsprogramPeriode> finnPerioderKappetMotMaksdato(Long behandlingId) {
+        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
+        if (grunnlag.isEmpty()) {
+            return Set.of();
+        }
+        var perioder = grunnlag.get().getUngdomsprogramPerioder().getPerioder();
+        var maksDato = grunnlag.get().getPeriodeMaksDato()
+            .map(FagsakperiodeUtleder::justerTilSisteVirkedag);
+        if (maksDato.isEmpty()) {
+            return perioder;
+        }
+        var kappetTom = maksDato.get();
+        return perioder.stream()
+            .filter(p -> !p.getPeriode().getFomDato().isAfter(kappetTom))
+            .map(p -> {
+                var opprinneligTom = p.getPeriode().getTomDato();
+                var nyTom = opprinneligTom.isBefore(kappetTom) ? opprinneligTom : kappetTom;
+                return new UngdomsprogramPeriode(p.getPeriode().getFomDato(), nyTom);
+            })
+            .collect(Collectors.toSet());
     }
 
     /**

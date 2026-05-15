@@ -82,7 +82,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public StatusForPerioderPåBehandling hentPerioderTilBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        return getStatusForPerioderPåBehandling(ref);
+        return getStatusForPerioderPåBehandling(ref, behandling);
     }
 
     @GET
@@ -101,7 +101,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref);
+        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling);
 
         var timelineTilVurdering = utledTidslinjeTilVurdering(behandling, perioderTilVurderingTjeneste);
 
@@ -136,12 +136,16 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
 
-    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref) {
+    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling) {
         var kravdokumenterTilBehandling = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
+        // Søknadsperioden hører til førstegangsbehandlingen og skal ikke vises som "ny periode"
+        // på revurderinger (typisk trigget av hendelser som forlenget periode eller opphør).
+        boolean erFørstegangsbehandling = behandling.getType() == no.nav.ung.kodeverk.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
         return UtledStatusForPerioderPåBehandling.utledStatus(
             kravdokumenterTilBehandling,
-            prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList()
+            prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList(),
+            erFørstegangsbehandling
         );
     }
 
