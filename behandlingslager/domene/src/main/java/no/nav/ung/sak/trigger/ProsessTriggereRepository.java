@@ -10,10 +10,12 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.diff.DiffResult;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent
 public class ProsessTriggereRepository {
@@ -34,6 +36,40 @@ public class ProsessTriggereRepository {
         if (!Objects.equals(result, prosessTriggere.map(ProsessTriggere::getTriggere).orElse(Set.of()))) {
             prosessTriggere.ifPresent(this::deaktiver);
             var oppdatert = new ProsessTriggere(behandlingId, new Triggere(result.stream()
+                .map(Trigger::new)
+                .collect(Collectors.toSet())));
+
+            entityManager.persist(oppdatert.getTriggereEntity());
+            entityManager.persist(oppdatert);
+            entityManager.flush();
+        }
+    }
+
+    /**
+     * Erstatter alle triggere for en gitt årsak med de oppgitte periodene. Andre triggere
+     * (med annen årsak) beholdes uendret. Brukes når en trigger må kappes/oppdateres etter
+     * at mer informasjon (f.eks. maks-dato fra register) er tilgjengelig.
+     */
+    public void erstattTriggereForÅrsak(Long behandlingId,
+                                        BehandlingÅrsakType årsak,
+                                        Set<DatoIntervallEntitet> perioder) {
+        var prosessTriggere = hentEksisterendeGrunnlag(behandlingId);
+        var beholdte = prosessTriggere
+            .map(ProsessTriggere::getTriggere)
+            .orElse(Set.of())
+            .stream()
+            .filter(t -> !årsak.equals(t.getÅrsak()))
+            .collect(Collectors.toSet());
+        var nye = perioder.stream()
+            .map(p -> new Trigger(årsak, p))
+            .collect(Collectors.toSet());
+        var alle = new HashSet<Trigger>();
+        alle.addAll(beholdte);
+        alle.addAll(nye);
+
+        if (!Objects.equals(alle, prosessTriggere.map(ProsessTriggere::getTriggere).orElse(Set.of()))) {
+            prosessTriggere.ifPresent(this::deaktiver);
+            var oppdatert = new ProsessTriggere(behandlingId, new Triggere(alle.stream()
                 .map(Trigger::new)
                 .collect(Collectors.toSet())));
 

@@ -81,17 +81,13 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
     }
 
     /**
-     * Utleder trigger-periode for revurdering ved forlenget periode.
+     * Utleder initial trigger-periode for revurdering ved forlenget periode.
      *
-     * <p>Trigger-perioden skal kun dekke de nye dagene (typisk 8 uker / 40 virkedager) som
-     * forlengelsen tilfører – ikke hele programperioden fra opprinnelig startdato.
-     *
-     * <ul>
-     *   <li>Åpen programperiode (tom=9999-12-31): originalMaksDato beregnes som 260 virkedager fra fom.
-     *       Trigger-periode = [originalMaksDato + 1 (justert til neste virkedag) .. periodeMaksDato].</li>
-     *   <li>Klippet programperiode (tom satt): originalMaksDato = tom.
-     *       Trigger-periode = [tom + 1 (justert til neste virkedag) .. periodeMaksDato].</li>
-     * </ul>
+     * <p>Den endelige tom-datoen er ikke kjent her – den settes av registret og lagres på
+     * grunnlaget for den nye behandlingen i {@code InnhentUngdomsprogramperioderTask}.
+     * Vi setter derfor en åpen trigger fra dagen etter opprinnelig maks-dato til {@code TIDENES_ENDE},
+     * og lar {@code InnhentUngdomsprogramperioderTask} kappe tom-datoen til faktisk maks-dato
+     * etter at registret er innhentet. På den måten unngår vi å kalle registret to ganger.
      */
     private DatoIntervallEntitet utledForlengetPeriode(Fagsak fagsak) {
         var eksisterendePeriode = fagsak.getPeriode();
@@ -106,7 +102,6 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
         }
         var fom = programTidslinje.getMinLocalDate();
         var tom = programTidslinje.getMaxLocalDate();
-        var maksDato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandlingId).orElse(null);
 
         // Beregn opprinnelig maks-dato (260 virkedager fra fom) – før forlengelsen.
         // For klippet programperiode brukes faktisk tom som opprinnelig maks-dato.
@@ -117,14 +112,10 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
             originalMaksDato = tom;
         }
 
+        // Initial trigger med åpen tom – kappes av InnhentUngdomsprogramperioderTask basert på
+        // maksdato lagret på grunnlaget for den nye behandlingen etter register-innhenting.
         var nyFom = FagsakperiodeUtleder.justerTilNesteVirkedag(originalMaksDato.plusDays(1));
-        var utvidetTom = FagsakperiodeUtleder.finnTomDato(originalMaksDato.plusDays(1), programTidslinje, true, maksDato);
-        if (!utvidetTom.isAfter(originalMaksDato)) {
-            // 300 virkedager allerede forbrukt – ingen utvidelse mulig
-            return eksisterendePeriode;
-        }
-        // Trigger-periode dekker kun de nye dagene fra forlengelsen.
-        return DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, utvidetTom);
+        return DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, TIDENES_ENDE);
     }
 
     /**
