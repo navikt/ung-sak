@@ -30,13 +30,13 @@ public record VilkårPeriodeVurderingDto(
     @NotNull
     @Size(min = 3, max = 5000)
     @Valid
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String begrunnelse,
 
     @JsonProperty("fritekstVurderingBrev")
     @Size(max = 10000)
     @Valid
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String fritekstVurderingBrev
 ) {
 

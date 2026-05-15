@@ -4,15 +4,16 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.annotation.JsonValue;
+import no.nav.ung.sak.kontrakt.Patterns;
 
 public class KortTekst {
 
     @JsonValue
     @Size(max = 2000)
-    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String tekst;
 
-    public KortTekst(@Size(max = 2000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]") String tekst) {
+    public KortTekst(@Size(max = 2000) @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{L}\\p{M}\\p{N}]+$", message = Patterns.FRITEKST_MISMATCH_MELDING) String tekst) {
         this.tekst = tekst;
     }
 
