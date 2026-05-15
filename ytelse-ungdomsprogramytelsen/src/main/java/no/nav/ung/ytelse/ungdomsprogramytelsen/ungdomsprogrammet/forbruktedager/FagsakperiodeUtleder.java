@@ -93,7 +93,14 @@ public class FagsakperiodeUtleder {
     }
 
     /**
-     * Justerer datoen til siste virkedag (fredag) dersom den lander på lørdag eller søndag.
+     * Justerer en dato til siste virkedag i samme helg.
+     *
+     * <p>Brukes for tom-/maksdatoer der perioden ikke skal strekke seg inn i helg.
+     * Hvis registeret sender en maksdato på lørdag eller søndag, flyttes datoen
+     * tilbake til fredag slik at perioden avsluttes på virkedag.
+     *
+     * <p>Eksempler:
+     * lørdag -> fredag, søndag -> fredag, mandag-fredag -> uendret.
      */
     public static LocalDate justerTilSisteVirkedag(LocalDate dato) {
         return switch (dato.getDayOfWeek()) {
@@ -104,7 +111,14 @@ public class FagsakperiodeUtleder {
     }
 
     /**
-     * Justerer datoen til neste virkedag (mandag) dersom den lander på lørdag eller søndag.
+     * Justerer en dato til første virkedag etter helg.
+     *
+     * <p>Brukes for fom-datoer når en ny periode skal starte "dagen etter"
+     * en tidligere tom-/maksdato. Hvis denne dagen lander i helg, flyttes
+     * start frem til mandag for å unngå at perioden starter på ikke-virkedag.
+     *
+     * <p>Eksempler:
+     * lørdag -> mandag, søndag -> mandag, mandag-fredag -> uendret.
      */
     public static LocalDate justerTilNesteVirkedag(LocalDate dato) {
         return switch (dato.getDayOfWeek()) {
