@@ -17,12 +17,12 @@ public record GenereltFritekstBrevDto(
     @Valid
     @NotNull
     @Size(max = 200)
-    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String overskrift,
 
     @Valid
     @NotNull
     @Size(max = 100000)
-    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String brødtekst) implements InformasjonsbrevInnholdDto {
 }
