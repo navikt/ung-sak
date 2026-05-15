@@ -164,7 +164,8 @@ class UngdomsprogramTjenesteTest {
             .flatMap(g -> g.getPeriodeMaksDato());
     }
 
-    private Behandling lagBehandling(BehandlingÅrsakType årsak) {        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE, AKTØR);
+    private Behandling lagBehandling(BehandlingÅrsakType årsak) {
+        var scenario = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE, AKTØR);
         if (årsak != null) {
             scenario.medBehandlingÅrsak(årsak);
         }
