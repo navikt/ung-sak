@@ -187,9 +187,8 @@ class UngdomsprogramTjenesteTest {
 
     private boolean harForlengetPeriodeLagret(Behandling behandling) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .flatMap(g -> g.getUngdomsprogramForlengetPeriode())
+            .flatMap(g -> g.getUngdomsprogramMaksPeriode())
             .map(k -> k.harForlengetPeriode())
             .orElse(false);
     }
 }
-

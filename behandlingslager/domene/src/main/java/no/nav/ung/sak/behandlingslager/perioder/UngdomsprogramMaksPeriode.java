@@ -8,16 +8,13 @@ import org.hibernate.annotations.Immutable;
 import java.time.LocalDate;
 import java.util.Optional;
 
-/**
- * Angir om bruker har forlenget periode i ungdomsprogrammet (300 virkedager i stedet for 260).
- */
-@Entity(name = "UngdomsprogramForlengetPeriode")
-@Table(name = "UNG_UNGDOMSPROGRAM_FORLENGET_PERIODE")
+@Entity(name = "UngdomsprogramMaksPeriode")
+@Table(name = "UNG_UNGDOMSPROGRAM_MAKS_PERIODE")
 @Immutable
-public class UngdomsprogramForlengetPeriode {
+public class UngdomsprogramMaksPeriode {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_UNGDOMSPROGRAM_FORLENGET_PERIODE_ID")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_UNGDOMSPROGRAM_MAKS_PERIODE_ID")
     private Long id;
 
     @Column(name = "har_forlenget_periode", nullable = false)
@@ -30,25 +27,25 @@ public class UngdomsprogramForlengetPeriode {
     @Column(name = "hjemmel")
     private Hjemmel hjemmel = Hjemmel.UNG_FORSKRIFT_PARAGRAF_6;
 
-    public UngdomsprogramForlengetPeriode() {
+    public UngdomsprogramMaksPeriode() {
     }
 
-    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode) {
+    public UngdomsprogramMaksPeriode(boolean harForlengetPeriode) {
         this.harForlengetPeriode = harForlengetPeriode;
     }
 
-    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate periodeMaksDato) {
+    public UngdomsprogramMaksPeriode(boolean harForlengetPeriode, LocalDate periodeMaksDato) {
         this.harForlengetPeriode = harForlengetPeriode;
         this.periodeMaksDato = periodeMaksDato;
     }
 
-    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, LocalDate periodeMaksDato, Hjemmel hjemmel) {
+    public UngdomsprogramMaksPeriode(boolean harForlengetPeriode, LocalDate periodeMaksDato, Hjemmel hjemmel) {
         this.harForlengetPeriode = harForlengetPeriode;
         this.periodeMaksDato = periodeMaksDato;
         this.hjemmel = hjemmel;
     }
 
-    public UngdomsprogramForlengetPeriode(boolean harForlengetPeriode, Hjemmel hjemmel) {
+    public UngdomsprogramMaksPeriode(boolean harForlengetPeriode, Hjemmel hjemmel) {
         this.harForlengetPeriode = harForlengetPeriode;
         this.hjemmel = hjemmel;
     }
