@@ -23,6 +23,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -187,7 +188,7 @@ class UngdomsprogramTjenesteTest {
 
     private boolean harForlengetPeriodeLagret(Behandling behandling) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .flatMap(g -> g.getUngdomsprogramMaksPeriode())
+            .flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
             .map(k -> k.harForlengetPeriode())
             .orElse(false);
     }

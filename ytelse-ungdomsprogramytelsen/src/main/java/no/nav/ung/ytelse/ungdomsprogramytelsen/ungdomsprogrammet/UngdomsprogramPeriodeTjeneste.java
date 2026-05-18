@@ -16,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.VurderAntallDagerResultat;
 
@@ -72,9 +71,10 @@ public class UngdomsprogramPeriodeTjeneste {
 
     /**
      * Returnerer ungdomsprogramperiodene for en behandling der hver periode sin {@code tom}-dato
-     * er kappet mot {@code periodeMaksDato} (justert til siste virkedag) fra grunnlaget.
+     * er kappet mot {@code periodeMaksDato} fra grunnlaget.
      *
-     * <p>For hver periode brukes {@code min(opprinnelig tom, justerTilSisteVirkedag(periodeMaksDato))}.
+     * <p>For hver periode brukes {@code min(opprinnelig tom, periodeMaksDato)}.
+     * {@code periodeMaksDato} er allerede beregnet som en virkedag av ung-deltakelse-opplyser.
      * Dersom {@code periodeMaksDato} ikke er satt på grunnlaget beholdes opprinnelig {@code tom} uendret.
      * Perioder som ligger helt etter maksdato filtreres bort.
      *
@@ -87,8 +87,7 @@ public class UngdomsprogramPeriodeTjeneste {
             return Set.of();
         }
         var perioder = grunnlag.get().getUngdomsprogramPerioder().getPerioder();
-        var maksDato = grunnlag.get().getPeriodeMaksDato()
-            .map(FagsakperiodeUtleder::justerTilSisteVirkedag);
+        var maksDato = grunnlag.get().getPeriodeMaksDato();
         if (maksDato.isEmpty()) {
             return perioder;
         }

@@ -65,8 +65,8 @@ public class FagsakperiodeUtleder {
                                         boolean harForlengetPeriode,
                                         LocalDate periodeMaksDato) {
         if (periodeMaksDato != null) {
-            // Bruk maks-dato direkte fra registeret, justert til siste virkedag.
-            return justerTilSisteVirkedag(periodeMaksDato);
+            // periodeMaksDato er allerede beregnet som en virkedag av ung-deltakelse-opplyser
+            return periodeMaksDato;
         }
         var tidligerePerioderIProgrammet = ungdomsprogramTidslinje.intersection(new LocalDateInterval(LocalDateInterval.TIDENES_BEGYNNELSE, søknadFom.minusDays(1)));
         var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(tidligerePerioderIProgrammet, harForlengetPeriode);
@@ -90,24 +90,6 @@ public class FagsakperiodeUtleder {
             periodeTidslinje,
             ungdomsprogramPeriodeGrunnlag.harForlengetPeriode(),
             ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElse(null));
-    }
-
-    /**
-     * Justerer en dato til siste virkedag i samme helg.
-     *
-     * <p>Brukes for tom-/maksdatoer der perioden ikke skal strekke seg inn i helg.
-     * Hvis registeret sender en maksdato på lørdag eller søndag, flyttes datoen
-     * tilbake til fredag slik at perioden avsluttes på virkedag.
-     *
-     * <p>Eksempler:
-     * lørdag -> fredag, søndag -> fredag, mandag-fredag -> uendret.
-     */
-    public static LocalDate justerTilSisteVirkedag(LocalDate dato) {
-        return switch (dato.getDayOfWeek()) {
-            case SATURDAY -> dato.minusDays(1);
-            case SUNDAY -> dato.minusDays(2);
-            default -> dato;
-        };
     }
 
     /**

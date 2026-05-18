@@ -78,15 +78,14 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
         if (grunnlag.isEmpty()) {
             return;
         }
-        var nyTom = FagsakperiodeUtleder.justerTilSisteVirkedag(maksDato);
         var nyePerioder = grunnlag.get().getTriggere().stream()
             .filter(t -> BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM.equals(t.getÅrsak()))
             .map(t -> DatoIntervallEntitet.fraOgMedTilOgMed(
                 t.getPeriode().getFomDato(),
-                t.getPeriode().getTomDato().isAfter(nyTom) ? nyTom : t.getPeriode().getTomDato()))
+                t.getPeriode().getTomDato().isAfter(maksDato) ? maksDato : t.getPeriode().getTomDato()))
             .collect(Collectors.toSet());
         if (!nyePerioder.isEmpty()) {
-            LOGGER.info("Kapper forlenget-periode-trigger på behandling={} til tom={} basert på maksdato lagret på grunnlaget.", behandling.getId(), nyTom);
+            LOGGER.info("Kapper forlenget-periode-trigger på behandling={} til tom={} basert på maksdato lagret på grunnlaget.", behandling.getId(), maksDato);
             prosessTriggereRepository.erstattTriggereForÅrsak(
                 behandling.getId(),
                 BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,

@@ -198,30 +198,13 @@ class FagsakperiodeUtlederTest {
     }
 
     @Test
-    void bruker_periodeMaksDato_direkte_når_den_er_satt() {
-        // Maks-dato fra registeret brukes direkte uten virkedagsberegning
+    void returnerer_periodeMaksDato_direkte_uavhengig_av_ukedag() {
+        // periodeMaksDato er allerede beregnet som virkedag av ung-deltakelse-opplyser,
+        // så finnTomDato skal returnere den uendret.
         var fom = LocalDate.of(2025, 1, 1);
-        var maksDato = LocalDate.of(2026, 2, 27); // fredag
-        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDato);
-        assertThat(tom).isEqualTo(maksDato);
-    }
-
-    @Test
-    void justerer_periodeMaksDato_til_fredag_hvis_lørdag() {
-        var fom = LocalDate.of(2025, 1, 1);
-        var maksDatoPåLørdag = LocalDate.of(2026, 2, 28); // lørdag
-        var forventetFredag = LocalDate.of(2026, 2, 27);
-        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDatoPåLørdag);
-        assertThat(tom).isEqualTo(forventetFredag);
-    }
-
-    @Test
-    void justerer_periodeMaksDato_til_fredag_hvis_søndag() {
-        var fom = LocalDate.of(2025, 1, 1);
-        var maksDatoPåSøndag = LocalDate.of(2026, 3, 1); // søndag
-        var forventetFredag = LocalDate.of(2026, 2, 27);
-        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDatoPåSøndag);
-        assertThat(tom).isEqualTo(forventetFredag);
+        var maksDatoFredag = LocalDate.of(2026, 2, 27); // fredag
+        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDatoFredag);
+        assertThat(tom).isEqualTo(maksDatoFredag);
     }
 
     @Test
