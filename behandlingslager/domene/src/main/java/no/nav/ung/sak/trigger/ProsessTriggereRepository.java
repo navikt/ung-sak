@@ -46,9 +46,18 @@ public class ProsessTriggereRepository {
     }
 
     /**
-     * Erstatter alle triggere for en gitt årsak med de oppgitte periodene. Andre triggere
-     * (med annen årsak) beholdes uendret. Brukes når en trigger må kappes/oppdateres etter
-     * at mer informasjon (f.eks. maks-dato fra register) er tilgjengelig.
+     * Erstatter alle triggere for en gitt årsak med de oppgitte periodene, og beholder triggere
+     * for andre årsaker uendret.
+     *
+     * <p><strong>Advarsel:</strong> Denne metoden kan føre til tap av informasjon dersom flere
+     * uavhengige prosesser produserer triggere med samme årsak for samme behandling.
+     * Metoden gjør en full erstatning av eksisterende perioder for årsaken, og tar ikke hensyn til
+     * hvilken prosess som opprinnelig la inn triggeren.
+     *
+     * <p>Bruk derfor {@link #leggTil(Long, Set)} som hovedregel. Denne metoden skal kun brukes når
+     * kallende kode har eksklusivt eierskap til årsaken i den aktuelle behandlingen, og der det er
+     * eksplisitt ønsket å overskrive tidligere perioder (for eksempel ved deterministisk kapping av
+     * en teknisk trigger som metoden selv har opprettet).
      */
     public void erstattTriggereForÅrsak(Long behandlingId,
                                         BehandlingÅrsakType årsak,
