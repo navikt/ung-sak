@@ -10,7 +10,6 @@ import no.nav.ung.sak.hendelsemottak.tjenester.FagsakerTilVurderingUtleder;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
 import java.util.List;
 import java.util.Map;
@@ -34,10 +33,9 @@ public class UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder implements Fags
     @Inject
     public UngdomsprogramUtvidetKvoteFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                                UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                                               FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
-                                                               UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+                                                               FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
         this.delegate = new UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder(
-            behandlingRepository, ungdomsprogramPeriodeRepository, finnFagsakerForAktørTjeneste, ungdomsprogramPeriodeTjeneste);
+            behandlingRepository, ungdomsprogramPeriodeRepository, finnFagsakerForAktørTjeneste);
     }
 
     @Override

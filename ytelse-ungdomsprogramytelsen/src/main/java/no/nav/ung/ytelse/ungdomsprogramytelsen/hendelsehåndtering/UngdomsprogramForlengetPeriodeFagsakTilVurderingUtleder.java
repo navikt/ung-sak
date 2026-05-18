@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.hendelsehåndtering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
@@ -16,7 +15,6 @@ import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.hendelsemottak.tjenester.HendelseTypeRef;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.*;
 
-import static no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE;
 
 @ApplicationScoped
 @HendelseTypeRef("UNGDOMSPROGRAM_FORLENGET_PERIODE")
@@ -35,7 +32,6 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
-    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     public UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder() {
         // For CDI
@@ -44,18 +40,17 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
     @Inject
     public UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                                    UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                                                   FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
-                                                                   UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+                                                                   FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
     }
 
     @Override
     public Map<Fagsak, List<ÅrsakOgPerioder>> finnFagsakerTilVurdering(Hendelse hendelse) {
         List<AktørId> aktører = hendelse.getHendelseInfo().getAktørIder();
         LocalDate periodeFom = hendelse.getHendelsePeriode().getFom();
+        LocalDate hendelseTom = hendelse.getHendelsePeriode().getTom();
         String hendelseId = hendelse.getHendelseInfo().getHendelseId();
 
         var fagsaker = new HashMap<Fagsak, List<ÅrsakOgPerioder>>();
@@ -67,7 +62,7 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
             }
             if (erNyInformasjonIHendelsen(relevantFagsak.get(), hendelseId)) {
                 var fagsak = relevantFagsak.get();
-                var forlengetPeriode = utledForlengetPeriode(fagsak);
+                var forlengetPeriode = utledForlengetPeriode(fagsak, hendelseTom);
                 var årsakOgPerioder = new ArrayList<ÅrsakOgPerioder>();
                 årsakOgPerioder.add(new ÅrsakOgPerioder(
                     BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
@@ -81,41 +76,15 @@ public class UngdomsprogramForlengetPeriodeFagsakTilVurderingUtleder implements 
     }
 
     /**
-     * Utleder initial trigger-periode for revurdering ved forlenget periode.
+     * Utleder trigger-periode for revurdering ved forlenget periode.
      *
-     * <p>Den endelige tom-datoen er ikke kjent her – den settes av registret og lagres på
-     * grunnlaget for den nye behandlingen i {@code InnhentUngdomsprogramperioderTask}.
-     * Vi setter derfor en åpen trigger fra dagen etter opprinnelig maks-dato til {@code TIDENES_ENDE},
-     * og lar {@code InnhentUngdomsprogramperioderTask} kappe tom-datoen til faktisk maks-dato
-     * etter at registret er innhentet. På den måten unngår vi å kalle registret to ganger.
+     * <p>Bruker fagsakens eksisterende tom-dato som slutt på opprinnelig periode,
+     * og hendelsens tom-dato som ny maks-dato etter forlengelsen.
+     * Trigger-perioden blir dermed fra dagen etter opprinnelig maks-dato til ny maks-dato.
      */
-    private DatoIntervallEntitet utledForlengetPeriode(Fagsak fagsak) {
-        var eksisterendePeriode = fagsak.getPeriode();
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
-        if (sisteBehandling.isEmpty()) {
-            return eksisterendePeriode;
-        }
-        Long behandlingId = sisteBehandling.get().getId();
-        var programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);
-        if (programTidslinje.isEmpty()) {
-            return eksisterendePeriode;
-        }
-        var fom = programTidslinje.getMinLocalDate();
-        var tom = programTidslinje.getMaxLocalDate();
-
-        // Beregn opprinnelig maks-dato (260 virkedager fra fom) – før forlengelsen.
-        // For klippet programperiode brukes faktisk tom som opprinnelig maks-dato.
-        LocalDate originalMaksDato;
-        if (tom.equals(TIDENES_ENDE)) {
-            originalMaksDato = FagsakperiodeUtleder.finnTomDato(fom, LocalDateTimeline.empty(), false, null);
-        } else {
-            originalMaksDato = tom;
-        }
-
-        // Initial trigger med åpen tom – kappes av InnhentUngdomsprogramperioderTask basert på
-        // maksdato lagret på grunnlaget for den nye behandlingen etter register-innhenting.
-        var nyFom = FagsakperiodeUtleder.justerTilNesteVirkedag(originalMaksDato.plusDays(1));
-        return DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, TIDENES_ENDE);
+    private DatoIntervallEntitet utledForlengetPeriode(Fagsak fagsak, LocalDate hendelseTom) {
+        var nyFom = FagsakperiodeUtleder.justerTilNesteVirkedag(fagsak.getPeriode().getTomDato().plusDays(1));
+        return DatoIntervallEntitet.fraOgMedTilOgMed(nyFom, hendelseTom);
     }
 
     /**
