@@ -68,7 +68,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
     /**
      * Henter startdatoer som allerede er kjent fra forrige avsluttede ikke-henlagte ytelsesbehandling på fagsaken.
      * <p>
-     * Brukes for å unngå at en startdato som er identisk med tidligere godkjent grunnlag (typisk fra papirsøknad
+     * Brukes for å unngå at en startdato som er identisk med tidligere godkjent grunnlag (typisk fra søknad
      * generert i forbindelse med revurdering) markeres som "relevant" på nytt og dermed blåser opp tidslinjen
      * for perioder til vurdering. Førstegangsbehandling og ekte nye startdatoer påvirkes ikke.
      */
@@ -96,7 +96,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
      * Lager aggregat av perioder som er relevant for denne behandlingen, altså perioder fra journalposter som har kommet inn i denne behandlingen.
      * <p>
      * Startdatoer som allerede er kjent fra forrige avsluttede behandling filtreres bort, slik at kun reelt
-     * nye startdatoer markeres som relevante. Dette hindrer at f.eks. en papirsøknad mottatt i forbindelse
+     * nye startdatoer markeres som relevante. Dette hindrer at f.eks. en søknad mottatt i forbindelse
      * med en forlengelse-revurdering (med samme startdato som forrige vedtak) re-vurderer hele programperioden.
      *
      * @param journalposterMottattIDenneBehandlingen Journalposter som er mottatt i denne behandlingen
