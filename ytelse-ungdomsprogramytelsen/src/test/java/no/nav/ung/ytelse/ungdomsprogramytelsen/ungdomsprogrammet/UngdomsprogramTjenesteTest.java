@@ -113,15 +113,15 @@ class UngdomsprogramTjenesteTest {
     }
 
     @Test
-    void tomme_register_opplysninger_lagrer_tomt_grunnlag_med_forlenget_periode_flagg_fra_behandlingsårsak() {
-        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+    void tomme_register_opplysninger_lagrer_tomt_grunnlag_uten_forlenget_periode() {
+        var behandling = lagBehandling(null);
         when(registerKlient.hentForAktørId(anyString()))
             .thenReturn(new DeltakerOpplysningerDTO(List.of()));
 
         tjeneste.innhentOpplysninger(behandling);
 
         assertThat(hentLagredePerioder(behandling)).isEmpty();
-        assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
+        assertThat(harForlengetPeriodeLagret(behandling)).isFalse();
     }
 
     @Test

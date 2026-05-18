@@ -5,7 +5,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -42,13 +41,8 @@ public class UngdomsprogramTjeneste {
     public void innhentOpplysninger(Behandling behandling) {
         var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(behandling.getFagsak().getAktørId().getAktørId());
 
-        // Forlenget periode gjelder dersom registeret returnerer flagget ELLER behandlingen ble trigget av
-        // forlenget-periode-hendelse. Sistnevnte håndterer tilfeller der registeret ennå ikke har oppdatert flagget.
-        boolean harForlengetPeriodeFraRegister = registerOpplysninger.opplysninger().stream()
+        boolean harForlengetPeriode = registerOpplysninger.opplysninger().stream()
             .anyMatch(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::harForlengetPeriode);
-        boolean harForlengetPeriodeFraBehandlingsårsak = behandling.getBehandlingÅrsakerTyper()
-            .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        boolean harForlengetPeriode = harForlengetPeriodeFraRegister || harForlengetPeriodeFraBehandlingsårsak;
 
         // Maks-dato sendes alltid fra registeret (260 virkedager ved normal periode, 300 ved forlenget periode).
         LocalDate periodeMaksDato = registerOpplysninger.opplysninger().stream()
@@ -57,8 +51,8 @@ public class UngdomsprogramTjeneste {
             .findFirst()
             .orElse(null);
 
-        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harForlengetPeriodeFraRegister={}, harForlengetPeriodeFraBehandlingsårsak={}, harForlengetPeriode={}, periodeMaksDato={}",
-            behandling.getId(), harForlengetPeriodeFraRegister, harForlengetPeriodeFraBehandlingsårsak, harForlengetPeriode, periodeMaksDato);
+        LOG.info("Innhenter ungdomsprogramperioder for behandling={}: harForlengetPeriode={}, periodeMaksDato={}",
+            behandling.getId(), harForlengetPeriode, periodeMaksDato);
 
         if (registerOpplysninger.opplysninger().isEmpty()) {
             ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(), harForlengetPeriode, periodeMaksDato);
