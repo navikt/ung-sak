@@ -1,6 +1,6 @@
 ---
 name: new-grunnlag
-description: Opprett nytt grunnlag (persistent domenedata knyttet til behandling) i ung-sak. USE FOR: opprette nye grunnlagstabeller, entiteter, repository, ORM-registrering, Flyway-migrasjon, kopiering ved revurdering, og mottak fra søknad eller eksterne kilder. DO NOT USE FOR: vilkår uten grunnlagsbehov (bruk new-vilkaar), aksjonspunkt (bruk new-aksjonspunkt), formidling/brev, frontend.
+description: "Opprett nytt grunnlag (persistent domenedata knyttet til behandling) i ung-sak. USE FOR: opprette nye grunnlagstabeller, entiteter, repository, ORM-registrering, Flyway-migrasjon, kopiering ved revurdering, og mottak fra søknad eller eksterne kilder. DO NOT USE FOR: vilkår uten grunnlagsbehov (bruk new-vilkaar), aksjonspunkt (bruk new-aksjonspunkt), formidling/brev, frontend."
 ---
 
 # Nytt grunnlag for Aktivitetspenger
