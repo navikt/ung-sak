@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
@@ -74,7 +75,7 @@ class UtledStatusForPerioderPåBehandlingTest {
 
         var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
         assertThat(perioderMedÅrsak.size()).isEqualTo(1);
-        var periode = perioderMedÅrsak.get(0);
+        var periode = perioderMedÅrsak.get(0);''
         assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
         assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
     }
@@ -93,7 +94,8 @@ class UtledStatusForPerioderPåBehandlingTest {
             Map.of(new KravDokument(new JournalpostId(12345L), LocalDateTime.now(), KravDokumentType.SØKNAD, Kildesystem.SØKNADSDIALOG.getKode()),
                 List.of(new SøktPeriode<>(opprinneligProgramperiode, null))),
             List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode)),
-            false
+            false,
+            FagsakYtelseType.UNGDOMSYTELSE
         );
 
         var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();

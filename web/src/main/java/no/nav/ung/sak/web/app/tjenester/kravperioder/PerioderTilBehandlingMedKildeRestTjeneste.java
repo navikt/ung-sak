@@ -139,13 +139,12 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling) {
         var kravdokumenterTilBehandling = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
-        // Søknadsperioden hører til førstegangsbehandlingen og skal ikke vises som "ny periode"
-        // på revurderinger (typisk trigget av hendelser som forlenget periode eller opphør).
         boolean erFørstegangsbehandling = behandling.getType() == no.nav.ung.kodeverk.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
         return UtledStatusForPerioderPåBehandling.utledStatus(
             kravdokumenterTilBehandling,
             prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList(),
-            erFørstegangsbehandling
+            erFørstegangsbehandling,
+            ref.getFagsakYtelseType()
         );
     }
 
