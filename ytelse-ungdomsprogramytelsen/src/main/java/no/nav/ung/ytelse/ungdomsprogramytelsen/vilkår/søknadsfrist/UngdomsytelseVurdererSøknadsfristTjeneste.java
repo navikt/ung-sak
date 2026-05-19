@@ -1,5 +1,14 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.søknadsfrist;
 
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
+
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -8,21 +17,19 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.*;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.KravDokumentType;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
 import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 
 @ApplicationScoped
@@ -33,19 +40,17 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
 
     private MottatteDokumentRepository mottatteDokumentRepository;
     private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
-    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     UngdomsytelseVurdererSøknadsfristTjeneste() {
         // CDI
     }
 
     @Inject
-    public UngdomsytelseVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository,
-                                                     UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
-                                                     UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+    public UngdomsytelseVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
 
@@ -69,35 +74,31 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
             return result;
         }
 
-        var ungdomsprogramperioder = ungdomsprogramPeriodeTjeneste.finnPerioderKappetMotMaksdato(referanse.getBehandlingId());
+        var ungdomsprogramperioder = ungdomsprogramPeriodeRepository.hentGrunnlag(referanse.getBehandlingId())
+            .stream()
+            .map(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramPerioder)
+            .map(UngdomsprogramPerioder::getPerioder)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
 
-        var startdatoGrunnlag = ungdomsytelseStartdatoRepository.hentGrunnlag(referanse.getBehandlingId());
-        // Bruk startdatoer som er markert som relevante for inneværende behandling. Faller tilbake
-        // til alle oppgitte startdatoer dersom ingen relevante er satt (typisk førstegangsbehandling
-        // før InitierPerioderSteg har kjørt).
-        var startdatoer = startdatoGrunnlag
-            .map(UngdomsytelseStartdatoGrunnlag::getRelevanteStartdatoer)
+        ungdomsytelseStartdatoRepository.hentGrunnlag(referanse.getBehandlingId())
+            .stream()
+            .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
             .map(UngdomsytelseStartdatoer::getStartdatoer)
-            .filter(s -> !s.isEmpty())
-            .orElseGet(() -> startdatoGrunnlag
-                .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
-                .map(UngdomsytelseStartdatoer::getStartdatoer)
-                .orElse(Set.of()));
-
-        startdatoer.stream()
+            .flatMap(Collection::stream)
             .filter(it -> mottatteDokumenter.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
             .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, ungdomsprogramperioder, dokument));
 
         return result;
     }
 
-    private void mapTilKravDokumentOgPeriode(HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> result, Set<MottattDokument> mottatteDokumenter, Set<DatoIntervallEntitet> ungdomsprogramperioder, UngdomsytelseSøktStartdato dokument) {
+    private void mapTilKravDokumentOgPeriode(HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> result, Set<MottattDokument> mottatteDokumenter, Set<UngdomsprogramPeriode> ungdomsprogramperioder, UngdomsytelseSøktStartdato dokument) {
         var mottattDokument = mottatteDokumenter.stream()
             .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
             .findFirst().orElseThrow();
-        var ungdomsprogramPeriode = ungdomsprogramperioder.stream().filter(it -> it.getFomDato().equals(dokument.getStartdato())).findFirst();
+        var ungdomsprogramPeriode = ungdomsprogramperioder.stream().filter(it -> it.getPeriode().getFomDato().equals(dokument.getStartdato())).findFirst();
         var kravDokument = new KravDokument(dokument.getJournalpostId(), mottattDokument.getInnsendingstidspunkt(), KravDokumentType.SØKNAD, mottattDokument.getKildesystem());
-        ungdomsprogramPeriode.ifPresentOrElse((p) -> result.put(kravDokument, List.of(new SøktPeriode<>(p, dokument))), () -> result.put(kravDokument, List.of()));
+        ungdomsprogramPeriode.ifPresentOrElse((p) -> result.put(kravDokument, List.of(new SøktPeriode<>(p.getPeriode(), dokument))), () -> result.put(kravDokument, List.of()));
     }
 
 

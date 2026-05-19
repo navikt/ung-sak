@@ -41,7 +41,8 @@ public class MånedsvisningDtoMapper {
             final var reduksjon = finnReduksjon(tilkjentYtelseForMåned);
             final var rapportertInntekt = finnRapportertInntekt(kontrollertInntektForMåned);
             final var reduksjonsgrunnlag = finnReduksjonsgrunnlag(måned, rapportertInntekt, antallYtelsesdagerIMåned);
-            final var utbetalingStatus = statusTidslinje.getSegment(måned.getLocalDateInterval()).getValue();
+            final var statusSegment = statusTidslinje.getSegment(måned.getLocalDateInterval());
+            final var utbetalingStatus = statusSegment != null ? statusSegment.getValue() : null;
             boolean slutterYtelseFørMånedsslutt = måned.getTom().isBefore(måned.getTom().with(TemporalAdjusters.lastDayOfMonth()));
             return new UngdomsytelseUtbetaltMånedDto(
                 slutterYtelseFørMånedsslutt,
