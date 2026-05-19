@@ -1,14 +1,5 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.vilkår.søknadsfrist;
 
-import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
-
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -17,17 +8,21 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.*;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.KravDokumentType;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
 import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 
 @ApplicationScoped
@@ -96,13 +91,13 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
         return result;
     }
 
-    private void mapTilKravDokumentOgPeriode(HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> result, Set<MottattDokument> mottatteDokumenter, Set<UngdomsprogramPeriode> ungdomsprogramperioder, UngdomsytelseSøktStartdato dokument) {
+    private void mapTilKravDokumentOgPeriode(HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> result, Set<MottattDokument> mottatteDokumenter, Set<DatoIntervallEntitet> ungdomsprogramperioder, UngdomsytelseSøktStartdato dokument) {
         var mottattDokument = mottatteDokumenter.stream()
             .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
             .findFirst().orElseThrow();
-        var ungdomsprogramPeriode = ungdomsprogramperioder.stream().filter(it -> it.getPeriode().getFomDato().equals(dokument.getStartdato())).findFirst();
+        var ungdomsprogramPeriode = ungdomsprogramperioder.stream().filter(it -> it.getFomDato().equals(dokument.getStartdato())).findFirst();
         var kravDokument = new KravDokument(dokument.getJournalpostId(), mottattDokument.getInnsendingstidspunkt(), KravDokumentType.SØKNAD, mottattDokument.getKildesystem());
-        ungdomsprogramPeriode.ifPresentOrElse((p) -> result.put(kravDokument, List.of(new SøktPeriode<>(p.getPeriode(), dokument))), () -> result.put(kravDokument, List.of()));
+        ungdomsprogramPeriode.ifPresentOrElse((p) -> result.put(kravDokument, List.of(new SøktPeriode<>(p, dokument))), () -> result.put(kravDokument, List.of()));
     }
 
 

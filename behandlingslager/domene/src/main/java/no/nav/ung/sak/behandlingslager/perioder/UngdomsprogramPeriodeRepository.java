@@ -61,14 +61,21 @@ public class UngdomsprogramPeriodeRepository {
                       Collection<UngdomsprogramPeriode> ungdomsprogramPerioder,
                       boolean harForlengetPeriode,
                       LocalDate periodeMaksDato) {
+        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
 
-        var maksPeriode = new UngdomsprogramMaksPeriode(harForlengetPeriode, periodeMaksDato);
-        entityManager.persist(maksPeriode);
-        nyttGrunnlag.setUngdomsprogramMaksPeriode(maksPeriode);
+        if (periodeMaksDato != null) {
+            var maksPeriode = new UngdomsprogramMaksPeriode(harForlengetPeriode, periodeMaksDato);
+            entityManager.persist(maksPeriode);
+            nyttGrunnlag.setUngdomsprogramMaksPeriode(maksPeriode);
+        } else {
+            // Bevar eksisterende maks-periode når periodeMaksDato ikke er oppgitt
+            eksisterende.flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
+                .ifPresent(nyttGrunnlag::setUngdomsprogramMaksPeriode);
+        }
 
-        persister(hentEksisterendeGrunnlag(behandlingId), nyttGrunnlag);
+        persister(eksisterende, nyttGrunnlag);
     }
 
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {

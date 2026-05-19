@@ -81,7 +81,7 @@ public class UngdomsprogramPeriodeTjeneste {
      * @param behandlingId Behandling som det skal hentes perioder for
      * @return Perioder kappet mot maksdato, eller tom mengde dersom grunnlag mangler
      */
-    public Set<UngdomsprogramPeriode> finnPerioderKappetMotMaksdato(Long behandlingId) {
+    public Set<DatoIntervallEntitet> finnPerioderKappetMotMaksdato(Long behandlingId) {
         var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
         if (grunnlag.isEmpty()) {
             return Set.of();
@@ -89,7 +89,9 @@ public class UngdomsprogramPeriodeTjeneste {
         var perioder = grunnlag.get().getUngdomsprogramPerioder().getPerioder();
         var maksDato = grunnlag.get().getPeriodeMaksDato();
         if (maksDato.isEmpty()) {
-            return perioder;
+            return perioder.stream()
+                .map(UngdomsprogramPeriode::getPeriode)
+                .collect(Collectors.toSet());
         }
         var kappetTom = maksDato.get();
         return perioder.stream()
@@ -97,7 +99,7 @@ public class UngdomsprogramPeriodeTjeneste {
             .map(p -> {
                 var opprinneligTom = p.getPeriode().getTomDato();
                 var nyTom = opprinneligTom.isBefore(kappetTom) ? opprinneligTom : kappetTom;
-                return new UngdomsprogramPeriode(p.getPeriode().getFomDato(), nyTom);
+                return DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFomDato(), nyTom);
             })
             .collect(Collectors.toSet());
     }

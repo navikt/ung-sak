@@ -78,12 +78,14 @@ class UngdomsprogramTjenesteTest {
         // (simulerer at grunnlaget ble kopiert over fra forrige behandling som forlenget perioden).
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         var utvidetTom = LocalDate.of(2026, 1, 25);
+        var maksDato = LocalDate.of(2026, 2, 27);
         ungdomsprogramPeriodeRepository.lagre(
             behandling.getId(),
             List.of(new UngdomsprogramPeriode(FOM, utvidetTom)),
-            true);
+            true,
+            maksDato);
 
-        // Register sender opphørt periode (klippet tom) med flagg for forlenget periode
+        // Register sender opphørt periode (klippet tom) med flagg for forlenget periode, uten periodeMaksDato
         var opphørTom = LocalDate.of(2026, 1, 15);
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true, null));
 
@@ -94,7 +96,9 @@ class UngdomsprogramTjenesteTest {
         assertThat(perioder).hasSize(1);
         assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(opphørTom);
+        // Eksisterende maks-periode bevares selv om register ikke sender periodeMaksDato ved opphør
         assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
+        assertThat(hentMaksDato(behandling)).contains(maksDato);
     }
 
     @Test
