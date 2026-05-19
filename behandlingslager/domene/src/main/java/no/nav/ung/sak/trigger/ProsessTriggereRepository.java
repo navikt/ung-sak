@@ -10,12 +10,10 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.diff.DiffResult;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Dependent
 public class ProsessTriggereRepository {
@@ -36,49 +34,6 @@ public class ProsessTriggereRepository {
         if (!Objects.equals(result, prosessTriggere.map(ProsessTriggere::getTriggere).orElse(Set.of()))) {
             prosessTriggere.ifPresent(this::deaktiver);
             var oppdatert = new ProsessTriggere(behandlingId, new Triggere(result.stream()
-                .map(Trigger::new)
-                .collect(Collectors.toSet())));
-
-            entityManager.persist(oppdatert.getTriggereEntity());
-            entityManager.persist(oppdatert);
-            entityManager.flush();
-        }
-    }
-
-    /**
-     * Erstatter alle triggere for en gitt årsak med de oppgitte periodene, og beholder triggere
-     * for andre årsaker uendret.
-     *
-     * <p><strong>Advarsel:</strong> Denne metoden kan føre til tap av informasjon dersom flere
-     * uavhengige prosesser produserer triggere med samme årsak for samme behandling.
-     * Metoden gjør en full erstatning av eksisterende perioder for årsaken, og tar ikke hensyn til
-     * hvilken prosess som opprinnelig la inn triggeren.
-     *
-     * <p>Bruk derfor {@link #leggTil(Long, Set)} som hovedregel. Denne metoden skal kun brukes når
-     * kallende kode har eksklusivt eierskap til årsaken i den aktuelle behandlingen, og der det er
-     * eksplisitt ønsket å overskrive tidligere perioder (for eksempel ved deterministisk kapping av
-     * en teknisk trigger som metoden selv har opprettet).
-     */
-    public void erstattTriggereForÅrsak(Long behandlingId,
-                                        BehandlingÅrsakType årsak,
-                                        Set<DatoIntervallEntitet> perioder) {
-        var prosessTriggere = hentEksisterendeGrunnlag(behandlingId);
-        var beholdte = prosessTriggere
-            .map(ProsessTriggere::getTriggere)
-            .orElse(Set.of())
-            .stream()
-            .filter(t -> !årsak.equals(t.getÅrsak()))
-            .collect(Collectors.toSet());
-        var nye = perioder.stream()
-            .map(p -> new Trigger(årsak, p))
-            .collect(Collectors.toSet());
-        var alle = new HashSet<Trigger>();
-        alle.addAll(beholdte);
-        alle.addAll(nye);
-
-        if (!Objects.equals(alle, prosessTriggere.map(ProsessTriggere::getTriggere).orElse(Set.of()))) {
-            prosessTriggere.ifPresent(this::deaktiver);
-            var oppdatert = new ProsessTriggere(behandlingId, new Triggere(alle.stream()
                 .map(Trigger::new)
                 .collect(Collectors.toSet())));
 
