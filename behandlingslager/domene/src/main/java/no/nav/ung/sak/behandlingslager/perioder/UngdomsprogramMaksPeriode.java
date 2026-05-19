@@ -20,7 +20,7 @@ public class UngdomsprogramMaksPeriode {
     @Column(name = "har_forlenget_periode", nullable = false)
     private boolean harForlengetPeriode;
 
-    @Column(name = "periode_maks_dato")
+    @Column(name = "periode_maks_dato", nullable = false)
     private LocalDate periodeMaksDato;
 
     @Convert(converter = HjemmelKodeverdiConverter.class)

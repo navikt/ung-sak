@@ -2,7 +2,7 @@
 -- sendes alltid fra ung-deltakelse-opplyser uavhengig av om har_forlenget_periode er true eller false.
 -- renamer også tabell, sekvens og FK-kolonne til "maks_periode" da tabellen ikke nødvendigvis representerer en forlenget periode.
 alter table if exists ung_ungdomsprogram_forlenget_periode
-    add column periode_maks_dato date null;
+    add column periode_maks_dato date not null;
 
 alter table if exists ung_ungdomsprogram_forlenget_periode rename to ung_ungdomsprogram_maks_periode;
 
