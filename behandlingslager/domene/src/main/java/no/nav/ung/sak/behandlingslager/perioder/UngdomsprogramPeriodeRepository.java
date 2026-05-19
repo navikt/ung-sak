@@ -65,15 +65,15 @@ public class UngdomsprogramPeriodeRepository {
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
 
-        if (periodeMaksDato != null) {
-            var maksPeriode = new UngdomsprogramMaksPeriode(harForlengetPeriode, periodeMaksDato);
-            entityManager.persist(maksPeriode);
-            nyttGrunnlag.setUngdomsprogramMaksPeriode(maksPeriode);
-        } else {
-            // Bevar eksisterende maks-periode når periodeMaksDato ikke er oppgitt
+        // Bevar eksisterende periodeMaksDato hvis ikke oppgitt (f.eks. ved opphør)
+        var effektivMaksDato = periodeMaksDato != null ? periodeMaksDato :
             eksisterende.flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
-                .ifPresent(nyttGrunnlag::setUngdomsprogramMaksPeriode);
-        }
+                .flatMap(UngdomsprogramMaksPeriode::getPeriodeMaksDato)
+                .orElse(null);
+
+        var maksPeriode = new UngdomsprogramMaksPeriode(harForlengetPeriode, effektivMaksDato);
+        entityManager.persist(maksPeriode);
+        nyttGrunnlag.setUngdomsprogramMaksPeriode(maksPeriode);
 
         persister(eksisterende, nyttGrunnlag);
     }
