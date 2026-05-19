@@ -10,11 +10,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.typer.JournalpostId;
 
-import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -60,59 +57,24 @@ public class InitierPerioderSteg implements BehandlingSteg {
             .map(MottattDokument::getJournalpostId)
             .collect(Collectors.toSet());
 
-        var alleredeKjenteStartdatoer = finnAlleredeKjenteStartdatoer(behandling.getFagsakId(), behandlingId);
-        var søknadsperioder = mapStartdatoerRelevantForBehandlingen(mottatteDokumenter, søknadsperiodeGrunnlag, alleredeKjenteStartdatoer);
+        var søknadsperioder = mapStartdatoerRelevantForBehandlingen(mottatteDokumenter, søknadsperiodeGrunnlag);
         startdatoRepository.lagreRelevanteSøknader(behandlingId, søknadsperioder);
     }
 
     /**
-     * Henter startdatoer som allerede er kjent fra forrige avsluttede ikke-henlagte ytelsesbehandling på fagsaken.
-     * <p>
-     * Brukes for å unngå at en startdato som er identisk med tidligere godkjent grunnlag (typisk fra søknad
-     * generert i forbindelse med revurdering) markeres som "relevant" på nytt og dermed blåser opp tidslinjen
-     * for perioder til vurdering. Førstegangsbehandling og ekte nye startdatoer påvirkes ikke.
-     */
-    private Set<LocalDate> finnAlleredeKjenteStartdatoer(Long fagsakId, Long behandlingId) {
-        return behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId)
-            .filter(b -> !b.getId().equals(behandlingId))
-            .flatMap(b -> startdatoRepository.hentGrunnlag(b.getId()))
-            .map(this::hentRelevanteStartdatoerSomLocalDate)
-            .orElse(Set.of());
-    }
-
-    private Set<LocalDate> hentRelevanteStartdatoerSomLocalDate(UngdomsytelseStartdatoGrunnlag grunnlag) {
-        var relevante = Optional.ofNullable(grunnlag.getRelevanteStartdatoer())
-            .orElse(grunnlag.getOppgitteStartdatoer());
-        if (relevante == null) {
-            return Set.of();
-        }
-        return relevante.getStartdatoer().stream()
-            .map(UngdomsytelseSøktStartdato::getStartdato)
-            .collect(Collectors.toSet());
-    }
-
-
-    /**
      * Lager aggregat av perioder som er relevant for denne behandlingen, altså perioder fra journalposter som har kommet inn i denne behandlingen.
-     * <p>
-     * Startdatoer som allerede er kjent fra forrige avsluttede behandling filtreres bort, slik at kun reelt
-     * nye startdatoer markeres som relevante. Dette hindrer at f.eks. en søknad mottatt i forbindelse
-     * med en forlengelse-revurdering (med samme startdato som forrige vedtak) re-vurderer hele programperioden.
      *
      * @param journalposterMottattIDenneBehandlingen Journalposter som er mottatt i denne behandlingen
      * @param grunnlag                               Søknadsperiodegrunnlag
-     * @param alleredeKjenteStartdatoer              Startdatoer som er kjent fra forrige avsluttede behandling
      * @return Aggregat for perioder som er relevant for denne behandlingen
      */
     private UngdomsytelseStartdatoer mapStartdatoerRelevantForBehandlingen(Set<JournalpostId> journalposterMottattIDenneBehandlingen,
-                                                                           UngdomsytelseStartdatoGrunnlag grunnlag,
-                                                                           Set<LocalDate> alleredeKjenteStartdatoer) {
+                                                                           UngdomsytelseStartdatoGrunnlag grunnlag) {
 
         var relevantePerioder = grunnlag.getOppgitteStartdatoer()
             .getStartdatoer()
             .stream()
             .filter(it -> journalposterMottattIDenneBehandlingen.stream().anyMatch(at -> at.equals(it.getJournalpostId())))
-            .filter(it -> !alleredeKjenteStartdatoer.contains(it.getStartdato()))
             .collect(Collectors.toSet());
 
         return new UngdomsytelseStartdatoer(relevantePerioder);

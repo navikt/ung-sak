@@ -78,11 +78,11 @@ class InitierPerioderStegTest {
     }
 
     @Test
-    void skal_filtrere_bort_startdato_som_allerede_er_kjent_fra_forrige_avsluttede_behandling() {
+    void skal_markere_startdato_som_relevant_selv_om_den_også_finnes_i_forrige_avsluttede_behandling() {
         // Førstegangsbehandling med startdato S1 - avsluttes
         var førstegangsbehandling = lagreFørstegangsbehandlingMedRelevantStartdato(STARTDATO, new JournalpostId("100"));
 
-        // Revurdering med papirsøknad som har samme startdato S1
+        // Revurdering med søknad som har samme startdato S1
         var revurdering = Behandling.fraTidligereBehandling(førstegangsbehandling, BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
 
@@ -93,11 +93,11 @@ class InitierPerioderStegTest {
         steg.utførSteg(kontekstFor(revurdering));
 
         var resultat = hentRelevanteStartdatoer(revurdering);
-        assertThat(resultat).isEmpty();
+        assertThat(resultat).containsExactly(STARTDATO);
     }
 
     @Test
-    void skal_kun_markere_nye_startdatoer_som_relevante_ved_revurdering() {
+    void skal_markere_alle_startdatoer_som_relevante_ved_revurdering_med_nye_dokumenter() {
         // Førstegangsbehandling med startdato S1 - avsluttes
         var førstegangsbehandling = lagreFørstegangsbehandlingMedRelevantStartdato(STARTDATO, new JournalpostId("100"));
 
@@ -118,7 +118,25 @@ class InitierPerioderStegTest {
         steg.utførSteg(kontekstFor(revurdering));
 
         var resultat = hentRelevanteStartdatoer(revurdering);
-        assertThat(resultat).containsExactly(nyStartdato);
+        assertThat(resultat).containsExactlyInAnyOrder(STARTDATO, nyStartdato);
+    }
+
+    @Test
+    void skal_ikke_markere_startdatoer_som_relevante_når_ingen_dokumenter_er_mottatt_i_behandlingen() {
+        // Førstegangsbehandling med startdato S1 - avsluttes
+        var førstegangsbehandling = lagreFørstegangsbehandlingMedRelevantStartdato(STARTDATO, new JournalpostId("100"));
+
+        // Revurdering uten nye mottatte dokumenter (typisk hendelse-trigget)
+        var revurdering = Behandling.fraTidligereBehandling(førstegangsbehandling, BehandlingType.REVURDERING).build();
+        behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
+
+        // Grunnlag kopieres fra forrige behandling men ingen nye dokumenter knyttes til revurderingen
+        startdatoRepository.lagre(revurdering.getId(), List.of(new UngdomsytelseSøktStartdato(STARTDATO, new JournalpostId("100"))));
+
+        steg.utførSteg(kontekstFor(revurdering));
+
+        var resultat = hentRelevanteStartdatoer(revurdering);
+        assertThat(resultat).isEmpty();
     }
 
     private void lagreMottattDokument(Behandling behandling, JournalpostId journalpostId) {
@@ -139,7 +157,7 @@ class InitierPerioderStegTest {
         startdatoRepository.lagre(førstegangsbehandling.getId(), List.of(søktStartdato));
         startdatoRepository.lagreRelevanteSøknader(førstegangsbehandling.getId(),
             new UngdomsytelseStartdatoer(Set.of(søktStartdato)));
-        // BehandlingVedtak kreves for at finnSisteAvsluttedeIkkeHenlagteYtelsebehandling skal returnere behandlingen.
+        lagreMottattDokument(førstegangsbehandling, journalpostId);
         var vedtak = BehandlingVedtak.builder(førstegangsbehandling.getId())
             .medVedtakstidspunkt(LocalDateTime.now().minusDays(1))
             .medAnsvarligSaksbehandler("test")
