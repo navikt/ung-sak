@@ -53,7 +53,7 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
     }
 
     private Behandling lagForlengetPeriodeBehandling(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
-        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(FOM);
+        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedMaksDato(FOM, opprinneligSluttdato);
         var forlengetPeriodeGrunnlag = ForlengetPeriodeScenarioer.forlengetPeriode(FOM, opprinneligSluttdato, nySluttdato);
 
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()
