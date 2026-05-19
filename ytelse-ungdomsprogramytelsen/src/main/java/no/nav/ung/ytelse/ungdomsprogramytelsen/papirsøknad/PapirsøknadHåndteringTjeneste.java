@@ -5,9 +5,11 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.saf.Kanal;
 import no.nav.k9.felles.integrasjon.saf.Tema;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.NorskIdentitetsnummer;
+import no.nav.ung.brukerdialog.kontrakt.AktørIdDto;
 import no.nav.ung.domenetjenester.arkiv.ArkivTjeneste;
 import no.nav.ung.domenetjenester.arkiv.JournalpostInfo;
 import no.nav.ung.domenetjenester.arkiv.journal.TilJournalføringTjeneste;
@@ -18,7 +20,6 @@ import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.VariantFormat;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.sak.behandling.FagsakTjeneste;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
@@ -27,19 +28,15 @@ import no.nav.ung.sak.dokument.arkiv.DokumentArkivTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
-import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
-import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
-import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.formidling.bestilling.JournalpostType;
+import no.nav.ung.sak.formidling.dokarkiv.DokArkivKlient;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequest;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostRequestBuilder;
 import no.nav.ung.sak.formidling.dokarkiv.dto.OpprettJournalpostResponse;
 import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.mottak.SøknadMottakTjeneste;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
+import no.nav.ung.sak.typer.*;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
 
 import java.time.LocalDate;
@@ -135,7 +132,7 @@ public class PapirsøknadHåndteringTjeneste {
         byte[] jsonDokument = lagJsonDokument(deltakerIdent, startdato, deltakelseId, journalpostId);
 
         //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
-        oppgaveKlient.løsSøkYtelseOppgave(new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()));
+        oppgaveKlient.løsSøkYtelseOppgave(new AktørIdDto(aktørId.getAktørId()));
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 
