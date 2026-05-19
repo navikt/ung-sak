@@ -11,16 +11,17 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
 /**
- * One-shot batch-task som oppretter ung_ungdomsprogram_maks_periode for alle aktive grunnlag
- * som mangler en slik rad.
+ * One-shot batch-task som populerer periode_maks_dato for alle aktive grunnlag.
  *
- * <p>Pr. nå har ingen saker forlenget periode, så alle settes til har_forlenget_periode=false
- * og periode_maks_dato = startdato + 260 virkedager (justert til fredag hvis helg).
+ * <p>Del 1: Oppdaterer eksisterende maks_periode-rader som mangler periode_maks_dato.
+ * <p>Del 2: Oppretter nye maks_periode-rader for grunnlag som mangler kobling helt.
+ *
+ * <p>Pr. nå har ingen saker forlenget periode, men tasken respekterer har_forlenget_periode-flagget
+ * og beregner riktig antall virkedager (260 normal, 300 forlenget).
  *
  * <p>Tasken er idempotent og kan kjøres på nytt uten sideeffekter.
  */
@@ -45,7 +46,55 @@ public class BackfillPeriodeMaksDatoTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        // Finner alle aktive grunnlag som mangler maks_periode-rad, sammen med tidligste startdato
+        backfillEksisterendeMaksPeriodeRader();
+        opprettManglendeMaksPeriodeRader();
+        entityManager.flush();
+    }
+
+    /**
+     * Oppdaterer eksisterende maks_periode-rader som mangler periode_maks_dato.
+     */
+    private void backfillEksisterendeMaksPeriodeRader() {
+        @SuppressWarnings("unchecked")
+        List<Object[]> rader = entityManager.createNativeQuery(
+                "select mp.id, mp.har_forlenget_periode, min(up.fom) as startdato " +
+                    "from ung_ungdomsprogram_maks_periode mp " +
+                    "join ung_gr_ungdomsprogramperiode gr on gr.ung_ungdomsprogram_maks_periode_id = mp.id " +
+                    "join ung_ungdomsprogramperioder ups on ups.id = gr.ung_ungdomsprogramperioder_id " +
+                    "join ung_ungdomsprogramperiode up on up.ung_ungdomsprogramperioder_id = ups.id " +
+                    "where mp.periode_maks_dato is null " +
+                    "group by mp.id, mp.har_forlenget_periode")
+            .getResultList();
+
+        log.info("Fant {} eksisterende maks_periode-rader uten periode_maks_dato", rader.size());
+
+        int oppdatert = 0;
+        for (Object[] rad : rader) {
+            Long maksPeriodeId = ((Number) rad[0]).longValue();
+            boolean harForlengetPeriode = (Boolean) rad[1];
+            LocalDate startdato = (LocalDate) rad[2];
+
+            LocalDate maksDato = justerTilSisteVirkedag(FagsakperiodeUtleder.finnTomDato(
+                startdato,
+                new LocalDateTimeline<>(startdato, startdato, true),
+                harForlengetPeriode));
+
+            entityManager.createNativeQuery(
+                    "update ung_ungdomsprogram_maks_periode set periode_maks_dato = :maksDato where id = :id")
+                .setParameter("maksDato", maksDato)
+                .setParameter("id", maksPeriodeId)
+                .executeUpdate();
+
+            oppdatert++;
+        }
+
+        log.info("Oppdatert periode_maks_dato for {} eksisterende maks_periode-rader", oppdatert);
+    }
+
+    /**
+     * Oppretter nye maks_periode-rader for aktive grunnlag som mangler kobling.
+     */
+    private void opprettManglendeMaksPeriodeRader() {
         @SuppressWarnings("unchecked")
         List<Object[]> rader = entityManager.createNativeQuery(
                 "select gr.id, min(up.fom) as startdato " +
@@ -64,14 +113,11 @@ public class BackfillPeriodeMaksDatoTask implements ProsessTaskHandler {
             Long grunnlagId = ((Number) rad[0]).longValue();
             LocalDate startdato = (LocalDate) rad[1];
 
-            // Ingen saker har forlenget periode, beregner startdato + 260 virkedager
-            // Justerer til fredag hvis beregningen havner i helg
             LocalDate maksDato = justerTilSisteVirkedag(FagsakperiodeUtleder.finnTomDato(
                 startdato,
                 new LocalDateTimeline<>(startdato, startdato, true),
                 false));
 
-            // Opprett ny maks_periode-rad
             Long maksPeriodeId = ((Number) entityManager.createNativeQuery(
                     "insert into ung_ungdomsprogram_maks_periode (id, har_forlenget_periode, periode_maks_dato, hjemmel) " +
                         "values (nextval('seq_ung_ungdomsprogram_maks_periode_id'), false, :maksDato, 'UNG_FRSKRFT_6') " +
@@ -79,7 +125,6 @@ public class BackfillPeriodeMaksDatoTask implements ProsessTaskHandler {
                 .setParameter("maksDato", maksDato)
                 .getSingleResult()).longValue();
 
-            // Koble grunnlaget til maks_periode-raden
             entityManager.createNativeQuery(
                     "update ung_gr_ungdomsprogramperiode set ung_ungdomsprogram_maks_periode_id = :maksPeriodeId where id = :grunnlagId")
                 .setParameter("maksPeriodeId", maksPeriodeId)
@@ -90,7 +135,6 @@ public class BackfillPeriodeMaksDatoTask implements ProsessTaskHandler {
         }
 
         log.info("Opprettet maks_periode for {} grunnlag", oppdatert);
-        entityManager.flush();
     }
 
     private static LocalDate justerTilSisteVirkedag(LocalDate dato) {
