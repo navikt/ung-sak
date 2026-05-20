@@ -55,7 +55,7 @@ public class UngdomsprogramRegisterKlient {
         LocalDate fraOgMed,
         LocalDate tilOgMed,
         boolean harForlengetPeriode,
-        LocalDate forlengetPeriodeMaksDato
+        LocalDate periodeMaksDato
     ) {
     }
 }

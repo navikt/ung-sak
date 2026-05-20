@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UngdomsprogramPeriodeTjeneste {
@@ -61,6 +62,46 @@ public class UngdomsprogramPeriodeTjeneste {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
             .map(gr -> gr.harForlengetPeriode())
             .orElse(false);
+    }
+
+    public Optional<LocalDate> finnPeriodeMaksDato(Long behandlingId) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .flatMap(gr -> gr.getPeriodeMaksDato());
+    }
+
+    /**
+     * Returnerer ungdomsprogramperiodene for en behandling der hver periode sin {@code tom}-dato
+     * er kappet mot {@code periodeMaksDato} fra grunnlaget.
+     *
+     * <p>For hver periode brukes {@code min(opprinnelig tom, periodeMaksDato)}.
+     * {@code periodeMaksDato} er allerede beregnet som en virkedag av ung-deltakelse-opplyser.
+     * Dersom {@code periodeMaksDato} ikke er satt på grunnlaget beholdes opprinnelig {@code tom} uendret.
+     * Perioder som ligger helt etter maksdato filtreres bort.
+     *
+     * @param behandlingId Behandling som det skal hentes perioder for
+     * @return Perioder kappet mot maksdato, eller tom mengde dersom grunnlag mangler
+     */
+    public Set<DatoIntervallEntitet> finnPerioderKappetMotMaksdato(Long behandlingId) {
+        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId);
+        if (grunnlag.isEmpty()) {
+            return Set.of();
+        }
+        var perioder = grunnlag.get().getUngdomsprogramPerioder().getPerioder();
+        var maksDato = grunnlag.get().getPeriodeMaksDato();
+        if (maksDato.isEmpty()) {
+            return perioder.stream()
+                .map(UngdomsprogramPeriode::getPeriode)
+                .collect(Collectors.toSet());
+        }
+        var kappetTom = maksDato.get();
+        return perioder.stream()
+            .filter(p -> !p.getPeriode().getFomDato().isAfter(kappetTom))
+            .map(p -> {
+                var opprinneligTom = p.getPeriode().getTomDato();
+                var nyTom = opprinneligTom.isBefore(kappetTom) ? opprinneligTom : kappetTom;
+                return DatoIntervallEntitet.fraOgMedTilOgMed(p.getPeriode().getFomDato(), nyTom);
+            })
+            .collect(Collectors.toSet());
     }
 
     /**

@@ -61,7 +61,6 @@ public class InitierPerioderSteg implements BehandlingSteg {
         startdatoRepository.lagreRelevanteSøknader(behandlingId, søknadsperioder);
     }
 
-
     /**
      * Lager aggregat av perioder som er relevant for denne behandlingen, altså perioder fra journalposter som har kommet inn i denne behandlingen.
      *

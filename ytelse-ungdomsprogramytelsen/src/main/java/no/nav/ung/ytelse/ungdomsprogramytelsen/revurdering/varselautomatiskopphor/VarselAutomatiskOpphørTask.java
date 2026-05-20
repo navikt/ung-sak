@@ -159,7 +159,7 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
     private LocalDate hentMaksdatoFraRegister(Fagsak fagsak) {
         var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(fagsak.getAktørId().getAktørId());
         return registerOpplysninger.opplysninger().stream()
-            .map(DeltakerProgramOpplysningDTO::forlengetPeriodeMaksDato)
+            .map(DeltakerProgramOpplysningDTO::periodeMaksDato)
             .filter(Objects::nonNull)
             .findFirst()
             .orElse(null);

@@ -57,6 +57,30 @@ public class FørstegangsbehandlingScenarioer {
     }
 
     /**
+     * Som innvilget19år, men med periodeMaksDato satt på grunnlaget.
+     */
+    public static UngTestScenario innvilget19årMedMaksDato(LocalDate fom, LocalDate periodeMaksDato) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+
+        var satser = new LocalDateTimeline<>(p, BrevScenarioerUtils.lavSatsBuilder(fom).build());
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), Tid.TIDENES_ENDE));
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(p),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
+            Collections.emptyList(), null, null, periodeMaksDato);
+    }
+
+    /**
      * 19 år ungdom med full ungdomsperiode med 1 barn 15 dager etter fom, ingen inntektsgradering
      */
     public static UngTestScenario innvilget19årMedBarn15DagerEtterStartdato(LocalDate fom) {

@@ -145,7 +145,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         try {
             var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(aktør.getAktørId());
             var maksdato = registerOpplysninger.opplysninger().stream()
-                .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::forlengetPeriodeMaksDato)
+                .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::periodeMaksDato)
                 .filter(Objects::nonNull)
                 .filter(opphørsdato::equals)
                 .findFirst();
