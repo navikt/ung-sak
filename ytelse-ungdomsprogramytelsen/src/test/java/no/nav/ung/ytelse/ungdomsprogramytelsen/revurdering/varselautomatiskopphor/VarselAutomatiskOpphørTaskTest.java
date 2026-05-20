@@ -18,9 +18,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient.DeltakerOpplysningerDTO;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -30,7 +28,6 @@ import jakarta.persistence.TypedQuery;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -43,7 +40,7 @@ class VarselAutomatiskOpphørTaskTest {
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
-    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     @BeforeEach
     void setUp() {
@@ -52,7 +49,7 @@ class VarselAutomatiskOpphørTaskTest {
         etterlysningRepository = mock(EtterlysningRepository.class);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         fagsakProsessTaskRepository = mock(FagsakProsessTaskRepository.class);
-        ungdomsprogramRegisterKlient = mock(UngdomsprogramRegisterKlient.class);
+        ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
 
         task = new VarselAutomatiskOpphørTask(
             entityManager,
@@ -60,7 +57,7 @@ class VarselAutomatiskOpphørTaskTest {
             etterlysningRepository,
             prosessTaskTjeneste,
             fagsakProsessTaskRepository,
-            ungdomsprogramRegisterKlient
+            ungdomsprogramPeriodeTjeneste
         );
     }
 
@@ -76,7 +73,7 @@ class VarselAutomatiskOpphørTaskTest {
         when(behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(1L)).thenReturn(List.of());
         when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
-        mockRegisterMedMaksdato("1234567890123", maksdato);
+        when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
         // Act
         task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
@@ -100,7 +97,7 @@ class VarselAutomatiskOpphørTaskTest {
         when(behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(1L)).thenReturn(List.of());
         when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
-        mockRegisterMedMaksdato("1234567890123", maksdato);
+        when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
         // Act
         task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
@@ -129,7 +126,7 @@ class VarselAutomatiskOpphørTaskTest {
     }
 
     @Test
-    void skal_ikke_opprette_revurdering_når_register_ikke_har_maksdato() {
+    void skal_ikke_opprette_revurdering_når_grunnlag_ikke_har_maksdato() {
         // Arrange
         var fagsak = lagFagsak(1L, "1234567890123");
         var behandling = lagBehandling(fagsak, 100L);
@@ -139,24 +136,14 @@ class VarselAutomatiskOpphørTaskTest {
         when(behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(1L)).thenReturn(List.of());
         when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
-        // Register returnerer null maksdato
-        when(ungdomsprogramRegisterKlient.hentForAktørId("1234567890123"))
-            .thenReturn(new DeltakerOpplysningerDTO(List.of(
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", LocalDate.of(2025, 1, 1), LocalDate.of(2026, 12, 31), false, null)
-            )));
+        // Grunnlag returnerer tom maksdato
+        when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.empty());
 
         // Act
         task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
 
         // Assert
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
-    }
-
-    private void mockRegisterMedMaksdato(String aktørId, LocalDate maksdato) {
-        when(ungdomsprogramRegisterKlient.hentForAktørId(aktørId))
-            .thenReturn(new DeltakerOpplysningerDTO(List.of(
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", LocalDate.of(2025, 1, 1), maksdato, false, maksdato)
-            )));
     }
 
     @SuppressWarnings("unchecked")
@@ -184,4 +171,3 @@ class VarselAutomatiskOpphørTaskTest {
         return behandling;
     }
 }
-

@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.hendelsehåndtering;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,7 +12,6 @@ import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,7 +48,6 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     private BehandlingRepositoryProvider behandlingRepositoryProvider;
     @Inject
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient = mock(UngdomsprogramRegisterKlient.class);
     private TestScenarioBuilder scenarioBuilder;
 
     @BeforeEach
@@ -59,8 +56,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
             new BehandlingRepository(entityManager),
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
-            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository),
-            ungdomsprogramRegisterKlient
+            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository)
         );
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);

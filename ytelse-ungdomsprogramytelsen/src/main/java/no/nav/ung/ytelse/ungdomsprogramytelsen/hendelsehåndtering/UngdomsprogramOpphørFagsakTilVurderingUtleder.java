@@ -16,7 +16,6 @@ import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +30,6 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
-    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
 
     public UngdomsprogramOpphørFagsakTilVurderingUtleder() {
         // For CDI
@@ -40,12 +38,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     @Inject
     public UngdomsprogramOpphørFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
-                                                         UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient) {
+                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
-        this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
     }
 
     @Override
@@ -62,12 +58,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
                 continue;
             }
 
-            // Scenario 4: Ignorer opphørshendelse dersom opphørsdato == maksdato (naturlig avslutning).
+            // Ignorer opphørshendelse dersom opphørsdato == maksdato (naturlig avslutning).
             // Deltaker-appen setter sluttdato = maksdato automatisk. Ung-sak trenger ikke opprette revurdering.
-            if (erNaturligAvslutningVedMaksdato(aktør, opphørsdatoFraHendelse, hendelseId)) {
-                continue;
-            }
-
             Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
             if (behandlingOpt.isEmpty()) {
                 logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
@@ -75,6 +67,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             }
 
             Behandling sisteBehandling = behandlingOpt.get();
+
+            if (erNaturligAvslutningVedMaksdato(sisteBehandling, opphørsdatoFraHendelse, hendelseId)) {
+                continue;
+            }
 
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
@@ -138,23 +134,14 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
     /**
      * Sjekker om opphørshendelsen er en naturlig avslutning ved maksdato.
-     * Dersom opphørsdato == kvoteMaksDato fra registeret, er dette en automatisk avslutning
+     * Dersom opphørsdato == periodeMaksDato fra grunnlaget, er dette en automatisk avslutning
      * fra deltaker-appen og ung-sak trenger ikke å opprette ny behandling.
      */
-    private boolean erNaturligAvslutningVedMaksdato(AktørId aktør, LocalDate opphørsdato, String hendelseId) {
-        try {
-            var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(aktør.getAktørId());
-            var maksdato = registerOpplysninger.opplysninger().stream()
-                .map(UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO::periodeMaksDato)
-                .filter(Objects::nonNull)
-                .filter(opphørsdato::equals)
-                .findFirst();
-            if (maksdato.isPresent()) {
-                logger.info("Opphørsdato {} == kvoteMaksDato fra register. Naturlig avslutning — ignorerer hendelse {}.", opphørsdato, hendelseId);
-                return true;
-            }
-        } catch (Exception e) {
-            logger.warn("Kunne ikke hente maksdato fra register for aktør. Fortsetter med normal opphørshåndtering. Hendelse: {}", hendelseId, e);
+    private boolean erNaturligAvslutningVedMaksdato(Behandling behandling, LocalDate opphørsdato, String hendelseId) {
+        var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId());
+        if (maksdato.isPresent() && maksdato.get().equals(opphørsdato)) {
+            logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag. Naturlig avslutning — ignorerer hendelse {}.", opphørsdato, hendelseId);
+            return true;
         }
         return false;
     }

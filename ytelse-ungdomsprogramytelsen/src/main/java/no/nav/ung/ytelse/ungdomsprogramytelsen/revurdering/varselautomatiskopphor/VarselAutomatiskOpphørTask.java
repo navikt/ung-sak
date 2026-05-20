@@ -20,14 +20,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramRegisterKlient.DeltakerProgramOpplysningDTO;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
@@ -49,7 +47,7 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
-    private UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient;
+    private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     VarselAutomatiskOpphørTask() {
     }
@@ -60,13 +58,13 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
                                       EtterlysningRepository etterlysningRepository,
                                       ProsessTaskTjeneste prosessTaskTjeneste,
                                       FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                      UngdomsprogramRegisterKlient ungdomsprogramRegisterKlient) {
+                                      UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
-        this.ungdomsprogramRegisterKlient = ungdomsprogramRegisterKlient;
+        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
     }
 
     @Override
@@ -132,8 +130,8 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
             return null;
         }
 
-        // Hent maksdato fra ung-deltaker-opplyser
-        var maksdato = hentMaksdatoFraRegister(fagsak);
+        // Hent maksdato fra grunnlaget
+        var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
         if (maksdato == null) {
             return null;
         }
@@ -152,18 +150,6 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
         return tilVurderingTask;
     }
 
-    /**
-     * Henter kvoteMaksDato fra ung-deltaker-opplyser for fagsaken.
-     * Returnerer null dersom ingen maksdato finnes (f.eks. åpen periode uten beregnet maksdato).
-     */
-    private LocalDate hentMaksdatoFraRegister(Fagsak fagsak) {
-        var registerOpplysninger = ungdomsprogramRegisterKlient.hentForAktørId(fagsak.getAktørId().getAktørId());
-        return registerOpplysninger.opplysninger().stream()
-            .map(DeltakerProgramOpplysningDTO::periodeMaksDato)
-            .filter(Objects::nonNull)
-            .findFirst()
-            .orElse(null);
-    }
 
     private List<Fagsak> hentLøpendeFagsaker() {
         var query = entityManager.createQuery(
