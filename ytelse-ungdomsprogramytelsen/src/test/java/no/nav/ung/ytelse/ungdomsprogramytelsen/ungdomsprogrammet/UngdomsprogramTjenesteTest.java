@@ -13,6 +13,7 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramMaksPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -193,7 +194,7 @@ class UngdomsprogramTjenesteTest {
     private boolean harForlengetPeriodeLagret(Behandling behandling) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
             .flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
-            .map(k -> k.harForlengetPeriode())
+            .map(UngdomsprogramMaksPeriode::harForlengetPeriode)
             .orElse(false);
     }
 }
