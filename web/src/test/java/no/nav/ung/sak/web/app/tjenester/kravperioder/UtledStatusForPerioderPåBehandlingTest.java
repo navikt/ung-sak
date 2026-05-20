@@ -75,7 +75,7 @@ class UtledStatusForPerioderPåBehandlingTest {
 
         var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
         assertThat(perioderMedÅrsak.size()).isEqualTo(1);
-        var periode = perioderMedÅrsak.get(0);''
+        var periode = perioderMedÅrsak.get(0);
         assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
         assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
     }
