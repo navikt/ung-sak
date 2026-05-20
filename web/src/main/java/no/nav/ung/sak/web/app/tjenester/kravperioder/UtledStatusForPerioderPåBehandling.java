@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentType;
@@ -39,25 +38,7 @@ class UtledStatusForPerioderPåBehandling {
 
     static StatusForPerioderPåBehandling utledStatus(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
                                                      List<Trigger> prosesstriggere) {
-        // Behold bakoverkompatibilitet for eksisterende kallsteder/tester: behandler kall uten
-        // behandlingstype som førstegangsbehandling (inkluderer søknadsperioden i tidslinjen).
-        return utledStatus(kravdokumenterTilBehandling, prosesstriggere, true, FagsakYtelseType.UNGDOMSYTELSE);
-    }
-
-    /**
-     * Utleder status for perioder på en behandling.
-     *
-     * <p>For revurderinger ({@code erFørstegangsbehandling = false}) på ungdomsprogramytelsen
-     * utelates søknadsperioden fra kravdokumentene. Søknaden hører til førstegangsbehandlingen
-     * og skal ikke vises som "ny periode" på revurderinger som typisk trigges av en hendelse
-     * (f.eks. forlenget periode). For andre ytelser (aktivitetspenger) inkluderes søknadsperioden
-     * alltid, da revurderingsmodellen der er annerledes.
-     */
-    static StatusForPerioderPåBehandling utledStatus(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
-                                                     List<Trigger> prosesstriggere,
-                                                     boolean erFørstegangsbehandling,
-                                                     FagsakYtelseType fagsakYtelseType) {
-        var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere, erFørstegangsbehandling, fagsakYtelseType);
+        var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere);
         var periodeMedÅrsaker = mapPeriodeMedÅrsaker(årsakstidslinje);
         var årsakerMedPerioder = finnÅrsakerMedPerioder(periodeMedÅrsaker);
         return new StatusForPerioderPåBehandling(
@@ -75,17 +56,8 @@ class UtledStatusForPerioderPåBehandling {
     }
 
     private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
-                                                                                List<Trigger> prosesstriggere,
-                                                                                boolean erFørstegangsbehandling,
-                                                                                FagsakYtelseType fagsakYtelseType) {
+                                                                                List<Trigger> prosesstriggere) {
         var årsakerFraTriggere = finnÅrsakerFraTriggereTidslinje(prosesstriggere);
-        if (!erFørstegangsbehandling && fagsakYtelseType == FagsakYtelseType.UNGDOMSYTELSE) {
-            // For ungdomsprogramytelsen utelates søknadsperioden fra revurderinger.
-            // Søknaden hører til førstegangsbehandlingen, og revurderinger trigges av hendelser
-            // (f.eks. forlenget periode/opphør). For andre ytelser (aktivitetspenger) har
-            // revurderinger en annen modell der søknadsperioden fortsatt er relevant.
-            return årsakerFraTriggere;
-        }
         var søknadtidslinje = finnFørsteSøknadTidslinje(kravdokumenterTilBehandling);
         return søknadtidslinje.crossJoin(årsakerFraTriggere, StandardCombinators::union);
     }

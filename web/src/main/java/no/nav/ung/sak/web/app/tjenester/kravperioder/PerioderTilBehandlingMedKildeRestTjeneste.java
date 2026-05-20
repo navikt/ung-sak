@@ -38,6 +38,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -137,14 +138,22 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
 
 
     private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling) {
-        var kravdokumenterTilBehandling = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
+        var vurderSøknadsfristTjeneste = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref);
+        var kravdokumenterTilBehandling = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(ref);
+
+        // Filtrer til kun kravdokumenter som er relevante for denne behandlingen.
+        // For revurderinger betyr dette at søknaden (som tilhører førstegangsbehandlingen) utelates,
+        // slik at kun dokumenter/triggere som faktisk har tilkommet i behandlingen vises.
+        var relevanteKravdokumenter = vurderSøknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
+        var filtrertKravdokumenter = kravdokumenterTilBehandling.entrySet().stream()
+            .filter(entry -> relevanteKravdokumenter.stream()
+                .anyMatch(relevantt -> relevantt.getJournalpostId().equals(entry.getKey().getJournalpostId())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
-        boolean erFørstegangsbehandling = behandling.getType() == no.nav.ung.kodeverk.behandling.BehandlingType.FØRSTEGANGSSØKNAD;
         return UtledStatusForPerioderPåBehandling.utledStatus(
-            kravdokumenterTilBehandling,
-            prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList(),
-            erFørstegangsbehandling,
-            ref.getFagsakYtelseType()
+            filtrertKravdokumenter,
+            prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList()
         );
     }
 

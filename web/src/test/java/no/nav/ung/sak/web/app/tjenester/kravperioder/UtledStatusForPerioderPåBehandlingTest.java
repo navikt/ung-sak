@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
@@ -81,21 +80,18 @@ class UtledStatusForPerioderPåBehandlingTest {
     }
 
     @Test
-    void revurdering_skal_ikke_inkludere_soknadsperiode_som_forstegangsvurdering() {
-        // Revurdering for forlenget periode skal kun vise trigger-perioden, ikke den opprinnelige
-        // søknadsperioden fra førstegangsbehandlingen.
+    void revurdering_skal_kun_vise_triggerperiode_naar_soknadsperiode_er_filtrert_bort() {
+        // Simulerer at kallstedet har filtrert bort søknadsdokumentet (som tilhører
+        // førstegangsbehandlingen) via relevanteKravdokumentForBehandling. Kun trigger-perioden
+        // skal vises.
         var startdato = LocalDate.now();
-        var opprinneligProgramperiode = DatoIntervallEntitet.fraOgMedTilOgMed(startdato, startdato.plusWeeks(52).minusDays(1));
-        var fomForlenget = opprinneligProgramperiode.getTomDato().plusDays(1);
+        var fomForlenget = startdato.plusWeeks(52);
         var tomForlenget = fomForlenget.plusWeeks(8).minusDays(1);
         var forlengetPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fomForlenget, tomForlenget);
 
         var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
-            Map.of(new KravDokument(new JournalpostId(12345L), LocalDateTime.now(), KravDokumentType.SØKNAD, Kildesystem.SØKNADSDIALOG.getKode()),
-                List.of(new SøktPeriode<>(opprinneligProgramperiode, null))),
-            List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode)),
-            false,
-            FagsakYtelseType.UNGDOMSYTELSE
+            Map.of(), // Søknadsdokumentet er allerede filtrert bort av kallstedet
+            List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode))
         );
 
         var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
