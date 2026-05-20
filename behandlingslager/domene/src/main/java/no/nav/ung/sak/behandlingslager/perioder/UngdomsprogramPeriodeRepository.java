@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.diff.DiffResult;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Dependent
@@ -46,21 +47,35 @@ public class UngdomsprogramPeriodeRepository {
         var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
-        // Bevar eksisterende forlenget periode – kan ikke trekkes tilbake etter innvilgelse
-        eksisterende.flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramForlengetPeriode)
-            .ifPresent(nyttGrunnlag::setUngdomsprogramForlengetPeriode);
+        // Bevar eksisterende maks-periode – kan ikke trekkes tilbake etter innvilgelse
+        eksisterende.flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
+            .ifPresent(nyttGrunnlag::setUngdomsprogramMaksPeriode);
         persister(eksisterende, nyttGrunnlag);
     }
 
     public void lagre(Long behandlingId, Collection<UngdomsprogramPeriode> ungdomsprogramPerioder, boolean harForlengetPeriode) {
+        lagre(behandlingId, ungdomsprogramPerioder, harForlengetPeriode, null);
+    }
+
+    public void lagre(Long behandlingId,
+                      Collection<UngdomsprogramPeriode> ungdomsprogramPerioder,
+                      boolean harForlengetPeriode,
+                      LocalDate periodeMaksDato) {
+        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var nyttGrunnlag = new UngdomsprogramPeriodeGrunnlag(behandlingId);
         nyttGrunnlag.leggTil(ungdomsprogramPerioder);
 
-        var forlengetPeriode = new UngdomsprogramForlengetPeriode(harForlengetPeriode);
-        entityManager.persist(forlengetPeriode);
-        nyttGrunnlag.setUngdomsprogramForlengetPeriode(forlengetPeriode);
+        // Bevar eksisterende periodeMaksDato hvis ikke oppgitt (f.eks. ved opphør)
+        var effektivMaksDato = periodeMaksDato != null ? periodeMaksDato :
+            eksisterende.flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
+                .flatMap(UngdomsprogramMaksPeriode::getPeriodeMaksDato)
+                .orElse(null);
 
-        persister(hentEksisterendeGrunnlag(behandlingId), nyttGrunnlag);
+        var maksPeriode = new UngdomsprogramMaksPeriode(harForlengetPeriode, effektivMaksDato);
+        entityManager.persist(maksPeriode);
+        nyttGrunnlag.setUngdomsprogramMaksPeriode(maksPeriode);
+
+        persister(eksisterende, nyttGrunnlag);
     }
 
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {

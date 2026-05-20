@@ -37,7 +37,7 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får forlenget ungdomsprogramytelse \
-                Fra 31. desember 2025 får du forlenget ungdomsprogramytelsen din. \
+                Fra 1. januar 2026 får du forlenget ungdomsprogramytelsen din. \
                 Du får ytelsen så lenge du deltar i ungdomsprogrammet, men ikke lenger enn i åtte nye uker. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelsen § 6. \
                 Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen \
@@ -53,7 +53,7 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
     }
 
     private Behandling lagForlengetPeriodeBehandling(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
-        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(FOM);
+        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedMaksDato(FOM, opprinneligSluttdato);
         var forlengetPeriodeGrunnlag = ForlengetPeriodeScenarioer.forlengetPeriode(FOM, opprinneligSluttdato, nySluttdato);
 
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()

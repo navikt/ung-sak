@@ -154,9 +154,10 @@ public class UngdomsytelseRestTjeneste {
         final var startDato = programperiodeTidslinje.getMinLocalDate();
         final var opphørsdato = programperiodeTidslinje.getMaxLocalDate().isBefore(TIDENES_ENDE) ? programperiodeTidslinje.getMaxLocalDate() : null;
         final var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(behandling.getId());
-        final var maksdato = finnProgramperiodeMaksdato(behandling, programperiodeTidslinje, harForlengetPeriode);
+        final var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId())
+            .orElseGet(() -> finnProgramperiodeMaksdato(behandling, programperiodeTidslinje, harForlengetPeriode));
         final var forbrukteDager = finnForbrukteDager(behandling, programperiodeTidslinje, harForlengetPeriode);
-        return new UngdomsprogramInformasjonDto(startDato, maksdato, opphørsdato, forbrukteDager.orElse(null));
+        return new UngdomsprogramInformasjonDto(startDato, maksdato, opphørsdato, forbrukteDager.orElse(null), harForlengetPeriode);
     }
 
     private static List<UngdomsytelseSatsPeriodeDto> mapSatsperioder(UngdomsytelseSatsPerioder perioder) {

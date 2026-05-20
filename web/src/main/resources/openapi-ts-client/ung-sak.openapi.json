@@ -4812,6 +4812,9 @@
             "format" : "int32",
             "type" : "integer"
           },
+          "harForlengetPeriode" : {
+            "type" : "boolean"
+          },
           "maksdatoForDeltakelse" : {
             "format" : "date",
             "type" : "string"

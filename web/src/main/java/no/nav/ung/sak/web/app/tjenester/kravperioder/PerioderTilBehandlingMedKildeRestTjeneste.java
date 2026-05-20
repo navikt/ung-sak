@@ -38,6 +38,7 @@ import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -82,7 +83,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public StatusForPerioderPåBehandling hentPerioderTilBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        return getStatusForPerioderPåBehandling(ref);
+        return getStatusForPerioderPåBehandling(ref, behandling);
     }
 
     @GET
@@ -101,7 +102,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref);
+        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling);
 
         var timelineTilVurdering = utledTidslinjeTilVurdering(behandling, perioderTilVurderingTjeneste);
 
@@ -136,11 +137,22 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
 
-    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref) {
-        var kravdokumenterTilBehandling = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
+    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling) {
+        var vurderSøknadsfristTjeneste = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref);
+        var kravdokumenterTilBehandling = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(ref);
+
+        // Filtrer til kun kravdokumenter som er relevante for denne behandlingen.
+        // For revurderinger betyr dette at søknaden (som tilhører førstegangsbehandlingen) utelates,
+        // slik at kun dokumenter/triggere som faktisk har tilkommet i behandlingen vises.
+        var relevanteKravdokumenter = vurderSøknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
+        var filtrertKravdokumenter = kravdokumenterTilBehandling.entrySet().stream()
+            .filter(entry -> relevanteKravdokumenter.stream()
+                .anyMatch(relevantt -> relevantt.getJournalpostId().equals(entry.getKey().getJournalpostId())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
         return UtledStatusForPerioderPåBehandling.utledStatus(
-            kravdokumenterTilBehandling,
+            filtrertKravdokumenter,
             prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList()
         );
     }

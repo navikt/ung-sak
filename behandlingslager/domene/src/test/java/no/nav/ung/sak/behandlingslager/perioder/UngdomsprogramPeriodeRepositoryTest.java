@@ -97,7 +97,7 @@ class UngdomsprogramPeriodeRepositoryTest {
     @Test
     void lagre_uten_harForlengetPeriode_bevarer_eksisterende_forlenget_periode() {
         // Arrange: lagre med forlenget periode = true
-        repository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(LocalDate.now(), LocalDate.now())), true);
+        repository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(LocalDate.now(), LocalDate.now())), true, LocalDate.now().plusYears(1));
         assertThat(repository.hentGrunnlag(behandling.getId()).map(g -> g.harForlengetPeriode())).contains(true);
 
         // Act: lagre perioder uten å oppgi harForlengetPeriode
