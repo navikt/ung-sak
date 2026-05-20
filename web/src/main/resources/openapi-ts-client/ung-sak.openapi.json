@@ -3568,8 +3568,7 @@
             "UNGDOMSPROGRAM_ENDRET_STARTDATO" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramEndretStartdatoHendelse",
             "UNGDOMSPROGRAM_FJERN_PERIODE" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramFjernDeltakelseHendelse",
             "UNGDOMSPROGRAM_FORLENGET_PERIODE" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramForlengetPeriodeHendelse",
-            "UNGDOMSPROGRAM_OPPHOER" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse",
-            "UNGDOMSPROGRAM_UTVIDET_KVOTE" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramUtvidetKvoteHendelse"
+            "UNGDOMSPROGRAM_OPPHOER" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse"
           },
           "propertyName" : "type"
         },
@@ -3585,8 +3584,6 @@
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramForlengetPeriodeHendelse"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramOpphørHendelse"
-        }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.UngdomsprogramUtvidetKvoteHendelse"
         } ],
         "properties" : {
           "type" : {
@@ -3694,18 +3691,6 @@
           }
         },
         "required" : [ "hendelseInfo", "opphørsdato" ],
-        "type" : "object"
-      },
-      "ung.sak.kontrakt.hendelser.UngdomsprogramUtvidetKvoteHendelse" : {
-        "properties" : {
-          "hendelseInfo" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.hendelser.HendelseInfo"
-          },
-          "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
-          }
-        },
-        "required" : [ "hendelseInfo", "periode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.historikk.HistorikkInnslagDokumentLinkDto" : {

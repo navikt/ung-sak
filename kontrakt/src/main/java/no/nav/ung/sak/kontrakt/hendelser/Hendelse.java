@@ -17,8 +17,6 @@ import no.nav.ung.sak.typer.Periode;
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_ENDRET_STARTDATO, value = UngdomsprogramEndretStartdatoHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_FJERN_PERIODE, value = UngdomsprogramFjernDeltakelseHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_FORLENGET_PERIODE, value = UngdomsprogramForlengetPeriodeHendelse.class),
-    // Bakoverkompatibel deserialisering av gammelt typenavn – fjernes etter at alle konsumenter har migrert
-    @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_UTVIDET_KVOTE, value = UngdomsprogramUtvidetKvoteHendelse.class),
 })
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.NONE, getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, isGetterVisibility = JsonAutoDetect.Visibility.NONE, creatorVisibility = JsonAutoDetect.Visibility.NONE)
 public interface Hendelse {
@@ -29,9 +27,6 @@ public interface Hendelse {
     String UNGDOMSPROGRAM_ENDRET_STARTDATO = "UNGDOMSPROGRAM_ENDRET_STARTDATO";
     String UNGDOMSPROGRAM_FJERN_PERIODE = "UNGDOMSPROGRAM_FJERN_PERIODE";
     String UNGDOMSPROGRAM_FORLENGET_PERIODE = "UNGDOMSPROGRAM_FORLENGET_PERIODE";
-    /** @deprecated Bruk {@link #UNGDOMSPROGRAM_FORLENGET_PERIODE}. Beholdes for bakoverkompatibilitet. */
-    @Deprecated String UNGDOMSPROGRAM_UTVIDET_KVOTE = "UNGDOMSPROGRAM_UTVIDET_KVOTE";
-
 
     HendelseType getHendelseType();
 
