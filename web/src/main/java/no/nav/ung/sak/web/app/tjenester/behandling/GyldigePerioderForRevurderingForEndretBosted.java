@@ -2,6 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.behandling;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -18,6 +19,7 @@ import no.nav.ung.sak.typer.Periode;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -49,6 +51,19 @@ public class GyldigePerioderForRevurderingForEndretBosted implements GyldigePeri
             .map(DatoIntervallEntitet::tilPeriode)
             .toList();
         return new ÅrsakOgPerioderDto(BehandlingÅrsakType.ENDRET_BOSTED, perioder);
+    }
+
+    @Override
+    public Set<BehandlingÅrsakType> støttedeÅrsaker() {
+        return Set.of(BehandlingÅrsakType.ENDRET_BOSTED);
+    }
+
+    @Override
+    public boolean periodeErGyldigForÅrsak(long fagsakId, DatoIntervallEntitet periode) {
+        LocalDateInterval inputIntervall = periode.toLocalDateInterval();
+        return utledPerioder(fagsakId).perioder().stream()
+            .map(p -> new LocalDateInterval(p.getFom(), p.getTom()))
+            .anyMatch(gyldigIntervall -> gyldigIntervall.contains(inputIntervall));
     }
 
 }

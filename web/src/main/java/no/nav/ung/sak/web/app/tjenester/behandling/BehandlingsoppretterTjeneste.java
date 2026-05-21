@@ -189,8 +189,17 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
-        return finnUtledereForFagsak(fagsak).stream()
-            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), behandlingÅrsakType, periode));
+        var relevanteUtledere = finnUtledereForFagsak(fagsak).stream()
+            .filter(utleder -> utleder.støttedeÅrsaker().contains(behandlingÅrsakType))
+            .toList();
+        if (relevanteUtledere.isEmpty()) {
+            return true;
+        }
+        if (periode.isEmpty()) {
+            return false;
+        }
+        return relevanteUtledere.stream()
+            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), periode.get()));
     }
 
 }

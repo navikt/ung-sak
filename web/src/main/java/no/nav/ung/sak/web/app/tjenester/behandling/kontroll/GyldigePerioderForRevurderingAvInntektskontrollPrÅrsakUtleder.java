@@ -7,11 +7,13 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.behandling.GyldigePerioderForRevurderingPrÅrsakUtleder;
-import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 
 import java.util.List;
+import java.util.Set;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -40,5 +42,18 @@ public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder impl
             .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
             .sorted()
             .toList()).orElse(List.of()));
+    }
+
+    @Override
+    public Set<BehandlingÅrsakType> støttedeÅrsaker() {
+        return Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+    }
+
+    @Override
+    public boolean periodeErGyldigForÅrsak(long fagsakId, DatoIntervallEntitet periode) {
+        var utledtePerioder = utledPerioder(fagsakId);
+        return utledtePerioder.perioder().stream()
+            .map(DatoIntervallEntitet::fra)
+            .anyMatch(periode::equals);
     }
 }

@@ -4,7 +4,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 
-import java.util.Optional;
+import java.util.Set;
 
 public interface GyldigePerioderForRevurderingPrÅrsakUtleder {
 
@@ -12,21 +12,14 @@ public interface GyldigePerioderForRevurderingPrÅrsakUtleder {
     ÅrsakOgPerioderDto utledPerioder(long fagsakId);
 
     /**
-     * Sjekker om en gitt periode er gyldig for revurdering med angitt årsak.
-     * Dersom denne utlederen ikke håndterer den gitte årsaken, returneres true (ingen begrensning).
-     * Dersom årsaken håndteres men ingen periode er oppgitt, returneres false.
+     * Returnerer settet med behandlingsårsaker denne utlederen håndterer.
      */
-    default boolean periodeErGyldigForÅrsak(long fagsakId, BehandlingÅrsakType årsak, Optional<DatoIntervallEntitet> periode) {
-        var utledtePerioder = utledPerioder(fagsakId);
-        if (utledtePerioder.årsak() != årsak) {
-            return true;
-        }
-        if (periode.isEmpty()) {
-            return false;
-        }
-        return utledtePerioder.perioder().stream()
-            .map(DatoIntervallEntitet::fra)
-            .anyMatch(periode.get()::equals);
-    }
+    Set<BehandlingÅrsakType> støttedeÅrsaker();
+
+    /**
+     * Sjekker om en gitt periode er gyldig for revurdering.
+     * Skal kun kalles for årsaker som er i {@link #støttedeÅrsaker()}.
+     */
+    boolean periodeErGyldigForÅrsak(long fagsakId, DatoIntervallEntitet periode);
 
 }
