@@ -14,6 +14,7 @@ public class GrunnbeløpSnittTidslinje {
 
     private static final LocalDateTimeline<Grunnbeløp> GRUNNBELØP_SNITT_TIDSLINJE = new LocalDateTimeline<>(
         List.of(
+            new LocalDateSegment<>(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31), new Grunnbeløp(BigDecimal.valueOf(134419))),
             new LocalDateSegment<>(LocalDate.of(2025, 1, 1), LocalDate.of(2025, 12, 31), new Grunnbeløp(BigDecimal.valueOf(128116))),
             new LocalDateSegment<>(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31), new Grunnbeløp(BigDecimal.valueOf(122225))),
             new LocalDateSegment<>(LocalDate.of(2023, 1, 1), LocalDate.of(2023, 12, 31), new Grunnbeløp(BigDecimal.valueOf(116239))),
