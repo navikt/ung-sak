@@ -1,5 +1,6 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.ung.sak.diff.ChangeTracked;
@@ -42,8 +43,8 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @ChangeTracked
-    @JoinColumn(name = "ung_ungdomsprogramp_forlenget_periode_id", nullable = true, updatable = false)
-    private UngdomsprogramForlengetPeriode ungdomsprogramForlengetPeriode;
+    @JoinColumn(name = "ung_ungdomsprogram_maks_periode_id", nullable = true, updatable = false)
+    private UngdomsprogramMaksPeriode ungdomsprogramMaksPeriode;
 
     public UngdomsprogramPeriodeGrunnlag() {
     }
@@ -51,7 +52,7 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     UngdomsprogramPeriodeGrunnlag(Long behandlingId, UngdomsprogramPeriodeGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.ungdomsprogramPerioder = grunnlag.ungdomsprogramPerioder;
-        this.ungdomsprogramForlengetPeriode = grunnlag.ungdomsprogramForlengetPeriode;
+        this.ungdomsprogramMaksPeriode = grunnlag.ungdomsprogramMaksPeriode;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -122,16 +123,21 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    public Optional<UngdomsprogramForlengetPeriode> getUngdomsprogramForlengetPeriode() {
-        return Optional.ofNullable(ungdomsprogramForlengetPeriode);
+    public Optional<UngdomsprogramMaksPeriode> getUngdomsprogramMaksPeriode() {
+        return Optional.ofNullable(ungdomsprogramMaksPeriode);
     }
 
-    public void setUngdomsprogramForlengetPeriode(UngdomsprogramForlengetPeriode ungdomsprogramForlengetPeriode) {
-        this.ungdomsprogramForlengetPeriode = ungdomsprogramForlengetPeriode;
+    public void setUngdomsprogramMaksPeriode(UngdomsprogramMaksPeriode ungdomsprogramMaksPeriode) {
+        this.ungdomsprogramMaksPeriode = ungdomsprogramMaksPeriode;
     }
 
     public boolean harForlengetPeriode() {
-        return ungdomsprogramForlengetPeriode != null && ungdomsprogramForlengetPeriode.harForlengetPeriode();
+        return ungdomsprogramMaksPeriode != null && ungdomsprogramMaksPeriode.harForlengetPeriode();
+    }
+
+    public Optional<LocalDate> getPeriodeMaksDato() {
+        return Optional.ofNullable(ungdomsprogramMaksPeriode)
+            .flatMap(UngdomsprogramMaksPeriode::getPeriodeMaksDato);
     }
 
     @Override

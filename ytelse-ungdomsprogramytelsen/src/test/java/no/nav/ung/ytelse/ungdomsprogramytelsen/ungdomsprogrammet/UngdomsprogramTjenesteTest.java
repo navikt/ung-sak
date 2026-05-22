@@ -23,6 +23,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -54,21 +55,20 @@ class UngdomsprogramTjenesteTest {
     }
 
     @Test
-    void første_gangs_utvidelse_klipper_åpen_periode_til_300_virkedager() {
-        // Behandling trigget av forlenget periode-hendelse, ingen tidligere forlengelse lagret
+    void åpen_periode_med_forlenget_periode_bevares_og_maks_dato_lagres() {
+        // Registeret sender periodeMaksDato – åpen periode skal bevares, ikke klippes
+        var maksDato = LocalDate.of(2026, 2, 27); // fredag
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        // Register sender åpen periode med forlenget periode-flagg
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, maksDato));
 
         tjeneste.innhentOpplysninger(behandling);
 
         var perioder = hentLagredePerioder(behandling);
         assertThat(perioder).hasSize(1);
-        var periode = perioder.get(0);
-        assertThat(periode.getPeriode().getFomDato()).isEqualTo(FOM);
-        // Skal være klippet til en konkret dato før TIDENES_ENDE
-        assertThat(periode.getPeriode().getTomDato()).isBefore(TIDENES_ENDE);
-        assertThat(periode.getPeriode().getTomDato()).isAfter(FOM.plusWeeks(52));
+        assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
+        // Åpen periode skal IKKE klippes
+        assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(TIDENES_ENDE);
+        assertThat(hentMaksDato(behandling)).contains(maksDato);
         assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
     }
 
@@ -78,14 +78,16 @@ class UngdomsprogramTjenesteTest {
         // (simulerer at grunnlaget ble kopiert over fra forrige behandling som forlenget perioden).
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
         var utvidetTom = LocalDate.of(2026, 1, 25);
+        var maksDato = LocalDate.of(2026, 2, 27);
         ungdomsprogramPeriodeRepository.lagre(
             behandling.getId(),
             List.of(new UngdomsprogramPeriode(FOM, utvidetTom)),
-            true);
+            true,
+            maksDato);
 
-        // Register sender opphørt periode (klippet tom) med flagg for forlenget periode
+        // Register sender opphørt periode (klippet tom) med flagg for forlenget periode, uten periodeMaksDato
         var opphørTom = LocalDate.of(2026, 1, 15);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -94,14 +96,16 @@ class UngdomsprogramTjenesteTest {
         assertThat(perioder).hasSize(1);
         assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(opphørTom);
+        // Eksisterende maks-periode bevares selv om register ikke sender periodeMaksDato ved opphør
         assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
+        assertThat(hentMaksDato(behandling)).contains(maksDato);
     }
 
     @Test
     void uten_forlenget_periode_lagrer_registerets_periode_uendret() {
         var behandling = lagBehandling(null);
         var registerTom = LocalDate.of(2025, 11, 30);
-        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, registerTom, false));
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, registerTom, false, null));
 
         tjeneste.innhentOpplysninger(behandling);
 
@@ -113,27 +117,27 @@ class UngdomsprogramTjenesteTest {
     }
 
     @Test
-    void tomme_register_opplysninger_lagrer_tomt_grunnlag_med_forlenget_periode_flagg_fra_behandlingsårsak() {
-        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+    void tomme_register_opplysninger_lagrer_tomt_grunnlag_uten_forlenget_periode() {
+        var behandling = lagBehandling(null);
         when(registerKlient.hentForAktørId(anyString()))
             .thenReturn(new DeltakerOpplysningerDTO(List.of()));
 
         tjeneste.innhentOpplysninger(behandling);
 
         assertThat(hentLagredePerioder(behandling)).isEmpty();
-        assertThat(harForlengetPeriodeLagret(behandling)).isTrue();
+        assertThat(harForlengetPeriodeLagret(behandling)).isFalse();
     }
 
     @Test
+    // Verifiserer at lagTimeline.compress() faktisk slår sammen kant-i-kant segmenter
     void tilstøtende_register_segmenter_komprimeres_til_én_periode() {
-        // Verifiserer at lagTimeline.compress() faktisk slår sammen kant-i-kant segmenter
         var behandling = lagBehandling(null);
         var midt = LocalDate.of(2025, 6, 30);
         var tom = LocalDate.of(2025, 11, 30);
         when(registerKlient.hentForAktørId(anyString()))
             .thenReturn(new DeltakerOpplysningerDTO(List.of(
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, midt, false),
-                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", midt.plusDays(1), tom, false)
+                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, midt, false, null),
+                new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", midt.plusDays(1), tom, false, null)
             )));
 
         tjeneste.innhentOpplysninger(behandling);
@@ -142,6 +146,27 @@ class UngdomsprogramTjenesteTest {
         assertThat(perioder).hasSize(1);
         assertThat(perioder.get(0).getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(tom);
+    }
+
+    @Test
+    void klippet_periode_fra_register_lagres_uendret_selv_med_maks_dato() {
+        // Registeret sender klippet periode (opphør) + maks-dato – klippet periode skal beholdes uendret
+        var maksDato = LocalDate.of(2026, 2, 27);
+        var opphørTom = LocalDate.of(2026, 1, 15);
+        var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, opphørTom, true, maksDato));
+
+        tjeneste.innhentOpplysninger(behandling);
+
+        var perioder = hentLagredePerioder(behandling);
+        assertThat(perioder).hasSize(1);
+        assertThat(perioder.get(0).getPeriode().getTomDato()).isEqualTo(opphørTom);
+        assertThat(hentMaksDato(behandling)).contains(maksDato);
+    }
+
+    private java.util.Optional<LocalDate> hentMaksDato(Behandling behandling) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .flatMap(g -> g.getPeriodeMaksDato());
     }
 
     private Behandling lagBehandling(BehandlingÅrsakType årsak) {
@@ -167,9 +192,8 @@ class UngdomsprogramTjenesteTest {
 
     private boolean harForlengetPeriodeLagret(Behandling behandling) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .flatMap(g -> g.getUngdomsprogramForlengetPeriode())
+            .flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
             .map(k -> k.harForlengetPeriode())
             .orElse(false);
     }
 }
-

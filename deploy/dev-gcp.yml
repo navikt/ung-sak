@@ -278,7 +278,8 @@ spec:
       value: "true"
     - name: AKTIVITETSPENGER_ENABLED
       value: "true"
-
+    - name: G_BELOP_2026_VEDTATT
+      value: "true"
 
       # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

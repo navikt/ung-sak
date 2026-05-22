@@ -79,5 +79,27 @@ class UtledStatusForPerioderPåBehandlingTest {
         assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
     }
 
+    @Test
+    void revurdering_skal_kun_vise_triggerperiode_naar_soknadsperiode_er_filtrert_bort() {
+        // Simulerer at kallstedet har filtrert bort søknadsdokumentet (som tilhører
+        // førstegangsbehandlingen) via relevanteKravdokumentForBehandling. Kun trigger-perioden
+        // skal vises.
+        var startdato = LocalDate.now();
+        var fomForlenget = startdato.plusWeeks(52);
+        var tomForlenget = fomForlenget.plusWeeks(8).minusDays(1);
+        var forlengetPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fomForlenget, tomForlenget);
+
+        var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
+            Map.of(), // Søknadsdokumentet er allerede filtrert bort av kallstedet
+            List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode))
+        );
+
+        var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
+        assertThat(perioderMedÅrsak.size()).isEqualTo(1);
+        var periode = perioderMedÅrsak.get(0);
+        assertThat(periode.getPeriode()).isEqualTo(new Periode(forlengetPeriode.getFomDato(), forlengetPeriode.getTomDato()));
+        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
+    }
+
 
 }

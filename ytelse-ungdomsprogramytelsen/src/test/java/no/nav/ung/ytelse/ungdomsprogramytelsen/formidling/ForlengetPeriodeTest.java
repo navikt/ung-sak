@@ -23,7 +23,7 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
     private static final LocalDate NY_SLUTTDATO = LocalDate.of(2026, 1, 28);
 
     ForlengetPeriodeTest() {
-        super(1, "Du får forlenget ungdomsprogramytelse");
+        super(1, "Du får forlenget perioden med ungdomsprogramytelsen");
     }
 
     @DisplayName("Forlenget periode gir korrekt brev")
@@ -36,8 +36,8 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
 
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
-                Du får forlenget ungdomsprogramytelse \
-                Fra 31. desember 2025 får du forlenget ungdomsprogramytelsen din. \
+                Du får forlenget perioden med ungdomsprogramytelsen \
+                Fra 1. januar 2026 får du forlenget perioden din med ungdomsprogramytelsen. \
                 Du får ytelsen så lenge du deltar i ungdomsprogrammet, men ikke lenger enn i åtte nye uker. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelsen § 6. \
                 Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen \
@@ -48,12 +48,12 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får forlenget ungdomsprogramytelse</h1>"
+                "<h1>Du får forlenget perioden med ungdomsprogramytelsen</h1>"
             );
     }
 
     private Behandling lagForlengetPeriodeBehandling(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
-        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(FOM);
+        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedMaksDato(FOM, opprinneligSluttdato);
         var forlengetPeriodeGrunnlag = ForlengetPeriodeScenarioer.forlengetPeriode(FOM, opprinneligSluttdato, nySluttdato);
 
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()

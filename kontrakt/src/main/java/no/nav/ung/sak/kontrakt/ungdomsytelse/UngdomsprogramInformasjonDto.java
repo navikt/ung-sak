@@ -6,6 +6,7 @@ public record UngdomsprogramInformasjonDto(
     LocalDate startdato,
     LocalDate maksdatoForDeltakelse,
     LocalDate opphørsdato,
-    Integer antallDagerTidligereUtbetalt
+    Integer antallDagerTidligereUtbetalt,
+    boolean harForlengetPeriode
 ) {
 }

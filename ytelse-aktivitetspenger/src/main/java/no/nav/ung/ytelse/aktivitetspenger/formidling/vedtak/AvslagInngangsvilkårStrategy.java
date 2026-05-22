@@ -45,6 +45,10 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
+        if (resultatInfo.isEmpty()) {
+            return false;
+        }
+
         return resultatInfo.stream()
             .map(DetaljertResultatInfo::detaljertResultatType)
             .collect(Collectors.toSet()).stream()

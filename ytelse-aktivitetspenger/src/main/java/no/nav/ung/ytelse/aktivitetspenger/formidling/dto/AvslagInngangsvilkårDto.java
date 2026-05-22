@@ -5,5 +5,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdDto;
 import java.time.LocalDate;
 
 public record AvslagInngangsvilkårDto(
-    LocalDate fom
+    LocalDate fom,
+    AvslåttBosted avslåttBosted,
+    AvslåttBistand avslåttBistand
 ) implements TemplateInnholdDto { }

@@ -55,9 +55,10 @@ class UtledStatusForPerioderPåBehandling {
             .toList();
     }
 
-    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling, List<Trigger> prosesstriggere) {
-        var søknadtidslinje = finnFørsteSøknadTidslinje(kravdokumenterTilBehandling);
+    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
+                                                                                List<Trigger> prosesstriggere) {
         var årsakerFraTriggere = finnÅrsakerFraTriggereTidslinje(prosesstriggere);
+        var søknadtidslinje = finnFørsteSøknadTidslinje(kravdokumenterTilBehandling);
         return søknadtidslinje.crossJoin(årsakerFraTriggere, StandardCombinators::union);
     }
 

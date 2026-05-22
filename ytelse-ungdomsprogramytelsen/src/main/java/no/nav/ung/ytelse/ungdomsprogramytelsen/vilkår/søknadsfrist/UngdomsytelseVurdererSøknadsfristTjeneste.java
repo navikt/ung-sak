@@ -87,7 +87,7 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
             .map(UngdomsytelseStartdatoer::getStartdatoer)
             .flatMap(Collection::stream)
             .filter(it -> mottatteDokumenter.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
-            .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, ungdomsprogramperioder, dokument ));
+            .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, ungdomsprogramperioder, dokument));
 
         return result;
     }

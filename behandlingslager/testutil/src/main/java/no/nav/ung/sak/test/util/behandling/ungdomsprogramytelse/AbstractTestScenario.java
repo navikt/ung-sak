@@ -509,8 +509,11 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         if (ungTestscenario.programPerioder() != null) {
-            repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder());
-
+            if (ungTestscenario.periodeMaksDato() != null) {
+                repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder(), false, ungTestscenario.periodeMaksDato());
+            } else {
+                repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder());
+            }
         }
 
         if (ungTestscenario.søknadStartDato() != null) {
