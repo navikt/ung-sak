@@ -1,6 +1,6 @@
 ---
 name: vilkaar-med-varsling
-description: "Implementer et nytt vilkår i aktivitetspenger med faktaavklaring av saksbehandler, varsling av bruker via Etterlysning, håndtering av brukerens uttalelse, og automatisk eller manuell vilkårsvurdering. USE FOR: opprette faktaavklaring-grunnlag, Etterlysning-type, OppgaveType i ung-brukerdialog-api, Bekreftelse-subtype i k9-format, aksjonspunkt, steg med etterlysningslogikk, auto-vurdering basert på grunnlag. DO NOT USE FOR: vilkår som ikke trenger faktaavklaring fra saksbehandler (bruk new-grunnlag), inntektskontroll (bruk inntektskontroll-skillen)."
+description: "Implementer et nytt vilkår i aktivitetspenger med faktaavklaring av saksbehandler, varsling av bruker via Etterlysning, håndtering av brukerens uttalelse, og automatisk eller manuell vilkårsvurdering. USE FOR: opprette faktaavklaring-grunnlag, Etterlysning-type, OppgaveType i ung-brukerdialog-api, Bekreftelse-subtype i k9-format, aksjonspunkt, steg med etterlysningslogikk, auto-vurdering basert på grunnlag. DO NOT USE FOR: inntektskontroll (bruk inntektskontroll-skillen). MERK: vilkaar-med-grunnlag-og-varsling er en mer komplett skill som også dekker enkel variant uten varsling."
 ---
 
 # Vilkår med faktaavklaring, varsling og automatisk/manuell vurdering
@@ -11,7 +11,7 @@ Dette mønsteret brukes når et vilkår krever:
 3. **Uttalelse** — bruker kan svare med kommentar (eller ikke svare innen frist)
 4. **Vilkårsvurdering** — automatisk basert på fakta, eller manuell av saksbehandler med begrunnelse
 
-**Referanseimplementasjon:** BOSTEDSVILKÅR — se `VurderBosattSteg`, `BostedsGrunnlag*`, `VurderBostedOppdaterer`, `ManuellVurderingBostedsvilkårOppdaterer`, `BostedOppgaveOppretter`.
+**Referanseimplementasjon:** BOSTEDSVILKÅR — se `VurderFaktaBostedSteg`, `VurderBosattVilkårSteg`, `BostedsGrunnlag*`, `VurderFaktaOmBostedOppdaterer`, `ManuellVurderingBostedsvilkårOppdaterer`, `BostedOppgaveOppretter`.
 
 ---
 
@@ -296,7 +296,7 @@ Begrunnelse-teksten inkluderes i brevet.
 
 ## Steg 7 — OppgaveOppretter og tjenesteoppdateringer
 
-**Ny klasse** `<Vilkår>OppgaveOppretter` med `@OppgaveTypeRef(UNG_<VILKÅR>_AVKLARING)`:
+**Ny klasse** `<Vilkår>OppgaveOppretter` (`@Dependent`, injiseres direkte i `OpprettOppgaveTjeneste`):
 ```java
 OppgavetypeDataDto lagOppgaveData(Etterlysning e) {
     var avklaring = repo.hentGrunnlagHvisEksisterer(e.getBehandlingId())
@@ -309,10 +309,10 @@ OppgavetypeDataDto lagOppgaveData(Etterlysning e) {
 
 | Fil | Hva legges til |
 |-----|---------------|
-| `OpprettOppgaveTjeneste` | `case UTTALELSE_<VILKÅR>` |
-| `EtterlysningOgUttalelseTjeneste` | `case UTTALELSE_<VILKÅR>` |
-| `GenerellOppgaveBekreftelseHåndterer` | `@OppgaveTypeRef` + `case UNG_<VILKÅR>_AVKLARING` i `mapTilEndringsType()` |
-| `HistorikkinnslagTjeneste` | `case AVKLAR_<VILKÅR>` |
+| `OpprettOppgaveTjeneste` | Inject ny `<Vilkår>OppgaveOppretter` + `case UTTALELSE_<VILKÅR>` i switch |
+| `EtterlysningOgUttalelseTjeneste` | `case UTTALELSE_<VILKÅR>` i `mapTilEndringsType()` |
+| `GenerellOppgaveBekreftelseHåndterer` | `@OppgaveTypeRef(Bekreftelse.Type.AVP_<VILKÅR>_AVKLARING)` + `case UTTALELSE_<VILKÅR>` i `mapTilEndringsType()` |
+| `HistorikkinnslagTjeneste` | `case AVKLAR_<VILKÅR>` i `mapTilBekreftelseNavn()` |
 
 ---
 
@@ -458,14 +458,17 @@ private record RegelInput(UUID referanse, LocalDate skjaeringstidspunkt,
 
 ---
 
-## Steg 10 — k9-verdikjede integrasjonstester
+## Steg 10 — k9-verdikjede integrasjonstester (eksternt repo)
 
-**`LokalkontorSteg.java`:**
+> **NB:** Disse klassene finnes i det separate repoet `k9-verdikjede`, ikke i `ung-sak`.
+> Oppdater kun dette steget dersom du har tilgang til k9-verdikjede.
+
+**`LokalkontorSteg.java`** (k9-verdikjede):
 - Oppdater `saksbehandlerVurdererOgForeslårVilkår` med nye params: `UngSakFordelingSteg`, `UngdomsprogramDeltaker`, `String søkerIdent`
 - Legg til ny metode `sendInn<Vilkår>Bekreftelse(steg, deltaker, søkerIdent)` som poster `Vurder<Vilkår>Dto`
 - Fjern `VURDER_<VILKÅR>` fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
 
-**`AktivitetspengerTest.java`** og **`ForutgåendeMedlemskapTest.java`**:
+**`AktivitetspengerTest.java`** og **`ForutgåendeMedlemskapTest.java`** (k9-verdikjede):
 - Legg til `UngdomsprogramDeltaker deltaker` felt
 - Pass `søkerIdent + deltaker + fordelingSteg` til `saksbehandlerVurdererOgForeslårVilkår`
 
