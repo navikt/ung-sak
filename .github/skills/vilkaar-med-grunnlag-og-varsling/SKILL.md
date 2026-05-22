@@ -1,6 +1,6 @@
 ---
 name: vilkaar-med-grunnlag-og-varsling
-description: "Komplett implementasjon av et nytt vilkår i aktivitetspenger — dekker alt fra enkelt vilkår med aksjonspunkt til fullt vilkår med faktaavklaring-grunnlag, bruker-varsling via Etterlysning, håndtering av brukerens uttalelse og automatisk/manuell vilkårsvurdering. USE FOR: alle nye vilkår i aktivitetspenger, uavhengig av kompleksitetsnivå — enkel variant (aksjonspunkt + vilkår), eller varslings-variant (grunnlag + Etterlysning + to behandlingssteg). DO NOT USE FOR: aksjonspunkt uten vilkår (bruk new-aksjonspunkt), inntektskontroll (bruk inntektskontroll-skillen), formidling/brev, frontend."
+description: "Komplett implementasjon av et nytt vilkår i aktivitetspenger — dekker alt fra enkelt vilkår med aksjonspunkt til fullt vilkår med faktaavklaring-grunnlag, bruker-varsling via Etterlysning, håndtering av brukerens uttalelse og automatisk/manuell vilkårsvurdering. USE FOR: alle nye vilkår i aktivitetspenger, uavhengig av kompleksitetsnivå — enkel variant (aksjonspunkt + vilkår), eller varslings-variant (grunnlag + Etterlysning + to behandlingssteg). DO NOT USE FOR: aksjonspunkt uten vilkår, inntektskontroll (bruk inntektskontroll-skillen), formidling/brev, frontend."
 ---
 
 # Komplett vilkår for Aktivitetspenger
@@ -9,7 +9,7 @@ Denne skillen dekker hele spekteret for å opprette et nytt vilkår i aktivitets
 
 **Referanseimplementasjoner:**
 - **Enkel variant:** `BistandsvilkårSteg`, `VurderBehovForBistandOppdaterer`
-- **Varslings-variant:** `VurderFaktaBostedSteg`, `VurderBosattVilkårSteg`, `BostedsGrunnlag*`, `VurderBostedOppdaterer`, `ManuellVurderingBostedsvilkårOppdaterer`, `BostedOppgaveOppretter`
+- **Varslings-variant:** `VurderFaktaBostedSteg`, `VurderBosattVilkårSteg`, `BostedsGrunnlag*`, `VurderFaktaOmBostedOppdaterer`, `ManuellVurderingBostedsvilkårOppdaterer`, `BostedOppgaveOppretter`
 
 ---
 
