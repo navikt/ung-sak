@@ -27,10 +27,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeri
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 
 import java.time.LocalDate;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -113,6 +110,8 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
             BostedAvklaringData nyAvklaring = nyeAvklaringer.get(stp);
             BostedAvklaringData gammelAvklaring = tidligereAvklaringer.get(stp);
+            Objects.requireNonNull(gammelAvklaring, "Dato for skjæringstidspunkt finnes ikke i liste over tidligere avklaringer. stp:" + stp);
+
             boolean avklaringEndret = erAvklaringEndret(nyAvklaring, gammelAvklaring);
 
             if (avklaringEndret) {

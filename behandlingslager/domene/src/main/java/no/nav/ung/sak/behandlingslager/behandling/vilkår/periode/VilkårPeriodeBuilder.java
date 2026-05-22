@@ -85,6 +85,12 @@ public class VilkårPeriodeBuilder {
         return this;
     }
 
+    public VilkårPeriodeBuilder nullstillFritekstvurderinger() {
+        this.entitet.setBegrunnelse(null);
+        this.entitet.setFritekstVurderingBrev(null);
+        return this;
+    }
+
     public VilkårPeriodeBuilder tilbakestillManuellVurdering() {
         this.entitet.setManueltVurdert(false);
         return this;

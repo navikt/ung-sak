@@ -18,6 +18,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
@@ -31,11 +32,13 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+import org.jspecify.annotations.NonNull;
 
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTEDVILKÅR;
@@ -111,8 +114,19 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
             return settPåVent(stegutfallTidslinje, etterlysningPerFom);
         }
 
+
+        Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Forventer vilkårresultat for behandling " + behandlingId));
+
+        var builder = Vilkårene.builderFraEksisterende(vilkårene);
+        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
         // Auto-vurder alle ferdigperioder (ingen etterlysning, utløpt, eller svar uten uttalelse)
-        autoVurder(behandlingId, stegutfallTidslinje, holder);
+        stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_AUTOMATISK::equals)
+            .toSegments()
+            .forEach(autoVurder(holder, vilkårBuilder));
+
+        builder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(behandlingId, builder.build());
         // Finn perioder som krever manuell vurdering av vilkåret
         if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
@@ -166,62 +180,50 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
             && etterlysning.uttalelseData().harUttalelse();
     }
 
-    private void autoVurder(long behandlingId,
-                            LocalDateTimeline<StegUtfall> stegutfallTidslinje,
-                            BostedsAvklaringHolder holder) {
+    private static @NonNull Consumer<LocalDateSegment<StegUtfall>> autoVurder(BostedsAvklaringHolder holder, VilkårBuilder vilkårBuilder) {
+        return s -> {
+            BostedsPeriodeAvklaring periodeAvklaring = holder.getPeriodeAvklaring(s.getFom()).orElseThrow(() -> new IllegalStateException("Kan ikke vurdere vilkår automatisk uten faktaopplysning"));
+            String regelInput = lagRegelInput(periodeAvklaring);
 
-        Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
-            .orElseThrow(() -> new IllegalStateException("Forventer vilkårresultat for behandling " + behandlingId));
-
-        var builder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
-        stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_AUTOMATISK::equals)
-            .toSegments()
-            .forEach(s -> {
-                BostedsPeriodeAvklaring periodeAvklaring = holder.getPeriodeAvklaring(s.getFom()).orElseThrow(() -> new IllegalStateException("Kan ikke vurdere vilkår automatisk uten faktaopplysning"));
-                String regelInput = lagRegelInput(periodeAvklaring);
-
-                if (!periodeAvklaring.isErBosattITrondheim()) {
-                    // Bruker er ikke bosatt fra start, avslår hele perioden
-                    var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(s.getLocalDateInterval()))
-                        .medRegelInput(regelInput);
-                    settIkkeOppfylt(periodeBuilder);
-                    vilkårBuilder.leggTil(periodeBuilder);
-                } else if (periodeAvklaring.getFraflyttingsDato() == null) {
-                    // Bruker er bosatt fra start og fraflyttingsdato er ikke satt, vilkåret er oppfylt i hele perioden
+            if (!periodeAvklaring.isErBosattITrondheim()) {
+                // Bruker er ikke bosatt fra start, avslår hele perioden
+                var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(s.getLocalDateInterval()))
+                    .medRegelInput(regelInput);
+                settIkkeOppfylt(periodeBuilder);
+                vilkårBuilder.leggTil(periodeBuilder);
+            } else if (periodeAvklaring.getFraflyttingsDato() == null) {
+                // Bruker er bosatt fra start og fraflyttingsdato er ikke satt, vilkåret er oppfylt i hele perioden
+                var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(s.getLocalDateInterval()));
+                periodeBuilder.medUtfall(Utfall.OPPFYLT).medRegelInput(regelInput);
+                vilkårBuilder.leggTil(periodeBuilder);
+            } else {
+                LocalDate fraflyttingsDato = periodeAvklaring.getFraflyttingsDato();
+                if (!fraflyttingsDato.isAfter(s.getFom())) {
+                    throw new IllegalStateException("Forventer at fraflyttingsdato er etter skjæringstidspunkt: " + periodeAvklaring);
+                } else if (fraflyttingsDato.isAfter(s.getTom())) {
+                    // Vilkårsperioden er endret og fraflyttingsdato ligger utenfor perioden (etter sluttdato), vilkåret er oppfylt i hele perioden
                     var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(s.getLocalDateInterval()));
                     periodeBuilder.medUtfall(Utfall.OPPFYLT).medRegelInput(regelInput);
                     vilkårBuilder.leggTil(periodeBuilder);
                 } else {
-                    LocalDate fraflyttingsDato = periodeAvklaring.getFraflyttingsDato();
-                    if (!fraflyttingsDato.isAfter(s.getFom())) {
-                        throw new IllegalStateException("Forventer at fraflyttingsdato er etter skjæringstidspunkt: " + periodeAvklaring);
-                    } else if (fraflyttingsDato.isAfter(s.getTom())) {
-                        // Vilkårsperioden er endret og fraflyttingsdato ligger utenfor perioden (etter sluttdato), vilkåret er oppfylt i hele perioden
-                        var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(s.getLocalDateInterval()));
-                        periodeBuilder.medUtfall(Utfall.OPPFYLT).medRegelInput(regelInput);
-                        vilkårBuilder.leggTil(periodeBuilder);
-                    } else {
-                        // Bruker flytter fra Trondheim i løpet av perioden, Setter oppfylt fram til fraflytting, deretter avslått
-                        var oppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), fraflyttingsDato.minusDays(1)));
-                        oppfyltBuilder.medUtfall(Utfall.OPPFYLT).medRegelInput(regelInput);
-                        vilkårBuilder.leggTil(oppfyltBuilder);
+                    // Bruker flytter fra Trondheim i løpet av perioden, Setter oppfylt fram til fraflytting, deretter avslått
+                    var oppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), fraflyttingsDato.minusDays(1)));
+                    oppfyltBuilder.medUtfall(Utfall.OPPFYLT).medRegelInput(regelInput);
+                    vilkårBuilder.leggTil(oppfyltBuilder);
 
-                        var ikkeOppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fraflyttingsDato, s.getTom()));
-                        ikkeOppfyltBuilder.medRegelInput(regelInput);
-                        settIkkeOppfylt(ikkeOppfyltBuilder);
-                        vilkårBuilder.leggTil(ikkeOppfyltBuilder);
-                    }
+                    var ikkeOppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(fraflyttingsDato, s.getTom()));
+                    ikkeOppfyltBuilder.medRegelInput(regelInput);
+                    settIkkeOppfylt(ikkeOppfyltBuilder);
+                    vilkårBuilder.leggTil(ikkeOppfyltBuilder);
                 }
-            });
-
-        builder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(behandlingId, builder.build());
+            }
+        };
     }
 
     private static void settIkkeOppfylt(no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder periodeBuilder) {
         periodeBuilder.medUtfall(Utfall.IKKE_OPPFYLT)
-            .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+            .medAvslagsårsak(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED)
+            .nullstillFritekstvurderinger();
     }
 
     private static String lagRegelInput(BostedsPeriodeAvklaring periodeAvklaring) {
