@@ -24,6 +24,7 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
     private static final Long NYESTE_ID = 2L;
     private static final LocalDate FOM = LocalDate.of(2024, 1, 1);
     private static final LocalDate TOM = LocalDate.of(2024, 12, 31);
+    private static final LocalDate MAKS_DATO = LocalDate.of(2024, 12, 31);
 
     private UngdomsprogramPeriodeRepository repository;
     private StartpunktUtlederUngdomsprogramperiode utleder;
@@ -38,8 +39,8 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
 
     @Test
     void ingen_endringer_gir_udefinert() {
-        var eldste = grunnlagMedForlengetPeriode(false);
-        var nyeste = grunnlagMedForlengetPeriode(false);
+        var eldste = grunnlagMedMaksDato(MAKS_DATO);
+        var nyeste = grunnlagMedMaksDato(MAKS_DATO);
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -49,9 +50,9 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
     }
 
     @Test
-    void forlenget_periode_innvilget_første_gang_gir_init_perioder() {
-        var eldste = grunnlagMedForlengetPeriode(false);
-        var nyeste = grunnlagMedForlengetPeriode(true);
+    void økt_maksdato_gir_init_perioder() {
+        var eldste = grunnlagMedMaksDato(MAKS_DATO);
+        var nyeste = grunnlagMedMaksDato(MAKS_DATO.plusDays(28));
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -61,35 +62,9 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
     }
 
     @Test
-    void forlenget_periode_allerede_innvilget_ingen_endring_gir_udefinert() {
-        var eldste = grunnlagMedForlengetPeriode(true);
-        var nyeste = grunnlagMedForlengetPeriode(true);
-        when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
-        when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
-
-        var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
-
-        assertThat(resultat).isEqualTo(StartpunktType.UDEFINERT);
-    }
-
-    @Test
-    void forlenget_periode_tilbaketrukket_ignoreres_og_gir_udefinert() {
-        // Forretningsregel: forlenget periode kan ikke fjernes etter innvilgelse.
-        // Startpunktet skal ikke trigges selv om verdien mot formodning endres fra true til false.
-        var eldste = grunnlagMedForlengetPeriode(true);
-        var nyeste = grunnlagMedForlengetPeriode(false);
-        when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
-        when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
-
-        var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
-
-        assertThat(resultat).isEqualTo(StartpunktType.UDEFINERT);
-    }
-
-    @Test
-    void endrede_perioder_uten_forlenget_periode_gir_init_perioder() {
-        var eldste = grunnlagMedForlengetPeriodeOgPeriode(false, FOM, TOM);
-        var nyeste = grunnlagMedForlengetPeriodeOgPeriode(false, FOM, TOM.plusDays(30));
+    void maksdato_satt_for_første_gang_gir_init_perioder() {
+        var eldste = grunnlagMedMaksDato(null);
+        var nyeste = grunnlagMedMaksDato(MAKS_DATO);
         when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
         when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
 
@@ -98,13 +73,38 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
         assertThat(resultat).isEqualTo(StartpunktType.INIT_PERIODER);
     }
 
-    private UngdomsprogramPeriodeGrunnlag grunnlagMedForlengetPeriode(boolean harForlengetPeriode) {
-        return grunnlagMedForlengetPeriodeOgPeriode(harForlengetPeriode, FOM, TOM);
+    @Test
+    void redusert_maksdato_gir_udefinert() {
+        // Forretningsregel: maksdato kan ikke reduseres. Hvis det likevel skjer, ignorer.
+        var eldste = grunnlagMedMaksDato(MAKS_DATO);
+        var nyeste = grunnlagMedMaksDato(MAKS_DATO.minusDays(10));
+        when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
+        when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
+
+        var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
+
+        assertThat(resultat).isEqualTo(StartpunktType.UDEFINERT);
     }
 
-    private UngdomsprogramPeriodeGrunnlag grunnlagMedForlengetPeriodeOgPeriode(boolean harForlengetPeriode, LocalDate fom, LocalDate tom) {
+    @Test
+    void endrede_perioder_uten_endret_maksdato_gir_init_perioder() {
+        var eldste = grunnlagMedMaksDatoOgPeriode(MAKS_DATO, FOM, TOM);
+        var nyeste = grunnlagMedMaksDatoOgPeriode(MAKS_DATO, FOM, TOM.plusDays(30));
+        when(repository.hentGrunnlagBasertPåId(ELDSTE_ID)).thenReturn(Optional.of(eldste));
+        when(repository.hentGrunnlagBasertPåId(NYESTE_ID)).thenReturn(Optional.of(nyeste));
+
+        var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
+
+        assertThat(resultat).isEqualTo(StartpunktType.INIT_PERIODER);
+    }
+
+    private UngdomsprogramPeriodeGrunnlag grunnlagMedMaksDato(LocalDate maksDato) {
+        return grunnlagMedMaksDatoOgPeriode(maksDato, FOM, TOM);
+    }
+
+    private UngdomsprogramPeriodeGrunnlag grunnlagMedMaksDatoOgPeriode(LocalDate maksDato, LocalDate fom, LocalDate tom) {
         var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        when(grunnlag.harForlengetPeriode()).thenReturn(harForlengetPeriode);
+        when(grunnlag.getPeriodeMaksDato()).thenReturn(Optional.ofNullable(maksDato));
         var periode = mock(UngdomsprogramPeriode.class);
         when(periode.getPeriode()).thenReturn(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         var perioder = mock(UngdomsprogramPerioder.class);
