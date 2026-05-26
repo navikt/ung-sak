@@ -272,8 +272,6 @@ spec:
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
-    - name: G_BELOP_2026_VEDTATT
-      value: "true"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
