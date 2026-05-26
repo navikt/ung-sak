@@ -45,9 +45,11 @@ public class VurderGReguleringKandidatTask extends FagsakProsessTask {
 
     @Inject
     public VurderGReguleringKandidatTask(FagsakLåsRepository fagsakLåsRepository,
+                                         no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository behandlingLåsRepository,
                                          @Any Instance<PerioderForGReguleringUtleder> kandidaterForGReguleringTjeneste,
-                                         ProsessTaskTjeneste taskRepository, BehandlingRepository behandlingRepository) {
-        super(fagsakLåsRepository, null);
+                                         ProsessTaskTjeneste taskRepository,
+                                         BehandlingRepository behandlingRepository) {
+        super(fagsakLåsRepository, behandlingLåsRepository);
         this.kandidaterForGReguleringTjeneste = kandidaterForGReguleringTjeneste;
         this.taskRepository = taskRepository;
         this.behandlingRepository = behandlingRepository;
