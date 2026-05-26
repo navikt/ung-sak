@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.perioder;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
+import no.nav.ung.sak.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
@@ -21,6 +22,7 @@ public class UngdomsprogramMaksPeriode {
     private boolean harForlengetPeriode;
 
     @Column(name = "periode_maks_dato")
+    @ChangeTracked
     private LocalDate periodeMaksDato;
 
     @Convert(converter = HjemmelKodeverdiConverter.class)

@@ -23,6 +23,112 @@ public class KombinasjonScenarioer {
 
 
     /**
+     * Kombinasjon - forlenget periode + kontroll av inntekt (full utbetaling, dvs. 0 kr inntekt).
+     * Skal gi forlenget-brev men ingen inntektskontroll-brev.
+     *
+     * @param fom - startdato for programmet
+     * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
+     * @param nySluttdato - ny sluttdato etter forlengelse
+     */
+    public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+        if (!nySluttdato.isAfter(opprinneligSluttdato)) {
+            throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
+        }
+
+        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato);
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, nySluttdato, BrevScenarioerUtils.lavSatsBuilder(fom).build())
+        ));
+
+        // Kontroll av inntekt for andre måned (0 kr → full utbetaling)
+        var kontrollPeriode = new LocalDateInterval(
+            fom.withDayOfMonth(1).plusMonths(1),
+            fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
+
+        var kontrollertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(kontrollPeriode,
+            BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.ZERO)));
+
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(nyProgramPeriode, kontrollertInntektTimeline);
+
+        var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
+        var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, kontrollPeriode, kontrollertInntektTimeline);
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(fom, nySluttdato)),
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
+            tilkjentYtelsePerioder,
+            new LocalDateTimeline<>(nyProgramPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(nyProgramPeriode, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(fom),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
+                    DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato)),
+                new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(kontrollPeriode)),
+                new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(kontrollPeriode))
+            ),
+            Collections.emptyList(),
+            null,
+            kontrollerInntektPerioder);
+    }
+
+
+    /**
+     * Kombinasjon - forlenget periode + kontroll av inntekt med reduksjon (10 000 kr inntekt).
+     * Skal gi to brev: ENDRING_INNTEKT og FORLENGET_PERIODE.
+     *
+     * @param fom - startdato for programmet
+     * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
+     * @param nySluttdato - ny sluttdato etter forlengelse
+     */
+    public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+        if (!nySluttdato.isAfter(opprinneligSluttdato)) {
+            throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
+        }
+
+        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato);
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, nySluttdato, BrevScenarioerUtils.lavSatsBuilder(fom).build())
+        ));
+
+        // Kontroll av inntekt for andre måned (10 000 kr → reduksjon)
+        var kontrollPeriode = new LocalDateInterval(
+            fom.withDayOfMonth(1).plusMonths(1),
+            fom.withDayOfMonth(1).plusMonths(1).with(TemporalAdjusters.lastDayOfMonth()));
+
+        var kontrollertInntektTimeline = BrevScenarioerUtils.splitPrMåned(new LocalDateTimeline<>(kontrollPeriode,
+            BrevScenarioerUtils.KontrollerInntektHolder.forRegisterInntekt(BigDecimal.valueOf(10000))));
+
+        var kontrollerInntektPerioder = BrevScenarioerUtils.kontrollerInntektFraHolder(nyProgramPeriode, kontrollertInntektTimeline);
+
+        var satserPrMåned = BrevScenarioerUtils.splitPrMåned(satser);
+        var tilkjentYtelsePerioder = BrevScenarioerUtils.tilkjentYtelsePerioderMedReduksjon(satserPrMåned, kontrollPeriode, kontrollertInntektTimeline);
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(fom, nySluttdato)),
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
+            tilkjentYtelsePerioder,
+            new LocalDateTimeline<>(nyProgramPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(nyProgramPeriode, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(fom),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
+                    DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato)),
+                new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(kontrollPeriode)),
+                new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(kontrollPeriode))
+            ),
+            Collections.emptyList(),
+            null,
+            kontrollerInntektPerioder);
+    }
+
+
+    /**
      * Kombinasjon - rapporterer 10 000kr inntekt 1 måned etter fom + fødsel av barn
      *
      **/
