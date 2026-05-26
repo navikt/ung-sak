@@ -6,6 +6,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -105,11 +106,10 @@ class StartpunktUtlederUngdomsprogramperiodeTest {
         var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
         when(grunnlag.harForlengetPeriode()).thenReturn(harForlengetPeriode);
         var periode = mock(UngdomsprogramPeriode.class);
-        when(periode.getPeriode()).thenReturn(no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+        when(periode.getPeriode()).thenReturn(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
         var perioder = mock(UngdomsprogramPerioder.class);
         when(perioder.getPerioder()).thenReturn(Set.of(periode));
         when(grunnlag.getUngdomsprogramPerioder()).thenReturn(perioder);
         return grunnlag;
     }
 }
-
