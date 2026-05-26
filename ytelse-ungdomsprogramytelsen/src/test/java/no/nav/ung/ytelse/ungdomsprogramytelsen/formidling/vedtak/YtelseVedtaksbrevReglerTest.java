@@ -254,6 +254,53 @@ class YtelseVedtaksbrevReglerTest {
         assertThat(barnetilleggResultat.forklaring()).contains("barn");
     }
 
+    @Test
+    void skal_gi_forlenget_brev_selv_om_inntektskontroll_gir_ingen_brev() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
+
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(fom, opprinneligSluttdato, nySluttdato));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        var forlengetResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.FORLENGET_PERIODE))
+            .findFirst()
+            .orElseThrow();
+
+        assertFullAutomatiskBrev(forlengetResultat, DokumentMalType.FORLENGET_PERIODE, ForlengetPeriodeInnholdBygger.class);
+    }
+
+    @Test
+    void skal_gi_to_brev_ved_forlenget_periode_og_kontroll_inntekt_med_reduksjon() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
+
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(fom, opprinneligSluttdato, nySluttdato));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(2);
+
+        var forlengetResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.FORLENGET_PERIODE))
+            .findFirst()
+            .orElseThrow();
+
+        assertFullAutomatiskBrev(forlengetResultat, DokumentMalType.FORLENGET_PERIODE, ForlengetPeriodeInnholdBygger.class);
+
+        var inntektResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .findFirst()
+            .orElseThrow();
+
+        assertFullAutomatiskBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
+    }
+
      static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
