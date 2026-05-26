@@ -45,15 +45,10 @@ public class GReguleringRepository {
             insert into prosess_task (id, task_type, task_gruppe, neste_kjoering_etter, task_parametere)
             select nextval('seq_prosess_task'), 'gregulering.kandidatUtprøving',
                    nextval('seq_prosess_task_gruppe'), null,
-                        'fom=""" + fomValue + """
-
-            tom=""" + tomValue + """
-
-            fagsakId=' || f.id || ''
-
-                from fagsak f
-              where f.ytelse_type = :ytelseType
-             and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+                   'fom=' || :fomValue || '\ntom=' || :tomValue || '\nfagsakId=' || f.id
+              from fagsak f
+             where f.ytelse_type = :ytelseType
+               and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
             """;
 
         var query = entityManager.createNativeQuery(sql); // NOSONAR
@@ -61,7 +56,8 @@ public class GReguleringRepository {
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", periode.getFomDato());
         query.setParameter("tom", periode.getTomDato());
-
+        query.setParameter("fomValue", fomValue);
+        query.setParameter("tomValue", tomValue);
 
         return Integer.toUnsignedLong(query.executeUpdate());
     }
