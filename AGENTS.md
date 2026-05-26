@@ -74,4 +74,10 @@ dev/generate-openapi-ts-client.sh
 - `dokumentasjon/arkitekturbeslutninger.md`
 - `migreringer/pom.xml`
 - `web/README.md`
-- PR-historikk for forlenget periode: `https://github.com/navikt/ung-sak/pull/1299`, `https://github.com/navikt/ung-sak/pull/1336`, `https://github.com/navikt/ung-sak/pull/1350`, `https://github.com/navikt/ung-sak/pull/1365`, `https://github.com/navikt/ung-sak/pull/1367`, `https://github.com/navikt/ung-sak/pull/1370`
+- PR-historikk for forlenget periode:
+  - https://github.com/navikt/ung-sak/pull/1299
+  - https://github.com/navikt/ung-sak/pull/1336
+  - https://github.com/navikt/ung-sak/pull/1350
+  - https://github.com/navikt/ung-sak/pull/1365
+  - https://github.com/navikt/ung-sak/pull/1367
+  - https://github.com/navikt/ung-sak/pull/1370
