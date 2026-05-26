@@ -1,6 +1,7 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse.gregulering;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -25,6 +26,7 @@ public class UngdomsytelseKandidatForGReguleringUtleder implements PerioderForGR
 
     private UngdomsytelseGrunnlagRepository grunnlagRepository;
 
+    @Inject
     public UngdomsytelseKandidatForGReguleringUtleder(UngdomsytelseGrunnlagRepository grunnlagRepository) {
         this.grunnlagRepository = grunnlagRepository;
     }

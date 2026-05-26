@@ -13,7 +13,7 @@ public interface PerioderForGReguleringUtleder {
 
     static PerioderForGReguleringUtleder finnTjeneste(FagsakYtelseType fagsakYtelseType, Instance<PerioderForGReguleringUtleder> tjenester) {
         return FagsakYtelseTypeRef.Lookup.find(tjenester, fagsakYtelseType)
-            .orElseThrow(() -> new IllegalStateException("Finner ikke KandidaterForGReguleringTjeneste"));
+            .orElseThrow(() -> new IllegalStateException("Finner ikke PerioderForGReguleringUtleder"));
     }
 
     NavigableSet<DatoIntervallEntitet> utledPerioderForGRegulering(Behandling behandling, DatoIntervallEntitet periode);
