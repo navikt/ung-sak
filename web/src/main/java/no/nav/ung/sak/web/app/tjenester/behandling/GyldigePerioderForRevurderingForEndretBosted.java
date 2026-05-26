@@ -19,7 +19,6 @@ import no.nav.ung.sak.typer.Periode;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -54,8 +53,8 @@ public class GyldigePerioderForRevurderingForEndretBosted implements GyldigePeri
     }
 
     @Override
-    public Set<BehandlingÅrsakType> støttedeÅrsaker() {
-        return Set.of(BehandlingÅrsakType.ENDRET_BOSTED);
+    public BehandlingÅrsakType støttetÅrsak() {
+        return BehandlingÅrsakType.ENDRET_BOSTED;
     }
 
     @Override

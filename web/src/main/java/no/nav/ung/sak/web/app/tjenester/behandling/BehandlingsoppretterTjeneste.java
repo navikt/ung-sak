@@ -190,7 +190,7 @@ public class BehandlingsoppretterTjeneste {
 
     private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
         var relevanteUtledere = finnUtledereForFagsak(fagsak).stream()
-            .filter(utleder -> utleder.støttedeÅrsaker().contains(behandlingÅrsakType))
+            .filter(utleder -> utleder.støttetÅrsak() == behandlingÅrsakType)
             .toList();
         if (relevanteUtledere.isEmpty()) {
             return true;

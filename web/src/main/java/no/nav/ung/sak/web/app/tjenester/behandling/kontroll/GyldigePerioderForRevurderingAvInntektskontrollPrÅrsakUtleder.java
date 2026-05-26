@@ -13,7 +13,6 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.behandling.GyldigePerioderForRevurderingPrÅrsakUtleder;
 
 import java.util.List;
-import java.util.Set;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -45,8 +44,8 @@ public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder impl
     }
 
     @Override
-    public Set<BehandlingÅrsakType> støttedeÅrsaker() {
-        return Set.of(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+    public BehandlingÅrsakType støttetÅrsak() {
+        return BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT;
     }
 
     @Override
