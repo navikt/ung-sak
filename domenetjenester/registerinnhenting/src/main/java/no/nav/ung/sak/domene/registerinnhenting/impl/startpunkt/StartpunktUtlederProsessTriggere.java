@@ -59,14 +59,11 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
             BehandlingÅrsakType.årsakerForInnhentingAvPersonopplysninger().contains(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
         }
-        // Programperiode-årsaker introduserer nye perioder som trenger vilkårsevaluering, og må tilbake til INIT_PERIODER
-        if (BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().contains(it.getÅrsak())) {
-            return StartpunktType.INIT_PERIODER;
-        }
-        // Disse årsakene gjør ingen endring på behandling før VURDER_KOMPLETTHET
+        // Disse årsakene gjør ingen endring på behandling før VURDER_KOMPLETTHET. Registerinnhenting skal allerede ha blitt trigget ved opprettelse og diff
         if (BehandlingÅrsakType.UTTALELSE_FRA_BRUKER.equals(it.getÅrsak()) ||
             BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.equals(it.getÅrsak()) ||
-            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT.equals(it.getÅrsak())) {
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().contains(it.getÅrsak())) {
             return StartpunktType.VURDER_KOMPLETTHET;
         }
         return StartpunktType.START;

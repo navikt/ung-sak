@@ -48,30 +48,6 @@ class StartpunktUtlederProsessTriggereTest {
     }
 
     @Test
-    void forlenget_periode_trigger_gir_init_perioder() {
-        mockGrunnlag(ELDSTE_ID, Set.of());
-        mockGrunnlag(NYESTE_ID, Set.of(
-            new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))
-        ));
-
-        var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
-
-        assertThat(resultat).isEqualTo(StartpunktType.INIT_PERIODER);
-    }
-
-    @Test
-    void opphør_trigger_gir_init_perioder() {
-        mockGrunnlag(ELDSTE_ID, Set.of());
-        mockGrunnlag(NYESTE_ID, Set.of(
-            new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))
-        ));
-
-        var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
-
-        assertThat(resultat).isEqualTo(StartpunktType.INIT_PERIODER);
-    }
-
-    @Test
     void kontroll_inntekt_trigger_gir_vurder_kompletthet() {
         mockGrunnlag(ELDSTE_ID, Set.of());
         mockGrunnlag(NYESTE_ID, Set.of(
@@ -105,20 +81,6 @@ class StartpunktUtlederProsessTriggereTest {
         var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
 
         assertThat(resultat).isEqualTo(StartpunktType.VURDER_KOMPLETTHET);
-    }
-
-    @Test
-    void kombinasjon_forlenget_og_kontroll_gir_init_perioder() {
-        // INIT_PERIODER har lavere rangering enn VURDER_KOMPLETTHET, så den vinner
-        mockGrunnlag(ELDSTE_ID, Set.of());
-        mockGrunnlag(NYESTE_ID, Set.of(
-            new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM)),
-            new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, FOM.plusMonths(1)))
-        ));
-
-        var resultat = utleder.utledStartpunkt(ref, NYESTE_ID, ELDSTE_ID);
-
-        assertThat(resultat).isEqualTo(StartpunktType.INIT_PERIODER);
     }
 
     @Test
