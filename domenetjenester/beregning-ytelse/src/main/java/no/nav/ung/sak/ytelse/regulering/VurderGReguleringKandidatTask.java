@@ -83,7 +83,6 @@ public class VurderGReguleringKandidatTask extends FagsakProsessTask {
     private static String lagPeriodeString(Set<DatoIntervallEntitet> perioderSomSkalGReguleres) {
         return perioderSomSkalGReguleres.stream()
             .map(p -> p.getFomDato().format(DateTimeFormatter.ISO_DATE) + "/" + p.getTomDato().format(DateTimeFormatter.ISO_DATE))
-            .reduce((s1, s2) -> s1 + "|" + s2)
-            .orElse("");
+            .collect(java.util.stream.Collectors.joining("|"));
     }
 }
