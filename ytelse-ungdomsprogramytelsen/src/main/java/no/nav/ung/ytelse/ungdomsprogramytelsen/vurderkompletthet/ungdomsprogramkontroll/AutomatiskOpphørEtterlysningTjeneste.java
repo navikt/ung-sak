@@ -17,7 +17,6 @@ import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -28,8 +27,6 @@ import java.util.UUID;
 public class AutomatiskOpphørEtterlysningTjeneste {
 
     private static final Logger logger = LoggerFactory.getLogger(AutomatiskOpphørEtterlysningTjeneste.class);
-    private static final int VARSEL_UKER_FØR_MAKSDATO = 4;
-    private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
 
     private EtterlysningRepository etterlysningRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
@@ -69,11 +66,6 @@ public class AutomatiskOpphørEtterlysningTjeneste {
         // Hent maksdato fra periodegrunnlag (kilde til sannhet)
         var maksdato = grunnlag.getPeriodeMaksDato().orElse(periode.getTomDato());
 
-        if (!erInnenforVarselvindu(maksdato, LocalDate.now())) {
-            logger.info("Oppretter ikke etterlysning for automatisk opphør for behandling {}: maksdato {} er utenfor varselvindu", behandlingId, maksdato);
-            return;
-        }
-
         var etterlysning = Etterlysning.opprettForType(
             behandlingId,
             grunnlag.getGrunnlagsreferanse(),
@@ -94,11 +86,6 @@ public class AutomatiskOpphørEtterlysningTjeneste {
         prosessTaskTjeneste.lagre(prosessTaskGruppe);
     }
 
-    private boolean erInnenforVarselvindu(LocalDate maksdato, LocalDate dagensDato) {
-        var fireUkerFrem = dagensDato.plusWeeks(VARSEL_UKER_FØR_MAKSDATO);
-        return !maksdato.isAfter(fireUkerFrem)
-            && !maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO));
-    }
 
     /**
      * Avbryter eksisterende etterlysning for automatisk opphør.

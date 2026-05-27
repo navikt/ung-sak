@@ -71,7 +71,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     }
 
     @Test
-    void skal_ikke_opprette_etterlysning_nar_maksdato_er_for_langt_frem_i_tid() {
+    void skal_opprette_etterlysning_selv_om_maksdato_er_for_langt_frem_i_tid() {
         var fom = LocalDate.now();
         var tom = fom.plusWeeks(8);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
@@ -79,11 +79,11 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
         tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
 
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
-        assertThat(etterlysninger).isEmpty();
+        assertThat(etterlysninger).hasSize(1);
     }
 
     @Test
-    void skal_ikke_opprette_etterlysning_nar_maksdato_er_for_gammel() {
+    void skal_opprette_etterlysning_selv_om_maksdato_er_for_gammel() {
         var fom = LocalDate.now().minusMonths(2);
         var tom = LocalDate.now().minusDays(4);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
@@ -91,7 +91,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
         tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
 
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
-        assertThat(etterlysninger).isEmpty();
+        assertThat(etterlysninger).hasSize(1);
     }
 
     @Test
