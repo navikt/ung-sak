@@ -57,16 +57,8 @@ public class VurderGReguleringKandidatTask extends FagsakProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        var fomProperty = prosessTaskData.getPropertyValue(PERIODE_FOM);
-        if (fomProperty.startsWith("\"")) {
-            fomProperty = fomProperty.substring(1, fomProperty.length() - 1);
-        }
-        var fom = LocalDate.parse(fomProperty);
-        var tomProperty = prosessTaskData.getPropertyValue(PERIODE_TOM);
-        if (tomProperty.startsWith("\"")) {
-            tomProperty = tomProperty.substring(1, tomProperty .length() - 1);
-        }
-        var tom = LocalDate.parse(tomProperty);
+        var fom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_FOM));
+        var tom = LocalDate.parse(prosessTaskData.getPropertyValue(PERIODE_TOM));
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom);
 
 
