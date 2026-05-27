@@ -42,6 +42,8 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
     public static final String TASKNAME = "varselAutomatiskOpphor";
     private static final Logger log = LoggerFactory.getLogger(VarselAutomatiskOpphørTask.class);
     private static final int VARSEL_UKER_FØR_MAKSDATO = 4;
+    /** Grace-periode: sender varsel selv om maksdato nylig er passert, i tilfelle tasken har vært i feil. */
+    private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
 
     private EntityManager entityManager;
     private BehandlingRepository behandlingRepository;
@@ -106,12 +108,15 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
 
         Behandling behandling = sisteBehandling.get();
 
-        // Sjekk om det allerede finnes en åpen behandling med denne årsaken
-        var åpneBehandlinger = behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(fagsak.getId());
-        boolean harAlleredeVarselBehandling = åpneBehandlinger.stream()
-            .anyMatch(b -> b.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR));
+        // Sjekk om det allerede finnes en åpen behandling med denne årsaken,
+        // eller en nylig avsluttet — hindrer dobbel-varsling dersom behandlingen
+        // fullføres raskt og tasken kjører på nytt samme dag.
+        var tidligsteOpprettetTidspunkt = dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO * 2L).atStartOfDay();
+        boolean harAlleredeVarselBehandling = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId()).stream()
+            .filter(b -> b.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR))
+            .anyMatch(b -> b.getOpprettetTidspunkt().isAfter(tidligsteOpprettetTidspunkt));
         if (harAlleredeVarselBehandling) {
-            log.info("Fagsak {} har allerede åpen behandling med årsak RE_VARSEL_AUTOMATISK_OPPHOR, hopper over", fagsak.getId());
+            log.info("Fagsak {} har allerede behandling med årsak RE_VARSEL_AUTOMATISK_OPPHOR opprettet etter {}, hopper over", fagsak.getId(), tidligsteOpprettetTidspunkt.toLocalDate());
             return null;
         }
 
@@ -140,8 +145,8 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
             return null;
         }
 
-        // Sjekk om maksdato er innenfor varselvinduet
-        if (maksdato.isAfter(fireUkerFrem) || maksdato.isBefore(dagensDato)) {
+        // Sjekk om maksdato er innenfor varselvinduet (inkl. grace-periode for forsinket task-kjøring)
+        if (maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO)) || maksdato.isAfter(fireUkerFrem)) {
             return null;
         }
 
