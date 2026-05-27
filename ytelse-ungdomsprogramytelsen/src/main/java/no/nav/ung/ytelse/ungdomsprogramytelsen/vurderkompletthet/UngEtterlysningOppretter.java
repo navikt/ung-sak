@@ -2,67 +2,35 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningOppretter;
-import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningTjeneste;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.AutomatiskOpphørEtterlysningTjeneste;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @ApplicationScoped
 public class UngEtterlysningOppretter implements EtterlysningOppretter {
 
-    private KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste;
-    private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
-    private AutomatiskOpphørEtterlysningTjeneste automatiskOpphørEtterlysningTjeneste;
     private BehandlingRepository behandlingRepository;
+    private UngEtterlysningsorkestrerserTjeneste etterlysningsorkestrerserTjeneste;
 
     public UngEtterlysningOppretter() {
     }
 
     @Inject
-    public UngEtterlysningOppretter(KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste,
-                                    ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
-                                    AutomatiskOpphørEtterlysningTjeneste automatiskOpphørEtterlysningTjeneste,
-                                    BehandlingRepository behandlingRepository) {
-        this.kontrollerInntektEtterlysningTjeneste = kontrollerInntektEtterlysningTjeneste;
-        this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
-        this.automatiskOpphørEtterlysningTjeneste = automatiskOpphørEtterlysningTjeneste;
+    public UngEtterlysningOppretter(BehandlingRepository behandlingRepository,
+                                    UngEtterlysningsorkestrerserTjeneste etterlysningsorkestrerserTjeneste) {
         this.behandlingRepository = behandlingRepository;
+        this.etterlysningsorkestrerserTjeneste = etterlysningsorkestrerserTjeneste;
     }
 
     @Override
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
-        kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
         Behandling behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
         var årsaker = behandling.getBehandlingÅrsakerTyper();
 
-        boolean harVarselAutomatiskOpphør = årsaker.contains(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR);
-        boolean harForlengetPeriode = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        boolean harOpphør = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-
-        // Scenario 2 & 3: Utvidet kvote eller manuelt opphør avbryter varsel om automatisk opphør
-        if (harVarselAutomatiskOpphør && (harForlengetPeriode || harOpphør)) {
-            automatiskOpphørEtterlysningTjeneste.avbrytEtterlysningForAutomatiskOpphør(behandlingReferanse);
-            // Fortsett med normal etterlysningsflyt for den nye årsaken
-            kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
-            if (!harForlengetPeriode) {
-                programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
-            }
-        } else if (harVarselAutomatiskOpphør) {
-            // Scenario 1: Kun varsel om automatisk opphør — opprett etterlysning
-            automatiskOpphørEtterlysningTjeneste.opprettEtterlysningForAutomatiskOpphør(behandlingReferanse);
-        } else {
-            // Normal flyt
-            kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
-            if (!harForlengetPeriode) {
-                programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
-            }
-        }
+        etterlysningsorkestrerserTjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
     }
 }
