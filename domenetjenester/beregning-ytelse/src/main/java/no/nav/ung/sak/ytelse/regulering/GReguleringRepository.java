@@ -33,8 +33,7 @@ public class GReguleringRepository {
 
         query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
         query.setParameter("fom", periode.getFomDato() == null ? Tid.TIDENES_BEGYNNELSE : periode.getFomDato());
-        query.setParameter("tom", periode.getTomDato() == null ? Tid.TIDENES_ENDE : periode.getFomDato());
-
+        query.setParameter("tom", periode.getTomDato() == null ? Tid.TIDENES_ENDE : periode.getTomDato());
         return (Long) query.getSingleResult();
     }
 
