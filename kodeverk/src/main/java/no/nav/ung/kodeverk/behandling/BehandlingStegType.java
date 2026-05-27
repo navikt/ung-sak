@@ -37,7 +37,8 @@ public enum BehandlingStegType implements Kodeverdi {
     KONTROLLER_REGISTER_INNTEKT("KONTROLLER_REGISTER_INNTEKT", "Kontroller brukers rapporterte inntekt mot registerinntekt", UTREDES),
 
     VURDER_FAKTA_OM_BOSTED("VURDER_FAKTA_OM_BOSTED", "Vurderer om bruker bor et sted ytelsen gjelder", UTREDES),
-    VURDER_BOSTEDVILKÅR("VURDER_BOSTEDVILKÅR", "Vurderer om bruker bor et sted ytelsen gjelder", UTREDES),
+    VURDER_KOMPLETTHET_BOSTEDVILKÅR("VURDER_KOMPLETTHET_BOSTEDVILKÅR", "Vurder kompletthet for bostedsvilkår", UTREDES),
+    VURDER_BOSTEDVILKÅR("FASTSETT_BOSTEDVILKÅR", "Fastsetter bostedsvilkår basert på opphørsresultat", UTREDES),
     VURDER_BISTANDSVILKÅR("VURDER_BISTANDSVILKÅR", "Vurder brukers behov om bistand ref 14a vedtak", UTREDES),
     VURDER_ANDRE_LIVSOPPHOLDSYTELSER("VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "Vurder om bruker har en annen livsoppholdsytelse", UTREDES),
     VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR("VURDER_FORUTGÅENDE_MEDLEMSKAP", "Vurder bosteder i søknad opp mot EØS-/trygdeavtaleland", UTREDES),

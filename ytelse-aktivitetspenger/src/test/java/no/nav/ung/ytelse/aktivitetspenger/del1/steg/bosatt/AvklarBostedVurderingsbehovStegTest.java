@@ -25,6 +25,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.OpphørResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
@@ -53,7 +54,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class VurderBosattVilkårStegTest {
+class AvklarBostedVurderingsbehovStegTest {
 
     private static final LocalDate FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate TOM = LocalDate.of(2026, 1, 31);
@@ -72,7 +73,7 @@ class VurderBosattVilkårStegTest {
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
-    private VurderBosattVilkårSteg steg;
+    private VurderKompletthetBostedvilkårSteg steg;
 
     @BeforeEach
     void setUp() {
@@ -87,7 +88,7 @@ class VurderBosattVilkårStegTest {
     }
 
     @Test
-    void skal_sette_oppfylt_og_regelinput_nar_bruker_er_bosatt_hele_perioden() {
+    void skal_passere_uten_aksjonspunkt_og_uten_opphorsresultat_nar_bruker_er_bosatt_hele_perioden() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
             FOM, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
@@ -96,15 +97,12 @@ class VurderBosattVilkårStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        var perioder = hentPerioder(behandling.getId());
-        assertThat(perioder).hasSize(1);
-        assertThat(perioder.getFirst().getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-        assertThat(perioder.getFirst().getRegelInput()).contains("\"skjaeringstidspunkt\"");
-        assertThat(perioder.getFirst().getRegelInput()).contains("\"erBosattITrondheim\" : true");
+        var opphørResultatRepository = new OpphørResultatRepository(entityManager);
+        assertThat(opphørResultatRepository.hentAktiveForBehandling(behandling.getId())).isEmpty();
     }
 
     @Test
-    void skal_splitte_periode_ved_fraflytting_og_sette_avslag_med_regelinput() {
+    void skal_opprette_opphorsresultat_ved_fraflytting_automatisk() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         var fraflyttingsDato = FOM.plusDays(10);
         bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
@@ -114,19 +112,12 @@ class VurderBosattVilkårStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        var perioder = hentPerioder(behandling.getId());
-        assertThat(perioder).hasSize(2);
-
-        var sortert = perioder.stream().sorted(Comparator.comparing(VilkårPeriode::getFom)).toList();
-        assertThat(sortert.get(0).getFom()).isEqualTo(FOM);
-        assertThat(sortert.get(0).getTom()).isEqualTo(fraflyttingsDato.minusDays(1));
-        assertThat(sortert.get(0).getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-
-        assertThat(sortert.get(1).getFom()).isEqualTo(fraflyttingsDato);
-        assertThat(sortert.get(1).getTom()).isEqualTo(TOM);
-        assertThat(sortert.get(1).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(sortert.get(1).getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
-        assertThat(sortert.get(1).getRegelInput()).contains("\"fraflyttingsAarsak\" : \"IKKE_BOSATTADRESSE_I_TRONDHEIM\"");
+        var opphørResultatRepository = new OpphørResultatRepository(entityManager);
+        var opphørResultater = opphørResultatRepository.hentAktiveForBehandling(behandling.getId());
+        assertThat(opphørResultater).hasSize(1);
+        assertThat(opphørResultater.getFirst().getSkjæringstidspunkt()).isEqualTo(FOM);
+        assertThat(opphørResultater.getFirst().getOpphørDato()).isEqualTo(fraflyttingsDato);
+        assertThat(opphørResultater.getFirst().getOpphørÅrsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
     }
 
     @Test
@@ -234,7 +225,7 @@ class VurderBosattVilkårStegTest {
         return behandling;
     }
 
-    private VurderBosattVilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
+    private VurderKompletthetBostedvilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
         var vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjenester, vilkårResultatRepository);
         var etterlysningTjeneste = new EtterlysningTjeneste(null, null) {
             @Override
@@ -242,13 +233,15 @@ class VurderBosattVilkårStegTest {
                 return etterlysninger;
             }
         };
+        var opphørResultatRepository = new OpphørResultatRepository(entityManager);
 
-        return new VurderBosattVilkårSteg(
+        return new VurderKompletthetBostedvilkårSteg(
             manuelleVilkårRekkefølgeTjeneste,
             vilkårResultatRepository,
             vilkårTjeneste,
             behandlingRepository,
             bostedsGrunnlagRepository,
+            opphørResultatRepository,
             vilkårsPerioderTilVurderingTjenester,
             etterlysningTjeneste
         );

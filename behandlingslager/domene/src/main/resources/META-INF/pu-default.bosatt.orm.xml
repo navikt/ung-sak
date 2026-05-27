@@ -9,11 +9,13 @@
     <sequence-generator name="SEQ_GR_BOSATT_AVKLARING" allocation-size="50" sequence-name="SEQ_GR_BOSATT_AVKLARING"/>
     <sequence-generator name="SEQ_BOSATT_SOEKNAD_GRUNNLAG" allocation-size="50" sequence-name="SEQ_BOSATT_SOEKNAD_GRUNNLAG"/>
     <sequence-generator name="SEQ_BOSATT_INFORMASJON_FRA_SOEKNAD" allocation-size="50" sequence-name="SEQ_BOSATT_INFORMASJON_FRA_SOEKNAD"/>
+    <sequence-generator name="SEQ_RS_OPPHOER" allocation-size="50" sequence-name="seq_rs_opphoer"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlag"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsinformasjonFraSøknad"/>
+    <entity class="no.nav.ung.sak.behandlingslager.bosatt.OpphørResultat"/>
 
 </entity-mappings>
