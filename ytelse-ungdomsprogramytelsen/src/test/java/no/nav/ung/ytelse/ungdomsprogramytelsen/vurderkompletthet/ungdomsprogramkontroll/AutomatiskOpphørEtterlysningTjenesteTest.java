@@ -4,7 +4,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.impl.ProsessTaskTjenesteImpl;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -16,8 +15,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
-import no.nav.ung.sak.trigger.Trigger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,19 +41,16 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     @Inject
     private EntityManager entityManager;
 
-    private ProsessTriggereRepository prosessTriggereRepository;
     private Behandling behandling;
 
     @BeforeEach
     void setUp() {
-        prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(entityManager);
         tjeneste = new AutomatiskOpphørEtterlysningTjeneste(
             etterlysningRepository,
             ungdomsprogramPeriodeRepository,
-            prosessTaskTjeneste,
-            prosessTriggereRepository
+            prosessTaskTjeneste
         );
     }
 
@@ -65,12 +58,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     void skal_opprette_etterlysning_for_automatisk_opphor() {
         var fom = LocalDate.now();
         var tom = fom.plusWeeks(2);
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
-
-        // Sett opp trigger med maksdato
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
-            new Trigger(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR, DatoIntervallEntitet.fraOgMedTilOgMed(tom, tom))
-        ));
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
 
         tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
 
@@ -86,11 +74,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     void skal_ikke_opprette_etterlysning_nar_maksdato_er_for_langt_frem_i_tid() {
         var fom = LocalDate.now();
         var tom = fom.plusWeeks(8);
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
-
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
-            new Trigger(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR, DatoIntervallEntitet.fraOgMedTilOgMed(tom, tom))
-        ));
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
 
         tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
 
@@ -102,11 +86,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     void skal_ikke_opprette_etterlysning_nar_maksdato_er_for_gammel() {
         var fom = LocalDate.now().minusMonths(2);
         var tom = LocalDate.now().minusDays(4);
-        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
-
-        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
-            new Trigger(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR, DatoIntervallEntitet.fraOgMedTilOgMed(tom, tom))
-        ));
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
 
         tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
 
