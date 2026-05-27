@@ -2,17 +2,14 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselautomatiskopph
 
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
@@ -31,6 +28,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
+import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
+import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
 
 class VarselAutomatiskOpphørTaskTest {
 
@@ -146,6 +145,54 @@ class VarselAutomatiskOpphørTaskTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
 
+    @Test
+    void skal_ikke_opprette_revurdering_når_lik_task_med_samme_årsak_og_periode_allerede_finnes() {
+        // Arrange
+        var fagsak = lagFagsak(1L, "1234567890123");
+        var behandling = lagBehandling(fagsak, 100L);
+        var maksdato = LocalDate.now().plusWeeks(2);
+        var periode = maksdato + "/" + maksdato;
+
+        mockLøpendeFagsaker(List.of(fagsak));
+        when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(1L)).thenReturn(List.of());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
+        when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean()))
+            .thenReturn(List.of(lagVentendeOpprettRevurderingTask(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR.getKode(), periode)));
+
+        // Act
+        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+
+        // Assert
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
+    }
+
+    @Test
+    void skal_opprette_revurdering_når_eksisterende_task_har_annen_årsak() {
+        // Arrange
+        var fagsak = lagFagsak(1L, "1234567890123");
+        var behandling = lagBehandling(fagsak, 100L);
+        var maksdato = LocalDate.now().plusWeeks(2);
+        var periode = maksdato + "/" + maksdato;
+
+        mockLøpendeFagsaker(List.of(fagsak));
+        when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
+        when(behandlingRepository.hentBehandlingerSomIkkeErAvsluttetForFagsakId(1L)).thenReturn(List.of());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
+        when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean()))
+            .thenReturn(List.of(lagVentendeOpprettRevurderingTask(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS.getKode(), periode)));
+
+        // Act
+        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+
+        // Assert
+        var captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
+        verify(prosessTaskTjeneste).lagre(captor.capture());
+        assertThat(captor.getValue().getTasks()).hasSize(1);
+    }
+
     @SuppressWarnings("unchecked")
     private void mockLøpendeFagsaker(List<Fagsak> fagsaker) {
         TypedQuery<Fagsak> query = mock(TypedQuery.class);
@@ -169,5 +216,12 @@ class VarselAutomatiskOpphørTaskTest {
         when(behandling.getId()).thenReturn(behandlingId);
         when(behandling.getFagsak()).thenReturn(fagsak);
         return behandling;
+    }
+
+    private ProsessTaskData lagVentendeOpprettRevurderingTask(String årsak, String perioder) {
+        var taskData = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+        taskData.setProperty(BEHANDLING_ÅRSAK, årsak);
+        taskData.setProperty(PERIODER, perioder);
+        return taskData;
     }
 }

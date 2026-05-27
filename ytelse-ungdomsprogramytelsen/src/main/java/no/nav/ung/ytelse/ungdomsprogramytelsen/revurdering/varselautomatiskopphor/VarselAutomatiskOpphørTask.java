@@ -26,6 +26,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
@@ -123,16 +124,19 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
             return null;
         }
 
-        // Sjekk om det finnes ventende prosesstasker
-        var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true);
-        if (prosesstaskerForFagsak.stream().anyMatch(task -> task.getTaskType().equals(OpprettRevurderingEllerOpprettDiffTask.TASKNAME))) {
-            log.info("Fagsak {} har allerede en ventende revurdering-task, hopper over", fagsak.getId());
-            return null;
-        }
-
         // Hent maksdato fra grunnlaget
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
         if (maksdato == null) {
+            return null;
+        }
+
+        // Sjekk om det finnes ventende revurdering-task med samme årsak og periode
+        var ønsketPeriode = maksdato + "/" + maksdato;
+        var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR.getKode();
+        var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(
+            fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true);
+        if (harVentendeRevurderingTaskForSammeÅrsakOgPeriode(prosesstaskerForFagsak, ønsketÅrsak, ønsketPeriode)) {
+            log.info("Fagsak {} har allerede ventende revurdering-task for årsak {} og periode {}, hopper over", fagsak.getId(), ønsketÅrsak, ønsketPeriode);
             return null;
         }
 
@@ -145,9 +149,18 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
 
         ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         tilVurderingTask.setFagsakId(fagsak.getId());
-        tilVurderingTask.setProperty(PERIODER, maksdato + "/" + maksdato);
-        tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR.getKode());
+        tilVurderingTask.setProperty(PERIODER, ønsketPeriode);
+        tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, ønsketÅrsak);
         return tilVurderingTask;
+    }
+
+    private static boolean harVentendeRevurderingTaskForSammeÅrsakOgPeriode(List<ProsessTaskData> tasks,
+                                                                             String ønsketÅrsak,
+                                                                             String ønsketPeriode) {
+        return tasks.stream()
+            .filter(task -> OpprettRevurderingEllerOpprettDiffTask.TASKNAME.equals(task.getTaskType()))
+            .anyMatch(task -> Objects.equals(ønsketÅrsak, task.getPropertyValue(BEHANDLING_ÅRSAK))
+                && Objects.equals(ønsketPeriode, task.getPropertyValue(PERIODER)));
     }
 
 
