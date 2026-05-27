@@ -4,7 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
-import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.automatiskopphor.BekreftAutomatiskOpphorOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.opphorvedmaksdato.BekreftOpphorVedMaksdatoOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
@@ -37,7 +37,7 @@ public class AutomatiskOpphørOppgaveOppretter {
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
-            new BekreftAutomatiskOpphorOppgavetypeDataDto(sluttdato, sluttdato),
+            new BekreftOpphorVedMaksdatoOppgavetypeDataDto(sluttdato, sluttdato),
             etterlysning.getFrist()
         );
     }
