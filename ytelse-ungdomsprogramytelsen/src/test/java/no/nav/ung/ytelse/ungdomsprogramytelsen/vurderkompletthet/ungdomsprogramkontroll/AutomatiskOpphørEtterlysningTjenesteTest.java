@@ -64,7 +64,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     @Test
     void skal_opprette_etterlysning_for_automatisk_opphor() {
         var fom = LocalDate.now();
-        var tom = fom.plusMonths(6);
+        var tom = fom.plusWeeks(2);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
 
         // Sett opp trigger med maksdato
@@ -80,6 +80,38 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
         assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR);
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
         assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+    }
+
+    @Test
+    void skal_ikke_opprette_etterlysning_nar_maksdato_er_for_langt_frem_i_tid() {
+        var fom = LocalDate.now();
+        var tom = fom.plusWeeks(8);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
+
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR, DatoIntervallEntitet.fraOgMedTilOgMed(tom, tom))
+        ));
+
+        tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+
+        var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        assertThat(etterlysninger).isEmpty();
+    }
+
+    @Test
+    void skal_ikke_opprette_etterlysning_nar_maksdato_er_for_gammel() {
+        var fom = LocalDate.now().minusMonths(2);
+        var tom = LocalDate.now().minusDays(4);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
+
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR, DatoIntervallEntitet.fraOgMedTilOgMed(tom, tom))
+        ));
+
+        tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+
+        var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        assertThat(etterlysninger).isEmpty();
     }
 
     @Test
