@@ -51,6 +51,7 @@ public class VurderKompletthetBostedvilkårSteg extends VilkårVurderingSteg {
     private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private OpphørResultatRepository opphørResultatRepository;
+    private OpphørTjeneste opphørTjeneste;
 
     VurderKompletthetBostedvilkårSteg() {
         // for CDI proxy
@@ -64,12 +65,14 @@ public class VurderKompletthetBostedvilkårSteg extends VilkårVurderingSteg {
                                              BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                              OpphørResultatRepository opphørResultatRepository,
                                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                             EtterlysningTjeneste etterlysningTjeneste) {
+                                             EtterlysningTjeneste etterlysningTjeneste,
+                                             OpphørTjeneste opphørTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.opphørResultatRepository = opphørResultatRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
+        this.opphørTjeneste = opphørTjeneste;
     }
 
     @Override
@@ -122,7 +125,8 @@ public class VurderKompletthetBostedvilkårSteg extends VilkårVurderingSteg {
                     s.getFom(),
                     avklaring.getFraflyttingsDato(),
                     avslagsårsak,
-                    OpphørKilde.AUTOMATISK
+                    OpphørKilde.AUTOMATISK,
+                    VilkårType.BOSTEDSVILKÅR
                 ));
             });
 
@@ -136,6 +140,7 @@ public class VurderKompletthetBostedvilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OPPHØR_BOSTED));
         }
 
+        opphørTjeneste.utledOgLagreVilkår(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

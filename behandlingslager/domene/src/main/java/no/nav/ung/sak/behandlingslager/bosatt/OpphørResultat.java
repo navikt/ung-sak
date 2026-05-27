@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.bosatt.OpphørKilde;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 import java.time.LocalDate;
@@ -34,6 +35,16 @@ public class OpphørResultat extends BaseEntitet {
     private boolean aktiv = true;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "vilkar_type", nullable = false, updatable = false)
+    private VilkårType vilkårType;
+
+    @Column(name = "begrunnelse")
+    private String begrunnelse;
+
+    @Column(name = "fritekst_vurdering_brev")
+    private String fritekstVurderingBrev;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "kilde", nullable = false, updatable = false)
     private OpphørKilde kilde;
 
@@ -45,12 +56,19 @@ public class OpphørResultat extends BaseEntitet {
         // Hibernate
     }
 
-    public OpphørResultat(Long behandlingId, LocalDate skjæringstidspunkt, LocalDate opphørDato, Avslagsårsak opphørÅrsak, OpphørKilde kilde) {
+    public OpphørResultat(Long behandlingId, LocalDate skjæringstidspunkt, LocalDate opphørDato, Avslagsårsak opphørÅrsak, OpphørKilde kilde, VilkårType vilkårType) {
         this.behandlingId = Objects.requireNonNull(behandlingId);
         this.skjæringstidspunkt = Objects.requireNonNull(skjæringstidspunkt);
         this.opphørDato = opphørDato;
         this.opphørÅrsak = opphørÅrsak;
         this.kilde = Objects.requireNonNull(kilde);
+        this.vilkårType = Objects.requireNonNull(vilkårType);
+    }
+
+    public OpphørResultat(Long behandlingId, LocalDate skjæringstidspunkt, LocalDate opphørDato, Avslagsårsak opphørÅrsak, OpphørKilde kilde, VilkårType vilkårType, String begrunnelse, String fritekstVurderingBrev) {
+        this(behandlingId, skjæringstidspunkt, opphørDato, opphørÅrsak, kilde, vilkårType);
+        this.begrunnelse = begrunnelse;
+        this.fritekstVurderingBrev = fritekstVurderingBrev;
     }
 
     public Long getId() {
@@ -77,6 +95,18 @@ public class OpphørResultat extends BaseEntitet {
         return kilde;
     }
 
+    public VilkårType getVilkårType() {
+        return vilkårType;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
+    public String getFritekstVurderingBrev() {
+        return fritekstVurderingBrev;
+    }
+
     public boolean isAktiv() {
         return aktiv;
     }
@@ -89,12 +119,13 @@ public class OpphørResultat extends BaseEntitet {
     public boolean equals(Object o) {
         if (!(o instanceof OpphørResultat that)) return false;
         return Objects.equals(behandlingId, that.behandlingId)
-            && Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt);
+            && Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt)
+            && vilkårType == that.vilkårType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingId, skjæringstidspunkt);
+        return Objects.hash(behandlingId, skjæringstidspunkt, vilkårType);
     }
 
     @Override
@@ -103,6 +134,7 @@ public class OpphørResultat extends BaseEntitet {
             + ", skjæringstidspunkt=" + skjæringstidspunkt
             + ", opphørDato=" + opphørDato
             + ", opphørÅrsak=" + opphørÅrsak
+            + ", vilkårType=" + vilkårType
             + ", kilde=" + kilde
             + ", aktiv=" + aktiv + '}';
     }

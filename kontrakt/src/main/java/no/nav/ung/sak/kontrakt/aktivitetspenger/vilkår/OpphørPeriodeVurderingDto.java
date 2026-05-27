@@ -20,6 +20,12 @@ public record OpphørPeriodeVurderingDto(
 
     @JsonProperty(value = "opphørÅrsak", required = true)
     @NotNull
-    Avslagsårsak opphørÅrsak
+    Avslagsårsak opphørÅrsak,
+
+    @JsonProperty("begrunnelse")
+    String begrunnelse,
+
+    @JsonProperty("fritekstVurderingBrev")
+    String fritekstVurderingBrev
 ) {
 }

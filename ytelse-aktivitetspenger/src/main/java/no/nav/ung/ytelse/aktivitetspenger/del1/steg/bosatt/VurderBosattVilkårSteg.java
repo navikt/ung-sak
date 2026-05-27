@@ -4,37 +4,38 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.bosatt.OpphørKilde;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingStegRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
-import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
-import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.OpphørResultat;
 import no.nav.ung.sak.behandlingslager.bosatt.OpphørResultatRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.EtterlysningData;
+import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTEDVILKÅR;
 
@@ -44,12 +45,13 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTEDVIL
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
 
-    private static final VilkårJsonObjectMapper VILKAR_JSON_OBJECT_MAPPER = new VilkårJsonObjectMapper();
+    private static final Duration DEFAULT_VENTEFRIST = Duration.ofDays(14);
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
-    private VilkårResultatRepository vilkårResultatRepository;
+    private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private OpphørResultatRepository opphørResultatRepository;
+    private OpphørTjeneste opphørTjeneste;
 
     VurderBosattVilkårSteg() {
         // for CDI proxy
@@ -57,17 +59,20 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
 
     @Inject
     public VurderBosattVilkårSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
-                                  VilkårResultatRepository vilkårResultatRepository,
-                                  VilkårTjeneste vilkårTjeneste,
-                                  BehandlingRepository behandlingRepository,
-                                  BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                  OpphørResultatRepository opphørResultatRepository,
-                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
+                                             VilkårResultatRepository vilkårResultatRepository,
+                                             VilkårTjeneste vilkårTjeneste,
+                                             BehandlingRepository behandlingRepository,
+                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                             OpphørResultatRepository opphørResultatRepository,
+                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
+                                             EtterlysningTjeneste etterlysningTjeneste,
+                                             OpphørTjeneste opphørTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
-        this.vilkårResultatRepository = vilkårResultatRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.opphørResultatRepository = opphørResultatRepository;
+        this.etterlysningTjeneste = etterlysningTjeneste;
+        this.opphørTjeneste = opphørTjeneste;
     }
 
     @Override
@@ -93,115 +98,127 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        List<OpphørResultat> aktiveOpphørResultater = opphørResultatRepository.hentAktiveForBehandling(behandlingId);
-        if (aktiveOpphørResultater.isEmpty()) {
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
-        Map<LocalDate, OpphørResultat> opphørPerStp = new HashMap<>();
-        for (OpphørResultat or : aktiveOpphørResultater) {
-            opphørPerStp.put(or.getSkjæringstidspunkt(), or);
-        }
+        List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
+            behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_BOSTED);
+        Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
+            .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
 
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
         BostedsAvklaringHolder holder = grunnlag.getHolder();
 
-        Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
-            .orElseThrow(() -> new IllegalStateException("Forventer vilkårresultat for behandling " + behandlingId));
+        LocalDateTimeline<StegUtfall> stegutfallTidslinje = tidslinjeTilVurdering.map(
+            segment -> vurder(segment, etterlysningPerFom, holder));
 
-        var builder = Vilkårene.builderFraEksisterende(vilkårene);
-        var vilkårBuilder = builder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
-
-        for (var segment : tidslinjeTilVurdering.toSegments()) {
-            LocalDate stp = segment.getFom();
-            OpphørResultat opphør = opphørPerStp.get(stp);
-
-            if (opphør == null) {
-                var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(segment.getLocalDateInterval()));
-                holder.getPeriodeAvklaring(stp).ifPresent(avklaring ->
-                    periodeBuilder.medRegelInput(lagRegelInput(avklaring))
-                );
-                periodeBuilder.medUtfall(Utfall.OPPFYLT);
-                vilkårBuilder.leggTil(periodeBuilder);
-            } else {
-                BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(stp)
-                    .orElseThrow(() -> new IllegalStateException("Forventer bostedsavklaring for stp " + stp));
-                String regelInput = lagRegelInput(avklaring);
-                Avslagsårsak avslagsårsak = opphør.getOpphørÅrsak();
-                LocalDate opphørDato = opphør.getOpphørDato();
-
-                if (opphørDato.isBefore(stp)) {
-                    // Ikke bosatt på stp
-                    var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(segment.getLocalDateInterval()))
-                        .medRegelInput(regelInput)
-                        .medUtfall(Utfall.IKKE_OPPFYLT)
-                        .medAvslagsårsak(avslagsårsak);
-
-                    if (opphør.getKilde() == OpphørKilde.AUTOMATISK) {
-                        periodeBuilder
-                            .nullstillFritekstvurderinger()
-                            .medManueltVurdert(false);
-                    }
-
-                    vilkårBuilder.leggTil(periodeBuilder);
-                } else if (opphørDato.isAfter(segment.getTom())) {
-                    // OpphørDato etter perioden — OPPFYLT hele perioden
-                    var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(segment.getLocalDateInterval()))
-                        .medRegelInput(regelInput)
-                        .medUtfall(Utfall.OPPFYLT);
-
-                    vilkårBuilder.leggTil(periodeBuilder);
-                } else {
-                    // Splitt: OPPFYLT frem til opphørDato, IKKE_OPPFYLT fra opphørDato
-                    var oppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(stp, opphørDato.minusDays(1)));
-                    oppfyltBuilder
-                        .medRegelInput(regelInput)
-                        .medUtfall(Utfall.OPPFYLT);
-
-                    if (opphør.getKilde() == OpphørKilde.AUTOMATISK) {
-                        oppfyltBuilder
-                            .nullstillFritekstvurderinger()
-                            .medManueltVurdert(false);
-                    }
-                    vilkårBuilder.leggTil(oppfyltBuilder);
-
-                    var ikkeOppfyltBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fraOgMedTilOgMed(opphørDato, segment.getTom()));
-                    ikkeOppfyltBuilder.medRegelInput(regelInput)
-                        .medUtfall(Utfall.IKKE_OPPFYLT)
-                        .medAvslagsårsak(avslagsårsak);
-
-                    if (opphør.getKilde() == OpphørKilde.AUTOMATISK) {
-                        ikkeOppfyltBuilder
-                            .nullstillFritekstvurderinger()
-                            .medManueltVurdert(false);
-                    }
-                    vilkårBuilder.leggTil(ikkeOppfyltBuilder);
-                }
-            }
+        if (!stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
+            return settPåVent(stegutfallTidslinje, etterlysningPerFom);
         }
 
-        builder.leggTil(vilkårBuilder);
-        vilkårResultatRepository.lagre(behandlingId, builder.build());
+        stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals)
+            .toSegments()
+            .forEach(s -> {
+                BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(s.getFom())
+                    .orElseThrow(() -> new IllegalStateException("Forventer bostedsavklaring for stp " + s.getFom()));
+                Avslagsårsak avslagsårsak = mapTilAvslagsårsak(avklaring.getFraflyttingsÅrsak());
+                opphørResultatRepository.lagre(new OpphørResultat(
+                    behandlingId,
+                    s.getFom(),
+                    avklaring.getFraflyttingsDato(),
+                    avslagsårsak,
+                    OpphørKilde.AUTOMATISK,
+                    VilkårType.BOSTEDSVILKÅR
+                ));
+            });
 
+        // erKildeSøknad → manuell vilkårsvurdering via ManuellVurderingBostedsvilkårOppdaterer
+        if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
+        }
+
+        // harMottattSvar/ANNET → manuell opphørsvurdering via VurderOpphørBostedOppdaterer
+        if (!stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_MANUELT::equals).isEmpty()) {
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OPPHØR_BOSTED));
+        }
+
+        opphørTjeneste.utledOgLagreVilkår(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static String lagRegelInput(BostedsPeriodeAvklaring periodeAvklaring) {
-        return VILKAR_JSON_OBJECT_MAPPER.writeValueAsString(new RegelInput(
-            periodeAvklaring.getReferanse(),
-            periodeAvklaring.getSkjæringstidspunkt(),
-            periodeAvklaring.isErBosattITrondheim(),
-            periodeAvklaring.getFraflyttingsDato(),
-            periodeAvklaring.getFraflyttingsÅrsak(),
-            periodeAvklaring.getKilde()));
+    private static List<LocalDateSegment<StegUtfall>> vurder(LocalDateSegment<Boolean> segment,
+                                                              Map<LocalDate, EtterlysningData> etterlysningPerFom,
+                                                              BostedsAvklaringHolder holder) {
+        LocalDate fom = segment.getFom();
+        EtterlysningData etterlysning = etterlysningPerFom.get(fom);
+        BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(fom)
+            .orElseThrow(() -> new IllegalStateException("Forventer å finne en bostedsperiodeavklaring for stp " + fom));
+        boolean erÅrsakAnnet = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
+        boolean erKildeSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
+
+        if (erVentende(etterlysning)) {
+            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER));
+        } else if (erKildeSøknad) {
+            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VILKÅR_VURDERES_MANUELT));
+        } else if (harMottattSvarMedUttalelse(etterlysning) || erÅrsakAnnet) {
+            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.OPPHØR_MANUELT));
+        } else if (!avklaring.isErBosattITrondheim() || avklaring.getFraflyttingsDato() != null) {
+            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.OPPHØR_AUTOMATISK));
+        }
+        return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.BOSATT_HELE_PERIODEN));
     }
 
-    private record RegelInput(UUID referanse,
-                              LocalDate skjaeringstidspunkt,
-                              boolean erBosattITrondheim,
-                              LocalDate fraflyttingsDato,
-                              FraflyttingsÅrsak fraflyttingsAarsak,
-                              Kilde kilde) {
+    private static BehandleStegResultat settPåVent(LocalDateTimeline<StegUtfall> stegutfallTidslinje,
+                                                   Map<LocalDate, EtterlysningData> etterlysningPerFom) {
+        Set<LocalDate> ventendeFom = stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals)
+            .toSegments().stream().map(LocalDateSegment::getFom).collect(Collectors.toSet());
+        LocalDateTime frist = ventendeFom.stream()
+            .map(fom -> Optional.ofNullable(etterlysningPerFom.get(fom)).map(EtterlysningData::frist).orElse(null))
+            .filter(Objects::nonNull)
+            .max(Comparator.naturalOrder())
+            .orElse(LocalDateTime.now().plus(DEFAULT_VENTEFRIST));
+        return BehandleStegResultat.utførtMedAksjonspunktResultater(List.of(
+            AksjonspunktResultat.opprettForAksjonspunktMedFrist(
+                EtterlysningType.UTTALELSE_BOSTED.tilAutopunktDefinisjon(),
+                EtterlysningType.UTTALELSE_BOSTED.mapTilVenteårsak(),
+                frist
+            )
+        ));
+    }
+
+    private static boolean erVentende(EtterlysningData etterlysning) {
+        return etterlysning != null
+            && (etterlysning.status() == EtterlysningStatus.OPPRETTET
+            || etterlysning.status() == EtterlysningStatus.VENTER);
+    }
+
+    private static boolean harMottattSvarMedUttalelse(EtterlysningData etterlysning) {
+        return etterlysning != null
+            && etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
+            && etterlysning.uttalelseData() != null
+            && etterlysning.uttalelseData().harUttalelse();
+    }
+
+    static Avslagsårsak mapTilAvslagsårsak(FraflyttingsÅrsak fraflyttingsÅrsak) {
+        if (fraflyttingsÅrsak == null) {
+            return Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED;
+        }
+        return switch (fraflyttingsÅrsak) {
+            case IKKE_BOSATTADRESSE_I_TRONDHEIM ->
+                Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED;
+            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM ->
+                Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
+            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM ->
+                Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED;
+            case ANNET ->
+                throw new IllegalStateException("FraflyttingsÅrsak.ANNET skal ikke treffe auto-path");
+        };
+    }
+
+    enum StegUtfall {
+        OPPHØR_AUTOMATISK,
+        OPPHØR_MANUELT,
+        VILKÅR_VURDERES_MANUELT,
+        VENTER_PÅ_UTTALELSE_FRA_BRUKER,
+        BOSATT_HELE_PERIODEN
     }
 }
+

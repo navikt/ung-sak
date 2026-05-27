@@ -73,7 +73,7 @@ class AvklarBostedVurderingsbehovStegTest {
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
-    private VurderKompletthetBostedvilkårSteg steg;
+    private VurderBosattVilkårSteg steg;
 
     @BeforeEach
     void setUp() {
@@ -225,7 +225,7 @@ class AvklarBostedVurderingsbehovStegTest {
         return behandling;
     }
 
-    private VurderKompletthetBostedvilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
+    private VurderBosattVilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
         var vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjenester, vilkårResultatRepository);
         var etterlysningTjeneste = new EtterlysningTjeneste(null, null) {
             @Override
@@ -234,8 +234,9 @@ class AvklarBostedVurderingsbehovStegTest {
             }
         };
         var opphørResultatRepository = new OpphørResultatRepository(entityManager);
+        var opphørTjeneste = new OpphørTjeneste(opphørResultatRepository, vilkårResultatRepository);
 
-        return new VurderKompletthetBostedvilkårSteg(
+        return new VurderBosattVilkårSteg(
             manuelleVilkårRekkefølgeTjeneste,
             vilkårResultatRepository,
             vilkårTjeneste,
@@ -243,7 +244,8 @@ class AvklarBostedVurderingsbehovStegTest {
             bostedsGrunnlagRepository,
             opphørResultatRepository,
             vilkårsPerioderTilVurderingTjenester,
-            etterlysningTjeneste
+            etterlysningTjeneste,
+            opphørTjeneste
         );
     }
 

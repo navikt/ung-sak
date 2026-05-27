@@ -96,10 +96,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder fakta om bosted", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BOSTED,
         UTEN_VILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BOSTEDVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret (årsak: Annet)", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BOSTEDVILKÅR,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret (årsak: Annet)", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTEDVILKÅR,
         VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_OPPHØR_BOSTED(AksjonspunktKodeDefinisjon.VURDER_OPPHØR_BOSTED_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av opphør for bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BOSTEDVILKÅR,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av opphør for bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTEDVILKÅR,
         VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
         AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
@@ -146,7 +146,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
     AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTED_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
-        "Satt på vent i påvente av brukers svar på bostedavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_KOMPLETTHET_BOSTEDVILKÅR, UTEN_VILKÅR,
+        "Satt på vent i påvente av brukers svar på bostedavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTEDVILKÅR, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
     // Gruppe: 80xx
