@@ -10,7 +10,7 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.AutomatiskOpphørEtterlysningTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.OpphørVedMaksdatoEtterlysningTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,7 +25,7 @@ import java.util.UUID;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM;
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM;
-import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR;
+import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.verify;
  *
  * Verifiserer at riktig etterlysnings-tjeneste kalles basert på behandlingsårsaker
  * for alle fire scenarioer:
- * - Scenario 1: Varsel om automatisk opphør alene
+ * - Scenario 1: Varsel om opphør ved maksdato alene
  * - Scenario 2: Varsel overstyrt av forlenget periode
  * - Scenario 3: Varsel overstyrt av manuelt opphør
  * - Scenario 0: Normal flyt (ingen varsel-årsak)
@@ -44,7 +44,7 @@ class UngEtterlysningsorkestrerserTjenesteTest {
     private UngEtterlysningsorkestrerserTjeneste tjeneste;
 
     @Mock
-    private AutomatiskOpphørEtterlysningTjeneste automatiskOpphørEtterlysningTjeneste;
+    private OpphørVedMaksdatoEtterlysningTjeneste opphørVedMaksdatoEtterlysningTjeneste;
 
     @Mock
     private KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste;
@@ -58,7 +58,7 @@ class UngEtterlysningsorkestrerserTjenesteTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
         tjeneste = new UngEtterlysningsorkestrerserTjeneste(
-            automatiskOpphørEtterlysningTjeneste,
+            opphørVedMaksdatoEtterlysningTjeneste,
             kontrollerInntektEtterlysningTjeneste,
             programperiodeendringEtterlysningTjeneste
         );
@@ -78,37 +78,37 @@ class UngEtterlysningsorkestrerserTjenesteTest {
     }
 
     @Test
-    void skal_opprette_automatisk_opphør_etterlysning_når_kun_varsel_årsak() {
-        // Scenario 1: Kun RE_VARSEL_AUTOMATISK_OPPHOR
-        Collection<BehandlingÅrsakType> årsaker = Arrays.asList(RE_VARSEL_AUTOMATISK_OPPHOR);
+    void skal_opprette_opphør_ved_maksdato_etterlysning_når_kun_varsel_årsak() {
+        // Scenario 1: Kun RE_VARSEL_OPPHOR_VED_MAKSDATO
+        Collection<BehandlingÅrsakType> årsaker = Arrays.asList(RE_VARSEL_OPPHOR_VED_MAKSDATO);
 
         tjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
 
-        verify(automatiskOpphørEtterlysningTjeneste).opprettEtterlysningForAutomatiskOpphør(behandlingReferanse);
+        verify(opphørVedMaksdatoEtterlysningTjeneste).opprettEtterlysningForOpphørVedMaksdato(behandlingReferanse);
         verify(kontrollerInntektEtterlysningTjeneste, never()).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
     }
 
     @Test
     void skal_avbryte_varsel_og_kjøre_normal_flyt_når_forlenget_periode_overstyrer() {
-        // Scenario 2: RE_VARSEL_AUTOMATISK_OPPHOR + RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM
-        Collection<BehandlingÅrsakType> årsaker = Arrays.asList(RE_VARSEL_AUTOMATISK_OPPHOR, RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+        // Scenario 2: RE_VARSEL_OPPHOR_VED_MAKSDATO + RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM
+        Collection<BehandlingÅrsakType> årsaker = Arrays.asList(RE_VARSEL_OPPHOR_VED_MAKSDATO, RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
 
         tjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
 
-        verify(automatiskOpphørEtterlysningTjeneste).avbrytEtterlysningForAutomatiskOpphør(behandlingReferanse);
+        verify(opphørVedMaksdatoEtterlysningTjeneste).avbrytEtterlysningForOpphørVedMaksdato(behandlingReferanse);
         verify(kontrollerInntektEtterlysningTjeneste).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
     }
 
     @Test
     void skal_avbryte_varsel_og_kjøre_normal_flyt_når_manuelt_opphør_overstyrer() {
-        // Scenario 3: RE_VARSEL_AUTOMATISK_OPPHOR + RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
-        Collection<BehandlingÅrsakType> årsaker = Arrays.asList(RE_VARSEL_AUTOMATISK_OPPHOR, RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        // Scenario 3: RE_VARSEL_OPPHOR_VED_MAKSDATO + RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+        Collection<BehandlingÅrsakType> årsaker = Arrays.asList(RE_VARSEL_OPPHOR_VED_MAKSDATO, RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
 
         tjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
 
-        verify(automatiskOpphørEtterlysningTjeneste).avbrytEtterlysningForAutomatiskOpphør(behandlingReferanse);
+        verify(opphørVedMaksdatoEtterlysningTjeneste).avbrytEtterlysningForOpphørVedMaksdato(behandlingReferanse);
         verify(kontrollerInntektEtterlysningTjeneste).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
     }
@@ -120,8 +120,8 @@ class UngEtterlysningsorkestrerserTjenesteTest {
 
         tjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
 
-        verify(automatiskOpphørEtterlysningTjeneste, never()).opprettEtterlysningForAutomatiskOpphør(behandlingReferanse);
-        verify(automatiskOpphørEtterlysningTjeneste, never()).avbrytEtterlysningForAutomatiskOpphør(behandlingReferanse);
+        verify(opphørVedMaksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdato(behandlingReferanse);
+        verify(opphørVedMaksdatoEtterlysningTjeneste, never()).avbrytEtterlysningForOpphørVedMaksdato(behandlingReferanse);
         verify(kontrollerInntektEtterlysningTjeneste).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
     }
@@ -133,7 +133,7 @@ class UngEtterlysningsorkestrerserTjenesteTest {
 
         tjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
 
-        verify(automatiskOpphørEtterlysningTjeneste, never()).opprettEtterlysningForAutomatiskOpphør(behandlingReferanse);
+        verify(opphørVedMaksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdato(behandlingReferanse);
         verify(kontrollerInntektEtterlysningTjeneste).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
     }

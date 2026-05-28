@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningTjeneste;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.AutomatiskOpphørEtterlysningTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.OpphørVedMaksdatoEtterlysningTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,9 +16,9 @@ import java.util.Collection;
  * Orkestrerer opprettelse og avlysning av etterlysninger for ungdomsytelse basert på behandlingsårsaker.
  *
  * Håndterer tre scenarioer:
- * 1. Varsel om automatisk opphør alene → opprett varsel-etterlysning
- * 2. Varsel om automatisk opphør + forlenget periode → avbryt varsel, kjør normal flow for forlenget periode
- * 3. Varsel om automatisk opphør + manuelt opphør → avbryt varsel, kjør normal flow for opphør
+ * 1. Varsel om opphør ved maksdato alene → opprett varsel-etterlysning
+ * 2. Varsel om opphør ved maksdato + forlenget periode → avbryt varsel, kjør normal flow for forlenget periode
+ * 3. Varsel om opphør ved maksdato + manuelt opphør → avbryt varsel, kjør normal flow for opphør
  * 0. Normal flow (ingen varsel-årsak) → inntektskontroll + programperiodeendring
  */
 @ApplicationScoped
@@ -26,7 +26,7 @@ public class UngEtterlysningsorkestrerserTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(UngEtterlysningsorkestrerserTjeneste.class);
 
-    private AutomatiskOpphørEtterlysningTjeneste automatiskOpphørEtterlysningTjeneste;
+    private OpphørVedMaksdatoEtterlysningTjeneste opphørVedMaksdatoEtterlysningTjeneste;
     private KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste;
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
 
@@ -34,10 +34,10 @@ public class UngEtterlysningsorkestrerserTjeneste {
     }
 
     @Inject
-    public UngEtterlysningsorkestrerserTjeneste(AutomatiskOpphørEtterlysningTjeneste automatiskOpphørEtterlysningTjeneste,
+    public UngEtterlysningsorkestrerserTjeneste(OpphørVedMaksdatoEtterlysningTjeneste opphørVedMaksdatoEtterlysningTjeneste,
                                                  KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste,
                                                  ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste) {
-        this.automatiskOpphørEtterlysningTjeneste = automatiskOpphørEtterlysningTjeneste;
+        this.opphørVedMaksdatoEtterlysningTjeneste = opphørVedMaksdatoEtterlysningTjeneste;
         this.kontrollerInntektEtterlysningTjeneste = kontrollerInntektEtterlysningTjeneste;
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
     }
@@ -50,19 +50,19 @@ public class UngEtterlysningsorkestrerserTjeneste {
      * @param årsaker alle behandlingsårsaker for behandlingen
      */
     public void orkestrerEtterlysninger(BehandlingReferanse behandlingReferanse, Collection<BehandlingÅrsakType> årsaker) {
-        boolean harVarselAutomatiskOpphør = årsaker.contains(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR);
+        boolean harVarselOpphørVedMaksdato = årsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
         boolean harForlengetPeriode = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
         boolean harOpphør = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
 
-        if (harVarselAutomatiskOpphør && (harForlengetPeriode || harOpphør)) {
+        if (harVarselOpphørVedMaksdato && (harForlengetPeriode || harOpphør)) {
             // Varsel-årsaken overstyres av forlenget periode eller manuelt opphør
-            log.info("Behandling med RE_VARSEL_AUTOMATISK_OPPHOR overstyres av annen årsak. Avbryter varsel-etterlysning.");
-            automatiskOpphørEtterlysningTjeneste.avbrytEtterlysningForAutomatiskOpphør(behandlingReferanse);
+            log.info("Behandling med RE_VARSEL_OPPHOR_VED_MAKSDATO overstyres av annen årsak. Avbryter varsel-etterlysning.");
+            opphørVedMaksdatoEtterlysningTjeneste.avbrytEtterlysningForOpphørVedMaksdato(behandlingReferanse);
             kjørNormalEtterlysningsflyt(behandlingReferanse, harForlengetPeriode);
-        } else if (harVarselAutomatiskOpphør) {
-            // Kun varsel om automatisk opphør
-            log.info("Behandling med RE_VARSEL_AUTOMATISK_OPPHOR alene. Oppretter varsel-etterlysning.");
-            automatiskOpphørEtterlysningTjeneste.opprettEtterlysningForAutomatiskOpphør(behandlingReferanse);
+        } else if (harVarselOpphørVedMaksdato) {
+            // Kun varsel om opphør ved maksdato
+            log.info("Behandling med RE_VARSEL_OPPHOR_VED_MAKSDATO alene. Oppretter varsel-etterlysning.");
+            opphørVedMaksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdato(behandlingReferanse);
         } else {
             // Normal flyt (ingen varsel-årsak)
             log.info("Normal etterlysningsflyt. Oppretter inntektskontroll og programperiodeendring-etterlysninger.");

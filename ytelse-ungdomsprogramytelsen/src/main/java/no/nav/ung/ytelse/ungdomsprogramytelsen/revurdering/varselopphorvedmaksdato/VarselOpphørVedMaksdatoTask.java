@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselautomatiskopphor;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselopphorvedmaksdato;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -33,14 +33,14 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
 
 /**
  * Task som finner løpende fagsaker der kvoteMaksDato (fra ung-deltaker-opplyser) er <= 4 uker frem i tid,
- * og oppretter revurdering med årsak RE_VARSEL_AUTOMATISK_OPPHOR for å sende varsel til bruker.
+ * og oppretter revurdering med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO for å sende varsel til bruker.
  */
 @ApplicationScoped
-@ProsessTask(value = VarselAutomatiskOpphørTask.TASKNAME)
-public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
+@ProsessTask(value = VarselOpphørVedMaksdatoTask.TASKNAME)
+public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
-    public static final String TASKNAME = "varselAutomatiskOpphor";
-    private static final Logger log = LoggerFactory.getLogger(VarselAutomatiskOpphørTask.class);
+    public static final String TASKNAME = "varselOpphorVedMaksdato";
+    private static final Logger log = LoggerFactory.getLogger(VarselOpphørVedMaksdatoTask.class);
     private static final int VARSEL_UKER_FØR_MAKSDATO = 4;
     /** Grace-periode: sender varsel selv om maksdato nylig er passert, i tilfelle tasken har vært i feil. */
     private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
@@ -52,11 +52,11 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
-    VarselAutomatiskOpphørTask() {
+    VarselOpphørVedMaksdatoTask() {
     }
 
     @Inject
-    public VarselAutomatiskOpphørTask(EntityManager entityManager,
+    public VarselOpphørVedMaksdatoTask(EntityManager entityManager,
                                       BehandlingRepository behandlingRepository,
                                       EtterlysningRepository etterlysningRepository,
                                       ProsessTaskTjeneste prosessTaskTjeneste,
@@ -90,12 +90,12 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
                     taskGruppe.addNesteSekvensiell(revurderingTask);
                 }
             } catch (Exception e) {
-                log.warn("Feil ved vurdering av fagsak {} for automatisk opphør-varsel", fagsak.getId(), e);
+                log.warn("Feil ved vurdering av fagsak {} for opphør ved maksdato-varsel", fagsak.getId(), e);
             }
         }
 
         if (!taskGruppe.getTasks().isEmpty()) {
-            log.info("Oppretter {} revurderinger for varsel om automatisk opphør", taskGruppe.getTasks().size());
+            log.info("Oppretter {} revurderinger for varsel om opphør ved maksdato", taskGruppe.getTasks().size());
             prosessTaskTjeneste.lagre(taskGruppe);
         }
     }
@@ -113,19 +113,19 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
         // fullføres raskt og tasken kjører på nytt samme dag.
         var tidligsteOpprettetTidspunkt = dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO * 2L).atStartOfDay();
         boolean harAlleredeVarselBehandling = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId()).stream()
-            .filter(b -> b.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR))
+            .filter(b -> b.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO))
             .anyMatch(b -> b.getOpprettetTidspunkt().isAfter(tidligsteOpprettetTidspunkt));
         if (harAlleredeVarselBehandling) {
-            log.info("Fagsak {} har allerede behandling med årsak RE_VARSEL_AUTOMATISK_OPPHOR opprettet etter {}, hopper over", fagsak.getId(), tidligsteOpprettetTidspunkt.toLocalDate());
+            log.info("Fagsak {} har allerede behandling med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO opprettet etter {}, hopper over", fagsak.getId(), tidligsteOpprettetTidspunkt.toLocalDate());
             return null;
         }
 
-        // Sjekk om det finnes en eksisterende etterlysning av typen UTTALELSE_AUTOMATISK_OPPHOR
+        // Sjekk om det finnes en eksisterende etterlysning av typen UTTALELSE_OPPHOR_VED_MAKSDATO
         var eksisterendeEtterlysning = etterlysningRepository.hentSisteEtterlysning(
-            behandling.getId(), EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR,
+            behandling.getId(), EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO,
             EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
         if (eksisterendeEtterlysning.isPresent()) {
-            log.info("Fagsak {} har allerede ventende etterlysning for automatisk opphør, hopper over", fagsak.getId());
+            log.info("Fagsak {} har allerede ventende etterlysning for opphør ved maksdato, hopper over", fagsak.getId());
             return null;
         }
 
@@ -137,7 +137,7 @@ public class VarselAutomatiskOpphørTask implements ProsessTaskHandler {
 
         // Sjekk om det finnes ventende revurdering-task med samme årsak og periode
         var ønsketPeriode = maksdato + "/" + maksdato;
-        var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR.getKode();
+        var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
         var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(
             fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true);
         if (harVentendeRevurderingTaskForSammeÅrsakOgPeriode(prosesstaskerForFagsak, ønsketÅrsak, ønsketPeriode)) {

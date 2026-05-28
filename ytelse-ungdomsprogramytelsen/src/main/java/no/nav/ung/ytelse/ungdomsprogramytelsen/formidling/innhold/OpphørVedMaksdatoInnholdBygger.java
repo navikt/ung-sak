@@ -9,7 +9,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.AutomatiskOpphørDto;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.OpphørVedMaksdatoDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 
@@ -17,12 +17,12 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 
 @Dependent
-public class AutomatiskOpphørInnholdBygger implements VedtaksbrevInnholdBygger {
+public class OpphørVedMaksdatoInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final LocalDate overrideDagensDatoForTest;
 
     @Inject
-    public AutomatiskOpphørInnholdBygger(@KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
+    public OpphørVedMaksdatoInnholdBygger(@KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
         this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
@@ -36,8 +36,8 @@ public class AutomatiskOpphørInnholdBygger implements VedtaksbrevInnholdBygger 
             opphørStartdato.minusDays(1),
             bestemInneværendeMåned());
 
-        return new TemplateInnholdResultat(TemplateType.AUTOMATISK_OPPHOR,
-            new AutomatiskOpphørDto(
+        return new TemplateInnholdResultat(TemplateType.OPPHOR_VED_MAKSDATO,
+            new OpphørVedMaksdatoDto(
                 opphørStartdato,
                 sisteUtbetalingsdato
             ));

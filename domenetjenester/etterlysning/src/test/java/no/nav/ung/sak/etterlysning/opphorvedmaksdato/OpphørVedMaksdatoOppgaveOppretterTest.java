@@ -1,4 +1,4 @@
-package no.nav.ung.sak.etterlysning.automatiskopphor;
+package no.nav.ung.sak.etterlysning.opphorvedmaksdato;
 
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -28,7 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class AutomatiskOpphørOppgaveOppretterTest {
+class OpphørVedMaksdatoOppgaveOppretterTest {
 
     @Mock
     private UngBrukerdialogOppgaveKlient oppgaveKlient;
@@ -41,11 +41,11 @@ class AutomatiskOpphørOppgaveOppretterTest {
     @Mock
     private UngdomsprogramPeriodeGrunnlag grunnlag;
 
-    private AutomatiskOpphørOppgaveOppretter oppretter;
+    private OpphørVedMaksdatoOppgaveOppretter oppretter;
 
     @BeforeEach
     void setUp() {
-        oppretter = new AutomatiskOpphørOppgaveOppretter(oppgaveKlient, ungdomsprogramPeriodeRepository);
+        oppretter = new OpphørVedMaksdatoOppgaveOppretter(oppgaveKlient, ungdomsprogramPeriodeRepository);
         when(behandling.getFagsak()).thenReturn(fagsak);
         when(fagsak.getYtelseType()).thenReturn(FagsakYtelseType.UNGDOMSYTELSE);
     }
@@ -99,7 +99,7 @@ class AutomatiskOpphørOppgaveOppretterTest {
             UUID.randomUUID(),
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, maksdato),
-            EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR
+            EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO
         );
         etterlysning.vent(LocalDateTime.now().plusDays(1));
         return etterlysning;

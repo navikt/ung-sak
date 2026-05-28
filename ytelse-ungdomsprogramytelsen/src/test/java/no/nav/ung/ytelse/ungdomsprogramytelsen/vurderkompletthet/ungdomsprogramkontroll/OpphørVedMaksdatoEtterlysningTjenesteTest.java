@@ -28,9 +28,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class AutomatiskOpphørEtterlysningTjenesteTest {
+class OpphørVedMaksdatoEtterlysningTjenesteTest {
 
-    private AutomatiskOpphørEtterlysningTjeneste tjeneste;
+    private OpphørVedMaksdatoEtterlysningTjeneste tjeneste;
 
     @Inject
     private ProsessTaskTjenesteImpl prosessTaskTjeneste;
@@ -47,7 +47,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     void setUp() {
         var scenario = TestScenarioBuilder.builderMedSøknad();
         behandling = scenario.lagre(entityManager);
-        tjeneste = new AutomatiskOpphørEtterlysningTjeneste(
+        tjeneste = new OpphørVedMaksdatoEtterlysningTjeneste(
             etterlysningRepository,
             ungdomsprogramPeriodeRepository,
             prosessTaskTjeneste
@@ -55,17 +55,17 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     }
 
     @Test
-    void skal_opprette_etterlysning_for_automatisk_opphor() {
+    void skal_opprette_etterlysning_for_opphor_ved_maksdato() {
         var fom = LocalDate.now();
         var tom = fom.plusWeeks(2);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
 
-        tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+        tjeneste.opprettEtterlysningForOpphørVedMaksdato(BehandlingReferanse.fra(behandling));
 
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
         assertThat(etterlysninger).hasSize(1);
         var etterlysning = etterlysninger.get(0);
-        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR);
+        assertThat(etterlysning.getType()).isEqualTo(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO);
         assertThat(etterlysning.getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
         assertThat(etterlysning.getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
     }
@@ -76,7 +76,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
         var tom = fom.plusWeeks(8);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
 
-        tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+        tjeneste.opprettEtterlysningForOpphørVedMaksdato(BehandlingReferanse.fra(behandling));
 
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
         assertThat(etterlysninger).hasSize(1);
@@ -88,7 +88,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
         var tom = LocalDate.now().minusDays(4);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, tom);
 
-        tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+        tjeneste.opprettEtterlysningForOpphørVedMaksdato(BehandlingReferanse.fra(behandling));
 
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
         assertThat(etterlysninger).hasSize(1);
@@ -104,12 +104,12 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
         // Opprett en eksisterende etterlysning på vent
         var eksisterende = Etterlysning.opprettForType(
             behandling.getId(), grunnlag.getGrunnlagsreferanse(), UUID.randomUUID(),
-            DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR);
+            DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO);
         eksisterende.vent(LocalDateTime.now());
         etterlysningRepository.lagre(eksisterende);
 
         // Act
-        tjeneste.opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+        tjeneste.opprettEtterlysningForOpphørVedMaksdato(BehandlingReferanse.fra(behandling));
 
         // Assert - skal fortsatt bare være 1
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -127,12 +127,12 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
         // Opprett en eksisterende etterlysning på vent
         var eksisterende = Etterlysning.opprettForType(
             behandling.getId(), grunnlag.getGrunnlagsreferanse(), UUID.randomUUID(),
-            DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR);
+            DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO);
         eksisterende.vent(LocalDateTime.now());
         etterlysningRepository.lagre(eksisterende);
 
         // Act
-        tjeneste.avbrytEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+        tjeneste.avbrytEtterlysningForOpphørVedMaksdato(BehandlingReferanse.fra(behandling));
 
         // Assert
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -143,7 +143,7 @@ class AutomatiskOpphørEtterlysningTjenesteTest {
     @Test
     void skal_ikke_feile_ved_avbryt_uten_eksisterende_etterlysning() {
         // Act - skal ikke kaste exception
-        tjeneste.avbrytEtterlysningForAutomatiskOpphør(BehandlingReferanse.fra(behandling));
+        tjeneste.avbrytEtterlysningForOpphørVedMaksdato(BehandlingReferanse.fra(behandling));
 
         // Assert
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());

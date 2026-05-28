@@ -1,4 +1,4 @@
-package no.nav.ung.sak.etterlysning.automatiskopphor;
+package no.nav.ung.sak.etterlysning.opphorvedmaksdato;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -18,9 +18,9 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Dependent
-public class AutomatiskOpphørOppgaveOppretter {
+public class OpphørVedMaksdatoOppgaveOppretter {
 
-    private static final Logger log = LoggerFactory.getLogger(AutomatiskOpphørOppgaveOppretter.class);
+    private static final Logger log = LoggerFactory.getLogger(OpphørVedMaksdatoOppgaveOppretter.class);
     private static final int VARSEL_UKER_FØR_MAKSDATO = 4;
     private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
 
@@ -28,7 +28,7 @@ public class AutomatiskOpphørOppgaveOppretter {
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public AutomatiskOpphørOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
+    public OpphørVedMaksdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                             UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.oppgaveKlient = oppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;

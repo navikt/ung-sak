@@ -13,31 +13,31 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.AutomatiskOpphørInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørVedMaksdatoInnholdBygger;
 
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public final class AutomatiskOpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final AutomatiskOpphørInnholdBygger automatiskOpphørInnholdBygger;
+    private final OpphørVedMaksdatoInnholdBygger opphørVedMaksdatoInnholdBygger;
 
     @Inject
-    public AutomatiskOpphørStrategy(AutomatiskOpphørInnholdBygger automatiskOpphørInnholdBygger) {
-        this.automatiskOpphørInnholdBygger = automatiskOpphørInnholdBygger;
+    public OpphørVedMaksdatoStrategy(OpphørVedMaksdatoInnholdBygger opphørVedMaksdatoInnholdBygger) {
+        this.opphørVedMaksdatoInnholdBygger = opphørVedMaksdatoInnholdBygger;
     }
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         return VedtaksbrevStrategyResultat.medUredigerbarBrev(
-            DokumentMalType.AUTOMATISK_OPPHOR_DOK, automatiskOpphørInnholdBygger,
+            DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
             "Automatisk brev ved opphør grunnet maksdato.");
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        boolean harVarselAutomatiskOpphør = behandling.getBehandlingÅrsakerTyper()
-            .contains(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR);
-        if (!harVarselAutomatiskOpphør) {
+        boolean harVarselOpphørVedMaksdato = behandling.getBehandlingÅrsakerTyper()
+            .contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
+        if (!harVarselOpphørVedMaksdato) {
             return false;
         }
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);

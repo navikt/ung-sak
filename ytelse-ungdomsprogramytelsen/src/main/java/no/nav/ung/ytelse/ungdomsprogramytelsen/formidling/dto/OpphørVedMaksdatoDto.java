@@ -4,7 +4,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdDto;
 
 import java.time.LocalDate;
 
-public record AutomatiskOpphørDto(
+public record OpphørVedMaksdatoDto(
     LocalDate opphørsdato,
     LocalDate sisteUtbetalingsdato) implements TemplateInnholdDto {
 }

@@ -20,23 +20,23 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 /**
- * Tjeneste for opprettelse av etterlysning av type UTTALELSE_AUTOMATISK_OPPHOR
- * ved revurderinger med årsak RE_VARSEL_AUTOMATISK_OPPHOR.
+ * Tjeneste for opprettelse av etterlysning av type UTTALELSE_OPPHOR_VED_MAKSDATO
+ * ved revurderinger med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO.
  */
 @Dependent
-public class AutomatiskOpphørEtterlysningTjeneste {
+public class OpphørVedMaksdatoEtterlysningTjeneste {
 
-    private static final Logger logger = LoggerFactory.getLogger(AutomatiskOpphørEtterlysningTjeneste.class);
+    private static final Logger logger = LoggerFactory.getLogger(OpphørVedMaksdatoEtterlysningTjeneste.class);
 
     private EtterlysningRepository etterlysningRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
 
-    public AutomatiskOpphørEtterlysningTjeneste() {
+    public OpphørVedMaksdatoEtterlysningTjeneste() {
     }
 
     @Inject
-    public AutomatiskOpphørEtterlysningTjeneste(EtterlysningRepository etterlysningRepository,
+    public OpphørVedMaksdatoEtterlysningTjeneste(EtterlysningRepository etterlysningRepository,
                                                 UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                                 ProsessTaskTjeneste prosessTaskTjeneste) {
         this.etterlysningRepository = etterlysningRepository;
@@ -44,16 +44,16 @@ public class AutomatiskOpphørEtterlysningTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public void opprettEtterlysningForAutomatiskOpphør(BehandlingReferanse behandlingReferanse) {
+    public void opprettEtterlysningForOpphørVedMaksdato(BehandlingReferanse behandlingReferanse) {
         var behandlingId = behandlingReferanse.getBehandlingId();
 
         // Sjekk om det allerede finnes en aktiv eller besvart etterlysning
         var eksisterende = etterlysningRepository.hentSisteEtterlysning(
-            behandlingId, EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR,
+            behandlingId, EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO,
             EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
 
         if (eksisterende.isPresent()) {
-            logger.info("Etterlysning for automatisk opphør finnes allerede for behandling {}, oppretter ikke ny", behandlingId);
+            logger.info("Etterlysning for opphør ved maksdato finnes allerede for behandling {}, oppretter ikke ny", behandlingId);
             return;
         }
 
@@ -71,16 +71,16 @@ public class AutomatiskOpphørEtterlysningTjeneste {
             grunnlag.getGrunnlagsreferanse(),
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFomDato(), maksdato),
-            EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR
+            EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO
         );
 
         etterlysningRepository.lagre(etterlysning);
-        logger.info("Opprettet etterlysning for automatisk opphør for behandling {}", behandlingId);
+        logger.info("Opprettet etterlysning for opphør ved maksdato for behandling {}", behandlingId);
 
         // Opprett task for å sende etterlysningen
         var prosessTaskGruppe = new ProsessTaskGruppe();
         var opprettEtterlysningTask = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
-        opprettEtterlysningTask.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR.getKode());
+        opprettEtterlysningTask.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO.getKode());
         opprettEtterlysningTask.setBehandling(behandlingReferanse.getFagsakId(), behandlingId);
         prosessTaskGruppe.addNesteSekvensiell(opprettEtterlysningTask);
         prosessTaskTjeneste.lagre(prosessTaskGruppe);
@@ -88,27 +88,27 @@ public class AutomatiskOpphørEtterlysningTjeneste {
 
 
     /**
-     * Avbryter eksisterende etterlysning for automatisk opphør.
+     * Avbryter eksisterende etterlysning for opphør ved maksdato.
      * Kalles ved Scenario 2 (utvidet kvote) og Scenario 3 (manuelt opphør).
      */
-    public void avbrytEtterlysningForAutomatiskOpphør(BehandlingReferanse behandlingReferanse) {
+    public void avbrytEtterlysningForOpphørVedMaksdato(BehandlingReferanse behandlingReferanse) {
         var behandlingId = behandlingReferanse.getBehandlingId();
 
         var eksisterende = etterlysningRepository.hentSisteEtterlysning(
-            behandlingId, EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR,
+            behandlingId, EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO,
             EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
 
         if (eksisterende.isPresent()) {
             var etterlysning = eksisterende.get();
             etterlysning.skalAvbrytes();
-            logger.info("Markert etterlysning {} for automatisk opphør som skal avbrytes for behandling {}", etterlysning.getId(), behandlingId);
+            logger.info("Markert etterlysning {} for opphør ved maksdato som skal avbrytes for behandling {}", etterlysning.getId(), behandlingId);
 
             // Opprett task for å avbryte etterlysningen hos veileder-appen
             var avbrytTask = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
             avbrytTask.setBehandling(behandlingReferanse.getFagsakId(), behandlingId);
             prosessTaskTjeneste.lagre(avbrytTask);
         } else {
-            logger.info("Ingen aktiv etterlysning for automatisk opphør å avbryte for behandling {}", behandlingId);
+            logger.info("Ingen aktiv etterlysning for opphør ved maksdato å avbryte for behandling {}", behandlingId);
         }
     }
 }

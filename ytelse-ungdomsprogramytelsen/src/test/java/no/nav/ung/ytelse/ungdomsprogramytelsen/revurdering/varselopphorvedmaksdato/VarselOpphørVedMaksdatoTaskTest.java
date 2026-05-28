@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselautomatiskopphor;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselopphorvedmaksdato;
 
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -32,9 +32,9 @@ import static org.mockito.Mockito.*;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
 
-class VarselAutomatiskOpphørTaskTest {
+class VarselOpphørVedMaksdatoTaskTest {
 
-    private VarselAutomatiskOpphørTask task;
+    private VarselOpphørVedMaksdatoTask task;
     private EntityManager entityManager;
     private BehandlingRepository behandlingRepository;
     private EtterlysningRepository etterlysningRepository;
@@ -51,7 +51,7 @@ class VarselAutomatiskOpphørTaskTest {
         fagsakProsessTaskRepository = mock(FagsakProsessTaskRepository.class);
         ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
 
-        task = new VarselAutomatiskOpphørTask(
+        task = new VarselOpphørVedMaksdatoTask(
             entityManager,
             behandlingRepository,
             etterlysningRepository,
@@ -70,11 +70,11 @@ class VarselAutomatiskOpphørTaskTest {
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of());
-        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         var captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
         verify(prosessTaskTjeneste).lagre(captor.capture());
@@ -90,11 +90,11 @@ class VarselAutomatiskOpphørTaskTest {
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of());
-        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
@@ -109,11 +109,11 @@ class VarselAutomatiskOpphørTaskTest {
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of());
-        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         var captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
         verify(prosessTaskTjeneste).lagre(captor.capture());
@@ -129,11 +129,11 @@ class VarselAutomatiskOpphørTaskTest {
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of());
-        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
@@ -145,7 +145,7 @@ class VarselAutomatiskOpphørTaskTest {
         var maksdato = LocalDate.now().plusWeeks(2);
 
         var tidligereVarselBehandling = mock(Behandling.class);
-        when(tidligereVarselBehandling.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR)).thenReturn(true);
+        when(tidligereVarselBehandling.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)).thenReturn(true);
         when(tidligereVarselBehandling.getOpprettetTidspunkt()).thenReturn(LocalDateTime.now().minusHours(2));
 
         mockLøpendeFagsaker(List.of(fagsak));
@@ -153,7 +153,7 @@ class VarselAutomatiskOpphørTaskTest {
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of(tidligereVarselBehandling));
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
@@ -166,11 +166,11 @@ class VarselAutomatiskOpphørTaskTest {
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of());
-        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO), any(), any())).thenReturn(Optional.empty());
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean())).thenReturn(List.of());
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.empty());
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
@@ -185,12 +185,12 @@ class VarselAutomatiskOpphørTaskTest {
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of());
-        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO), any(), any())).thenReturn(Optional.empty());
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean()))
-            .thenReturn(List.of(lagVentendeOpprettRevurderingTask(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR.getKode(), periode)));
+            .thenReturn(List.of(lagVentendeOpprettRevurderingTask(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode(), periode)));
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
@@ -205,12 +205,12 @@ class VarselAutomatiskOpphørTaskTest {
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));
         when(behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(1L)).thenReturn(List.of());
-        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_AUTOMATISK_OPPHOR), any(), any())).thenReturn(Optional.empty());
+        when(etterlysningRepository.hentSisteEtterlysning(eq(100L), eq(EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO), any(), any())).thenReturn(Optional.empty());
         when(ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(100L)).thenReturn(Optional.of(maksdato));
         when(fagsakProsessTaskRepository.finnAlleForAngittSøk(eq(1L), any(), any(), any(), anyBoolean()))
             .thenReturn(List.of(lagVentendeOpprettRevurderingTask(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS.getKode(), periode)));
 
-        task.doTask(ProsessTaskData.forProsessTask(VarselAutomatiskOpphørTask.class));
+        task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
         var captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
         verify(prosessTaskTjeneste).lagre(captor.capture());

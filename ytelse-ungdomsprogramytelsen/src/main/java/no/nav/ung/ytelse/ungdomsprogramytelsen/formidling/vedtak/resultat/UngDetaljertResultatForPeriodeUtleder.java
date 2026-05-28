@@ -55,7 +55,7 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
         }
 
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
-            || relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR)) {
+            || relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
         }
 

@@ -63,8 +63,8 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
         LOGGER.info("Innhenter ungdomsprogramperioder for behandling: {}", behandling.getId());
         ungdomsprogramTjeneste.innhentOpplysninger(behandling);
 
-        // Ved automatisk opphør: klipp perioden ved maksdato fra prosess-triggere
-        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR)) {
+        // Ved opphør ved maksdato: klipp perioden ved maksdato fra prosess-triggere
+        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
             klippPeriodeVedMaksdato(behandling);
         }
 
@@ -87,7 +87,7 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
         var maksdato = prosessTriggereRepository.hentGrunnlag(behandling.getId())
             .stream()
             .flatMap(pt -> pt.getTriggere().stream())
-            .filter(t -> t.getÅrsak() == BehandlingÅrsakType.RE_VARSEL_AUTOMATISK_OPPHOR)
+            .filter(t -> t.getÅrsak() == BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
             .map(Trigger::getPeriode)
             .map(DatoIntervallEntitet::getFomDato)
             .findFirst()

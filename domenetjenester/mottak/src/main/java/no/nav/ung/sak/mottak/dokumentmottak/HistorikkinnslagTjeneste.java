@@ -105,7 +105,7 @@ public class HistorikkinnslagTjeneste {
             case ENDRET_STARTDATO -> "Svar på varsel: Endret startdato";
             case ENDRET_SLUTTDATO -> "Svar på varsel: Endret sluttdato";
             case ENDRET_PERIODE -> "Svar på varsel: Endret programperiode";
-            case AUTOMATISK_OPPHOR -> "Svar på varsel: Automatisk opphør ved maksdato";
+            case OPPHOR_VED_MAKSDATO -> "Svar på varsel: Opphør ved maksdato";
             case AVKLAR_BOSTED -> "Svar på varsel: Bostedavklaring";
         };
     }
