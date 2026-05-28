@@ -37,7 +37,7 @@ class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
                 de har mottatt saken. Du finner oversikt over saksbehandlingstidene på nav.no/saksbehandlingstider. \
                 Dette har vi lagt vekt på i vurderingen vår \
                 FRITEKST I BREV \
-                Har du nye opplysninger eller ønsker å uttale deg, kan du sende dette via klage.nav.no/nb/ettersendelse/klage/SYKDOM_I_FAMILIEN. Velg NAV-enhet: NAV Klageinstans Sør. \
+                Har du nye opplysninger eller ønsker å uttale deg, kan du sende dette via klage.nav.no/nb/ettersendelse/klage/ungdomsprogrammet/begrunnelse. Velg NAV-enhet: NAV Klageinstans Sør. \
                 """);
 
 
