@@ -96,6 +96,11 @@
         },
         "type" : "object"
       },
+      "k9.felles.sikkerhet.abac.ÅrsakIkkeTilgang" : {
+        "enum" : [ "HAR_IKKE_TILGANG_TIL_KODE6_PERSON", "HAR_IKKE_TILGANG_TIL_KODE7_PERSON", "HAR_IKKE_TILGANG_TIL_EGEN_ANSATT", "HAR_IKKE_TILGANG_TIL_HISTORISK_SAK", "HAR_IKKE_TILGANG_TIL_APPLIKASJONEN", "HAR_IKKE_TILGANG_TIL_TJENESTE_FOR_BORGER", "HAR_IKKE_TILGANG_TIL_TJENESTE_FOR_DRIFT", "HAR_IKKE_TILGANG_TIL_PIP_TJENESTE", "HAR_IKKE_TILGANG_ANNEN_GRUNN", "TEKNISK_FEIL" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "HAR_IKKE_TILGANG_TIL_KODE6_PERSON", "HAR_IKKE_TILGANG_TIL_KODE7_PERSON", "HAR_IKKE_TILGANG_TIL_EGEN_ANSATT", "HAR_IKKE_TILGANG_TIL_HISTORISK_SAK", "HAR_IKKE_TILGANG_TIL_APPLIKASJONEN", "HAR_IKKE_TILGANG_TIL_TJENESTE_FOR_BORGER", "HAR_IKKE_TILGANG_TIL_TJENESTE_FOR_DRIFT", "HAR_IKKE_TILGANG_TIL_PIP_TJENESTE", "HAR_IKKE_TILGANG_ANNEN_GRUNN", "TEKNISK_FEIL" ]
+      },
       "k9.oppdrag.kontrakt.Periode" : {
         "properties" : {
           "fom" : {
@@ -1553,6 +1558,13 @@
             "maxItems" : 20,
             "minItems" : 0,
             "type" : "array"
+          },
+          "ikkeTilgangÅrsaker" : {
+            "items" : {
+              "$ref" : "#/components/schemas/k9.felles.sikkerhet.abac.ÅrsakIkkeTilgang"
+            },
+            "type" : "array",
+            "uniqueItems" : true
           },
           "type" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.FeilType"
