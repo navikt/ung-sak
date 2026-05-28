@@ -20,22 +20,6 @@ import no.nav.ung.sak.kontrakt.FeilType;
 
 public class GeneralRestExceptionMapperTest {
 
-
-    @Test
-    public void skalMappeManglerTilgangFeil() {
-        Feil manglerTilgangFeil = TestFeil.FACTORY.manglerTilgangFeil();
-
-        @SuppressWarnings("resource")
-        Response response = new ManglerTilgangExceptionMapper().toResponse((ManglerTilgangException) manglerTilgangFeil.toException());
-
-        assertThat(response.getStatus()).isEqualTo(403);
-        assertThat(response.getEntity()).isInstanceOf(FeilDto.class);
-        FeilDto feilDto = (FeilDto) response.getEntity();
-
-        assertThat(feilDto.getType()).isEqualTo(FeilType.MANGLER_TILGANG_FEIL);
-        assertThat(feilDto.getFeilmelding()).isEqualTo("ManglerTilgangFeilmeldingKode");
-    }
-
     @Test
     public void skalMappeFunksjonellFeil() {
         Feil funksjonellFeil = TestFeil.FACTORY.funksjonellFeil();
@@ -88,7 +72,5 @@ public class GeneralRestExceptionMapperTest {
         @TekniskFeil(feilkode = "TEK_FEIL", feilmelding = "en teknisk feilmelding", logLevel = LogLevel.WARN)
         Feil tekniskFeil();
 
-        @ManglerTilgangFeil(feilkode = "MANGLER_TILGANG_FEIL", feilmelding = "ManglerTilgangFeilmeldingKode", logLevel = LogLevel.WARN)
-        Feil manglerTilgangFeil();
     }
 }
