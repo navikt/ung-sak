@@ -1,0 +1,61 @@
+package no.nav.ung.sak.trigger;
+
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import org.junit.jupiter.api.Test;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+class ProsessTriggereNormaliseringTest {
+
+    @Test
+    void skal_fjerne_varsel_opphor_ved_maksdato_nar_forlenget_periode_finnes() {
+        var dato = LocalDate.now();
+        var triggere = List.of(
+            new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fraOgMedTilOgMed(dato, dato)),
+            new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(dato.plusDays(1), dato.plusDays(10)))
+        );
+
+        var resultat = ProsessTriggereNormalisering.forKravperioder(triggere);
+
+        assertThat(resultat)
+            .extracting(Trigger::getÅrsak)
+            .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)
+            .doesNotContain(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
+    }
+
+    @Test
+    void skal_fjerne_varsel_opphor_ved_maksdato_nar_opphor_finnes() {
+        var dato = LocalDate.now();
+        var triggere = List.of(
+            new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fraOgMedTilOgMed(dato, dato)),
+            new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(dato.plusDays(1), dato.plusDays(10)))
+        );
+
+        var resultat = ProsessTriggereNormalisering.forKravperioder(triggere);
+
+        assertThat(resultat)
+            .extracting(Trigger::getÅrsak)
+            .contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+            .doesNotContain(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
+    }
+
+    @Test
+    void skal_beholde_varsel_opphor_ved_maksdato_nar_den_ikke_er_overstyrt() {
+        var dato = LocalDate.now();
+        var triggere = List.of(new Trigger(
+            BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO,
+            DatoIntervallEntitet.fraOgMedTilOgMed(dato, dato)
+        ));
+
+        var resultat = ProsessTriggereNormalisering.forKravperioder(triggere);
+
+        assertThat(resultat)
+            .extracting(Trigger::getÅrsak)
+            .containsExactly(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
+    }
+}
+

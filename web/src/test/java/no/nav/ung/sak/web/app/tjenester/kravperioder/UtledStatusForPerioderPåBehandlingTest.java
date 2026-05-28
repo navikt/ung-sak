@@ -1,13 +1,14 @@
 package no.nav.ung.sak.web.app.tjenester.kravperioder;
 
 import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -18,6 +19,7 @@ import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.KravDokumentType;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
+import no.nav.ung.sak.trigger.ProsessTriggereNormalisering;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -77,6 +79,72 @@ class UtledStatusForPerioderPåBehandlingTest {
         var periode = perioderMedÅrsak.get(0);
         assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
         assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
+    }
+
+    @Test
+    void skal_utlede_status_fra_varsel_opphor_ved_maksdato() {
+        var startdato = LocalDate.now();
+        var maksdato = startdato.plusWeeks(52).minusDays(1);
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato);
+
+        var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
+            Map.of(),
+            List.of(new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, periodeTilVurdering))
+        );
+
+        var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
+        assertThat(perioderMedÅrsak.size()).isEqualTo(1);
+        var periode = perioderMedÅrsak.get(0);
+        assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
+        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.OPPHØR_VED_MAKSDATO));
+    }
+
+    @Test
+    void skal_ikke_vise_opphor_ved_maksdato_nar_forlenget_periode_overstyrer_varselarsak() {
+        var startdato = LocalDate.now();
+        var maksdato = startdato.plusWeeks(52).minusDays(1);
+        var varselPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato);
+        var forlengetPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(maksdato.plusDays(1), maksdato.plusWeeks(8));
+
+        var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
+            Map.of(),
+            ProsessTriggereNormalisering.forKravperioder(List.of(
+                new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, varselPeriode),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode)
+            ))
+        );
+
+        var unikeÅrsaker = statusForPerioderPåBehandling.getPerioderMedÅrsak().stream()
+            .flatMap(periode -> periode.getÅrsaker().stream())
+            .collect(Collectors.toSet());
+
+        assertThat(unikeÅrsaker)
+            .contains(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM)
+            .doesNotContain(ÅrsakTilVurdering.OPPHØR_VED_MAKSDATO);
+    }
+
+    @Test
+    void skal_ikke_vise_opphor_ved_maksdato_nar_opphor_overstyrer_varselarsak() {
+        var startdato = LocalDate.now();
+        var maksdato = startdato.plusWeeks(52).minusDays(1);
+        var varselPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato);
+        var opphørPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(maksdato.plusDays(1), maksdato.plusWeeks(4));
+
+        var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
+            Map.of(),
+            ProsessTriggereNormalisering.forKravperioder(List.of(
+                new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, varselPeriode),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, opphørPeriode)
+            ))
+        );
+
+        var unikeÅrsaker = statusForPerioderPåBehandling.getPerioderMedÅrsak().stream()
+            .flatMap(periode -> periode.getÅrsaker().stream())
+            .collect(Collectors.toSet());
+
+        assertThat(unikeÅrsaker)
+            .contains(ÅrsakTilVurdering.OPPHØR_UNGDOMSPROGRAM)
+            .doesNotContain(ÅrsakTilVurdering.OPPHØR_VED_MAKSDATO);
     }
 
     @Test

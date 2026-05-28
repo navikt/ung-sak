@@ -17,6 +17,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     HENDELSE_DØD_BARN("HENDELSE_DØD_BARN", "Dødsfall barn"),
     HENDELSE_FØDSEL_BARN("HENDELSE_FØDSEL_BARN", "Fødsel barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
+    OPPHØR_VED_MAKSDATO("OPPHØR_VED_MAKSDATO", "Opphør ved maksdato"),
     ENDRET_STARTDATO_UNGDOMSPROGRAM("ENDRET_STARTDATO_UNGDOMSPROGRAM", "Endret startdato for ungdomsprogram"),
     FORLENGET_PERIODE_UNGDOMSPROGRAM("FORLENGET_PERIODE_UNGDOMSPROGRAM", "Forlenget periode"),
     KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll og rapportering av inntekt"),
@@ -36,6 +37,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, HENDELSE_DØD_BARN);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, HENDELSE_FØDSEL_BARN);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, OPPHØR_UNGDOMSPROGRAM);
+        sammenheng.put(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, OPPHØR_VED_MAKSDATO);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, ENDRET_STARTDATO_UNGDOMSPROGRAM);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, FORLENGET_PERIODE_UNGDOMSPROGRAM);
         sammenheng.put(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, KONTROLL_AV_INNTEKT);
