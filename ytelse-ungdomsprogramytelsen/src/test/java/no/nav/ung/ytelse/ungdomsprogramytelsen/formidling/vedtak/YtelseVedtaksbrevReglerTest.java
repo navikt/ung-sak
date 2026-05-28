@@ -4,6 +4,8 @@ import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -19,6 +21,8 @@ import no.nav.ung.sak.formidling.vedtak.regler.YtelseVedtaksbrevRegler;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
+import no.nav.ung.sak.trigger.Trigger;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.*;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.*;
@@ -27,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -301,6 +306,44 @@ class YtelseVedtaksbrevReglerTest {
         assertFullAutomatiskBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
     }
 
+    @Test
+    void skal_overstyre_opphor_ved_maksdato_brev_med_forlenget_periode_brev() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
+
+        var scenario = leggTilVarselOpphørVedMaksdato(
+            ForlengetPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato),
+            opprinneligSluttdato);
+        var behandling = lagBehandling(scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.FORLENGET_PERIODE)
+            .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
+    }
+
+    @Test
+    void skal_overstyre_opphor_ved_maksdato_brev_med_programperiodeendring_ved_manuelt_opphor() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.minusDays(20);
+
+        var scenario = leggTilVarselOpphørVedMaksdato(
+            EndringProgramPeriodeScenarioer.endringOpphør(new LocalDateInterval(fom, opprinneligSluttdato), nySluttdato),
+            opprinneligSluttdato);
+        var behandling = lagBehandling(scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.ENDRING_PROGRAMPERIODE)
+            .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
+    }
+
      static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
@@ -332,6 +375,26 @@ class YtelseVedtaksbrevReglerTest {
         behandling.avsluttBehandling();
 
         return behandling;
+    }
+
+    private static UngTestScenario leggTilVarselOpphørVedMaksdato(UngTestScenario scenario, LocalDate maksdato) {
+        var triggere = new HashSet<>(scenario.behandlingTriggere());
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)));
+        return new UngTestScenario(
+            scenario.navn(),
+            scenario.programPerioder(),
+            scenario.satser(),
+            scenario.uttakPerioder(),
+            scenario.tilkjentYtelsePerioder(),
+            scenario.aldersvilkår(),
+            scenario.ungdomsprogramvilkår(),
+            scenario.fødselsdato(),
+            scenario.søknadStartDato(),
+            triggere,
+            scenario.barn(),
+            scenario.dødsdato(),
+            scenario.kontrollerInntektPerioder(),
+            scenario.periodeMaksDato());
     }
 
 }

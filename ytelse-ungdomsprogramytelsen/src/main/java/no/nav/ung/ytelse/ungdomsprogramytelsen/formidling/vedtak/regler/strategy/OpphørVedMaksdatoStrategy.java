@@ -40,6 +40,15 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
         if (!harVarselOpphørVedMaksdato) {
             return false;
         }
+
+        boolean harForlengetPeriode = behandling.getBehandlingÅrsakerTyper()
+            .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+        boolean harOpphør = behandling.getBehandlingÅrsakerTyper()
+            .contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        if (harForlengetPeriode || harOpphør) {
+            return false;
+        }
+
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);

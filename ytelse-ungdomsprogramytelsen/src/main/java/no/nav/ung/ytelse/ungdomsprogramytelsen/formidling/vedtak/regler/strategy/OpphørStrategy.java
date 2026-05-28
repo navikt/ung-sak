@@ -42,8 +42,12 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        // Opphør ved maksdato håndteres av OpphørVedMaksdatoStrategy
-        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
+        // Opphør ved maksdato håndteres av OpphørVedMaksdatoStrategy,
+        // men eksplisitt opphør-årsak skal overstyre varsel-årsaken.
+        var årsaker = behandling.getBehandlingÅrsakerTyper();
+        boolean harVarselOpphørVedMaksdato = årsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
+        boolean harOpphør = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
+        if (harVarselOpphørVedMaksdato && !harOpphør) {
             return false;
         }
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
