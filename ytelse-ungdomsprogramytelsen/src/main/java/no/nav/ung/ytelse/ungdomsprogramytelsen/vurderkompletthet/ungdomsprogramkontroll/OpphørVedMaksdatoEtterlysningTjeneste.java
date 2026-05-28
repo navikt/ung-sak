@@ -89,7 +89,7 @@ public class OpphørVedMaksdatoEtterlysningTjeneste {
 
     /**
      * Avbryter eksisterende etterlysning for opphør ved maksdato.
-     * Kalles ved Scenario 2 (utvidet kvote) og Scenario 3 (manuelt opphør).
+     * Kalles ved forlenget periode og manuelt opphør.
      */
     public void avbrytEtterlysningForOpphørVedMaksdato(BehandlingReferanse behandlingReferanse) {
         var behandlingId = behandlingReferanse.getBehandlingId();
