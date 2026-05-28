@@ -272,6 +272,8 @@ spec:
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
+    - name: VARSEL_OPPHOR_VED_MAKSDATO_ENABLED
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
