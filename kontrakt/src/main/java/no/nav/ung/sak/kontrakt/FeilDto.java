@@ -2,6 +2,7 @@ package no.nav.ung.sak.kontrakt;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -15,6 +16,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import no.nav.k9.felles.sikkerhet.abac.ÅrsakIkkeTilgang;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
@@ -38,6 +40,10 @@ public class FeilDto implements Serializable {
     @Pattern(regexp = "^[\\p{Graph}\\p{Space}\\p{Sc}\\p{P}\\p{L}\\p{M}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String feilkode;
 
+    @JsonInclude(value = Include.NON_EMPTY)
+    @JsonProperty(value = "ikkeTilgangÅrsaker")
+    private Set<ÅrsakIkkeTilgang> ikkeTilgangÅrsaker;
+
     @JsonProperty(value = "type", required = true)
     @Valid
     private FeilType type;
@@ -47,10 +53,15 @@ public class FeilDto implements Serializable {
         this(type, feilmelding, null);
     }
 
-    public FeilDto(FeilType type, String feilmelding, String feilkode) {
+    public FeilDto(FeilType type, String feilmelding, Set<ÅrsakIkkeTilgang> ikkeTilgangÅrsaker) {
+        this(type, feilmelding, null, ikkeTilgangÅrsaker);
+    }
+
+    public FeilDto(FeilType type, String feilmelding, String feilkode, Set<ÅrsakIkkeTilgang> ikkeTilgangÅrsaker) {
         this.type = type;
         this.feilmelding = feilmelding;
         this.feilkode = feilkode;
+        this.ikkeTilgangÅrsaker = ikkeTilgangÅrsaker;
     }
 
     public FeilDto(String feilmelding) {
@@ -80,5 +91,9 @@ public class FeilDto implements Serializable {
 
     public FeilType getType() {
         return type;
+    }
+
+    public Set<ÅrsakIkkeTilgang> getIkkeTilgangÅrsaker() {
+        return ikkeTilgangÅrsaker;
     }
 }

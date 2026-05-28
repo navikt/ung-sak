@@ -12,6 +12,8 @@ import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontro
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+
 @Dependent
 @Alternative
 @Priority(1)
@@ -33,7 +35,7 @@ public class AppPdpKlient implements PdpKlient {
 
         if (tilgangskontrollInput.operasjon().resource() == ResourceType.APPLIKASJON) {
             //håndtert av azure.application.allowAllUsers=true som bare tillater kall for brukere som har rettighet til å kalle applikasjonen
-            return new Tilgangsbeslutning(true, pdpRequest, tilgangType);
+            return new Tilgangsbeslutning(true, Set.of(), pdpRequest, tilgangType);
         }
 
         //bruker aktivitetspenger-domene i abac dersom fagsaken er for aktivitetspenger,
@@ -43,10 +45,10 @@ public class AppPdpKlient implements PdpKlient {
         no.nav.sif.abac.kontrakt.abac.resultat.Tilgangsbeslutning resultat = gjelderAktivitetspenger
             ? sifAbacPdpRestKlient.sjekkTilgangForInnloggetBrukerAktivitetspenger(tilgangskontrollInput)
             : sifAbacPdpRestKlient.sjekkTilgangForInnloggetBrukerUng(tilgangskontrollInput);
-        if (!resultat.harTilgang() && (Environment.current().isDev() || Environment.current().isLocal())){
+        if (!resultat.harTilgang() && (Environment.current().isDev() || Environment.current().isLocal())) {
             log.warn("Fikk ikke tilgang pga: {}", resultat.årsakerForIkkeTilgang());
         }
-        return new Tilgangsbeslutning(resultat.harTilgang(), pdpRequest, tilgangType);
+        return new Tilgangsbeslutning(resultat.harTilgang(), resultat.årsakerForIkkeTilgang(), pdpRequest, tilgangType);
     }
 }
 
