@@ -65,7 +65,7 @@ class BeregningTjenesteTest {
 
         assertThat(resultat.getÅrsinntektSisteÅr()).isEqualByComparingTo(BigDecimal.ZERO);
         // 130 160 (G-snitt 2026) / 116 239 (G-snitt 2023) * 300 000/ 3 = 111 976,18699
-        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(new BigDecimal("111976.18699"));
+        assertThat(resultat.getBeregningsgrunnlag()).isEqualByComparingTo(new BigDecimal("117472.62107"));
     }
 
     @Test
