@@ -39,12 +39,12 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>11.1.4</felles.version>
+        <felles.version>11.2.2</felles.version>
         <swagger.version>2.2.50</swagger.version>
-        <junit.version>6.0.3</junit.version>
+        <junit.version>6.1.0</junit.version>
         <k9format.version>13.2.2</k9format.version>
         <jackson.version>2.21.3</jackson.version>
-        <asm.version>9.9.1</asm.version>
+        <asm.version>9.10</asm.version>
         <kotlin-stdlib.version>2.3.21</kotlin-stdlib.version>
         <jandex.version>3.5.3</jandex.version>
         <pdfgen-core.version>1.1.81</pdfgen-core.version>
@@ -149,7 +149,7 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>3.0.3</version>
+                <version>3.0.4</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
@@ -185,7 +185,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.27.0</version>
+                <version>2.28.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -344,7 +344,7 @@
             <dependency>
                 <groupId>no.nav.sif.abac</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.10.0</version>
+                <version>1.11.1</version>
             </dependency>
 
             <dependency>
@@ -813,7 +813,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.2</version>
+                    <version>3.6.3</version>
                 </plugin>
             </plugins>
         </pluginManagement>
