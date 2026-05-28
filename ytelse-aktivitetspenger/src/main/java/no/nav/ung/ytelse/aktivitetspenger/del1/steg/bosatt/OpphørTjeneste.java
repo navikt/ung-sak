@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.bosatt.OpphørKilde;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -15,6 +16,8 @@ import no.nav.ung.sak.behandlingslager.bosatt.OpphørResultatRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
@@ -61,7 +64,19 @@ public class OpphørTjeneste {
             Avslagsårsak avslagsårsak = opphør.getOpphørÅrsak();
             LocalDate opphørDato = opphør.getOpphørDato();
 
-            if (opphørDato.isBefore(stp)) {
+            if (opphørDato == null || opphørDato.isAfter(segment.getTom())) {
+                var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(segment.getLocalDateInterval()))
+                    .medRegelInput(regelInput)
+                    .medUtfall(Utfall.OPPFYLT);
+
+                if (opphør.getKilde() == OpphørKilde.AUTOMATISK) {
+                    periodeBuilder
+                        .nullstillFritekstvurderinger()
+                        .medManueltVurdert(false);
+                }
+
+                vilkårBuilder.leggTil(periodeBuilder);
+            } else if (opphørDato.isBefore(stp)) {
                 var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(segment.getLocalDateInterval()))
                     .medRegelInput(regelInput)
                     .medUtfall(Utfall.IKKE_OPPFYLT)
@@ -72,12 +87,6 @@ public class OpphørTjeneste {
                         .nullstillFritekstvurderinger()
                         .medManueltVurdert(false);
                 }
-
-                vilkårBuilder.leggTil(periodeBuilder);
-            } else if (opphørDato.isAfter(segment.getTom())) {
-                var periodeBuilder = vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(segment.getLocalDateInterval()))
-                    .medRegelInput(regelInput)
-                    .medUtfall(Utfall.OPPFYLT);
 
                 vilkårBuilder.leggTil(periodeBuilder);
             } else {
@@ -129,6 +138,29 @@ public class OpphørTjeneste {
                 }
             }
         }
+        opphørResultatRepository.flush();
+    }
+
+    static LocalDateTimeline<OpphørResultat> byggOpphørTidslinje(
+            Map<LocalDate, OpphørResultat> opphørPerStp,
+            LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        if (opphørPerStp.isEmpty() || tidslinjeTilVurdering.isEmpty()) {
+            return LocalDateTimeline.empty();
+        }
+
+        LocalDate slutdato = tidslinjeTilVurdering.getMaxLocalDate();
+        List<LocalDate> stpSortert = opphørPerStp.keySet().stream().sorted().toList();
+
+        List<LocalDateSegment<OpphørResultat>> segmenter = new ArrayList<>();
+        for (int i = 0; i < stpSortert.size(); i++) {
+            LocalDate stp = stpSortert.get(i);
+            LocalDate tom = (i + 1 < stpSortert.size())
+                ? stpSortert.get(i + 1).minusDays(1)
+                : slutdato;
+            segmenter.add(new LocalDateSegment<>(stp, tom, opphørPerStp.get(stp)));
+        }
+
+        return new LocalDateTimeline<>(segmenter);
     }
 
     static String lagRegelInput(OpphørResultat opphørResultat) {

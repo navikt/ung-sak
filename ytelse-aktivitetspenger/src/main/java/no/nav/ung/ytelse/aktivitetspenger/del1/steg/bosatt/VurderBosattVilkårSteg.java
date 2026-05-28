@@ -105,10 +105,10 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
 
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
-        BostedsAvklaringHolder holder = grunnlag.getHolder();
+        BostedsAvklaringHolder bostedAvklaring = grunnlag.getHolder();
 
         LocalDateTimeline<StegUtfall> stegutfallTidslinje = tidslinjeTilVurdering.map(
-            segment -> vurder(segment, etterlysningPerFom, holder));
+            segment -> vurder(segment, etterlysningPerFom, bostedAvklaring));
 
         if (!stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
             return settPåVent(stegutfallTidslinje, etterlysningPerFom);
@@ -117,7 +117,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
         stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals)
             .toSegments()
             .forEach(s -> {
-                BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(s.getFom())
+                BostedsPeriodeAvklaring avklaring = bostedAvklaring.getPeriodeAvklaring(s.getFom())
                     .orElseThrow(() -> new IllegalStateException("Forventer bostedsavklaring for stp " + s.getFom()));
                 Avslagsårsak avslagsårsak = mapTilAvslagsårsak(avklaring.getFraflyttingsÅrsak());
                 opphørResultatRepository.lagre(new OpphørResultat(

@@ -72,6 +72,10 @@ public class OpphørResultatRepository {
         entityManager.flush();
     }
 
+    public void flush() {
+        entityManager.flush();
+    }
+
     private void deaktiverEksisterende(Long behandlingId, LocalDate skjæringstidspunkt, VilkårType vilkårType) {
         entityManager.createQuery(
                 "SELECT o FROM OpphørResultat o WHERE o.behandlingId = :behandlingId AND o.skjæringstidspunkt = :stp AND o.vilkårType = :vilkårType AND o.aktiv = true",

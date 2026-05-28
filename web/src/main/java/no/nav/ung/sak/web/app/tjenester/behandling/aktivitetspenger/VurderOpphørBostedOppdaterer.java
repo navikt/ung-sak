@@ -50,10 +50,18 @@ public class VurderOpphørBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     public OppdateringResultat oppdater(VurderOpphørBostedDto dto, AksjonspunktOppdaterParameter param) {
         Long behandlingId = param.getBehandlingId();
 
+        for (OpphørPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
+            if (!vurdertPeriode.erOpphør() && (vurdertPeriode.opphørDato() != null || vurdertPeriode.opphørÅrsak() != null)) {
+                throw new IllegalArgumentException("erOpphør=false, men opphørDato eller opphørÅrsak er satt for periode " + vurdertPeriode.periode());
+            }
+        }
+
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = new LocalDateTimeline<>(
             dto.getVurdertePerioder().stream()
                 .map(p -> new LocalDateSegment<>(p.periode().getFom(), p.periode().getTom(), Boolean.TRUE))
                 .toList());
+
+        opphørTjeneste.deaktiverOppfylteOpphørsresultater(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
 
         for (OpphørPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
             opphørResultatRepository.lagre(new OpphørResultat(
