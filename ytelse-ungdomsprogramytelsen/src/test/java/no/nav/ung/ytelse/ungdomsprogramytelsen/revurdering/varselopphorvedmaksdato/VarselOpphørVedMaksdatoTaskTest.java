@@ -62,7 +62,7 @@ class VarselOpphørVedMaksdatoTaskTest {
     }
 
     @Test
-    void skal_opprette_revurdering_nar_maksdato_er_innenfor_4_uker() {
+    void skal_opprette_revurdering_nar_maksdato_er_innenfor_3_uker() {
         var fagsak = lagFagsak(1L, "1234567890123");
         var behandling = lagBehandling(fagsak, 100L);
         var maksdato = LocalDate.now().plusWeeks(2);
@@ -82,10 +82,10 @@ class VarselOpphørVedMaksdatoTaskTest {
     }
 
     @Test
-    void skal_ikke_opprette_revurdering_nar_maksdato_er_mer_enn_4_uker_frem() {
+    void skal_ikke_opprette_revurdering_nar_maksdato_er_mer_enn_3_uker_frem() {
         var fagsak = lagFagsak(1L, "1234567890123");
         var behandling = lagBehandling(fagsak, 100L);
-        var maksdato = LocalDate.now().plusWeeks(6);
+        var maksdato = LocalDate.now().plusWeeks(4);
 
         mockLøpendeFagsaker(List.of(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(1L)).thenReturn(Optional.of(behandling));

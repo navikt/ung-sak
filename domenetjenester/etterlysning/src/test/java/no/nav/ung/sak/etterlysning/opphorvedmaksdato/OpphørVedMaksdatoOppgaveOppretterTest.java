@@ -80,7 +80,7 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
 
     @Test
     void skal_ikke_opprette_oppgave_nar_maksdato_er_for_langt_frem_i_tid() {
-        var maksdato = LocalDate.now().plusWeeks(5);
+        var maksdato = LocalDate.now().plusWeeks(4);
         var etterlysning = opprettEtterlysning(maksdato);
 
         when(ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse()))

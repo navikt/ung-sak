@@ -12,7 +12,7 @@ import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import java.util.List;
 
 /**
- * Batchtask som varsler deltakere om opphør ved maksdato 4 uker før maksdato.
+ * Batchtask som varsler deltakere om opphør ved maksdato 3 uker før maksdato.
  * <p>
  * Kjører hver dag kl 07:30.
  */

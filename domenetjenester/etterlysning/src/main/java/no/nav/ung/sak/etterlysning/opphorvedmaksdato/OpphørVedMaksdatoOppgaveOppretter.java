@@ -21,7 +21,7 @@ import java.util.List;
 public class OpphørVedMaksdatoOppgaveOppretter {
 
     private static final Logger log = LoggerFactory.getLogger(OpphørVedMaksdatoOppgaveOppretter.class);
-    private static final int VARSEL_UKER_FØR_MAKSDATO = 4;
+    private static final int VARSEL_UKER_FØR_MAKSDATO = 3;
     private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
 
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
@@ -54,8 +54,8 @@ public class OpphørVedMaksdatoOppgaveOppretter {
     }
 
     private boolean erInnenforVarselvindu(LocalDate maksdato, LocalDate dagensDato) {
-        var fireUkerFrem = dagensDato.plusWeeks(VARSEL_UKER_FØR_MAKSDATO);
-        return !maksdato.isAfter(fireUkerFrem)
+        var treUkerFrem = dagensDato.plusWeeks(VARSEL_UKER_FØR_MAKSDATO);
+        return !maksdato.isAfter(treUkerFrem)
             && !maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO));
     }
 
