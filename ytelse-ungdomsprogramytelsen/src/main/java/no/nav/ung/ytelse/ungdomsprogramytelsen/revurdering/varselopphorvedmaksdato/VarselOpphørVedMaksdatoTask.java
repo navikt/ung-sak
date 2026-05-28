@@ -32,7 +32,7 @@ import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOppre
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
 
 /**
- * Task som finner løpende fagsaker der kvoteMaksDato (fra ung-deltaker-opplyser) er <= 3 uker frem i tid,
+ * Task som finner løpende fagsaker der periodeMaksDato (fra ung-deltaker-opplyser) er <= 3 uker frem i tid,
  * og oppretter revurdering med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO for å sende varsel til bruker.
  */
 @ApplicationScoped
@@ -150,7 +150,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
             return null;
         }
 
-        log.info("Fagsak {} har kvoteMaksDato {} fra register som er innenfor varselvinduet. Oppretter revurdering.", fagsak.getId(), maksdato);
+        log.info("Fagsak {} har periodeMaksDato {} fra register som er innenfor varselvinduet. Oppretter revurdering.", fagsak.getId(), maksdato);
 
         ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         tilVurderingTask.setFagsakId(fagsak.getId());
