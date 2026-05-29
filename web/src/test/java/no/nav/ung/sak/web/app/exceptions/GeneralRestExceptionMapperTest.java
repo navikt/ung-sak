@@ -1,22 +1,17 @@
 package no.nav.ung.sak.web.app.exceptions;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import jakarta.ws.rs.core.Response;
-
-import org.junit.jupiter.api.Test;
-
-import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FeilFactory;
 import no.nav.k9.felles.feil.LogLevel;
 import no.nav.k9.felles.feil.deklarasjon.DeklarerteFeil;
 import no.nav.k9.felles.feil.deklarasjon.FunksjonellFeil;
-import no.nav.k9.felles.feil.deklarasjon.ManglerTilgangFeil;
 import no.nav.k9.felles.feil.deklarasjon.TekniskFeil;
 import no.nav.ung.sak.kontrakt.FeilDto;
-import no.nav.ung.sak.kontrakt.FeilType;
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class GeneralRestExceptionMapperTest {
 

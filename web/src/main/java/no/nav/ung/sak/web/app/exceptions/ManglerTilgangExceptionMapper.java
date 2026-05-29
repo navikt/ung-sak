@@ -3,12 +3,9 @@ package no.nav.ung.sak.web.app.exceptions;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
-
+import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.k9.felles.sikkerhet.abac.PepNektetTilgangException;
 import no.nav.k9.felles.sikkerhet.abac.ÅrsakIkkeTilgang;
-import org.slf4j.MDC;
-
-import no.nav.k9.felles.exception.ManglerTilgangException;
 import no.nav.ung.sak.kontrakt.FeilDto;
 import no.nav.ung.sak.kontrakt.FeilType;
 
