@@ -3,16 +3,11 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselopphorvedmaksd
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
+import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
 
 /**
  * Batchtask som varsler deltakere om opphør ved maksdato 3 uker før maksdato.
@@ -21,12 +16,10 @@ import java.util.List;
  */
 @ApplicationScoped
 @ProsessTask(value = VarselOpphørVedMaksdatoBatchTask.TASKNAME, maxFailedRuns = 1)
-public class VarselOpphørVedMaksdatoBatchTask implements BatchProsessTaskHandler {
+public class VarselOpphørVedMaksdatoBatchTask extends DuplikatbeskyttetBatchTask {
 
     public static final String TASKNAME = "batch.varselOpphorVedMaksdato";
-    private static final Logger log = LoggerFactory.getLogger(VarselOpphørVedMaksdatoBatchTask.class);
 
-    private ProsessTaskTjeneste prosessTaskTjeneste;
     private boolean varselOpphørVedMaksdatoEnabled;
 
     VarselOpphørVedMaksdatoBatchTask() {
@@ -36,26 +29,23 @@ public class VarselOpphørVedMaksdatoBatchTask implements BatchProsessTaskHandle
     @Inject
     public VarselOpphørVedMaksdatoBatchTask(ProsessTaskTjeneste prosessTaskTjeneste,
                                             @KonfigVerdi(value = "VARSEL_OPPHOR_VED_MAKSDATO_ENABLED", required = false, defaultVerdi = "false") boolean varselOpphørVedMaksdatoEnabled) {
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
+        super(prosessTaskTjeneste);
         this.varselOpphørVedMaksdatoEnabled = varselOpphørVedMaksdatoEnabled;
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
-        if (!varselOpphørVedMaksdatoEnabled) {
-            log.info("Varsel opphør ved maksdato er deaktivert via konfigurasjon");
-            return;
-        }
+    protected String childTaskName() {
+        return VarselOpphørVedMaksdatoTask.TASKNAME;
+    }
 
-        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(VarselOpphørVedMaksdatoTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(it -> it.getSaksnummer() == null).toList();
-        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(VarselOpphørVedMaksdatoTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(it -> it.getSaksnummer() == null).toList();
-        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(VarselOpphørVedMaksdatoTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(it -> it.getSaksnummer() == null).toList();
-        if (!feiletTask.isEmpty() || !klarTask.isEmpty() || !vetoTask.isEmpty()) {
-            return;
-        }
+    @Override
+    protected ProsessTaskData createChildTaskData() {
+        return ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class);
+    }
 
-        ProsessTaskData taskData = ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class);
-        prosessTaskTjeneste.lagre(taskData);
+    @Override
+    protected boolean isEnabled() {
+        return varselOpphørVedMaksdatoEnabled;
     }
 
     @Override
@@ -63,4 +53,3 @@ public class VarselOpphørVedMaksdatoBatchTask implements BatchProsessTaskHandle
         return CronExpression.create("0 30 7 * * *");
     }
 }
-
