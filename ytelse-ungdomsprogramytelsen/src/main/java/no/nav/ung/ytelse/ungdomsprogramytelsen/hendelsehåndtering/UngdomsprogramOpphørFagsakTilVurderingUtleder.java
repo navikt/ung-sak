@@ -143,11 +143,34 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
      * Hvis ikke, er det ingen aktiv ytelse å opphøre — revurdering er unødvendig.
      * Dette fanger opp naturlig avslutning ved maksdato, aldersvilkår-avslag,
      * og andre scenarioer der ytelsen allerede er avsluttet/avslått.
+     *
+     * Dersom vilkårsresultatet er tomt (vilkår ikke vurdert), antas ytelsen å være aktiv.
      */
     private boolean harIngenOppfyltYtelseEtterDato(Behandling behandling, LocalDate opphørsdato, String hendelseId) {
+        // Sjekk 1: Hvis opphørsdato == periodeMaksDato er dette en naturlig avslutning
+        var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId());
+        if (maksdato.isPresent() && maksdato.get().equals(opphørsdato)) {
+            logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag. Naturlig avslutning — ignorerer hendelse {}.",
+                opphørsdato, hendelseId);
+            return true;
+        }
+
+        // Sjekk 2: Hvis vilkårsresultat finnes og dekker perioden etter opphørsdato med kun ikke-oppfylte utfall
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(behandling.getId());
-        var oppfyltEtterOpphørsdato = samletResultat
-            .intersection(new LocalDateInterval(opphørsdato.plusDays(1), LocalDateInterval.TIDENES_ENDE))
+        if (samletResultat.isEmpty()) {
+            // Vilkår ikke vurdert ennå — anta at ytelsen er aktiv
+            return false;
+        }
+
+        var resultatEtterOpphørsdato = samletResultat
+            .intersection(new LocalDateInterval(opphørsdato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
+
+        if (resultatEtterOpphørsdato.isEmpty()) {
+            // Vilkårsresultatet dekker ikke perioden etter opphørsdato (ikke evaluert ennå) — anta aktiv ytelse
+            return false;
+        }
+
+        var oppfyltEtterOpphørsdato = resultatEtterOpphørsdato
             .filterValue(v -> v.getSamletUtfall() == Utfall.OPPFYLT);
 
         if (oppfyltEtterOpphørsdato.isEmpty()) {
