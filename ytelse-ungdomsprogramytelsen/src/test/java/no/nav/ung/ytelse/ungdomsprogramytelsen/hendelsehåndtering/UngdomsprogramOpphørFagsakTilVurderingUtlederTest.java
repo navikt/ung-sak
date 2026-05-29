@@ -2,15 +2,22 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.hendelsehåndtering;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
+import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,14 +56,22 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     @Inject
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private TestScenarioBuilder scenarioBuilder;
+    private VilkårTjeneste vilkårTjeneste;
 
     @BeforeEach
     void setUp() {
         var fagsakRepository = new FagsakRepository(entityManager);
+        vilkårTjeneste = mock(VilkårTjeneste.class);
+        // Default: returner oppfylte vilkår for hele perioden (STP til langt fram)
+        var oppfyltSamlet = new VilkårUtfallSamlet(Utfall.OPPFYLT, List.of());
+        when(vilkårTjeneste.samletVilkårsresultat(anyLong()))
+            .thenReturn(new LocalDateTimeline<>(STP, STP.plusYears(2), oppfyltSamlet));
+
         this.utleder = new UngdomsprogramOpphørFagsakTilVurderingUtleder(
             new BehandlingRepository(entityManager),
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
-            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository)
+            new FinnFagsakerForAktørTjeneste(entityManager, fagsakRepository),
+            vilkårTjeneste
         );
         scenarioBuilder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.UNGDOMSYTELSE)
             .medBruker(BRUKER_AKTØR_ID);
@@ -158,6 +173,30 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
 
 
         validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
+    }
+
+    @Test
+    void skal_ikke_returnere_årsak_dersom_ingen_oppfylte_vilkår_etter_opphørsdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        // Programperiode som strekker seg forbi opphørsdato
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, OPPHØRSDATO.plusDays(10)))));
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        // Overstyr mock: vilkårsresultat kun oppfylt FØR opphørsdato (f.eks. pga aldersvilkår-avslag)
+        var oppfyltSamlet = new VilkårUtfallSamlet(Utfall.OPPFYLT, List.of());
+        when(vilkårTjeneste.samletVilkårsresultat(anyLong()))
+            .thenReturn(new LocalDateTimeline<>(STP, OPPHØRSDATO, oppfyltSamlet));
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
     }
 
     private static void validerHarÅrsak(Map<Fagsak, List<ÅrsakOgPerioder>> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {
