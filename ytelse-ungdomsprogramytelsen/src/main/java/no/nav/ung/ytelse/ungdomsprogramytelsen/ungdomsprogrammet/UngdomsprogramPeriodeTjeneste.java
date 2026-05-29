@@ -51,9 +51,24 @@ public class UngdomsprogramPeriodeTjeneste {
     }
 
 
+    /**
+     * Lager tidslinje for perioder kappet mot periodeMaksDato.
+     * Brukes av konsumenter som trenger perioder begrenset til faktisk maksdato
+     * i stedet for rå registerperioder som kan ha tom=TIDENES_ENDE.
+     */
+    public LocalDateTimeline<Boolean> finnPeriodeTidslinjeKappetMotMaksdato(Long behandlingId) {
+        var perioder = finnPerioderKappetMotMaksdato(behandlingId);
+        return perioder.stream()
+            .map(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), true))
+            .reduce(LocalDateTimeline::crossJoin)
+            .map(UngdomsprogramPeriodeTjeneste::komprimer)
+            .orElse(LocalDateTimeline.empty());
+    }
+
+
     @WithSpan
     public VurderAntallDagerResultat finnVirkedagerTidslinje(Long behandlingId) {
-        var tidslinje = finnPeriodeTidslinje(behandlingId);
+        var tidslinje = finnPeriodeTidslinjeKappetMotMaksdato(behandlingId);
         var harForlengetPeriode = finnHarForlengetPeriode(behandlingId);
         return FinnForbrukteDager.finnForbrukteDager(tidslinje, harForlengetPeriode);
     }
