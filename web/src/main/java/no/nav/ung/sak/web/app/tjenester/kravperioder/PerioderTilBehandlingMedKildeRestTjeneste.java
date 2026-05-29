@@ -33,7 +33,7 @@ import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilk�
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.søknadsfrist.SøknadsfristTjenesteProvider;
 import no.nav.ung.sak.trigger.ProsessTriggere;
-import no.nav.ung.sak.trigger.ProsessTriggereNormalisering;
+import no.nav.ung.sak.trigger.ProsessTriggerFilter;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
@@ -152,7 +152,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
-        var normaliserteTriggere = ProsessTriggereNormalisering.forKravperioder(
+        var normaliserteTriggere = ProsessTriggerFilter.forKravperioder(
             prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList());
         return UtledStatusForPerioderPåBehandling.utledStatus(
             filtrertKravdokumenter,

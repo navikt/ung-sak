@@ -5,14 +5,14 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import java.util.List;
 import java.util.Set;
 
-public final class ProsessTriggereNormalisering {
+public final class ProsessTriggerFilter {
 
     private static final Set<BehandlingÅrsakType> OVERSTYRER_VARSEL_OPPHØR_VED_MAKSDATO = Set.of(
         BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
         BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
     );
 
-    private ProsessTriggereNormalisering() {
+    private ProsessTriggerFilter() {
     }
 
     public static List<Trigger> forKravperioder(List<Trigger> triggere) {

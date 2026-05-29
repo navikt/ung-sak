@@ -9,7 +9,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class ProsessTriggereNormaliseringTest {
+class ProsessTriggerFilterTest {
 
     @Test
     void skal_fjerne_varsel_opphor_ved_maksdato_nar_forlenget_periode_finnes() {
@@ -19,7 +19,7 @@ class ProsessTriggereNormaliseringTest {
             new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(dato.plusDays(1), dato.plusDays(10)))
         );
 
-        var resultat = ProsessTriggereNormalisering.forKravperioder(triggere);
+        var resultat = ProsessTriggerFilter.forKravperioder(triggere);
 
         assertThat(resultat)
             .extracting(Trigger::getÅrsak)
@@ -35,7 +35,7 @@ class ProsessTriggereNormaliseringTest {
             new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fraOgMedTilOgMed(dato.plusDays(1), dato.plusDays(10)))
         );
 
-        var resultat = ProsessTriggereNormalisering.forKravperioder(triggere);
+        var resultat = ProsessTriggerFilter.forKravperioder(triggere);
 
         assertThat(resultat)
             .extracting(Trigger::getÅrsak)
@@ -51,7 +51,7 @@ class ProsessTriggereNormaliseringTest {
             DatoIntervallEntitet.fraOgMedTilOgMed(dato, dato)
         ));
 
-        var resultat = ProsessTriggereNormalisering.forKravperioder(triggere);
+        var resultat = ProsessTriggerFilter.forKravperioder(triggere);
 
         assertThat(resultat)
             .extracting(Trigger::getÅrsak)

@@ -19,7 +19,7 @@ import no.nav.ung.sak.kontrakt.krav.ÅrsakTilVurdering;
 import no.nav.ung.sak.søknadsfrist.KravDokument;
 import no.nav.ung.sak.søknadsfrist.KravDokumentType;
 import no.nav.ung.sak.søknadsfrist.SøktPeriode;
-import no.nav.ung.sak.trigger.ProsessTriggereNormalisering;
+import no.nav.ung.sak.trigger.ProsessTriggerFilter;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -108,7 +108,7 @@ class UtledStatusForPerioderPåBehandlingTest {
 
         var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
             Map.of(),
-            ProsessTriggereNormalisering.forKravperioder(List.of(
+            ProsessTriggerFilter.forKravperioder(List.of(
                 new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, varselPeriode),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode)
             ))
@@ -132,7 +132,7 @@ class UtledStatusForPerioderPåBehandlingTest {
 
         var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
             Map.of(),
-            ProsessTriggereNormalisering.forKravperioder(List.of(
+            ProsessTriggerFilter.forKravperioder(List.of(
                 new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, varselPeriode),
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, opphørPeriode)
             ))
