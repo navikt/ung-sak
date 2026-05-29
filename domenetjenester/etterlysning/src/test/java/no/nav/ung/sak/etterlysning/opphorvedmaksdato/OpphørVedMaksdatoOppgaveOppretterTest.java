@@ -5,8 +5,6 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
@@ -19,11 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -33,31 +29,23 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
     @Mock
     private UngBrukerdialogOppgaveKlient oppgaveKlient;
     @Mock
-    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    @Mock
     private Behandling behandling;
     @Mock
     private Fagsak fagsak;
-    @Mock
-    private UngdomsprogramPeriodeGrunnlag grunnlag;
 
     private OpphørVedMaksdatoOppgaveOppretter oppretter;
 
     @BeforeEach
     void setUp() {
-        oppretter = new OpphørVedMaksdatoOppgaveOppretter(oppgaveKlient, ungdomsprogramPeriodeRepository);
+        oppretter = new OpphørVedMaksdatoOppgaveOppretter(oppgaveKlient);
         when(behandling.getFagsak()).thenReturn(fagsak);
         when(fagsak.getYtelseType()).thenReturn(FagsakYtelseType.UNGDOMSYTELSE);
     }
 
     @Test
-    void skal_opprette_oppgave_nar_maksdato_er_innenfor_varselvindu() {
+    void skal_opprette_oppgave_for_etterlysning() {
         var maksdato = LocalDate.now().plusWeeks(2);
         var etterlysning = opprettEtterlysning(maksdato);
-
-        when(ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse()))
-            .thenReturn(grunnlag);
-        when(grunnlag.getPeriodeMaksDato()).thenReturn(Optional.of(maksdato));
 
         oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
 
@@ -65,31 +53,13 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
     }
 
     @Test
-    void skal_ikke_opprette_oppgave_nar_maksdato_er_for_gammel() {
-        var maksdato = LocalDate.now().minusDays(4);
-        var etterlysning = opprettEtterlysning(maksdato);
+    void skal_opprette_oppgave_for_alle_etterlysninger() {
+        var etterlysning1 = opprettEtterlysning(LocalDate.now().plusWeeks(2));
+        var etterlysning2 = opprettEtterlysning(LocalDate.now().plusWeeks(1));
 
-        when(ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse()))
-            .thenReturn(grunnlag);
-        when(grunnlag.getPeriodeMaksDato()).thenReturn(Optional.of(maksdato));
+        oppretter.opprettOppgave(behandling, List.of(etterlysning1, etterlysning2), new AktørId("1234567890123"));
 
-        oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
-
-        verify(oppgaveKlient, never()).opprettOppgave(any());
-    }
-
-    @Test
-    void skal_ikke_opprette_oppgave_nar_maksdato_er_for_langt_frem_i_tid() {
-        var maksdato = LocalDate.now().plusWeeks(4);
-        var etterlysning = opprettEtterlysning(maksdato);
-
-        when(ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse()))
-            .thenReturn(grunnlag);
-        when(grunnlag.getPeriodeMaksDato()).thenReturn(Optional.of(maksdato));
-
-        oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
-
-        verify(oppgaveKlient, never()).opprettOppgave(any());
+        verify(oppgaveKlient, org.mockito.Mockito.times(2)).opprettOppgave(any());
     }
 
     private Etterlysning opprettEtterlysning(LocalDate maksdato) {

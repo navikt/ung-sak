@@ -7,57 +7,37 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.opphorvedmaksdato.BekreftOpphorVedMaksdatoOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Oppretter oppgaver i brukerdialog for etterlysninger av type UTTALELSE_OPPHOR_VED_MAKSDATO.
+ * <p>
+ * Varselvindu-sjekk (om maksdato er innenfor 3 uker) gjøres oppstrøms i
+ * {@code VarselOpphørVedMaksdatoTask} før revurderingen opprettes.
+ * Alle etterlysninger som når dette punktet skal alltid resultere i en oppgave.
+ */
 @Dependent
 public class OpphørVedMaksdatoOppgaveOppretter {
 
-    private static final Logger log = LoggerFactory.getLogger(OpphørVedMaksdatoOppgaveOppretter.class);
-    private static final int VARSEL_UKER_FØR_MAKSDATO = 3;
-    private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
-
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
-    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public OpphørVedMaksdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
-                                            UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public OpphørVedMaksdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient) {
         this.oppgaveKlient = oppgaveKlient;
-        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
-            .filter(this::erGyldigForOppgaveOpprettelse)
             .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype))
             .forEach(oppgaveKlient::opprettOppgave);
     }
 
-    private boolean erGyldigForOppgaveOpprettelse(Etterlysning etterlysning) {
-        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
-        var maksdato = grunnlag.getPeriodeMaksDato().orElse(etterlysning.getPeriode().getTomDato());
-        var gyldig = erInnenforVarselvindu(maksdato, LocalDate.now());
-        if (!gyldig) {
-            log.info("Oppretter ikke oppgave for etterlysning {}: maksdato {} fra grunnlag {} er utenfor varselvindu",
-                etterlysning.getEksternReferanse(), maksdato, etterlysning.getGrunnlagsreferanse());
-        }
-        return gyldig;
-    }
-
-    private boolean erInnenforVarselvindu(LocalDate maksdato, LocalDate dagensDato) {
-        var treUkerFrem = dagensDato.plusWeeks(VARSEL_UKER_FØR_MAKSDATO);
-        return !maksdato.isAfter(treUkerFrem)
-            && !maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO));
-    }
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype) {
         LocalDate sluttdato = etterlysning.getPeriode().getTomDato();
