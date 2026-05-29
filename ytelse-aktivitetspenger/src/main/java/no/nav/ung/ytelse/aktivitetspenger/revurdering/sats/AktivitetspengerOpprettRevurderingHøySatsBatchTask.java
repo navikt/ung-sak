@@ -2,37 +2,34 @@ package no.nav.ung.ytelse.aktivitetspenger.revurdering.sats;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
-
-import java.util.List;
+import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
 
 @ApplicationScoped
 @ProsessTask(value = AktivitetspengerOpprettRevurderingHøySatsBatchTask.TASKNAME, maxFailedRuns = 1)
-public class AktivitetspengerOpprettRevurderingHøySatsBatchTask implements BatchProsessTaskHandler {
+public class AktivitetspengerOpprettRevurderingHøySatsBatchTask extends DuplikatbeskyttetBatchTask {
 
     public static final String TASKNAME = "batch.opprettRevurderingHøySatsAktivitetspenger";
-    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     AktivitetspengerOpprettRevurderingHøySatsBatchTask() {
     }
 
     @Inject
     public AktivitetspengerOpprettRevurderingHøySatsBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
+        super(prosessTaskTjeneste);
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
-        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(AktivitetspengerOpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(it -> it.getSaksnummer() == null).toList();
-        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(AktivitetspengerOpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(it -> it.getSaksnummer() == null).toList();
-        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(AktivitetspengerOpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(it -> it.getSaksnummer() == null).toList();
-        if (!feiletTask.isEmpty() || !klarTask.isEmpty() || !vetoTask.isEmpty()) {
-            return;
-        }
+    protected String childTaskName() {
+        return AktivitetspengerOpprettRevurderingHøySatsTask.TASKNAME;
+    }
 
-        ProsessTaskData taskData = ProsessTaskData.forProsessTask(AktivitetspengerOpprettRevurderingHøySatsTask.class);
-        prosessTaskTjeneste.lagre(taskData);
+    @Override
+    protected ProsessTaskData createChildTaskData() {
+        return ProsessTaskData.forProsessTask(AktivitetspengerOpprettRevurderingHøySatsTask.class);
     }
 
     @Override
@@ -40,4 +37,3 @@ public class AktivitetspengerOpprettRevurderingHøySatsBatchTask implements Batc
         return CronExpression.create("0 20 7 * * *");
     }
 }
-
