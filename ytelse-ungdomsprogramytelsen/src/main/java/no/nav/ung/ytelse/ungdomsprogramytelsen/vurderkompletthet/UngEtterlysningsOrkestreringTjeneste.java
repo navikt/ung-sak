@@ -22,21 +22,21 @@ import java.util.Collection;
  * 0. Normal flow (ingen varsel-årsak) → inntektskontroll + programperiodeendring
  */
 @ApplicationScoped
-public class UngEtterlysningsorkestrerserTjeneste {
+public class UngEtterlysningsOrkestreringTjeneste {
 
-    private static final Logger log = LoggerFactory.getLogger(UngEtterlysningsorkestrerserTjeneste.class);
+    private static final Logger log = LoggerFactory.getLogger(UngEtterlysningsOrkestreringTjeneste.class);
 
     private OpphørVedMaksdatoEtterlysningTjeneste opphørVedMaksdatoEtterlysningTjeneste;
     private KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste;
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
 
-    public UngEtterlysningsorkestrerserTjeneste() {
+    public UngEtterlysningsOrkestreringTjeneste() {
     }
 
     @Inject
-    public UngEtterlysningsorkestrerserTjeneste(OpphørVedMaksdatoEtterlysningTjeneste opphørVedMaksdatoEtterlysningTjeneste,
-                                                 KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste,
-                                                 ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste) {
+    public UngEtterlysningsOrkestreringTjeneste(OpphørVedMaksdatoEtterlysningTjeneste opphørVedMaksdatoEtterlysningTjeneste,
+                                                KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste,
+                                                ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste) {
         this.opphørVedMaksdatoEtterlysningTjeneste = opphørVedMaksdatoEtterlysningTjeneste;
         this.kontrollerInntektEtterlysningTjeneste = kontrollerInntektEtterlysningTjeneste;
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
@@ -78,4 +78,5 @@ public class UngEtterlysningsorkestrerserTjeneste {
         }
     }
 }
+
 

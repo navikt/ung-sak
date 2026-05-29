@@ -14,16 +14,16 @@ import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningOppretter;
 public class UngEtterlysningOppretter implements EtterlysningOppretter {
 
     private BehandlingRepository behandlingRepository;
-    private UngEtterlysningsorkestrerserTjeneste etterlysningsorkestrerserTjeneste;
+    private UngEtterlysningsOrkestreringTjeneste etterlysningsOrkestreringTjeneste;
 
     public UngEtterlysningOppretter() {
     }
 
     @Inject
     public UngEtterlysningOppretter(BehandlingRepository behandlingRepository,
-                                    UngEtterlysningsorkestrerserTjeneste etterlysningsorkestrerserTjeneste) {
+                                    UngEtterlysningsOrkestreringTjeneste etterlysningsOrkestreringTjeneste) {
         this.behandlingRepository = behandlingRepository;
-        this.etterlysningsorkestrerserTjeneste = etterlysningsorkestrerserTjeneste;
+        this.etterlysningsOrkestreringTjeneste = etterlysningsOrkestreringTjeneste;
     }
 
     @Override
@@ -31,6 +31,6 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
         var årsaker = behandling.getBehandlingÅrsakerTyper();
 
-        etterlysningsorkestrerserTjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
+        etterlysningsOrkestreringTjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
     }
 }

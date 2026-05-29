@@ -18,10 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM;
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM;
@@ -30,7 +27,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 /**
- * Tester for UngEtterlysningsorkestrerserTjeneste.
+ * Tester for UngEtterlysningsOrkestreringTjeneste.
  *
  * Verifiserer at riktig etterlysnings-tjeneste kalles basert på behandlingsårsaker
  * for alle fire scenarioer:
@@ -39,9 +36,9 @@ import static org.mockito.Mockito.verify;
  * - Scenario 3: Varsel overstyrt av manuelt opphør
  * - Scenario 0: Normal flyt (ingen varsel-årsak)
  */
-class UngEtterlysningsorkestrerserTjenesteTest {
+class UngEtterlysningsOrkestreringTjenesteTest {
 
-    private UngEtterlysningsorkestrerserTjeneste tjeneste;
+    private UngEtterlysningsOrkestreringTjeneste tjeneste;
 
     @Mock
     private OpphørVedMaksdatoEtterlysningTjeneste opphørVedMaksdatoEtterlysningTjeneste;
@@ -57,7 +54,7 @@ class UngEtterlysningsorkestrerserTjenesteTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        tjeneste = new UngEtterlysningsorkestrerserTjeneste(
+        tjeneste = new UngEtterlysningsOrkestreringTjeneste(
             opphørVedMaksdatoEtterlysningTjeneste,
             kontrollerInntektEtterlysningTjeneste,
             programperiodeendringEtterlysningTjeneste
@@ -116,7 +113,7 @@ class UngEtterlysningsorkestrerserTjenesteTest {
     @Test
     void skal_kjøre_normal_flyt_uten_varsel_årsak() {
         // Scenario 0: Ingen varsel-årsak
-        Collection<BehandlingÅrsakType> årsaker = Arrays.asList();
+        Collection<BehandlingÅrsakType> årsaker = List.of();
 
         tjeneste.orkestrerEtterlysninger(behandlingReferanse, årsaker);
 
@@ -138,4 +135,3 @@ class UngEtterlysningsorkestrerserTjenesteTest {
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
     }
 }
-
