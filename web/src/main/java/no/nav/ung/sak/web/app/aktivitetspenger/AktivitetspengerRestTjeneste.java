@@ -118,9 +118,7 @@ public class AktivitetspengerRestTjeneste {
         if (beregningsgrunnlag.isEmpty()) {
             return null;
         }
-        return beregningsgrunnlag
-            .map(grunnlag -> mapTilBeregningsgrunnlagDto(grunnlag, inntektsposter))
-            .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: " + behandling.getId()));
+        return mapTilBeregningsgrunnlagDto(beregningsgrunnlag.get(), inntektsposter);
     }
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag, List<Inntektspost> inntektsposter) {
