@@ -140,12 +140,6 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         // Sjekk om det finnes ventende revurdering-task med samme årsak og periode
         var ønsketPeriode = maksdato + "/" + maksdato;
         var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
-        var prosesstaskerForFagsak = fagsakProsessTaskRepository.finnAlleForAngittSøk(
-            fagsak.getId(), null, null, List.of(ProsessTaskStatus.KLAR, ProsessTaskStatus.VETO, ProsessTaskStatus.FEILET), true);
-        if (harVentendeRevurderingTaskForSammeÅrsakOgPeriode(prosesstaskerForFagsak, ønsketÅrsak, ønsketPeriode)) {
-            log.info("Fagsak {} har allerede ventende revurdering-task for årsak {} og periode {}, hopper over", fagsak.getId(), ønsketÅrsak, ønsketPeriode);
-            return null;
-        }
 
         // Sjekk om maksdato er innenfor varselvinduet (inkl. grace-periode for forsinket task-kjøring)
         if (maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO)) || maksdato.isAfter(treUkerFrem)) {
@@ -160,16 +154,6 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, ønsketÅrsak);
         return tilVurderingTask;
     }
-
-    private static boolean harVentendeRevurderingTaskForSammeÅrsakOgPeriode(List<ProsessTaskData> tasks,
-                                                                             String ønsketÅrsak,
-                                                                             String ønsketPeriode) {
-        return tasks.stream()
-            .filter(task -> OpprettRevurderingEllerOpprettDiffTask.TASKNAME.equals(task.getTaskType()))
-            .anyMatch(task -> Objects.equals(ønsketÅrsak, task.getPropertyValue(BEHANDLING_ÅRSAK))
-                && Objects.equals(ønsketPeriode, task.getPropertyValue(PERIODER)));
-    }
-
 
     private List<Fagsak> hentAktuelleFagsaker(LocalDate fom, LocalDate tom) {
         return fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom, List.of(FagsakYtelseType.UNGDOMSYTELSE));
