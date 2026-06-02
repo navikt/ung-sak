@@ -6058,7 +6058,7 @@
           }
         } ],
         "responses" : {
-          "default" : {
+          "200" : {
             "content" : {
               "application/json" : {
                 "schema" : {
@@ -6066,7 +6066,10 @@
                 }
               }
             },
-            "description" : "default response"
+            "description" : "Beregningsgrunnlag funnet"
+          },
+          "204" : {
+            "description" : "Beregning er ikke kjørt ennå – ingen beregningsgrunnlag tilgjengelig"
           }
         },
         "tags" : [ "avp" ]
