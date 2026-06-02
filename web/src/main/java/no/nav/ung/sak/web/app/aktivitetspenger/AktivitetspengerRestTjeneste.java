@@ -2,6 +2,9 @@ package no.nav.ung.sak.web.app.aktivitetspenger;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -105,7 +108,10 @@ public class AktivitetspengerRestTjeneste {
     }
 
     @GET
-    @Operation(description = "Henter beregningsgrunnlag for en aktivitetspengerbehandling", tags = "avp")
+    @Operation(description = "Henter beregningsgrunnlag for en aktivitetspengerbehandling", tags = "avp", responses = {
+        @ApiResponse(responseCode = "200", description = "Beregningsgrunnlag funnet", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BeregningsgrunnlagDto.class))),
+        @ApiResponse(responseCode = "204", description = "Beregning er ikke kjørt ennå – ingen beregningsgrunnlag tilgjengelig")
+    })
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(BEREGNINGSGRUNNLAG_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
