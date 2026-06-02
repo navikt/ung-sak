@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
@@ -40,6 +41,7 @@ class VarselOpphørVedMaksdatoTaskTest {
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private FagsakRepository fagsakRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     @BeforeEach
@@ -47,6 +49,8 @@ class VarselOpphørVedMaksdatoTaskTest {
         entityManager = mock(EntityManager.class);
         behandlingRepository = mock(BehandlingRepository.class);
         etterlysningRepository = mock(EtterlysningRepository.class);
+        etterlysningRepository = mock(EtterlysningRepository.class);
+        fagsakRepository=mock(FagsakRepository.class);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         fagsakProsessTaskRepository = mock(FagsakProsessTaskRepository.class);
         ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
@@ -57,7 +61,8 @@ class VarselOpphørVedMaksdatoTaskTest {
             etterlysningRepository,
             prosessTaskTjeneste,
             fagsakProsessTaskRepository,
-            ungdomsprogramPeriodeTjeneste
+            ungdomsprogramPeriodeTjeneste,
+            fagsakRepository
         );
     }
 
@@ -219,10 +224,7 @@ class VarselOpphørVedMaksdatoTaskTest {
 
     @SuppressWarnings("unchecked")
     private void mockLøpendeFagsaker(List<Fagsak> fagsaker) {
-        TypedQuery<Fagsak> query = mock(TypedQuery.class);
-        when(entityManager.createQuery(anyString(), eq(Fagsak.class))).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getResultList()).thenReturn(fagsaker);
+        when(fagsakRepository.hentAlleFagsakerSomOverlapper(any(), any(), any())).thenReturn(fagsaker);
     }
 
     private Fagsak lagFagsak(Long id, String aktørId) {

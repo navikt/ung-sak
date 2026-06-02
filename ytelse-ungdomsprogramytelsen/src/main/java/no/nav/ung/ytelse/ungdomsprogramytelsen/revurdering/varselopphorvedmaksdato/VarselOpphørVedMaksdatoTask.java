@@ -10,7 +10,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -20,6 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,23 +51,25 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private FagsakRepository fagsakRepository;
 
     VarselOpphørVedMaksdatoTask() {
     }
 
     @Inject
     public VarselOpphørVedMaksdatoTask(EntityManager entityManager,
-                                      BehandlingRepository behandlingRepository,
-                                      EtterlysningRepository etterlysningRepository,
-                                      ProsessTaskTjeneste prosessTaskTjeneste,
-                                      FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                      UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste) {
+                                       BehandlingRepository behandlingRepository,
+                                       EtterlysningRepository etterlysningRepository,
+                                       ProsessTaskTjeneste prosessTaskTjeneste,
+                                       FagsakProsessTaskRepository fagsakProsessTaskRepository,
+                                       UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, FagsakRepository fagsakRepository) {
         this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.fagsakRepository = fagsakRepository;
     }
 
     @Override
@@ -77,13 +79,13 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         log.info("Starter utledning av fagsaker som nærmer seg maksdato. Dato i dag: {}, sjekker maksdato <= {}", dagensDato, treUkerFrem);
 
-        var løpendeFagsaker = hentLøpendeFagsaker();
+        var aktuelleFagsaker = hentAktuelleFagsaker(dagensDato, treUkerFrem);
 
-        log.info("Fant {} løpende fagsaker for ungdomsytelse", løpendeFagsaker.size());
+        log.info("Fant {} aktuelle fagsaker for ungdomsytelse", aktuelleFagsaker.size());
 
         ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
 
-        for (Fagsak fagsak : løpendeFagsaker) {
+        for (Fagsak fagsak : aktuelleFagsaker) {
             try {
                 var revurderingTask = vurderOgOpprettTask(fagsak, dagensDato, treUkerFrem);
                 if (revurderingTask != null) {
@@ -169,12 +171,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     }
 
 
-    private List<Fagsak> hentLøpendeFagsaker() {
-        var query = entityManager.createQuery(
-            "SELECT f FROM Fagsak f WHERE f.fagsakStatus = :status AND f.ytelseType = :ytelseType",
-            Fagsak.class);
-        query.setParameter("status", FagsakStatus.LØPENDE);
-        query.setParameter("ytelseType", FagsakYtelseType.UNGDOMSYTELSE);
-        return query.getResultList();
+    private List<Fagsak> hentAktuelleFagsaker(LocalDate fom, LocalDate tom) {
+        return fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom, List.of(FagsakYtelseType.UNGDOMSYTELSE));
     }
 }
