@@ -36,11 +36,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Year;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -117,8 +113,12 @@ public class AktivitetspengerRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var inntektsposter = beregningTjeneste.hentSigrunInntektsposter(behandling.getId());
 
-        return aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
-            .flatMap(AktivitetspengerGrunnlag::getSenesteBeregningsgrunnlag)
+        Optional<Beregningsgrunnlag> beregningsgrunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
+            .flatMap(AktivitetspengerGrunnlag::getSenesteBeregningsgrunnlag);
+        if (beregningsgrunnlag.isEmpty()) {
+            return null;
+        }
+        return beregningsgrunnlag
             .map(grunnlag -> mapTilBeregningsgrunnlagDto(grunnlag, inntektsposter))
             .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: " + behandling.getId()));
     }
