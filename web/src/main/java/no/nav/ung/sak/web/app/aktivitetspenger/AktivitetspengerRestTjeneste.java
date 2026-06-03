@@ -2,6 +2,9 @@ package no.nav.ung.sak.web.app.aktivitetspenger;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -36,11 +39,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.*;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Year;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -109,7 +108,10 @@ public class AktivitetspengerRestTjeneste {
     }
 
     @GET
-    @Operation(description = "Henter beregningsgrunnlag for en aktivitetspengerbehandling", tags = "avp")
+    @Operation(description = "Henter beregningsgrunnlag for en aktivitetspengerbehandling", tags = "avp", responses = {
+        @ApiResponse(responseCode = "200", description = "Beregningsgrunnlag funnet", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = BeregningsgrunnlagDto.class))),
+        @ApiResponse(responseCode = "204", description = "Beregning er ikke kjørt ennå – ingen beregningsgrunnlag tilgjengelig")
+    })
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path(BEREGNINGSGRUNNLAG_PATH)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
@@ -117,10 +119,12 @@ public class AktivitetspengerRestTjeneste {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var inntektsposter = beregningTjeneste.hentSigrunInntektsposter(behandling.getId());
 
-        return aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
-            .flatMap(AktivitetspengerGrunnlag::getSenesteBeregningsgrunnlag)
-            .map(grunnlag -> mapTilBeregningsgrunnlagDto(grunnlag, inntektsposter))
-            .orElseThrow(() -> new IllegalStateException("Fant ikke beregningsgrunnlag for behandlingid: " + behandling.getId()));
+        Optional<Beregningsgrunnlag> beregningsgrunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
+            .flatMap(AktivitetspengerGrunnlag::getSenesteBeregningsgrunnlag);
+        if (beregningsgrunnlag.isEmpty()) {
+            return null;
+        }
+        return mapTilBeregningsgrunnlagDto(beregningsgrunnlag.get(), inntektsposter);
     }
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag, List<Inntektspost> inntektsposter) {
