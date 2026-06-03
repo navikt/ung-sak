@@ -7,6 +7,8 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.opphorvedmaksdato.BekreftOpphorVedMaksdatoOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
@@ -25,10 +27,12 @@ import java.util.List;
 public class OpphørVedMaksdatoOppgaveOppretter {
 
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
+    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public OpphørVedMaksdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient) {
+    public OpphørVedMaksdatoOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.oppgaveKlient = oppgaveKlient;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
@@ -40,12 +44,14 @@ public class OpphørVedMaksdatoOppgaveOppretter {
 
 
     private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype) {
-        LocalDate sluttdato = etterlysning.getPeriode().getTomDato();
+        UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
+        LocalDate sluttdato = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato();
+        LocalDate maksdato = ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer å finne maksdato"));
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
-            new BekreftOpphorVedMaksdatoOppgavetypeDataDto(sluttdato, sluttdato),
+            new BekreftOpphorVedMaksdatoOppgavetypeDataDto(sluttdato, maksdato),
             etterlysning.getFrist()
         );
     }
