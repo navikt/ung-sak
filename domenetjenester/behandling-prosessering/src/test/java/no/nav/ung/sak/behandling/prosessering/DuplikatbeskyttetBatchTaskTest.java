@@ -3,13 +3,13 @@ package no.nav.ung.sak.behandling.prosessering;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -141,13 +141,8 @@ class DuplikatbeskyttetBatchTaskTest {
         }
 
         @Override
-        protected String childTaskName() {
-            return CHILD_TASK_NAME;
-        }
-
-        @Override
-        protected ProsessTaskData createChildTaskData() {
-            return new ProsessTaskData(CHILD_TASK_NAME);
+        protected TaskType getTaskType() {
+            return new TaskType(CHILD_TASK_NAME);
         }
 
         @Override
@@ -170,8 +165,8 @@ class DuplikatbeskyttetBatchTaskTest {
         }
 
         @Override
-        protected Predicate<ProsessTaskData> duplikatFilter() {
-            return it -> expectedValue.equals(it.getPropertyValue("key"));
+        protected boolean erDuplikat(ProsessTaskData data) {
+            return expectedValue.equals(data.getPropertyValue("key"));
         }
     }
 }

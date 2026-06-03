@@ -1,14 +1,10 @@
 package no.nav.ung.sak.behandling.prosessering;
 
-import no.nav.k9.prosesstask.api.BatchProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * Baseklasse for batch-tasks som skal opprette én child-task dersom det ikke allerede finnes
@@ -43,21 +39,16 @@ public abstract class DuplikatbeskyttetBatchTask implements BatchProsessTaskHand
     }
 
     /**
-     * Tasknavn for child-tasken som skal opprettes.
+     * Tasktype for child-tasken som skal opprettes.
      */
-    protected abstract String childTaskName();
+    protected abstract TaskType getTaskType();
 
     /**
-     * Opprett og konfigurer child-task-dataen som skal lagres.
-     */
-    protected abstract ProsessTaskData createChildTaskData();
-
-    /**
-     * Filter for å avgjøre hvilke eksisterende tasks som regnes som duplikater.
+     * Sjekk for å avgjøre hvilke eksisterende tasks som regnes som duplikater.
      * Default: tasks uten saksnummer (globale tasks).
      */
-    protected Predicate<ProsessTaskData> duplikatFilter() {
-        return it -> it.getSaksnummer() == null;
+    protected boolean erDuplikat(ProsessTaskData data) {
+        return data.getSaksnummer() == null;
     }
 
     /**
@@ -68,7 +59,7 @@ public abstract class DuplikatbeskyttetBatchTask implements BatchProsessTaskHand
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
+    public final void doTask(ProsessTaskData prosessTaskData) {
         if (!isEnabled()) {
             log.info("{} er deaktivert, oppretter ikke child-task", getClass().getSimpleName());
             return;
@@ -76,26 +67,22 @@ public abstract class DuplikatbeskyttetBatchTask implements BatchProsessTaskHand
 
         if (harEksisterendeChildTask()) {
             log.info("{} fant eksisterende child-task med status FEILET/KLAR/VETO for {}. Oppretter ikke duplikat.",
-                getClass().getSimpleName(), childTaskName());
+                getClass().getSimpleName(), getTaskType().value());
             return;
         }
 
-        ProsessTaskData childTask = createChildTaskData();
+        ProsessTaskData childTask = ProsessTaskData.forTaskType(getTaskType());
         prosessTaskTjeneste.lagre(childTask);
     }
 
     private boolean harEksisterendeChildTask() {
-        var filter = duplikatFilter();
         for (var status : BLOKKERENDE_STATUSER) {
-            if (prosessTaskTjeneste.finnAlle(childTaskName(), status).stream().anyMatch(filter)) {
+            if (prosessTaskTjeneste.finnAlle(getTaskType().value(), status).stream().anyMatch(this::erDuplikat)) {
                 return true;
             }
         }
         return false;
     }
 
-    protected ProsessTaskTjeneste getProsessTaskTjeneste() {
-        return prosessTaskTjeneste;
-    }
 }
 

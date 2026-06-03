@@ -6,6 +6,7 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
 
@@ -44,26 +45,17 @@ public class OpprettRevurderingForInntektskontrollBatchTask extends Duplikatbesk
         return CronExpression.create(inntetskontrollCronString);
     }
 
+
     @Override
-    protected String childTaskName() {
-        return OpprettRevurderingForInntektskontrollTask.TASKNAME;
+    protected TaskType getTaskType() {
+        return new TaskType(OpprettRevurderingForInntektskontrollTask.TASKNAME);
     }
 
-    @Override
-    protected ProsessTaskData createChildTaskData() {
-        var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-        var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
-
-        ProsessTaskData kontrollTask = ProsessTaskData.forProsessTask(OpprettRevurderingForInntektskontrollTask.class);
-        kontrollTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        kontrollTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        return kontrollTask;
-    }
 
     @Override
-    protected Predicate<ProsessTaskData> duplikatFilter() {
+    protected boolean erDuplikat(ProsessTaskData data) {
         var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-        return it -> it.getPropertyValue(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM)
+        return data.getPropertyValue(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM)
             .equals(fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 }

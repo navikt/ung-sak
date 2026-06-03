@@ -6,8 +6,10 @@ import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
+import no.nav.ung.sak.behandling.revurdering.sats.OpprettRevurderingHøySatsTask;
 
 /**
  * Batchtask som varsler deltakere om opphør ved maksdato 3 uker før maksdato.
@@ -34,13 +36,8 @@ public class VarselOpphørVedMaksdatoBatchTask extends DuplikatbeskyttetBatchTas
     }
 
     @Override
-    protected String childTaskName() {
-        return VarselOpphørVedMaksdatoTask.TASKNAME;
-    }
-
-    @Override
-    protected ProsessTaskData createChildTaskData() {
-        return ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class);
+    protected TaskType getTaskType() {
+        return new TaskType(VarselOpphørVedMaksdatoTask.TASKNAME);
     }
 
     @Override

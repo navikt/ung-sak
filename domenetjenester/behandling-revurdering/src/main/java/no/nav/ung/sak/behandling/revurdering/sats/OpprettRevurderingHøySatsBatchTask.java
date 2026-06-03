@@ -5,8 +5,10 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
+import no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettRevurderingForInntektskontrollTask;
 
 
 /**
@@ -30,13 +32,8 @@ public class OpprettRevurderingHøySatsBatchTask extends DuplikatbeskyttetBatchT
     }
 
     @Override
-    protected String childTaskName() {
-        return OpprettRevurderingHøySatsTask.TASKNAME;
-    }
-
-    @Override
-    protected ProsessTaskData createChildTaskData() {
-        return ProsessTaskData.forProsessTask(OpprettRevurderingHøySatsTask.class);
+    protected TaskType getTaskType() {
+        return new TaskType(OpprettRevurderingHøySatsTask.TASKNAME);
     }
 
     @Override
