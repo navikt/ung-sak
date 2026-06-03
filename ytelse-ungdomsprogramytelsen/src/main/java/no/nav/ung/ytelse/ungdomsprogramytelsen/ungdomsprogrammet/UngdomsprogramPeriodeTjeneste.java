@@ -25,6 +25,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+
 @ApplicationScoped
 public class UngdomsprogramPeriodeTjeneste {
 
@@ -205,6 +207,11 @@ public class UngdomsprogramPeriodeTjeneste {
         var førsteSluttdato = førstePeriode.get().getTomDato();
 
         if (andreSluttdato.equals(førsteSluttdato)) {
+            return List.of();
+        }
+
+        // Dersom sluttdato endres til å være maksdato eller senere og denne før enten ikke var satt (tidenes ende) eller satt til noe lenger frem i tid enn gjeldende sluttdato håndteres varsling av varsel ved opphør på maksdato
+        if (andreGrunnlag.getPeriodeMaksDato().isPresent() && førsteSluttdato.isAfter(andreGrunnlag.getPeriodeMaksDato().get()) && !andreSluttdato.isBefore(andreGrunnlag.getPeriodeMaksDato().get())) {
             return List.of();
         }
 

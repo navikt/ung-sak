@@ -7,7 +7,6 @@ import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskStatus;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -20,13 +19,13 @@ import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
@@ -41,7 +40,6 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "varselOpphorVedMaksdato";
     private static final Logger log = LoggerFactory.getLogger(VarselOpphørVedMaksdatoTask.class);
-    private static final int VARSEL_UKER_FØR_MAKSDATO = 3;
     /** Grace-periode: sender varsel selv om maksdato nylig er passert, i tilfelle tasken har vært i feil. */
     private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
 
@@ -75,7 +73,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var dagensDato = LocalDate.now();
-        var treUkerFrem = dagensDato.plusWeeks(VARSEL_UKER_FØR_MAKSDATO);
+        var treUkerFrem = dagensDato.plusWeeks(MaksdatoOpphørVarslingPeriode.VARSEL_UKER_FØR_MAKSDATO);
 
         log.info("Starter utledning av fagsaker som nærmer seg maksdato. Dato i dag: {}, sjekker maksdato <= {}", dagensDato, treUkerFrem);
 
@@ -87,7 +85,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         for (Fagsak fagsak : aktuelleFagsaker) {
             try {
-                var revurderingTask = vurderOgOpprettTask(fagsak, dagensDato, treUkerFrem);
+                var revurderingTask = vurderOgOpprettTask(fagsak, dagensDato);
                 if (revurderingTask != null) {
                     taskGruppe.addNesteSekvensiell(revurderingTask);
                 }
@@ -102,7 +100,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         }
     }
 
-    private ProsessTaskData vurderOgOpprettTask(Fagsak fagsak, LocalDate dagensDato, LocalDate treUkerFrem) {
+    private ProsessTaskData vurderOgOpprettTask(Fagsak fagsak, LocalDate dagensDato) {
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (sisteBehandling.isEmpty()) {
             return null;
@@ -142,7 +140,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
 
         // Sjekk om maksdato er innenfor varselvinduet (inkl. grace-periode for forsinket task-kjøring)
-        if (maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO)) || maksdato.isAfter(treUkerFrem)) {
+        if (maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO)) || !MaksdatoOpphørVarslingPeriode.harPassertVarseldato(maksdato)) {
             return null;
         }
 
