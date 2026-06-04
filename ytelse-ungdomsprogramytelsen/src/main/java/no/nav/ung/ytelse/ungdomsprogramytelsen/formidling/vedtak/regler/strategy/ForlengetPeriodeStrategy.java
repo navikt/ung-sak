@@ -33,6 +33,7 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        //TODO slett og løs på en annen måte
         if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)) {
             return true;
         }

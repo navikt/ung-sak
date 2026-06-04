@@ -30,7 +30,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     private static final Logger LOG = LoggerFactory.getLogger(YtelseVedtaksbrevRegler.class);
 
     private BehandlingRepository behandlingRepository;
-    private Instance<DetaljertResultatTidslinjeUtleder> detaljertResultatUtleder;
+    private DetaljertResultatTidslinjeUtleder detaljertResultatUtleder;
     private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances;
 
     public YtelseVedtaksbrevRegler() {
@@ -39,7 +39,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     @Inject
     public YtelseVedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
-        @Any Instance<DetaljertResultatTidslinjeUtleder> detaljertResultatUtleder,
+        DetaljertResultatTidslinjeUtleder detaljertResultatUtleder,
         @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances
     ) {
         this.behandlingRepository = behandlingRepository;
@@ -50,7 +50,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     @Override
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = DetaljertResultatTidslinjeUtleder.finnTjeneste(detaljertResultatUtleder, behandling.getFagsakYtelseType()).utledDetaljertResultat(behandling);
+        LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 

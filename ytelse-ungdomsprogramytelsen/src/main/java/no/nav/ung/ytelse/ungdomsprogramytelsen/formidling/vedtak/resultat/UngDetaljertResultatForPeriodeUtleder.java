@@ -24,7 +24,8 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL),
         BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_DELTAKER_DØDSFALL),
         BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_FJERNE_PERIODE),
-        BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.FORLENGET_PERIODE)
+        BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.FORLENGET_PERIODE),
+        BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO)
     );
 
 
@@ -54,12 +55,9 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
             resultater.add(endretStartdatoDetaljertResultat(avslåtteVilkår));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+            || relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
-        }
-
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
-            resultater.add(varsleOpphørMaksdatoDetaljertResultat(avslåtteVilkår));
         }
 
         relevanteÅrsaker.stream()
@@ -81,6 +79,7 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
     }
 
 
+
     private static DetaljertResultatInfo behandlingsårsakDetaljertResultat(BehandlingÅrsakType key, Set<DetaljertVilkårResultat> avslåtteVilkår) {
         if (avslåtteVilkår.isEmpty()) {
             return ÅRSAK_RESULTAT_INNVILGELSE_MAP.get(key);
@@ -95,11 +94,6 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
         } else {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphørsdato flyttet fremover");
         }
-    }
-
-    private static DetaljertResultatInfo varsleOpphørMaksdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
-        return DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO, "Opphør av ungdomsprogramperiode");
-
     }
 
     private static DetaljertResultatInfo endretStartdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
