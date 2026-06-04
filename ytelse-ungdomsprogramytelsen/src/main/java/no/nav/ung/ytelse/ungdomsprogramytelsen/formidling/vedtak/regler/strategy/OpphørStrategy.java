@@ -4,7 +4,6 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -42,14 +41,6 @@ public final class OpphørStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        // Opphør ved maksdato håndteres av OpphørVedMaksdatoStrategy,
-        // men eksplisitt opphør-årsak skal overstyre varsel-årsaken.
-        var årsaker = behandling.getBehandlingÅrsakerTyper();
-        boolean harVarselOpphørVedMaksdato = årsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
-        boolean harOpphør = årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        if (harVarselOpphørVedMaksdato && !harOpphør) {
-            return false;
-        }
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
         return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)

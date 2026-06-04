@@ -12,4 +12,10 @@ public class MaksdatoOpphørVarslingPeriode {
         LocalDate dagensDato = LocalDate.now();
         return !dagensDato.isBefore(periodeMaksDato.minusWeeks(VARSEL_UKER_FØR_MAKSDATO));
     }
+
+    public static boolean erRelevantForVarsling(LocalDate tomDato, LocalDate maksDato) {
+        boolean opphørErIkkeSattTidligereEnnMaksdato = !tomDato.isBefore(maksDato);
+        return harPassertVarseldato(maksDato) && opphørErIkkeSattTidligereEnnMaksdato;
+    }
+
 }

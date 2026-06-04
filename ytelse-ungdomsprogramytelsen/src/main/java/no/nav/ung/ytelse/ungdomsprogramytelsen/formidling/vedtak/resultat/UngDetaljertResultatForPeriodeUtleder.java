@@ -54,9 +54,12 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
             resultater.add(endretStartdatoDetaljertResultat(avslåtteVilkår));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
-            || relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
+        }
+
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
+            resultater.add(varsleOpphørMaksdatoDetaljertResultat(avslåtteVilkår));
         }
 
         relevanteÅrsaker.stream()
@@ -78,7 +81,6 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
     }
 
 
-
     private static DetaljertResultatInfo behandlingsårsakDetaljertResultat(BehandlingÅrsakType key, Set<DetaljertVilkårResultat> avslåtteVilkår) {
         if (avslåtteVilkår.isEmpty()) {
             return ÅRSAK_RESULTAT_INNVILGELSE_MAP.get(key);
@@ -93,6 +95,11 @@ public class UngDetaljertResultatForPeriodeUtleder implements DetaljertResultatF
         } else {
             return DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphørsdato flyttet fremover");
         }
+    }
+
+    private static DetaljertResultatInfo varsleOpphørMaksdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
+        return DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO, "Opphør av ungdomsprogramperiode");
+
     }
 
     private static DetaljertResultatInfo endretStartdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {

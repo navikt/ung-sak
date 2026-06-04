@@ -3,7 +3,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strateg
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -35,23 +34,9 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        boolean harVarselOpphørVedMaksdato = behandling.getBehandlingÅrsakerTyper()
-            .contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
-        if (!harVarselOpphørVedMaksdato) {
-            return false;
-        }
-
-        boolean harForlengetPeriode = behandling.getBehandlingÅrsakerTyper()
-            .contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
-        boolean harOpphør = behandling.getBehandlingÅrsakerTyper()
-            .contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
-        if (harForlengetPeriode || harOpphør) {
-            return false;
-        }
-
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
+        return resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO);
     }
 }
 

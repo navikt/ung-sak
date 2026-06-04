@@ -1,37 +1,49 @@
-package no.nav.ung.sak.formidling.vedtak.resultat;
+package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.resultat;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.*;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
+import no.nav.ung.sak.formidling.vedtak.resultat.*;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Dependent
-public class DetaljertResultatTidslinjeUtlederImpl implements DetaljertResultatTidslinjeUtleder {
+@ApplicationScoped
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
+public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTidslinjeUtleder {
 
-    private final Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
-    private final TilkjentYtelseRepository tilkjentYtelseRepository;
-    private final VilkårResultatRepository vilkårResultatRepository;
-    private final Instance<DetaljertResultatForPeriodeUtleder> detaljertResultatForPeriodeUtledere;
+    private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
+    private TilkjentYtelseRepository tilkjentYtelseRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private Instance<DetaljertResultatForPeriodeUtleder> detaljertResultatForPeriodeUtledere;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+
+    public UngDetaljertResultatTidslinjeUtleder() {
+        // Weld krever en default constructor for proxy
+    }
 
     @Inject
-    public DetaljertResultatTidslinjeUtlederImpl(
+    public UngDetaljertResultatTidslinjeUtleder(
         @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere,
         TilkjentYtelseRepository tilkjentYtelseRepository,
         VilkårResultatRepository vilkårResultatRepository,
@@ -51,9 +63,9 @@ public class DetaljertResultatTidslinjeUtlederImpl implements DetaljertResultatT
         var prosessTriggerPeriodeUtleder = FagsakYtelseTypeRef.Lookup.find(prosessTriggerPeriodeUtledere, behandling.getFagsakYtelseType()).orElseThrow();
 
         var perioderTilVurdering = prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId())
-            .mapValue(DetaljertResultatTidslinjeUtlederImpl::fjernIkkeRelevanteÅrsaker)
-            .combine(tilkjentYtelseTidslinje, DetaljertResultatTidslinjeUtlederImpl::fjernIkkeRelevanteKontrollårsaker, JoinStyle.LEFT_JOIN)
-            .combine(kontrollertePerioderTidslinje, DetaljertResultatTidslinjeUtlederImpl::fjernIkkeRelevanteKontrollårsaker, JoinStyle.LEFT_JOIN)
+            .mapValue(it -> fjernIkkeRelevanteÅrsaker(it, behandling))
+            .combine(tilkjentYtelseTidslinje, UngDetaljertResultatTidslinjeUtleder::fjernIkkeRelevanteKontrollårsaker, JoinStyle.LEFT_JOIN)
+            .combine(kontrollertePerioderTidslinje, UngDetaljertResultatTidslinjeUtleder::fjernIkkeRelevanteKontrollårsaker, JoinStyle.LEFT_JOIN)
             .filterValue(it -> !it.isEmpty())
             .compress();
 
@@ -76,22 +88,33 @@ public class DetaljertResultatTidslinjeUtlederImpl implements DetaljertResultatT
 
     // Fjerner årsaker som ikke er relevant for brev
 
-    private static Set<BehandlingÅrsakType> fjernIkkeRelevanteÅrsaker(Set<BehandlingÅrsakType> behandlingÅrsaker) {
-            var årsaker = new HashSet<>(behandlingÅrsaker);
-            //Rapportert inntekt er uinterressant uten kontrollert inntekt årsak
-            årsaker.remove(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT);
-            //uttalelse er uinterressant uten en annen årsak
-            årsaker.remove(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
-            return årsaker;
+    private Set<BehandlingÅrsakType> fjernIkkeRelevanteÅrsaker(Set<BehandlingÅrsakType> behandlingÅrsaker, Behandling behandling) {
+        var årsaker = new HashSet<>(behandlingÅrsaker);
+        //Rapportert inntekt er uinterressant uten kontrollert inntekt årsak
+        årsaker.remove(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT);
+        //uttalelse er uinterressant uten en annen årsak
+        årsaker.remove(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
+
+
+        if (behandlingÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
+            UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow(() -> new IllegalStateException("Forventer periodegrunnlag"));
+            LocalDate periodeMaksDato = ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer at maksdato er satt"));
+            LocalDate tomDato = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato();
+            if (!MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(tomDato, periodeMaksDato)) {
+                årsaker.remove(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
+            }
+        }
+
+        return årsaker;
     }
 
     // Fjern kontrollårsak hvis det ikke er noen kontroll eller tilkjent ytelse i perioden
     private static <T> LocalDateSegment<Set<BehandlingÅrsakType>> fjernIkkeRelevanteKontrollårsaker(LocalDateInterval di, LocalDateSegment<Set<BehandlingÅrsakType>> trigger, LocalDateSegment<T> kontrollEllerYtelseSegment) {
-            var årsaker = new HashSet<>(trigger.getValue());
-            if (kontrollEllerYtelseSegment == null) {
-                årsaker.remove(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
-            }
-            return new LocalDateSegment<>(di, årsaker);
+        var årsaker = new HashSet<>(trigger.getValue());
+        if (kontrollEllerYtelseSegment == null) {
+            årsaker.remove(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
+        }
+        return new LocalDateSegment<>(di, årsaker);
     }
 
     private LocalDateSegmentCombinator<SamletVilkårResultatOgBehandlingÅrsaker, TilkjentYtelseVerdi, DetaljertResultat> bestemResultatForPeriodeCombinator(

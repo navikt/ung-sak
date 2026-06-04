@@ -10,16 +10,7 @@ import java.time.LocalDate;
 public class EtterlysningForOpphørVedMaksdatoResultatUtleder {
 
     static ResultatType utledResultat(EtterlysningForMaksdatoInput input) {
-        if (input.tomDato.isBefore(input.maksdato)) {
-            // Opphør er satt til en dato før maksdato
-            // Håndteres via vanlig opphørsvarsling
-            // Avbryter eventuelt eksisterende etterlysning og varsel
-            return input.eksisterendeEtterlysning != null && input.eksisterendeEtterlysning.etterlysningData().status().equals(EtterlysningStatus.VENTER) ? ResultatType.AVBRYT_ETTERLYSNING : ResultatType.INGEN_ENDRING;
-        }
-
-
-        if (!MaksdatoOpphørVarslingPeriode.harPassertVarseldato(input.maksdato)) {
-            // Vi har ikke passert varslingsdatoen. Dette betyr mest sannsynlig at maksdato har blitt flyttet etter opprettelse av behandlingen
+        if (!MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(input.tomDato, input.maksdato)) {
             // Avbryter eventuelt eksisterende etterlysning og varsel
             return input.eksisterendeEtterlysning != null && input.eksisterendeEtterlysning.etterlysningData().status().equals(EtterlysningStatus.VENTER) ? ResultatType.AVBRYT_ETTERLYSNING : ResultatType.INGEN_ENDRING;
         }
