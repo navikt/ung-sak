@@ -71,7 +71,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null);
     }
 
 
@@ -124,7 +124,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null);
     }
 
 
@@ -185,7 +185,7 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ), null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null);
     }
 
 
@@ -242,7 +242,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null);
     }
 
     /**
@@ -280,7 +280,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null, null);
+            null, null, null);
     }
 
     public static UngTestScenario endringStartdatoOgOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate nyStartdato, LocalDate sluttdato) {
@@ -316,7 +316,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null, null);
+            null, null, null);
     }
 
 
@@ -355,6 +355,6 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ),
-            null, null);
+            null, null, null);
     }
 }

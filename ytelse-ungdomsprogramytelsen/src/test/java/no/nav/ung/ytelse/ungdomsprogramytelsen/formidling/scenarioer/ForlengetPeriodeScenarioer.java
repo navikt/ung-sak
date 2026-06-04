@@ -49,6 +49,6 @@ public class ForlengetPeriodeScenarioer {
                     DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato))
             ),
             Collections.emptyList(),
-            null, null);
+            null, null, null);
     }
 }
