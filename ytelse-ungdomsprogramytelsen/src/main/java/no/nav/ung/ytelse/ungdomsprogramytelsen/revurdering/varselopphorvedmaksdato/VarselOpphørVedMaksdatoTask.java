@@ -21,7 +21,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
@@ -36,7 +39,9 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "varselOpphorVedMaksdato";
     private static final Logger log = LoggerFactory.getLogger(VarselOpphørVedMaksdatoTask.class);
-    /** Grace-periode: sender varsel selv om maksdato nylig er passert, i tilfelle tasken har vært i feil. */
+    /**
+     * Grace-periode: sender varsel selv om maksdato nylig er passert, i tilfelle tasken har vært i feil.
+     */
     private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
 
     private BehandlingRepository behandlingRepository;
@@ -72,7 +77,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         for (Fagsak fagsak : aktuelleFagsaker) {
             try {
-                var revurderingTask = vurderOgOpprettTask(fagsak, dagensDato);
+                var revurderingTask = vurderOgOpprettTask(fagsak);
                 if (revurderingTask != null) {
                     taskGruppe.addNesteSekvensiell(revurderingTask);
                 }
@@ -87,28 +92,29 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         }
     }
 
-    private ProsessTaskData vurderOgOpprettTask(Fagsak fagsak, LocalDate dagensDato) {
+    private ProsessTaskData vurderOgOpprettTask(Fagsak fagsak) {
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (sisteBehandling.isEmpty()) {
             return null;
         }
 
         Behandling behandling = sisteBehandling.get();
+        var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
 
         // Sjekk om det allerede finnes en åpen behandling med denne årsaken,
         // eller en nylig avsluttet — hindrer dobbel-varsling dersom behandlingen
         // fullføres raskt og tasken kjører på nytt samme dag.
-        var tidligsteOpprettetTidspunkt = dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO * 2L).atStartOfDay();
-        boolean harAlleredeVarselBehandling = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId()).stream()
+        Optional<Behandling> behandlingMedVarsel = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId()).stream()
             .filter(b -> b.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO))
-            .anyMatch(b -> b.getOpprettetTidspunkt().isAfter(tidligsteOpprettetTidspunkt));
-        if (harAlleredeVarselBehandling) {
-            log.info("Fagsak {} har allerede behandling med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO opprettet etter {}, hopper over", fagsak.getId(), tidligsteOpprettetTidspunkt.toLocalDate());
+            .max(Comparator.comparing(Behandling::getOpprettetTidspunkt));
+        if (behandlingMedVarsel.isPresent()) {
+            var varsletMaksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandlingMedVarsel.get().getId()).orElse(null);
+            if (Objects.equals(varsletMaksdato, maksdato))
+                log.info("Fagsak {} har allerede behandling med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO og har varslet for samme maksdato", fagsak.getId());
             return null;
         }
 
         // Hent maksdato fra grunnlaget
-        var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
         if (maksdato == null) {
             return null;
         }
