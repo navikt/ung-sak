@@ -3,18 +3,12 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselopphorvedmaksd
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.prosesstask.api.ProsessTask;
-import no.nav.k9.prosesstask.api.ProsessTaskData;
-import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
-import no.nav.k9.prosesstask.api.ProsessTaskHandler;
-import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
@@ -47,7 +41,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
-    private FagsakRepository fagsakRepository;
+    private AktuelleFagsakerForMaksdatoVarselRepository aktuellleFagsakerRepository;
 
     VarselOpphørVedMaksdatoTask() {
     }
@@ -55,11 +49,11 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     @Inject
     public VarselOpphørVedMaksdatoTask(BehandlingRepository behandlingRepository,
                                        ProsessTaskTjeneste prosessTaskTjeneste,
-                                       UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, FagsakRepository fagsakRepository) {
+                                       UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, AktuelleFagsakerForMaksdatoVarselRepository aktuellleFagsakerRepository) {
         this.behandlingRepository = behandlingRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
-        this.fagsakRepository = fagsakRepository;
+        this.aktuellleFagsakerRepository = aktuellleFagsakerRepository;
     }
 
     @Override
@@ -69,7 +63,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         log.info("Starter utledning av fagsaker som nærmer seg maksdato. Dato i dag: {}, sjekker maksdato <= {}", dagensDato, treUkerFrem);
 
-        var aktuelleFagsaker = hentAktuelleFagsaker(dagensDato, treUkerFrem);
+        var aktuelleFagsaker = hentAktuelleFagsaker();
 
         log.info("Fant {} aktuelle fagsaker for ungdomsytelse", aktuelleFagsaker.size());
 
@@ -136,7 +130,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         return tilVurderingTask;
     }
 
-    private List<Fagsak> hentAktuelleFagsaker(LocalDate fom, LocalDate tom) {
-        return fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom, List.of(FagsakYtelseType.UNGDOMSYTELSE));
+    private List<Fagsak> hentAktuelleFagsaker() {
+        return aktuellleFagsakerRepository.hentFagsakerRelevantForMaksdatoVarsel();
     }
 }

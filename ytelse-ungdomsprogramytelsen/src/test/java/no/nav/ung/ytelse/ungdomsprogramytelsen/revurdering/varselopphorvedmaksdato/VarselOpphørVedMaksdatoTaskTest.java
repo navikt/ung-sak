@@ -36,7 +36,7 @@ class VarselOpphørVedMaksdatoTaskTest {
     private BehandlingRepository behandlingRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private FagsakRepository fagsakRepository;
+    private AktuelleFagsakerForMaksdatoVarselRepository aktuellFagsakRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
 
     @BeforeEach
@@ -44,7 +44,7 @@ class VarselOpphørVedMaksdatoTaskTest {
         behandlingRepository = mock(BehandlingRepository.class);
         etterlysningRepository = mock(EtterlysningRepository.class);
         etterlysningRepository = mock(EtterlysningRepository.class);
-        fagsakRepository = mock(FagsakRepository.class);
+        aktuellFagsakRepository = mock(AktuelleFagsakerForMaksdatoVarselRepository.class);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         ungdomsprogramPeriodeTjeneste = mock(UngdomsprogramPeriodeTjeneste.class);
 
@@ -52,7 +52,7 @@ class VarselOpphørVedMaksdatoTaskTest {
             behandlingRepository,
             prosessTaskTjeneste,
             ungdomsprogramPeriodeTjeneste,
-            fagsakRepository
+            aktuellFagsakRepository
         );
     }
 
@@ -164,7 +164,7 @@ class VarselOpphørVedMaksdatoTaskTest {
 
     @SuppressWarnings("unchecked")
     private void mockLøpendeFagsaker(List<Fagsak> fagsaker) {
-        when(fagsakRepository.hentAlleFagsakerSomOverlapper(any(), any(), any())).thenReturn(fagsaker);
+        when(aktuellFagsakRepository.hentFagsakerRelevantForMaksdatoVarsel()).thenReturn(fagsaker);
     }
 
     private Fagsak lagFagsak(Long id, String aktørId) {
