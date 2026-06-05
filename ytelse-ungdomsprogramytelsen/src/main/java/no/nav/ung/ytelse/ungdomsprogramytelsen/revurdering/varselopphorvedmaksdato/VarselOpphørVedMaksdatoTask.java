@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselopphorvedmaksd
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
@@ -15,10 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.PERIODER;
@@ -71,7 +67,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         for (Fagsak fagsak : aktuelleFagsaker) {
             try {
-                var revurderingTask = vurderOgOpprettTask(fagsak);
+                var revurderingTask = opprettTask(fagsak);
                 if (revurderingTask != null) {
                     taskGruppe.addNesteSekvensiell(revurderingTask);
                 }
@@ -86,7 +82,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         }
     }
 
-    private ProsessTaskData vurderOgOpprettTask(Fagsak fagsak) {
+    private ProsessTaskData opprettTask(Fagsak fagsak) {
         var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
         if (sisteBehandling.isEmpty()) {
             return null;
@@ -94,30 +90,6 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         Behandling behandling = sisteBehandling.get();
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
-
-        // Sjekk om det allerede finnes en åpen behandling med denne årsaken,
-        // eller en nylig avsluttet — hindrer dobbel-varsling dersom behandlingen
-        // fullføres raskt og tasken kjører på nytt samme dag.
-        Optional<Behandling> behandlingMedVarsel = behandlingRepository.hentAbsoluttAlleBehandlingerForFagsak(fagsak.getId()).stream()
-            .filter(b -> b.harBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO))
-            .max(Comparator.comparing(Behandling::getOpprettetTidspunkt));
-        if (behandlingMedVarsel.isPresent()) {
-            var varsletMaksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandlingMedVarsel.get().getId()).orElse(null);
-            if (Objects.equals(varsletMaksdato, maksdato))
-                log.info("Fagsak {} har allerede behandling med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO og har varslet for samme maksdato", fagsak.getId());
-            return null;
-        }
-
-        // Hent maksdato fra grunnlaget
-        if (maksdato == null) {
-            return null;
-        }
-
-        // Sjekk om maksdato er innenfor varselvinduet (inkl. grace-periode for forsinket task-kjøring)
-        LocalDateTimeline<Boolean> periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
-        if (!MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(periodeTidslinje.getMaxLocalDate(), maksdato)) {
-            return null;
-        }
 
         log.info("Fagsak {} har periodeMaksDato {} fra register som er innenfor varselvinduet. Oppretter revurdering.", fagsak.getId(), maksdato);
 
