@@ -8,15 +8,17 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
@@ -35,7 +37,6 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
 
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
     private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
     private BehandlingRepository behandlingRepository;
 
@@ -46,12 +47,10 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
     @Inject
     public VurderFaktaBostedSteg(BehandlingRepository behandlingRepository,
                                  BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                 BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                  @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere) {
 
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
-        this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.prosessTriggerPeriodeUtledere = prosessTriggerPeriodeUtledere;
         this.behandlingRepository = behandlingRepository;
@@ -83,24 +82,26 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
 
     // Dette kan vurderes å flyttes til persistering av søknad. Ulempen er at vi må då må ta stilling til vilkårsperioder tidlig
     private void initierFaktaFraSøknadsdata(long behandlingId, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        Map<LocalDate, Boolean> søknadErBosattPerFom = bosattSøknadGrunnlagRepository.hentSøknadBostedPerFom(behandlingId);
+        Map<LocalDate, Boolean> søknadErBosattPerFom = bostedsGrunnlagRepository.hentSøknadBostedPerFom(behandlingId);
         // Auto-sett fakta fra søknad for perioder uten grunnlag
-        Map<LocalDate, Boolean> nyeSøknadAvklaringer = new LinkedHashMap<>();
-        perioderTilVurdering.stream().forEach(segment -> {
+        Map<Periode, BostedAvklaringData> nyeSøknadAvklaringer = new LinkedHashMap<>();
+        perioderTilVurdering.forEach(segment -> {
             LocalDate fom = segment.getFomDato();
-            Boolean søknadVerdi = finnSøknadverdi(søknadErBosattPerFom, fom);
+            LocalDate tom = segment.getTomDato();
+
+            // Kan vi forvente eksakte datoer her?
+            Boolean søknadVerdi = søknadErBosattPerFom.get(fom);
             if (søknadVerdi != null) {
-                nyeSøknadAvklaringer.put(fom, søknadVerdi);
+                nyeSøknadAvklaringer.put(new Periode(fom, tom), new BostedAvklaringData(
+                    søknadVerdi,
+                    null,
+                    null,
+                    Kilde.SØKNAD));
             }
-        });
+            });
+
         if (!nyeSøknadAvklaringer.isEmpty()) {
-            bostedsGrunnlagRepository.lagreAvklaringerFraSøknad(behandlingId, nyeSøknadAvklaringer);
+            bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandlingId, nyeSøknadAvklaringer);
         }
     }
-
-    private static Boolean finnSøknadverdi(Map<LocalDate, Boolean> søknadErBosattPerFom, LocalDate fom) {
-        // Kan vi forvente eksakte datoer her?
-        return søknadErBosattPerFom.get(fom);
-    }
-
 }

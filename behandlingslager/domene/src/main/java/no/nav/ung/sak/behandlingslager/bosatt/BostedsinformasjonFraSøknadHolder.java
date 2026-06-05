@@ -13,29 +13,23 @@ import java.util.Set;
  * Aggregat for søknadbaserte bostedsopplysninger per behandling.
  * Uavhengig av vilkårsperioder – lagres additivt uten deaktivering.
  */
-@Entity(name = "BosattSøknadGrunnlag")
+@Entity(name = "BostedsinformasjonFraSøknadHolder")
 @Table(name = "BOSATT_SOEKNAD_GRUNNLAG")
-public class BosattSøknadGrunnlag extends BaseEntitet {
+public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSATT_SOEKNAD_GRUNNLAG")
     private Long id;
-
-    @Column(name = "behandling_id", nullable = false, updatable = false)
-    private Long behandlingId;
 
     @BatchSize(size = 20)
     @JoinColumn(name = "bosatt_soeknad_grunnlag_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<BostedsinformasjonFraSøknad> informasjon = new LinkedHashSet<>();
 
-    public BosattSøknadGrunnlag() {
-        // Hibernate
-    }
-
-    public BosattSøknadGrunnlag(Long behandlingId) {
-        Objects.requireNonNull(behandlingId, "behandlingId");
-        this.behandlingId = behandlingId;
+    public BostedsinformasjonFraSøknadHolder(BostedsinformasjonFraSøknadHolder oppgittFraSøknad) {
+        if (oppgittFraSøknad != null) {
+            this.informasjon.addAll(oppgittFraSøknad.getInformasjon());
+        }
     }
 
     void leggTilInformasjon(BostedsinformasjonFraSøknad info) {
@@ -47,23 +41,18 @@ public class BosattSøknadGrunnlag extends BaseEntitet {
         return id;
     }
 
-    public Long getBehandlingId() {
-        return behandlingId;
-    }
-
     public Set<BostedsinformasjonFraSøknad> getInformasjon() {
         return Collections.unmodifiableSet(informasjon);
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof BosattSøknadGrunnlag that)) return false;
-        return Objects.equals(behandlingId, that.behandlingId)
-            && Objects.equals(informasjon, that.informasjon);
+        if (!(o instanceof BostedsinformasjonFraSøknadHolder that)) return false;
+        return Objects.equals(informasjon, that.informasjon);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(behandlingId, informasjon);
+        return Objects.hash(informasjon);
     }
 }

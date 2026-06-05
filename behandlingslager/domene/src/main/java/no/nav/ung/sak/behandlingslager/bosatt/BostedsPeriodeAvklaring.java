@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.domene.typer.tid.Range;
 import org.hibernate.annotations.Immutable;
+import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
 import java.util.Objects;
@@ -30,14 +34,12 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Column(name = "referanse", nullable = false, updatable = false)
     private UUID referanse = UUID.randomUUID();
 
-    @Column(name = "skaeringstidspunkt", nullable = false, updatable = false)
-    private LocalDate skjæringstidspunkt;
+    @Type(PostgreSQLRangeType.class)
+    @Column(name = "periode", columnDefinition = "daterange")
+    private Range<LocalDate> periode;
 
     @Column(name = "er_bosatt_i_trondheim", nullable = false, updatable = false)
     private boolean erBosattITrondheim;
-
-    @Column(name = "fraflyttings_dato", updatable = false)
-    private LocalDate fraflyttingsDato;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "fraflyttings_aarsak", updatable = false)
@@ -51,10 +53,9 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaring(LocalDate skjæringstidspunkt, boolean erBosattITrondheim, LocalDate fraflyttingsDato, FraflyttingsÅrsak fraflyttingsÅrsak, Kilde kilde) {
-        this.skjæringstidspunkt = skjæringstidspunkt;
+    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, FraflyttingsÅrsak fraflyttingsÅrsak, Kilde kilde) {
+        this.periode = periode.toRange();
         this.erBosattITrondheim = erBosattITrondheim;
-        this.fraflyttingsDato = fraflyttingsDato;
         this.fraflyttingsÅrsak = fraflyttingsÅrsak;
         this.kilde = kilde;
     }
@@ -67,16 +68,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return referanse;
     }
 
-    public LocalDate getSkjæringstidspunkt() {
-        return skjæringstidspunkt;
-    }
-
     public boolean isErBosattITrondheim() {
         return erBosattITrondheim;
-    }
-
-    public LocalDate getFraflyttingsDato() {
-        return fraflyttingsDato;
     }
 
     public FraflyttingsÅrsak getFraflyttingsÅrsak() {
@@ -91,24 +84,24 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
         return erBosattITrondheim == that.erBosattITrondheim
-            && Objects.equals(skjæringstidspunkt, that.skjæringstidspunkt)
-            && Objects.equals(fraflyttingsDato, that.fraflyttingsDato)
             && fraflyttingsÅrsak == that.fraflyttingsÅrsak
             && kilde == that.kilde;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(skjæringstidspunkt, erBosattITrondheim, fraflyttingsDato, fraflyttingsÅrsak, kilde);
+        return Objects.hash(erBosattITrondheim, fraflyttingsÅrsak, kilde);
     }
 
     @Override
     public String toString() {
-        return "BostedsPeriodeAvklaring{skjæringstidspunkt=" + skjæringstidspunkt
-            + ", referanse=" + referanse
+        return "BostedsPeriodeAvklaring{referanse=" + referanse
             + ", erBosattITrondheim=" + erBosattITrondheim
-            + ", fraflyttingsDato=" + fraflyttingsDato
             + ", fraflyttingsÅrsak=" + fraflyttingsÅrsak
             + ", kilde=" + kilde + '}';
+    }
+
+    public DatoIntervallEntitet getPeriode() {
+        return DatoIntervallEntitet.fra(periode);
     }
 }

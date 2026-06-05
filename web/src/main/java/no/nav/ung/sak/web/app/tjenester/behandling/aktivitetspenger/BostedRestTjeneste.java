@@ -17,7 +17,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
@@ -48,7 +47,6 @@ public class BostedRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
     private UttalelseRepository uttalelseRepository;
 
     public BostedRestTjeneste() {
@@ -58,11 +56,9 @@ public class BostedRestTjeneste {
     @Inject
     public BostedRestTjeneste(BehandlingRepository behandlingRepository,
                                BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                               BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
                                UttalelseRepository uttalelseRepository) {
         this.behandlingRepository = behandlingRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
-        this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
         this.uttalelseRepository = uttalelseRepository;
     }
 
@@ -98,11 +94,11 @@ public class BostedRestTjeneste {
 
         var grunnlag = grunnlagOpt.get();
 
-        // Hent søknadsdata fra separat aggregat
-        Map<LocalDate, Boolean> søknadErBosattPerFom = bosattSøknadGrunnlagRepository.hentSøknadBostedPerFom(behandling.getId());
+        // Hent søknadsdata fra bostedsgrunnlaget
+        Map<LocalDate, Boolean> søknadErBosattPerFom = bostedsGrunnlagRepository.hentSøknadBostedPerFom(behandling.getId());
 
         // Hent bosteduttalelser og indekser dem på periode fom-dato
-        var periodeReferanser = grunnlag.getHolder().getPeriodeAvklaringer().stream()
+        var periodeReferanser = grunnlag.getForeslått().getPeriodeAvklaringer().stream()
             .map(BostedsPeriodeAvklaring::getReferanse)
             .collect(Collectors.toSet());
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
@@ -112,8 +108,8 @@ public class BostedRestTjeneste {
 
         // Bygg liste med én DTO per vilkårsperiode (skjæringstidspunkt)
         var perioder = new ArrayList<BostedGrunnlagPeriodeDto>();
-        for (BostedsPeriodeAvklaring periodeAvklaring : grunnlag.getHolder().getPeriodeAvklaringer()) {
-            LocalDate fom = periodeAvklaring.getSkjæringstidspunkt();
+        for (BostedsPeriodeAvklaring periodeAvklaring : grunnlag.getForeslått().getPeriodeAvklaringer()) {
+            LocalDate fom = periodeAvklaring.getPeriode().getFomDato();
 
             Boolean søknadOppgitt = søknadErBosattPerFom.get(fom);
 
@@ -124,7 +120,7 @@ public class BostedRestTjeneste {
             perioder.add(new BostedGrunnlagPeriodeDto(
                 fom,
                 periodeAvklaring.isErBosattITrondheim(),
-                periodeAvklaring.getFraflyttingsDato(),
+                periodeAvklaring.getPeriode().getFomDato(),
                 periodeAvklaring.getFraflyttingsÅrsak(),
                 periodeAvklaring.getKilde(),
                 søknadOppgitt,

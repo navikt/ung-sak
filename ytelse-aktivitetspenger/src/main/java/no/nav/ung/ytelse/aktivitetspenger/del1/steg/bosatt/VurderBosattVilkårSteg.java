@@ -105,7 +105,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
 
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
-        BostedsAvklaringHolder bostedAvklaring = grunnlag.getHolder();
+        BostedsAvklaringHolder bostedAvklaring = grunnlag.getForeslått();
 
         LocalDateTimeline<StegUtfall> stegutfallTidslinje = tidslinjeTilVurdering.map(
             segment -> vurder(segment, etterlysningPerFom, bostedAvklaring));
@@ -123,7 +123,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
                 opphørResultatRepository.lagre(new OpphørResultat(
                     behandlingId,
                     s.getFom(),
-                    avklaring.getFraflyttingsDato(),
+                    avklaring.getPeriode().getFomDato(),
                     avslagsårsak,
                     OpphørKilde.AUTOMATISK,
                     VilkårType.BOSTEDSVILKÅR
@@ -160,7 +160,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
             return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VILKÅR_VURDERES_MANUELT));
         } else if (harMottattSvarMedUttalelse(etterlysning) || erÅrsakAnnet) {
             return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.OPPHØR_MANUELT));
-        } else if (!avklaring.isErBosattITrondheim() || avklaring.getFraflyttingsDato() != null) {
+        } else if (!avklaring.isErBosattITrondheim()) {
             return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.OPPHØR_AUTOMATISK));
         }
         return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.BOSATT_HELE_PERIODEN));

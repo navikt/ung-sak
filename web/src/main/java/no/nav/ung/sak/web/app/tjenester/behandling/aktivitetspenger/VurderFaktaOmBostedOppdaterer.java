@@ -17,7 +17,6 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -25,6 +24,7 @@ import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
+import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -64,18 +64,20 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
         // Les eksisterende avklaringer per skjæringstidspunkt FØR lagreAvklaringer
         Map<LocalDate, BostedAvklaringData> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getHolder().getPeriodeAvklaringer().stream()
+            .map(g -> g.getForeslått().getPeriodeAvklaringer().stream()
                 .collect(Collectors.toMap(
-                    BostedsPeriodeAvklaring::getSkjæringstidspunkt,
-                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak(), p.getKilde())))).orElse(Map.of());
+                    p -> p.getPeriode().getFomDato(),
+                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getPeriode().getFomDato(), p.getFraflyttingsÅrsak(), p.getKilde())))).orElse(Map.of());
 
         // Bygg nye avklaringer basert på vurdering (nøkkel = vilkårsperiode fom)
-        Map<LocalDate, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
+        Map<Periode, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
         for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            nyeAvklaringer.put(avklaring.periode().getFom(),
+            nyeAvklaringer.put(avklaring.periode(),
                 BostedAvklaringUtil.tilAvklaringData(avklaring.periode().getFom(), avklaring.vurdering()));
         }
-        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreAvklaringer(behandlingId, nyeAvklaringer);
+
+        // Lagre forseslått og ikke overføerer eksisterende resultat.
+        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandlingId, nyeAvklaringer);
 
         opprettEtterlysning(dto, behandlingId, nyeAvklaringer, tidligereAvklaringer, periodeReferanser, behandling.getFagsakId());
 
@@ -92,7 +94,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     }
 
     private void opprettEtterlysning(VurderFaktaOmBostedDto dto, long behandlingId,
-                                     Map<LocalDate, BostedAvklaringData> nyeAvklaringer,
+                                     Map<Periode, BostedAvklaringData> nyeAvklaringer,
                                      Map<LocalDate, BostedAvklaringData> tidligereAvklaringer,
                                      Map<LocalDate, UUID> periodeReferanser, Long fagsakId) {
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom

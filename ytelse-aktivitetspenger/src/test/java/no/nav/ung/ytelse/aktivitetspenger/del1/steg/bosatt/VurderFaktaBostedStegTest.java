@@ -14,7 +14,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -23,6 +22,7 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +53,6 @@ class VurderFaktaBostedStegTest {
     private BehandlingRepository behandlingRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private VurderFaktaBostedSteg steg;
 
@@ -62,13 +61,11 @@ class VurderFaktaBostedStegTest {
         behandlingRepository = new BehandlingRepository(entityManager);
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
-        bosattSøknadGrunnlagRepository = new BosattSøknadGrunnlagRepository(entityManager);
         aktivitetspengerSøktPeriodeRepository = new AktivitetspengerSøktPeriodeRepository(entityManager);
 
         steg = new VurderFaktaBostedSteg(
             behandlingRepository,
             bostedsGrunnlagRepository,
-            bosattSøknadGrunnlagRepository,
             vilkårsPerioderTilVurderingTjenester,
             prosessTriggerPeriodeUtledere
         );
@@ -105,14 +102,14 @@ class VurderFaktaBostedStegTest {
             new JournalpostId("jp-1"),
             LocalDateTime.now(),
             periode));
-        bosattSøknadGrunnlagRepository.lagreSøknadBosted(behandling.getId(), "jp-1", FOM, true);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-1", new Periode(FOM, TOM), true);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode)));
 
         utførSteg(behandling);
 
         var lagretGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
-        var periodeAvklaring = lagretGrunnlag.getHolder().getPeriodeAvklaring(FOM).orElseThrow();
+        var periodeAvklaring = lagretGrunnlag.getForeslått().getPeriodeAvklaring(FOM).orElseThrow();
         assertThat(periodeAvklaring.isErBosattITrondheim()).isTrue();
         assertThat(periodeAvklaring.getKilde()).isEqualTo(Kilde.SØKNAD);
     }

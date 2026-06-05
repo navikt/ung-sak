@@ -45,7 +45,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -58,6 +57,7 @@ class AvklarBostedVurderingsbehovStegTest {
 
     private static final LocalDate FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate TOM = LocalDate.of(2026, 1, 31);
+    private static final Periode PERIODE = new Periode(FOM, TOM);
 
     @Inject
     private EntityManager entityManager;
@@ -90,8 +90,9 @@ class AvklarBostedVurderingsbehovStegTest {
     @Test
     void skal_passere_uten_aksjonspunkt_og_uten_opphorsresultat_nar_bruker_er_bosatt_hele_perioden() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
         ));
 
         var resultat = utførSteg(behandling);
@@ -105,8 +106,9 @@ class AvklarBostedVurderingsbehovStegTest {
     void skal_opprette_opphorsresultat_ved_fraflytting_automatisk() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         var fraflyttingsDato = FOM.plusDays(10);
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, fraflyttingsDato, FraflyttingsÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, Kilde.SAKSBEHANDLER)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, fraflyttingsDato, FraflyttingsÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, Kilde.SAKSBEHANDLER)
         ));
 
         var resultat = utførSteg(behandling);
@@ -123,8 +125,9 @@ class AvklarBostedVurderingsbehovStegTest {
     @Test
     void skal_sette_pa_vent_nar_periode_venter_pa_etterlysning() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
         ));
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -149,9 +152,10 @@ class AvklarBostedVurderingsbehovStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER),
-            fom2, new BostedAvklaringData(true, null, null, Kilde.SØKNAD)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(fom2, tom2), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER),
+            new Periode(fom2, tom2), new BostedAvklaringData(true, null, null, Kilde.SØKNAD)
         ));
         var frist = LocalDateTime.of(2026, 3, 1, 10, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(

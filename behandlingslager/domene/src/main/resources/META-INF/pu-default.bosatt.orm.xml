@@ -14,7 +14,7 @@
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag"/>
-    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlag"/>
+    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsinformasjonFraSøknadHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsinformasjonFraSøknad"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.OpphørResultat"/>
 

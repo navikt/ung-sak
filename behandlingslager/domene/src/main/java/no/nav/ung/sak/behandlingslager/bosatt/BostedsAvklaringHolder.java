@@ -30,14 +30,27 @@ public class BostedsAvklaringHolder extends BaseEntitet {
     }
 
     BostedsAvklaringHolder(BostedsAvklaringHolder other) {
-        this.periodeAvklaringer = other.periodeAvklaringer.stream()
-            .map(p -> new BostedsPeriodeAvklaring(p.getSkjæringstidspunkt(), p.isErBosattITrondheim(), p.getFraflyttingsDato(), p.getFraflyttingsÅrsak(), p.getKilde()))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (other != null && other.periodeAvklaringer != null) {
+            this.periodeAvklaringer = other.periodeAvklaringer.stream()
+                .map(p -> new BostedsPeriodeAvklaring(p.getPeriode(), p.isErBosattITrondheim(), p.getFraflyttingsÅrsak(), p.getKilde()))
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        }
+    }
+
+    BostedsAvklaringHolder(Set<BostedsPeriodeAvklaring> periodeAvklaringer) {
+        this.periodeAvklaringer = periodeAvklaringer;
+    }
+
+    void fjernPeriodeAvklaringForFom(LocalDate fom) {
+        periodeAvklaringer.removeIf(it -> it.getPeriode().getFomDato().equals(fom));
     }
 
     void leggTilPeriodeAvklaring(BostedsPeriodeAvklaring periodeAvklaring) {
-        periodeAvklaringer.removeIf(p -> p.getSkjæringstidspunkt().equals(periodeAvklaring.getSkjæringstidspunkt()));
         periodeAvklaringer.add(periodeAvklaring);
+    }
+
+    void leggTilPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> periodeAvklaring) {
+        periodeAvklaringer.addAll(periodeAvklaring);
     }
 
     public Long getId() {
@@ -48,8 +61,8 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         return Collections.unmodifiableSet(periodeAvklaringer);
     }
 
-    public Optional<BostedsPeriodeAvklaring> getPeriodeAvklaring(LocalDate skjæringstidspunkt) {
-        return periodeAvklaringer.stream().filter(it -> it.getSkjæringstidspunkt().equals(skjæringstidspunkt)).findFirst();
+    public Optional<BostedsPeriodeAvklaring> getPeriodeAvklaring(LocalDate fom) {
+        return periodeAvklaringer.stream().filter(it -> it.getPeriode().getFomDato().equals(fom)).findFirst();
     }
 
 
