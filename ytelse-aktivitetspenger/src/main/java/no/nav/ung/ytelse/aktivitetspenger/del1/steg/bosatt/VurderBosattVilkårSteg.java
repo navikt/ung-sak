@@ -11,7 +11,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
-import no.nav.ung.kodeverk.bosatt.OpphørKilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -22,8 +21,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
-import no.nav.ung.sak.behandlingslager.bosatt.OpphørResultat;
-import no.nav.ung.sak.behandlingslager.bosatt.OpphørResultatRepository;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -50,8 +47,6 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private OpphørResultatRepository opphørResultatRepository;
-    private OpphørTjeneste opphørTjeneste;
 
     VurderBosattVilkårSteg() {
         // for CDI proxy
@@ -63,16 +58,12 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
                                              VilkårTjeneste vilkårTjeneste,
                                              BehandlingRepository behandlingRepository,
                                              BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                             OpphørResultatRepository opphørResultatRepository,
                                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                             EtterlysningTjeneste etterlysningTjeneste,
-                                             OpphørTjeneste opphørTjeneste) {
+                                             EtterlysningTjeneste etterlysningTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
-        this.opphørResultatRepository = opphørResultatRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
-        this.opphørTjeneste = opphørTjeneste;
     }
 
     @Override
@@ -120,14 +111,15 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
                 BostedsPeriodeAvklaring avklaring = bostedAvklaring.getPeriodeAvklaring(s.getFom())
                     .orElseThrow(() -> new IllegalStateException("Forventer bostedsavklaring for stp " + s.getFom()));
                 Avslagsårsak avslagsårsak = mapTilAvslagsårsak(avklaring.getFraflyttingsÅrsak());
-                opphørResultatRepository.lagre(new OpphørResultat(
-                    behandlingId,
-                    s.getFom(),
-                    avklaring.getPeriode().getFomDato(),
-                    avslagsårsak,
-                    OpphørKilde.AUTOMATISK,
-                    VilkårType.BOSTEDSVILKÅR
-                ));
+//                vurdertAktivitetspengerGrunnlag.lagre(new BostedsvurderingResultat(
+//                    behandlingId,
+//                    s.getFom(),
+//                    avklaring.getPeriode().getFomDato(),
+//                    avslagsårsak,
+//                    OpphørKilde.AUTOMATISK,
+//                    VilkårType.BOSTEDSVILKÅR,
+//                    null,
+//                    null));
             });
 
         // erKildeSøknad → manuell vilkårsvurdering via ManuellVurderingBostedsvilkårOppdaterer
@@ -140,7 +132,7 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OPPHØR_BOSTED));
         }
 
-        opphørTjeneste.utledOgLagreVilkår(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
+//        opphørTjeneste.utledOgLagreVilkår(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

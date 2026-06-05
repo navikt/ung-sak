@@ -6,14 +6,13 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -25,7 +24,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.OpphørResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
@@ -98,8 +96,6 @@ class AvklarBostedVurderingsbehovStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        var opphørResultatRepository = new OpphørResultatRepository(entityManager);
-        assertThat(opphørResultatRepository.hentAktiveForBehandling(behandling.getId())).isEmpty();
     }
 
     @Test
@@ -114,12 +110,12 @@ class AvklarBostedVurderingsbehovStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        var opphørResultatRepository = new OpphørResultatRepository(entityManager);
-        var opphørResultater = opphørResultatRepository.hentAktiveForBehandling(behandling.getId());
-        assertThat(opphørResultater).hasSize(1);
-        assertThat(opphørResultater.getFirst().getSkjæringstidspunkt()).isEqualTo(FOM);
-        assertThat(opphørResultater.getFirst().getOpphørDato()).isEqualTo(fraflyttingsDato);
-        assertThat(opphørResultater.getFirst().getOpphørÅrsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
+//        var vurdertAktivitetspengerGrunnlag = new VurdertAktivitetspengerGrunnlag(entityManager);
+//        var opphørResultater = vurdertAktivitetspengerGrunnlag.hentAktiveForBehandling(behandling.getId());
+//        assertThat(opphørResultater).hasSize(1);
+//        assertThat(opphørResultater.getFirst().getSkjæringstidspunkt()).isEqualTo(FOM);
+//        assertThat(opphørResultater.getFirst().getOpphørDato()).isEqualTo(fraflyttingsDato);
+//        assertThat(opphørResultater.getFirst().getOpphørÅrsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
     }
 
     @Test
@@ -237,8 +233,6 @@ class AvklarBostedVurderingsbehovStegTest {
                 return etterlysninger;
             }
         };
-        var opphørResultatRepository = new OpphørResultatRepository(entityManager);
-        var opphørTjeneste = new OpphørTjeneste(opphørResultatRepository, vilkårResultatRepository);
 
         return new VurderBosattVilkårSteg(
             manuelleVilkårRekkefølgeTjeneste,
@@ -246,10 +240,8 @@ class AvklarBostedVurderingsbehovStegTest {
             vilkårTjeneste,
             behandlingRepository,
             bostedsGrunnlagRepository,
-            opphørResultatRepository,
             vilkårsPerioderTilVurderingTjenester,
-            etterlysningTjeneste,
-            opphørTjeneste
+            etterlysningTjeneste
         );
     }
 
