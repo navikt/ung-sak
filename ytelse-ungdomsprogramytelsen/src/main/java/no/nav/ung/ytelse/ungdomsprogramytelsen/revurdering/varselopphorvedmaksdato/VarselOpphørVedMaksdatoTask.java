@@ -2,7 +2,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.revurdering.varselopphorvedmaksd
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -10,14 +10,10 @@ import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
@@ -43,11 +39,8 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     /** Grace-periode: sender varsel selv om maksdato nylig er passert, i tilfelle tasken har vært i feil. */
     private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
 
-    private EntityManager entityManager;
     private BehandlingRepository behandlingRepository;
-    private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private FagsakRepository fagsakRepository;
 
@@ -55,17 +48,11 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     }
 
     @Inject
-    public VarselOpphørVedMaksdatoTask(EntityManager entityManager,
-                                       BehandlingRepository behandlingRepository,
-                                       EtterlysningRepository etterlysningRepository,
+    public VarselOpphørVedMaksdatoTask(BehandlingRepository behandlingRepository,
                                        ProsessTaskTjeneste prosessTaskTjeneste,
-                                       FagsakProsessTaskRepository fagsakProsessTaskRepository,
                                        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, FagsakRepository fagsakRepository) {
-        this.entityManager = entityManager;
         this.behandlingRepository = behandlingRepository;
-        this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.fagsakRepository = fagsakRepository;
     }
@@ -120,32 +107,22 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
             return null;
         }
 
-        // Sjekk om det finnes en eksisterende etterlysning av typen UTTALELSE_OPPHOR_VED_MAKSDATO
-        var eksisterendeEtterlysning = etterlysningRepository.hentSisteEtterlysning(
-            behandling.getId(), EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO,
-            EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET);
-        if (eksisterendeEtterlysning.isPresent()) {
-            log.info("Fagsak {} har allerede ventende etterlysning for opphør ved maksdato, hopper over", fagsak.getId());
-            return null;
-        }
-
         // Hent maksdato fra grunnlaget
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
         if (maksdato == null) {
             return null;
         }
 
-        // Sjekk om det finnes ventende revurdering-task med samme årsak og periode
-        var ønsketPeriode = maksdato + "/" + maksdato;
-        var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
-
         // Sjekk om maksdato er innenfor varselvinduet (inkl. grace-periode for forsinket task-kjøring)
-        if (maksdato.isBefore(dagensDato.minusDays(VARSEL_GRACE_DAGER_ETTER_MAKSDATO)) || !MaksdatoOpphørVarslingPeriode.harPassertVarseldato(maksdato)) {
+        LocalDateTimeline<Boolean> periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+        if (!MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(periodeTidslinje.getMaxLocalDate(), maksdato)) {
             return null;
         }
 
         log.info("Fagsak {} har periodeMaksDato {} fra register som er innenfor varselvinduet. Oppretter revurdering.", fagsak.getId(), maksdato);
 
+        var ønsketPeriode = maksdato + "/" + maksdato;
+        var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
         ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
         tilVurderingTask.setFagsakId(fagsak.getId());
         tilVurderingTask.setProperty(PERIODER, ønsketPeriode);
