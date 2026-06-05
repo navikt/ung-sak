@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
@@ -48,6 +49,7 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
         // harPassertVarseldato: periodeMaksDato <= now + VARSEL_UKER_FØR_MAKSDATO uker
         LocalDate grensedato = LocalDate.now().plusWeeks(MaksdatoOpphørVarslingPeriode.VARSEL_UKER_FØR_MAKSDATO);
         String ungdomsytelseKode = FagsakYtelseType.UNGDOMSYTELSE.getKode();
+        String varselOpphorKode = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
 
         // BT-002 = FØRSTEGANGSSØKNAD, BT-004 = REVURDERING (BehandlingType.getYtelseBehandlingTyper())
         String sql = """
@@ -75,6 +77,17 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
                       )
                       and mp.periode_maks_dato is not null
                       and mp.periode_maks_dato <= cast(:grensedato as date)
+                      and not exists (
+                          select 1
+                          from behandling b3
+                          inner join prosess_triggere ptg
+                              on ptg.behandling_id = b3.id and ptg.aktiv = true
+                          inner join pt_trigger pt
+                              on pt.triggere_id = ptg.triggere_id
+                          where b3.fagsak_id = f.id
+                            and pt.arsak = :varselOpphorArsak
+                            and pt.periode && daterange(cast(mp.periode_maks_dato as date), cast(mp.periode_maks_dato as date), '[]')
+                      )
                     group by mp.periode_maks_dato
                     having max(p.tom) >= mp.periode_maks_dato
                   )
@@ -83,6 +96,7 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
         Query query = entityManager.createNativeQuery(sql, Fagsak.class); // NOSONAR
         query.setParameter("grensedato", grensedato);
         query.setParameter("ytelseType", ungdomsytelseKode);
+        query.setParameter("varselOpphorArsak", varselOpphorKode);
         return query.getResultList();
     }
 }

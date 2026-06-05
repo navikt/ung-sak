@@ -4,19 +4,24 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,6 +36,9 @@ class AktuelleFagsakerForMaksdatoVarselRepositoryTest {
 
     @Inject
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+
+    @Inject
+    private ProsessTriggereRepository prosessTriggereRepository;
 
     private AktuelleFagsakerForMaksdatoVarselRepository repository;
     private BehandlingRepository behandlingRepository;
@@ -115,6 +123,51 @@ class AktuelleFagsakerForMaksdatoVarselRepositoryTest {
             .doesNotContain(førstegangsbehandling.getFagsakId());
     }
 
+    @Test
+    void skal_ikke_returnere_fagsak_nar_det_finnes_varsel_trigger_med_periode_som_overlapper_maksdato() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        var maksdato = LocalDate.now().plusWeeks(2);
+        lagreUngdomsprogramGrunnlag(behandling, maksdato, maksdato);
+
+        leggTilTrigger(behandling, BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, maksdato.minusDays(1), maksdato.plusDays(1));
+
+        var fagsaker = repository.hentFagsakerRelevantForMaksdatoVarsel();
+
+        assertThat(fagsaker)
+            .extracting(f -> f.getId())
+            .doesNotContain(behandling.getFagsakId());
+    }
+
+    @Test
+    void skal_returnere_fagsak_nar_varsel_trigger_ikke_overlapper_maksdato() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        var maksdato = LocalDate.now().plusWeeks(2);
+        lagreUngdomsprogramGrunnlag(behandling, maksdato, maksdato);
+
+        leggTilTrigger(behandling, BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, maksdato.plusDays(1), maksdato.plusDays(2));
+
+        var fagsaker = repository.hentFagsakerRelevantForMaksdatoVarsel();
+
+        assertThat(fagsaker)
+            .extracting(f -> f.getId())
+            .contains(behandling.getFagsakId());
+    }
+
+    @Test
+    void skal_returnere_fagsak_nar_overlapper_maksdato_men_trigger_har_annen_arsak() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        var maksdato = LocalDate.now().plusWeeks(2);
+        lagreUngdomsprogramGrunnlag(behandling, maksdato, maksdato);
+
+        leggTilTrigger(behandling, BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, maksdato.minusDays(1), maksdato.plusDays(1));
+
+        var fagsaker = repository.hentFagsakerRelevantForMaksdatoVarsel();
+
+        assertThat(fagsaker)
+            .extracting(f -> f.getId())
+            .contains(behandling.getFagsakId());
+    }
+
     private void lagreUngdomsprogramGrunnlag(Behandling behandling, LocalDate tom, LocalDate maksdato) {
         ungdomsprogramPeriodeRepository.lagre(
             behandling.getId(),
@@ -130,6 +183,11 @@ class AktuelleFagsakerForMaksdatoVarselRepositoryTest {
         behandlingRepository.lagre(revurdering, lås);
         entityManager.flush();
         return revurdering;
+    }
+
+    private void leggTilTrigger(Behandling behandling, BehandlingÅrsakType årsak, LocalDate fom, LocalDate tom) {
+        var trigger = new Trigger(årsak, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom));
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(trigger));
     }
 }
 
