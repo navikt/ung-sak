@@ -43,6 +43,11 @@ public class BistandsvilkårVurderingPeriode extends BaseEntitet {
         // Hibernate
     }
 
+    /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
+    BistandsvilkårVurderingPeriode(DatoIntervallEntitet periode, BistandsvilkårVurderingPeriode kilde) {
+        this(periode, kilde.godkjent, kilde.getAvslagsårsak(), kilde.vurdertAv, kilde.vurdertTidspunkt);
+    }
+
     public BistandsvilkårVurderingPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");

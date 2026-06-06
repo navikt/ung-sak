@@ -149,6 +149,33 @@ class InngangsvilkårVurderingRepositoryTest {
     }
 
     @Test
+    void oppdatering_av_ny_periode_beholder_eksisterende_uberørt_periode() {
+        repository.lagreBistandsVurderinger(behandling.getId(),
+            List.of(
+                new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT),
+                new BistandsvilkårVurderingPeriode(PERIODE_2, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)
+            ));
+
+        // Kun PERIODE_2 oppdateres — PERIODE_1 skal beholdes fra eksisterende
+        repository.lagreBistandsVurderinger(behandling.getId(),
+            List.of(new BistandsvilkårVurderingPeriode(PERIODE_2, false, Avslagsårsak.IKKE_14A_VEDTAK, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
+
+        var vurderinger = repository.hentGrunnlag(behandling.getId())
+            .flatMap(InngangsvilkårVurderingGrunnlag::getBistandsvilkårVurderingHolder)
+            .orElseThrow()
+            .getVurderinger();
+
+        assertThat(vurderinger).hasSize(2);
+        var periode2Vurdering = vurderinger.stream().filter(v -> v.getPeriode().equals(PERIODE_2)).findFirst().orElseThrow();
+        assertThat(periode2Vurdering.isGodkjent()).isFalse();
+        assertThat(periode2Vurdering.getVurdertAv()).isEqualTo("saksbehandler2");
+
+        var periode1Vurdering = vurderinger.stream().filter(v -> v.getPeriode().equals(PERIODE_1)).findFirst().orElseThrow();
+        assertThat(periode1Vurdering.isGodkjent()).isTrue();
+        assertThat(periode1Vurdering.getVurdertAv()).isEqualTo(VURDERT_AV);
+    }
+
+    @Test
     void skal_kopiere_grunnlag_til_ny_behandling() {
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)));

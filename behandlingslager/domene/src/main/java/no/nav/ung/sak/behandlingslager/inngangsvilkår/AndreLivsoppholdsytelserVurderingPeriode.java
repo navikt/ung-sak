@@ -43,6 +43,11 @@ public class AndreLivsoppholdsytelserVurderingPeriode extends BaseEntitet {
         // Hibernate
     }
 
+    /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
+    AndreLivsoppholdsytelserVurderingPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserVurderingPeriode kilde) {
+        this(periode, kilde.godkjent, kilde.getAvslagsårsak(), kilde.vurdertAv, kilde.vurdertTidspunkt);
+    }
+
     public AndreLivsoppholdsytelserVurderingPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
