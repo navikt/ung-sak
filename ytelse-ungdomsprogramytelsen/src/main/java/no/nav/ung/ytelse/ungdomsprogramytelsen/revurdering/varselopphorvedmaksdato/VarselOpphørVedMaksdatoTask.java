@@ -29,11 +29,6 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
     public static final String TASKNAME = "varselOpphorVedMaksdato";
     private static final Logger log = LoggerFactory.getLogger(VarselOpphørVedMaksdatoTask.class);
-    /**
-     * Grace-periode: sender varsel selv om maksdato nylig er passert, i tilfelle tasken har vært i feil.
-     */
-    private static final int VARSEL_GRACE_DAGER_ETTER_MAKSDATO = 3;
-
     private BehandlingRepository behandlingRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
