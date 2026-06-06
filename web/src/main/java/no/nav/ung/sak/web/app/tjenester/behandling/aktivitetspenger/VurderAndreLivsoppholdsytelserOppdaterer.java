@@ -68,17 +68,6 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
 
-        LocalDateTimeline<Boolean> alleredeVurdert = inngangsvilkårVurderingRepository.hentGrunnlag(param.getBehandlingId())
-            .flatMap(g -> g.getAndreLivsoppholdsytelserVurderingHolder())
-            .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
-                .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
-                .toList()))
-            .orElse(LocalDateTimeline.empty());
-        LocalDateTimeline<?> manglendePerioder = perioderTilVurdering.disjoint(inputOppdateres).disjoint(alleredeVurdert);
-        if (!manglendePerioder.isEmpty()) {
-            throw new IllegalArgumentException("Forventer at alle perioder til vurdering er vurdert. Mangler : " + manglendePerioder);
-        }
-
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         var periodeVurderinger = dto.getVurdertePerioder().stream()
@@ -90,6 +79,17 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 vurdertTidspunkt))
             .toList();
         inngangsvilkårVurderingRepository.lagreLivsoppholdsVurderinger(param.getBehandlingId(), periodeVurderinger);
+
+        LocalDateTimeline<Boolean> vurdertEtterOppdatering = inngangsvilkårVurderingRepository.hentGrunnlag(param.getBehandlingId())
+            .flatMap(g -> g.getAndreLivsoppholdsytelserVurderingHolder())
+            .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
+                .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
+                .toList()))
+            .orElse(LocalDateTimeline.empty());
+        LocalDateTimeline<?> manglendePerioder = perioderTilVurdering.disjoint(vurdertEtterOppdatering);
+        if (!manglendePerioder.isEmpty()) {
+            throw new IllegalArgumentException("Forventer at alle perioder til vurdering er vurdert. Mangler : " + manglendePerioder);
+        }
 
         inngangsvilkårVurderingTjeneste.settAndreLivsoppholdsytelserResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
