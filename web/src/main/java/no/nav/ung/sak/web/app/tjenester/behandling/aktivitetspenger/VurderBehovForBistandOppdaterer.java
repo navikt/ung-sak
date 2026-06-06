@@ -67,9 +67,16 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         if (!uforventedePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
-        LocalDateTimeline<?> manglendePerioder = perioderTilVurdering.disjoint(inputOppdateres);
+
+        LocalDateTimeline<Boolean> alleredeVurdert = inngangsvilkårVurderingRepository.hentGrunnlag(param.getBehandlingId())
+            .flatMap(g -> g.getBistandsvilkårVurderingHolder())
+            .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
+                .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
+                .toList()))
+            .orElse(LocalDateTimeline.empty());
+        LocalDateTimeline<?> manglendePerioder = perioderTilVurdering.disjoint(inputOppdateres).disjoint(alleredeVurdert);
         if (!manglendePerioder.isEmpty()) {
-            throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);
+            throw new IllegalArgumentException("Forventer at alle perioder til vurdering er vurdert. Mangler : " + manglendePerioder);
         }
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
