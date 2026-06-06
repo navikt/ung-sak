@@ -43,6 +43,10 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
      *   <li>{@code opphørErIkkeSattTidligereEnnMaksdato}: programmets maks sluttdato er ikke
      *       satt tidligere enn {@code periodeMaksDato}</li>
      * </ol>
+     *
+     * I tillegg sjekkes det på om fagsaken har en tidligere behandling med prosesstrigger for RE_VARSEL_OPPHOR_VED_MAKSDATO med periode som overlapper gjeldende maksdato.
+     * Dersom det finnes en slik behandling er det sendt varsel tidligere og vi skal ikke sende på nytt.
+     *
      */
     @SuppressWarnings("unchecked")
     public List<Fagsak> hentFagsakerRelevantForMaksdatoVarsel() {
