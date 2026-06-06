@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -19,8 +20,13 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserVurderingPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto;
-import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+
+import java.time.LocalDateTime;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderAndreLivsoppholdsytelserDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -29,6 +35,8 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     VurderAndreLivsoppholdsytelserOppdaterer() {
         // for CDI proxy
@@ -36,10 +44,15 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
 
     @Inject
     public VurderAndreLivsoppholdsytelserOppdaterer(BehandlingRepository behandlingRepository,
-                                                    HistorikkinnslagRepository historikkinnslagRepository, VilkårResultatRepository vilkårResultatRepository) {
+                                                    HistorikkinnslagRepository historikkinnslagRepository,
+                                                    VilkårResultatRepository vilkårResultatRepository,
+                                                    InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
+                                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     @Override
@@ -59,17 +72,19 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
             throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);
         }
 
-        var resultatBuilder = param.getVilkårResultatBuilder();
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
-        for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
-            Utfall utfall = vurdertPeriode.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
-                .medUtfallManuell(utfall)
-                .medAvslagsårsak(vurdertPeriode.avslagsårsak())
-                .medBegrunnelse(vurdertPeriode.begrunnelse())
-                .medFritekstVurderingBrev(vurdertPeriode.fritekstVurderingBrev()));
-        }
-        resultatBuilder.leggTil(vilkårBuilder);
+        String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
+        LocalDateTime vurdertTidspunkt = LocalDateTime.now();
+        var periodeVurderinger = dto.getVurdertePerioder().stream()
+            .map(it -> new AndreLivsoppholdsytelserVurderingPeriode(
+                DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
+                it.erVilkårOppfylt(),
+                it.avslagsårsak(),
+                vurdertAv,
+                vurdertTidspunkt))
+            .toList();
+        inngangsvilkårVurderingRepository.lagreLivsoppholdsVurderinger(param.getBehandlingId(), periodeVurderinger);
+
+        inngangsvilkårVurderingTjeneste.settAndreLivsoppholdsytelserResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
 
