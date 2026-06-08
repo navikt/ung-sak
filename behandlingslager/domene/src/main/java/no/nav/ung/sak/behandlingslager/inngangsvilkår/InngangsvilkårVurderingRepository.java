@@ -40,14 +40,14 @@ public class InngangsvilkårVurderingRepository {
         persister(eksisterende, new InngangsvilkårVurderingGrunnlag(behandlingId, nyHolder, livsoppholdHolder));
     }
 
-    public void lagreLivsoppholdsVurderinger(Long behandlingId, List<AndreLivsoppholdsytelserVurderingPeriode> nyeVurderinger) {
+    public void lagreYtelseVurderinger(Long behandlingId, List<AndreLivsoppholdsytelserVurderingPeriode> nyeVurderinger) {
         var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var eksisterendeVurderinger = eksisterende
             .flatMap(InngangsvilkårVurderingGrunnlag::getAndreLivsoppholdsytelserVurderingHolder)
             .map(AndreLivsoppholdsytelserVurderingHolder::getVurderinger)
             .orElse(List.of());
 
-        var kombinerte = kombinerLivsopphold(eksisterendeVurderinger, nyeVurderinger);
+        var kombinerte = kombinerYtelser(eksisterendeVurderinger, nyeVurderinger);
         var bistandHolder = eksisterende.flatMap(InngangsvilkårVurderingGrunnlag::getBistandsvilkårVurderingHolder).orElse(null);
         var nyHolder = new AndreLivsoppholdsytelserVurderingHolder(kombinerte);
         persister(eksisterende, new InngangsvilkårVurderingGrunnlag(behandlingId, bistandHolder, nyHolder));
@@ -79,7 +79,7 @@ public class InngangsvilkårVurderingRepository {
             .toList();
     }
 
-    private List<AndreLivsoppholdsytelserVurderingPeriode> kombinerLivsopphold(
+    private List<AndreLivsoppholdsytelserVurderingPeriode> kombinerYtelser(
             List<AndreLivsoppholdsytelserVurderingPeriode> eksisterende,
             List<AndreLivsoppholdsytelserVurderingPeriode> nye) {
         var eksisterendeTidslinje = tilLivsoppholdTidslinje(eksisterende);

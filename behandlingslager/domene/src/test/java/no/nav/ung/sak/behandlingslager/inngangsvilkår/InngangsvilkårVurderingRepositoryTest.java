@@ -86,7 +86,7 @@ class InngangsvilkårVurderingRepositoryTest {
     @Test
     void skal_lagre_og_hente_livsoppholdsytelsevurdering() {
         var vurdering = new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT);
-        repository.lagreLivsoppholdsVurderinger(behandling.getId(), List.of(vurdering));
+        repository.lagreYtelseVurderinger(behandling.getId(), List.of(vurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
@@ -103,7 +103,7 @@ class InngangsvilkårVurderingRepositoryTest {
     @Test
     void oppdatering_av_bistand_bevarer_livsopphold_holder() {
         var livsoppholdVurdering = new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
-        repository.lagreLivsoppholdsVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
+        repository.lagreYtelseVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
 
         var bistandVurdering = new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(bistandVurdering));
@@ -121,7 +121,7 @@ class InngangsvilkårVurderingRepositoryTest {
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(bistandVurdering));
 
         var livsoppholdVurdering = new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_2, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT);
-        repository.lagreLivsoppholdsVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
+        repository.lagreYtelseVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow();
         assertThat(grunnlag.getAndreLivsoppholdsytelserVurderingHolder()).isPresent();
@@ -179,7 +179,7 @@ class InngangsvilkårVurderingRepositoryTest {
     void skal_kopiere_grunnlag_til_ny_behandling() {
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
-        repository.lagreLivsoppholdsVurderinger(behandling.getId(),
+        repository.lagreYtelseVurderinger(behandling.getId(),
             List.of(new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT)));
 
         var revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();

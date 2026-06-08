@@ -21,6 +21,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserVurderingPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto;
@@ -78,10 +79,10 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 vurdertAv,
                 vurdertTidspunkt))
             .toList();
-        inngangsvilkårVurderingRepository.lagreLivsoppholdsVurderinger(param.getBehandlingId(), periodeVurderinger);
+        inngangsvilkårVurderingRepository.lagreYtelseVurderinger(param.getBehandlingId(), periodeVurderinger);
 
         LocalDateTimeline<Boolean> vurdertEtterOppdatering = inngangsvilkårVurderingRepository.hentGrunnlag(param.getBehandlingId())
-            .flatMap(g -> g.getAndreLivsoppholdsytelserVurderingHolder())
+            .flatMap(InngangsvilkårVurderingGrunnlag::getAndreLivsoppholdsytelserVurderingHolder)
             .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
                 .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
                 .toList()))
