@@ -9,9 +9,9 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.OpphørVedMaksdatoDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.OpphørVedMaksdatoDto;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -29,7 +29,7 @@ public class OpphørVedMaksdatoInnholdBygger implements VedtaksbrevInnholdBygger
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         var opphørStartdato = resultatTidslinje.filterValue(it -> it.resultatInfo().stream()
-                .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.ENDRING_SLUTTDATO))
+                .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.OPPHØR_VED_MAKSDATO))
             .getMinLocalDate();
 
         var sisteUtbetalingsdato = PeriodeBeregner.utledFremtidigUtbetalingsdato(
