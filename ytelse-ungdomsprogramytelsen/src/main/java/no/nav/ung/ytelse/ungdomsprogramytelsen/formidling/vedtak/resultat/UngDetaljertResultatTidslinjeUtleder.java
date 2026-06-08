@@ -47,12 +47,13 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere,
         TilkjentYtelseRepository tilkjentYtelseRepository,
         VilkårResultatRepository vilkårResultatRepository,
-        @Any Instance<DetaljertResultatForPeriodeUtleder> detaljertResultatForPeriodeUtledere) {
+        @Any Instance<DetaljertResultatForPeriodeUtleder> detaljertResultatForPeriodeUtledere, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
 
         this.prosessTriggerPeriodeUtledere = prosessTriggerPeriodeUtledere;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.detaljertResultatForPeriodeUtledere = detaljertResultatForPeriodeUtledere;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
 
