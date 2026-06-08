@@ -15,12 +15,12 @@ import java.util.Objects;
 
 @Immutable
 @Entity(name = "AndreLivsoppholdsytelserVurderingPeriode")
-@Table(name = "inngangsvilkaar_livsopphold_vurd_periode")
+@Table(name = "livsopphold_vurd_periode")
 public class AndreLivsoppholdsytelserVurderingPeriode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_INNGANGSVILKAAR_LIVSOPPHOLD_VURD_PERIODE")
-    @SequenceGenerator(name = "SEQ_INNGANGSVILKAAR_LIVSOPPHOLD_VURD_PERIODE", sequenceName = "seq_inngangsvilkaar_livsopphold_vurd_periode", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_LIVSOPPHOLD_VURD_PERIODE")
+    @SequenceGenerator(name = "SEQ_LIVSOPPHOLD_VURD_PERIODE", sequenceName = "seq_livsopphold_vurd_periode", allocationSize = 50)
     private Long id;
 
     @Type(PostgreSQLRangeType.class)

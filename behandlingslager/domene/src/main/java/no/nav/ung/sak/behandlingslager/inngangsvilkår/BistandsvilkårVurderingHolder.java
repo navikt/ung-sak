@@ -9,16 +9,16 @@ import java.util.Collections;
 import java.util.List;
 
 @Entity(name = "BistandsvilkårVurderingHolder")
-@Table(name = "inngangsvilkaar_bistand_vurd_holder")
+@Table(name = "bistand_vurd_holder")
 public class BistandsvilkårVurderingHolder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_INNGANGSVILKAAR_BISTAND_VURD_HOLDER")
-    @SequenceGenerator(name = "SEQ_INNGANGSVILKAAR_BISTAND_VURD_HOLDER", sequenceName = "seq_inngangsvilkaar_bistand_vurd_holder", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BISTAND_VURD_HOLDER")
+    @SequenceGenerator(name = "SEQ_BISTAND_VURD_HOLDER", sequenceName = "seq_bistand_vurd_holder", allocationSize = 50)
     private Long id;
 
     @BatchSize(size = 20)
-    @JoinColumn(name = "inngangsvilkaar_bistand_vurd_holder_id", nullable = false)
+    @JoinColumn(name = "bistand_vurd_holder_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<BistandsvilkårVurderingPeriode> vurderinger = new ArrayList<>();
 

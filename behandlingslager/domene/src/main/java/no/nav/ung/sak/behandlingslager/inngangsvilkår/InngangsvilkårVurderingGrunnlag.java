@@ -7,12 +7,12 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Entity(name = "InngangsvilkårVurderingGrunnlag")
-@Table(name = "gr_inngangsvilkaar_vurdering")
+@Table(name = "gr_vurdering")
 public class InngangsvilkårVurderingGrunnlag extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_INNGANGSVILKAAR_VURDERING")
-    @SequenceGenerator(name = "SEQ_GR_INNGANGSVILKAAR_VURDERING", sequenceName = "seq_gr_inngangsvilkaar_vurdering", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_VURDERING")
+    @SequenceGenerator(name = "SEQ_GR_VURDERING", sequenceName = "seq_gr_vurdering", allocationSize = 50)
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false)

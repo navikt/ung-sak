@@ -4,11 +4,11 @@
                  xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_2.xsd"
                  version="3.2">
 
-    <sequence-generator name="SEQ_INNGANGSVILKAAR_BISTAND_VURD_HOLDER" allocation-size="50" sequence-name="seq_inngangsvilkaar_bistand_vurd_holder"/>
-    <sequence-generator name="SEQ_INNGANGSVILKAAR_BISTAND_VURD_PERIODE" allocation-size="50" sequence-name="seq_inngangsvilkaar_bistand_vurd_periode"/>
-    <sequence-generator name="SEQ_INNGANGSVILKAAR_LIVSOPPHOLD_VURD_HOLDER" allocation-size="50" sequence-name="seq_inngangsvilkaar_livsopphold_vurd_holder"/>
-    <sequence-generator name="SEQ_INNGANGSVILKAAR_LIVSOPPHOLD_VURD_PERIODE" allocation-size="50" sequence-name="seq_inngangsvilkaar_livsopphold_vurd_periode"/>
-    <sequence-generator name="SEQ_GR_INNGANGSVILKAAR_VURDERING" allocation-size="50" sequence-name="seq_gr_inngangsvilkaar_vurdering"/>
+    <sequence-generator name="SEQ_BISTAND_VURD_HOLDER" allocation-size="50" sequence-name="seq_bistand_vurd_holder"/>
+    <sequence-generator name="SEQ_BISTAND_VURD_PERIODE" allocation-size="50" sequence-name="seq_bistand_vurd_periode"/>
+    <sequence-generator name="SEQ_LIVSOPPHOLD_VURD_HOLDER" allocation-size="50" sequence-name="seq_livsopphold_vurd_holder"/>
+    <sequence-generator name="SEQ_LIVSOPPHOLD_VURD_PERIODE" allocation-size="50" sequence-name="seq_livsopphold_vurd_periode"/>
+    <sequence-generator name="SEQ_GR_VURDERING" allocation-size="50" sequence-name="seq_gr_vurdering"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårVurderingHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårVurderingPeriode"/>
