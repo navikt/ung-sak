@@ -26,9 +26,9 @@ public class KombinasjonScenarioer {
      * Kombinasjon - forlenget periode + kontroll av inntekt (full utbetaling, dvs. 0 kr inntekt).
      * Skal gi forlenget-brev men ingen inntektskontroll-brev.
      *
-     * @param fom - startdato for programmet
+     * @param fom                  - startdato for programmet
      * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
-     * @param nySluttdato - ny sluttdato etter forlengelse
+     * @param nySluttdato          - ny sluttdato etter forlengelse
      */
     public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
@@ -79,9 +79,9 @@ public class KombinasjonScenarioer {
      * Kombinasjon - forlenget periode + kontroll av inntekt med reduksjon (10 000 kr inntekt).
      * Skal gi to brev: ENDRING_INNTEKT og FORLENGET_PERIODE.
      *
-     * @param fom - startdato for programmet
+     * @param fom                  - startdato for programmet
      * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
-     * @param nySluttdato - ny sluttdato etter forlengelse
+     * @param nySluttdato          - ny sluttdato etter forlengelse
      */
     public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
@@ -357,4 +357,25 @@ public class KombinasjonScenarioer {
             ),
             null, null, null);
     }
+
+    public static UngTestScenario leggTilVarselOpphørVedMaksdato(UngTestScenario scenario, LocalDate maksdato) {
+        var triggere = new HashSet<>(scenario.behandlingTriggere());
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)));
+        return new UngTestScenario(
+            scenario.navn(),
+            scenario.programPerioder(),
+            scenario.satser(),
+            scenario.uttakPerioder(),
+            scenario.tilkjentYtelsePerioder(),
+            scenario.aldersvilkår(),
+            scenario.ungdomsprogramvilkår(),
+            scenario.fødselsdato(),
+            scenario.søknadStartDato(),
+            triggere,
+            scenario.barn(),
+            scenario.dødsdato(),
+            scenario.kontrollerInntektPerioder(),
+            maksdato);
+    }
+
 }

@@ -216,4 +216,39 @@ public class EndringProgramPeriodeScenarioer {
                 Collections.emptyList(),
             dødsdato, null, null);
     }
+
+    /**
+     * Scenario der perioden er forlenget fra opprinnlig sluttdato til ny sluttdato.
+     *
+     * @param fom               - startdato for programmet
+     * @param opprinneligSluttdato - opprinnlig sluttdato (slik det var i forrige behandling)
+     * @param nySluttdato       - ny sluttdato etter forlengelse
+     */
+    public static UngTestScenario forlengetPeriode(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+        if (!nySluttdato.isAfter(opprinneligSluttdato)) {
+            throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
+        }
+
+        var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato);
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, nySluttdato, BrevScenarioerUtils.lavSatsBuilder(fom).build())
+        ));
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(fom, nySluttdato)),
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, nyProgramPeriode),
+            new LocalDateTimeline<>(nyProgramPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(nyProgramPeriode, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(fom),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
+                    DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato))
+            ),
+            Collections.emptyList(),
+            null, null, null);
+    }
 }

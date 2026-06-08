@@ -3,9 +3,8 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -21,8 +20,6 @@ import no.nav.ung.sak.formidling.vedtak.regler.YtelseVedtaksbrevRegler;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
-import no.nav.ung.sak.trigger.Trigger;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.*;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.*;
@@ -31,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -312,8 +308,8 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
 
-        var scenario = leggTilVarselOpphørVedMaksdato(
-            ForlengetPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato),
+        var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
+            EndringProgramPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato),
             nySluttdato);
         var behandling = lagBehandling(scenario);
 
@@ -331,7 +327,7 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.minusDays(20);
 
-        var scenario = leggTilVarselOpphørVedMaksdato(
+        var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
             EndringProgramPeriodeScenarioer.endringOpphør(new LocalDateInterval(fom, opprinneligSluttdato), nySluttdato),
             opprinneligSluttdato);
         var behandling = lagBehandling(scenario);
@@ -375,26 +371,6 @@ class YtelseVedtaksbrevReglerTest {
         behandling.avsluttBehandling();
 
         return behandling;
-    }
-
-    private static UngTestScenario leggTilVarselOpphørVedMaksdato(UngTestScenario scenario, LocalDate maksdato) {
-        var triggere = new HashSet<>(scenario.behandlingTriggere());
-        triggere.add(new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)));
-        return new UngTestScenario(
-            scenario.navn(),
-            scenario.programPerioder(),
-            scenario.satser(),
-            scenario.uttakPerioder(),
-            scenario.tilkjentYtelsePerioder(),
-            scenario.aldersvilkår(),
-            scenario.ungdomsprogramvilkår(),
-            scenario.fødselsdato(),
-            scenario.søknadStartDato(),
-            triggere,
-            scenario.barn(),
-            scenario.dødsdato(),
-            scenario.kontrollerInntektPerioder(),
-            maksdato);
     }
 
 }
