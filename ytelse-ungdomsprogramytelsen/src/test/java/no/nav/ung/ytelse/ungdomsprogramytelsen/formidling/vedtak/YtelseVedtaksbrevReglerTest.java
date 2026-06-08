@@ -308,13 +308,13 @@ class YtelseVedtaksbrevReglerTest {
 
     @Test
     void skal_overstyre_opphor_ved_maksdato_brev_med_forlenget_periode_brev() {
-        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate fom = LocalDate.now().minusWeeks(52).plusWeeks(2);
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
-        LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
+        LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
 
         var scenario = leggTilVarselOpphørVedMaksdato(
             ForlengetPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato),
-            opprinneligSluttdato);
+            nySluttdato);
         var behandling = lagBehandling(scenario);
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
@@ -394,7 +394,7 @@ class YtelseVedtaksbrevReglerTest {
             scenario.barn(),
             scenario.dødsdato(),
             scenario.kontrollerInntektPerioder(),
-            scenario.periodeMaksDato());
+            maksdato);
     }
 
 }
