@@ -3,7 +3,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strateg
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -33,13 +32,11 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        //TODO slett og løs på en annen måte
-        if (behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)) {
-            return true;
-        }
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE);
+        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
+            && resultater.innholderIkke(DetaljertResultatType.ENDRING_SLUTTDATO)
+            && resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE);
     }
 
 }

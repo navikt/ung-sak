@@ -340,7 +340,51 @@ class YtelseVedtaksbrevReglerTest {
             .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
     }
 
-     static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
+    @Test
+    void skal_gi_kun_opphorsbrev_ved_forlenget_periode_og_opphor() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate opphørsdato = opprinneligSluttdato.plusDays(14);
+
+        UngTestScenario forrigeBehandlingScenario = FørstegangsbehandlingScenarioer.innvilget19år(fom);
+        UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgOpphør(fom, opphørsdato);
+        var behandling = lagBehandlingMedOriginalBehandling(forrigeBehandlingScenario, ungTestscenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .containsExactly(DokumentMalType.OPPHØR_DOK)
+            .doesNotContain(DokumentMalType.FORLENGET_PERIODE);
+
+        var opphørResultat = totalresultater.vedtaksbrevResultater().getFirst();
+        assertFullAutomatiskBrev(opphørResultat, DokumentMalType.OPPHØR_DOK, OpphørInnholdBygger.class);
+    }
+
+    private Behandling lagBehandlingMedOriginalBehandling(UngTestScenario forrigeBehandlingScenario, UngTestScenario ungTestscenario) {
+        // Originalbehandling med innvilget programperiode slik at revurderingen får riktig programperiode
+        var builder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(forrigeBehandlingScenario);
+
+        var originalBehandling = builder.buildOgLagreMedUng(ungTestRepositories);
+        originalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        originalBehandling.avsluttBehandling();
+
+        builder
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestscenario)
+            .medOriginalBehandling(originalBehandling, null);
+
+        var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+        return behandling;
+    }
+
+    static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
         assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);

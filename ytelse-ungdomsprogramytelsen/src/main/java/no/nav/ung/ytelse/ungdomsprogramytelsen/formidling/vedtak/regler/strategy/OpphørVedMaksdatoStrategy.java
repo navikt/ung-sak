@@ -46,7 +46,8 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
 
-        return resultater.innholderIkke(DetaljertResultatType.ENDRING_SLUTTDATO)
+        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
+            && resultater.innholderIkke(DetaljertResultatType.ENDRING_SLUTTDATO)
             && resultater.innholderIkke(DetaljertResultatType.FORLENGET_PERIODE)
             && resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO)
             && erRelevantForVarsling(behandling, ungdomsprogramPeriodeRepository);
