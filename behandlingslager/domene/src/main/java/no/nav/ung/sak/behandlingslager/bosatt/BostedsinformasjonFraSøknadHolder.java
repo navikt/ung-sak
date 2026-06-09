@@ -26,6 +26,9 @@ public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<BostedsinformasjonFraSøknad> informasjon = new LinkedHashSet<>();
 
+    public BostedsinformasjonFraSøknadHolder() {
+    }
+
     public BostedsinformasjonFraSøknadHolder(BostedsinformasjonFraSøknadHolder oppgittFraSøknad) {
         if (oppgittFraSøknad != null) {
             this.informasjon.addAll(oppgittFraSøknad.getInformasjon());

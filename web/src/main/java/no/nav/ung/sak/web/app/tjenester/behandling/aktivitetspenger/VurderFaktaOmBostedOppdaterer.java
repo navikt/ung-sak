@@ -26,9 +26,12 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeri
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.typer.Periode;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderFaktaOmBostedDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -62,22 +65,23 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        // Les eksisterende avklaringer per skjæringstidspunkt FØR lagreAvklaringer
-        Map<LocalDate, BostedAvklaringData> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getForeslått().getPeriodeAvklaringer().stream()
-                .collect(Collectors.toMap(
-                    p -> p.getPeriode().getFomDato(),
-                    p -> new BostedAvklaringData(p.isErBosattITrondheim(), p.getPeriode().getFomDato(), p.getFraflyttingsÅrsak(), p.getKilde())))).orElse(Map.of());
+        LocalDateTimeline<BostedAvklaringData> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g -> new LocalDateTimeline<>(
+                g.getForeslått().getPeriodeAvklaringer().stream()
+                    .map(p -> new LocalDateSegment<>(
+                        p.getPeriode().getFomDato(),
+                        p.getPeriode().getTomDato(),
+                        new BostedAvklaringData(p.isErBosattITrondheim(), p.isErBosattITrondheim() ? p.getPeriode().getFomDato() : null, p.getFraflyttingsÅrsak(), p.getKilde())))
+                    .toList()))
+            .orElse(LocalDateTimeline.empty());
 
-        // Bygg nye avklaringer basert på vurdering (nøkkel = vilkårsperiode fom)
         Map<Periode, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
         for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer()) {
             nyeAvklaringer.put(avklaring.periode(),
                 BostedAvklaringUtil.tilAvklaringData(avklaring.periode().getFom(), avklaring.vurdering()));
         }
 
-        // Lagre forseslått og ikke overføerer eksisterende resultat.
-        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandlingId, nyeAvklaringer);
+        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandlingId, nyeAvklaringer);
 
         opprettEtterlysning(dto, behandlingId, nyeAvklaringer, tidligereAvklaringer, periodeReferanser, behandling.getFagsakId());
 
@@ -95,7 +99,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
     private void opprettEtterlysning(VurderFaktaOmBostedDto dto, long behandlingId,
                                      Map<Periode, BostedAvklaringData> nyeAvklaringer,
-                                     Map<LocalDate, BostedAvklaringData> tidligereAvklaringer,
+                                     LocalDateTimeline<BostedAvklaringData> tidligereTidslinje,
                                      Map<LocalDate, UUID> periodeReferanser, Long fagsakId) {
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
         List<Etterlysning> etterlysningerSomVenterSvar = etterlysningRepository
@@ -107,35 +111,43 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         boolean skalAvbryte = false;
         boolean skalOpprette = false;
         List<BostedFaktaavklaringPeriodeDto> avklaringerSomKreverVarselVedEndring = dto.getAvklaringer().stream().filter(BostedFaktaavklaringPeriodeDto::skalSendeVarsel).toList();
-        for (BostedFaktaavklaringPeriodeDto avklaring : avklaringerSomKreverVarselVedEndring) {
-            LocalDate stp = avklaring.periode().getFom();
+        for (BostedFaktaavklaringPeriodeDto avklaringSomKreverVarsel : avklaringerSomKreverVarselVedEndring) {
+            LocalDate fom = avklaringSomKreverVarsel.periode().getFom();
+            LocalDate tom = avklaringSomKreverVarsel.periode().getTom();
 
-            BostedAvklaringData nyAvklaring = nyeAvklaringer.get(stp);
-            BostedAvklaringData gammelAvklaring = tidligereAvklaringer.get(stp);
-            Objects.requireNonNull(gammelAvklaring, "Dato for skjæringstidspunkt finnes ikke i liste over tidligere avklaringer. stp:" + stp);
+            BostedAvklaringData nyAvklaring = nyeAvklaringer.get(avklaringSomKreverVarsel.periode());
 
-            boolean avklaringEndret = erAvklaringEndret(nyAvklaring, gammelAvklaring);
-
-            if (avklaringEndret) {
-                // Avbryt aktiv
-                var eksisterendeAktive = etterlysningerSomVenterSvar.stream()
-                    .filter(e -> e.getPeriode().getFomDato().equals(stp))
-                    .toList();
-                skalAvbryte = skalAvbryte || !eksisterendeAktive.isEmpty();
-                eksisterendeAktive.forEach(Etterlysning::skalAvbrytes);
-                etterlysningRepository.lagre(eksisterendeAktive);
-
-                // Opprett ny
-                var etterlysning = Etterlysning.opprettForType(
-                    behandlingId,
-                    periodeReferanser.get(avklaring.periode().getFom()),
-                    UUID.randomUUID(),
-                    DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.periode().getFom(), avklaring.periode().getTom()),
-                    EtterlysningType.UTTALELSE_BOSTED
-                );
+            LocalDateTimeline<BostedAvklaringData> gammelAvklaringTidslinje = tidligereTidslinje.intersection(new LocalDateInterval(fom, tom));
+            if (gammelAvklaringTidslinje.isEmpty()) {
                 skalOpprette = true;
-                etterlysningRepository.lagre(etterlysning);
+            } else {
+                BostedAvklaringData gammelAvklaring = gammelAvklaringTidslinje.stream()
+                    .map(LocalDateSegment::getValue)
+                    .findFirst().orElseThrow();
 
+                boolean avklaringEndret = erAvklaringEndret(nyAvklaring, gammelAvklaring);
+
+                if (avklaringEndret) {
+                    // Avbryt aktiv
+                    var eksisterendeAktive = etterlysningerSomVenterSvar.stream()
+                        .filter(e -> e.getPeriode().getFomDato().equals(fom))
+                        .toList();
+                    skalAvbryte = skalAvbryte || !eksisterendeAktive.isEmpty();
+                    eksisterendeAktive.forEach(Etterlysning::skalAvbrytes);
+                    etterlysningRepository.lagre(eksisterendeAktive);
+
+                    // Opprett ny
+                    var etterlysning = Etterlysning.opprettForType(
+                        behandlingId,
+                        periodeReferanser.get(avklaringSomKreverVarsel.periode().getFom()),
+                        UUID.randomUUID(),
+                        DatoIntervallEntitet.fraOgMedTilOgMed(avklaringSomKreverVarsel.periode().getFom(), avklaringSomKreverVarsel.periode().getTom()),
+                        EtterlysningType.UTTALELSE_BOSTED
+                    );
+                    skalOpprette = true;
+                    etterlysningRepository.lagre(etterlysning);
+
+                }
             }
         }
 

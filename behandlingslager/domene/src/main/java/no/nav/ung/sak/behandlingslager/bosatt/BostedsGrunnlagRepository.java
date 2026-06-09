@@ -84,7 +84,7 @@ public class BostedsGrunnlagRepository {
      *
      * @return Map fra skjæringstidspunkt til periodeAvklaring.referanse
      */
-    public Map<LocalDate, UUID> lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(
+    public Map<LocalDate, UUID> lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(
         Long behandlingId,
         Map<Periode, BostedAvklaringData> avklaringerPerSkjæringstidspunkt) {
 
@@ -95,7 +95,6 @@ public class BostedsGrunnlagRepository {
             .orElse(new BostedsGrunnlag(behandlingId));
 
         nyttGrunnlag.setForeslåttAvklaring(avklaringerPerSkjæringstidspunkt);
-        nyttGrunnlag.fjernOverlappendeResultat(avklaringerPerSkjæringstidspunkt.keySet());
 
         if (eksisterendeGrunnlag.isPresent()) {
             if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {

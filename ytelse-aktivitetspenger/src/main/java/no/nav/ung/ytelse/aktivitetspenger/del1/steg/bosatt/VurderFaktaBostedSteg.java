@@ -101,7 +101,7 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
             });
 
         if (!nyeSøknadAvklaringer.isEmpty()) {
-            bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandlingId, nyeSøknadAvklaringer);
+            bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandlingId, nyeSøknadAvklaringer);
         }
     }
 }

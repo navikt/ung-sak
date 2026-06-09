@@ -98,6 +98,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         if (nyHolder.equals(this.resultat)) {
             return;
         }
+        fjernOverlappendeResultat(avklaringer.keySet());
         this.resultat = nyHolder;
     }
 

@@ -40,7 +40,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTEDVIL
 @BehandlingStegRef(value = VURDER_BOSTEDVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
+public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
     private static final Duration DEFAULT_VENTEFRIST = Duration.ofDays(14);
 
@@ -48,18 +48,18 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
     private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
 
-    VurderBosattVilkårSteg() {
+    VurderBostedVilkårSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderBosattVilkårSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
-                                             VilkårResultatRepository vilkårResultatRepository,
-                                             VilkårTjeneste vilkårTjeneste,
-                                             BehandlingRepository behandlingRepository,
-                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                             EtterlysningTjeneste etterlysningTjeneste) {
+    public VurderBostedVilkårSteg(ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
+                                  VilkårResultatRepository vilkårResultatRepository,
+                                  VilkårTjeneste vilkårTjeneste,
+                                  BehandlingRepository behandlingRepository,
+                                  BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                  @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
+                                  EtterlysningTjeneste etterlysningTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
@@ -121,18 +121,16 @@ public class VurderBosattVilkårSteg extends VilkårVurderingSteg {
 //                    null,
 //                    null));
             });
+//        opphørTjeneste.utledOgLagreVilkår(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
 
-        // erKildeSøknad → manuell vilkårsvurdering via ManuellVurderingBostedsvilkårOppdaterer
         if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
         }
 
-        // harMottattSvar/ANNET → manuell opphørsvurdering via VurderOpphørBostedOppdaterer
         if (!stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_MANUELT::equals).isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OPPHØR_BOSTED));
         }
 
-//        opphørTjeneste.utledOgLagreVilkår(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
