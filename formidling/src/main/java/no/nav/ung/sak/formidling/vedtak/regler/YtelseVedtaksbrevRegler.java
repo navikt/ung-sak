@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
+
 @ApplicationScoped
 @FagsakYtelseTypeRef
 @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
@@ -30,7 +31,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     private static final Logger LOG = LoggerFactory.getLogger(YtelseVedtaksbrevRegler.class);
 
     private BehandlingRepository behandlingRepository;
-    private DetaljertResultatTidslinjeUtleder detaljertResultatUtleder;
+    private Instance<DetaljertResultatTidslinjeUtleder> detaljertResultatUtledere;
     private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances;
 
     public YtelseVedtaksbrevRegler() {
@@ -39,17 +40,18 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     @Inject
     public YtelseVedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
-        DetaljertResultatTidslinjeUtleder detaljertResultatUtleder,
+        @Any Instance<DetaljertResultatTidslinjeUtleder> detaljertResultatUtledere,
         @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances
     ) {
         this.behandlingRepository = behandlingRepository;
-        this.detaljertResultatUtleder = detaljertResultatUtleder;
+        this.detaljertResultatUtledere = detaljertResultatUtledere;
         this.innholdbyggerStrategiesInstances = innholdbyggerStrategiesInstances;
     }
 
     @Override
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
+        var detaljertResultatUtleder = FagsakYtelseTypeRef.Lookup.find(detaljertResultatUtledere, behandling.getFagsakYtelseType()).orElseThrow();
         LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
