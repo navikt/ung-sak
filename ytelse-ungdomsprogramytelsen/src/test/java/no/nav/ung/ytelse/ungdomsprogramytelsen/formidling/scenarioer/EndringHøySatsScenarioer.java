@@ -44,7 +44,7 @@ public class EndringHøySatsScenarioer {
             fødselsdato,
             List.of(programPeriode.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))), Collections.emptyList(),
-            null, null, null);
+            null, null, null, false);
     }
 
     /**
@@ -76,6 +76,6 @@ public class EndringHøySatsScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, programPeriode.getTomDato()))),
                 List.of(
                 BrevScenarioerUtils.lagBarn(fom.minusYears(5))
-            ), null, null, null);
+            ), null, null, null, false);
     }
 }

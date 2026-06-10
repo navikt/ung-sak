@@ -71,7 +71,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder, null);
+            kontrollerInntektPerioder, null, false);
     }
 
 
@@ -124,7 +124,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder, null);
+            kontrollerInntektPerioder, null, false);
     }
 
 
@@ -173,7 +173,7 @@ public class KombinasjonScenarioer {
                     DatoIntervallEntitet.fra(opphørsdato.plusDays(1), nySluttdato))
             ),
             Collections.emptyList(),
-            null, null, null);
+            null, null, null, true);
     }
 
 
@@ -234,7 +234,7 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ), null,
-            kontrollerInntektPerioder, null);
+            kontrollerInntektPerioder, null, false);
     }
 
 
@@ -291,7 +291,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder, null);
+            kontrollerInntektPerioder, null, false);
     }
 
     /**
@@ -329,7 +329,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null, null, null);
+            null, null, null, false);
     }
 
     public static UngTestScenario endringStartdatoOgOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate nyStartdato, LocalDate sluttdato) {
@@ -365,7 +365,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null, null, null);
+            null, null, null, false);
     }
 
 
@@ -404,7 +404,7 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ),
-            null, null, null);
+            null, null, null, false);
     }
 
     public static UngTestScenario leggTilVarselOpphørVedMaksdato(UngTestScenario scenario, LocalDate maksdato) {
@@ -424,7 +424,7 @@ public class KombinasjonScenarioer {
             scenario.barn(),
             scenario.dødsdato(),
             scenario.kontrollerInntektPerioder(),
-            maksdato);
+            maksdato, false);
     }
 
 }

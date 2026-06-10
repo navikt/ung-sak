@@ -128,7 +128,7 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
                 List.of(PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).leggTilPersonopplysning(Personopplysning.builder().aktørId(barnAktørId).fødselsdato(barnFødselsdato).build()).build()),
                 null,
                 null,
-                null)
+                null, false)
         ).buildOgLagreMedUng(UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, null));
         return behandling;
     }

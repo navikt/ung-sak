@@ -66,7 +66,7 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .intersection(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
-                    -> new LocalDateSegment<>(p, new SamletVilkårResultatOgBehandlingÅrsaker(vilkårResultater.getValue(), behandlingÅrsaker.getValue(), behandling.erManueltOpprettet())));
+                    -> new LocalDateSegment<>(p, new AktivitetspengerDetaljertResultatGrunnlag(vilkårResultater.getValue(), behandlingÅrsaker.getValue(), behandling.erManueltOpprettet())));
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, bestemResultatForPeriodeCombinator(), JoinStyle.LEFT_JOIN);
@@ -74,7 +74,7 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
         return detaljertResultatTidslinje.compress();
     }
 
-    private Set<DetaljertResultatInfo> bestemDetaljertResultat(LocalDateInterval periode, SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat, TilkjentYtelseVerdi tilkjentYtelse) {
+    private Set<DetaljertResultatInfo> bestemDetaljertResultat(LocalDateInterval periode, AktivitetspengerDetaljertResultatGrunnlag vilkårResultat, TilkjentYtelseVerdi tilkjentYtelse) {
 
         if (!vilkårResultat.ikkeVurderteVilkår().isEmpty()) {
             return Set.of(DetaljertResultatInfo.of(DetaljertResultatType.IKKE_VURDERT));
@@ -114,9 +114,9 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
         return resultater;
     }
 
-    private LocalDateSegmentCombinator<SamletVilkårResultatOgBehandlingÅrsaker, TilkjentYtelseVerdi, DetaljertResultat> bestemResultatForPeriodeCombinator() {
+    private LocalDateSegmentCombinator<AktivitetspengerDetaljertResultatGrunnlag, TilkjentYtelseVerdi, DetaljertResultat> bestemResultatForPeriodeCombinator() {
         return (p, lhs, rhs) -> {
-            SamletVilkårResultatOgBehandlingÅrsaker vilkårResultat = lhs.getValue();
+            AktivitetspengerDetaljertResultatGrunnlag vilkårResultat = lhs.getValue();
             var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
 
             if (vilkårResultat == null) {
