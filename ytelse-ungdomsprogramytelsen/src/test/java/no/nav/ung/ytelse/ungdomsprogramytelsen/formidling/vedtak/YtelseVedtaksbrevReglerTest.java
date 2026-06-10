@@ -149,6 +149,24 @@ class YtelseVedtaksbrevReglerTest {
 
     }
 
+
+    @Test
+    void skal_gi_ingen_brev_ved_g_regulering() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(SatsEndringScenarioer.gRegulering(fom));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isFalse();
+
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
     @Test
     void skal_gi_tomt_brev_som_må_redigeres_ved_avslag_aldersvilkår() {
         LocalDate fom = LocalDate.of(2025, 8, 1);

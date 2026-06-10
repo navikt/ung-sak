@@ -21,8 +21,8 @@ public enum DetaljertResultatType {
     ENDRING_BARN_DØDSFALL("Endring pga dødsfall av barn"),
     ENDRING_DELTAKER_DØDSFALL("Endring pga dødsfall av deltaker"),
     INNVILGELSE_ANNET("Innvilgelse pga annen årsak - se forklaring"),
-    INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak")
-    ;
+    INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak"),
+    SATS_REGULERING("Innvilgelse etter G-regulering");
 
     private final String beskrivelse;
 
