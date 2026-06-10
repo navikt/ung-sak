@@ -23,50 +23,50 @@ public class InngangsvilkårVurderingRepository {
         this.entityManager = entityManager;
     }
 
-    public Optional<InngangsvilkårVurderingGrunnlag> hentGrunnlag(Long behandlingId) {
+    public Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> hentGrunnlag(Long behandlingId) {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagreBistandsVurderinger(Long behandlingId, List<BistandsvilkårVurderingPeriode> nyeVurderinger) {
+    public void lagreBistandsVurderinger(Long behandlingId, List<BistandsvilkårResultatPeriode> nyeVurderinger) {
         var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var eksisterendeVurderinger = eksisterende
-            .flatMap(InngangsvilkårVurderingGrunnlag::getBistandsvilkårVurderingHolder)
-            .map(BistandsvilkårVurderingHolder::getVurderinger)
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
+            .map(BistandsvilkårResultatHolder::getVurderinger)
             .orElse(List.of());
 
         var kombinerte = kombinerBistand(eksisterendeVurderinger, nyeVurderinger);
-        var nyHolder = new BistandsvilkårVurderingHolder(kombinerte);
-        var livsoppholdHolder = eksisterende.flatMap(InngangsvilkårVurderingGrunnlag::getAndreLivsoppholdsytelserVurderingHolder).orElse(null);
-        persister(eksisterende, new InngangsvilkårVurderingGrunnlag(behandlingId, nyHolder, livsoppholdHolder));
+        var nyHolder = new BistandsvilkårResultatHolder(kombinerte);
+        var livsoppholdHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
+        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, nyHolder, livsoppholdHolder));
     }
 
-    public void lagreYtelseVurderinger(Long behandlingId, List<AndreLivsoppholdsytelserVurderingPeriode> nyeVurderinger) {
+    public void lagreYtelseVurderinger(Long behandlingId, List<AndreLivsoppholdsytelserResultatPeriode> nyeVurderinger) {
         var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var eksisterendeVurderinger = eksisterende
-            .flatMap(InngangsvilkårVurderingGrunnlag::getAndreLivsoppholdsytelserVurderingHolder)
-            .map(AndreLivsoppholdsytelserVurderingHolder::getVurderinger)
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder)
+            .map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
             .orElse(List.of());
 
         var kombinerte = kombinerYtelser(eksisterendeVurderinger, nyeVurderinger);
-        var bistandHolder = eksisterende.flatMap(InngangsvilkårVurderingGrunnlag::getBistandsvilkårVurderingHolder).orElse(null);
-        var nyHolder = new AndreLivsoppholdsytelserVurderingHolder(kombinerte);
-        persister(eksisterende, new InngangsvilkårVurderingGrunnlag(behandlingId, bistandHolder, nyHolder));
+        var bistandHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
+        var nyHolder = new AndreLivsoppholdsytelserResultatHolder(kombinerte);
+        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandHolder, nyHolder));
     }
 
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
         hentEksisterendeGrunnlag(eksisterendeBehandlingId).ifPresent(eksisterende -> {
-            var nyttGrunnlag = new InngangsvilkårVurderingGrunnlag(
+            var nyttGrunnlag = new AktivitetspengerInngangsvilkårResultatGrunnlag(
                 nyBehandlingId,
-                eksisterende.getBistandsvilkårVurderingHolder().orElse(null),
-                eksisterende.getAndreLivsoppholdsytelserVurderingHolder().orElse(null)
+                eksisterende.getBistandsvilkårResultatHolder().orElse(null),
+                eksisterende.getAndreLivsoppholdsytelserResultatHolder().orElse(null)
             );
             persister(Optional.empty(), nyttGrunnlag);
         });
     }
 
-    private List<BistandsvilkårVurderingPeriode> kombinerBistand(
-            List<BistandsvilkårVurderingPeriode> eksisterende,
-            List<BistandsvilkårVurderingPeriode> nye) {
+    private List<BistandsvilkårResultatPeriode> kombinerBistand(
+            List<BistandsvilkårResultatPeriode> eksisterende,
+            List<BistandsvilkårResultatPeriode> nye) {
         var eksisterendeTidslinje = tilBistandTidslinje(eksisterende);
         var nyTidslinje = tilBistandTidslinje(nye);
         // Behold eksisterende der nye ikke overlapper, nye tar alltid presedens
@@ -74,55 +74,55 @@ public class InngangsvilkårVurderingRepository {
             .map(seg -> {
                 var periode = DatoIntervallEntitet.fraOgMedTilOgMed(seg.getFom(), seg.getTom());
                 var v = seg.getValue();
-                return v.getPeriode().equals(periode) ? v : new BistandsvilkårVurderingPeriode(periode, v);
+                return v.getPeriode().equals(periode) ? v : new BistandsvilkårResultatPeriode(periode, v);
             })
             .toList();
     }
 
-    private List<AndreLivsoppholdsytelserVurderingPeriode> kombinerYtelser(
-            List<AndreLivsoppholdsytelserVurderingPeriode> eksisterende,
-            List<AndreLivsoppholdsytelserVurderingPeriode> nye) {
+    private List<AndreLivsoppholdsytelserResultatPeriode> kombinerYtelser(
+            List<AndreLivsoppholdsytelserResultatPeriode> eksisterende,
+            List<AndreLivsoppholdsytelserResultatPeriode> nye) {
         var eksisterendeTidslinje = tilLivsoppholdTidslinje(eksisterende);
         var nyTidslinje = tilLivsoppholdTidslinje(nye);
         return eksisterendeTidslinje.disjoint(nyTidslinje).crossJoin(nyTidslinje).stream()
             .map(seg -> {
                 var periode = DatoIntervallEntitet.fraOgMedTilOgMed(seg.getFom(), seg.getTom());
                 var v = seg.getValue();
-                return v.getPeriode().equals(periode) ? v : new AndreLivsoppholdsytelserVurderingPeriode(periode, v);
+                return v.getPeriode().equals(periode) ? v : new AndreLivsoppholdsytelserResultatPeriode(periode, v);
             })
             .toList();
     }
 
-    private static LocalDateTimeline<BistandsvilkårVurderingPeriode> tilBistandTidslinje(List<BistandsvilkårVurderingPeriode> vurderinger) {
+    private static LocalDateTimeline<BistandsvilkårResultatPeriode> tilBistandTidslinje(List<BistandsvilkårResultatPeriode> vurderinger) {
         return new LocalDateTimeline<>(vurderinger.stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }
 
-    private static LocalDateTimeline<AndreLivsoppholdsytelserVurderingPeriode> tilLivsoppholdTidslinje(List<AndreLivsoppholdsytelserVurderingPeriode> vurderinger) {
+    private static LocalDateTimeline<AndreLivsoppholdsytelserResultatPeriode> tilLivsoppholdTidslinje(List<AndreLivsoppholdsytelserResultatPeriode> vurderinger) {
         return new LocalDateTimeline<>(vurderinger.stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }
 
-    private void persister(Optional<InngangsvilkårVurderingGrunnlag> eksisterendeGrunnlag, InngangsvilkårVurderingGrunnlag nyttGrunnlag) {
+    private void persister(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterendeGrunnlag, AktivitetspengerInngangsvilkårResultatGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
     }
 
-    private void deaktiverEksisterende(InngangsvilkårVurderingGrunnlag grunnlag) {
+    private void deaktiverEksisterende(AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag) {
         grunnlag.deaktiver();
         entityManager.persist(grunnlag);
         entityManager.flush();
     }
 
-    private Optional<InngangsvilkårVurderingGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
+    private Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
-            "SELECT g FROM InngangsvilkårVurderingGrunnlag g " +
+            "SELECT g FROM AktivitetspengerInngangsvilkårResultatGrunnlag g " +
                 "WHERE g.behandlingId = :behandlingId " +
                 "AND g.aktiv = true",
-            InngangsvilkårVurderingGrunnlag.class);
+            AktivitetspengerInngangsvilkårResultatGrunnlag.class);
         query.setParameter("behandlingId", behandlingId);
         return HibernateVerktøy.hentUniktResultat(query);
     }

@@ -51,13 +51,13 @@ class InngangsvilkårVurderingRepositoryTest {
 
     @Test
     void skal_lagre_og_hente_bistandsvurdering() {
-        var vurdering = new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(vurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
         assertThat(grunnlag).isPresent();
-        var holder = grunnlag.get().getBistandsvilkårVurderingHolder();
+        var holder = grunnlag.get().getBistandsvilkårResultatHolder();
         assertThat(holder).isPresent();
         assertThat(holder.get().getVurderinger()).hasSize(1);
         var lagretVurdering = holder.get().getVurderinger().get(0);
@@ -70,11 +70,11 @@ class InngangsvilkårVurderingRepositoryTest {
 
     @Test
     void skal_lagre_bistandsvurdering_med_avslagsårsak() {
-        var vurdering = new BistandsvilkårVurderingPeriode(PERIODE_1, false, Avslagsårsak.IKKE_14A_VEDTAK, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, false, Avslagsårsak.IKKE_14A_VEDTAK, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(vurdering));
 
         var holder = repository.hentGrunnlag(behandling.getId())
-            .flatMap(InngangsvilkårVurderingGrunnlag::getBistandsvilkårVurderingHolder)
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
             .orElseThrow();
 
         assertThat(holder.getVurderinger()).hasSize(1);
@@ -85,14 +85,14 @@ class InngangsvilkårVurderingRepositoryTest {
 
     @Test
     void skal_lagre_og_hente_livsoppholdsytelsevurdering() {
-        var vurdering = new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var vurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(vurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
         assertThat(grunnlag).isPresent();
-        assertThat(grunnlag.get().getBistandsvilkårVurderingHolder()).as("bistandsholder skal være tom").isEmpty();
-        var holder = grunnlag.get().getAndreLivsoppholdsytelserVurderingHolder();
+        assertThat(grunnlag.get().getBistandsvilkårResultatHolder()).as("bistandsholder skal være tom").isEmpty();
+        var holder = grunnlag.get().getAndreLivsoppholdsytelserResultatHolder();
         assertThat(holder).isPresent();
         assertThat(holder.get().getVurderinger()).hasSize(1);
         var lagretVurdering = holder.get().getVurderinger().get(0);
@@ -102,30 +102,30 @@ class InngangsvilkårVurderingRepositoryTest {
 
     @Test
     void oppdatering_av_bistand_bevarer_livsopphold_holder() {
-        var livsoppholdVurdering = new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var livsoppholdVurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
 
-        var bistandVurdering = new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var bistandVurdering = new BistandsvilkårResultatPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(bistandVurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow();
-        assertThat(grunnlag.getBistandsvilkårVurderingHolder()).isPresent();
-        assertThat(grunnlag.getAndreLivsoppholdsytelserVurderingHolder())
+        assertThat(grunnlag.getBistandsvilkårResultatHolder()).isPresent();
+        assertThat(grunnlag.getAndreLivsoppholdsytelserResultatHolder())
             .as("livsopphold-holder skal bevares ved oppdatering av bistand")
             .isPresent();
     }
 
     @Test
     void oppdatering_av_livsopphold_bevarer_bistand_holder() {
-        var bistandVurdering = new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var bistandVurdering = new BistandsvilkårResultatPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(bistandVurdering));
 
-        var livsoppholdVurdering = new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_2, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var livsoppholdVurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_2, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow();
-        assertThat(grunnlag.getAndreLivsoppholdsytelserVurderingHolder()).isPresent();
-        assertThat(grunnlag.getBistandsvilkårVurderingHolder())
+        assertThat(grunnlag.getAndreLivsoppholdsytelserResultatHolder()).isPresent();
+        assertThat(grunnlag.getBistandsvilkårResultatHolder())
             .as("bistand-holder skal bevares ved oppdatering av livsopphold")
             .isPresent();
     }
@@ -133,16 +133,16 @@ class InngangsvilkårVurderingRepositoryTest {
     @Test
     void oppdatering_erstatter_tidligere_bistandsvurdering() {
         repository.lagreBistandsVurderinger(behandling.getId(),
-            List.of(new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
+            List.of(new BistandsvilkårResultatPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
 
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(
-                new BistandsvilkårVurderingPeriode(PERIODE_1, false, Avslagsårsak.IKKE_14A_VEDTAK, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1)),
-                new BistandsvilkårVurderingPeriode(PERIODE_2, true, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))
+                new BistandsvilkårResultatPeriode(PERIODE_1, false, Avslagsårsak.IKKE_14A_VEDTAK, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1)),
+                new BistandsvilkårResultatPeriode(PERIODE_2, true, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))
             ));
 
         var holder = repository.hentGrunnlag(behandling.getId())
-            .flatMap(InngangsvilkårVurderingGrunnlag::getBistandsvilkårVurderingHolder)
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
             .orElseThrow();
 
         assertThat(holder.getVurderinger()).hasSize(2);
@@ -152,16 +152,16 @@ class InngangsvilkårVurderingRepositoryTest {
     void oppdatering_av_ny_periode_beholder_eksisterende_uberørt_periode() {
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(
-                new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT),
-                new BistandsvilkårVurderingPeriode(PERIODE_2, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)
+                new BistandsvilkårResultatPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT),
+                new BistandsvilkårResultatPeriode(PERIODE_2, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)
             ));
 
         // Kun PERIODE_2 oppdateres — PERIODE_1 skal beholdes fra eksisterende
         repository.lagreBistandsVurderinger(behandling.getId(),
-            List.of(new BistandsvilkårVurderingPeriode(PERIODE_2, false, Avslagsårsak.IKKE_14A_VEDTAK, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
+            List.of(new BistandsvilkårResultatPeriode(PERIODE_2, false, Avslagsårsak.IKKE_14A_VEDTAK, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
 
         var vurderinger = repository.hentGrunnlag(behandling.getId())
-            .flatMap(InngangsvilkårVurderingGrunnlag::getBistandsvilkårVurderingHolder)
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
             .orElseThrow()
             .getVurderinger();
 
@@ -178,22 +178,22 @@ class InngangsvilkårVurderingRepositoryTest {
     @Test
     void skal_kopiere_grunnlag_til_ny_behandling() {
         repository.lagreBistandsVurderinger(behandling.getId(),
-            List.of(new BistandsvilkårVurderingPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
+            List.of(new BistandsvilkårResultatPeriode(PERIODE_1, true, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
         repository.lagreYtelseVurderinger(behandling.getId(),
-            List.of(new AndreLivsoppholdsytelserVurderingPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT)));
+            List.of(new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, VURDERT_AV, VURDERT_TIDSPUNKT)));
 
         var revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
         repository.kopier(behandling.getId(), revurdering.getId());
 
         var kopiert = repository.hentGrunnlag(revurdering.getId()).orElseThrow();
-        assertThat(kopiert.getBistandsvilkårVurderingHolder()).isPresent();
-        assertThat(kopiert.getAndreLivsoppholdsytelserVurderingHolder()).isPresent();
+        assertThat(kopiert.getBistandsvilkårResultatHolder()).isPresent();
+        assertThat(kopiert.getAndreLivsoppholdsytelserResultatHolder()).isPresent();
 
         var original = repository.hentGrunnlag(behandling.getId()).orElseThrow();
-        assertThat(kopiert.getBistandsvilkårVurderingHolder().get().getId())
+        assertThat(kopiert.getBistandsvilkårResultatHolder().get().getId())
             .as("Kopiert grunnlag skal dele samme bistand-holder")
-            .isEqualTo(original.getBistandsvilkårVurderingHolder().get().getId());
+            .isEqualTo(original.getBistandsvilkårResultatHolder().get().getId());
     }
 
     @Test

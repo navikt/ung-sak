@@ -5,10 +5,11 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 
 /**
- * Leser saksbehandlers lagrede vurderinger fra {@link no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingGrunnlag}
+ * Leser saksbehandlers lagrede vurderinger fra {@link AktivitetspengerInngangsvilkårResultatGrunnlag}
  * og setter tilsvarende vilkårsresultat.
  */
 @ApplicationScoped
@@ -28,7 +29,7 @@ public class InngangsvilkårVurderingTjeneste {
     public void settBistandsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
         var grunnlag = repository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
-        var holder = grunnlag.getBistandsvilkårVurderingHolder()
+        var holder = grunnlag.getBistandsvilkårResultatHolder()
             .orElseThrow(() -> new IllegalStateException("Bistandsvilkår-holder mangler i grunnlag for behandling " + behandlingId));
 
         var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BISTANDSVILKÅR);
@@ -45,7 +46,7 @@ public class InngangsvilkårVurderingTjeneste {
     public void settAndreLivsoppholdsytelserResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
         var grunnlag = repository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
-        var holder = grunnlag.getAndreLivsoppholdsytelserVurderingHolder()
+        var holder = grunnlag.getAndreLivsoppholdsytelserResultatHolder()
             .orElseThrow(() -> new IllegalStateException("Andre livsoppholdsytelser-holder mangler i grunnlag for behandling " + behandlingId));
 
         var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);

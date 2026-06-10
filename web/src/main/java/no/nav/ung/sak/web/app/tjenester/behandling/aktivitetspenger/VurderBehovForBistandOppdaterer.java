@@ -20,7 +20,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårVurderingPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto;
@@ -71,7 +71,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         var periodeVurderinger = dto.getVurdertePerioder().stream()
-            .map(it -> new BistandsvilkårVurderingPeriode(
+            .map(it -> new BistandsvilkårResultatPeriode(
                 DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
                 it.erVilkårOppfylt(),
                 it.avslagsårsak(),
@@ -81,7 +81,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(param.getBehandlingId(), periodeVurderinger);
 
         LocalDateTimeline<Boolean> vurdertEtterOppdatering = inngangsvilkårVurderingRepository.hentGrunnlag(param.getBehandlingId())
-            .flatMap(g -> g.getBistandsvilkårVurderingHolder())
+            .flatMap(g -> g.getBistandsvilkårResultatHolder())
             .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
                 .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
                 .toList()))

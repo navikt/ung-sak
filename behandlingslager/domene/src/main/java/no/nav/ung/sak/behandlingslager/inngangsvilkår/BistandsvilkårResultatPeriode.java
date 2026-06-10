@@ -14,13 +14,13 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Immutable
-@Entity(name = "BistandsvilkårVurderingPeriode")
-@Table(name = "bistand_vurd_periode")
-public class BistandsvilkårVurderingPeriode extends BaseEntitet {
+@Entity(name = "BistandsvilkårResultatPeriode")
+@Table(name = "bistand_resultat_periode")
+public class BistandsvilkårResultatPeriode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BISTAND_VURD_PERIODE")
-    @SequenceGenerator(name = "SEQ_BISTAND_VURD_PERIODE", sequenceName = "seq_bistand_vurd_periode", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BISTAND_RESULTAT_PERIODE")
+    @SequenceGenerator(name = "SEQ_BISTAND_RESULTAT_PERIODE", sequenceName = "seq_bistand_resultat_periode", allocationSize = 50)
     private Long id;
 
     @Type(PostgreSQLRangeType.class)
@@ -39,16 +39,16 @@ public class BistandsvilkårVurderingPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
-    BistandsvilkårVurderingPeriode() {
+    BistandsvilkårResultatPeriode() {
         // Hibernate
     }
 
     /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
-    BistandsvilkårVurderingPeriode(DatoIntervallEntitet periode, BistandsvilkårVurderingPeriode kilde) {
+    BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, BistandsvilkårResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.getAvslagsårsak(), kilde.vurdertAv, kilde.vurdertTidspunkt);
     }
 
-    public BistandsvilkårVurderingPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");

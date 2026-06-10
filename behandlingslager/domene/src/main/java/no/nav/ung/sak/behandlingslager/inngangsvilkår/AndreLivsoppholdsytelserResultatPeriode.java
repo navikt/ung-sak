@@ -14,13 +14,13 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Immutable
-@Entity(name = "AndreLivsoppholdsytelserVurderingPeriode")
-@Table(name = "livsopphold_vurd_periode")
-public class AndreLivsoppholdsytelserVurderingPeriode extends BaseEntitet {
+@Entity(name = "AndreLivsoppholdsytelserResultatPeriode")
+@Table(name = "livsopphold_resultat_periode")
+public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_LIVSOPPHOLD_VURD_PERIODE")
-    @SequenceGenerator(name = "SEQ_LIVSOPPHOLD_VURD_PERIODE", sequenceName = "seq_livsopphold_vurd_periode", allocationSize = 50)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_LIVSOPPHOLD_RESULTAT_PERIODE")
+    @SequenceGenerator(name = "SEQ_LIVSOPPHOLD_RESULTAT_PERIODE", sequenceName = "seq_livsopphold_resultat_periode", allocationSize = 50)
     private Long id;
 
     @Type(PostgreSQLRangeType.class)
@@ -39,16 +39,16 @@ public class AndreLivsoppholdsytelserVurderingPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
-    AndreLivsoppholdsytelserVurderingPeriode() {
+    AndreLivsoppholdsytelserResultatPeriode() {
         // Hibernate
     }
 
     /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
-    AndreLivsoppholdsytelserVurderingPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserVurderingPeriode kilde) {
+    AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.getAvslagsårsak(), kilde.vurdertAv, kilde.vurdertTidspunkt);
     }
 
-    public AndreLivsoppholdsytelserVurderingPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
