@@ -153,7 +153,7 @@ class YtelseVedtaksbrevReglerTest {
     @Test
     void skal_gi_ingen_brev_ved_g_regulering() {
         LocalDate fom = LocalDate.of(2024, 12, 1);
-        var behandling = lagBehandling(SatsEndringScenarioer.gRegulsering(fom));
+        var behandling = lagBehandling(SatsEndringScenarioer.gRegulering(fom));
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isFalse();

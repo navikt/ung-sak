@@ -20,7 +20,7 @@ public class SatsEndringScenarioer {
     /**
      * G-regulering
      */
-    public static UngTestScenario gRegulsering(LocalDate fom) {
+    public static UngTestScenario gRegulering(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusYears(1));
         var satser = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom, p.getTomDato(), BrevScenarioerUtils.lavSatsBuilder(fom).build())

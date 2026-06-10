@@ -1,7 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -17,10 +16,6 @@ import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class SatsReguleringStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-
-    @Inject
-    public SatsReguleringStrategy() {
-    }
 
     @Override
     public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
