@@ -292,6 +292,8 @@ spec:
       value: "P14D"
     - name: HENT_INNTEKT_HENDElSER_INTERVALL
       value: "PT1M"
+    - name: BREVGENERERING_MAX_ANTALL_SAMTIDIGE
+      value: "4"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED
