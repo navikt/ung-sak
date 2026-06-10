@@ -31,7 +31,8 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
         BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_ØKT_SATS),
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL),
         BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_DELTAKER_DØDSFALL),
-        BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO)
+        BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO),
+        BehandlingÅrsakType.RE_SATS_REGULERING, DetaljertResultatInfo.of(DetaljertResultatType.SATS_REGULERING)
     );
 
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
