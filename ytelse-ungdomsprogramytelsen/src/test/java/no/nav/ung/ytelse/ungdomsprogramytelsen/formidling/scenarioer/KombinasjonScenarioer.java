@@ -71,7 +71,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder, null, false);
+            kontrollerInntektPerioder, null, true);
     }
 
 
@@ -124,7 +124,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder, null, false);
+            kontrollerInntektPerioder, null, true);
     }
 
 
@@ -424,7 +424,8 @@ public class KombinasjonScenarioer {
             scenario.barn(),
             scenario.dødsdato(),
             scenario.kontrollerInntektPerioder(),
-            maksdato, false);
+            maksdato,
+            scenario.harForlengetPeriode());
     }
 
 }

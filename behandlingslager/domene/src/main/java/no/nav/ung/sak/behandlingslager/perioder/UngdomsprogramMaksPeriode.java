@@ -52,6 +52,16 @@ public class UngdomsprogramMaksPeriode {
         this.hjemmel = hjemmel;
     }
 
+    @Override
+    public String toString() {
+        return "UngdomsprogramMaksPeriode{" +
+            "id=" + id +
+            ", harForlengetPeriode=" + harForlengetPeriode +
+            ", periodeMaksDato=" + periodeMaksDato +
+            ", hjemmel=" + hjemmel +
+            '}';
+    }
+
     public Long getId() {
         return id;
     }
@@ -67,4 +77,6 @@ public class UngdomsprogramMaksPeriode {
     public Hjemmel getHjemmel() {
         return hjemmel;
     }
+
+
 }
