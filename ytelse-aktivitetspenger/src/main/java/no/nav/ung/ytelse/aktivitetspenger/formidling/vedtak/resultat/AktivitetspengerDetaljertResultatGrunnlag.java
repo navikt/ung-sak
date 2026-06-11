@@ -1,7 +1,8 @@
-package no.nav.ung.sak.formidling.vedtak.resultat;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak.resultat;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 
 import java.util.List;
 import java.util.Set;
@@ -12,9 +13,9 @@ import java.util.stream.Collectors;
  * Intermidiate object for vilkårresultat and behandling årsaker primært brukt for tidslinje
  *
  */
-public record SamletVilkårResultatOgBehandlingÅrsaker(List<DetaljertVilkårResultat> vilkårsresultater,
-                                                      Set<BehandlingÅrsakType> behandlingÅrsaker,
-                                                      boolean manuellOpprettetBehandling) {
+public record AktivitetspengerDetaljertResultatGrunnlag(List<DetaljertVilkårResultat> vilkårsresultater,
+                                                        Set<BehandlingÅrsakType> behandlingÅrsaker,
+                                                        boolean manuellOpprettetBehandling) {
 
     public Set<Utfall> utfall() {
         return vilkårsresultater.stream().map(DetaljertVilkårResultat::utfall).collect(Collectors.toSet());

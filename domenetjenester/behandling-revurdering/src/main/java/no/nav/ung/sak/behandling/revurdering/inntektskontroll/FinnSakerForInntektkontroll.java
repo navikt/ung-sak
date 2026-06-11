@@ -52,9 +52,7 @@ public class FinnSakerForInntektkontroll {
     }
 
     List<Fagsak> finnFagsaker(LocalDate fom, LocalDate tom) {
-        var fagsaker = fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom).stream()
-            .filter(f -> STØTTEDE_YTELSE_TYPER.contains(f.getYtelseType()))
-            .toList();
+        var fagsaker = fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom, STØTTEDE_YTELSE_TYPER);
 
         var behandlinger = fagsaker.stream().map(Fagsak::getId).map(fagsakId -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId)).flatMap(Optional::stream).toList();
 

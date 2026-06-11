@@ -93,7 +93,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Fra 1. august 2025 til 12. desember 2025 får du ungdomsprogramytelse på 681 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 12. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Den siste utbetalingen får du før den 10. januar 2026. \
+                Den siste utbetalingen får du før den 12. januar 2026. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """
@@ -169,7 +169,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Fra 1. august 2025 til 15. februar 2026 får du ungdomsprogramytelse på 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 12. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Den siste utbetalingen får du før den 10. mars 2026. \
+                Den siste utbetalingen får du før den 12. mars 2026. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """

@@ -209,6 +209,16 @@ class BehandlingDtoUtilTest {
     }
 
     @Test
+    void forventer_opphør_ved_maksdato_for_re_varsel_opphor_ved_maksdato() {
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO));
+
+        BehandlingDto dto = new BehandlingDto();
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
+
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_VED_MAKSDATO);
+    }
+
+    @Test
     void forventer_flere_behandlingårsaker_for_blandede_årsaker() {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
             BehandlingÅrsakType.RE_HENDELSE_FØDSEL,

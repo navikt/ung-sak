@@ -5,9 +5,10 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringProgramPeriodeScenarioer;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.FørstegangsbehandlingScenarioer;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -18,14 +19,14 @@ import static no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.HtmlAssert.asse
 import static org.assertj.core.api.Assertions.assertThat;
 
 
-class EndringOpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
+class OpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
 
     private static final LocalDate DAGENS_DATO = LocalDate.of(2025, 8, 15);
 
 
 
 
-    EndringOpphørTest() {
+    OpphørTest() {
         super(1, "Du får ikke lenger ungdomsprogramytelse");
     }
 
@@ -47,7 +48,7 @@ class EndringOpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTe
                 Du får ikke lenger ungdomsprogramytelse \
                 Fra 16. august 2025 får du ikke lenger penger gjennom ungdomsprogramytelsen. \
                 Det er fordi du ikke lenger er med i ungdomsprogrammet. \
-                Den siste utbetalingen får du før den 10. september 2025. \
+                Den siste utbetalingen får du før den 12. september 2025. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3. \
                 """);
 
@@ -94,10 +95,54 @@ class EndringOpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTe
 
     }
 
+    @Test
+    void opphørMaksDato() {
+        var behandling = lagOpphørVedMaksDatoBehandling(LocalDate.of(2026, 4, 25));
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Ungdomsprogramytelsen din opphører \
+                Fra 25. april 2026 får du ikke lenger penger gjennom ungdomsprogramytelsen. \
+                Det er fordi du har brukt opp alle dagene dine i ungdomsprogrammet. \
+                Den siste utbetalingen får du før den 12. mai 2026. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3. \
+                """);
+
+
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.OPPHOR_VED_MAKSDATO);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Ungdomsprogramytelsen din opphører</h1>"
+            );
+
+    }
+
     private Behandling lagOpphørsbehandling(LocalDate sluttdato) {
         var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(LocalDate.of(2025, 1, 1));
-        var ungTestGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval(), sluttdato);
+        var revurderingGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(forrigeBehandlingGrunnlag.programPerioder().getFirst().getPeriode().toLocalDateInterval(), sluttdato);
 
+        var behandling = lagRevurderingMedOriginalBehandling(forrigeBehandlingGrunnlag, revurderingGrunnlag);
+
+
+        return behandling;
+    }
+
+    private Behandling lagOpphørVedMaksDatoBehandling(LocalDate maksdato) {
+        LocalDate fom = maksdato.minusWeeks(52).plusDays(1);
+        var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19år(fom);
+        var revurderingGrunnlag = EndringProgramPeriodeScenarioer.opphørMaksDato(fom, maksdato);
+
+
+        return lagRevurderingMedOriginalBehandling(forrigeBehandlingGrunnlag, revurderingGrunnlag);
+    }
+
+    private Behandling lagRevurderingMedOriginalBehandling(UngTestScenario forrigeBehandlingGrunnlag, UngTestScenario revurderingGrunnlag) {
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medUngTestGrunnlag(forrigeBehandlingGrunnlag);
@@ -107,7 +152,7 @@ class EndringOpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTe
 
         builder
             .medBehandlingType(BehandlingType.REVURDERING)
-            .medUngTestGrunnlag(ungTestGrunnlag)
+            .medUngTestGrunnlag(revurderingGrunnlag)
             .medOriginalBehandling(originalBehandling, null);
 
         var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
@@ -115,8 +160,6 @@ class EndringOpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTe
 
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         behandling.avsluttBehandling();
-
-
         return behandling;
     }
 

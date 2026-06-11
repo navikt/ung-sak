@@ -26,9 +26,9 @@ public class KombinasjonScenarioer {
      * Kombinasjon - forlenget periode + kontroll av inntekt (full utbetaling, dvs. 0 kr inntekt).
      * Skal gi forlenget-brev men ingen inntektskontroll-brev.
      *
-     * @param fom - startdato for programmet
+     * @param fom                  - startdato for programmet
      * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
-     * @param nySluttdato - ny sluttdato etter forlengelse
+     * @param nySluttdato          - ny sluttdato etter forlengelse
      */
     public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
@@ -71,7 +71,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null, true);
     }
 
 
@@ -79,9 +79,9 @@ public class KombinasjonScenarioer {
      * Kombinasjon - forlenget periode + kontroll av inntekt med reduksjon (10 000 kr inntekt).
      * Skal gi to brev: ENDRING_INNTEKT og FORLENGET_PERIODE.
      *
-     * @param fom - startdato for programmet
+     * @param fom                  - startdato for programmet
      * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
-     * @param nySluttdato - ny sluttdato etter forlengelse
+     * @param nySluttdato          - ny sluttdato etter forlengelse
      */
     public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
@@ -124,7 +124,56 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null, true);
+    }
+
+
+    /**
+     * Kombinasjon - forlenget periode + opphør i samme behandling.
+     * Perioden er først forlenget fra opprinnelig sluttdato til ny sluttdato, men programmet
+     * opphører deretter ved opphørsdato (som ligger i den forlengede delen av perioden).
+     * Skal gi både forlenget-trigger og opphørs-trigger.
+     *
+     * @param fom                  - startdato for programmet
+     * @param opphørsdato          - dato programmet opphører (siste dag med ytelse)
+     */
+    public static UngTestScenario kombinasjon_forlengetPeriodeOgOpphør(LocalDate fom, LocalDate opphørsdato) {
+        // Opprinnelig sluttdato er 52 uker fra fom, ny sluttdato er 8 uker etter opprinnelig sluttdato
+        var opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        var nySluttdato = opprinneligSluttdato.plusWeeks(8);
+        if (!opphørsdato.isAfter(opprinneligSluttdato) || !opphørsdato.isBefore(nySluttdato)) {
+            throw new IllegalArgumentException("Opphørsdato må ligge i den forlengede delen av perioden (etter opprinnelig sluttdato og før ny sluttdato)");
+        }
+
+        var forlengetPeriode = new LocalDateInterval(fom, nySluttdato);
+        var nyProgramPeriode = new LocalDateInterval(fom, opphørsdato);
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, nySluttdato, BrevScenarioerUtils.lavSatsBuilder(fom).build())
+        ));
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), nyProgramPeriode.getTomDato())),
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, nyProgramPeriode),
+            new LocalDateTimeline<>(forlengetPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(nyProgramPeriode, Utfall.OPPFYLT),
+                new LocalDateSegment<>(opphørsdato.plusDays(1), nySluttdato, Utfall.IKKE_OPPFYLT)
+            )),
+            fom.minusYears(19).plusDays(42),
+            List.of(fom),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
+                    DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato)),
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER,
+                    DatoIntervallEntitet.fra(fom, opphørsdato)),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+                    DatoIntervallEntitet.fra(opphørsdato.plusDays(1), nySluttdato))
+            ),
+            Collections.emptyList(),
+            null, null, null, true);
     }
 
 
@@ -185,7 +234,7 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ), null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null, false);
     }
 
 
@@ -242,7 +291,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null, false);
     }
 
     /**
@@ -280,7 +329,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null, null);
+            null, null, null, false);
     }
 
     public static UngTestScenario endringStartdatoOgOpphør(LocalDateInterval opprinneligProgramPeriode, LocalDate nyStartdato, LocalDate sluttdato) {
@@ -316,7 +365,7 @@ public class KombinasjonScenarioer {
             ungTestScenario.søknadStartDato(),
             triggere,
             ungTestScenario.barn(),
-            null, null);
+            null, null, null, false);
     }
 
 
@@ -355,6 +404,28 @@ public class KombinasjonScenarioer {
             List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
             ),
-            null, null);
+            null, null, null, false);
     }
+
+    public static UngTestScenario leggTilVarselOpphørVedMaksdato(UngTestScenario scenario, LocalDate maksdato) {
+        var triggere = new HashSet<>(scenario.behandlingTriggere());
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)));
+        return new UngTestScenario(
+            scenario.navn(),
+            scenario.programPerioder(),
+            scenario.satser(),
+            scenario.uttakPerioder(),
+            scenario.tilkjentYtelsePerioder(),
+            scenario.aldersvilkår(),
+            scenario.ungdomsprogramvilkår(),
+            scenario.fødselsdato(),
+            scenario.søknadStartDato(),
+            triggere,
+            scenario.barn(),
+            scenario.dødsdato(),
+            scenario.kontrollerInntektPerioder(),
+            maksdato,
+            scenario.harForlengetPeriode());
+    }
+
 }

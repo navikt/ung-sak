@@ -32,6 +32,7 @@ class UtledStatusForPerioderPåBehandling {
         BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS,
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
         BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
+        BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO,
         BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
         BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
         BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
