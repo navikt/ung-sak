@@ -33,6 +33,15 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
     @Column(name = "avslagsarsak", updatable = false)
     private String avslagsårsakKode;
 
+    @Column(name = "manuell_vurdering", nullable = false, updatable = false)
+    private boolean manuellVurdering;
+
+    @Column(name = "begrunnelse", updatable = false)
+    private String begrunnelse;
+
+    @Column(name = "fritekst_vurdering_brev", updatable = false)
+    private String fritekstVurderingBrev;
+
     @Column(name = "vurdert_av", nullable = false, updatable = false)
     private String vurdertAv;
 
@@ -45,10 +54,10 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
 
     /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
     AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.getAvslagsårsak(), kilde.vurdertAv, kilde.vurdertTidspunkt);
+        this(periode, kilde.godkjent, kilde.getAvslagsårsak(), kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
     }
 
-    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, Avslagsårsak avslagsårsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
@@ -58,6 +67,9 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
         this.godkjent = godkjent;
         this.avslagsårsakKode = avslagsårsak != null ? avslagsårsak.getKode() : null;
+        this.manuellVurdering = manuellVurdering;
+        this.begrunnelse = begrunnelse;
+        this.fritekstVurderingBrev = fritekstVurderingBrev;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
     }
@@ -76,6 +88,18 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
 
     public Avslagsårsak getAvslagsårsak() {
         return avslagsårsakKode != null ? Avslagsårsak.fraKode(avslagsårsakKode) : null;
+    }
+
+    public boolean isManuellVurdering() {
+        return manuellVurdering;
+    }
+
+    public String getBegrunnelse() {
+        return begrunnelse;
+    }
+
+    public String getFritekstVurderingBrev() {
+        return fritekstVurderingBrev;
     }
 
     public String getVurdertAv() {

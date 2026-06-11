@@ -17,17 +17,20 @@ comment on table bistand_resultat_holder is 'Aggregat som samler saksbehandlers 
 
 create table bistand_resultat_periode
 (
-    id                        bigint                                               not null primary key,
-    bistand_resultat_holder_id bigint references bistand_resultat_holder (id)     not null,
-    periode                   daterange                                            not null,
-    godkjent                  boolean                                              not null,
-    avslagsarsak              varchar(100),
-    vurdert_av                varchar(100)                                         not null,
-    vurdert_tidspunkt         timestamp(3)                                         not null,
-    opprettet_av              varchar(20)  default 'VL'                            not null,
-    opprettet_tid             timestamp(3) default current_timestamp               not null,
-    endret_av                 varchar(20),
-    endret_tid                timestamp(3)
+    id                         bigint                                               not null primary key,
+    bistand_resultat_holder_id bigint references bistand_resultat_holder (id)      not null,
+    periode                    daterange                                            not null,
+    godkjent                   boolean                                              not null,
+    avslagsarsak               varchar(100),
+    manuell_vurdering          boolean                                              not null,
+    begrunnelse                text,
+    fritekst_vurdering_brev    text,
+    vurdert_av                 varchar(100)                                         not null,
+    vurdert_tidspunkt          timestamp(3)                                         not null,
+    opprettet_av               varchar(20)  default 'VL'                            not null,
+    opprettet_tid              timestamp(3) default current_timestamp               not null,
+    endret_av                  varchar(20),
+    endret_tid                 timestamp(3)
 );
 
 comment on table bistand_resultat_periode is 'Periodisert vurdering av bistandsvilkåret. godkjent=false krever avslagsarsak.';
@@ -47,17 +50,20 @@ comment on table livsopphold_resultat_holder is 'Aggregat som samler saksbehandl
 
 create table livsopphold_resultat_periode
 (
-    id                           bigint                                                     not null primary key,
-    livsopphold_resultat_holder_id bigint references livsopphold_resultat_holder (id)       not null,
-    periode                      daterange                                                  not null,
-    godkjent                     boolean                                                    not null,
-    avslagsarsak                 varchar(100),
-    vurdert_av                   varchar(100)                                               not null,
-    vurdert_tidspunkt            timestamp(3)                                               not null,
-    opprettet_av                 varchar(20)  default 'VL'                                  not null,
-    opprettet_tid                timestamp(3) default current_timestamp                     not null,
-    endret_av                    varchar(20),
-    endret_tid                   timestamp(3)
+    id                             bigint                                                     not null primary key,
+    livsopphold_resultat_holder_id bigint references livsopphold_resultat_holder (id)         not null,
+    periode                        daterange                                                  not null,
+    godkjent                       boolean                                                    not null,
+    avslagsarsak                   varchar(100),
+    manuell_vurdering              boolean                                                    not null,
+    begrunnelse                    text,
+    fritekst_vurdering_brev        text,
+    vurdert_av                     varchar(100)                                               not null,
+    vurdert_tidspunkt              timestamp(3)                                               not null,
+    opprettet_av                   varchar(20)  default 'VL'                                  not null,
+    opprettet_tid                  timestamp(3) default current_timestamp                     not null,
+    endret_av                      varchar(20),
+    endret_tid                     timestamp(3)
 );
 
 comment on table livsopphold_resultat_periode is 'Periodisert vurdering av andre livsoppholdsytelser-vilkåret. godkjent=false krever avslagsarsak.';

@@ -76,6 +76,9 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
                 it.erVilkårOppfylt(),
                 it.avslagsårsak(),
+                true,
+                it.begrunnelse(),
+                it.fritekstVurderingBrev(),
                 vurdertAv,
                 vurdertTidspunkt))
             .toList();

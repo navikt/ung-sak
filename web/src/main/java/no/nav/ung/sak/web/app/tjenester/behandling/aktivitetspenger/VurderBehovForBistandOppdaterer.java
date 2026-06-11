@@ -75,6 +75,9 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
                 DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
                 it.erVilkårOppfylt(),
                 it.avslagsårsak(),
+                true,
+                it.begrunnelse(),
+                it.fritekstVurderingBrev(),
                 vurdertAv,
                 vurdertTidspunkt))
             .toList();
