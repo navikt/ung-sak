@@ -12,9 +12,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import org.junit.jupiter.api.Test;
 
@@ -279,9 +279,7 @@ public class EndringInntektScenarioer {
                 triggere.add(new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, periode));
             });
 
-        List<LocalDateSegment<Utfall>> ungVilkår = List.of(
-            new LocalDateSegment<>(p.getFomDato(), tilkjentPeriode.getTomDato(), Utfall.OPPFYLT),
-            new LocalDateSegment<>(tilkjentPeriode.getTomDato().plusDays(1), p.getTomDato(), Utfall.IKKE_OPPFYLT));
+        List<LocalDateSegment<Utfall>> ungVilkår = List.of(new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Utfall.OPPFYLT));
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
             programPerioder,
