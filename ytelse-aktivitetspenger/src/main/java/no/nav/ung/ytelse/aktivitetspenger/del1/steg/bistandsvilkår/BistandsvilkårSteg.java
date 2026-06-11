@@ -34,7 +34,6 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BISTANDSV
 public class BistandsvilkårSteg extends VilkårVurderingSteg {
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
-    private VilkårResultatRepository vilkårResultatRepository;
 
     BistandsvilkårSteg() {
         //for CDI proxy
@@ -48,7 +47,6 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
-        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
