@@ -20,10 +20,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
 import java.time.LocalDateTime;
@@ -84,7 +86,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(param.getBehandlingId(), periodeVurderinger);
 
         LocalDateTimeline<Boolean> vurdertEtterOppdatering = inngangsvilkårVurderingRepository.hentGrunnlag(param.getBehandlingId())
-            .flatMap(g -> g.getBistandsvilkårResultatHolder())
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
             .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
                 .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
                 .toList()))

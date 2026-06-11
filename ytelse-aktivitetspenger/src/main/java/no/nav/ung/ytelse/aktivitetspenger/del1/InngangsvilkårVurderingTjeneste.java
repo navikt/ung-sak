@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -36,9 +37,10 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : holder.getVurderinger()) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? Avslagsårsak.IKKE_14A_VEDTAK : null;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medUtfallManuell(utfall)
-                .medAvslagsårsak(vurdering.getAvslagsårsak()));
+                .medAvslagsårsak(avslagsårsak));
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }
@@ -53,9 +55,10 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : holder.getVurderinger()) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE : null;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medUtfallManuell(utfall)
-                .medAvslagsårsak(vurdering.getAvslagsårsak()));
+                .medAvslagsårsak(avslagsårsak));
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }

@@ -21,7 +21,7 @@ create table bistand_resultat_periode
     bistand_resultat_holder_id bigint references bistand_resultat_holder (id)      not null,
     periode                    daterange                                            not null,
     godkjent                   boolean                                              not null,
-    avslagsarsak               varchar(100),
+    ikke_oppfylt_aarsak        varchar(100),
     manuell_vurdering          boolean                                              not null,
     begrunnelse                text,
     fritekst_vurdering_brev    text,
@@ -33,7 +33,7 @@ create table bistand_resultat_periode
     endret_tid                 timestamp(3)
 );
 
-comment on table bistand_resultat_periode is 'Periodisert vurdering av bistandsvilkåret. godkjent=false krever avslagsarsak.';
+comment on table bistand_resultat_periode is 'Periodisert vurdering av bistandsvilkåret. godkjent=false krever ikke_oppfylt_aarsak.';
 
 create index idx_bistand_resultat_periode_resultat_holder on bistand_resultat_periode (bistand_resultat_holder_id);
 
@@ -54,7 +54,7 @@ create table livsopphold_resultat_periode
     livsopphold_resultat_holder_id bigint references livsopphold_resultat_holder (id)         not null,
     periode                        daterange                                                  not null,
     godkjent                       boolean                                                    not null,
-    avslagsarsak                   varchar(100),
+    ikke_oppfylt_aarsak            varchar(100),
     manuell_vurdering              boolean                                                    not null,
     begrunnelse                    text,
     fritekst_vurdering_brev        text,
@@ -66,7 +66,7 @@ create table livsopphold_resultat_periode
     endret_tid                     timestamp(3)
 );
 
-comment on table livsopphold_resultat_periode is 'Periodisert vurdering av andre livsoppholdsytelser-vilkåret. godkjent=false krever avslagsarsak.';
+comment on table livsopphold_resultat_periode is 'Periodisert vurdering av andre livsoppholdsytelser-vilkåret. godkjent=false krever ikke_oppfylt_aarsak.';
 
 create index idx_livsopphold_resultat_periode_resultat_holder on livsopphold_resultat_periode (livsopphold_resultat_holder_id);
 

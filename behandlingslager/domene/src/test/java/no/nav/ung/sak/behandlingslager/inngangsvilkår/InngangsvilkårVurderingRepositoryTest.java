@@ -3,7 +3,8 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -63,14 +64,14 @@ class InngangsvilkårVurderingRepositoryTest {
         var lagretVurdering = holder.get().getVurderinger().get(0);
         assertThat(lagretVurdering.getPeriode()).isEqualTo(PERIODE_1);
         assertThat(lagretVurdering.isGodkjent()).isTrue();
-        assertThat(lagretVurdering.getAvslagsårsak()).isNull();
+        assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isNull();
         assertThat(lagretVurdering.getVurdertAv()).isEqualTo(VURDERT_AV);
         assertThat(lagretVurdering.getVurdertTidspunkt()).isEqualTo(VURDERT_TIDSPUNKT);
     }
 
     @Test
     void skal_lagre_bistandsvurdering_med_avslagsårsak() {
-        var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, false, Avslagsårsak.IKKE_14A_VEDTAK, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(vurdering));
 
         var holder = repository.hentGrunnlag(behandling.getId())
@@ -80,12 +81,12 @@ class InngangsvilkårVurderingRepositoryTest {
         assertThat(holder.getVurderinger()).hasSize(1);
         var lagretVurdering = holder.getVurderinger().get(0);
         assertThat(lagretVurdering.isGodkjent()).isFalse();
-        assertThat(lagretVurdering.getAvslagsårsak()).isEqualTo(Avslagsårsak.IKKE_14A_VEDTAK);
+        assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
     }
 
     @Test
     void skal_lagre_og_hente_livsoppholdsytelsevurdering() {
-        var vurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var vurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(vurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
@@ -97,7 +98,7 @@ class InngangsvilkårVurderingRepositoryTest {
         assertThat(holder.get().getVurderinger()).hasSize(1);
         var lagretVurdering = holder.get().getVurderinger().get(0);
         assertThat(lagretVurdering.isGodkjent()).isFalse();
-        assertThat(lagretVurdering.getAvslagsårsak()).isEqualTo(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE);
+        assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE);
     }
 
     @Test
@@ -120,7 +121,7 @@ class InngangsvilkårVurderingRepositoryTest {
         var bistandVurdering = new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(bistandVurdering));
 
-        var livsoppholdVurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_2, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var livsoppholdVurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_2, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow();
@@ -137,7 +138,7 @@ class InngangsvilkårVurderingRepositoryTest {
 
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(
-                new BistandsvilkårResultatPeriode(PERIODE_1, false, Avslagsårsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1)),
+                new BistandsvilkårResultatPeriode(PERIODE_1, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1)),
                 new BistandsvilkårResultatPeriode(PERIODE_2, true, null, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))
             ));
 
@@ -158,7 +159,7 @@ class InngangsvilkårVurderingRepositoryTest {
 
         // Kun PERIODE_2 oppdateres — PERIODE_1 skal beholdes fra eksisterende
         repository.lagreBistandsVurderinger(behandling.getId(),
-            List.of(new BistandsvilkårResultatPeriode(PERIODE_2, false, Avslagsårsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
+            List.of(new BistandsvilkårResultatPeriode(PERIODE_2, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
 
         var vurderinger = repository.hentGrunnlag(behandling.getId())
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
@@ -180,7 +181,7 @@ class InngangsvilkårVurderingRepositoryTest {
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
         repository.lagreYtelseVurderinger(behandling.getId(),
-            List.of(new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
+            List.of(new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
 
         var revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
