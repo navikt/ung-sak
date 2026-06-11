@@ -2,8 +2,10 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.hendelsehåndtering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -15,6 +17,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.hendelser.Hendelse;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     private BehandlingRepository behandlingRepository;
     private UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
+    private VilkårTjeneste vilkårTjeneste;
 
     public UngdomsprogramOpphørFagsakTilVurderingUtleder() {
         // For CDI
@@ -38,10 +42,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     @Inject
     public UngdomsprogramOpphørFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                          UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste) {
+                                                         FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
+                                                         VilkårTjeneste vilkårTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
+        this.vilkårTjeneste = vilkårTjeneste;
     }
 
     @Override
@@ -58,6 +64,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
                 continue;
             }
 
+            // Ignorer opphørshendelse dersom opphørsdato == maksdato (naturlig avslutning).
+            // Deltaker-appen setter sluttdato = maksdato automatisk. Ung-sak trenger ikke opprette revurdering.
             Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
             if (behandlingOpt.isEmpty()) {
                 logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
@@ -65,6 +73,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             }
 
             Behandling sisteBehandling = behandlingOpt.get();
+
+            if (harIngenOppfyltYtelseEtterDato(sisteBehandling, opphørsdatoFraHendelse, hendelseId)) {
+                continue;
+            }
 
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
@@ -126,4 +138,46 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         return true;
     }
 
+    /**
+     * Sjekker om det finnes oppfylte vilkårsperioder etter opphørsdato.
+     * Hvis ikke, er det ingen aktiv ytelse å opphøre — revurdering er unødvendig.
+     * Dette fanger opp naturlig avslutning ved maksdato, aldersvilkår-avslag,
+     * og andre scenarioer der ytelsen allerede er avsluttet/avslått.
+     *
+     * Dersom vilkårsresultatet er tomt (vilkår ikke vurdert), antas ytelsen å være aktiv.
+     */
+    private boolean harIngenOppfyltYtelseEtterDato(Behandling behandling, LocalDate opphørsdato, String hendelseId) {
+        // Sjekk 1: Hvis opphørsdato == periodeMaksDato er dette en naturlig avslutning
+        var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId());
+        if (maksdato.isPresent() && maksdato.get().equals(opphørsdato)) {
+            logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag. Naturlig avslutning — ignorerer hendelse {}.",
+                opphørsdato, hendelseId);
+            return true;
+        }
+
+        // Sjekk 2: Hvis vilkårsresultat finnes og dekker perioden etter opphørsdato med kun ikke-oppfylte utfall
+        var samletResultat = vilkårTjeneste.samletVilkårsresultat(behandling.getId());
+        if (samletResultat.isEmpty()) {
+            // Vilkår ikke vurdert ennå — anta at ytelsen er aktiv
+            return false;
+        }
+
+        var resultatEtterOpphørsdato = samletResultat
+            .intersection(new LocalDateInterval(opphørsdato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
+
+        if (resultatEtterOpphørsdato.isEmpty()) {
+            // Vilkårsresultatet dekker ikke perioden etter opphørsdato (ikke evaluert ennå) — anta aktiv ytelse
+            return false;
+        }
+
+        var oppfyltEtterOpphørsdato = resultatEtterOpphørsdato
+            .filterValue(v -> v.getSamletUtfall() == Utfall.OPPFYLT);
+
+        if (oppfyltEtterOpphørsdato.isEmpty()) {
+            logger.info("Ingen oppfylte vilkårsperioder etter opphørsdato {} for behandling {}. Ignorerer hendelse {}.",
+                opphørsdato, behandling.getId(), hendelseId);
+            return true;
+        }
+        return false;
+    }
 }

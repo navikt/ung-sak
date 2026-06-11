@@ -272,6 +272,8 @@ spec:
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
+    - name: VARSEL_OPPHOR_VED_MAKSDATO_ENABLED
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
@@ -290,6 +292,8 @@ spec:
       value: "P14D"
     - name: HENT_INNTEKT_HENDElSER_INTERVALL
       value: "PT1M"
+    - name: BREVGENERERING_MAX_ANTALL_SAMTIDIGE
+      value: "4"
 
     # Audit logging
     - name: AUDITLOGGER_ENABLED

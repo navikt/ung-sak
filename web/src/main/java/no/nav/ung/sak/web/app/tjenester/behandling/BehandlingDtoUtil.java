@@ -126,7 +126,8 @@ public class BehandlingDtoUtil {
             BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
             BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
             BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
-            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO
         );
 
         // Kun behold behandlingsårsaker som faktisk har en spesifikk visningsnavnlogikk
@@ -151,6 +152,9 @@ public class BehandlingDtoUtil {
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM == it || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
             return BehandlingVisningsnavn.UNGDOMSPROGRAMENDRING;
+        }
+        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO == it)) {
+            return BehandlingVisningsnavn.OPPHØR_VED_MAKSDATO;
         }
         return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;
     }

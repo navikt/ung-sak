@@ -5,9 +5,9 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.ForlengetPeriodeScenarioer;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringProgramPeriodeScenarioer;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -54,7 +54,7 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
 
     private Behandling lagForlengetPeriodeBehandling(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
         var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedMaksDato(FOM, opprinneligSluttdato);
-        var forlengetPeriodeGrunnlag = ForlengetPeriodeScenarioer.forlengetPeriode(FOM, opprinneligSluttdato, nySluttdato);
+        var forlengetPeriodeGrunnlag = EndringProgramPeriodeScenarioer.forlengetPeriode(FOM, opprinneligSluttdato, nySluttdato);
 
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
