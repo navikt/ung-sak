@@ -8,7 +8,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -42,8 +41,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
                                             UttalelseRepository uttalelseRepository,
                                             OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                            AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository) {
-                                            BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
+                                            AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
                                             InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
