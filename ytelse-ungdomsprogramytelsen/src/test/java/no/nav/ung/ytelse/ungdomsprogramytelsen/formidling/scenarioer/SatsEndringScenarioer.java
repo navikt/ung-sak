@@ -69,6 +69,7 @@ public class SatsEndringScenarioer {
             scenario.barn(),
             scenario.dødsdato(),
             scenario.kontrollerInntektPerioder(),
-            scenario.periodeMaksDato());
+            scenario.periodeMaksDato(),
+            scenario.harForlengetPeriode());
     }
 }
