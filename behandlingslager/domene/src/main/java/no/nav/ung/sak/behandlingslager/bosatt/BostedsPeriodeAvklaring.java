@@ -7,6 +7,7 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
 import no.nav.ung.sak.domene.typer.tid.Range;
+import no.nav.ung.sak.typer.Periode;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
@@ -58,6 +59,15 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.erBosattITrondheim = erBosattITrondheim;
         this.fraflyttingsÅrsak = fraflyttingsÅrsak;
         this.kilde = kilde;
+    }
+
+    public BostedsPeriodeAvklaring medNyPeriode(DatoIntervallEntitet nyPeriode) {
+        return new BostedsPeriodeAvklaring(
+            nyPeriode,
+            this.isErBosattITrondheim(),
+            this.getFraflyttingsÅrsak(),
+            this.getKilde()
+        );
     }
 
     public Long getId() {

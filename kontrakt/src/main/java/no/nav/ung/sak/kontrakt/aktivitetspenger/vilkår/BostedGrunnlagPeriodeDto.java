@@ -14,6 +14,8 @@ import java.time.LocalDate;
 public record BostedGrunnlagPeriodeDto(
     /** Fom-dato i vilkårsperioden. */
     @NotNull LocalDate fom,
+    /** Tom-dato i vilkårsperioden. */
+    LocalDate tom,
     /** Om bruker er bosatt ved skjæringstidspunktet. */
     @NotNull Boolean erBosattITrondheim,
     /** Eventuell dato for utflytting fra Trondheim. Null dersom bruker er bosatt hele perioden. */

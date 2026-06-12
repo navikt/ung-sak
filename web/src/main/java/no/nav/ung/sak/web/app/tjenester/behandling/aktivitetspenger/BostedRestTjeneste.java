@@ -112,15 +112,17 @@ public class BostedRestTjeneste {
             LocalDate fom = periodeAvklaring.getPeriode().getFomDato();
 
             Boolean søknadOppgitt = søknadErBosattPerFom.get(fom);
+            var fraflyttingsdato = søknadOppgitt != null && søknadOppgitt && !periodeAvklaring.isErBosattITrondheim()  ? periodeAvklaring.getPeriode().getFomDato() : null;
 
             var uttalelse = uttalelseByFom.get(fom);
             boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
             String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
             perioder.add(new BostedGrunnlagPeriodeDto(
-                fom,
-                periodeAvklaring.isErBosattITrondheim(),
                 periodeAvklaring.getPeriode().getFomDato(),
+                periodeAvklaring.getPeriode().getTomDato(),
+                periodeAvklaring.isErBosattITrondheim(),
+                fraflyttingsdato,
                 periodeAvklaring.getFraflyttingsÅrsak(),
                 periodeAvklaring.getKilde(),
                 søknadOppgitt,

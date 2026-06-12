@@ -48,7 +48,6 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VURDER_FAKTA_OM_BOSTED = "5130";
     public static final String VURDER_BOSTEDVILKÅR_KODE = "5140";
-    public static final String VURDER_OPPHØR_BOSTED_KODE = "5144";
     public static final String VURDER_BISTANDSVILKÅR_KODE = "5141";
     public static final String VURDER_ANDRE_LIVSOPPHOLDSYTELSER_KODE = "5142";
     public static final String LOKALKONTOR_FORESLÅR_VILKÅR_KODE = "5100";

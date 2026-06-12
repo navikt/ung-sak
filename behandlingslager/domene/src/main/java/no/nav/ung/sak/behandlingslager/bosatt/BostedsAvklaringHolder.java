@@ -1,7 +1,12 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.Periode;
 import org.hibernate.annotations.BatchSize;
 
 import java.time.LocalDate;
@@ -41,16 +46,24 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         this.periodeAvklaringer = periodeAvklaringer;
     }
 
-    void fjernPeriodeAvklaringForFom(LocalDate fom) {
-        periodeAvklaringer.removeIf(it -> it.getPeriode().getFomDato().equals(fom));
+    void fjernPeriodeAvklaring(Set<Periode> perioderSomSkalFjernes) {
+        var fjerneTidslinje = new LocalDateTimeline<>(perioderSomSkalFjernes.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).collect(Collectors.toList()));
+        periodeAvklaringer = hentSomTidslinje().disjoint(fjerneTidslinje)
+            .toSegments().stream()
+            .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    void leggTilPeriodeAvklaring(BostedsPeriodeAvklaring periodeAvklaring) {
-        periodeAvklaringer.add(periodeAvklaring);
+    void leggTilEllerErstattPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
+        periodeAvklaringer = byggAvklaringTidslinje(nyePeriodeAvklaring)
+            .crossJoin(hentSomTidslinje())
+            .toSegments().stream()
+            .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    void leggTilPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> periodeAvklaring) {
-        periodeAvklaringer.addAll(periodeAvklaring);
+    public LocalDateTimeline<BostedsPeriodeAvklaring> hentSomTidslinje() {
+        return byggAvklaringTidslinje(periodeAvklaringer);
     }
 
     public Long getId() {
@@ -61,13 +74,19 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         return Collections.unmodifiableSet(periodeAvklaringer);
     }
 
-    public Optional<BostedsPeriodeAvklaring> getPeriodeAvklaring(LocalDate fom) {
-        return periodeAvklaringer.stream().filter(it -> it.getPeriode().getFomDato().equals(fom)).findFirst();
-    }
-
-
     public Optional<BostedsPeriodeAvklaring> getPeriodeAvklaring(UUID ref) {
         return periodeAvklaringer.stream().filter(it -> it.getReferanse().equals(ref)).findFirst();
+    }
+
+    private static LocalDateTimeline<BostedsPeriodeAvklaring> byggAvklaringTidslinje(Collection<BostedsPeriodeAvklaring> avklaringer) {
+        return new LocalDateTimeline<>(
+            avklaringer.stream().map(avklaring ->
+                new LocalDateSegment<>(
+                    avklaring.getPeriode().getFomDato(),
+                    avklaring.getPeriode().getTomDato(),
+                    avklaring)
+            ).collect(Collectors.toList())
+        );
     }
 
     @Override

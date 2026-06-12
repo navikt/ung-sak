@@ -59,14 +59,6 @@ public class BostedsGrunnlagRepository {
 
         nyttGrunnlag.leggTilInformasjonFraSøknad(new BostedsinformasjonFraSøknad(journalpostId, periode.getFom(), erBosattITrondheim));
 
-        // Opprette bostedfaktaforslag ved persistering av søknaddata?
-        //        nyttGrunnlag.medForeslåttAvklaring(Map.of(periode, new BostedAvklaringData(
-        //            erBosattITrondheim,
-        //            null,
-        //            null,
-        //            Kilde.SØKNAD))
-        //        );
-
         if (eksisterendeGrunnlag.isPresent()) {
             if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
                 return;
@@ -86,7 +78,7 @@ public class BostedsGrunnlagRepository {
      */
     public Map<LocalDate, UUID> lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(
         Long behandlingId,
-        Map<Periode, BostedAvklaringData> avklaringerPerSkjæringstidspunkt) {
+        Map<Periode, BostedAvklaringData> nyeAvklaringer) {
 
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
 
@@ -94,7 +86,7 @@ public class BostedsGrunnlagRepository {
             .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
             .orElse(new BostedsGrunnlag(behandlingId));
 
-        nyttGrunnlag.setForeslåttAvklaring(avklaringerPerSkjæringstidspunkt);
+        nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
 
         if (eksisterendeGrunnlag.isPresent()) {
             if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {

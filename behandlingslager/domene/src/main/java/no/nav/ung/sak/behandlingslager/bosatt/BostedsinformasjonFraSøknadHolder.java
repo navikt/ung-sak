@@ -1,13 +1,14 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import org.hibernate.annotations.BatchSize;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Aggregat for søknadbaserte bostedsopplysninger per behandling.
@@ -46,6 +47,11 @@ public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
 
     public Set<BostedsinformasjonFraSøknad> getInformasjon() {
         return Collections.unmodifiableSet(informasjon);
+    }
+
+    public Map<LocalDate, BostedsinformasjonFraSøknad> hentSomMap() {
+        return informasjon.stream()
+            .collect(Collectors.toMap(BostedsinformasjonFraSøknad::getFomDato, i -> i));
     }
 
     @Override

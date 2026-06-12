@@ -1,6 +1,6 @@
 package no.nav.ung.sak.domene.arbeidsgiver;
 
-import static no.nav.ung.StringTrimmer.trim;
+import static no.nav.ung.kodeverk.StringTrimmer.trim;
 
 import java.time.LocalDate;
 import java.util.Objects;

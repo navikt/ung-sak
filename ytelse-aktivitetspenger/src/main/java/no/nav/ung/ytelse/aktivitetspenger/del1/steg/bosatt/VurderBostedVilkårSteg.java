@@ -5,31 +5,30 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
-import no.nav.ung.kodeverk.bosatt.Kilde;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringOgUttalelseOgResultat.StegUtfall;
 
 import java.time.Duration;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -91,25 +90,44 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
         List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
             behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_BOSTED);
-        Map<LocalDate, EtterlysningData> etterlysningPerFom = etterlysninger.stream()
-            .collect(Collectors.toMap(e -> e.periode().getFomDato(), e -> e));
+
+        var etterlysningTidslinje = new LocalDateTimeline<>(
+            etterlysninger.stream().map(e->
+                    new LocalDateSegment<>(e.periode().getFomDato(), e.periode().getTomDato(), e)
+            ).collect(Collectors.toList())
+        ).intersection(tidslinjeTilVurdering);
 
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
-        BostedsAvklaringHolder bostedAvklaring = grunnlag.getForeslått();
 
-        LocalDateTimeline<StegUtfall> stegutfallTidslinje = tidslinjeTilVurdering.map(
-            segment -> vurder(segment, etterlysningPerFom, bostedAvklaring));
+        var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(tidslinjeTilVurdering);
+        LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
+            .intersection(tidslinjeTilVurdering)
+            .mapValue(BostedAvklaringOgUttalelseOgResultat::new)
+            .combine(
+                etterlysningTidslinje,
+                leggTilEtterlysning(),
+                LocalDateTimeline.JoinStyle.LEFT_JOIN);
+
+        LocalDateTimeline<StegUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
 
         if (!stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
-            return settPåVent(stegutfallTidslinje, etterlysningPerFom);
+            return settPåVent(vurderingTidslinje);
         }
 
-        stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals)
+        vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals))
             .toSegments()
             .forEach(s -> {
-                BostedsPeriodeAvklaring avklaring = bostedAvklaring.getPeriodeAvklaring(s.getFom())
-                    .orElseThrow(() -> new IllegalStateException("Forventer bostedsavklaring for stp " + s.getFom()));
+                if (s.getValue().getEtterlysning() == null) {
+                    throw new IllegalStateException("Mangler etterlysning for "+ s.getLocalDateInterval());
+                }
+
+                if (!s.getValue().getEtterlysning().grunnlagsreferanse().equals(s.getValue().getAvklaring().getReferanse())) {
+                    throw new IllegalStateException("Avklaring og etterlysning har ulik grunnlagsreferanse "
+                        +s.getLocalDateInterval()+", "+s.getValue().getEtterlysning().grunnlagsreferanse()+", "+s.getValue().getAvklaring().getReferanse());
+                }
+
+                BostedsPeriodeAvklaring avklaring = s.getValue().getAvklaring().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
                 Avslagsårsak avslagsårsak = mapTilAvslagsårsak(avklaring.getFraflyttingsÅrsak());
 //                vurdertAktivitetspengerGrunnlag.lagre(new BostedsvurderingResultat(
 //                    behandlingId,
@@ -127,41 +145,34 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
         }
 
-        if (!stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_MANUELT::equals).isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_OPPHØR_BOSTED));
-        }
-
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static List<LocalDateSegment<StegUtfall>> vurder(LocalDateSegment<Boolean> segment,
-                                                              Map<LocalDate, EtterlysningData> etterlysningPerFom,
-                                                              BostedsAvklaringHolder holder) {
-        LocalDate fom = segment.getFom();
-        EtterlysningData etterlysning = etterlysningPerFom.get(fom);
-        BostedsPeriodeAvklaring avklaring = holder.getPeriodeAvklaring(fom)
-            .orElseThrow(() -> new IllegalStateException("Forventer å finne en bostedsperiodeavklaring for stp " + fom));
-        boolean erÅrsakAnnet = FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
-        boolean erKildeSøknad = Kilde.SØKNAD.equals(avklaring.getKilde());
-
-        if (erVentende(etterlysning)) {
-            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER));
-        } else if (erKildeSøknad) {
-            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.VILKÅR_VURDERES_MANUELT));
-        } else if (harMottattSvarMedUttalelse(etterlysning) || erÅrsakAnnet) {
-            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.OPPHØR_MANUELT));
-        } else if (!avklaring.isErBosattITrondheim()) {
-            return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.OPPHØR_AUTOMATISK));
-        }
-        return List.of(new LocalDateSegment<>(segment.getLocalDateInterval(), StegUtfall.BOSATT_HELE_PERIODEN));
+    private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, EtterlysningData, BostedAvklaringOgUttalelseOgResultat> leggTilEtterlysning() {
+        return (di, lhs, rhs) -> {
+            var vurdering = lhs.getValue();
+            if (rhs != null) {
+                vurdering.medEtterlysning(rhs.getValue());
+            }
+            return new LocalDateSegment<>(di, vurdering);
+        };
     }
 
-    private static BehandleStegResultat settPåVent(LocalDateTimeline<StegUtfall> stegutfallTidslinje,
-                                                   Map<LocalDate, EtterlysningData> etterlysningPerFom) {
-        Set<LocalDate> ventendeFom = stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals)
-            .toSegments().stream().map(LocalDateSegment::getFom).collect(Collectors.toSet());
-        LocalDateTime frist = ventendeFom.stream()
-            .map(fom -> Optional.ofNullable(etterlysningPerFom.get(fom)).map(EtterlysningData::frist).orElse(null))
+    private static LocalDateTimeline<BostedsPeriodeAvklaring> lagAvklaringTidslinje(Collection<BostedsPeriodeAvklaring> bostedsPeriodeAvklaringer) {
+        List<LocalDateSegment<BostedsPeriodeAvklaring>> segmenter = bostedsPeriodeAvklaringer.stream()
+            .map(avklaring -> new LocalDateSegment<>(
+                avklaring.getPeriode().getFomDato(),
+                avklaring.getPeriode().getTomDato(),
+                avklaring))
+            .collect(Collectors.toList());
+        return new LocalDateTimeline<>(segmenter);
+    }
+
+    private static BehandleStegResultat settPåVent(LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje) {
+        LocalDateTime frist = vurderingTidslinje
+            .filterValue(v -> v.utledUtfall() == StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
+            .toSegments().stream()
+            .map(seg -> seg.getValue().getFrist())
             .filter(Objects::nonNull)
             .max(Comparator.naturalOrder())
             .orElse(LocalDateTime.now().plus(DEFAULT_VENTEFRIST));
@@ -172,19 +183,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 frist
             )
         ));
-    }
-
-    private static boolean erVentende(EtterlysningData etterlysning) {
-        return etterlysning != null
-            && (etterlysning.status() == EtterlysningStatus.OPPRETTET
-            || etterlysning.status() == EtterlysningStatus.VENTER);
-    }
-
-    private static boolean harMottattSvarMedUttalelse(EtterlysningData etterlysning) {
-        return etterlysning != null
-            && etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
-            && etterlysning.uttalelseData() != null
-            && etterlysning.uttalelseData().harUttalelse();
     }
 
     static Avslagsårsak mapTilAvslagsårsak(FraflyttingsÅrsak fraflyttingsÅrsak) {
@@ -201,14 +199,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             case ANNET ->
                 throw new IllegalStateException("FraflyttingsÅrsak.ANNET skal ikke treffe auto-path");
         };
-    }
-
-    enum StegUtfall {
-        OPPHØR_AUTOMATISK,
-        OPPHØR_MANUELT,
-        VILKÅR_VURDERES_MANUELT,
-        VENTER_PÅ_UTTALELSE_FRA_BRUKER,
-        BOSATT_HELE_PERIODEN
     }
 }
 

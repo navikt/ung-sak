@@ -71,7 +71,7 @@ class AvklarBostedVurderingsbehovStegTest {
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
-    private VurderBosattVilkårSteg steg;
+    private VurderBostedVilkårSteg steg;
 
     @BeforeEach
     void setUp() {
@@ -89,7 +89,7 @@ class AvklarBostedVurderingsbehovStegTest {
     void skal_passere_uten_aksjonspunkt_og_uten_opphorsresultat_nar_bruker_er_bosatt_hele_perioden() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
             PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
         ));
 
@@ -103,7 +103,7 @@ class AvklarBostedVurderingsbehovStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         var fraflyttingsDato = FOM.plusDays(10);
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
             PERIODE, new BostedAvklaringData(true, fraflyttingsDato, FraflyttingsÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, Kilde.SAKSBEHANDLER)
         ));
 
@@ -122,7 +122,7 @@ class AvklarBostedVurderingsbehovStegTest {
     void skal_sette_pa_vent_nar_periode_venter_pa_etterlysning() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
             PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
         ));
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
@@ -149,7 +149,7 @@ class AvklarBostedVurderingsbehovStegTest {
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(fom2, tom2), true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernOverlappendeResultat(behandling.getId(), Map.of(
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
             PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER),
             new Periode(fom2, tom2), new BostedAvklaringData(true, null, null, Kilde.SØKNAD)
         ));
@@ -225,7 +225,7 @@ class AvklarBostedVurderingsbehovStegTest {
         return behandling;
     }
 
-    private VurderBosattVilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
+    private VurderBostedVilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
         var vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjenester, vilkårResultatRepository);
         var etterlysningTjeneste = new EtterlysningTjeneste(null, null) {
             @Override
@@ -234,7 +234,7 @@ class AvklarBostedVurderingsbehovStegTest {
             }
         };
 
-        return new VurderBosattVilkårSteg(
+        return new VurderBostedVilkårSteg(
             manuelleVilkårRekkefølgeTjeneste,
             vilkårResultatRepository,
             vilkårTjeneste,

@@ -4,6 +4,8 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -30,6 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -65,8 +68,6 @@ class VurderFaktaBostedStegTest {
 
         steg = new VurderFaktaBostedSteg(
             behandlingRepository,
-            bostedsGrunnlagRepository,
-            vilkårsPerioderTilVurderingTjenester,
             prosessTriggerPeriodeUtledere
         );
     }
@@ -108,10 +109,11 @@ class VurderFaktaBostedStegTest {
 
         utførSteg(behandling);
 
+        var vurdertTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(FOM, TOM, true)));
         var lagretGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
-        var periodeAvklaring = lagretGrunnlag.getForeslått().getPeriodeAvklaring(FOM).orElseThrow();
-        assertThat(periodeAvklaring.isErBosattITrondheim()).isTrue();
-        assertThat(periodeAvklaring.getKilde()).isEqualTo(Kilde.SØKNAD);
+        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(vurdertTidslinje).stream().findFirst().orElseThrow();
+        assertThat(periodeAvklaring.getValue().isErBosattITrondheim()).isTrue();
+        assertThat(periodeAvklaring.getValue().getKilde()).isEqualTo(Kilde.SØKNAD);
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {

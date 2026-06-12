@@ -35,8 +35,6 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FAKTA_OM_
 public class VurderFaktaBostedSteg implements BehandlingSteg {
 
 
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
     private BehandlingRepository behandlingRepository;
 
@@ -46,12 +44,8 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
 
     @Inject
     public VurderFaktaBostedSteg(BehandlingRepository behandlingRepository,
-                                 BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                 @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                  @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere) {
 
-        this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
-        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.prosessTriggerPeriodeUtledere = prosessTriggerPeriodeUtledere;
         this.behandlingRepository = behandlingRepository;
     }
@@ -61,9 +55,6 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType())
-            .utled(behandlingId, VilkårType.BOSTEDSVILKÅR);
-        initierFaktaFraSøknadsdata(behandlingId, perioderTilVurdering);
         LocalDateTimeline<Boolean> tidslinjeForManuellFaktavurdering = finnTidslinjeForManuellFaktavurdering(behandling, behandlingId);
         // Saksbehandler må vurdere bosted for perioder uten grunnlag — prioritert over vent
         if (!tidslinjeForManuellFaktavurdering.isEmpty()) {
@@ -78,30 +69,5 @@ public class VurderFaktaBostedSteg implements BehandlingSteg {
             .utledTidslinje(behandlingId)
             .filterValue(it -> it.contains(BehandlingÅrsakType.ENDRET_BOSTED))
             .mapValue(_ -> true);
-    }
-
-    // Dette kan vurderes å flyttes til persistering av søknad. Ulempen er at vi må då må ta stilling til vilkårsperioder tidlig
-    private void initierFaktaFraSøknadsdata(long behandlingId, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {
-        Map<LocalDate, Boolean> søknadErBosattPerFom = bostedsGrunnlagRepository.hentSøknadBostedPerFom(behandlingId);
-        // Auto-sett fakta fra søknad for perioder uten grunnlag
-        Map<Periode, BostedAvklaringData> nyeSøknadAvklaringer = new LinkedHashMap<>();
-        perioderTilVurdering.forEach(segment -> {
-            LocalDate fom = segment.getFomDato();
-            LocalDate tom = segment.getTomDato();
-
-            // Kan vi forvente eksakte datoer her?
-            Boolean søknadVerdi = søknadErBosattPerFom.get(fom);
-            if (søknadVerdi != null) {
-                nyeSøknadAvklaringer.put(new Periode(fom, tom), new BostedAvklaringData(
-                    søknadVerdi,
-                    null,
-                    null,
-                    Kilde.SØKNAD));
-            }
-            });
-
-        if (!nyeSøknadAvklaringer.isEmpty()) {
-            bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandlingId, nyeSøknadAvklaringer);
-        }
     }
 }

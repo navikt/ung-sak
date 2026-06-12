@@ -1,12 +1,18 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -24,11 +30,8 @@ import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
-
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -42,6 +45,8 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
+
 
     VurderFaktaOmBostedOppdaterer() {
         // for CDI proxy
@@ -52,12 +57,14 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
                                          HistorikkinnslagRepository historikkinnslagRepository,
                                          BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                          EtterlysningRepository etterlysningRepository,
-                                         ProsessTaskTjeneste prosessTaskTjeneste) {
+                                         ProsessTaskTjeneste prosessTaskTjeneste,
+                                         @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
@@ -65,15 +72,8 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
-        LocalDateTimeline<BostedAvklaringData> tidligereAvklaringer = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> new LocalDateTimeline<>(
-                g.getForeslått().getPeriodeAvklaringer().stream()
-                    .map(p -> new LocalDateSegment<>(
-                        p.getPeriode().getFomDato(),
-                        p.getPeriode().getTomDato(),
-                        new BostedAvklaringData(p.isErBosattITrondheim(), p.isErBosattITrondheim() ? p.getPeriode().getFomDato() : null, p.getFraflyttingsÅrsak(), p.getKilde())))
-                    .toList()))
-            .orElse(LocalDateTimeline.empty());
+        NavigableSet<DatoIntervallEntitet> perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType()).utled(behandlingId, VilkårType.BOSTEDSVILKÅR);
+        LocalDateTimeline<BostedAvklaringData> tidligereAvklaringer = hentTidligereAvklaringer(perioderTilVurdering, behandlingId);
 
         Map<Periode, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
         for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer()) {
@@ -95,6 +95,17 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         historikkinnslagRepository.lagre(historikkinnslag);
 
         return OppdateringResultat.nyttResultat();
+    }
+
+    private LocalDateTimeline<BostedAvklaringData> hentTidligereAvklaringer(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, long behandlingId) {
+        var perioderTilVurderingTidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(periode-> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true)).toList());
+
+        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g ->
+                g.hentOppgittOgForeslåttFaktaSomTidslinje(perioderTilVurderingTidslinje).mapValue(p ->
+                        new BostedAvklaringData(p.isErBosattITrondheim(), p.isErBosattITrondheim() ? null : p.getPeriode().getFomDato(), p.getFraflyttingsÅrsak(), p.getKilde())
+                 ))
+            .orElse(LocalDateTimeline.empty());
     }
 
     private void opprettEtterlysning(VurderFaktaOmBostedDto dto, long behandlingId,
@@ -166,8 +177,8 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
     private static boolean erAvklaringEndret(BostedAvklaringData nyAvklaring, BostedAvklaringData gammelAvklaring) {
         return nyAvklaring.erBosattITrondheim() != gammelAvklaring.erBosattITrondheim() ||
-            nyAvklaring.fraflyttingsDato() != gammelAvklaring.fraflyttingsDato() ||
-            nyAvklaring.fraflyttingsÅrsak() != gammelAvklaring.fraflyttingsÅrsak();
+            !Objects.equals(nyAvklaring.fraflyttingsDato(), gammelAvklaring.fraflyttingsDato()) ||
+             nyAvklaring.fraflyttingsÅrsak() != gammelAvklaring.fraflyttingsÅrsak();
     }
 
 }

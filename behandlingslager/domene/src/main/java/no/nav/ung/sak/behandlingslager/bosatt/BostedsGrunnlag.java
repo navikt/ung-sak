@@ -1,10 +1,14 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -80,7 +84,8 @@ public class BostedsGrunnlag extends BaseEntitet {
      */
     void setForeslåttAvklaring(Map<Periode, BostedAvklaringData> avklaringer) {
         var nyHolder = new BostedsAvklaringHolder(this.foreslått);
-        nyHolder.leggTilPeriodeAvklaringer(byggAvklaringer(avklaringer));
+        var nyeAvklaringer = mapTilBostedsperiodeAvklaring(avklaringer);
+        nyHolder.leggTilEllerErstattPeriodeAvklaringer(nyeAvklaringer);
 
         if (nyHolder.equals(this.foreslått)) {
             return;
@@ -93,7 +98,7 @@ public class BostedsGrunnlag extends BaseEntitet {
      */
     void setResultat(Map<Periode, BostedAvklaringData> avklaringer) {
         var nyHolder = new BostedsAvklaringHolder(this.resultat);
-        nyHolder.leggTilPeriodeAvklaringer(byggAvklaringer(avklaringer));
+        nyHolder.leggTilEllerErstattPeriodeAvklaringer(mapTilBostedsperiodeAvklaring(avklaringer));
 
         if (nyHolder.equals(this.resultat)) {
             return;
@@ -104,18 +109,15 @@ public class BostedsGrunnlag extends BaseEntitet {
 
     void fjernOverlappendeResultat(Set<Periode> perioder) {
         var nyHolder =  new BostedsAvklaringHolder(this.resultat);
-        perioder.forEach(periode -> {
-            nyHolder.fjernPeriodeAvklaringForFom(periode.getFom());
-        });
+        nyHolder.fjernPeriodeAvklaring(perioder);
 
         if (nyHolder.equals(this.resultat)) {
             return;
         }
-
         this.resultat = nyHolder;
     }
 
-    private static List<BostedsPeriodeAvklaring> byggAvklaringer(Map<Periode, BostedAvklaringData> avklaringer) {
+    private static List<BostedsPeriodeAvklaring> mapTilBostedsperiodeAvklaring(Map<Periode, BostedAvklaringData> avklaringer) {
         return avklaringer.entrySet().stream().map(entry ->
                 new BostedsPeriodeAvklaring(
                     DatoIntervallEntitet.fra(entry.getKey()),
@@ -145,6 +147,32 @@ public class BostedsGrunnlag extends BaseEntitet {
 
     public BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
         return oppgittFraSøknad;
+    }
+
+    // Bygger en tidslinje for vurdert periode, som inneholder oppgitt fakta, og foreslått fakta der de overlapper
+    public LocalDateTimeline<BostedsPeriodeAvklaring> hentOppgittOgForeslåttFaktaSomTidslinje(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        Map<LocalDate, BostedsinformasjonFraSøknad> oppgittFraSøknadPerFom = (oppgittFraSøknad == null) ? Map.of() : oppgittFraSøknad.hentSomMap();
+
+        var oppgittFraSøknadTidslinje = tidslinjeTilVurdering.map(periode -> {
+            var oppgittForPeriode = oppgittFraSøknadPerFom.get(periode.getFom());
+            if (oppgittForPeriode == null) {
+                return Collections.emptyList();
+            }
+
+            return List.of(new LocalDateSegment<>(periode.getFom(), periode.getTom(),
+                new BostedsPeriodeAvklaring(
+                    DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()),
+                    oppgittForPeriode.isErBosattITrondheim(),
+                    null,
+                    Kilde.SØKNAD
+                )
+            ));
+        });
+
+        if (foreslått == null) {
+            return oppgittFraSøknadTidslinje;
+        }
+        return foreslått.hentSomTidslinje().crossJoin(oppgittFraSøknadTidslinje);
     }
 
     public UUID getGrunnlagsreferanse() {
