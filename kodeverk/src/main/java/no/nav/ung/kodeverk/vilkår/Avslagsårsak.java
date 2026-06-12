@@ -45,6 +45,9 @@ public enum Avslagsårsak implements Kodeverdi {
     SØKER_ER_IKKE_MEDLEM("4001", "Søker er ikke medlem.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
+    ANNET("4002", "Annet",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
     UDEFINERT("-", "Ikke definert",
         Map.of());
 
