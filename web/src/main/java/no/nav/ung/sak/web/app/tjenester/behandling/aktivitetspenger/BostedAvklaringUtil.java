@@ -1,7 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto;
 
@@ -18,12 +18,12 @@ class BostedAvklaringUtil {
     /**
      * Konverterer én {@link BostedVurderingDto} til {@link BostedAvklaringData} med kilde=SAKSBEHANDLER.
      * <ul>
-     * <li> Hvis borITrondheimIHelePerioden=true, settes fraflyttingsÅrsak og fom til null.</li>
-     * <li> Hvis borITrondheimIHelePerioden=false, settes fraflyttingsÅrsak og fom til verdiene fra vurdering.</li>
+     * <li> Hvis borITrondheimIHelePerioden=true, settes ikkeOppfyltÅrsak og fom til null.</li>
+     * <li> Hvis borITrondheimIHelePerioden=false, settes ikkeOppfyltÅrsak og fom til verdiene fra vurdering.</li>
      * </ul>
      */
     static BostedAvklaringData tilAvklaringData(LocalDate fom, BostedVurderingDto vurdering) {
-        FraflyttingsÅrsak årsak = vurdering.fraflyttingsÅrsak();
+        BostedsvilkårIkkeOppfyltÅrsak årsak = vurdering.fraflyttingsÅrsak();
         if (Boolean.TRUE.equals(vurdering.borITrondheimIHelePerioden())) {
             return new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER);
         } else {

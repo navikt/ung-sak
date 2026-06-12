@@ -9,7 +9,10 @@ import java.util.Map;
 
 public enum BostedsvilkårIkkeOppfyltÅrsak implements Kodeverdi {
 
-    YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE("YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE", "Søker har verken bosted eller folkeregistrert adresse som er forenlig med ytelsen."),
+    IKKE_BOSATTADRESSE_I_TRONDHEIM("IKKE_BOSATTADRESSE_I_TRONDHEIM", "Ikke bosattadresse i Trondheim"),
+    IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM("IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "Ikke bostedsadresse i Trondheim og ikke folkeregistrert i Trondheim"),
+    STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "Har studie- eller arbeidssted utenfor Trondheim"),
+    ANNET("ANNET", "Annet"),
     UDEFINERT("-", "Ikke definert"),
     ;
 

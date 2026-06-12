@@ -103,7 +103,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g ->
                 g.hentOppgittOgForeslåttFaktaSomTidslinje(perioderTilVurderingTidslinje).mapValue(p ->
-                        new BostedAvklaringData(p.isErBosattITrondheim(), p.isErBosattITrondheim() ? null : p.getPeriode().getFomDato(), p.getFraflyttingsÅrsak(), p.getKilde())
+                        new BostedAvklaringData(p.isErBosattITrondheim(), p.isErBosattITrondheim() ? null : p.getPeriode().getFomDato(), p.getIkkeOppfyltÅrsak(), p.getKilde())
                  ))
             .orElse(LocalDateTimeline.empty());
     }

@@ -10,6 +10,7 @@ update bosatt_periode_avklaring
 set periode = daterange(skaeringstidspunkt, (skaeringstidspunkt + interval '1 year')::date, '[)');
 
 alter table bosatt_periode_avklaring
+    rename column fraflyttings_aarsak to ikke_oppfylt_aarsak,
     alter column periode set not null,
     drop column skaeringstidspunkt;
 
