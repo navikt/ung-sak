@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
@@ -9,7 +8,6 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 import org.hibernate.annotations.BatchSize;
 
-import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -37,7 +35,7 @@ public class BostedsAvklaringHolder extends BaseEntitet {
     BostedsAvklaringHolder(BostedsAvklaringHolder other) {
         if (other != null && other.periodeAvklaringer != null) {
             this.periodeAvklaringer = other.periodeAvklaringer.stream()
-                .map(p -> new BostedsPeriodeAvklaring(p.getPeriode(), p.isErBosattITrondheim(), p.getFraflyttingsÅrsak(), p.getKilde()))
+                .map(p -> new BostedsPeriodeAvklaring(p.getPeriode(), p.isErBosattITrondheim(), p.getIkkeOppfyltÅrsak(), p.getKilde()))
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }

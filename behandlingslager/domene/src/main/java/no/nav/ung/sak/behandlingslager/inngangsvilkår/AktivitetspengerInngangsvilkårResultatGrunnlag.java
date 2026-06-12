@@ -1,8 +1,11 @@
 package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.persistence.*;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -75,6 +78,16 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
 
     public Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
         return Optional.ofNullable(bostedsvilkårResultatHolder);
+    }
+
+    public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {
+        if (bostedsvilkårResultatHolder == null) {
+            return LocalDateTimeline.empty();
+        }
+
+        return new LocalDateTimeline<>(bostedsvilkårResultatHolder.getVurderinger().stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
     }
 
     public boolean isAktiv() {

@@ -10,15 +10,16 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
@@ -26,6 +27,7 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringOgUttalelseOgResultat.StegUtfall;
 
 import java.time.Duration;
@@ -46,6 +48,8 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     VurderBostedVilkårSteg() {
         // for CDI proxy
@@ -58,11 +62,15 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                                   BehandlingRepository behandlingRepository,
                                   BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                  EtterlysningTjeneste etterlysningTjeneste) {
+                                  EtterlysningTjeneste etterlysningTjeneste,
+                                  InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
+                                  InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     @Override
@@ -83,7 +91,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
         long behandlingId = kontekst.getBehandlingId();
         LocalDateTimeline<Boolean> tidslinjeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
-
         if (tidslinjeTilVurdering.isEmpty()) {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
@@ -100,13 +107,21 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
 
-        var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(tidslinjeTilVurdering);
+        var tidligereVilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandlingId)
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
+            .orElse(new LocalDateTimeline<>(List.of()));
+
+            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(tidslinjeTilVurdering);
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
             .intersection(tidslinjeTilVurdering)
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new)
             .combine(
                 etterlysningTidslinje,
                 leggTilEtterlysning(),
+                LocalDateTimeline.JoinStyle.LEFT_JOIN)
+            .combine(
+                tidligereVilkårVurderingResultat,
+                leggTilResultat(),
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         LocalDateTimeline<StegUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
@@ -115,9 +130,9 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             return settPåVent(vurderingTidslinje);
         }
 
-        vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals))
+        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals))
             .toSegments()
-            .forEach(s -> {
+            .stream().map(s -> {
                 if (s.getValue().getEtterlysning() == null) {
                     throw new IllegalStateException("Mangler etterlysning for "+ s.getLocalDateInterval());
                 }
@@ -128,23 +143,25 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 }
 
                 BostedsPeriodeAvklaring avklaring = s.getValue().getAvklaring().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
-                Avslagsårsak avslagsårsak = mapTilAvslagsårsak(avklaring.getFraflyttingsÅrsak());
-//                vurdertAktivitetspengerGrunnlag.lagre(new BostedsvurderingResultat(
-//                    behandlingId,
-//                    s.getFom(),
-//                    avklaring.getPeriode().getFomDato(),
-//                    avslagsårsak,
-//                    OpphørKilde.AUTOMATISK,
-//                    VilkårType.BOSTEDSVILKÅR,
-//                    null,
-//                    null));
-            });
-//        opphørTjeneste.utledOgLagreVilkår(behandlingId, VilkårType.BOSTEDSVILKÅR, tidslinjeTilVurdering);
+                return new BostedsvilkårResultatPeriode(
+                    avklaring.getPeriode(),
+                    avklaring.isErBosattITrondheim(),
+                    avklaring.getIkkeOppfyltÅrsak(),
+                    false,
+                    null,
+                    null,
+                    avklaring.getEndretAv(),
+                    avklaring.getEndretTidspunkt());
+        }).collect(Collectors.toList());
+
+        inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, vurderingResultat);
 
         if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
         }
 
+        // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
+        inngangsvilkårVurderingTjeneste.settBostedsvilkårResultatAutomatisk(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
@@ -158,14 +175,14 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         };
     }
 
-    private static LocalDateTimeline<BostedsPeriodeAvklaring> lagAvklaringTidslinje(Collection<BostedsPeriodeAvklaring> bostedsPeriodeAvklaringer) {
-        List<LocalDateSegment<BostedsPeriodeAvklaring>> segmenter = bostedsPeriodeAvklaringer.stream()
-            .map(avklaring -> new LocalDateSegment<>(
-                avklaring.getPeriode().getFomDato(),
-                avklaring.getPeriode().getTomDato(),
-                avklaring))
-            .collect(Collectors.toList());
-        return new LocalDateTimeline<>(segmenter);
+    private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, BostedsvilkårResultatPeriode, BostedAvklaringOgUttalelseOgResultat> leggTilResultat() {
+        return (di, lhs, rhs) -> {
+            var vurdering = lhs.getValue();
+            if (rhs != null) {
+                vurdering.medResultat(rhs.getValue());
+            }
+            return new LocalDateSegment<>(di, vurdering);
+        };
     }
 
     private static BehandleStegResultat settPåVent(LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje) {
@@ -183,22 +200,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 frist
             )
         ));
-    }
-
-    static Avslagsårsak mapTilAvslagsårsak(FraflyttingsÅrsak fraflyttingsÅrsak) {
-        if (fraflyttingsÅrsak == null) {
-            return Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED;
-        }
-        return switch (fraflyttingsÅrsak) {
-            case IKKE_BOSATTADRESSE_I_TRONDHEIM ->
-                Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED;
-            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM ->
-                Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
-            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM ->
-                Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED;
-            case ANNET ->
-                throw new IllegalStateException("FraflyttingsÅrsak.ANNET skal ikke treffe auto-path");
-        };
     }
 }
 

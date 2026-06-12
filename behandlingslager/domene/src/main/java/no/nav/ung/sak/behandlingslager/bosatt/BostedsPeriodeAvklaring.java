@@ -1,13 +1,12 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
 import no.nav.ung.sak.domene.typer.tid.Range;
-import no.nav.ung.sak.typer.Periode;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
@@ -43,8 +42,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     private boolean erBosattITrondheim;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "fraflyttings_aarsak", updatable = false)
-    private FraflyttingsÅrsak fraflyttingsÅrsak;
+    @Column(name = "ikke_oppfylt_aarsak", updatable = false)
+    private BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "kilde", nullable = false, updatable = false)
@@ -54,10 +53,10 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, FraflyttingsÅrsak fraflyttingsÅrsak, Kilde kilde) {
+    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, Kilde kilde) {
         this.periode = periode.toRange();
         this.erBosattITrondheim = erBosattITrondheim;
-        this.fraflyttingsÅrsak = fraflyttingsÅrsak;
+        this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
         this.kilde = kilde;
     }
 
@@ -65,7 +64,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return new BostedsPeriodeAvklaring(
             nyPeriode,
             this.isErBosattITrondheim(),
-            this.getFraflyttingsÅrsak(),
+            this.getIkkeOppfyltÅrsak(),
             this.getKilde()
         );
     }
@@ -82,8 +81,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return erBosattITrondheim;
     }
 
-    public FraflyttingsÅrsak getFraflyttingsÅrsak() {
-        return fraflyttingsÅrsak;
+    public BostedsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {
+        return ikkeOppfyltÅrsak;
     }
 
     public Kilde getKilde() {
@@ -94,20 +93,20 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
         return erBosattITrondheim == that.erBosattITrondheim
-            && fraflyttingsÅrsak == that.fraflyttingsÅrsak
+            && ikkeOppfyltÅrsak == that.ikkeOppfyltÅrsak
             && kilde == that.kilde;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(erBosattITrondheim, fraflyttingsÅrsak, kilde);
+        return Objects.hash(erBosattITrondheim, ikkeOppfyltÅrsak, kilde);
     }
 
     @Override
     public String toString() {
         return "BostedsPeriodeAvklaring{referanse=" + referanse
             + ", erBosattITrondheim=" + erBosattITrondheim
-            + ", fraflyttingsÅrsak=" + fraflyttingsÅrsak
+            + ", fraflyttingsÅrsak=" + ikkeOppfyltÅrsak
             + ", kilde=" + kilde + '}';
     }
 

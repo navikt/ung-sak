@@ -1,9 +1,10 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ class BostedAvklaringOgUttalelseOgResultat {
 
     private final BostedsPeriodeAvklaring avklaring;
     private EtterlysningData etterlysning;
+    private BostedsvilkårResultatPeriode resultat;
 
     BostedAvklaringOgUttalelseOgResultat(BostedsPeriodeAvklaring avklaring) {
         this.avklaring = avklaring;
@@ -27,10 +29,15 @@ class BostedAvklaringOgUttalelseOgResultat {
         return this;
     }
 
+    BostedAvklaringOgUttalelseOgResultat medResultat(BostedsvilkårResultatPeriode resultat) {
+        this.resultat = resultat;
+        return this;
+    }
+
     StegUtfall utledUtfall() {
         if (erVentende()) {
             return StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
-        } else if (erKildeSøknad() || harMottattSvarMedUttalelse() || erÅrsakAnnet()) {
+        } else if (erKildeSøknadOgIkkeTidligereVurdert() || harMottattSvarMedUttalelse() || erÅrsakAnnet()) {
             return StegUtfall.VILKÅR_VURDERES_MANUELT;
         } else if (!avklaring.isErBosattITrondheim()) {
             return StegUtfall.OPPHØR_AUTOMATISK;
@@ -50,12 +57,12 @@ class BostedAvklaringOgUttalelseOgResultat {
         return etterlysning;
     }
 
-    private boolean erKildeSøknad() {
-        return Kilde.SØKNAD.equals(avklaring.getKilde());
+    private boolean erKildeSøknadOgIkkeTidligereVurdert() {
+        return Kilde.SØKNAD.equals(avklaring.getKilde()) && resultat == null;
     }
 
     private boolean erÅrsakAnnet() {
-        return FraflyttingsÅrsak.ANNET.equals(avklaring.getFraflyttingsÅrsak());
+        return BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(avklaring.getIkkeOppfyltÅrsak());
     }
 
     private boolean erVentende() {

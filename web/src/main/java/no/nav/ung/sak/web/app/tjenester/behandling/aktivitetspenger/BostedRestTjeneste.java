@@ -123,7 +123,7 @@ public class BostedRestTjeneste {
                 periodeAvklaring.getPeriode().getTomDato(),
                 periodeAvklaring.isErBosattITrondheim(),
                 fraflyttingsdato,
-                periodeAvklaring.getFraflyttingsÅrsak(),
+                periodeAvklaring.getIkkeOppfyltÅrsak(),
                 periodeAvklaring.getKilde(),
                 søknadOppgitt,
                 harUttalelse,

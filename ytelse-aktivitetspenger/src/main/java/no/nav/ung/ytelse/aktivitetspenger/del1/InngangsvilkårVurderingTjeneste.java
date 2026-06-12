@@ -7,9 +7,11 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.inngangsvilkår.InngangsvilkårTjeneste;
 
 /**
  * Leser saksbehandlers lagrede vurderinger fra {@link AktivitetspengerInngangsvilkårResultatGrunnlag}
@@ -19,14 +21,17 @@ import no.nav.ung.sak.inngangsvilkår.InngangsvilkårTjeneste;
 public class InngangsvilkårVurderingTjeneste {
 
     private InngangsvilkårVurderingRepository repository;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     InngangsvilkårVurderingTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public InngangsvilkårVurderingTjeneste(InngangsvilkårVurderingRepository repository) {
+    public InngangsvilkårVurderingTjeneste(InngangsvilkårVurderingRepository repository,
+                                           VilkårResultatRepository vilkårResultatRepository) {
         this.repository = repository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public void settBistandsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
@@ -69,24 +74,40 @@ public class InngangsvilkårVurderingTjeneste {
         resultatBuilder.leggTil(vilkårBuilder);
     }
 
+    public void settBostedsvilkårResultatAutomatisk(Long behandlingId) {
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+        settBostedsvilkårResultat(behandlingId, resultatBuilder);
+    }
+
     public void settBostedsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
         var grunnlag = repository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
         var holder = grunnlag.getBostedsvilkårResultatHolder()
             .orElseThrow(() -> new IllegalStateException("Bostedsvilkår-holder mangler i grunnlag for behandling " + behandlingId));
+        byggVilkårIBuilder(resultatBuilder, holder, VilkårType.BOSTEDSVILKÅR);
+    }
 
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
+    private void byggVilkårIBuilder(VilkårResultatBuilder resultatBuilder, BostedsvilkårResultatHolder holder, VilkårType vilkårType) {
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
         for (var vurdering : holder.getVurderinger()) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT
                 ? mapBostedsvilkårÅrsak(vurdering.getIkkeOppfyltÅrsak())
                 : null;
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+
+            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medUtfallManuell(utfall)
-                .medAvslagsårsak(avslagsårsak));
+                .medAvslagsårsak(avslagsårsak);
+
+            if (vurdering.isManuellVurdering()) {
+                vilkårPeriodeBuilder.medUtfallManuell(utfall);
+            } else {
+                vilkårPeriodeBuilder.medUtfall(utfall).medManueltVurdert(false);
+            }
+            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }
@@ -96,7 +117,10 @@ public class InngangsvilkårVurderingTjeneste {
             return Avslagsårsak.UDEFINERT;
         }
         return switch (årsak) {
-            case YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE ->
+            case IKKE_BOSATTADRESSE_I_TRONDHEIM,
+                 IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM,
+                 STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
+                 ANNET ->
                 Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
             default -> Avslagsårsak.UDEFINERT;
         };

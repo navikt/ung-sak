@@ -7,7 +7,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -121,7 +121,7 @@ class VurderFaktaOmBostedOppdatererTest {
             .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
 
-        var dto = dtoMedEnAvklaring(false, false, FraflyttingsÅrsak.ANNET);
+        var dto = dtoMedEnAvklaring(false, false, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
 
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
@@ -155,7 +155,7 @@ class VurderFaktaOmBostedOppdatererTest {
         );
         when(etterlysningRepository.hentEtterlysningerSomVenterPåSvar(BEHANDLING_ID)).thenReturn(List.of(eksisterende));
 
-        var dto = dtoMedEnAvklaring(false, false, FraflyttingsÅrsak.ANNET);
+        var dto = dtoMedEnAvklaring(false, false, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
 
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
@@ -193,7 +193,7 @@ class VurderFaktaOmBostedOppdatererTest {
             .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
 
-        var dto = dtoMedEnAvklaring(false, true, FraflyttingsÅrsak.ANNET);
+        var dto = dtoMedEnAvklaring(false, true, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
 
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
@@ -203,7 +203,7 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     private static LocalDateTimeline<BostedsPeriodeAvklaring> tidslinjeMedTidligereAvklaring(boolean bosattITrondheim,
-                                                                                              FraflyttingsÅrsak årsak) {
+                                                                                              BostedsvilkårIkkeOppfyltÅrsak årsak) {
         var avklaring = new BostedsPeriodeAvklaring(
             DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
             bosattITrondheim,
@@ -215,7 +215,7 @@ class VurderFaktaOmBostedOppdatererTest {
 
     private static VurderFaktaOmBostedDto dtoMedEnAvklaring(boolean borITrondheimHelePerioden,
                                                              boolean skalIkkeSendeVarsel,
-                                                             FraflyttingsÅrsak årsak) {
+                                                             BostedsvilkårIkkeOppfyltÅrsak årsak) {
         var periode = new Periode(FOM, TOM);
         var vurdering = new BostedVurderingDto(
             borITrondheimHelePerioden,
