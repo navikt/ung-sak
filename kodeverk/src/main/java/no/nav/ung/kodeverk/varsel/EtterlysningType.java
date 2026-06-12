@@ -20,6 +20,7 @@ public enum EtterlysningType implements Kodeverdi {
     UTTALELSE_ENDRET_STARTDATO("UTTALELSE_ENDRET_STARTDATO", "Svar på varsel: Endret startdato"),
     UTTALELSE_ENDRET_SLUTTDATO("UTTALELSE_ENDRET_SLUTTDATO", "Svar på varsel: Endret sluttdato"),
     UTTALELSE_ENDRET_PERIODE("UTTALELSE_ENDRET_PERIODE", "Svar på varsel: Endret programperiode"),
+    UTTALELSE_OPPHOR_VED_MAKSDATO("UTTALELSE_OPPHOR_VED_MAKSDATO", "Svar på varsel: Opphør ved maksdato"),
     UTTALELSE_BOSTED("UTTALELSE_BOSTED", "Svar på varsel: Bostedavklaring"),
 
     ;
@@ -78,7 +79,7 @@ public enum EtterlysningType implements Kodeverdi {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
             }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE, UTTALELSE_OPPHOR_VED_MAKSDATO -> {
                 return AUTO_SATT_PÅ_VENT_REVURDERING;
             }
             case UTTALELSE_BOSTED -> {
@@ -93,7 +94,7 @@ public enum EtterlysningType implements Kodeverdi {
             case UTTALELSE_KONTROLL_INNTEKT -> {
                 return Venteårsak.VENTER_PÅ_ETTERLYST_INNTEKT_UTTALELSE;
             }
-            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE -> {
+            case UTTALELSE_ENDRET_STARTDATO, UTTALELSE_ENDRET_SLUTTDATO, UTTALELSE_ENDRET_PERIODE, UTTALELSE_OPPHOR_VED_MAKSDATO -> {
                 return Venteårsak.VENTER_BEKREFTELSE_ENDRET_UNGDOMSPROGRAMPERIODE;
             }
             case UTTALELSE_BOSTED -> {

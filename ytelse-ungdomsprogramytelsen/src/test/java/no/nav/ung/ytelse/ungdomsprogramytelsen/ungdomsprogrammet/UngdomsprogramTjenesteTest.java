@@ -13,6 +13,8 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramMaksPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +25,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -59,8 +60,8 @@ class UngdomsprogramTjenesteTest {
         // Registeret sender periodeMaksDato – åpen periode skal bevares, ikke klippes
         var maksDato = LocalDate.of(2026, 2, 27); // fredag
         var behandling = lagBehandling(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+        // Register sender åpen periode med forlenget periode-flagg
         mockRegister(new DeltakerProgramOpplysningDTO(UUID.randomUUID(), "ident", FOM, TIDENES_ENDE, true, maksDato));
-
         tjeneste.innhentOpplysninger(behandling);
 
         var perioder = hentLagredePerioder(behandling);
@@ -193,7 +194,7 @@ class UngdomsprogramTjenesteTest {
     private boolean harForlengetPeriodeLagret(Behandling behandling) {
         return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
             .flatMap(UngdomsprogramPeriodeGrunnlag::getUngdomsprogramMaksPeriode)
-            .map(k -> k.harForlengetPeriode())
+            .map(UngdomsprogramMaksPeriode::harForlengetPeriode)
             .orElse(false);
     }
 }

@@ -34,7 +34,9 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE);
+        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
+            && resultater.innholderIkke(DetaljertResultatType.ENDRING_SLUTTDATO)
+            && resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE);
     }
 
 }

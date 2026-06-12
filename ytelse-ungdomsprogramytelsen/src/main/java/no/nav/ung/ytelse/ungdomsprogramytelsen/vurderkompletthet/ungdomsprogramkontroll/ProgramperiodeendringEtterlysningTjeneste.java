@@ -78,6 +78,8 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             opprettEtterlysningDersomRelevantEndringForType(behandlingReferanse, EtterlysningType.UTTALELSE_ENDRET_STARTDATO, ungdomsprogramPeriodeGrunnlag, initiellPeriodegrunnlag);
             opprettTaskerForOpprettelseAvEtterlysning(behandlingReferanse);
         }
+
+
     }
 
     private void opprettEtterlysningDersomRelevantEndringForType(BehandlingReferanse behandlingReferanse, EtterlysningType etterlysningType, UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag) {

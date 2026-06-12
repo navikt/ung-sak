@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -33,7 +34,6 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BISTANDSV
 public class BistandsvilkårSteg extends VilkårVurderingSteg {
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
-    private VilkårResultatRepository vilkårResultatRepository;
 
     BistandsvilkårSteg() {
         //for CDI proxy
@@ -47,7 +47,6 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
-        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
@@ -66,7 +65,8 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
 
     @Override
     public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
-        if (vilkårResultatRepository.finnesRelevantPeriode(kontekst.getBehandlingId(), getAktuellVilkårType())) {
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
+        if (!tidslinjeTilVurdering.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR));
         } else {
             return BehandleStegResultat.utførtUtenAksjonspunkter();

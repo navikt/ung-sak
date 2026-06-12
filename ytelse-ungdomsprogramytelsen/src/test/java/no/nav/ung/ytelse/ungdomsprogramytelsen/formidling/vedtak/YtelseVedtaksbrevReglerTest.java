@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -144,6 +145,24 @@ class YtelseVedtaksbrevReglerTest {
 
         var regelResulat = totalresultater.ingenBrevResultater().getFirst();
         assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+
+    @Test
+    void skal_gi_ingen_brev_ved_g_regulering() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(SatsEndringScenarioer.gRegulering(fom));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isFalse();
+
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
 
         assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
 
@@ -301,7 +320,89 @@ class YtelseVedtaksbrevReglerTest {
         assertFullAutomatiskBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
     }
 
-     static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
+    @Test
+    void skal_overstyre_opphor_ved_maksdato_brev_med_forlenget_periode_brev() {
+        LocalDate fom = LocalDate.now().minusWeeks(52).plusWeeks(2);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
+
+        var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
+            EndringProgramPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato),
+            nySluttdato);
+        var behandling = lagBehandling(scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.FORLENGET_PERIODE)
+            .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
+    }
+
+    @Test
+    void skal_overstyre_opphor_ved_maksdato_brev_med_programperiodeendring_ved_manuelt_opphor() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.minusDays(20);
+
+        var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
+            EndringProgramPeriodeScenarioer.endringOpphør(new LocalDateInterval(fom, opprinneligSluttdato), nySluttdato),
+            opprinneligSluttdato);
+        var behandling = lagBehandling(scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.ENDRING_PROGRAMPERIODE)
+            .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
+    }
+
+    @Test
+    void skal_gi_kun_opphorsbrev_ved_forlenget_periode_og_opphor() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate opphørsdato = opprinneligSluttdato.plusDays(14);
+
+        UngTestScenario forrigeBehandlingScenario = FørstegangsbehandlingScenarioer.innvilget19år(fom);
+        UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgOpphør(fom, opphørsdato);
+        var behandling = lagBehandlingMedOriginalBehandling(forrigeBehandlingScenario, ungTestscenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .containsExactly(DokumentMalType.OPPHØR_DOK)
+            .doesNotContain(DokumentMalType.FORLENGET_PERIODE);
+
+        var opphørResultat = totalresultater.vedtaksbrevResultater().getFirst();
+        assertFullAutomatiskBrev(opphørResultat, DokumentMalType.OPPHØR_DOK, OpphørInnholdBygger.class);
+    }
+
+    private Behandling lagBehandlingMedOriginalBehandling(UngTestScenario forrigeBehandlingScenario, UngTestScenario ungTestscenario) {
+        // Originalbehandling med innvilget programperiode slik at revurderingen får riktig programperiode
+        var builder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(forrigeBehandlingScenario);
+
+        var originalBehandling = builder.buildOgLagreMedUng(ungTestRepositories);
+        originalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        originalBehandling.avsluttBehandling();
+
+        builder
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestscenario)
+            .medOriginalBehandling(originalBehandling, null);
+
+        var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+        return behandling;
+    }
+
+    static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
         assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);

@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
+package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.validation.Valid;
@@ -13,27 +13,26 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
-@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_KODE)
-public class VurderAndreLivsoppholdsytelserDto extends BekreftetAksjonspunktDto {
+@JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE)
+public class VurderBehovForBistandDto extends BekreftetAksjonspunktDto {
 
     @JsonProperty("vurdertePerioder")
     @NotNull
     @Size(min = 0, max = 100)
-    private List<@Valid VilkårPeriodeVurderingDto> vurdertePerioder;
+    private List<@Valid VilkårBistandPeriodeVurderingDto> vurdertePerioder;
 
-    public VurderAndreLivsoppholdsytelserDto() {
+    public VurderBehovForBistandDto() {
         //for jackson
     }
 
     @JsonCreator
-    public VurderAndreLivsoppholdsytelserDto(
-        @JsonProperty("vurdertePerioder") List<VilkårPeriodeVurderingDto> vurderinger,
-        @JsonProperty("begrunnelse") String begrunnelse) {
+    public VurderBehovForBistandDto(@JsonProperty("vurdertePerioder") List<VilkårBistandPeriodeVurderingDto> vurdertePerioder,
+                                    @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
-        this.vurdertePerioder = vurderinger;
+        this.vurdertePerioder = vurdertePerioder;
     }
 
-    public List<VilkårPeriodeVurderingDto> getVurdertePerioder() {
+    public List<VilkårBistandPeriodeVurderingDto> getVurdertePerioder() {
         return vurdertePerioder;
     }
 

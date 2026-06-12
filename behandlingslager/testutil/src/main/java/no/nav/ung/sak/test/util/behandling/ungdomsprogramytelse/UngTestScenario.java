@@ -28,6 +28,7 @@ import java.util.Set;
  * @param barn
  * @param dødsdato
  * @param kontrollerInntektPerioder
+ * @param harForlengetPeriode
  */
 public record UngTestScenario(
     String navn,
@@ -43,29 +44,8 @@ public record UngTestScenario(
     List<PersonInformasjon> barn,
     LocalDate dødsdato,
     LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder,
-    LocalDate periodeMaksDato) {
+    LocalDate periodeMaksDato, boolean harForlengetPeriode) {
 
-    /**
-     * Kompakt konstruktør uten periodeMaksDato (bakoverkompatibel).
-     */
-    public UngTestScenario(
-        String navn,
-        List<UngdomsprogramPeriode> programPerioder,
-        LocalDateTimeline<UngdomsytelseSatser> satser,
-        UngdomsytelseUttakPerioder uttakPerioder,
-        LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder,
-        LocalDateTimeline<Utfall> aldersvilkår,
-        LocalDateTimeline<Utfall> ungdomsprogramvilkår,
-        LocalDate fødselsdato,
-        List<LocalDate> søknadStartDato,
-        Set<Trigger> behandlingTriggere,
-        List<PersonInformasjon> barn,
-        LocalDate dødsdato,
-        LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder) {
-        this(navn, programPerioder, satser, uttakPerioder, tilkjentYtelsePerioder,
-            aldersvilkår, ungdomsprogramvilkår, fødselsdato, søknadStartDato,
-            behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, null);
-    }
 }
 
 
