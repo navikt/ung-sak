@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.ytelse;
 import java.util.Objects;
 import java.util.Optional;
 
+import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

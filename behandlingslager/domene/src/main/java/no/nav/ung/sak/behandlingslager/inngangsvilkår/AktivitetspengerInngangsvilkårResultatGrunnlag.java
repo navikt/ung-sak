@@ -1,8 +1,11 @@
 package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.persistence.*;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -26,6 +29,10 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     @JoinColumn(name = "livsopphold_resultat_holder_id", updatable = false)
     private AndreLivsoppholdsytelserResultatHolder andreLivsoppholdsytelserResultatHolder;
 
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "bosted_resultat_holder_id", updatable = false)
+    private BostedsvilkårResultatHolder bostedsvilkårResultatHolder;
+
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv = true;
 
@@ -39,10 +46,18 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     AktivitetspengerInngangsvilkårResultatGrunnlag(Long behandlingId,
                                                    BistandsvilkårResultatHolder bistandHolder,
                                                    AndreLivsoppholdsytelserResultatHolder livsoppholdHolder) {
+        this(behandlingId, bistandHolder, livsoppholdHolder, null);
+    }
+
+    AktivitetspengerInngangsvilkårResultatGrunnlag(Long behandlingId,
+                                                   BistandsvilkårResultatHolder bistandHolder,
+                                                   AndreLivsoppholdsytelserResultatHolder livsoppholdHolder,
+                                                   BostedsvilkårResultatHolder bostedHolder) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         this.behandlingId = behandlingId;
         this.bistandsvilkårResultatHolder = bistandHolder;
         this.andreLivsoppholdsytelserResultatHolder = livsoppholdHolder;
+        this.bostedsvilkårResultatHolder = bostedHolder;
     }
 
     public Long getId() {
@@ -61,6 +76,20 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
     }
 
+    public Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
+        return Optional.ofNullable(bostedsvilkårResultatHolder);
+    }
+
+    public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {
+        if (bostedsvilkårResultatHolder == null) {
+            return LocalDateTimeline.empty();
+        }
+
+        return new LocalDateTimeline<>(bostedsvilkårResultatHolder.getVurderinger().stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+    }
+
     public boolean isAktiv() {
         return aktiv;
     }
@@ -75,11 +104,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         if (o == null || getClass() != o.getClass()) return false;
         AktivitetspengerInngangsvilkårResultatGrunnlag that = (AktivitetspengerInngangsvilkårResultatGrunnlag) o;
         return Objects.equals(bistandsvilkårResultatHolder, that.bistandsvilkårResultatHolder)
-            && Objects.equals(andreLivsoppholdsytelserResultatHolder, that.andreLivsoppholdsytelserResultatHolder);
+            && Objects.equals(andreLivsoppholdsytelserResultatHolder, that.andreLivsoppholdsytelserResultatHolder)
+            && Objects.equals(bostedsvilkårResultatHolder, that.bostedsvilkårResultatHolder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bistandsvilkårResultatHolder, andreLivsoppholdsytelserResultatHolder);
+        return Objects.hash(bistandsvilkårResultatHolder, andreLivsoppholdsytelserResultatHolder, bostedsvilkårResultatHolder);
     }
 }

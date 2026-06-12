@@ -144,8 +144,13 @@ public class BehandlingsoppretterTjeneste {
     }
 
     public List<ÅrsakOgPerioderDto> finnGyldigeVurderingsperioderPrÅrsak(Fagsak fagsak) {
-        return FagsakYtelseTypeRef.Lookup.find(gyldigePerioderForRevurderingUtledere,  fagsak.getYtelseType()).stream().map(utleder -> utleder.utledPerioder(fagsak.getId()))
+        return finnUtledereForFagsak(fagsak).stream()
+            .map(utleder -> utleder.utledPerioder(fagsak.getId()))
             .toList();
+    }
+
+    private List<GyldigePerioderForRevurderingPrÅrsakUtleder> finnUtledereForFagsak(Fagsak fagsak) {
+        return FagsakYtelseTypeRef.Lookup.find(gyldigePerioderForRevurderingUtledere, fagsak.getYtelseType()).stream().toList();
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
@@ -184,19 +189,17 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
-        var gyldigePerioderForRevurderingPrÅrsak = finnGyldigeVurderingsperioderPrÅrsak(fagsak);
-        boolean skalSjekkeGyldighetAvPeriode = gyldigePerioderForRevurderingPrÅrsak.stream().anyMatch(dto -> dto.årsak() == behandlingÅrsakType);
-        //Dersom det ikke er utledet gyldige perioder for årsak så aksepteres alle perioder, også ingen periode.
-        if (!skalSjekkeGyldighetAvPeriode) {
+        var relevanteUtledere = finnUtledereForFagsak(fagsak).stream()
+            .filter(utleder -> utleder.støttetÅrsak() == behandlingÅrsakType)
+            .toList();
+        if (relevanteUtledere.isEmpty()) {
             return true;
         }
         if (periode.isEmpty()) {
             return false;
         }
-        return gyldigePerioderForRevurderingPrÅrsak.stream().filter(
-                dto -> dto.årsak() == behandlingÅrsakType).flatMap(dto -> dto.perioder().stream())
-            .map(DatoIntervallEntitet::fra)
-            .anyMatch(periode.get()::equals);
+        return relevanteUtledere.stream()
+            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), periode.get()));
     }
 
 }

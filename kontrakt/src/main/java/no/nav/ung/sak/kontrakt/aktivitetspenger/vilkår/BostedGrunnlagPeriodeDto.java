@@ -1,8 +1,8 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 
 import java.time.LocalDate;
 
@@ -14,12 +14,14 @@ import java.time.LocalDate;
 public record BostedGrunnlagPeriodeDto(
     /** Fom-dato i vilkårsperioden. */
     @NotNull LocalDate fom,
+    /** Tom-dato i vilkårsperioden. */
+    LocalDate tom,
     /** Om bruker er bosatt ved skjæringstidspunktet. */
     @NotNull Boolean erBosattITrondheim,
     /** Eventuell dato for utflytting fra Trondheim. Null dersom bruker er bosatt hele perioden. */
     LocalDate fraflyttingsDato,
-    /** Årsak til fraflytting. Null dersom bruker er bosatt hele perioden. */
-    FraflyttingsÅrsak fraflyttingsÅrsak,
+    /** Årsak til fraflytting eller avslått periode. Null dersom bruker er bosatt hele perioden. */
+    BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
     /** Kilde for fakta — SØKNAD (automatisk) eller SAKSBEHANDLER (manuelt registrert). */
     @NotNull Kilde kilde,
     /** Hva bruker oppga i søknaden. Null dersom ikke oppgitt. */

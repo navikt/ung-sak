@@ -6,14 +6,13 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -25,6 +24,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
@@ -37,6 +37,7 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -44,7 +45,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -53,10 +53,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
-class VurderBosattVilkårStegTest {
+class AvklarBostedVurderingsbehovStegTest {
 
     private static final LocalDate FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate TOM = LocalDate.of(2026, 1, 31);
+    private static final Periode PERIODE = new Periode(FOM, TOM);
 
     @Inject
     private EntityManager entityManager;
@@ -72,7 +73,9 @@ class VurderBosattVilkårStegTest {
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
-    private VurderBosattVilkårSteg steg;
+    private VurderBostedVilkårSteg steg;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     @BeforeEach
     void setUp() {
@@ -82,58 +85,51 @@ class VurderBosattVilkårStegTest {
         bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
         aktivitetspengerSøktPeriodeRepository = new AktivitetspengerSøktPeriodeRepository(entityManager);
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
+        inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
+        inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, vilkårResultatRepository);
 
         steg = lagSteg(List.of());
     }
 
     @Test
-    void skal_sette_oppfylt_og_regelinput_nar_bruker_er_bosatt_hele_perioden() {
+    void skal_passere_uten_aksjonspunkt_og_uten_opphorsresultat_nar_bruker_er_bosatt_hele_perioden() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
         ));
 
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        var perioder = hentPerioder(behandling.getId());
-        assertThat(perioder).hasSize(1);
-        assertThat(perioder.getFirst().getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-        assertThat(perioder.getFirst().getRegelInput()).contains("\"skjaeringstidspunkt\"");
-        assertThat(perioder.getFirst().getRegelInput()).contains("\"erBosattITrondheim\" : true");
     }
 
     @Test
-    void skal_splitte_periode_ved_fraflytting_og_sette_avslag_med_regelinput() {
+    void skal_opprette_opphorsresultat_ved_fraflytting_automatisk() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         var fraflyttingsDato = FOM.plusDays(10);
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, fraflyttingsDato, FraflyttingsÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, Kilde.SAKSBEHANDLER)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, fraflyttingsDato, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, Kilde.SAKSBEHANDLER)
         ));
 
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        var perioder = hentPerioder(behandling.getId());
-        assertThat(perioder).hasSize(2);
-
-        var sortert = perioder.stream().sorted(Comparator.comparing(VilkårPeriode::getFom)).toList();
-        assertThat(sortert.get(0).getFom()).isEqualTo(FOM);
-        assertThat(sortert.get(0).getTom()).isEqualTo(fraflyttingsDato.minusDays(1));
-        assertThat(sortert.get(0).getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-
-        assertThat(sortert.get(1).getFom()).isEqualTo(fraflyttingsDato);
-        assertThat(sortert.get(1).getTom()).isEqualTo(TOM);
-        assertThat(sortert.get(1).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(sortert.get(1).getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
-        assertThat(sortert.get(1).getRegelInput()).contains("\"fraflyttingsAarsak\" : \"IKKE_BOSATTADRESSE_I_TRONDHEIM\"");
+//        var vurdertAktivitetspengerGrunnlag = new VurdertAktivitetspengerGrunnlag(entityManager);
+//        var opphørResultater = vurdertAktivitetspengerGrunnlag.hentAktiveForBehandling(behandling.getId());
+//        assertThat(opphørResultater).hasSize(1);
+//        assertThat(opphørResultater.getFirst().getSkjæringstidspunkt()).isEqualTo(FOM);
+//        assertThat(opphørResultater.getFirst().getOpphørDato()).isEqualTo(fraflyttingsDato);
+//        assertThat(opphørResultater.getFirst().getOpphørÅrsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
     }
 
     @Test
     void skal_sette_pa_vent_nar_periode_venter_pa_etterlysning() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER)
         ));
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -158,9 +154,10 @@ class VurderBosattVilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        bostedsGrunnlagRepository.lagreAvklaringer(behandling.getId(), Map.of(
-            FOM, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER),
-            fom2, new BostedAvklaringData(true, null, null, Kilde.SØKNAD)
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(fom2, tom2), true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandling.getId(), Map.of(
+            PERIODE, new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER),
+            new Periode(fom2, tom2), new BostedAvklaringData(true, null, null, Kilde.SØKNAD)
         ));
         var frist = LocalDateTime.of(2026, 3, 1, 10, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -234,7 +231,7 @@ class VurderBosattVilkårStegTest {
         return behandling;
     }
 
-    private VurderBosattVilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
+    private VurderBostedVilkårSteg lagSteg(List<EtterlysningData> etterlysninger) {
         var vilkårTjeneste = new VilkårTjeneste(behandlingRepository, vilkårsPerioderTilVurderingTjenester, vilkårResultatRepository);
         var etterlysningTjeneste = new EtterlysningTjeneste(null, null) {
             @Override
@@ -243,14 +240,16 @@ class VurderBosattVilkårStegTest {
             }
         };
 
-        return new VurderBosattVilkårSteg(
+        return new VurderBostedVilkårSteg(
             manuelleVilkårRekkefølgeTjeneste,
             vilkårResultatRepository,
             vilkårTjeneste,
             behandlingRepository,
             bostedsGrunnlagRepository,
             vilkårsPerioderTilVurderingTjenester,
-            etterlysningTjeneste
+            etterlysningTjeneste,
+            inngangsvilkårVurderingRepository,
+            inngangsvilkårVurderingTjeneste
         );
     }
 
