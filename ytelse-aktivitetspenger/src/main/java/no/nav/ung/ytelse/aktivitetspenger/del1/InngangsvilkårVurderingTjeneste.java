@@ -39,6 +39,8 @@ public class InngangsvilkårVurderingTjeneste {
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? Avslagsårsak.IKKE_14A_VEDTAK : null;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+                .medBegrunnelse(vurdering.getBegrunnelse())
+                .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medUtfallManuell(utfall)
                 .medAvslagsårsak(avslagsårsak));
         }
@@ -57,6 +59,8 @@ public class InngangsvilkårVurderingTjeneste {
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE : null;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+                .medBegrunnelse(vurdering.getBegrunnelse())
+                .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medUtfallManuell(utfall)
                 .medAvslagsårsak(avslagsårsak));
         }
