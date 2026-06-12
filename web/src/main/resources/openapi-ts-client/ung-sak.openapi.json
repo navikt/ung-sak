@@ -1446,10 +1446,20 @@
         "type" : "string",
         "x-enum-varnames" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "UDEFINERT" ]
       },
+      "ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak" : {
+        "enum" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "-" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "UDEFINERT" ]
+      },
       "ung.kodeverk.vilkår.Avslagsårsak" : {
         "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "3001", "3003", "3004", "3005", "3002", "4001", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED", "SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE", "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE", "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED", "IKKE_14A_VEDTAK", "SØKER_ER_IKKE_MEDLEM", "UDEFINERT" ]
+      },
+      "ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak" : {
+        "enum" : [ "IKKE_14A_VEDTAK", "-" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Utfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
@@ -1935,8 +1945,8 @@
             "5100" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorForeslåVilkårAksjonspunktDto",
             "5130" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto",
             "5140" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.ManuellVurderingBostedsvilkårDto",
-            "5141" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto",
-            "5142" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto",
+            "5141" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto",
+            "5142" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto",
             "5200" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto",
             "5301" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto",
             "8000" : "#/components/schemas/ung.sak.kontrakt.kontroll.FastsettInntektDto"
@@ -1952,11 +1962,11 @@
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.ManuellVurderingBostedsvilkårDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto"
-        }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto"
-        }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.revurdering.KontrollAvManueltOpprettetRevurderingsbehandlingDto"
         }, {
@@ -2319,46 +2329,6 @@
         "required" : [ "vurdertePerioder" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderAndreLivsoppholdsytelserDto" : {
-        "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "vurdertePerioder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          }
-        },
-        "required" : [ "vurdertePerioder" ],
-        "type" : "object"
-      },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderBehovForBistandDto" : {
-        "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "vurdertePerioder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 0,
-            "type" : "array"
-          }
-        },
-        "required" : [ "vurdertePerioder" ],
-        "type" : "object"
-      },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto" : {
         "properties" : {
           "avklaringer" : {
@@ -2377,6 +2347,112 @@
           }
         },
         "required" : [ "avklaringer" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VilkårBistandPeriodeVurderingDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak"
+          },
+          "begrunnelse" : {
+            "maxLength" : 5000,
+            "minLength" : 3,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "erVilkårOppfylt" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "maxLength" : 10000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "harAvslagsårsakSattVedInnvilgelse" : {
+            "type" : "boolean"
+          },
+          "manglerAvslagsårsak" : {
+            "type" : "boolean"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          }
+        },
+        "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "vurdertePerioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VilkårBistandPeriodeVurderingDto"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurdertePerioder" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VilkårLivsoppholdsytelserPeriodeVurderingDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak"
+          },
+          "begrunnelse" : {
+            "maxLength" : 5000,
+            "minLength" : 3,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "erVilkårOppfylt" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "maxLength" : 10000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "harAvslagsårsakSattVedInnvilgelse" : {
+            "type" : "boolean"
+          },
+          "manglerAvslagsårsak" : {
+            "type" : "boolean"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          }
+        },
+        "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "vurdertePerioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VilkårLivsoppholdsytelserPeriodeVurderingDto"
+            },
+            "maxItems" : 100,
+            "minItems" : 0,
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurdertePerioder" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto" : {
