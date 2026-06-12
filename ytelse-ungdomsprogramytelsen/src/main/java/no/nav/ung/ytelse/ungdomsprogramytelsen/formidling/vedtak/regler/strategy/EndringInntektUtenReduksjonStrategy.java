@@ -99,7 +99,7 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderBare(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
+        return resultater.utenom(DetaljertResultatType.SATS_REGULERING).innholderBare(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
     }
 
 }

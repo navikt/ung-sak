@@ -31,7 +31,7 @@ public final class EndringFjerneProgramPeriodeStrategy implements VedtaksbrevInn
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
         var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderBare(DetaljertResultatType.ENDRING_FJERNE_PERIODE);
+        return resultater.utenom(DetaljertResultatType.SATS_REGULERING).innholderBare(DetaljertResultatType.ENDRING_FJERNE_PERIODE);
     }
 
 }
