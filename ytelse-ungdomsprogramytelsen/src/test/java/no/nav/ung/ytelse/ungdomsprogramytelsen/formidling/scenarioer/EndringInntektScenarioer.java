@@ -292,7 +292,7 @@ public class EndringInntektScenarioer {
             List.of(p.getFomDato()),
             triggere,
             Collections.emptyList(), null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null, false);
     }
 
     public static Behandling lagBehandlingMedAksjonspunktKontrollerInntekt(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories) {

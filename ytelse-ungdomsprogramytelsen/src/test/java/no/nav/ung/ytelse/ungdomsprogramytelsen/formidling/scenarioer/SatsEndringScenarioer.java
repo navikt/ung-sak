@@ -40,7 +40,7 @@ public class SatsEndringScenarioer {
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.RE_SATS_REGULERING, DatoIntervallEntitet.fra(p.getFomDato(), p.getTomDato()))),
-            Collections.emptyList(), null, null);
+            Collections.emptyList(), null, null, null, false);
     }
 
     /**

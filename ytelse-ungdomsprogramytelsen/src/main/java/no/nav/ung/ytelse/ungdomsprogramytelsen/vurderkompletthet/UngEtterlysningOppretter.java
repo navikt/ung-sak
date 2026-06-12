@@ -2,13 +2,12 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.EtterlysningOppretter;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.KontrollerInntektEtterlysningTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.maksdato.MaksdatoEtterlysningTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.ProgramperiodeendringEtterlysningTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -17,30 +16,22 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
 
     private KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste;
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
-    private BehandlingRepository behandlingRepository;
+    private MaksdatoEtterlysningTjeneste maksdatoEtterlysningTjeneste;
 
     public UngEtterlysningOppretter() {
     }
 
     @Inject
-    public UngEtterlysningOppretter(KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste,
-                                    ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
-                                    BehandlingRepository behandlingRepository) {
+    public UngEtterlysningOppretter(KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste, ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste, MaksdatoEtterlysningTjeneste maksdatoEtterlysningTjeneste) {
         this.kontrollerInntektEtterlysningTjeneste = kontrollerInntektEtterlysningTjeneste;
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
-        this.behandlingRepository = behandlingRepository;
+        this.maksdatoEtterlysningTjeneste = maksdatoEtterlysningTjeneste;
     }
 
     @Override
     public void opprettEtterlysninger(BehandlingReferanse behandlingReferanse) {
         kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
-        if (!erForlengetPeriode(behandlingReferanse)) {
-            programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
-        }
-    }
-
-    private boolean erForlengetPeriode(BehandlingReferanse behandlingReferanse) {
-        var behandling = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId());
-        return behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM);
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+        maksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
     }
 }

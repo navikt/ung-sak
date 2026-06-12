@@ -278,6 +278,8 @@ spec:
       value: "true"
     - name: AKTIVITETSPENGER_ENABLED
       value: "true"
+    - name: VARSEL_OPPHOR_VED_MAKSDATO_ENABLED
+      value: "true"
 
       # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

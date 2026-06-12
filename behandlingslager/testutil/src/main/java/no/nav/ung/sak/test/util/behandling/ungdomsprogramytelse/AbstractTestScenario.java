@@ -4,13 +4,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
-import no.nav.ung.kodeverk.behandling.BehandlingStatus;
-import no.nav.ung.kodeverk.behandling.BehandlingStegType;
-import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.behandling.FagsakStatus;
-import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
@@ -24,16 +18,8 @@ import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonBuilder;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagBuilder;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
+import no.nav.ung.sak.behandlingslager.behandling.repository.*;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -45,11 +31,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakLås;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakLåsRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.FagsakTestUtil;
+import no.nav.ung.sak.behandlingslager.fagsak.*;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
@@ -75,15 +57,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.Collections.singletonList;
@@ -509,13 +483,8 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         if (ungTestscenario.programPerioder() != null) {
-            if (ungTestscenario.periodeMaksDato() != null) {
-                repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder(), false, ungTestscenario.periodeMaksDato());
-            } else {
-                repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder());
-            }
+            repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder(), ungTestscenario.harForlengetPeriode(), ungTestscenario.periodeMaksDato());
         }
-
         if (ungTestscenario.søknadStartDato() != null) {
             List<UngdomsytelseSøktStartdato> starDatoer = ungTestscenario.søknadStartDato().stream().map(it -> new UngdomsytelseSøktStartdato(it, new JournalpostId("123")))
                 .toList();

@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -64,17 +65,18 @@ public class FagsakRepository {
         return opt;
     }
 
-    public List<Fagsak> hentAlleFagsakerSomOverlapper(LocalDate fom, LocalDate tom) {
+    public List<Fagsak> hentAlleFagsakerSomOverlapper(LocalDate fom, LocalDate tom, Collection<FagsakYtelseType> ytelsetyper) {
         Objects.requireNonNull(fom, "fom");
         Objects.requireNonNull(tom, "tom");
         String sqlString = """
                     select f.* from Fagsak f
-                      where f.ytelse_type <> 'OBSOLETE' and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]')
+                      where f.ytelse_type in (:ytelsetyper) and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]')
             """;
 
         Query query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
         query.setParameter("fom", fom);
         query.setParameter("tom", tom);
+        query.setParameter("ytelsetyper", ytelsetyper.stream().map(FagsakYtelseType::getKode).collect(Collectors.toSet()));
 
         return query.getResultList();
     }

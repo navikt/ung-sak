@@ -45,15 +45,27 @@ public class InnhentUngdomsprogramperioderTask extends UnderBehandlingProsessTas
 
     @Override
     public void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
-        LOGGER.info("Innhenter ungdomsprogramperioder for behandling: {}", behandling.getId());
+        LOGGER.info("Innhenter ungdomsprogramperioder for behandling={}, fagsakId={}, behandlingsårsaker={}",
+            behandling.getId(), behandling.getFagsakId(), behandling.getBehandlingÅrsakerTyper());
         ungdomsprogramTjeneste.innhentOpplysninger(behandling);
+
+        // Perioder fra register lagres uendret (kan ha tom=TIDENES_ENDE for åpne perioder).
+        // Konsumenter som trenger perioder begrenset til periodeMaksDato bruker
+        // UngdomsprogramPeriodeTjeneste#finnPerioderKappetMotMaksdato.
+        // Fagsakperioden beregnes korrekt via FagsakperiodeUtleder som bruker periodeMaksDato.
+
         final var periodeTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
         if (!periodeTidslinje.isEmpty()) {
             var fom = periodeTidslinje.getMinLocalDate();
             var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(behandling.getId());
             var maksDato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
             var tom = FagsakperiodeUtleder.finnTomDato(fom, periodeTidslinje, harForlengetPeriode, maksDato);
+            LOGGER.info("Utvider fagsakperiode for behandling={}: fom={}, tom={}, harForlengetPeriode={}, periodeMaksDato={}",
+                behandling.getId(), fom, tom, harForlengetPeriode, maksDato);
             fagsakRepository.utvidPeriode(behandling.getFagsakId(), fom, tom);
+        } else {
+            LOGGER.info("Ingen ungdomsprogramperioder funnet for behandling={}", behandling.getId());
         }
     }
+
 }

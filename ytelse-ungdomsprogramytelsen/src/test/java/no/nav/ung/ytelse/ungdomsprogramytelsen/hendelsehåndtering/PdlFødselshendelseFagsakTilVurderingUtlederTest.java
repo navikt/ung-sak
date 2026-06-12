@@ -17,16 +17,16 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 import org.junit.jupiter.api.BeforeEach;
@@ -127,7 +127,8 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
                 Set.of(),
                 List.of(PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).leggTilPersonopplysning(Personopplysning.builder().aktørId(barnAktørId).fødselsdato(barnFødselsdato).build()).build()),
                 null,
-                null)
+                null,
+                null, false)
         ).buildOgLagreMedUng(UngTestRepositories.lagAlleUngTestRepositoriesOgAbakusTjeneste(entityManager, null));
         return behandling;
     }

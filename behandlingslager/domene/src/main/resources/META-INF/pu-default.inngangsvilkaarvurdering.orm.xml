@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                 xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_2.xsd"
+                 version="3.2">
+
+    <sequence-generator name="SEQ_BISTAND_RESULTAT_HOLDER" allocation-size="50" sequence-name="seq_bistand_resultat_holder"/>
+    <sequence-generator name="SEQ_BISTAND_RESULTAT_PERIODE" allocation-size="50" sequence-name="seq_bistand_resultat_periode"/>
+    <sequence-generator name="SEQ_LIVSOPPHOLD_RESULTAT_HOLDER" allocation-size="50" sequence-name="seq_livsopphold_resultat_holder"/>
+    <sequence-generator name="SEQ_LIVSOPPHOLD_RESULTAT_PERIODE" allocation-size="50" sequence-name="seq_livsopphold_resultat_periode"/>
+    <sequence-generator name="SEQ_GR_AKT_INNGANGSVILKAAR_RES" allocation-size="50" sequence-name="seq_gr_akt_inngangsvilkaar_res"/>
+
+    <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatHolder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode"/>
+    <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatHolder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode"/>
+    <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag"/>
+
+</entity-mappings>

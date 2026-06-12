@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
@@ -27,6 +28,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
 
     public GrunnlagKopiererAktivitetspenger() {
         // for CDI proxy
@@ -39,7 +41,8 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
                                             UttalelseRepository uttalelseRepository,
                                             OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                            BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository) {
+                                            BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
+                                            InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
@@ -47,6 +50,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
     }
 
 
@@ -60,6 +64,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
         bostedsGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         bosattSøknadGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        inngangsvilkårVurderingRepository.kopier(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus
         iayTjeneste.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
