@@ -17,6 +17,8 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektReduksjonInnholdBygger;
 
+import java.util.List;
+
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
@@ -29,19 +31,19 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
     }
 
     @Override
-    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         boolean harUtførtKontrollerInntekt = behandling.getAksjonspunkter().stream()
             .filter(Aksjonspunkt::erUtført)
             .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
 
         var forklaring = "Automatisk brev ved endring av inntekt.";
         if (harUtførtKontrollerInntekt) {
-            return medRedigerbarKontrollerInntektBrev(forklaring);
+            return List.of(medRedigerbarKontrollerInntektBrev(forklaring));
         }
 
-        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_INNTEKT,
+        return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_INNTEKT,
             endringInntektReduksjonInnholdBygger,
-            forklaring);
+            forklaring));
     }
 
     private VedtaksbrevStrategyResultat medRedigerbarKontrollerInntektBrev(String forklaring) {
@@ -61,12 +63,10 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
-        var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
-            && (resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
-            || resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING)
-        );
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        return resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
+            || resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
     }
 
 }
+

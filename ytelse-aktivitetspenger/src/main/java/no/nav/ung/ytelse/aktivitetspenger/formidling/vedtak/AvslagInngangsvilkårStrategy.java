@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -15,6 +16,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.FørstegangsAvslagInnholdBygger;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -29,8 +31,13 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
     }
 
     @Override
-    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return new VedtaksbrevStrategyResultat(
+    public Presedens presedens() {
+        return Presedens.OVERSTYRENDE_ENKELTBREV;
+    }
+
+    @Override
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return List.of(new VedtaksbrevStrategyResultat(
             DokumentMalType.AVSLAG__DOK,
             førstegangsAvslagInnholdBygger,
             new VedtaksbrevEgenskaper(true,
@@ -39,7 +46,7 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
                 true),
             null,
             "Avslagsbrev ved avslag på inngangsvilkår"
-        );
+        ));
     }
 
     @Override

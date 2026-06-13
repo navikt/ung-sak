@@ -14,6 +14,8 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringBarnetilleggInnholdBygger;
 
+import java.util.List;
+
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbyggerStrategy {
@@ -26,17 +28,15 @@ public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbygg
     }
 
     @Override
-    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_BARNETILLEGG, endringBarnetilleggInnholdBygger, "Automatisk brev ved fødsel av barn.");
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        //TODO endre til å sjekke faktisk endring i grunnlaget
+        return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_BARNETILLEGG, endringBarnetilleggInnholdBygger, "Automatisk brev ved fødsel av barn."));
     }
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
-        var resultater = new ResultatHelper(resultatInfo);
-        return resultater.innholderIkke(DetaljertResultatType.INNVILGELSE_UTBETALING)
-            && resultater.innholderIkke(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)
-            && resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL);
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        return resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL);
     }
 
 }

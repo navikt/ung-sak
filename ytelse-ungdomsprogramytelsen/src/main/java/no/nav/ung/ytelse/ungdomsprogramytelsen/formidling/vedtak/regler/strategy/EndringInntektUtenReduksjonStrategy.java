@@ -23,6 +23,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -41,13 +42,13 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
     }
 
     @Override
-    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
 
         var harManueltFastsattInntekt = harManueltFastsattInntekt(behandling, detaljertResultat, kontrollertInntektPerioderTidslinje);
 
         if (harManueltFastsattInntekt) {
-            return new VedtaksbrevStrategyResultat(
+            return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON,
                 endringInntektUtenReduksjonInnholdBygger,
                 new VedtaksbrevEgenskaper(false,
@@ -56,9 +57,9 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
                     true),
                 null,
                 "Redigerbar brev ved full utbetaling med manuelt fastsatt inntekt på 0 kr uten registerinntekt."
-            );
+            ));
         }
-        return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved full utbetaling etter kontroll av inntekt.");
+        return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved full utbetaling etter kontroll av inntekt."));
     }
 
     private boolean harManueltFastsattInntekt(
@@ -97,9 +98,8 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
 
     @Override
     public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
-        var resultater = new ResultatHelper(resultatInfo);
-        return resultater.utenom(DetaljertResultatType.SATS_REGULERING).innholderBare(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        return resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
     }
 
 }

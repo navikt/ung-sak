@@ -175,7 +175,7 @@ class YtelseVedtaksbrevReglerTest {
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isFalse();
-        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(2);
 
         var regelResulat = totalresultater.ingenBrevResultater().getFirst();
         assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
