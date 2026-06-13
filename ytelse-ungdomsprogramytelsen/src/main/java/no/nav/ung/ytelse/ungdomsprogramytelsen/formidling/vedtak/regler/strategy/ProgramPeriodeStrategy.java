@@ -54,35 +54,34 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        boolean harSluttdato = resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
-        boolean harStartdato = resultater.innholder(DetaljertResultatType.ENDRING_STARTDATO);
+        boolean harEndretSluttdato = resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
+        boolean harEndretStartdato = resultater.innholder(DetaljertResultatType.ENDRING_STARTDATO);
+        boolean erOpphør = harEndretSluttdato && erFørsteSluttdato(behandling, ungdomsprogramPeriodeRepository);
 
         var brev = new ArrayList<VedtaksbrevStrategyResultat>();
-        boolean leggTilProgramperiodeEndring = harStartdato;
 
-        if (harSluttdato) {
-            if (erFørsteSluttdato(behandling, ungdomsprogramPeriodeRepository)) {
-                brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
-                    DokumentMalType.OPPHØR_DOK, opphørInnholdBygger,
-                    "Automatisk brev ved opphør."));
-            } else {
-                leggTilProgramperiodeEndring = true;
-            }
-        }
-
-        if (leggTilProgramperiodeEndring) {
+        boolean harFlyttetSluttdato = harEndretSluttdato && !erOpphør;
+        if (harEndretStartdato || harFlyttetSluttdato) {
             brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger,
-                "Automatisk brev ved endring av programperiode"));
+                "Automatisk brev flytting av: "
+                    + (harFlyttetSluttdato ? " sluttdato" : "")
+                    + (harEndretStartdato ? " startdato" : "")));
+        }
+
+        if (erOpphør) {
+            brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
+                DokumentMalType.OPPHØR_DOK, opphørInnholdBygger, "Automatisk brev ved opphør."));
         }
 
         // Forlengelse og opphør ved maksdato er kun aktuelt når det ikke samtidig er endring av sluttdato.
-        if (!harSluttdato) {
+        if (!harEndretSluttdato) {
             if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)) {
                 brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                     DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
                     "Automatisk brev ved forlenget periode"));
             }
+
             if (resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO)) {
                 brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                     DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
@@ -90,7 +89,7 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
             }
         }
 
-        return List.copyOf(brev);
+        return brev;
     }
 
     private static boolean erFørsteSluttdato(Behandling behandling, UngdomsprogramPeriodeRepository repo) {
