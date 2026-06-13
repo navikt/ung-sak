@@ -32,6 +32,13 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        boolean erRelevant = resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
+            || resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
+        if (!erRelevant) {
+            return List.of();
+        }
+
         boolean harUtførtKontrollerInntekt = behandling.getAksjonspunkter().stream()
             .filter(Aksjonspunkt::erUtført)
             .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
@@ -59,13 +66,6 @@ public final class EndringInntektReduksjonStrategy implements VedtaksbrevInnhold
             null,
             forklaring
         );
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        return resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
-            || resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
     }
 
 }

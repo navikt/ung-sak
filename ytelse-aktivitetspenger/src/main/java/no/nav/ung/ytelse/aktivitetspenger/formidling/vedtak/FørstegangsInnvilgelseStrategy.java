@@ -31,19 +31,18 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
+        boolean erFørstegangsInnvilgelse = resultatInfo.stream()
+            .map(DetaljertResultatInfo::detaljertResultatType)
+            .collect(Collectors.toSet()).contains(DetaljertResultatType.INNVILGELSE_KUN_VILKÅR); //TODO må endres senere
+        if (!erFørstegangsInnvilgelse) {
+            return List.of();
+        }
         return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.INNVILGELSE_DOK, førstegangsInnvilgelseInnholdBygger, "Automatisk brev ved ny innvilgelse. "));
     }
 
     @Override
     public Presedens presedens() {
         return Presedens.OVERSTYRENDE_ENKELTBREV;
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
-        return resultatInfo.stream()
-            .map(DetaljertResultatInfo::detaljertResultatType)
-            .collect(Collectors.toSet()).contains(DetaljertResultatType.INNVILGELSE_KUN_VILKÅR); //TODO må endres senere
     }
 }

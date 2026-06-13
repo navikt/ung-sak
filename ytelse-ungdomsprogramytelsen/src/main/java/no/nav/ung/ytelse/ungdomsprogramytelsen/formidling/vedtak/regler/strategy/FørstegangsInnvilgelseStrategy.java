@@ -30,17 +30,15 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        if (!resultater.innholder(DetaljertResultatType.INNVILGELSE_UTBETALING)) {
+            return List.of();
+        }
         return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.INNVILGELSE_DOK, førstegangsInnvilgelseInnholdBygger, "Automatisk brev ved ny innvilgelse. "));
     }
 
     @Override
     public Presedens presedens() {
         return Presedens.OVERSTYRENDE_ENKELTBREV;
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        return resultater.innholder(DetaljertResultatType.INNVILGELSE_UTBETALING);
     }
 }

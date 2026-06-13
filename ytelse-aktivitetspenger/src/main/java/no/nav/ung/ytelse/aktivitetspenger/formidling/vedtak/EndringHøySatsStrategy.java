@@ -35,6 +35,11 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        if (!resultater.innholder(DetaljertResultatType.ENDRING_ØKT_SATS)) {
+            return List.of();
+        }
+
         var satstidslinje = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
             .map(AktivitetspengerGrunnlag::hentAktivitetspengerSatsTidslinje)
             .map(it -> it.intersection(detaljertResultat));
@@ -51,11 +56,5 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
             }
         }
         return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_HØY_SATS, endringHøySatsInnholdBygger, "Automatisk brev ved endring til høy sats."));
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        return resultater.innholder(DetaljertResultatType.ENDRING_ØKT_SATS);
     }
 }

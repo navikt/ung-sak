@@ -60,9 +60,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var innholdbyggerStrategies = innholdbyggerStrategiesInstances.select(new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(behandling.getFagsakYtelseType()));
 
-        var kandidater = innholdbyggerStrategies.stream()
-            .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
-            .toList();
+        var kandidater = innholdbyggerStrategies.stream().toList();
 
         // 1. Overstyrende ingen-brev (f.eks. dødsfall barn) vinner uansett. //TODO vurderinline evaluerKandidater
         var overstyrendeIngenBrev = evaluerKandidater(kandidater, Presedens.OVERSTYRENDE_INGEN_BREV, behandling, detaljertResultat);

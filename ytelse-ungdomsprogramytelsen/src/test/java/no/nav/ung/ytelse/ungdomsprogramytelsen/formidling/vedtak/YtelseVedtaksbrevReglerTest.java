@@ -455,6 +455,26 @@ class YtelseVedtaksbrevReglerTest {
     }
 
 
+    /**
+     * Invariant: Når et reelt detaljert resultat foreligger, men ingen strategi gjør krav på det,
+     * skal resolveren feile tydelig med IKKE_IMPLEMENTERT i stedet for å stille produsere ingen brev.
+     * Dette beskytter mot at en fremtidig endring gjør alle relevante strategier irrelevante for en
+     * gyldig resultatkombinasjon uten at noe varsles.
+     */
+    @Test
+    void skal_gi_ikke_implementert_nar_ingen_strategi_gjor_krav_pa_resultatet() {
+        var behandling = lagBehandling(FørstegangsbehandlingScenarioer.innvilget19årUtenTrigger(LocalDate.of(2024, 12, 1)));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResultat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+        assertThat(regelResultat.forklaring()).containsIgnoringCase("Ingen brev ved resultater");
+    }
+
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)

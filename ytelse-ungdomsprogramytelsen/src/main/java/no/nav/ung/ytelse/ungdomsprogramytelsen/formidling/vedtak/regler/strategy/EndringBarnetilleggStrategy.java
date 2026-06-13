@@ -29,14 +29,12 @@ public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbygg
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        if (!resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL)) {
+            return List.of();
+        }
         //TODO endre til å sjekke faktisk endring i grunnlaget
         return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_BARNETILLEGG, endringBarnetilleggInnholdBygger, "Automatisk brev ved fødsel av barn."));
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        return resultater.innholder(DetaljertResultatType.ENDRING_BARN_FØDSEL);
     }
 
 }

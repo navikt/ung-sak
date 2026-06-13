@@ -32,6 +32,10 @@ public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStra
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        if (!resultater.innholder(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
+            return List.of();
+        }
         return List.of(new VedtaksbrevStrategyResultat(
             DokumentMalType.MANUELT_VEDTAK_DOK,
             tomVedtaksbrevInnholdBygger,
@@ -39,12 +43,6 @@ public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStra
             null,
             "Tom brev for redigering ved avslag"
         ));
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        return resultater.innholder(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
     }
 
     @Override

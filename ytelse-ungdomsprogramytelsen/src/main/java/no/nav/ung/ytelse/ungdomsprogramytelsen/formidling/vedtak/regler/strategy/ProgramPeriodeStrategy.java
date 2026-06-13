@@ -93,15 +93,6 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
         return List.copyOf(brev);
     }
 
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        return resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO)
-            || resultater.innholder(DetaljertResultatType.ENDRING_STARTDATO)
-            || resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)
-            || resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO);
-    }
-
     private static boolean erFørsteSluttdato(Behandling behandling, UngdomsprogramPeriodeRepository repo) {
         return behandling.getOriginalBehandlingId()
             .flatMap(repo::hentGrunnlag)

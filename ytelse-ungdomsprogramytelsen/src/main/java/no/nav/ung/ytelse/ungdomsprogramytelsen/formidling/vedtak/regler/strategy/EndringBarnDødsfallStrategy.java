@@ -39,27 +39,23 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        if (enableAutoBrevVedBarnDødsfall) {
+            return List.of();
+        }
+
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        boolean erDødsfall = harSatsendringenDødsfall(behandling, detaljertResultat)
+            || resultater.innholder(DetaljertResultatType.ENDRING_BARN_DØDSFALL);
+        if (!erDødsfall) {
+            return List.of();
+        }
+
         return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "Ingen brev ved dødsfall av barn."));
     }
 
     @Override
     public Presedens presedens() {
         return Presedens.OVERSTYRENDE_INGEN_BREV;
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        if (enableAutoBrevVedBarnDødsfall) {
-            return false;
-        }
-
-        if (harSatsendringenDødsfall(behandling, detaljertResultat)) {
-            return true;
-        }
-
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-
-        return resultater.innholder(DetaljertResultatType.ENDRING_BARN_DØDSFALL);
     }
 
     private boolean harSatsendringenDødsfall(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {

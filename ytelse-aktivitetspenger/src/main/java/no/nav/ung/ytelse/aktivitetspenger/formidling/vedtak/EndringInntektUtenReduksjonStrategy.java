@@ -37,6 +37,11 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        if (!resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)) {
+            return List.of();
+        }
+
         var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
 
         var harManueltFastsattInntekt = harManueltFastsattInntekt(detaljertResultat, kontrollertInntektPerioderTidslinje);
@@ -83,12 +88,6 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
                 p.getPeriode().getTomDato(),
                 p)).reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        return resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
     }
 
 }

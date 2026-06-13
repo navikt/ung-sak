@@ -37,6 +37,12 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultatTyper = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat).stream()
+            .map(DetaljertResultatInfo::detaljertResultatType)
+            .collect(Collectors.toSet());
+        if (resultatTyper.isEmpty() || !resultatTyper.stream().allMatch(it -> it == DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
+            return List.of();
+        }
         return List.of(new VedtaksbrevStrategyResultat(
             DokumentMalType.AVSLAG__DOK,
             førstegangsAvslagInnholdBygger,
@@ -47,18 +53,5 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
             null,
             "Avslagsbrev ved avslag på inngangsvilkår"
         ));
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
-        if (resultatInfo.isEmpty()) {
-            return false;
-        }
-
-        return resultatInfo.stream()
-            .map(DetaljertResultatInfo::detaljertResultatType)
-            .collect(Collectors.toSet()).stream()
-            .allMatch(it -> it == DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
     }
 }
