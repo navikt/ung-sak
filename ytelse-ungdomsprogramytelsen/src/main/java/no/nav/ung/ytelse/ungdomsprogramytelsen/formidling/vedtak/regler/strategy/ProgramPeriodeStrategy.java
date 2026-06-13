@@ -18,7 +18,6 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringProgram
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.ForlengetPeriodeInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørVedMaksdatoInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,13 +76,13 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
 
         // Forlengelse og opphør ved maksdato er kun aktuelt når det ikke samtidig er endring av sluttdato.
         if (!harEndretSluttdato) {
-            if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE) && harForlengetPeriode(behandling)) {
+            if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)) {
                 brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                     DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
                     "Automatisk brev ved forlenget periode"));
             }
 
-            if (resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO) && erRelevantForVarslingOmOpphørVedMaksdato(behandling)) {
+            if (resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO)) {
                 brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                     DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
                     "Automatisk brev ved opphør grunnet maksdato."));
@@ -91,19 +90,6 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
         }
 
         return brev;
-    }
-
-    private boolean harForlengetPeriode(Behandling behandling) {
-        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .orElseThrow()
-            .harForlengetPeriode();
-    }
-
-    private boolean erRelevantForVarslingOmOpphørVedMaksdato(Behandling behandling) {
-        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
-        return MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(
-            grunnlag.hentForEksaktEnPeriode().getTomDato(),
-            grunnlag.getPeriodeMaksDato().orElseThrow());
     }
 
     private static boolean erFørsteSluttdato(Behandling behandling, UngdomsprogramPeriodeRepository repo) {

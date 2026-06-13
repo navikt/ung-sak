@@ -13,13 +13,16 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.vedtak.resultat.*;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -39,6 +42,7 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private VilkårResultatRepository vilkårResultatRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     UngDetaljertResultatTidslinjeUtleder() {
     }
@@ -47,10 +51,12 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
     public UngDetaljertResultatTidslinjeUtleder(
         @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
         TilkjentYtelseRepository tilkjentYtelseRepository,
-        VilkårResultatRepository vilkårResultatRepository) {
+        VilkårResultatRepository vilkårResultatRepository,
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     @Override
@@ -65,13 +71,20 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
 
         var samletVilkårTidslinje = DetaljertResultatFelles.samleVilkårIEnTidslinje(vilkårResultatRepository.hentVilkårResultater(behandling.getId()));
 
+        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .orElseThrow();
+        var ungdomsprogramMaksPeriode = grunnlag.getUngdomsprogramMaksPeriode().orElse(null);
+        var ungdomsprogramPeriode = grunnlag.hentForEksaktEnPeriode();
+
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .intersection(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
                     -> new LocalDateSegment<>(p, new UngDetaljertResultatGrunnlag(
                     vilkårResultater.getValue(),
                     behandlingÅrsaker.getValue(),
-                    behandling.erManueltOpprettet())));
+                    behandling.erManueltOpprettet(),
+                    ungdomsprogramMaksPeriode,
+                    ungdomsprogramPeriode)));
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, bestemResultatForPeriodeCombinator(), JoinStyle.LEFT_JOIN);
@@ -108,11 +121,13 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)
+            && detaljertResultatGrunnlag.ungdomsprogramMaksPeriodeOpt().orElseThrow().harForlengetPeriode()) {
             resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.FORLENGET_PERIODE));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)) {
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
+            && erRelevantForVarslingOmOpphørVedMaksdato(detaljertResultatGrunnlag)) {
             resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO));
         }
 
@@ -132,6 +147,12 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
 
 
         return resultater;
+    }
+
+    private static boolean erRelevantForVarslingOmOpphørVedMaksdato(UngDetaljertResultatGrunnlag vilkårResultat) {
+        var maksPeriode = Optional.ofNullable(vilkårResultat.ungdomsprogramMaksPeriode()).orElseThrow();
+        return MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(
+            vilkårResultat.ungdomsprogramPeriode().getTomDato(), maksPeriode.getPeriodeMaksDato().orElseThrow());
     }
 
     private static DetaljertResultatInfo endretSluttdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
