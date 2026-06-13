@@ -33,7 +33,7 @@ public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStra
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (!resultater.innholder(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
+        if (!resultater.inneholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
             return List.of();
         }
         return List.of(new VedtaksbrevStrategyResultat(

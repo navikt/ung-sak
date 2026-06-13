@@ -14,7 +14,8 @@ public enum Presedens {
 
     /**
      * Overstyrer normale strategier: hvis aktuell og den produserer brev, blir det det eneste brevet.
-     * Brukes f.eks. ved førstegangsinnvilgelse.
+     * Maks én slik strategi kan gi brev for samme behandling (strategiene må være gjensidig utelukkende);
+     * resolveren feiler dersom flere gjør krav på dette nivået.
      */
     OVERSTYRENDE_ENKELTBREV,
 

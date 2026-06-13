@@ -72,6 +72,10 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         var overstyrendeEnkeltbrev = evaluerKandidater(kandidater, Presedens.OVERSTYRENDE_ENKELTBREV, behandling, detaljertResultat).stream()
             .filter(it -> it.bygger() != null)
             .toList();
+        if (overstyrendeEnkeltbrev.size() > 1) {
+            throw new IllegalStateException("Flere overstyrende enkeltbrev-strategier ga resultat, forventet maks ett: "
+                + overstyrendeEnkeltbrev.stream().map(VedtaksbrevStrategyResultat::forklaring).collect(Collectors.joining(", ")));
+        }
         if (!overstyrendeEnkeltbrev.isEmpty()) {
             return lagBrevResultat(detaljertResultat, overstyrendeEnkeltbrev);
         }

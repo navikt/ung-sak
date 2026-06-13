@@ -12,12 +12,11 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.FørstegangsAvslagInnholdBygger;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -37,10 +36,8 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatTyper = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat).stream()
-            .map(DetaljertResultatInfo::detaljertResultatType)
-            .collect(Collectors.toSet());
-        if (resultatTyper.isEmpty() || !resultatTyper.stream().allMatch(it -> it == DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        if (!resultater.inneholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
             return List.of();
         }
         return List.of(new VedtaksbrevStrategyResultat(
