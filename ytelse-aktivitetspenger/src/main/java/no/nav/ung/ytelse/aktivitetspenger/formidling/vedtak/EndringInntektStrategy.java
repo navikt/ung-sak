@@ -25,12 +25,6 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringInntektUtenR
 import java.math.BigDecimal;
 import java.util.List;
 
-/**
- * Samler brevutledning for utfallet av kontroll av inntekt. Reduksjon (eller ingen utbetaling) og full
- * utbetaling er gjensidig utelukkende utfall av samme flyt, og avgjøres derfor her i én strategi slik at
- * det aldri produseres både et reduksjonsbrev og et uten-reduksjon-brev for samme behandling. Reduksjon
- * har presedens over full utbetaling.
- */
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStrategy {

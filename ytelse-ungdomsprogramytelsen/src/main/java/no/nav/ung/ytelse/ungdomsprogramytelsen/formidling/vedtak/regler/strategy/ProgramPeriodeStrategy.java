@@ -22,11 +22,7 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørVedMaks
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Samler all brevutledning for endringer i ungdomsprogramperioden. De ulike utfallene (opphør, flytting av
- * start-/sluttdato, forlengelse, opphør ved maksdato) er innbyrdes avhengige og avgjøres derfor her i én
- * strategi i stedet for å la separate strategier sjekke hverandres resultattyper.
- */
+
 @Dependent
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStrategy {
