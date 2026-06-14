@@ -16,7 +16,7 @@ public class ResultatHelper {
         return resultatTyper.contains(detaljertResultatType);
     }
 
-    public boolean inneholderBare(DetaljertResultatType detaljertResultatType) {
+    public boolean innholderBare(DetaljertResultatType detaljertResultatType) {
         return !resultatTyper.isEmpty() && resultatTyper.stream().allMatch(it -> it == detaljertResultatType);
     }
 }
