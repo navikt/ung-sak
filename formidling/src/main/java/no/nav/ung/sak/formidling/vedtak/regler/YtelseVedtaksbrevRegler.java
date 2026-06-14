@@ -62,14 +62,18 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
 
         var kandidater = innholdbyggerStrategies.stream().toList();
 
-        // 1. Overstyrende ingen-brev (f.eks. dødsfall barn) vinner uansett. //TODO vurderinline evaluerKandidater
-        var overstyrendeIngenBrev = evaluerKandidater(kandidater, Presedens.OVERSTYRENDE_INGEN_BREV, behandling, detaljertResultat);
+        var overstyrendeIngenBrev = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.OVERSTYRENDE_INGEN_BREV)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
+            .toList();
         if (!overstyrendeIngenBrev.isEmpty()) {
             return lagIngenBrevResultat(detaljertResultat, overstyrendeIngenBrev);
         }
 
-        // 2. Overstyrende enkeltbrev (f.eks. førstegangsinnvilgelse) undertrykker normale strategier.
-        var overstyrendeEnkeltbrev = evaluerKandidater(kandidater, Presedens.OVERSTYRENDE_ENKELTBREV, behandling, detaljertResultat).stream()
+        var overstyrendeEnkeltbrev = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.OVERSTYRENDE_ENKELTBREV)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
+            .toList().stream()
             .filter(it -> it.bygger() != null)
             .toList();
         if (overstyrendeEnkeltbrev.size() > 1) {
@@ -81,7 +85,10 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         }
 
         // 3. Normale, additive strategier.
-        var normaleResultater = evaluerKandidater(kandidater, Presedens.NORMAL, behandling, detaljertResultat);
+        var normaleResultater = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.NORMAL)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
+            .toList();
 
         if (normaleResultater.size() > 1) {
             LOG.info("Flere resultater for strategier: {}", normaleResultater.stream()
@@ -105,17 +112,6 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
 
         //Fallback for ukjente brev
         return lagIkkeImplementertBrevResultat(detaljertResultat);
-    }
-
-    private static List<VedtaksbrevStrategyResultat> evaluerKandidater(
-        List<VedtaksbrevInnholdbyggerStrategy> kandidater,
-        Presedens presedens,
-        Behandling behandling,
-        LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return kandidater.stream()
-            .filter(it -> it.presedens() == presedens)
-            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
-            .toList();
     }
 
     private static BehandlingVedtaksbrevResultat lagIngenBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
