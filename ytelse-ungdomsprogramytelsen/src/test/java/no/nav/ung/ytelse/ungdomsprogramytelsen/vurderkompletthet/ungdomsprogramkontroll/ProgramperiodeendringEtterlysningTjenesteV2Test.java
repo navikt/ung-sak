@@ -116,6 +116,24 @@ class ProgramperiodeendringEtterlysningTjenesteV2Test {
     }
 
     @Test
+    void skal_ikke_kaste_ved_tom_endringstidslinje_når_periode_maksdato_er_satt() {
+
+        final var fom = LocalDate.now();
+        final var tom = TIDENES_ENDE;
+        final var periodeMaksDato = fom.plusWeeks(8);
+        ungdomsytelseStartdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(fom, new JournalpostId("1L"))));
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, periodeMaksDato);
+
+        // lagrer identisk grunnlag på nytt slik at endret tidslinje blir tom, men periodeMaksDato fortsatt er satt
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)), false, periodeMaksDato);
+
+        programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse.fra(behandling));
+
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        assertThat(etterlysninger.size()).isEqualTo(0);
+    }
+
+    @Test
     void skal_opprette_etterlysning_for_endret_startdato_endring() {
         final var fom = LocalDate.now();
         final var tom = TIDENES_ENDE;
