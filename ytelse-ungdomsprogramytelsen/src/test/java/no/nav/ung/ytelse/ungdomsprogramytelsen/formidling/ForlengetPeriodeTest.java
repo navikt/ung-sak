@@ -37,8 +37,8 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             """
                 Du får forlenget perioden med ungdomsprogramytelsen \
-                Fra 1. januar 2026 får du forlenget perioden din med ungdomsprogramytelsen. \
-                Du får ytelsen så lenge du deltar i ungdomsprogrammet, men ikke lenger enn i åtte nye uker. \
+                Fra 1. januar 2026 får du forlenget perioden din med ungdomsprogramytelsen med inntil 8 nye uker. \
+                Du får ytelsen så lenge du deltar i ungdomsprogrammet, men ikke lenger enn til 28. januar 2026. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelsen § 6. \
                 Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen \
                 Hvis du har en arbeidsinntekt i tillegg til ungdomsprogramytelsen, er det viktig at du sier fra til oss om det. \

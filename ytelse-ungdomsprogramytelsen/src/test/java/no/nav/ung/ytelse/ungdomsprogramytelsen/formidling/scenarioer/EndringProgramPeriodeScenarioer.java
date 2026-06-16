@@ -249,6 +249,6 @@ public class EndringProgramPeriodeScenarioer {
                     DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato))
             ),
             Collections.emptyList(),
-            null, null, null, true);
+            null, null, nySluttdato, true);
     }
 }

@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -40,7 +41,13 @@ public class ForlengetPeriodeInnholdBygger implements VedtaksbrevInnholdBygger {
 
         LocalDate forlengetPeriodeFraOgMedDato = FagsakperiodeUtleder.justerTilNesteVirkedag(originalMaksDato.plusDays(1));
 
+        LocalDate nyMaksdato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .flatMap(UngdomsprogramPeriodeGrunnlag::getPeriodeMaksDato)
+            .orElseThrow(() -> new IllegalStateException(
+                "Forventet periodeMaksDato på behandling=" + behandling.getId()
+                    + " ved bygging av brev for forlenget periode"));
+
         return new TemplateInnholdResultat(TemplateType.FORLENGET_PERIODE,
-            new ForlengetPeriodeDto(forlengetPeriodeFraOgMedDato));
+            new ForlengetPeriodeDto(forlengetPeriodeFraOgMedDato, nyMaksdato));
     }
 }
