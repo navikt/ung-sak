@@ -40,7 +40,14 @@ public class ForlengetPeriodeInnholdBygger implements VedtaksbrevInnholdBygger {
 
         LocalDate forlengetPeriodeFraOgMedDato = FagsakperiodeUtleder.justerTilNesteVirkedag(originalMaksDato.plusDays(1));
 
+        // Hent ny maksdato (etter 8 uker / 300 virkedager) fra registeret på nåværende behandling
+        LocalDate nyMaksdato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .flatMap(gr -> gr.getPeriodeMaksDato())
+            .orElseThrow(() -> new IllegalStateException(
+                "Forventet periodeMaksDato på behandling=" + behandling.getId()
+                    + " ved bygging av brev for forlenget periode"));
+
         return new TemplateInnholdResultat(TemplateType.FORLENGET_PERIODE,
-            new ForlengetPeriodeDto(forlengetPeriodeFraOgMedDato));
+            new ForlengetPeriodeDto(forlengetPeriodeFraOgMedDato, nyMaksdato));
     }
 }
