@@ -41,8 +41,11 @@ public class ForlengetPeriodeInnholdBygger implements VedtaksbrevInnholdBygger {
 
         LocalDate forlengetPeriodeFraOgMedDato = FagsakperiodeUtleder.justerTilNesteVirkedag(originalMaksDato.plusDays(1));
 
-        LocalDate nyMaksdato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .flatMap(UngdomsprogramPeriodeGrunnlag::getPeriodeMaksDato)
+        var nyttGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .orElseThrow(() -> new IllegalStateException(
+                "Forventet ungdomsprogramPeriodeGrunnlag på behandling=" + behandling.getId()
+                    + " ved bygging av brev for forlenget periode"));
+        LocalDate nyMaksdato = nyttGrunnlag.getPeriodeMaksDato()
             .orElseThrow(() -> new IllegalStateException(
                 "Forventet periodeMaksDato på behandling=" + behandling.getId()
                     + " ved bygging av brev for forlenget periode"));
