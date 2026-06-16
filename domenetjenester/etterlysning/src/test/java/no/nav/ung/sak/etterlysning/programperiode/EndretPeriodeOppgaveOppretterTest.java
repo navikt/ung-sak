@@ -9,10 +9,10 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -59,7 +59,7 @@ class EndretPeriodeOppgaveOppretterTest {
     @Mock
     private EtterlysningRepository etterlysningRepository;
     @Mock
-    private UngdomsytelseStartdatoRepository startdatoRepository;
+    private StartdatoRepository startdatoRepository;
 
     @Mock
     private Behandling behandling;
@@ -364,11 +364,11 @@ class EndretPeriodeOppgaveOppretterTest {
         return grunnlag;
     }
 
-    private static UngdomsytelseStartdatoGrunnlag startdatoGrunnlag(LocalDate... startdatoer) {
-        var grunnlag = org.mockito.Mockito.mock(UngdomsytelseStartdatoGrunnlag.class);
-        var oppgitteStartdatoer = org.mockito.Mockito.mock(UngdomsytelseStartdatoer.class);
+    private static StartdatoGrunnlag startdatoGrunnlag(LocalDate... startdatoer) {
+        var grunnlag = org.mockito.Mockito.mock(StartdatoGrunnlag.class);
+        var oppgitteStartdatoer = org.mockito.Mockito.mock(Startdatoer.class);
         var søkteStartdatoer = Arrays.stream(startdatoer)
-            .map(dato -> new UngdomsytelseSøktStartdato(dato, new JournalpostId("123")))
+            .map(dato -> new SøktStartdato(dato, new JournalpostId("123")))
             .collect(java.util.stream.Collectors.toSet());
         when(grunnlag.getOppgitteStartdatoer()).thenReturn(oppgitteStartdatoer);
         when(oppgitteStartdatoer.getStartdatoer()).thenReturn(søkteStartdatoer);

@@ -21,12 +21,12 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "UngdomsytelseSøktStartdato")
-@Table(name = "UNG_SOEKT_STARTDATO")
+@Table(name = "SOEKT_STARTDATO")
 @Immutable
-public class UngdomsytelseSøktStartdato extends BaseEntitet implements SøktPeriodeData {
+public class SøktStartdato extends BaseEntitet implements SøktPeriodeData {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_SOEKT_STARTDATO")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOEKT_STARTDATO")
     private Long id;
 
 
@@ -41,17 +41,17 @@ public class UngdomsytelseSøktStartdato extends BaseEntitet implements SøktPer
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseSøktStartdato(LocalDate startdato, JournalpostId journalpostId) {
+    public SøktStartdato(LocalDate startdato, JournalpostId journalpostId) {
         this.startdato = startdato;
         this.journalpostId = journalpostId;
     }
 
-    public UngdomsytelseSøktStartdato(UngdomsytelseSøktStartdato it) {
+    public SøktStartdato(SøktStartdato it) {
         this.journalpostId = it.getJournalpostId();
         this.startdato = it.getStartdato();
     }
 
-    public UngdomsytelseSøktStartdato() {
+    public SøktStartdato() {
         // hibernate
     }
 
@@ -73,7 +73,7 @@ public class UngdomsytelseSøktStartdato extends BaseEntitet implements SøktPer
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UngdomsytelseSøktStartdato that = (UngdomsytelseSøktStartdato) o;
+        SøktStartdato that = (SøktStartdato) o;
         return Objects.equals(startdato, that.startdato);
     }
 

@@ -17,6 +17,9 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
@@ -71,7 +74,7 @@ class VurderBostedVilkårStegTest {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
+    private StartdatoRepository startdatoRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private VurderBostedVilkårSteg steg;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
@@ -84,7 +87,7 @@ class VurderBostedVilkårStegTest {
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
-        aktivitetspengerSøktPeriodeRepository = new AktivitetspengerSøktPeriodeRepository(entityManager);
+        startdatoRepository = new StartdatoRepository(entityManager);
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, vilkårResultatRepository);
@@ -203,11 +206,9 @@ class VurderBostedVilkårStegTest {
             .lagre(entityManager);
 
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
-        aktivitetspengerSøktPeriodeRepository.lagreNyPeriode(new AktivitetspengerSøktPeriode(
-            behandling.getId(),
-            new JournalpostId("jp-vilkår"),
-            LocalDateTime.now(),
-            periode));
+        var søktStartdato = new SøktStartdato(FOM, new JournalpostId("jp-vilkår"));
+        startdatoRepository.lagre(behandling.getId(), List.of(søktStartdato));
+        startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(List.of(søktStartdato)));
         prosessTriggereRepository.leggTil(behandling.getId(), java.util.Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode)));
         return behandling;
@@ -225,16 +226,10 @@ class VurderBostedVilkårStegTest {
 
         var periode1 = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
         var periode2 = DatoIntervallEntitet.fraOgMedTilOgMed(fom2, tom2);
-        aktivitetspengerSøktPeriodeRepository.lagreNyPeriode(new AktivitetspengerSøktPeriode(
-            behandling.getId(),
-            new JournalpostId("jp-vilkår-1"),
-            LocalDateTime.now(),
-            periode1));
-        aktivitetspengerSøktPeriodeRepository.lagreNyPeriode(new AktivitetspengerSøktPeriode(
-            behandling.getId(),
-            new JournalpostId("jp-vilkår-2"),
-            LocalDateTime.now(),
-            periode2));
+        var søktStartdato1 = new SøktStartdato(FOM, new JournalpostId("jp-vilkår-1"));
+        var søktStartdato2 = new SøktStartdato(fom2, new JournalpostId("jp-vilkår-2"));
+        startdatoRepository.lagre(behandling.getId(), List.of(søktStartdato1, søktStartdato2));
+        startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(List.of(søktStartdato1, søktStartdato2)));
         prosessTriggereRepository.leggTil(behandling.getId(), java.util.Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode1),
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode2)));

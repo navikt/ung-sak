@@ -9,11 +9,11 @@ import java.util.HashSet;
 import java.util.Objects;
 
 @Entity(name = "UngdomsytelseStartdatoGrunnlag")
-@Table(name = "UNG_GR_STARTDATO")
-public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
+@Table(name = "GR_STARTDATO")
+public class StartdatoGrunnlag extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_GR_STARTDATO")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_GR_STARTDATO")
     private Long id;
 
     @Column(name = "behandling_id", nullable = false, updatable = false, unique = true)
@@ -25,7 +25,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @JoinColumn(name = "relevante_startdatoer_id", nullable = true, updatable = false, unique = true)
-    private UngdomsytelseStartdatoer relevanteStartdatoer;
+    private Startdatoer relevanteStartdatoer;
 
     /**
      * Alle søknadsperioder med krav som har kommet inn i denne og tidligere behandlinger
@@ -33,7 +33,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @JoinColumn(name = "oppgitte_startdatoer_id", nullable = false, updatable = false, unique = true)
-    private UngdomsytelseStartdatoer oppgitteStartdatoer;
+    private Startdatoer oppgitteStartdatoer;
 
 
     @Column(name = "aktiv", nullable = false)
@@ -43,16 +43,16 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseStartdatoGrunnlag() {
+    public StartdatoGrunnlag() {
     }
 
-    UngdomsytelseStartdatoGrunnlag(Long behandlingId, UngdomsytelseStartdatoGrunnlag grunnlag) {
+    StartdatoGrunnlag(Long behandlingId, StartdatoGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.oppgitteStartdatoer = grunnlag.oppgitteStartdatoer;
         this.relevanteStartdatoer = grunnlag.relevanteStartdatoer;
     }
 
-    public UngdomsytelseStartdatoGrunnlag(Long behandlingId) {
+    public StartdatoGrunnlag(Long behandlingId) {
         this.behandlingId = behandlingId;
     }
 
@@ -60,11 +60,11 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         return id;
     }
 
-    public UngdomsytelseStartdatoer getOppgitteStartdatoer() {
+    public Startdatoer getOppgitteStartdatoer() {
         return oppgitteStartdatoer;
     }
 
-    public UngdomsytelseStartdatoer getRelevanteStartdatoer() {
+    public Startdatoer getRelevanteStartdatoer() {
         return relevanteStartdatoer;
     }
 
@@ -77,16 +77,16 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    void leggTil(Collection<UngdomsytelseSøktStartdato> startdatoer) {
+    void leggTil(Collection<SøktStartdato> startdatoer) {
         if (id != null) {
             throw new IllegalStateException("[Utvikler feil] Kan ikke editere persistert grunnlag");
         }
         var perioder = this.oppgitteStartdatoer != null ? new HashSet<>(this.oppgitteStartdatoer.getStartdatoer()) : new HashSet<>(startdatoer);
         perioder.addAll(startdatoer);
-        this.oppgitteStartdatoer = new UngdomsytelseStartdatoer(perioder);
+        this.oppgitteStartdatoer = new Startdatoer(perioder);
     }
 
-    void setRelevanteStartdatoer(UngdomsytelseStartdatoer relevanteSøknader) {
+    void setRelevanteStartdatoer(Startdatoer relevanteSøknader) {
         Objects.requireNonNull(relevanteSøknader);
         this.relevanteStartdatoer = relevanteSøknader;
     }
@@ -95,7 +95,7 @@ public class UngdomsytelseStartdatoGrunnlag extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UngdomsytelseStartdatoGrunnlag that = (UngdomsytelseStartdatoGrunnlag) o;
+        StartdatoGrunnlag that = (StartdatoGrunnlag) o;
         return Objects.equals(oppgitteStartdatoer, that.oppgitteStartdatoer)
             && Objects.equals(relevanteStartdatoer, that.relevanteStartdatoer);
     }

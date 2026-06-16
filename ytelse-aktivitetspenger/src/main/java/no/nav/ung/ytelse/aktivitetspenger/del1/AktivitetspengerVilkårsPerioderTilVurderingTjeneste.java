@@ -10,23 +10,17 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.ung.sak.vilkår.VilkårUtleder;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
+import no.nav.ung.sak.vilkår.VilkårUtleder;
+import no.nav.ung.ytelse.aktivitetspenger.perioder.AktivitetspengerSøknadsperiodeTjeneste;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.NavigableSet;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
@@ -36,7 +30,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 @ApplicationScoped
 public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements VilkårsPerioderTilVurderingTjeneste {
 
-    private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
+    private AktivitetspengerSøknadsperiodeTjeneste aktivitetspengerSøknadsperiodeTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårUtleder inngangsvilkårUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
@@ -47,11 +41,11 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
 
     @Inject
     public AktivitetspengerVilkårsPerioderTilVurderingTjeneste(
-        AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository,
+        AktivitetspengerSøknadsperiodeTjeneste aktivitetspengerSøknadsperiodeTjeneste,
         VilkårResultatRepository vilkårResultatRepository,
         @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD) VilkårUtleder inngangsvilkårUtleder,
         @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
-        this.aktivitetspengerSøktPeriodeRepository = aktivitetspengerSøktPeriodeRepository;
+        this.aktivitetspengerSøknadsperiodeTjeneste = aktivitetspengerSøknadsperiodeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
@@ -76,7 +70,7 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
                 .filter(it -> !relevantePerioderTidslinje.intersection(it.toLocalDateInterval()).isEmpty())
                 .collect(Collectors.toCollection(TreeSet::new));
         }
-        return TidslinjeUtil.tilDatoIntervallEntiteter(aktivitetspengerSøktPeriodeRepository.hentSøktePerioderTidslinje(behandlingId));
+        return aktivitetspengerSøknadsperiodeTjeneste.utledPeriode(behandlingId);
     }
 
     private Set<BehandlingÅrsakType> hentRelevanteÅrsaker(VilkårType vilkårType) {
@@ -117,6 +111,6 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
      * @return Perioder som vurderes
      */
     private NavigableSet<DatoIntervallEntitet> utledPerioderFraRelevanteEndringer(Long behandlingId) {
-        return TidslinjeUtil.tilDatoIntervallEntiteter(aktivitetspengerSøktPeriodeRepository.hentSøktePerioderTidslinje(behandlingId));
+        return aktivitetspengerSøknadsperiodeTjeneste.utledPeriode(behandlingId);
     }
 }

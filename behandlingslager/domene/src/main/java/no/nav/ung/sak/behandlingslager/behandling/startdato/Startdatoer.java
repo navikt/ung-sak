@@ -24,31 +24,31 @@ import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.ChangeTracked;
 
 @Entity(name = "UngdomsytelseStartdatoer")
-@Table(name = "UNG_STARTDATOER")
+@Table(name = "STARTDATOER")
 @Immutable
-public class UngdomsytelseStartdatoer extends BaseEntitet {
+public class Startdatoer extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_UNG_STARTDATOER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_STARTDATOER")
     private Long id;
 
     @ChangeTracked
     @BatchSize(size = 20)
-    @JoinColumn(name = "UNG_STARTDATOER_ID", nullable = false)
+    @JoinColumn(name = "STARTDATOER_ID", nullable = false)
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REFRESH}, orphanRemoval = true)
-    private Set<UngdomsytelseSøktStartdato> startdatoer;
+    private Set<SøktStartdato> startdatoer;
 
     @Version
     @Column(name = "versjon", nullable = false)
     private long versjon;
 
-    public UngdomsytelseStartdatoer() {
+    public Startdatoer() {
         // hibernate
     }
 
 
-    public UngdomsytelseStartdatoer(Collection<UngdomsytelseSøktStartdato> startdatoer) {
-        this.startdatoer = startdatoer.stream().map(UngdomsytelseSøktStartdato::new).collect(Collectors.toCollection(LinkedHashSet::new));
+    public Startdatoer(Collection<SøktStartdato> startdatoer) {
+        this.startdatoer = startdatoer.stream().map(SøktStartdato::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Long getId() {
@@ -56,7 +56,7 @@ public class UngdomsytelseStartdatoer extends BaseEntitet {
     }
 
 
-    public Set<UngdomsytelseSøktStartdato> getStartdatoer() {
+    public Set<SøktStartdato> getStartdatoer() {
         return Collections.unmodifiableSet(startdatoer);
     }
 
@@ -64,7 +64,7 @@ public class UngdomsytelseStartdatoer extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UngdomsytelseStartdatoer that = (UngdomsytelseStartdatoer) o;
+        Startdatoer that = (Startdatoer) o;
         return Objects.equals(startdatoer, that.startdatoer);
     }
 
