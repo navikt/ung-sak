@@ -2,6 +2,9 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -14,8 +17,16 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.ManuellVurderingBostedsvilkårDto;
-import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+
+import java.time.LocalDateTime;
 
 /**
  * Oppdaterer for aksjonspunkt 5144 – manuell vurdering av bostedsvilkåret.
@@ -26,7 +37,10 @@ import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOppdaterer<ManuellVurderingBostedsvilkårDto> {
 
     private BehandlingRepository behandlingRepository;
+    private VilkårResultatRepository vilkårResultatRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     ManuellVurderingBostedsvilkårOppdaterer() {
         // for CDI proxy
@@ -34,28 +48,49 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
 
     @Inject
     public ManuellVurderingBostedsvilkårOppdaterer(BehandlingRepository behandlingRepository,
-                                                    HistorikkinnslagRepository historikkinnslagRepository) {
+                                                   VilkårResultatRepository vilkårResultatRepository,
+                                                   InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
+                                                   InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
+                                                   HistorikkinnslagRepository historikkinnslagRepository) {
         this.behandlingRepository = behandlingRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     @Override
     public OppdateringResultat oppdater(ManuellVurderingBostedsvilkårDto dto, AksjonspunktOppdaterParameter param) {
-        var resultatBuilder = param.getVilkårResultatBuilder();
-        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.BOSTEDSVILKÅR);
+        Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
+        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
+            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
-        for (VilkårPeriodeVurderingDto vurdertPeriode : dto.getVurdertePerioder()) {
-            Utfall utfall = vurdertPeriode.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(vurdertPeriode.periode().getFom(), vurdertPeriode.periode().getTom())
-                .medUtfallManuell(utfall)
-                .medAvslagsårsak(vurdertPeriode.avslagsårsak())
-                .medBegrunnelse(vurdertPeriode.begrunnelse())
-                .medFritekstVurderingBrev(vurdertPeriode.fritekstVurderingBrev()));
+        LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
+        LocalDateTimeline<Boolean> uforventedePerioder = inputOppdateres.disjoint(perioderTilVurdering);
+        if (!uforventedePerioder.isEmpty()) {
+            throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
-        resultatBuilder.leggTil(vilkårBuilder);
+
+        String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
+        LocalDateTime vurdertTidspunkt = LocalDateTime.now();
+
+        var periodeVurderinger = dto.getVurdertePerioder().stream()
+            .map(it -> new BostedsvilkårResultatPeriode(
+                DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
+                it.erVilkårOppfylt(),
+                it.avslagsårsak(),
+                true,
+                it.begrunnelse(),
+                it.fritekstVurderingBrev(),
+                vurdertAv,
+                vurdertTidspunkt))
+            .toList();
+
+        inngangsvilkårVurderingRepository.lagreBostedVurderinger(param.getBehandlingId(), periodeVurderinger);
+
+        inngangsvilkårVurderingTjeneste.settBostedsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
             .medFagsakId(behandling.getFagsakId())

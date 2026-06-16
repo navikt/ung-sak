@@ -91,7 +91,7 @@ class VurderFaktaOmBostedOppdatererTest {
 
         when(behandlingRepository.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
 
-        when(bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(eq(BEHANDLING_ID), any()))
+        when(bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(eq(BEHANDLING_ID), any()))
             .thenReturn(Map.of(FOM, UUID.randomUUID()));
         when(etterlysningRepository.hentEtterlysningerSomVenterPåSvar(BEHANDLING_ID)).thenReturn(List.of());
     }

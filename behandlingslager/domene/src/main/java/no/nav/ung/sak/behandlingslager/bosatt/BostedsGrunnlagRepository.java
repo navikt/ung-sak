@@ -8,6 +8,7 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -70,15 +71,14 @@ public class BostedsGrunnlagRepository {
     }
 
     /**
-     * Lagrer saksbehandlers bostedsavklaringer for en behandling (kilde=SAKSBEHANDLER).
-     * Nøkkel er skjæringstidspunkt (= vilkårsperiode fom); verdi er {@link BostedAvklaringData}.
+     * Lagrer saksbehandlers bostedsavklaringer for en behandling.
      * Beholder referanser til {@code oppgittFraSøknad} og {@code resultat} på grunnlaget.
      *
      * @return Map fra skjæringstidspunkt til periodeAvklaring.referanse
      */
-    public Map<LocalDate, UUID> lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(
+    public Map<LocalDate, UUID> lagreForeslåtteAvklaringer(
         Long behandlingId,
-        Map<Periode, BostedAvklaringData> nyeAvklaringer) {
+        List<BostedsPeriodeAvklaring> nyeAvklaringer) {
 
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
 
@@ -105,32 +105,6 @@ public class BostedsGrunnlagRepository {
             .collect(Collectors.toMap(
                 p -> p.getPeriode().getFomDato(),
                 BostedsPeriodeAvklaring::getReferanse));
-    }
-
-
-    /**
-     * Lagrer endelig resultat av bostedsavklaringer på behandlingens grunnlag.
-     * Beholder referanser til {@code oppgittFraSøknad} og {@code foreslått} på grunnlaget.
-     *
-     * @return Map fra skjæringstidspunkt til periodeAvklaring.referanse
-     */
-    public void lagreAvklaringResultat(Long behandlingId,
-                                                       Map<Periode, BostedAvklaringData> avklaringerPerSkjæringstidspunkt) {
-        var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
-
-        var nyttGrunnlag = eksisterendeGrunnlag
-            .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
-            .orElse(new BostedsGrunnlag(behandlingId));
-        nyttGrunnlag.setResultat(avklaringerPerSkjæringstidspunkt);
-
-        if (eksisterendeGrunnlag.isPresent()) {
-            if (eksisterendeGrunnlag.get().getResultat() == nyttGrunnlag.getResultat()) {
-                return;
-            }
-            deaktiverEksisterende(eksisterendeGrunnlag.get());
-        }
-        entityManager.persist(nyttGrunnlag);
-        entityManager.flush();
     }
 
     /**

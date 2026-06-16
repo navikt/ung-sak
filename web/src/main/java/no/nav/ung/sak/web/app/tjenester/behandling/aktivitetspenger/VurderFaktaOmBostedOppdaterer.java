@@ -9,6 +9,8 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -23,6 +25,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -34,6 +37,7 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @ApplicationScoped
@@ -75,13 +79,25 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType()).utled(behandlingId, VilkårType.BOSTEDSVILKÅR);
         LocalDateTimeline<BostedAvklaringData> tidligereAvklaringer = hentTidligereAvklaringer(perioderTilVurdering, behandlingId);
 
+        String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
+        LocalDateTime vurdertTidspunkt = LocalDateTime.now();
+
         Map<Periode, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
+        List<BostedsPeriodeAvklaring> nyePeriodeAvklaringer = new ArrayList<>();
         for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer()) {
-            nyeAvklaringer.put(avklaring.periode(),
-                BostedAvklaringUtil.tilAvklaringData(avklaring.periode().getFom(), avklaring.vurdering()));
+            nyeAvklaringer.put(avklaring.periode(), BostedAvklaringUtil.tilAvklaringData(avklaring.periode().getFom(), avklaring.vurdering()));
+
+            nyePeriodeAvklaringer.add(new BostedsPeriodeAvklaring(
+                DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.periode().getFom(), avklaring.periode().getTom()),
+                Boolean.TRUE.equals(avklaring.vurdering().borITrondheimIHelePerioden()),
+                avklaring.vurdering().fraflyttingsÅrsak(),
+                Kilde.SAKSBEHANDLER,
+                vurdertAv,
+                vurdertTidspunkt
+            ));
         }
 
-        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreForeslåtteAvklaringerOgFjernTilhørendeResultat(behandlingId, nyeAvklaringer);
+        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
 
         opprettEtterlysning(dto, behandlingId, nyeAvklaringer, tidligereAvklaringer, periodeReferanser, behandling.getFagsakId());
 

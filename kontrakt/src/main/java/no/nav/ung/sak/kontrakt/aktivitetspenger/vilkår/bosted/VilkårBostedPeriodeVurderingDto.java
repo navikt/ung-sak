@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.vilkår;
+package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -8,10 +8,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.typer.Periode;
 
-public record VilkårPeriodeVurderingDto(
+public record VilkårBostedPeriodeVurderingDto(
 
     @JsonProperty(value = "periode", required = true)
     @Valid
@@ -24,7 +25,7 @@ public record VilkårPeriodeVurderingDto(
 
     @JsonProperty("avslagsårsak")
     @Valid
-    Avslagsårsak avslagsårsak,
+    BostedsvilkårIkkeOppfyltÅrsak avslagsårsak,
 
     @JsonProperty(value = "begrunnelse", required = true)
     @NotNull

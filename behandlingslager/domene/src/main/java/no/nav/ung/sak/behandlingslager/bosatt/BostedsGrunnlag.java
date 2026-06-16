@@ -82,51 +82,14 @@ public class BostedsGrunnlag extends BaseEntitet {
      * Bygger ny holder fra avklaringene og setter foreslått — kun hvis innholdet faktisk er endret.
      * Beholder gammel holder-referanse ved ingen endring (tilsvarende {@link #leggTilInformasjonFraSøknad}).
      */
-    void setForeslåttAvklaring(Map<Periode, BostedAvklaringData> avklaringer) {
+    void setForeslåttAvklaring(List<BostedsPeriodeAvklaring> avklaringer) {
         var nyHolder = new BostedsAvklaringHolder(this.foreslått);
-        var nyeAvklaringer = mapTilBostedsperiodeAvklaring(avklaringer);
-        nyHolder.leggTilEllerErstattPeriodeAvklaringer(nyeAvklaringer);
+        nyHolder.leggTilEllerErstattPeriodeAvklaringer(avklaringer);
 
         if (nyHolder.equals(this.foreslått)) {
             return;
         }
         this.foreslått = nyHolder;
-    }
-
-    /**
-     * Bygger ny holder fra avklaringene og setter resultat — kun hvis innholdet faktisk er endret.
-     */
-    void setResultat(Map<Periode, BostedAvklaringData> avklaringer) {
-        var nyHolder = new BostedsAvklaringHolder(this.resultat);
-        nyHolder.leggTilEllerErstattPeriodeAvklaringer(mapTilBostedsperiodeAvklaring(avklaringer));
-
-        if (nyHolder.equals(this.resultat)) {
-            return;
-        }
-        fjernOverlappendeResultat(avklaringer.keySet());
-        this.resultat = nyHolder;
-    }
-
-    void fjernOverlappendeResultat(Set<Periode> perioder) {
-        var nyHolder =  new BostedsAvklaringHolder(this.resultat);
-        nyHolder.fjernPeriodeAvklaring(perioder);
-
-        if (nyHolder.equals(this.resultat)) {
-            return;
-        }
-        this.resultat = nyHolder;
-    }
-
-    private static List<BostedsPeriodeAvklaring> mapTilBostedsperiodeAvklaring(Map<Periode, BostedAvklaringData> avklaringer) {
-        return avklaringer.entrySet().stream().map(entry ->
-                new BostedsPeriodeAvklaring(
-                    DatoIntervallEntitet.fra(entry.getKey()),
-                    entry.getValue().erBosattITrondheim(),
-                    entry.getValue().fraflyttingsÅrsak(),
-                    entry.getValue().kilde()
-                )
-            )
-            .collect(Collectors.toList());
     }
 
     public Long getId() {

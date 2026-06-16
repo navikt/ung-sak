@@ -73,3 +73,7 @@ create index idx_bosted_resultat_periode_resultat_holder on bosted_resultat_peri
 alter table gr_akt_inngangsvilkaar_res
     add column bosted_resultat_holder_id bigint references bosted_resultat_holder (id);
 
+-- legg til vurdert_av og vurdert_tidspunkt på bosatt_periode_avklaring for å spore hvem og når avklaringen ble gjort
+alter table bosatt_periode_avklaring add column if not exists vurdert_av varchar(100);
+alter table bosatt_periode_avklaring add column if not exists vurdert_tidspunkt timestamp;
+

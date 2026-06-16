@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
+package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -11,7 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 import java.util.List;
 
@@ -28,20 +27,20 @@ public class ManuellVurderingBostedsvilkårDto extends BekreftetAksjonspunktDto 
     @JsonProperty("vurdertePerioder")
     @NotNull
     @Size(min = 1, max = 100)
-    private List<@Valid VilkårPeriodeVurderingDto> vurdertePerioder;
+    private List<@Valid VilkårBostedPeriodeVurderingDto> vurdertePerioder;
 
     public ManuellVurderingBostedsvilkårDto() {
         // for Jackson
     }
 
     @JsonCreator
-    public ManuellVurderingBostedsvilkårDto(@JsonProperty("vurdertePerioder") List<VilkårPeriodeVurderingDto> vurdertePerioder,
+    public ManuellVurderingBostedsvilkårDto(@JsonProperty("vurdertePerioder") List<VilkårBostedPeriodeVurderingDto> vurdertePerioder,
                                             @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
         this.vurdertePerioder = vurdertePerioder;
     }
 
-    public List<VilkårPeriodeVurderingDto> getVurdertePerioder() {
+    public List<VilkårBostedPeriodeVurderingDto> getVurdertePerioder() {
         return vurdertePerioder;
     }
 }

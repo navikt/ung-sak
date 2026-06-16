@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto;
 
 import java.util.List;
 

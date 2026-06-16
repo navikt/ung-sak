@@ -6,8 +6,6 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.util.List;

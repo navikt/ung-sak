@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -98,7 +99,9 @@ public class BostedRestTjeneste {
         Map<LocalDate, Boolean> søknadErBosattPerFom = bostedsGrunnlagRepository.hentSøknadBostedPerFom(behandling.getId());
 
         // Hent bosteduttalelser og indekser dem på periode fom-dato
-        var periodeReferanser = grunnlag.getForeslått().getPeriodeAvklaringer().stream()
+        Set<BostedsPeriodeAvklaring> foreslåttePerioder = grunnlag.getForeslått() != null ? grunnlag.getForeslått().getPeriodeAvklaringer() : Set.of();
+
+        var periodeReferanser = foreslåttePerioder.stream()
             .map(BostedsPeriodeAvklaring::getReferanse)
             .collect(Collectors.toSet());
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
@@ -108,7 +111,7 @@ public class BostedRestTjeneste {
 
         // Bygg liste med én DTO per vilkårsperiode (skjæringstidspunkt)
         var perioder = new ArrayList<BostedGrunnlagPeriodeDto>();
-        for (BostedsPeriodeAvklaring periodeAvklaring : grunnlag.getForeslått().getPeriodeAvklaringer()) {
+        for (BostedsPeriodeAvklaring periodeAvklaring : foreslåttePerioder) {
             LocalDate fom = periodeAvklaring.getPeriode().getFomDato();
 
             Boolean søknadOppgitt = søknadErBosattPerFom.get(fom);

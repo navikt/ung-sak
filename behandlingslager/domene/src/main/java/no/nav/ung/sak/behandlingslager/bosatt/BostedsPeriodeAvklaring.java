@@ -11,6 +11,7 @@ import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Type;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -49,6 +50,12 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Column(name = "kilde", nullable = false, updatable = false)
     private Kilde kilde;
 
+    @Column(name = "vurdert_av", updatable = false)
+    private String vurdertAv;
+
+    @Column(name = "vurdert_tidspunkt", updatable = false)
+    private LocalDateTime vurdertTidspunkt;
+
     public BostedsPeriodeAvklaring() {
         // Hibernate
     }
@@ -60,12 +67,23 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.kilde = kilde;
     }
 
+    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, Kilde kilde, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        this.periode = periode.toRange();
+        this.erBosattITrondheim = erBosattITrondheim;
+        this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
+        this.kilde = kilde;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
+    }
+
     public BostedsPeriodeAvklaring medNyPeriode(DatoIntervallEntitet nyPeriode) {
         return new BostedsPeriodeAvklaring(
             nyPeriode,
             this.isErBosattITrondheim(),
             this.getIkkeOppfyltÅrsak(),
-            this.getKilde()
+            this.getKilde(),
+            this.vurdertAv,
+            this.vurdertTidspunkt
         );
     }
 
@@ -89,17 +107,27 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return kilde;
     }
 
+    public String getVurdertAv() {
+        return vurdertAv;
+    }
+
+    public LocalDateTime getVurdertTidspunkt() {
+        return vurdertTidspunkt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
         return erBosattITrondheim == that.erBosattITrondheim
             && ikkeOppfyltÅrsak == that.ikkeOppfyltÅrsak
-            && kilde == that.kilde;
+            && kilde == that.kilde
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(erBosattITrondheim, ikkeOppfyltÅrsak, kilde);
+        return Objects.hash(erBosattITrondheim, ikkeOppfyltÅrsak, kilde, vurdertAv, vurdertTidspunkt);
     }
 
     @Override
@@ -107,7 +135,9 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return "BostedsPeriodeAvklaring{referanse=" + referanse
             + ", erBosattITrondheim=" + erBosattITrondheim
             + ", fraflyttingsÅrsak=" + ikkeOppfyltÅrsak
-            + ", kilde=" + kilde + '}';
+            + ", kilde=" + kilde
+            + ", vurdertAv=" + vurdertAv
+            + ", vurdertTidspunkt=" + vurdertTidspunkt + '}';
     }
 
     public DatoIntervallEntitet getPeriode() {
