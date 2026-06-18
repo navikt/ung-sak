@@ -39,7 +39,12 @@ public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStra
         return List.of(new VedtaksbrevStrategyResultat(
             DokumentMalType.MANUELT_VEDTAK_DOK,
             tomVedtaksbrevInnholdBygger,
-            new VedtaksbrevEgenskaper(true, true, true, true),
+            VedtaksbrevEgenskaper.builder()
+                .kanHindre(true)
+                .kanOverstyreHindre(true)
+                .kanRedigere(true)
+                .kanOverstyreRediger(true)
+                .build(),
             null,
             "Tom brev for redigering ved avslag"
         ));

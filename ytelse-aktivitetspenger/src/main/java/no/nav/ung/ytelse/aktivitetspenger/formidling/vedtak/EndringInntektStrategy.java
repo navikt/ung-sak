@@ -79,11 +79,12 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
         return new VedtaksbrevStrategyResultat(
             DokumentMalType.ENDRING_INNTEKT,
             endringInntektReduksjonInnholdBygger,
-            new VedtaksbrevEgenskaper(
-                false,
-                false,
-                true,
-                true),
+            VedtaksbrevEgenskaper.builder()
+                .kanHindre(false)
+                .kanOverstyreHindre(false)
+                .kanRedigere(true)
+                .kanOverstyreRediger(true)
+                .build(),
             null,
             forklaring
         );
@@ -98,10 +99,12 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
             return new VedtaksbrevStrategyResultat(
                 DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON,
                 endringInntektUtenReduksjonInnholdBygger,
-                new VedtaksbrevEgenskaper(false,
-                    false,
-                    true,
-                    true),
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(false)
+                    .kanOverstyreHindre(false)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(true)
+                    .build(),
                 null,
                 "Redigerbar brev ved full utbetaling med manuelt fastsatt inntekt på 0 kr uten registerinntekt."
             );

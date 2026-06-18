@@ -43,10 +43,12 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
         return List.of(new VedtaksbrevStrategyResultat(
             DokumentMalType.AVSLAG__DOK,
             førstegangsAvslagInnholdBygger,
-            new VedtaksbrevEgenskaper(true,
-                true,
-                true,
-                true),
+            VedtaksbrevEgenskaper.builder()
+                .kanHindre(true)
+                .kanOverstyreHindre(true)
+                .kanRedigere(true)
+                .kanOverstyreRediger(true)
+                .build(),
             null,
             "Avslagsbrev ved avslag på inngangsvilkår"
         ));
