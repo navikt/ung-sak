@@ -22,10 +22,10 @@ public final class EndringFjerneProgramPeriodeStrategy implements VedtaksbrevInn
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (!resultater.innholder(DetaljertResultatType.ENDRING_FJERNE_PERIODE)) {
-            return List.of();
+        if (resultater.innholder(DetaljertResultatType.ENDRING_FJERNE_PERIODE)) {
+            return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Sender ikke brev ved fjerning av programperiode foreløpig"));
         }
-        return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Sender ikke brev ved fjerning av programperiode foreløpig"));
+        return List.of();
     }
 
 }

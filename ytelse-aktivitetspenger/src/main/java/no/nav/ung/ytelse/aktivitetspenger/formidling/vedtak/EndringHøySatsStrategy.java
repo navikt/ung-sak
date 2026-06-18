@@ -36,10 +36,15 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (!resultater.innholder(DetaljertResultatType.ENDRING_ØKT_SATS)) {
-            return List.of();
+        if (resultater.innholder(DetaljertResultatType.ENDRING_ØKT_SATS)) {
+            return evaluerEndringØktSats(behandling, detaljertResultat);
         }
 
+        return List.of();
+
+    }
+
+    private List<VedtaksbrevStrategyResultat> evaluerEndringØktSats(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var satstidslinje = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
             .map(AktivitetspengerGrunnlag::hentAktivitetspengerSatsTidslinje)
             .map(it -> it.intersection(detaljertResultat));

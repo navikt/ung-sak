@@ -22,10 +22,10 @@ public final class SatsReguleringStrategy implements VedtaksbrevInnholdbyggerStr
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (!resultater.innholder(DetaljertResultatType.SATS_REGULERING)) {
-            return List.of();
+        if (resultater.innholder(DetaljertResultatType.SATS_REGULERING)) {
+            return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved G-regulering"));
         }
-        return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved G-regulering"));
+        return List.of();
     }
 
 }

@@ -57,7 +57,6 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
         if (harReduksjon) {
             return List.of(reduksjonResultat(behandling));
         }
-        // Kun hvis har ikke reduksjon
         if (harFullUtbetaling) {
             return List.of(fullUtbetalingResultat(behandling, detaljertResultat));
         }

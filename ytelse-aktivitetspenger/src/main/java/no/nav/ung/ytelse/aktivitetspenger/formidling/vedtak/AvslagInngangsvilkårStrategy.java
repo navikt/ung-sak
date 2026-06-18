@@ -37,20 +37,20 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (!resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
-            return List.of();
+        if (resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
+            return List.of(new VedtaksbrevStrategyResultat(
+                DokumentMalType.AVSLAG__DOK,
+                førstegangsAvslagInnholdBygger,
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(true)
+                    .kanOverstyreHindre(true)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(true)
+                    .build(),
+                null,
+                "Avslagsbrev ved avslag på inngangsvilkår"
+            ));
         }
-        return List.of(new VedtaksbrevStrategyResultat(
-            DokumentMalType.AVSLAG__DOK,
-            førstegangsAvslagInnholdBygger,
-            VedtaksbrevEgenskaper.builder()
-                .kanHindre(true)
-                .kanOverstyreHindre(true)
-                .kanRedigere(true)
-                .kanOverstyreRediger(true)
-                .build(),
-            null,
-            "Avslagsbrev ved avslag på inngangsvilkår"
-        ));
+        return List.of();
     }
 }

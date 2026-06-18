@@ -46,11 +46,12 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
         boolean erDødsfall = harSatsendringenDødsfall(behandling, detaljertResultat)
             || resultater.innholder(DetaljertResultatType.ENDRING_BARN_DØDSFALL);
-        if (!erDødsfall) {
-            return List.of();
-        }
 
-        return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "Ingen brev ved dødsfall av barn."));
+        if (erDødsfall) {
+            return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "Ingen brev ved dødsfall av barn."));
+        }
+        return List.of();
+
     }
 
     @Override

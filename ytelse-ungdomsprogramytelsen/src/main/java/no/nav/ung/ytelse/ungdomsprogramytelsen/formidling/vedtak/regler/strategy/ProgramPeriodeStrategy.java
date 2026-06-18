@@ -52,11 +52,11 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
         boolean harEndretSluttdato = resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
         boolean harEndretStartdato = resultater.innholder(DetaljertResultatType.ENDRING_STARTDATO);
-        boolean erOpphør = harEndretSluttdato && erFørsteSluttdato(behandling, ungdomsprogramPeriodeRepository);
+        boolean erOpphør = harEndretSluttdato && haddeÅpenSluttdatoIForrigeBehandling(behandling, ungdomsprogramPeriodeRepository);
+        boolean harFlyttetSluttdato = harEndretSluttdato && !erOpphør;
 
         var brev = new ArrayList<VedtaksbrevStrategyResultat>();
 
-        boolean harFlyttetSluttdato = harEndretSluttdato && !erOpphør;
         if (harEndretStartdato || harFlyttetSluttdato) {
             brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.ENDRING_PROGRAMPERIODE, endringProgramPeriodeInnholdBygger,
@@ -70,25 +70,28 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
                 DokumentMalType.OPPHØR_DOK, opphørInnholdBygger, "Automatisk brev ved opphør."));
         }
 
-        // Forlengelse og opphør ved maksdato er kun aktuelt når det ikke samtidig er endring av sluttdato.
-        if (!harEndretSluttdato) {
-            if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)) {
-                brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
-                    DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
-                    "Automatisk brev ved forlenget periode"));
-            }
+        if (harEndretSluttdato) {
+            return brev;
+        }
 
-            if (resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO)) {
-                brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
-                    DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
-                    "Automatisk brev ved opphør grunnet maksdato."));
-            }
+        // Forlengelse og opphør ved maksdato er kun aktuelt når det ikke samtidig er endring av sluttdato.
+        if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)) {
+            brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
+                DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
+                "Automatisk brev ved forlenget periode"));
+        }
+
+        if (resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO)) {
+            brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
+                DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
+                "Automatisk brev ved opphør grunnet maksdato."));
         }
 
         return brev;
     }
 
-    private static boolean erFørsteSluttdato(Behandling behandling, UngdomsprogramPeriodeRepository repo) {
+
+    private static boolean haddeÅpenSluttdatoIForrigeBehandling(Behandling behandling, UngdomsprogramPeriodeRepository repo) {
         return behandling.getOriginalBehandlingId()
             .flatMap(repo::hentGrunnlag)
             .map(grunnlag -> grunnlag.getUngdomsprogramPerioder().getPerioder().stream()

@@ -33,21 +33,22 @@ public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStra
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (!resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
-            return List.of();
+        if (resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
+            return List.of(new VedtaksbrevStrategyResultat(
+                DokumentMalType.MANUELT_VEDTAK_DOK,
+                tomVedtaksbrevInnholdBygger,
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(true)
+                    .kanOverstyreHindre(true)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(true)
+                    .build(),
+                null,
+                "Tomt brev for redigering ved avslag"
+            ));
         }
-        return List.of(new VedtaksbrevStrategyResultat(
-            DokumentMalType.MANUELT_VEDTAK_DOK,
-            tomVedtaksbrevInnholdBygger,
-            VedtaksbrevEgenskaper.builder()
-                .kanHindre(true)
-                .kanOverstyreHindre(true)
-                .kanRedigere(true)
-                .kanOverstyreRediger(true)
-                .build(),
-            null,
-            "Tom brev for redigering ved avslag"
-        ));
+
+        return List.of();
     }
 
     @Override
