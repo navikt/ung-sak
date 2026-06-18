@@ -85,12 +85,17 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
 
     private static boolean harEndring(UngdomsprogramPeriodeGrunnlag førsteGrunnlag, UngdomsprogramPeriodeGrunnlag andreGrunnlag) {
         LocalDateTimeline<Boolean> endretTidslinje = UngdomsprogramPeriodeTjeneste.finnEndretTidslinje(Optional.of(andreGrunnlag), Optional.of(førsteGrunnlag));
-        if (andreGrunnlag.getPeriodeMaksDato().isPresent() && andreGrunnlag.getPeriodeMaksDato().get().isBefore(endretTidslinje.getMinLocalDate())) {
-            // Hele endringen ligger etter maksdato
-            // dette håndteres av varsel ved opphør på maksdato
+        if (endretTidslinje.isEmpty()) {
             return false;
         }
-        return !endretTidslinje.isEmpty();
+
+        return andreGrunnlag.getPeriodeMaksDato()
+            .filter(maksDato -> {
+                // Hele endringen ligger etter maksdato
+                // dette håndteres av varsel ved opphør på maksdato
+                return maksDato.isBefore(endretTidslinje.getMinLocalDate());
+            })
+            .isEmpty();
     }
 
     private static void validerHøystEnProgramperiode(EndretUngdomsprogramEtterlysningInput input) {
