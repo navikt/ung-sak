@@ -108,7 +108,12 @@ public class ForvaltningMottattDokumentRestTjeneste {
                 .build();
         }
 
-        if (eksisterendeBekreftelse.getUttalelseFraBruker() != null || !eksisterendeBekreftelse.harUttalelse()) {
+        if (!eksisterendeBekreftelse.harUttalelse()) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Eksisterende payload har harUttalelse=false og kan derfor ikke patches")
+                .build();
+        }
+        if (eksisterendeBekreftelse.getUttalelseFraBruker() != null) {
             return Response.status(Response.Status.BAD_REQUEST)
                 .entity("Eksisterende payload har allerede uttalelseFraBruker satt")
                 .build();
