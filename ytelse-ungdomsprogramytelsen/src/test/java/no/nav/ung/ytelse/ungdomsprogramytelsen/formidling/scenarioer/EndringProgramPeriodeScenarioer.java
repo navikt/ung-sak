@@ -220,14 +220,19 @@ public class EndringProgramPeriodeScenarioer {
     /**
      * Scenario der perioden er forlenget fra opprinnlig sluttdato til ny sluttdato.
      *
-     * @param fom               - startdato for programmet
-     * @param opprinneligSluttdato - opprinnlig sluttdato (slik det var i forrige behandling)
-     * @param nySluttdato       - ny sluttdato etter forlengelse
+     * @param fom                    - startdato for programmet
+     * @param opprinneligSluttdato   - opprinnlig sluttdato (slik det var i forrige behandling)
+     * @param nySluttdato            - ny sluttdato etter forlengelse
+     * @param periodeMaksDato        - registerets maksdato (kan avvike fra programperiodens sluttdato)
      */
-    public static UngTestScenario forlengetPeriode(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+    public static UngTestScenario forlengetPeriode(LocalDate fom,
+                                                   LocalDate opprinneligSluttdato,
+                                                   LocalDate nySluttdato,
+                                                   LocalDate periodeMaksDato) {
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
             throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
         }
+
 
         var nyProgramPeriode = new LocalDateInterval(fom, nySluttdato);
         var satser = new LocalDateTimeline<>(List.of(
@@ -249,6 +254,6 @@ public class EndringProgramPeriodeScenarioer {
                     DatoIntervallEntitet.fra(opprinneligSluttdato.plusDays(1), nySluttdato))
             ),
             Collections.emptyList(),
-            null, null, nySluttdato, true);
+            null, null, periodeMaksDato, true);
     }
 }
