@@ -358,9 +358,10 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate fom = LocalDate.now().minusWeeks(52).plusWeeks(2);
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
+        LocalDate periodeMaksDato = nySluttdato;
 
         var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
-            EndringProgramPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato),
+            EndringProgramPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato, periodeMaksDato),
             nySluttdato);
         var behandling = lagBehandling(scenario);
 
