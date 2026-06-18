@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -26,23 +25,14 @@ import java.util.List;
 public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private final boolean enableAutoBrevVedBarnDødsfall;
 
     @Inject
-    public EndringBarnDødsfallStrategy(
-        UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-        @KonfigVerdi(value = "ENABLE_AUTO_BREV_BARN_DØDSFALL", defaultVerdi = "false") boolean enableAutoBrevVedBarnDødsfall
-    ) {
+    public EndringBarnDødsfallStrategy(UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository) {
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
-        this.enableAutoBrevVedBarnDødsfall = enableAutoBrevVedBarnDødsfall;
     }
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        if (enableAutoBrevVedBarnDødsfall) {
-            return List.of();
-        }
-
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
         boolean erDødsfall = harSatsendringenDødsfall(behandling, detaljertResultat)
             || resultater.innholder(DetaljertResultatType.ENDRING_BARN_DØDSFALL);

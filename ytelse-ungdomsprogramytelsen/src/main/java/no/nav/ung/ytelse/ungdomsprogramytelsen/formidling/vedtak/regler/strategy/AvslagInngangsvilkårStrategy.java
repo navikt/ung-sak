@@ -20,13 +20,13 @@ import java.util.List;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStrategy {
+public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
 
     private final TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger;
 
     @Inject
-    public AvslagInngangsvilkår(TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger) {
+    public AvslagInngangsvilkårStrategy(TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger) {
         this.tomVedtaksbrevInnholdBygger = tomVedtaksbrevInnholdBygger;
     }
 
