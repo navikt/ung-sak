@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -17,7 +17,7 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.FørstegangsIn
 
 import java.util.List;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnholdbyggerStrategy {
 

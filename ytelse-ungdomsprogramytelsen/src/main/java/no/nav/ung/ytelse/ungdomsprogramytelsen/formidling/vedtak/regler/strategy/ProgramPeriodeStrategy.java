@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStrategy {
 

@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -14,7 +14,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 
 import java.util.List;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class SatsReguleringStrategy implements VedtaksbrevInnholdbyggerStrategy {
 

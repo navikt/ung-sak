@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -18,7 +18,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 
 import java.util.List;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class AvslagInngangsvilkår implements VedtaksbrevInnholdbyggerStrategy {
 

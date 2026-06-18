@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -18,7 +18,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.FørstegangsInnvilg
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnholdbyggerStrategy {
 

@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -25,7 +25,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringInntektUtenR
 import java.math.BigDecimal;
 import java.util.List;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
