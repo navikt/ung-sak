@@ -7,8 +7,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import java.time.LocalDate;
 
 /**
- * Bostedavklaring for ett skjæringstidspunkt.
- * {@code fom} er fom-datoen i den tilhørende vilkårsperioden (= skjæringstidspunktet).
+ * Bostedavklaring for en periode.
  * {@code kilde} angir om fakta er satt automatisk fra søknad eller manuelt av saksbehandler.
  */
 public record BostedGrunnlagPeriodeDto(
@@ -18,14 +17,16 @@ public record BostedGrunnlagPeriodeDto(
     LocalDate tom,
     /** Om bruker er bosatt ved skjæringstidspunktet. */
     @NotNull Boolean erBosattITrondheim,
-    /** Eventuell dato for utflytting fra Trondheim. Null dersom bruker er bosatt hele perioden. */
-    LocalDate fraflyttingsDato,
     /** Årsak til fraflytting eller avslått periode. Null dersom bruker er bosatt hele perioden. */
     BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
     /** Kilde for fakta — SØKNAD (automatisk) eller SAKSBEHANDLER (manuelt registrert). */
     @NotNull Kilde kilde,
     /** Hva bruker oppga i søknaden. Null dersom ikke oppgitt. */
     Boolean søknadOppgittErBosattITrondheim,
+    /** Bostedavklaringen (faktagrunnlag) for perioden. */
+    BostedAvklaringDto avklaring,
+    /** Resultat av vurdering av bostedsvilkår. Null dersom ikke vurdert. */
+    BostedResultatDto resultat,
     /** Om bruker har avgitt uttalelse om bosted. False dersom etterlysning ikke er besvart. */
     boolean harUttalelse,
     /** Brukerens uttalelsetekst. Null dersom bruker ikke har svart. */

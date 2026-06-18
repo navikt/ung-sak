@@ -109,9 +109,8 @@ class VurderFaktaBostedStegTest {
 
         utførSteg(behandling);
 
-        var vurdertTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(FOM, TOM, true)));
         var lagretGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
-        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(vurdertTidslinje).stream().findFirst().orElseThrow();
+        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().stream().findFirst().orElseThrow();
         assertThat(periodeAvklaring.getValue().isErBosattITrondheim()).isTrue();
         assertThat(periodeAvklaring.getValue().getKilde()).isEqualTo(Kilde.SØKNAD);
     }

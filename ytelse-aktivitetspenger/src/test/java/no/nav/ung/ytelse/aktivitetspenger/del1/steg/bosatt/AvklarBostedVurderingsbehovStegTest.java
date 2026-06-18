@@ -97,7 +97,7 @@ class AvklarBostedVurderingsbehovStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
-            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), true, null, Kilde.SAKSBEHANDLER)
+            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), true, null, null, null)
         ));
 
         var resultat = utførSteg(behandling);
@@ -106,13 +106,23 @@ class AvklarBostedVurderingsbehovStegTest {
     }
 
     @Test
-    void skal_opprette_opphorsresultat_ved_fraflytting_automatisk() {
+    void skal_opprette_vilkårvurderingresultat_ved_fraflytting_automatisk() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
-            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), true, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, Kilde.SAKSBEHANDLER)
-        ));
 
+        var avklaring = new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "A12345", LocalDateTime.now());
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(avklaring));
+
+        var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
+        var ventendeEtterlysning = new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            frist,
+            avklaring.getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(false, null, new JournalpostId("jp-uttalelse-1"))
+        );
+        steg = lagSteg(List.of(ventendeEtterlysning));
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
@@ -128,7 +138,7 @@ class AvklarBostedVurderingsbehovStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
-            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), true, null, Kilde.SAKSBEHANDLER)
+            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), true, null, "A12345", LocalDateTime.now())
         ));
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -155,8 +165,8 @@ class AvklarBostedVurderingsbehovStegTest {
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(fom2, tom2), true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
-            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), true, null, Kilde.SAKSBEHANDLER),
-            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(fom2, tom2), true, null, Kilde.SØKNAD)
+            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM), true, null, null, null),
+            new BostedsPeriodeAvklaring(DatoIntervallEntitet.fraOgMedTilOgMed(fom2, tom2), true, null, null, null)
         ));
         var frist = LocalDateTime.of(2026, 3, 1, 10, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(

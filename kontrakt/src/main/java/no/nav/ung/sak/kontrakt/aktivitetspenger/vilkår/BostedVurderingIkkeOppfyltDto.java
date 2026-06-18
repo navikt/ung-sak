@@ -1,12 +1,9 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-
-import java.time.LocalDate;
 
 /**
  * Saksbehandlers vurdering av brukers bosted for én periode.
@@ -18,9 +15,7 @@ import java.time.LocalDate;
  * Dersom {@code fraflyttingsDato} er null eller ≤ fom, er bruker aldri bosatt i perioden.
  * {@code ikkeOppfyltÅrsak} er påkrevd når {@code borITrondheimIHelePerioden} er {@code false}.
  */
-public record BostedVurderingDto(
-    @NotNull Boolean borITrondheimIHelePerioden,
-    LocalDate fraflyttingsDato,
+public record BostedVurderingIkkeOppfyltDto(
     BostedsvilkårIkkeOppfyltÅrsak fraflyttingsÅrsak,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse
 ) {

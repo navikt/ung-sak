@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
-import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -46,10 +45,6 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Column(name = "ikke_oppfylt_aarsak", updatable = false)
     private BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "kilde", nullable = false, updatable = false)
-    private Kilde kilde;
-
     @Column(name = "vurdert_av", updatable = false)
     private String vurdertAv;
 
@@ -60,18 +55,28 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, Kilde kilde) {
+    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode.toRange();
         this.erBosattITrondheim = erBosattITrondheim;
         this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
-        this.kilde = kilde;
+        this.vurdertAv = vurdertAv;
+        this.vurdertTidspunkt = vurdertTidspunkt;
     }
 
-    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, Kilde kilde, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public BostedsPeriodeAvklaring(BostedsPeriodeAvklaring annenAvklaring) {
+        this.periode = annenAvklaring.getPeriode().toRange();
+        this.referanse = annenAvklaring.getReferanse();
+        this.erBosattITrondheim = annenAvklaring.isErBosattITrondheim();
+        this.ikkeOppfyltÅrsak = annenAvklaring.getIkkeOppfyltÅrsak();
+        this.vurdertAv = annenAvklaring.getVurdertAv();
+        this.vurdertTidspunkt = annenAvklaring.getVurdertTidspunkt();
+    }
+
+    private BostedsPeriodeAvklaring(DatoIntervallEntitet periode, UUID referanse, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         this.periode = periode.toRange();
+        this.referanse = referanse;
         this.erBosattITrondheim = erBosattITrondheim;
         this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
-        this.kilde = kilde;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
     }
@@ -79,9 +84,9 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     public BostedsPeriodeAvklaring medNyPeriode(DatoIntervallEntitet nyPeriode) {
         return new BostedsPeriodeAvklaring(
             nyPeriode,
+            this.referanse,
             this.isErBosattITrondheim(),
             this.getIkkeOppfyltÅrsak(),
-            this.getKilde(),
             this.vurdertAv,
             this.vurdertTidspunkt
         );
@@ -103,10 +108,6 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return ikkeOppfyltÅrsak;
     }
 
-    public Kilde getKilde() {
-        return kilde;
-    }
-
     public String getVurdertAv() {
         return vurdertAv;
     }
@@ -120,14 +121,13 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
         return erBosattITrondheim == that.erBosattITrondheim
             && ikkeOppfyltÅrsak == that.ikkeOppfyltÅrsak
-            && kilde == that.kilde
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(erBosattITrondheim, ikkeOppfyltÅrsak, kilde, vurdertAv, vurdertTidspunkt);
+        return Objects.hash(erBosattITrondheim, ikkeOppfyltÅrsak, vurdertAv, vurdertTidspunkt);
     }
 
     @Override
@@ -135,7 +135,6 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return "BostedsPeriodeAvklaring{referanse=" + referanse
             + ", erBosattITrondheim=" + erBosattITrondheim
             + ", fraflyttingsÅrsak=" + ikkeOppfyltÅrsak
-            + ", kilde=" + kilde
             + ", vurdertAv=" + vurdertAv
             + ", vurdertTidspunkt=" + vurdertTidspunkt + '}';
     }

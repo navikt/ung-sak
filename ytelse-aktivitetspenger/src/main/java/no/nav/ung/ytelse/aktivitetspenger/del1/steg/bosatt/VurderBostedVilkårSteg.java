@@ -16,7 +16,6 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
@@ -111,7 +110,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(new LocalDateTimeline<>(List.of()));
 
-            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(tidslinjeTilVurdering);
+            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering);
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
             .intersection(tidslinjeTilVurdering)
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new)
@@ -137,21 +136,21 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                     throw new IllegalStateException("Mangler etterlysning for "+ s.getLocalDateInterval());
                 }
 
-                if (!s.getValue().getEtterlysning().grunnlagsreferanse().equals(s.getValue().getAvklaring().getReferanse())) {
+                if (!s.getValue().getEtterlysning().grunnlagsreferanse().equals(s.getValue().getForeslåttAvklaring().getReferanse())) {
                     throw new IllegalStateException("Avklaring og etterlysning har ulik grunnlagsreferanse "
-                        +s.getLocalDateInterval()+", "+s.getValue().getEtterlysning().grunnlagsreferanse()+", "+s.getValue().getAvklaring().getReferanse());
+                        +s.getLocalDateInterval()+", "+s.getValue().getEtterlysning().grunnlagsreferanse()+", "+s.getValue().getForeslåttAvklaring().getReferanse());
                 }
 
-                BostedsPeriodeAvklaring avklaring = s.getValue().getAvklaring().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()));
+                var foreslåttAvklaring = s.getValue().getForeslåttAvklaring();
                 return new BostedsvilkårResultatPeriode(
-                    avklaring.getPeriode(),
-                    avklaring.isErBosattITrondheim(),
-                    avklaring.getIkkeOppfyltÅrsak(),
+                    DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
+                    foreslåttAvklaring.isErBosattITrondheim(),
+                    foreslåttAvklaring.getIkkeOppfyltÅrsak(),
                     false,
                     null,
                     null,
-                    avklaring.getEndretAv(),
-                    avklaring.getEndretTidspunkt());
+                    foreslåttAvklaring.getVurdertAv(),
+                    foreslåttAvklaring.getVurdertTidspunkt());
         }).collect(Collectors.toList());
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, vurderingResultat);

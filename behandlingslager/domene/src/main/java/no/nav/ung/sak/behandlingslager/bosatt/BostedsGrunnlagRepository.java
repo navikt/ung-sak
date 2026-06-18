@@ -34,20 +34,6 @@ public class BostedsGrunnlagRepository {
     }
 
     /**
-     * Returnerer map fra fomDato til erBosattITrondheim for alle søknadsoppgitte bostedsopplysninger på behandlingen.
-     * Dersom to opplysninger har samme fomDato brukes den sist registrerte.
-     */
-    public Map<LocalDate, Boolean> hentSøknadBostedPerFom(Long behandlingId) {
-        return hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getOppgittFraSøknad().getInformasjon().stream()
-                .collect(Collectors.toMap(
-                    BostedsinformasjonFraSøknad::getFomDato,
-                    BostedsinformasjonFraSøknad::isErBosattITrondheim,
-                    (a, b) -> b)))
-            .orElse(Map.of());
-    }
-
-    /**
      * Lagrer bostedsopplysning oppgitt av bruker i søknaden på behandlingens bostedsgrunnlag.
      * Oppretter et bostedsgrunnlag dersom det ikke finnes fra før. Eksisterende opplysning for
      * samme journalpostId erstattes.

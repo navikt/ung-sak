@@ -4,6 +4,7 @@ import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
@@ -16,11 +17,11 @@ import java.time.LocalDateTime;
  */
 class BostedAvklaringOgUttalelseOgResultat {
 
-    private final BostedsPeriodeAvklaring avklaring;
+    private final BostedsfaktaOgAvklaring avklaring;
     private EtterlysningData etterlysning;
     private BostedsvilkårResultatPeriode resultat;
 
-    BostedAvklaringOgUttalelseOgResultat(BostedsPeriodeAvklaring avklaring) {
+    BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring avklaring) {
         this.avklaring = avklaring;
     }
 
@@ -49,8 +50,8 @@ class BostedAvklaringOgUttalelseOgResultat {
         return etterlysning != null ? etterlysning.frist() : null;
     }
 
-    BostedsPeriodeAvklaring getAvklaring() {
-        return avklaring;
+    BostedsPeriodeAvklaring getForeslåttAvklaring() {
+        return avklaring.harForeslåttAvklaring() ? avklaring.getForeslåttAvklaring() : null;
     }
 
     EtterlysningData getEtterlysning() {

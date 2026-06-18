@@ -15,11 +15,11 @@ alter table bosatt_periode_avklaring
 
 alter table bosatt_periode_avklaring
     alter column periode set not null,
-    drop column skaeringstidspunkt;
+    drop column skaeringstidspunkt,
+    drop column kilde;
 
 alter table gr_bosatt_avklaring
-    add column bosatt_soeknad_grunnlag_id bigint references bosatt_soeknad_grunnlag (id),
-    add column resultat_holder_id bigint references bosatt_avklaring_holder (id);
+    add column bosatt_soeknad_grunnlag_id bigint references bosatt_soeknad_grunnlag (id);
 
 --  For å kunne lagre bostedsgrunnlag med søknadsopplysninger, for deretter å opprette avklaring i senere steg
 alter table gr_bosatt_avklaring

@@ -17,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -24,7 +25,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
@@ -35,6 +36,7 @@ import org.mockito.ArgumentCaptor;
 
 import java.lang.annotation.Annotation;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -117,7 +119,7 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_opprette_etterlysning_og_task_nar_soknad_avklaring_endres() {
         var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(any()))
+        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
             .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
 
@@ -142,7 +144,7 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_avbryte_eksisterende_og_opprette_ny_nar_avklaring_endres() {
         var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(any()))
+        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
             .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
 
@@ -173,11 +175,11 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
         var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(any()))
-            .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
+        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
+            .thenReturn(tidslinjeMedTidligereAvklaring(false, null));
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
 
-        var dto = dtoMedEnAvklaring(true, false, null);
+        var dto = dtoMedEnAvklaring(false, false, null);
 
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
@@ -189,7 +191,7 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_skal_ikke_sende_varsel_selv_om_endret() {
         var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje(any()))
+        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
             .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
 
@@ -202,27 +204,24 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
-    private static LocalDateTimeline<BostedsPeriodeAvklaring> tidslinjeMedTidligereAvklaring(boolean bosattITrondheim,
-                                                                                              BostedsvilkårIkkeOppfyltÅrsak årsak) {
+    private static LocalDateTimeline<BostedsfaktaOgAvklaring> tidslinjeMedTidligereAvklaring(boolean bosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak årsak) {
+        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
         var avklaring = new BostedsPeriodeAvklaring(
-            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            periode,
             bosattITrondheim,
             årsak,
-            no.nav.ung.kodeverk.bosatt.Kilde.SØKNAD
+            "A12345",
+            LocalDateTime.now()
         );
-        return new LocalDateTimeline<>(List.of(new LocalDateSegment<>(FOM, TOM, avklaring)));
+        var fakta = new BostedsfaktaOgAvklaring(null, avklaring);
+        return new LocalDateTimeline<>(List.of(new LocalDateSegment<>(FOM, TOM, fakta)));
     }
 
     private static VurderFaktaOmBostedDto dtoMedEnAvklaring(boolean borITrondheimHelePerioden,
                                                              boolean skalIkkeSendeVarsel,
                                                              BostedsvilkårIkkeOppfyltÅrsak årsak) {
         var periode = new Periode(FOM, TOM);
-        var vurdering = new BostedVurderingDto(
-            borITrondheimHelePerioden,
-            borITrondheimHelePerioden ? null : FOM,
-            borITrondheimHelePerioden ? null : årsak,
-            "begrunnelse"
-        );
+        var vurdering = !borITrondheimHelePerioden ? new BostedVurderingIkkeOppfyltDto(årsak, "begrunnelse") : null;
         var avklaring = new BostedFaktaavklaringPeriodeDto(periode, vurdering, skalIkkeSendeVarsel);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }

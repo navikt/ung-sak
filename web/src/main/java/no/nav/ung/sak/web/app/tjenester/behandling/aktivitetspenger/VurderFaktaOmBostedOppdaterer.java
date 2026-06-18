@@ -84,14 +84,13 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
         Map<Periode, BostedAvklaringData> nyeAvklaringer = new LinkedHashMap<>();
         List<BostedsPeriodeAvklaring> nyePeriodeAvklaringer = new ArrayList<>();
-        for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer()) {
+        for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer().stream().filter(a -> a.vurdering() != null).toList()) {
             nyeAvklaringer.put(avklaring.periode(), BostedAvklaringUtil.tilAvklaringData(avklaring.periode().getFom(), avklaring.vurdering()));
 
             nyePeriodeAvklaringer.add(new BostedsPeriodeAvklaring(
                 DatoIntervallEntitet.fraOgMedTilOgMed(avklaring.periode().getFom(), avklaring.periode().getTom()),
-                Boolean.TRUE.equals(avklaring.vurdering().borITrondheimIHelePerioden()),
+                false,
                 avklaring.vurdering().fraflyttingsÅrsak(),
-                Kilde.SAKSBEHANDLER,
                 vurdertAv,
                 vurdertTidspunkt
             ));
@@ -118,8 +117,9 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g ->
-                g.hentOppgittOgForeslåttFaktaSomTidslinje(perioderTilVurderingTidslinje).mapValue(p ->
-                        new BostedAvklaringData(p.isErBosattITrondheim(), p.isErBosattITrondheim() ? null : p.getPeriode().getFomDato(), p.getIkkeOppfyltÅrsak(), p.getKilde())
+                g.hentOppgittOgForeslåttFaktaSomTidslinje()
+                    .intersection(perioderTilVurderingTidslinje).map(p ->
+                        List.of(new LocalDateSegment<>(p.getLocalDateInterval(), new BostedAvklaringData(p.getValue().isErBosattITrondheim(), p.getValue().isErBosattITrondheim() ? null : p.getFom(), p.getValue().getIkkeOppfyltÅrsak(), p.getValue().getKilde())))
                  ))
             .orElse(LocalDateTimeline.empty());
     }

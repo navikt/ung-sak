@@ -12,24 +12,29 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
+import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -49,6 +54,7 @@ public class BostedRestTjeneste {
     private BehandlingRepository behandlingRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private UttalelseRepository uttalelseRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
 
     public BostedRestTjeneste() {
         // for CDI proxy
@@ -56,11 +62,12 @@ public class BostedRestTjeneste {
 
     @Inject
     public BostedRestTjeneste(BehandlingRepository behandlingRepository,
-                               BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                               UttalelseRepository uttalelseRepository) {
+                              BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                              UttalelseRepository uttalelseRepository, InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
         this.behandlingRepository = behandlingRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.uttalelseRepository = uttalelseRepository;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
     }
 
     @GET
@@ -94,46 +101,96 @@ public class BostedRestTjeneste {
         }
 
         var grunnlag = grunnlagOpt.get();
+        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje();
 
-        // Hent søknadsdata fra bostedsgrunnlaget
-        Map<LocalDate, Boolean> søknadErBosattPerFom = bostedsGrunnlagRepository.hentSøknadBostedPerFom(behandling.getId());
+        LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
+            .orElse(LocalDateTimeline.empty());
 
-        // Hent bosteduttalelser og indekser dem på periode fom-dato
-        Set<BostedsPeriodeAvklaring> foreslåttePerioder = grunnlag.getForeslått() != null ? grunnlag.getForeslått().getPeriodeAvklaringer() : Set.of();
+        var faktaOgResultat = faktaOgAvklaringTidslinje
+            .filterValue(fa -> fa.getKilde() == Kilde.SAKSBEHANDLER)
+            .mapValue(BostedFaktaOgResultat::new)
+            .combine(vurderingResultatTidslinje, (interval, fakta, vurdering) ->
+                new LocalDateSegment<>(interval, fakta.getValue().medResultat(
+                    vurdering == null ? null : vurdering.getValue())), LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        var periodeReferanser = foreslåttePerioder.stream()
-            .map(BostedsPeriodeAvklaring::getReferanse)
-            .collect(Collectors.toSet());
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
-        var uttalelseByFom = uttalelser.stream()
-            .filter(u -> periodeReferanser.contains(u.getGrunnlagsreferanse()))
-            .collect(Collectors.toMap(u -> u.getPeriode().getFomDato(), u -> u, (a, b) -> a));
+        var uttalelseByReferanse = uttalelser.stream()
+            .collect(Collectors.toMap(UttalelseV2::getGrunnlagsreferanse, u -> u, (a, _) -> a));
 
-        // Bygg liste med én DTO per vilkårsperiode (skjæringstidspunkt)
-        var perioder = new ArrayList<BostedGrunnlagPeriodeDto>();
-        for (BostedsPeriodeAvklaring periodeAvklaring : foreslåttePerioder) {
-            LocalDate fom = periodeAvklaring.getPeriode().getFomDato();
-
-            Boolean søknadOppgitt = søknadErBosattPerFom.get(fom);
-            var fraflyttingsdato = søknadOppgitt != null && søknadOppgitt && !periodeAvklaring.isErBosattITrondheim()  ? periodeAvklaring.getPeriode().getFomDato() : null;
-
-            var uttalelse = uttalelseByFom.get(fom);
+        var perioder = faktaOgResultat.stream().map(segment -> {
+            var info = segment.getValue();
+            var faktaOgAvklaring = info.getFaktaOgAvklaring();
+            var uttalelse = uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvklaring().getReferanse());
             boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
             String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
-            perioder.add(new BostedGrunnlagPeriodeDto(
-                periodeAvklaring.getPeriode().getFomDato(),
-                periodeAvklaring.getPeriode().getTomDato(),
-                periodeAvklaring.isErBosattITrondheim(),
-                fraflyttingsdato,
-                periodeAvklaring.getIkkeOppfyltÅrsak(),
-                periodeAvklaring.getKilde(),
-                søknadOppgitt,
+            var resultatDto = info.byggResultatDtoHvisFinnes();
+            var søknadsinformasjon = faktaOgAvklaring.getSøknadsinformasjon();
+            var avklaringDto = segment.getValue().byggAvklaringDto();
+
+            var erBosatt = resultatDto != null ? resultatDto.erBosatt() : null;
+            var erIkkeOppfyltÅrsak = resultatDto != null ? resultatDto.ikkeOppfyltÅrsak() : null;
+
+            return new BostedGrunnlagPeriodeDto(
+                segment.getFom(),
+                segment.getTom(),
+                erBosatt,
+                erIkkeOppfyltÅrsak,
+                faktaOgAvklaring.getKilde(),
+                søknadsinformasjon.isErBosattITrondheim(),
+                avklaringDto,
+                resultatDto,
                 harUttalelse,
                 uttalelseTekst
-            ));
+            );
+        });
+
+        return new BostedGrunnlagResponseDto(perioder.collect(Collectors.toList()));
+    }
+
+    static class BostedFaktaOgResultat {
+
+        private final BostedsfaktaOgAvklaring faktaOgAvklaring;
+        private BostedsvilkårResultatPeriode resultat;
+
+        BostedFaktaOgResultat(BostedsfaktaOgAvklaring fakta) {
+            this.faktaOgAvklaring = fakta;
         }
 
-        return new BostedGrunnlagResponseDto(perioder);
+        public BostedFaktaOgResultat medResultat(BostedsvilkårResultatPeriode resultat) {
+            this.resultat = resultat;
+            return this;
+        }
+
+        public BostedsfaktaOgAvklaring getFaktaOgAvklaring() {
+            return faktaOgAvklaring;
+        }
+
+        public BostedsvilkårResultatPeriode getResultat() {
+            return resultat;
+        }
+
+        public BostedResultatDto byggResultatDtoHvisFinnes() {
+            if (resultat == null) {
+                return null;
+            }
+            return new BostedResultatDto(
+                resultat.isGodkjent(),
+                resultat.getIkkeOppfyltÅrsak(),
+                resultat.isManuellVurdering(),
+                resultat.getBegrunnelse(),
+                resultat.getFritekstVurderingBrev(),
+                resultat.getVurdertAv()
+            );
+        }
+
+        public BostedAvklaringDto byggAvklaringDto() {
+            return new BostedAvklaringDto(
+                faktaOgAvklaring.isErBosattITrondheim(),
+                faktaOgAvklaring.getIkkeOppfyltÅrsak()
+            );
+        }
+
     }
 }

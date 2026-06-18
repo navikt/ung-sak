@@ -1,16 +1,14 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * Grunnlag som kobler en behandling til bostedsavklarings-aggregatet.
@@ -35,10 +33,6 @@ public class BostedsGrunnlag extends BaseEntitet {
     @JoinColumn(name = "foreslatt_holder_id", updatable = false)
     private BostedsAvklaringHolder foreslått;
 
-    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "resultat_holder_id", updatable = false)
-    private BostedsAvklaringHolder resultat;
-
     @Column(name = "grunnlag_ref", nullable = false, updatable = false)
     private UUID grunnlagsreferanse;
 
@@ -58,11 +52,10 @@ public class BostedsGrunnlag extends BaseEntitet {
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
-    BostedsGrunnlag(Long behandlingId, BostedsinformasjonFraSøknadHolder oppgittFraSøknad, BostedsAvklaringHolder foreslått, BostedsAvklaringHolder resultat) {
+    BostedsGrunnlag(Long behandlingId, BostedsinformasjonFraSøknadHolder oppgittFraSøknad, BostedsAvklaringHolder foreslått) {
         this.behandlingId = behandlingId;
         this.oppgittFraSøknad = oppgittFraSøknad;
         this.foreslått = foreslått;
-        this.resultat = resultat;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -104,38 +97,54 @@ public class BostedsGrunnlag extends BaseEntitet {
         return foreslått;
     }
 
-    public BostedsAvklaringHolder getResultat() {
-        return resultat;
-    }
-
     public BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
         return oppgittFraSøknad;
     }
 
-    // Bygger en tidslinje for vurdert periode, som inneholder oppgitt fakta, og foreslått fakta der de overlapper
-    public LocalDateTimeline<BostedsPeriodeAvklaring> hentOppgittOgForeslåttFaktaSomTidslinje(LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
-        Map<LocalDate, BostedsinformasjonFraSøknad> oppgittFraSøknadPerFom = (oppgittFraSøknad == null) ? Map.of() : oppgittFraSøknad.hentSomMap();
-
-        var oppgittFraSøknadTidslinje = tidslinjeTilVurdering.map(periode -> {
-            var oppgittForPeriode = oppgittFraSøknadPerFom.get(periode.getFom());
-            if (oppgittForPeriode == null) {
-                return Collections.emptyList();
-            }
-
-            return List.of(new LocalDateSegment<>(periode.getFom(), periode.getTom(),
-                new BostedsPeriodeAvklaring(
-                    DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()),
-                    oppgittForPeriode.isErBosattITrondheim(),
-                    null,
-                    Kilde.SØKNAD
-                )
-            ));
-        });
-
-        if (foreslått == null) {
-            return oppgittFraSøknadTidslinje;
+    /**
+     * Bygger en tidslinje av {@link BostedsinformasjonFraSøknad}. Hver søknad dekker fra sin fomDato til dagen før neste søknads fomDato.
+     * Den siste søknaden får tom = {@link LocalDateInterval#TIDENES_ENDE} (åpen slutt) istedenfor 260 dager for å ikke ta stilling til eventuell kortere søknadsperiode her.
+     * Denne metoden forutsetter at søknadene kommer inn med økende fom dato.
+     */
+    public LocalDateTimeline<BostedsinformasjonFraSøknad> hentSøknadsfaktaSomTidslinje() {
+        if (oppgittFraSøknad == null) {
+            return new LocalDateTimeline<>(Collections.emptyList());
         }
-        return foreslått.hentSomTidslinje().crossJoin(oppgittFraSøknadTidslinje);
+
+        Map<LocalDate, BostedsinformasjonFraSøknad> søknadPerFom = oppgittFraSøknad.hentSomMap();
+
+        List<LocalDate> sortertFom = søknadPerFom.keySet()
+            .stream()
+            .sorted()
+            .toList();
+
+        List<LocalDateSegment<BostedsinformasjonFraSøknad>> segmenter = new ArrayList<>();
+        for (int i = 0; i < sortertFom.size(); i++) {
+            LocalDate fom = sortertFom.get(i);
+            LocalDate tom = (i < sortertFom.size() - 1)
+                ? sortertFom.get(i + 1).minusDays(1)
+                : LocalDateInterval.TIDENES_ENDE;
+            segmenter.add(new LocalDateSegment<>(fom, tom, søknadPerFom.get(fom)));
+        }
+
+        return new LocalDateTimeline<>(segmenter);
+    }
+
+    /**
+     * Bygger en tidslinje for vurdert periode der oppgitt fakta fra søknad flettes sammen med eventuell foreslått
+     * avklaring fra saksbehandler. Foreslått avklaring er kilde til sannhet der de overlapper.
+     * Baserer seg på {@link #hentSøknadsfaktaSomTidslinje()} og mapper til {@link BostedsfaktaOgAvklaring}.
+     */
+    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaSomTidslinje() {
+        var søknadsTidslinje = hentSøknadsfaktaSomTidslinje();
+        var foreslåttTidslinje = foreslått == null ? LocalDateTimeline.<BostedsPeriodeAvklaring>empty() : foreslått.hentSomTidslinje();
+
+        return søknadsTidslinje.combine(foreslåttTidslinje,
+            (di, søknad, avklaring) -> new LocalDateSegment<>(di, new BostedsfaktaOgAvklaring(
+                søknad == null ? null : søknad.getValue(),
+                avklaring == null ? null : avklaring.getValue()
+            )),
+            LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
     public UUID getGrunnlagsreferanse() {
@@ -154,8 +163,7 @@ public class BostedsGrunnlag extends BaseEntitet {
     public boolean equals(Object o) {
         if (!(o instanceof BostedsGrunnlag that)) return false;
         return Objects.equals(oppgittFraSøknad, that.oppgittFraSøknad) &&
-            Objects.equals(foreslått, that.foreslått) &&
-            Objects.equals(resultat, that.resultat);
+            Objects.equals(foreslått, that.foreslått);
     }
 
     @Override
@@ -174,8 +182,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             grunnlag.getBehandlingId(),
             grunnlag.getOppgittFraSøknad(),
-            grunnlag.getForeslått(),
-            grunnlag.getResultat()
+            grunnlag.getForeslått()
         );
     }
 
@@ -183,8 +190,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             behandlingId,
             grunnlag.getOppgittFraSøknad(),
-            grunnlag.getForeslått(),
-            grunnlag.getResultat()
+            grunnlag.getForeslått()
         );
     }
 }

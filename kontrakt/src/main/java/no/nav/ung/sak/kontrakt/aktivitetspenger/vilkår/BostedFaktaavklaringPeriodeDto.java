@@ -5,11 +5,11 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.ung.sak.typer.Periode;
 
 /**
- * Saksbehandlers fakta-avklaring for én vilkårsperiode om brukers bosted.
+ * Saksbehandlers fakta-avklaring for hvorfor bruker ikke bor i Trondheim i en periode
  */
 public record BostedFaktaavklaringPeriodeDto(
     @NotNull @Valid Periode periode,
-    @NotNull @Valid BostedVurderingDto vurdering,
+    @NotNull @Valid BostedVurderingIkkeOppfyltDto vurdering,
     boolean skalIkkeSendeVarsel
 ) {
 
