@@ -7,6 +7,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.oppgave.OppgaveBekreftelse;
 import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretSluttdatoBekreftelse;
 import no.nav.k9.søknad.JsonUtils;
+import no.nav.ung.fordel.repo.journalpost.JournalpostInnsendingEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostMottattEntitet;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -24,6 +25,7 @@ import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -99,6 +101,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         // Arrange
         lagreMottattDokument(PAYLOAD_UTEN_UTTALELSE);
         lagreJournalpostMottatt(PAYLOAD_UTEN_UTTALELSE);
+        lagreJournalpostInnsending(PAYLOAD_UTEN_UTTALELSE);
 
         var request = lagRequest(NY_UTTALELSE);
 
@@ -118,6 +121,10 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         var oppdatertJournalpost = journalpostRepository.finnJournalpostMottatt(new JournalpostId(JOURNALPOST_ID));
         assertThat(oppdatertJournalpost).isPresent();
         assertThat(uttalelseAv(oppdatertJournalpost.get().getPayload())).isEqualTo(NY_UTTALELSE);
+
+        var oppdatertInnsending = journalpostRepository.finnJournalpostInnsending(new JournalpostId(JOURNALPOST_ID));
+        assertThat(oppdatertInnsending).isPresent();
+        assertThat(uttalelseAv(oppdatertInnsending.get().getPayload())).isEqualTo(NY_UTTALELSE);
     }
 
     @Test
@@ -203,6 +210,20 @@ class ForvaltningMottattDokumentRestTjenesteTest {
             JournalpostMottattEntitet.Status.UBEHANDLET
         );
         journalpostRepository.lagreMottatt(journalpostMottatt);
+    }
+
+    private void lagreJournalpostInnsending(String payload) {
+        var innsending = new JournalpostInnsendingEntitet(
+            FagsakYtelseType.UNGDOMSYTELSE,
+            new Saksnummer("123456789"),
+            new JournalpostId(JOURNALPOST_ID),
+            fagsak.getAktørId(),
+            Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE,
+            LocalDateTime.now(),
+            payload,
+            JournalpostInnsendingEntitet.Status.UBEHANDLET
+        );
+        journalpostRepository.lagreInnsending(innsending);
     }
 
     private ForvaltningMottattDokumentRestTjeneste.OppdaterMottattDokumentRequest lagRequest(String nyUttalelse) {
