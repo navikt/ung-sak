@@ -23,7 +23,9 @@ public enum DetaljertResultatType {
     ENDRING_DELTAKER_DØDSFALL("Endring pga dødsfall av deltaker"),
     INNVILGELSE_ANNET("Innvilgelse pga annen årsak - se forklaring"),
     INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak"),
-    SATS_REGULERING("Innvilgelse etter G-regulering");
+    SATS_REGULERING("Innvilgelse etter G-regulering"),
+    UENDRET("Vurdert, men uendret utfall på vilkår")
+    ;
 
     private final String beskrivelse;
 

@@ -19,7 +19,9 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EndringType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
@@ -81,6 +83,7 @@ public class BostedRestTjeneste {
         return hentBostedGrunnlagInternal(behandlingUuid);
     }
 
+    @Deprecated // Duplikatimplementasjon av hentBostedGrunnlag
     @GET
     @Path(BOSATT_FAKTA_PATH)
     @Operation(description = "Hent bostedsgrunnlag (avklaringer per periode)", tags = "aktivitetspenger")
@@ -101,18 +104,7 @@ public class BostedRestTjeneste {
         }
 
         var grunnlag = grunnlagOpt.get();
-        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje();
-
-        LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
-            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
-            .orElse(LocalDateTimeline.empty());
-
-        var faktaOgResultat = faktaOgAvklaringTidslinje
-            .filterValue(fa -> fa.getKilde() == Kilde.SAKSBEHANDLER)
-            .mapValue(BostedFaktaOgResultat::new)
-            .combine(vurderingResultatTidslinje, (interval, fakta, vurdering) ->
-                new LocalDateSegment<>(interval, fakta.getValue().medResultat(
-                    vurdering == null ? null : vurdering.getValue())), LocalDateTimeline.JoinStyle.LEFT_JOIN);
+        var faktaOgResultat = lagFaktaOgResultatTidslinje(grunnlag, behandling, true);
 
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
         var uttalelseByReferanse = uttalelser.stream()
@@ -149,18 +141,39 @@ public class BostedRestTjeneste {
         return new BostedGrunnlagResponseDto(perioder.collect(Collectors.toList()));
     }
 
+    private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedsGrunnlag grunnlag, Behandling behandling, boolean visAlleAvklaringer) {
+        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje()
+            .filterValue(fa -> fa.getKilde() == Kilde.SAKSBEHANDLER);
+
+        LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
+            .orElse(LocalDateTimeline.empty())
+            .filterValue(resultatPeriode -> !resultatPeriode.isGodkjent());
+
+        var joinstyle = visAlleAvklaringer ? LocalDateTimeline.JoinStyle.LEFT_JOIN : LocalDateTimeline.JoinStyle.RIGHT_JOIN;
+        return faktaOgAvklaringTidslinje
+            .mapValue(BostedFaktaOgResultat::new)
+            .combine(vurderingResultatTidslinje, (interval, fakta, resultat) ->
+                new LocalDateSegment<>(interval, fakta.getValue().medResultat(
+                    resultat == null ? null : resultat.getValue())), joinstyle);
+    }
+
     static class BostedFaktaOgResultat {
 
         private final BostedsfaktaOgAvklaring faktaOgAvklaring;
-        private BostedsvilkårResultatPeriode resultat;
+        private final BostedsvilkårResultatPeriode resultat;
 
         BostedFaktaOgResultat(BostedsfaktaOgAvklaring fakta) {
-            this.faktaOgAvklaring = fakta;
+            this(fakta, null);
+        }
+
+        private BostedFaktaOgResultat(BostedsfaktaOgAvklaring faktaOgAvklaring, BostedsvilkårResultatPeriode resultat) {
+            this.faktaOgAvklaring = faktaOgAvklaring;
+            this.resultat = resultat;
         }
 
         public BostedFaktaOgResultat medResultat(BostedsvilkårResultatPeriode resultat) {
-            this.resultat = resultat;
-            return this;
+            return new BostedFaktaOgResultat(this.faktaOgAvklaring, resultat);
         }
 
         public BostedsfaktaOgAvklaring getFaktaOgAvklaring() {
@@ -186,7 +199,9 @@ public class BostedRestTjeneste {
         }
 
         public BostedAvklaringDto byggAvklaringDto() {
+            var foreslåttPeriode = faktaOgAvklaring.getForeslåttAvklaring() != null ? faktaOgAvklaring.getForeslåttAvklaring().getPeriode().tilPeriode() : null;
             return new BostedAvklaringDto(
+                foreslåttPeriode,
                 faktaOgAvklaring.isErBosattITrondheim(),
                 faktaOgAvklaring.getIkkeOppfyltÅrsak()
             );

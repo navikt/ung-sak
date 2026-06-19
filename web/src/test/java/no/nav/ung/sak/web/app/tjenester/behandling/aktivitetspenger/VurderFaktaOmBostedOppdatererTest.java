@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -21,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
@@ -39,6 +41,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static no.nav.ung.kodeverk.vilkår.VilkårType.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -58,6 +61,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private VurderFaktaOmBostedOppdaterer oppdaterer;
     private Behandling behandling;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
 
     @BeforeEach
     void setUp() {
@@ -67,6 +71,7 @@ class VurderFaktaOmBostedOppdatererTest {
         etterlysningRepository = mock(EtterlysningRepository.class);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårsPerioderTilVurderingTjeneste = mock(Instance.class);
+        inngangsvilkårVurderingRepository = mock(InngangsvilkårVurderingRepository.class);
 
         mockPerioderTilVurdering(FOM, TOM);
 
@@ -76,7 +81,8 @@ class VurderFaktaOmBostedOppdatererTest {
             bostedsGrunnlagRepository,
             etterlysningRepository,
             prosessTaskTjeneste,
-            vilkårsPerioderTilVurderingTjeneste
+            vilkårsPerioderTilVurderingTjeneste,
+            inngangsvilkårVurderingRepository
         );
 
         behandling = mock(Behandling.class);
@@ -186,6 +192,26 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(etterlysningRepository, never()).lagre(any(Etterlysning.class));
         verify(etterlysningRepository, never()).lagre(anyList());
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
+    }
+
+    @Test
+    void skal_kalle_fjernResultatFor_med_riktig_vilkartype_og_perioder() {
+        when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.empty());
+
+        var dto = dtoMedEnAvklaring(false, true, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
+
+        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+
+        var vilkårCaptor = ArgumentCaptor.forClass(VilkårType.class);
+        var perioderCaptor = ArgumentCaptor.forClass(Set.class);
+
+        verify(inngangsvilkårVurderingRepository).fjernResultatFor(
+            eq(BEHANDLING_ID),
+            vilkårCaptor.capture(),
+            perioderCaptor.capture()
+        );
+        assertThat(vilkårCaptor.getValue()).isEqualTo(BOSTEDSVILKÅR);
+        assertThat(perioderCaptor.getValue()).containsExactly(new Periode(FOM, TOM));
     }
 
     @Test
