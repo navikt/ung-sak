@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -59,32 +60,54 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var innholdbyggerStrategies = innholdbyggerStrategiesInstances.select(new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(behandling.getFagsakYtelseType()));
 
-        var strategyResultater = innholdbyggerStrategies.stream()
-            .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
-            .map(it -> it.evaluer(behandling, detaljertResultat))
+        var kandidater = innholdbyggerStrategies.stream().toList();
+
+        var overstyrendeIngenBrev = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.OVERSTYRENDE_INGEN_BREV)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
+            .toList();
+        if (!overstyrendeIngenBrev.isEmpty()) {
+            return lagIngenBrevResultat(detaljertResultat, overstyrendeIngenBrev);
+        }
+
+        var overstyrendeEnkeltbrev = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.OVERSTYRENDE_ENKELTBREV)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
+            .toList().stream()
+            .filter(it -> it.bygger() != null)
+            .toList();
+        if (overstyrendeEnkeltbrev.size() > 1) {
+            throw new IllegalStateException("Flere overstyrende enkeltbrev-strategier ga resultat, forventet maks ett: "
+                + overstyrendeEnkeltbrev.stream().map(VedtaksbrevStrategyResultat::forklaring).collect(Collectors.joining(", ")));
+        }
+        if (!overstyrendeEnkeltbrev.isEmpty()) {
+            return lagBrevResultat(detaljertResultat, overstyrendeEnkeltbrev);
+        }
+
+        // 3. Normale, additive strategier.
+        var normaleResultater = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.NORMAL)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
             .toList();
 
-
-        if (strategyResultater.size() > 1) {
-            LOG.info("Flere resultater for strategier: {}", strategyResultater.stream()
+        if (normaleResultater.size() > 1) {
+            LOG.info("Flere resultater for strategier: {}", normaleResultater.stream()
                 .map(VedtaksbrevStrategyResultat::forklaring)
                 .collect(Collectors.joining(", ")));
         }
 
-        var ingenBrevResultat = strategyResultater.stream()
-            .filter(it -> it.bygger() == null)
-            .toList();
-
-        if (!ingenBrevResultat.isEmpty()) {
-            return lagIngenBrevResultat(detaljertResultat, ingenBrevResultat);
-        }
-
-        var brevResultater = strategyResultater.stream()
+        var brevResultater = normaleResultater.stream()
             .filter(it -> it.bygger() != null)
             .toList();
-
         if (!brevResultater.isEmpty()) {
             return lagBrevResultat(detaljertResultat, brevResultater);
+        }
+
+        var ingenBrevResultat = normaleResultater.stream()
+            .filter(it -> it.bygger() == null)
+            .toList();
+        if (!ingenBrevResultat.isEmpty()) {
+            return lagIngenBrevResultat(detaljertResultat, ingenBrevResultat);
         }
 
         //Fallback for ukjente brev

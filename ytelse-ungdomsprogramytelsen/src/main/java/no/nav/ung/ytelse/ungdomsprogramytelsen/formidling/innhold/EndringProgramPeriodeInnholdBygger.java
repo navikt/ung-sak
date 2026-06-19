@@ -5,17 +5,16 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringProgramPeriodeDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.endring.programperiode.EndretSluttDato;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.endring.programperiode.EndretStartDato;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,14 +27,11 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
     private static final Logger LOG = LoggerFactory.getLogger(EndringProgramPeriodeInnholdBygger.class);
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
     public EndringProgramPeriodeInnholdBygger(
-        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
-        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
@@ -87,6 +83,8 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
     }
 
     private YearMonth bestemInneværendeMåned() {
+        //Kan ikke injectes i konstruktør fordi den settes én gang for hele testkjøringen pga application scoped
+        var overrideDagensDatoForTest = Environment.current().getProperty("BREV_DAGENS_DATO_TEST", LocalDate.class);
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ?
             YearMonth.from(overrideDagensDatoForTest)
             : YearMonth.now();

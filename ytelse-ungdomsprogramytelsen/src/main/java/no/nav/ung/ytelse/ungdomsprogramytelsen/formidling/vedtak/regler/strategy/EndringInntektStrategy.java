@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
 
-import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -20,28 +20,81 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektReduksjonInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 
 import java.math.BigDecimal;
+import java.util.List;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInnholdbyggerStrategy {
-
+public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final boolean enableEndringUtenReduksjonSjekk;
+    private final EndringInntektReduksjonInnholdBygger endringInntektReduksjonInnholdBygger;
     private final EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger;
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
-    public EndringInntektUtenReduksjonStrategy(@KonfigVerdi(value = "ENABLE_ENDRING_UTEN_REDUKSJON_SJEKK", defaultVerdi = "false") boolean enableEndringUtenReduksjonSjekk, EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger, TilkjentYtelseRepository tilkjentYtelseRepository) {
+    public EndringInntektStrategy(
+        @KonfigVerdi(value = "ENABLE_ENDRING_UTEN_REDUKSJON_SJEKK", defaultVerdi = "false") boolean enableEndringUtenReduksjonSjekk,
+        EndringInntektReduksjonInnholdBygger endringInntektReduksjonInnholdBygger,
+        EndringInntektUtenReduksjonInnholdBygger endringInntektUtenReduksjonInnholdBygger,
+        TilkjentYtelseRepository tilkjentYtelseRepository) {
         this.enableEndringUtenReduksjonSjekk = enableEndringUtenReduksjonSjekk;
+        this.endringInntektReduksjonInnholdBygger = endringInntektReduksjonInnholdBygger;
         this.endringInntektUtenReduksjonInnholdBygger = endringInntektUtenReduksjonInnholdBygger;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
     @Override
-    public VedtaksbrevStrategyResultat evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+        boolean harReduksjon = resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON)
+            || resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
+        boolean harFullUtbetaling = resultater.innholder(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
+
+        if (harReduksjon) {
+            return List.of(reduksjonResultat(behandling));
+        }
+        if (harFullUtbetaling) {
+            return List.of(fullUtbetalingResultat(behandling, detaljertResultat));
+        }
+        return List.of();
+    }
+
+    private VedtaksbrevStrategyResultat reduksjonResultat(Behandling behandling) {
+        boolean harUtførtKontrollerInntekt = behandling.getAksjonspunkter().stream()
+            .filter(Aksjonspunkt::erUtført)
+            .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
+
+        var forklaring = "Automatisk brev ved endring av inntekt.";
+        if (harUtførtKontrollerInntekt) {
+            return medRedigerbarKontrollerInntektBrev(forklaring);
+        }
+
+        return VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_INNTEKT,
+            endringInntektReduksjonInnholdBygger,
+            forklaring);
+    }
+
+    private VedtaksbrevStrategyResultat medRedigerbarKontrollerInntektBrev(String forklaring) {
+        forklaring += " Kan redigere pga ap=" + AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode() + ".";
+        return new VedtaksbrevStrategyResultat(
+            DokumentMalType.ENDRING_INNTEKT,
+            endringInntektReduksjonInnholdBygger,
+            VedtaksbrevEgenskaper.builder()
+                .kanHindre(false)
+                .kanOverstyreHindre(false)
+                .kanRedigere(true)
+                .kanOverstyreRediger(true)
+                .build(),
+            null,
+            forklaring
+        );
+    }
+
+    private VedtaksbrevStrategyResultat fullUtbetalingResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
 
         var harManueltFastsattInntekt = harManueltFastsattInntekt(behandling, detaljertResultat, kontrollertInntektPerioderTidslinje);
@@ -50,10 +103,12 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
             return new VedtaksbrevStrategyResultat(
                 DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON,
                 endringInntektUtenReduksjonInnholdBygger,
-                new VedtaksbrevEgenskaper(false,
-                    false,
-                    true,
-                    true),
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(false)
+                    .kanOverstyreHindre(false)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(true)
+                    .build(),
                 null,
                 "Redigerbar brev ved full utbetaling med manuelt fastsatt inntekt på 0 kr uten registerinntekt."
             );
@@ -93,13 +148,6 @@ public final class EndringInntektUtenReduksjonStrategy implements VedtaksbrevInn
                 p.getPeriode().getTomDato(),
                 p)).reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
-    }
-
-    @Override
-    public boolean skalEvaluere(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultatInfo = VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat);
-        var resultater = new ResultatHelper(resultatInfo);
-        return resultater.utenom(DetaljertResultatType.SATS_REGULERING).innholderBare(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
     }
 
 }

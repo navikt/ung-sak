@@ -16,14 +16,14 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndring;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.InnvilgelseDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.SatsEndringHendelseDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.SatsOgBeregningDto;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
@@ -47,21 +47,18 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private final boolean ignoreIkkeStøttedeBrev;
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
-    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
     public FørstegangsInnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
         UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
         TilkjentYtelseRepository tilkjentYtelseRepository,
-        @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil,
-        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
+        @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.ignoreIkkeStøttedeBrev = ignoreFeil;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
-        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
@@ -117,6 +114,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     }
 
     private LocalDate bestemDagensDato() {
+        //Kan ikke injectes i konstruktør fordi den settes én gang for hele testkjøringen pga application scoped
+        var overrideDagensDatoForTest = Environment.current().getProperty("BREV_DAGENS_DATO_TEST", LocalDate.class);
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
     }
 
@@ -155,6 +154,10 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         if (result.overgangLavSats()) {
             throw new IllegalStateException("Kan ikke ha overgang fra høy til lav sats men fant det mellom %s og %s".formatted(previous.getLocalDateInterval(), current.getLocalDateInterval()));
+        }
+
+        if (result.dødsfallBarn()) {
+            throw new IllegalStateException("Støtter ikke brev ved dødsfall av barn");
         }
 
         return new SatsEndringHendelseDto(
