@@ -104,7 +104,7 @@ public class BostedRestTjeneste {
         }
 
         var grunnlag = grunnlagOpt.get();
-        var faktaOgResultat = lagFaktaOgResultatTidslinje(grunnlag, behandling, true);
+        var faktaOgResultat = lagFaktaOgResultatTidslinje(grunnlag, behandling);
 
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
         var uttalelseByReferanse = uttalelser.stream()
@@ -141,7 +141,7 @@ public class BostedRestTjeneste {
         return new BostedGrunnlagResponseDto(perioder.collect(Collectors.toList()));
     }
 
-    private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedsGrunnlag grunnlag, Behandling behandling, boolean visAlleAvklaringer) {
+    private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedsGrunnlag grunnlag, Behandling behandling) {
         LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje()
             .filterValue(fa -> fa.getKilde() == Kilde.SAKSBEHANDLER);
 
@@ -150,12 +150,11 @@ public class BostedRestTjeneste {
             .orElse(LocalDateTimeline.empty())
             .filterValue(resultatPeriode -> !resultatPeriode.isGodkjent());
 
-        var joinstyle = visAlleAvklaringer ? LocalDateTimeline.JoinStyle.LEFT_JOIN : LocalDateTimeline.JoinStyle.RIGHT_JOIN;
         return faktaOgAvklaringTidslinje
             .mapValue(BostedFaktaOgResultat::new)
-            .combine(vurderingResultatTidslinje, (interval, fakta, resultat) ->
+            .crossJoin(vurderingResultatTidslinje, (interval, fakta, resultat) ->
                 new LocalDateSegment<>(interval, fakta.getValue().medResultat(
-                    resultat == null ? null : resultat.getValue())), joinstyle);
+                    resultat == null ? null : resultat.getValue())));
     }
 
     static class BostedFaktaOgResultat {
