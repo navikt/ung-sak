@@ -12,6 +12,9 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+
+import java.util.List;
 
 /**
  * Leser saksbehandlers lagrede vurderinger fra {@link AktivitetspengerInngangsvilkårResultatGrunnlag}
@@ -74,10 +77,21 @@ public class InngangsvilkårVurderingTjeneste {
         resultatBuilder.leggTil(vilkårBuilder);
     }
 
-    public void settBostedsvilkårResultatAutomatisk(Long behandlingId) {
+    public void oppdaterBostedsvilkårResultatFraVurdering(Long behandlingId) {
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
         settBostedsvilkårResultat(behandlingId, resultatBuilder);
+        vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
+    }
+
+    public void fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(Long behandlingId, VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, List<DatoIntervallEntitet> perioder) {
+        repository.fjernResultatFor(behandlingId, vilkårType, perioder.stream().map(DatoIntervallEntitet::tilPeriode).toList());
+        var resultatBuilderForVilkår = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+        perioder.forEach(periode -> {
+            var periodeBuilder = resultatBuilderForVilkår.hentBuilderFor(periode).medUtfall(Utfall.IKKE_VURDERT);
+            resultatBuilderForVilkår.leggTil(periodeBuilder);
+        });
+        vilkårResultatBuilder.leggTil(resultatBuilderForVilkår);
     }
 
     public void settBostedsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {

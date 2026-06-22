@@ -147,8 +147,7 @@ public class BostedRestTjeneste {
 
         LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
-            .orElse(LocalDateTimeline.empty())
-            .filterValue(resultatPeriode -> !resultatPeriode.isGodkjent());
+            .orElse(LocalDateTimeline.empty());
 
         return faktaOgAvklaringTidslinje
             .mapValue(BostedFaktaOgResultat::new)

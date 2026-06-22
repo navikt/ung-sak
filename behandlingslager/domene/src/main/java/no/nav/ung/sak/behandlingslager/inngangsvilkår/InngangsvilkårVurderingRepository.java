@@ -10,10 +10,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Dependent
 public class InngangsvilkårVurderingRepository {
@@ -167,32 +164,32 @@ public class InngangsvilkårVurderingRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    public void fjernResultatFor(long behandlingId, VilkårType vilkårType, Set<Periode> perioder) {
+    public void fjernResultatFor(long behandlingId, VilkårType vilkårType, Collection<Periode> perioder) {
         var perioderSomSkalFjernes = new LocalDateTimeline<>(perioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE)).toList());
-        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
 
         BostedsvilkårResultatHolder bostedVilkårHolder;
         if (VilkårType.BOSTEDSVILKÅR.equals(vilkårType)) {
-            bostedVilkårHolder = oppdaterBostedVilkår(eksisterende, perioderSomSkalFjernes);
+            bostedVilkårHolder = oppdaterBostedVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
         } else {
-            bostedVilkårHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder).orElse(null);
+            bostedVilkårHolder = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder).orElse(null);
         }
 
         BistandsvilkårResultatHolder bistandsvilkårResultatHolder;
         if (VilkårType.BISTANDSVILKÅR.equals(vilkårType)) {
-            bistandsvilkårResultatHolder = oppdaterBistandsVilkår(eksisterende, perioderSomSkalFjernes);
+            bistandsvilkårResultatHolder = oppdaterBistandsVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
         } else {
-            bistandsvilkårResultatHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
+            bistandsvilkårResultatHolder = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
         }
 
         AndreLivsoppholdsytelserResultatHolder livsoppholdYtelser;
         if (VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR.equals(vilkårType)) {
-            livsoppholdYtelser = oppdaterLivsoppholdYtelserVilkår(eksisterende, perioderSomSkalFjernes);
+            livsoppholdYtelser = oppdaterLivsoppholdYtelserVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
         } else {
-            livsoppholdYtelser = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
+            livsoppholdYtelser = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
         }
 
-        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandsvilkårResultatHolder, livsoppholdYtelser, bostedVilkårHolder));
+        persister(eksisterendeGrunnlag, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandsvilkårResultatHolder, livsoppholdYtelser, bostedVilkårHolder));
     }
 
     private static BostedsvilkårResultatHolder oppdaterBostedVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {

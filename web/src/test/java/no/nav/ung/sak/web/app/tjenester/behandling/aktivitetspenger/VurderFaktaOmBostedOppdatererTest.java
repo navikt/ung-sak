@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -22,7 +23,6 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
@@ -32,6 +32,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -61,7 +62,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private VurderFaktaOmBostedOppdaterer oppdaterer;
     private Behandling behandling;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
-    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
     @BeforeEach
     void setUp() {
@@ -71,7 +72,7 @@ class VurderFaktaOmBostedOppdatererTest {
         etterlysningRepository = mock(EtterlysningRepository.class);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårsPerioderTilVurderingTjeneste = mock(Instance.class);
-        inngangsvilkårVurderingRepository = mock(InngangsvilkårVurderingRepository.class);
+        inngangsvilkårVurderingTjeneste = mock(InngangsvilkårVurderingTjeneste.class);
 
         mockPerioderTilVurdering(FOM, TOM);
 
@@ -82,7 +83,7 @@ class VurderFaktaOmBostedOppdatererTest {
             etterlysningRepository,
             prosessTaskTjeneste,
             vilkårsPerioderTilVurderingTjeneste,
-            inngangsvilkårVurderingRepository
+            inngangsvilkårVurderingTjeneste
         );
 
         behandling = mock(Behandling.class);
@@ -203,15 +204,16 @@ class VurderFaktaOmBostedOppdatererTest {
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
         var vilkårCaptor = ArgumentCaptor.forClass(VilkårType.class);
-        var perioderCaptor = ArgumentCaptor.forClass(Set.class);
+        var perioderCaptor = ArgumentCaptor.forClass(List.class);
 
-        verify(inngangsvilkårVurderingRepository).fjernResultatFor(
+        verify(inngangsvilkårVurderingTjeneste).fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(
             eq(BEHANDLING_ID),
+            new VilkårResultatBuilder(),
             vilkårCaptor.capture(),
             perioderCaptor.capture()
         );
         assertThat(vilkårCaptor.getValue()).isEqualTo(BOSTEDSVILKÅR);
-        assertThat(perioderCaptor.getValue()).containsExactly(new Periode(FOM, TOM));
+        assertThat(perioderCaptor.getValue()).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
     }
 
     @Test

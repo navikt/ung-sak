@@ -10,7 +10,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
-import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -28,7 +27,6 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
@@ -36,11 +34,11 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeri
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderFaktaOmBostedDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -52,7 +50,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
-    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
 
     VurderFaktaOmBostedOppdaterer() {
@@ -66,14 +64,14 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
                                          EtterlysningRepository etterlysningRepository,
                                          ProsessTaskTjeneste prosessTaskTjeneste,
                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                         InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
+                                         InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
-        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     @Override
@@ -113,7 +111,9 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         }
 
         Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
-        inngangsvilkårVurderingRepository.fjernResultatFor(behandlingId, VilkårType.BOSTEDSVILKÅR, nyePeriodeAvklaringer.stream().map(it -> it.getPeriode().tilPeriode()).collect(Collectors.toSet()));
+
+        var perioderSomSkalVurderesPåNytt = nyePeriodeAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
+        inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
 
         opprettEtterlysning(behandlingId, nyeAvklaringerSomSkalVarsles, tidligereAvklaringer, periodeReferanser, behandling.getFagsakId());
 
