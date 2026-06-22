@@ -132,13 +132,11 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals))
             .toSegments()
             .stream().map(s -> {
-                if (s.getValue().getEtterlysning() == null) {
-                    throw new IllegalStateException("Mangler etterlysning for "+ s.getLocalDateInterval());
-                }
-
-                if (!s.getValue().getEtterlysning().grunnlagsreferanse().equals(s.getValue().getForeslåttAvklaring().getReferanse())) {
-                    throw new IllegalStateException("Avklaring og etterlysning har ulik grunnlagsreferanse "
-                        +s.getLocalDateInterval()+", "+s.getValue().getEtterlysning().grunnlagsreferanse()+", "+s.getValue().getForeslåttAvklaring().getReferanse());
+                if (s.getValue().getEtterlysning() != null) {
+                    if (!s.getValue().getEtterlysning().grunnlagsreferanse().equals(s.getValue().getForeslåttAvklaring().getReferanse())) {
+                        throw new IllegalStateException("Avklaring og etterlysning har ulik grunnlagsreferanse "
+                            +s.getLocalDateInterval()+", "+s.getValue().getEtterlysning().grunnlagsreferanse()+", "+s.getValue().getForeslåttAvklaring().getReferanse());
+                    }
                 }
 
                 var foreslåttAvklaring = s.getValue().getForeslåttAvklaring();
