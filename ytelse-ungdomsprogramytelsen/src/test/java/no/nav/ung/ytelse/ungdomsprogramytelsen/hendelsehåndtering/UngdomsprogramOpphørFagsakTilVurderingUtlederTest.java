@@ -138,18 +138,18 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     }
 
     @Test
-    void skal_returnere_årsak_når_fagsakperiode_er_kortet_ned_og_opphørsdato_settes_til_periodeMaksDato() {
+    void skal_returnere_årsak_selv_om_opphørsdato_ikke_treffer_fagsakperiode() {
         var behandling = scenarioBuilder.lagre(entityManager);
         var fagsak = scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
-        final var gammelOpphørsdato = OPPHØRSDATO.minusDays(10);
+        final var tidligereOpphørsdato = OPPHØRSDATO.minusDays(10);
 
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
-            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelOpphørsdato))),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, tidligereOpphørsdato))),
             false,
-            OPPHØRSDATO);
+            OPPHØRSDATO.plusDays(30));
 
-        // Simuler at fagsaken allerede er forkortet etter tidligere opphør.
-        behandlingRepositoryProvider.getFagsakRepository().oppdaterPeriode(fagsak.getId(), STP, gammelOpphørsdato);
+        // Simulerer sak der fagsakperioden ikke overlapper hendelsesdato, men vi fortsatt skal finne siste fagsak.
+        behandlingRepositoryProvider.getFagsakRepository().oppdaterPeriode(fagsak.getId(), STP, tidligereOpphørsdato);
 
         behandling.avsluttBehandling();
         entityManager.flush();
@@ -160,8 +160,9 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         builder.medOpprettet(LocalDateTime.now());
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
-        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(gammelOpphørsdato.plusDays(1), OPPHØRSDATO));
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(tidligereOpphørsdato.plusDays(1), OPPHØRSDATO));
     }
+
 
     @Test
     void skal_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_etter_opphørsdato() {

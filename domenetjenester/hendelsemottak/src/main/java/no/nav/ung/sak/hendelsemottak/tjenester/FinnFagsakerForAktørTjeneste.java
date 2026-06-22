@@ -68,10 +68,6 @@ public class FinnFagsakerForAktørTjeneste {
         return fagsakRepository.hentForBruker(aktør, fagsakYtelseType).stream().filter(f -> f.getPeriode().overlapper(relevantDato, AbstractLocalDateInterval.TIDENES_ENDE)).findFirst();
     }
 
-    /**
-     * Fallback for hendelser der relevant dato ligger etter fagsakens nåværende tom-dato.
-     * Brukes for å finne sist aktive fagsak når perioden nylig er forkortet.
-     */
     public Optional<Fagsak> hentSisteFagsakForAktørSomSøker(FagsakYtelseType fagsakYtelseType, AktørId aktør) {
         return fagsakRepository.hentForBruker(aktør, fagsakYtelseType).stream()
             .max(Comparator.comparing((Fagsak f) -> f.getPeriode().getTomDato()).thenComparing(Fagsak::getId));
