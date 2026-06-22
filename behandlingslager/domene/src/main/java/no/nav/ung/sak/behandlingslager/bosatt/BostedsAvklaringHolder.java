@@ -40,18 +40,6 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         }
     }
 
-    BostedsAvklaringHolder(Set<BostedsPeriodeAvklaring> periodeAvklaringer) {
-        this.periodeAvklaringer = periodeAvklaringer;
-    }
-
-    void fjernPeriodeAvklaring(Set<Periode> perioderSomSkalFjernes) {
-        var fjerneTidslinje = new LocalDateTimeline<>(perioderSomSkalFjernes.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true)).collect(Collectors.toList()));
-        periodeAvklaringer = hentSomTidslinje().disjoint(fjerneTidslinje)
-            .toSegments().stream()
-            .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
-            .collect(Collectors.toCollection(LinkedHashSet::new));
-    }
-
     void leggTilEllerErstattPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
         periodeAvklaringer = byggAvklaringTidslinje(nyePeriodeAvklaring)
             .crossJoin(hentSomTidslinje())

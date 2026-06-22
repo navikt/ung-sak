@@ -195,11 +195,7 @@ public class BehandlingsoppretterTjeneste {
         if (relevanteUtledere.isEmpty()) {
             return true;
         }
-        if (periode.isEmpty()) {
-            return false;
-        }
         return relevanteUtledere.stream()
-            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), periode.get()));
+            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), periode));
     }
-
 }

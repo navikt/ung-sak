@@ -13,6 +13,7 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.app.tjenester.behandling.GyldigePerioderForRevurderingPrÅrsakUtleder;
 
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -49,10 +50,13 @@ public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder impl
     }
 
     @Override
-    public boolean periodeErGyldigForÅrsak(long fagsakId, DatoIntervallEntitet periode) {
+    public boolean periodeErGyldigForÅrsak(long fagsakId, Optional<DatoIntervallEntitet> periode) {
+        if (periode.isEmpty()) {
+            return false;
+        }
         var utledtePerioder = utledPerioder(fagsakId);
         return utledtePerioder.perioder().stream()
             .map(DatoIntervallEntitet::fra)
-            .anyMatch(periode::equals);
+            .anyMatch(periode.get()::equals);
     }
 }

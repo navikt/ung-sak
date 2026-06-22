@@ -58,8 +58,13 @@ public class GyldigePerioderForRevurderingForEndretBosted implements GyldigePeri
     }
 
     @Override
-    public boolean periodeErGyldigForÅrsak(long fagsakId, DatoIntervallEntitet periode) {
-        LocalDateInterval inputIntervall = periode.toLocalDateInterval();
+    public boolean periodeErGyldigForÅrsak(long fagsakId, Optional<DatoIntervallEntitet> periode) {
+        // Fordi opphør/avslag kan endres etter uttalelse fra bruker, gir det ikke mening å velge en avgrensende periode i behandlingsmenyen.
+        // Hvis det likevel skulle bli valgt, valideres den mot vilkårsperioden.
+        if (periode.isEmpty()) {
+            return true;
+        }
+        LocalDateInterval inputIntervall = periode.get().toLocalDateInterval();
         return utledPerioder(fagsakId).perioder().stream()
             .map(p -> new LocalDateInterval(p.getFom(), p.getTom()))
             .anyMatch(gyldigIntervall -> gyldigIntervall.contains(inputIntervall));

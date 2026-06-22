@@ -161,7 +161,7 @@ class BehandlingsoppretterTjenesteTest {
     }
 
     @Test
-    void skalFeileForEndretBostedNårPeriodeErUtenfor() {
+    void skalFeileForEndretBostedNårPeriodeErOppgittOgUtenforVilkårsperioder() {
         behandling = opprettRevurderingsKandidat(FagsakYtelseType.AKTIVITETSPENGER);
         Fagsak fagsak = behandling.getFagsak();
         var fagsakPeriode = fagsak.getPeriode();
@@ -173,18 +173,6 @@ class BehandlingsoppretterTjenesteTest {
 
         assertThrows(IllegalArgumentException.class, () ->
             behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.ENDRET_BOSTED, Optional.of(periodeUtenfor)));
-    }
-
-    @Test
-    void skalFeileForEndretBostedNårPeriodeIkkeErOppgitt() {
-        behandling = opprettRevurderingsKandidat(FagsakYtelseType.AKTIVITETSPENGER);
-        Fagsak fagsak = behandling.getFagsak();
-        var fagsakPeriode = fagsak.getPeriode();
-
-        opprettBostedsvilkår(behandling, fagsakPeriode);
-
-        assertThrows(IllegalArgumentException.class, () ->
-            behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.ENDRET_BOSTED, Optional.empty()));
     }
 
     private Behandling opprettRevurderingsKandidat(FagsakYtelseType ytelseType) {
