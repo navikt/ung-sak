@@ -138,6 +138,32 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     }
 
     @Test
+    void skal_returnere_årsak_når_fagsakperiode_er_kortet_ned_og_opphørsdato_settes_til_periodeMaksDato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        var fagsak = scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        final var gammelOpphørsdato = OPPHØRSDATO.minusDays(10);
+
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelOpphørsdato))),
+            false,
+            OPPHØRSDATO);
+
+        // Simuler at fagsaken allerede er forkortet etter tidligere opphør.
+        behandlingRepositoryProvider.getFagsakRepository().oppdaterPeriode(fagsak.getId(), STP, gammelOpphørsdato);
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(gammelOpphørsdato.plusDays(1), OPPHØRSDATO));
+    }
+
+    @Test
     void skal_returnere_årsak_dersom_ungdomsprogramperiode_sluttdato_er_etter_opphørsdato() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);

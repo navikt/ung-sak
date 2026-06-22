@@ -59,7 +59,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         var fagsaker = new HashMap<Fagsak, List<ÅrsakOgPerioder>>();
 
         for (AktørId aktør : aktører) {
-            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, opphørsdatoFraHendelse);
+            // Ved gjenopptak kan opphørsdato ligge utenfor nåværende fagsakperiode (som allerede er forkortet),
+            // så vi faller tilbake til siste fagsak for aktør for å sikre at hendelsen fortsatt treffer riktig sak.
+            var relevantFagsak = finnFagsakerForAktørTjeneste
+                .hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, opphørsdatoFraHendelse)
+                .or(() -> finnFagsakerForAktørTjeneste.hentSisteFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør)
+                    .filter(f -> !opphørsdatoFraHendelse.isBefore(f.getPeriode().getFomDato())));
             if (relevantFagsak.isEmpty()) {
                 continue;
             }
@@ -149,10 +154,16 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
     private boolean harIngenOppfyltYtelseEtterDato(Behandling behandling, LocalDate opphørsdato, String hendelseId) {
         // Sjekk 1: Hvis opphørsdato == periodeMaksDato er dette en naturlig avslutning
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId());
+        // Ved naturlig avslutning på maksdato skal hendelsen ignoreres, men hvis tidslinjen i grunnlaget
+        // er kortere enn opphørsdato må vi fortsatt opprette revurdering for å utvide perioden tilbake.
         if (maksdato.isPresent() && maksdato.get().equals(opphørsdato)) {
-            logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag. Naturlig avslutning — ignorerer hendelse {}.",
-                opphørsdato, hendelseId);
-            return true;
+            var ungdomsprogramTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+            var trengerUtvidelseAvPeriode = !ungdomsprogramTidslinje.isEmpty() && ungdomsprogramTidslinje.getMaxLocalDate().isBefore(opphørsdato);
+            if (!trengerUtvidelseAvPeriode) {
+                logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag uten behov for utvidelse. Naturlig avslutning — ignorerer hendelse {}.",
+                    opphørsdato, hendelseId);
+                return true;
+            }
         }
 
         // Sjekk 2: Hvis vilkårsresultat finnes og dekker perioden etter opphørsdato med kun ikke-oppfylte utfall
