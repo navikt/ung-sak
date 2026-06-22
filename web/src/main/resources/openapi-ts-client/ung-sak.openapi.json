@@ -2198,6 +2198,21 @@
         "type" : "string",
         "x-enum-varnames" : [ "SØKER_IKKE_MEDLEM" ]
       },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto" : {
+        "properties" : {
+          "erBosatt" : {
+            "type" : "boolean"
+          },
+          "foreslåttPeriode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "ikkeOppfyltÅrsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          }
+        },
+        "required" : [ "erBosatt" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto" : {
         "properties" : {
           "periode" : {
@@ -2207,7 +2222,7 @@
             "type" : "boolean"
           },
           "vurdering" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto"
           }
         },
         "required" : [ "periode", "vurdering" ],
@@ -2215,14 +2230,13 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagPeriodeDto" : {
         "properties" : {
+          "avklaring" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto"
+          },
           "erBosattITrondheim" : {
             "type" : "boolean"
           },
           "fom" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "fraflyttingsDato" : {
             "format" : "date",
             "type" : "string"
           },
@@ -2234,6 +2248,9 @@
           },
           "kilde" : {
             "$ref" : "#/components/schemas/ung.kodeverk.bosatt.Kilde"
+          },
+          "resultat" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto"
           },
           "søknadOppgittErBosattITrondheim" : {
             "type" : "boolean"
@@ -2261,7 +2278,31 @@
         "required" : [ "perioder" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "erBosatt" : {
+            "type" : "boolean"
+          },
+          "friteksttilBrev" : {
+            "type" : "string"
+          },
+          "ikkeOppfyltÅrsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          },
+          "manuellVurdering" : {
+            "type" : "boolean"
+          },
+          "vurdertAv" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "erBosatt", "manuellVurdering", "vurdertAv" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto" : {
         "properties" : {
           "begrunnelse" : {
             "maxLength" : 4000,
@@ -2269,18 +2310,10 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "borITrondheimIHelePerioden" : {
-            "type" : "boolean"
-          },
-          "fraflyttingsDato" : {
-            "format" : "date",
-            "type" : "string"
-          },
           "fraflyttingsÅrsak" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
           }
         },
-        "required" : [ "borITrondheimIHelePerioden" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto" : {
@@ -6606,6 +6639,7 @@
     },
     "/api/behandling/bosatt-fakta" : {
       "get" : {
+        "deprecated" : true,
         "description" : "Hent bostedsgrunnlag (avklaringer per periode)",
         "operationId" : "hentBosattFakta",
         "parameters" : [ {
