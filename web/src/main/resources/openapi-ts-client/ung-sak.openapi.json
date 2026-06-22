@@ -5566,6 +5566,24 @@
         },
         "type" : "object"
       },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.OppdaterMottattDokumentRequest" : {
+        "properties" : {
+          "behandlingId" : {
+            "type" : "string"
+          },
+          "journalpostId" : {
+            "type" : "string"
+          },
+          "nyUttalelseFraBruker" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "behandlingId" ],
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk" : {
         "properties" : {
           "antallBarn" : {
@@ -6064,6 +6082,32 @@
           }
         },
         "tags" : [ "redirect" ]
+      }
+    },
+    "/api/TSFF-2756/forvaltning/oppdater-mottatt-dokument" : {
+      "post" : {
+        "description" : "oppdaterer mottatt dokument ifm TSFF-2756",
+        "operationId" : "oppdaterMottattDokument",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.OppdaterMottattDokumentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "oppdaterer mottatt dokument ifm TSFF-2756",
+        "tags" : [ "forvaltning" ]
       }
     },
     "/api/aksjonspunkt" : {

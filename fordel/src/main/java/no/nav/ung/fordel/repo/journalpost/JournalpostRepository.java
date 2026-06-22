@@ -1,14 +1,5 @@
 package no.nav.ung.fordel.repo.journalpost;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.hibernate.jpa.SpecHints;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
@@ -16,6 +7,14 @@ import jakarta.persistence.LockModeType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
+import org.hibernate.jpa.SpecHints;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Dependent
 public class JournalpostRepository {
@@ -60,6 +59,21 @@ public class JournalpostRepository {
     public void lagreInnsending(JournalpostInnsendingEntitet innsending) {
         entityManager.persist(innsending);
         entityManager.flush();
+    }
+
+    public Optional<JournalpostInnsendingEntitet> finnJournalpostInnsending(JournalpostId journalpostId) {
+        var list = entityManager
+            .createQuery("select j from JournalpostInnsendingEntitet j where j.journalpostId=:journalpostId", JournalpostInnsendingEntitet.class)
+            .setParameter("journalpostId", journalpostId.getVerdi())
+            .getResultList();
+
+        if (list.isEmpty()) {
+            return Optional.empty();
+        } else if (list.size() == 1) {
+            return Optional.of(list.getFirst());
+        } else {
+            throw new IllegalStateException("Fant mer enn ett innslag [" + list.size() + "] for journalpostInnsending: " + journalpostId);
+        }
     }
 
     public List<JournalpostMottattEntitet> markerJournalposterBehandlet(JournalpostId journalpostId) {
