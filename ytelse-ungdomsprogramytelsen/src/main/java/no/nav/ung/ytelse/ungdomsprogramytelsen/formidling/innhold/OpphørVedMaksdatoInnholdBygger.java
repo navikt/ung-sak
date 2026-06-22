@@ -1,10 +1,8 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
 
 import jakarta.enterprise.context.Dependent;
-import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
@@ -18,13 +16,6 @@ import java.time.YearMonth;
 
 @Dependent
 public class OpphørVedMaksdatoInnholdBygger implements VedtaksbrevInnholdBygger {
-
-    private final LocalDate overrideDagensDatoForTest;
-
-    @Inject
-    public OpphørVedMaksdatoInnholdBygger(@KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
-        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
-    }
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
@@ -44,6 +35,8 @@ public class OpphørVedMaksdatoInnholdBygger implements VedtaksbrevInnholdBygger
     }
 
     private YearMonth bestemInneværendeMåned() {
+        //Kan ikke injectes i konstruktør fordi den settes én gang for hele testkjøringen pga application scoped
+        var overrideDagensDatoForTest = Environment.current().getProperty("BREV_DAGENS_DATO_TEST", LocalDate.class);
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ?
             YearMonth.from(overrideDagensDatoForTest)
             : YearMonth.now();

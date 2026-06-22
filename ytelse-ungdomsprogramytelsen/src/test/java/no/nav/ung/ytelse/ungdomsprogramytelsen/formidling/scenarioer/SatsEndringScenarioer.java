@@ -12,6 +12,7 @@ import no.nav.ung.sak.trigger.Trigger;
 
 import java.time.LocalDate;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -40,5 +41,35 @@ public class SatsEndringScenarioer {
             List.of(p.getFomDato()),
             Set.of(new Trigger(BehandlingÅrsakType.RE_SATS_REGULERING, DatoIntervallEntitet.fra(p.getFomDato(), p.getTomDato()))),
             Collections.emptyList(), null, null, null, false);
+    }
+
+    /**
+     * Utvider et eksisterende scenario med en RE_SATS_REGULERING-trigger over hele programperioden.
+     *
+     * @param scenario - eksisterende scenario som skal utvides
+     */
+    public static UngTestScenario leggTilGRegulering(UngTestScenario scenario) {
+        var fom = scenario.programPerioder().getFirst().getPeriode().getFomDato();
+        var tom = scenario.programPerioder().getLast().getPeriode().getTomDato();
+
+        var triggere = new HashSet<>(scenario.behandlingTriggere());
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_SATS_REGULERING, DatoIntervallEntitet.fra(fom, tom)));
+
+        return new UngTestScenario(
+            scenario.navn(),
+            scenario.programPerioder(),
+            scenario.satser(),
+            scenario.uttakPerioder(),
+            scenario.tilkjentYtelsePerioder(),
+            scenario.aldersvilkår(),
+            scenario.ungdomsprogramvilkår(),
+            scenario.fødselsdato(),
+            scenario.søknadStartDato(),
+            triggere,
+            scenario.barn(),
+            scenario.dødsdato(),
+            scenario.kontrollerInntektPerioder(),
+            scenario.periodeMaksDato(),
+            scenario.harForlengetPeriode());
     }
 }

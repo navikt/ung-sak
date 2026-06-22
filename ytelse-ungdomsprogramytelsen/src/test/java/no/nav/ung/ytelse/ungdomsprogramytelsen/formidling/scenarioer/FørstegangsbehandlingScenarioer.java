@@ -33,6 +33,31 @@ public class FørstegangsbehandlingScenarioer {
     }
 
     /**
+     * Som innvilget19år, men uten behandlingsårsak/trigger. Brukes for å verifisere at resolveren
+     * feiler tydelig (IKKE_IMPLEMENTERT) når et resultat foreligger som ingen strategi gjør krav på.
+     */
+    public static UngTestScenario innvilget19årUtenTrigger(LocalDate fom) {
+        var p = new LocalDateInterval(fom, fom.plusYears(1));
+
+        var satser = new LocalDateTimeline<>(p, BrevScenarioerUtils.lavSatsBuilder(fom).build());
+
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), Tid.TIDENES_ENDE));
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            programPerioder,
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(p),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, new LocalDateInterval(fom, fom.plusMonths(1).minusDays(1))),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(p.getFomDato()),
+            Collections.emptySet(),
+            Collections.emptyList(), null, null, null, false);
+    }
+
+    /**
      * 19 år ungdom med full ungdomsperiode, ingen inntektsgradering og ingen barn
      */
     public static UngTestScenario innvilget19år(LocalDate fom) {

@@ -1,23 +1,16 @@
 package no.nav.ung.sak.behandlingslager.behandling.motattdokument;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import jakarta.persistence.TypedQuery;
-
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.typer.JournalpostId;
+
+import java.util.*;
 
 @Dependent
 public class MottatteDokumentRepository {
@@ -48,6 +41,21 @@ public class MottatteDokumentRepository {
         entityManager.persist(mottattDokument);
         entityManager.flush();
         return mottattDokument;
+    }
+
+    /**
+     * Oppdaterer payload direkte via native spørring. Payload-kolonnen er {@code updatable = false} i JPA-mappingen,
+     * så ordinær persist vil ikke endre den. Payload lagres som large object (oid) i Postgres, så vi binder en Clob
+     * med eksplisitt CLOB-type slik at Hibernate kan utlede riktig JDBC-mapping.
+     */
+    public void oppdaterPayload(Long mottattDokumentId, String payload) {
+        var clob = org.hibernate.Hibernate.getLobHelper().createClob(payload);
+        entityManager.createNativeQuery("update mottatt_dokument set payload = :payload where id = :id")
+            .unwrap(org.hibernate.query.NativeQuery.class)
+            .setParameter("payload", clob, org.hibernate.type.StandardBasicTypes.CLOB)
+            .setParameter("id", mottattDokumentId)
+            .executeUpdate();
+        entityManager.flush();
     }
 
     public Optional<MottattDokument> hentMottattDokument(long mottattDokumentId) {

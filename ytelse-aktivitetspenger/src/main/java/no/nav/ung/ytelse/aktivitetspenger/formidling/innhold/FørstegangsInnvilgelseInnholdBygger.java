@@ -6,10 +6,10 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.formidling.innhold.MonthUtils;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
@@ -29,7 +29,6 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.UtbetalingD
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.SatsgrunnlagDto;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -45,17 +44,14 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private final AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository;
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
-    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
     public FørstegangsInnvilgelseInnholdBygger(
         AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository,
-        TilkjentYtelseRepository tilkjentYtelseRepository,
-        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
+        TilkjentYtelseRepository tilkjentYtelseRepository) {
 
         this.beregningsgrunnlagRepository = beregningsgrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
-        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
@@ -200,6 +196,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     }
 
     private LocalDate bestemDagensDato() {
+        //Kan ikke injectes i konstruktør fordi den settes én gang for hele testkjøringen pga application scoped
+        var overrideDagensDatoForTest = Environment.current().getProperty("BREV_DAGENS_DATO_TEST", LocalDate.class);
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
     }
 }

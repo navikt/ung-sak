@@ -5,5 +5,6 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdDto;
 import java.time.LocalDate;
 
 public record ForlengetPeriodeDto(
-    LocalDate fom) implements TemplateInnholdDto {
+    LocalDate fom,
+    LocalDate maksdato) implements TemplateInnholdDto {
 }

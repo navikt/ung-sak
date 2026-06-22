@@ -22,7 +22,6 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphør
 
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -73,26 +72,25 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
 
         var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
             .orElseThrow();
-        var ungdomsprogramMaksPeriode = grunnlag.getUngdomsprogramMaksPeriode().orElse(null);
-        var ungdomsprogramPeriode = grunnlag.hentForEksaktEnPeriode();
+        var behandlingGrunnlag = new UngDetaljertResultatBehandlingGrunnlag(
+            behandling.erManueltOpprettet(),
+            grunnlag.getUngdomsprogramMaksPeriode().orElse(null),
+            grunnlag.hentForEksaktEnPeriode());
 
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .intersection(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater)
-                    -> new LocalDateSegment<>(p, new UngDetaljertResultatGrunnlag(
+                    -> new LocalDateSegment<>(p, new UngDetaljertResultatPeriodeGrunnlag(
                     vilkårResultater.getValue(),
-                    behandlingÅrsaker.getValue(),
-                    behandling.erManueltOpprettet(),
-                    ungdomsprogramMaksPeriode,
-                    ungdomsprogramPeriode)));
+                    behandlingÅrsaker.getValue())));
 
         var detaljertResultatTidslinje = vilkårOgBehandlingsårsakerTidslinje
-            .combine(tilkjentYtelseTidslinje, bestemResultatForPeriodeCombinator(), JoinStyle.LEFT_JOIN);
+            .combine(tilkjentYtelseTidslinje, bestemResultatForPeriodeCombinator(behandlingGrunnlag), JoinStyle.LEFT_JOIN);
 
         return detaljertResultatTidslinje.compress();
     }
 
-    private Set<DetaljertResultatInfo> bestemDetaljertResultat(LocalDateInterval periode, UngDetaljertResultatGrunnlag detaljertResultatGrunnlag, TilkjentYtelseVerdi tilkjentYtelse) {
+    private Set<DetaljertResultatInfo> bestemDetaljertResultat(LocalDateInterval periode, UngDetaljertResultatPeriodeGrunnlag detaljertResultatGrunnlag, UngDetaljertResultatBehandlingGrunnlag behandlingGrunnlag, TilkjentYtelseVerdi tilkjentYtelse) {
 
         if (!detaljertResultatGrunnlag.ikkeVurderteVilkår().isEmpty()) {
             return Set.of(DetaljertResultatInfo.of(DetaljertResultatType.IKKE_VURDERT));
@@ -109,7 +107,7 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         }
 
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.NY_SØKT_PERIODE)
-            || detaljertResultatGrunnlag.manuellOpprettetBehandling() && relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
+            || behandlingGrunnlag.manuellOpprettetBehandling() && relevanteÅrsaker.contains(BehandlingÅrsakType.RE_SATS_ENDRING)) {
             resultater.add(DetaljertResultatFelles.nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
 
@@ -122,12 +120,12 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         }
 
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)
-            && detaljertResultatGrunnlag.ungdomsprogramMaksPeriodeOpt().orElseThrow().harForlengetPeriode()) {
+            && behandlingGrunnlag.ungdomsprogramMaksPeriodeOpt().orElseThrow().harForlengetPeriode()) {
             resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.FORLENGET_PERIODE));
         }
 
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
-            && erRelevantForVarslingOmOpphørVedMaksdato(detaljertResultatGrunnlag)) {
+            && erRelevantForVarslingOmOpphørVedMaksdato(behandlingGrunnlag)) {
             resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO));
         }
 
@@ -149,10 +147,10 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         return resultater;
     }
 
-    private static boolean erRelevantForVarslingOmOpphørVedMaksdato(UngDetaljertResultatGrunnlag vilkårResultat) {
-        var maksPeriode = Optional.ofNullable(vilkårResultat.ungdomsprogramMaksPeriode()).orElseThrow();
+    private static boolean erRelevantForVarslingOmOpphørVedMaksdato(UngDetaljertResultatBehandlingGrunnlag behandlingGrunnlag) {
+        var maksPeriode = behandlingGrunnlag.ungdomsprogramMaksPeriodeOpt().orElseThrow();
         return MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(
-            vilkårResultat.ungdomsprogramPeriode().getTomDato(), maksPeriode.getPeriodeMaksDato().orElseThrow());
+            behandlingGrunnlag.ungdomsprogramPeriode().getTomDato(), maksPeriode.getPeriodeMaksDato().orElseThrow());
     }
 
     private static DetaljertResultatInfo endretSluttdatoDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår) {
@@ -176,9 +174,9 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
             (it -> it.vilkårType() == vilkårType);
     }
 
-    private LocalDateSegmentCombinator<UngDetaljertResultatGrunnlag, TilkjentYtelseVerdi, DetaljertResultat> bestemResultatForPeriodeCombinator() {
+    private LocalDateSegmentCombinator<UngDetaljertResultatPeriodeGrunnlag, TilkjentYtelseVerdi, DetaljertResultat> bestemResultatForPeriodeCombinator(UngDetaljertResultatBehandlingGrunnlag behandlingGrunnlag) {
         return (p, lhs, rhs) -> {
-            UngDetaljertResultatGrunnlag vilkårResultat = lhs.getValue();
+            UngDetaljertResultatPeriodeGrunnlag vilkårResultat = lhs.getValue();
             var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
 
             if (vilkårResultat == null) {
@@ -189,7 +187,7 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
             var avslåtteVilkår = vilkårResultat.avslåtteVilkår();
             var behandlingsårsaker = vilkårResultat.behandlingÅrsaker();
 
-            var resultatType = bestemDetaljertResultat(p, vilkårResultat, tilkjentYtelse);
+            var resultatType = bestemDetaljertResultat(p, vilkårResultat, behandlingGrunnlag, tilkjentYtelse);
 
             var resultat = new DetaljertResultat(resultatType, behandlingsårsaker, avslåtteVilkår, vilkårSomIkkeErVurdert);
 

@@ -169,6 +169,39 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     @Test
+    void skal_ignorere_g_regulering_kombinert_med_full_utbetaling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(SatsEndringScenarioer.leggTilGRegulering(EndringInntektScenarioer.endring0KrInntekt_19år(fom)));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(2);
+
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
+    void skal_ignorere_g_regulering_kombinert_med_kontorller_inntekt_brev() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(SatsEndringScenarioer.leggTilGRegulering(
+            EndringInntektScenarioer.endringMedInntektPå10k_19år(fom))
+        );
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
+
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
+
+    }
+
+    @Test
     void skal_gi_tomt_brev_som_må_redigeres_ved_avslag_aldersvilkår() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
         UngTestScenario ungTestGrunnlag = AvslagScenarioer.avslagAlder(fom);
@@ -325,9 +358,10 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate fom = LocalDate.now().minusWeeks(52).plusWeeks(2);
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
+        LocalDate periodeMaksDato = nySluttdato;
 
         var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
-            EndringProgramPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato),
+            EndringProgramPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato, periodeMaksDato),
             nySluttdato);
         var behandling = lagBehandling(scenario);
 
@@ -421,6 +455,26 @@ class YtelseVedtaksbrevReglerTest {
         assertThat(egenskaper.kanOverstyreRediger()).isFalse();
     }
 
+
+    /**
+     * Invariant: Når et reelt detaljert resultat foreligger, men ingen strategi gjør krav på det,
+     * skal resolveren feile tydelig med IKKE_IMPLEMENTERT i stedet for å stille produsere ingen brev.
+     * Dette beskytter mot at en fremtidig endring gjør alle relevante strategier irrelevante for en
+     * gyldig resultatkombinasjon uten at noe varsles.
+     */
+    @Test
+    void skal_gi_ikke_implementert_nar_ingen_strategi_gjor_krav_pa_resultatet() {
+        var behandling = lagBehandling(FørstegangsbehandlingScenarioer.innvilget19årUtenTrigger(LocalDate.of(2024, 12, 1)));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResultat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+        assertThat(regelResultat.forklaring()).containsIgnoringCase("Ingen brev ved resultater");
+    }
 
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()
