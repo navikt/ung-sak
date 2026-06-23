@@ -24,9 +24,13 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPer
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 
 /**
  * Oppdaterer for aksjonspunkt 5144 – manuell vurdering av bostedsvilkåret.
@@ -65,7 +69,12 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
-        LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
+        var senesteDatoFraVilkårsperiode = perioderTilVurdering.getMaxLocalDate();
+
+        LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it ->
+            new LocalDateSegment<>(it.periode().getFom(), hentMaksDatoVedÅpenPeriode(it.periode(), senesteDatoFraVilkårsperiode), true)).toList()
+        );
+
         LocalDateTimeline<Boolean> uforventedePerioder = inputOppdateres.disjoint(perioderTilVurdering);
         if (!uforventedePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
@@ -76,7 +85,10 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
 
         var periodeVurderinger = dto.getVurdertePerioder().stream()
             .map(it -> new BostedsvilkårResultatPeriode(
-                DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
+                DatoIntervallEntitet.fraOgMedTilOgMed(
+                    it.periode().getFom(),
+                    hentMaksDatoVedÅpenPeriode(it.periode(), senesteDatoFraVilkårsperiode)
+                ),
                 it.erVilkårOppfylt(),
                 it.avslagsårsak(),
                 true,
@@ -101,5 +113,9 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         historikkinnslagRepository.lagre(historikkinnslag);
 
         return OppdateringResultat.nyttResultat();
+    }
+    static LocalDate hentMaksDatoVedÅpenPeriode(Periode periode, LocalDate senesteTomVilkårsperiode) {
+        var erÅpenPeriode = periode.getTom() == null || periode.getFom().equals(TIDENES_ENDE);
+        return erÅpenPeriode ? senesteTomVilkårsperiode : periode.getTom();
     }
 }
