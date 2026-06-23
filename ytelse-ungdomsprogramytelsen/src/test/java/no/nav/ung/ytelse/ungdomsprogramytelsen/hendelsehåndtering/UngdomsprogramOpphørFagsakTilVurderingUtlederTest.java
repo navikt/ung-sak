@@ -10,10 +10,14 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
@@ -135,6 +139,64 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
         assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
+    }
+
+    @Test
+    void skal_ikke_returnere_årsak_dersom_kun_ikke_oppfylte_vilkårsperioder_etter_maksdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        final var gammelOpphørsdato = OPPHØRSDATO.plusDays(10);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelOpphørsdato))),
+            false,
+            OPPHØRSDATO);
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var vilkåreneMock = mock(Vilkårene.class);
+        var ikkeOppfyltPeriode = mock(VilkårPeriode.class);
+        when(ikkeOppfyltPeriode.getGjeldendeUtfall()).thenReturn(Utfall.IKKE_OPPFYLT);
+        when(vilkåreneMock.getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET))
+            .thenReturn(new LocalDateTimeline<>(OPPHØRSDATO.plusDays(1), gammelOpphørsdato, ikkeOppfyltPeriode));
+        when(vilkårTjeneste.hentHvisEksisterer(anyLong())).thenReturn(Optional.of(vilkåreneMock));
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
+    }
+
+    @Test
+    void skal_returnere_årsak_dersom_oppfylte_vilkårsperioder_finnes_etter_maksdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        final var gammelOpphørsdato = OPPHØRSDATO.plusDays(10);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelOpphørsdato))),
+            false,
+            OPPHØRSDATO);
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var vilkåreneMock = mock(Vilkårene.class);
+        var oppfyltPeriode = mock(VilkårPeriode.class);
+        when(oppfyltPeriode.getGjeldendeUtfall()).thenReturn(Utfall.OPPFYLT);
+        when(vilkåreneMock.getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET))
+            .thenReturn(new LocalDateTimeline<>(OPPHØRSDATO.plusDays(1), gammelOpphørsdato, oppfyltPeriode));
+        when(vilkårTjeneste.hentHvisEksisterer(anyLong())).thenReturn(Optional.of(vilkåreneMock));
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
     }
 
     @Test

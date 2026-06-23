@@ -156,7 +156,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         if (maksdato.isPresent() && maksdato.get().equals(opphørsdato)) {
             var vilkårene = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
             if (vilkårene.isPresent()) {
-                var ungdomsprogramVilkårTimeline = vilkårene.get().getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET);
+                var ungdomsprogramVilkårTimeline = vilkårene.get().getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET)
+                    .filterValue(v -> v.getGjeldendeUtfall() == Utfall.OPPFYLT);
                 var vilkårsperiodeEtterMaksdato = ungdomsprogramVilkårTimeline.intersection(
                     new LocalDateInterval(opphørsdato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
                 if (!vilkårsperiodeEtterMaksdato.isEmpty()) {
