@@ -75,7 +75,7 @@ class BostedAvklaringOgUttalelseOgResultat {
     private boolean harMottattSvarMedUttalelse() {
         return etterlysning != null
             && etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
-            && etterlysning.uttalelseData().harUttalelse();
+            && etterlysning.uttalelseData() != null && etterlysning.uttalelseData().harUttalelse();
     }
 
     enum StegUtfall {

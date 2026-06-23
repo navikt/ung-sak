@@ -25,8 +25,8 @@ public class BostedsGrunnlag extends BaseEntitet {
     @Column(name = "behandling_id", nullable = false, updatable = false)
     private Long behandlingId;
 
-    @JoinColumn(name = "bosatt_soeknad_grunnlag_id", nullable = false)
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "bosatt_soeknad_grunnlag_id", nullable = false)
     private BostedsinformasjonFraSøknadHolder oppgittFraSøknad;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
@@ -168,7 +168,7 @@ public class BostedsGrunnlag extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(foreslått);
+        return Objects.hash(oppgittFraSøknad, foreslått);
     }
 
     @Override

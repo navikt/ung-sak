@@ -62,24 +62,18 @@ public class BostedsGrunnlagRepository {
      *
      * @return Map fra skjæringstidspunkt til periodeAvklaring.referanse
      */
-    public Map<LocalDate, UUID> lagreForeslåtteAvklaringer(
-        Long behandlingId,
-        List<BostedsPeriodeAvklaring> nyeAvklaringer) {
+    public Map<LocalDate, UUID> lagreForeslåtteAvklaringer(Long behandlingId, List<BostedsPeriodeAvklaring> nyeAvklaringer) {
+        var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Forventer at grunnlag allerede eksisterer ved lagring av avklaring"));
 
-        var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
-
-        var nyttGrunnlag = eksisterendeGrunnlag
-            .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
-            .orElse(new BostedsGrunnlag(behandlingId));
-
+        var nyttGrunnlag = BostedsGrunnlag.nyttGrunnlagMedReferanserFra(eksisterendeGrunnlag);
         nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
 
-        if (eksisterendeGrunnlag.isPresent()) {
-            if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
-                return hentForeslåttAvklaringsreferanser(eksisterendeGrunnlag.get().getForeslått());
-            }
-            deaktiverEksisterende(eksisterendeGrunnlag.get());
+        if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
+            return hentForeslåttAvklaringsreferanser(eksisterendeGrunnlag.getForeslått());
         }
+        deaktiverEksisterende(eksisterendeGrunnlag);
+
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
 
