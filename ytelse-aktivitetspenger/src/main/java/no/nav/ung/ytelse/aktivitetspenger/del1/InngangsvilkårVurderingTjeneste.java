@@ -119,7 +119,7 @@ public class InngangsvilkårVurderingTjeneste {
             if (vurdering.isManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
             } else {
-                vilkårPeriodeBuilder.medUtfall(utfall).medManueltVurdert(false);
+                vilkårPeriodeBuilder.tilbakestillManuellVurdering().medUtfall(utfall);
             }
             vilkårBuilder.leggTil(vilkårPeriodeBuilder);
         }

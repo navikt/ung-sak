@@ -15,11 +15,11 @@ import java.util.stream.Collectors;
  * Uavhengig av vilkårsperioder – lagres additivt uten deaktivering.
  */
 @Entity(name = "BostedsinformasjonFraSøknadHolder")
-@Table(name = "BOSATT_SOEKNAD_GRUNNLAG")
+@Table(name = "BOSTEDSINFORMASJON_SOEKNAD_HOLDER")
 public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSATT_SOEKNAD_GRUNNLAG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSTEDSINFORMASJON_SOEKNAD_HOLDER")
     private Long id;
 
     @BatchSize(size = 20)

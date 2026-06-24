@@ -43,10 +43,10 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "fritekst_vurdering_brev", updatable = false)
     private String fritekstVurderingBrev;
 
-    @Column(name = "vurdert_av", nullable = false, updatable = false)
+    @Column(name = "vurdert_av", updatable = false)
     private String vurdertAv;
 
-    @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
+    @Column(name = "vurdert_tidspunkt",  updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
     protected BostedsvilkårResultatPeriode() {
@@ -60,8 +60,11 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
-        Objects.requireNonNull(vurdertAv, "vurdertAv");
-        Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
+        if (manuellVurdering) {
+            Objects.requireNonNull(vurdertAv, "vurdertAv");
+            Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
+        }
+
         if (!godkjent) {
             Objects.requireNonNull(ikkeOppfyltÅrsak, "ikkeOppfyltÅrsak må settes når godkjent=false");
         }

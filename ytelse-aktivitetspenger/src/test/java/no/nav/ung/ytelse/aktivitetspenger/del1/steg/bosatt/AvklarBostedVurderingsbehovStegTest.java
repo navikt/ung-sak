@@ -18,6 +18,8 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -77,6 +79,7 @@ class AvklarBostedVurderingsbehovStegTest {
     private VurderBostedVilkårSteg steg;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private BehandingprosessSporingRepository behandlingprosessSporingRepository;
 
     @BeforeEach
     void setUp() {
@@ -88,6 +91,7 @@ class AvklarBostedVurderingsbehovStegTest {
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, vilkårResultatRepository);
+        behandlingprosessSporingRepository = new BehandingprosessSporingRepository(entityManager);
 
         steg = lagSteg(List.of());
     }
@@ -258,7 +262,8 @@ class AvklarBostedVurderingsbehovStegTest {
             vilkårsPerioderTilVurderingTjenester,
             etterlysningTjeneste,
             inngangsvilkårVurderingRepository,
-            inngangsvilkårVurderingTjeneste
+            inngangsvilkårVurderingTjeneste,
+            behandlingprosessSporingRepository
         );
     }
 

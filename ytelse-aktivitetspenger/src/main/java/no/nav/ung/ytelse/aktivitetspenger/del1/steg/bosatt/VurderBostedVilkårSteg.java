@@ -14,12 +14,15 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -28,7 +31,10 @@ import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringOgUttalelseOgResultat.StegUtfall;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -43,12 +49,15 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTEDVIL
 public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
     private static final Duration DEFAULT_VENTEFRIST = Duration.ofDays(14);
+    private static final Logger logger = LoggerFactory.getLogger(VurderBostedVilkårSteg.class);
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private BehandingprosessSporingRepository behandingprosessSporingRepository;
+
 
     VurderBostedVilkårSteg() {
         // for CDI proxy
@@ -63,13 +72,14 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                   EtterlysningTjeneste etterlysningTjeneste,
                                   InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                  InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
+                                  InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste, BehandingprosessSporingRepository behandingprosessSporingRepository) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
+        this.behandingprosessSporingRepository = behandingprosessSporingRepository;
     }
 
     @Override
@@ -124,6 +134,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         LocalDateTimeline<StegUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
+        lagreBehandlingprosessSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje);
 
         if (!stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
             return settPåVent(vurderingTidslinje);
@@ -147,7 +158,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                     false,
                     null,
                     null,
-                    foreslåttAvklaring.getVurdertAv(),
+                    null,
                     foreslåttAvklaring.getVurdertTidspunkt());
         }).collect(Collectors.toList());
 
@@ -160,6 +171,19 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
         inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private void lagreBehandlingprosessSporing(long behandlingId, LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje, LocalDateTimeline<StegUtfall> stegutfallTidslinje) {
+        try {
+            behandingprosessSporingRepository.lagreSporing(new BehandlingprosessSporing(
+                behandlingId,
+                JsonObjectMapper.getJson(vurderingTidslinje),
+                JsonObjectMapper.getJson(stegutfallTidslinje),
+                VURDER_BOSTEDVILKÅR.getKode())
+            );
+        } catch (IOException e) {
+            logger.warn("Feil ved lagring av sporing for utledning av StegUtfall i VurderBostedVilkårSteg", e);
+        }
     }
 
     private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, EtterlysningData, BostedAvklaringOgUttalelseOgResultat> leggTilEtterlysning() {

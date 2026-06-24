@@ -1,3 +1,14 @@
+drop index idx_bosatt_soeknad_grunnlag_behandling;
+
+alter table bosatt_soeknad_grunnlag
+    drop column behandling_id;
+
+alter table bosatt_soeknad_grunnlag
+    rename to bostedsinformasjon_soeknad_holder;
+
+ALTER SEQUENCE SEQ_BOSATT_SOEKNAD_GRUNNLAG
+    RENAME TO SEQ_BOSTEDSINFORMASJON_SOEKNAD_HOLDER;
+
 comment on table bosatt_periode_avklaring is 'Resultat etter avklaring av bostedsvilkåret per vilkårsperiode.';
 
 alter table gr_bosatt_avklaring
@@ -19,18 +30,14 @@ alter table bosatt_periode_avklaring
     drop column kilde;
 
 alter table gr_bosatt_avklaring
-    add column bosatt_soeknad_grunnlag_id bigint references bosatt_soeknad_grunnlag (id);
+    add column bostedsinformasjon_soeknad_holder_id bigint references bostedsinformasjon_soeknad_holder (id);
 
 --  For å kunne lagre bostedsgrunnlag med søknadsopplysninger, for deretter å opprette avklaring i senere steg
 alter table gr_bosatt_avklaring
     alter column foreslatt_holder_id drop not null;
 
-create index idx_gr_bosatt_avklaring_soeknad_grunnlag on gr_bosatt_avklaring (bosatt_soeknad_grunnlag_id);
+create index idx_gr_bosatt_avklaring_soeknad_grunnlag on gr_bosatt_avklaring (bostedsinformasjon_soeknad_holder_id);
 
-drop index idx_bosatt_soeknad_grunnlag_behandling;
-
-alter table bosatt_soeknad_grunnlag
-    drop column behandling_id;
 
 -- bostedsvilkår vurderingsresultat
 
@@ -58,7 +65,7 @@ create table bosted_resultat_periode
     manuell_vurdering        boolean                                         not null,
     begrunnelse              text,
     fritekst_vurdering_brev  text,
-    vurdert_av               varchar(100)                                    not null,
+    vurdert_av               varchar(100),
     vurdert_tidspunkt        timestamp(3)                                    not null,
     opprettet_av             varchar(20)  default 'VL'                       not null,
     opprettet_tid            timestamp(3) default current_timestamp          not null,

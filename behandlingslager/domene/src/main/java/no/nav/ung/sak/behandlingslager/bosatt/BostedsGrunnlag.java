@@ -5,7 +5,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -26,7 +25,7 @@ public class BostedsGrunnlag extends BaseEntitet {
     private Long behandlingId;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "bosatt_soeknad_grunnlag_id", nullable = false)
+    @JoinColumn(name = "bostedsinformasjon_soeknad_holder_id", nullable = false)
     private BostedsinformasjonFraSøknadHolder oppgittFraSøknad;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
