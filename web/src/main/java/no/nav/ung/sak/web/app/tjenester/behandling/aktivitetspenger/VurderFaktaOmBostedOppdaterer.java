@@ -115,7 +115,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         var perioderSomSkalVurderesPåNytt = nyePeriodeAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
         inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
 
-        opprettEtterlysning(behandlingId, nyeAvklaringerSomSkalVarsles, tidligereAvklaringer, periodeReferanser, behandling.getFagsakId());
+        opprettEtterlysning(behandling, nyeAvklaringerSomSkalVarsles, tidligereAvklaringer, periodeReferanser);
 
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
@@ -141,10 +141,13 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             .orElse(LocalDateTimeline.empty());
     }
 
-    private void opprettEtterlysning(long behandlingId,
+    private void opprettEtterlysning(Behandling behandling,
                                      Map<Periode, BostedAvklaringData> nyeAvklaringerSomSkalVarsles,
                                      LocalDateTimeline<BostedAvklaringData> tidligereTidslinje,
-                                     Map<LocalDate, UUID> periodeReferanser, Long fagsakId) {
+                                     Map<LocalDate, UUID> periodeReferanser) {
+
+        long behandlingId = behandling.getId();
+
         // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
         List<Etterlysning> etterlysningerSomVenterSvar = etterlysningRepository
             .hentEtterlysningerSomVenterPåSvar(behandlingId).stream()
@@ -158,20 +161,19 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             BostedAvklaringData nyAvklaring = avklaringSomKreverVarsel.getValue();
             Periode periode = avklaringSomKreverVarsel.getKey();
 
-            LocalDateTimeline<BostedAvklaringData> gammelAvklaringTidslinje = tidligereTidslinje.intersection(new LocalDateInterval(periode.getFom(), periode.getTom()));
-            if (gammelAvklaringTidslinje.isEmpty()) {
+            LocalDateTimeline<BostedAvklaringData> tidligereOverlappendeAvklaringerTidslinje = tidligereTidslinje.intersection(new LocalDateInterval(periode.getFom(), periode.getTom()));
+            if (tidligereOverlappendeAvklaringerTidslinje.isEmpty()) {
                 skalOpprette = true;
             } else {
-                BostedAvklaringData gammelAvklaring = gammelAvklaringTidslinje.stream()
-                    .map(LocalDateSegment::getValue)
-                    .findFirst().orElseThrow();
+                List<BostedAvklaringData> gamleAvklaringerSomOverlapperMedDenne = tidligereOverlappendeAvklaringerTidslinje.stream()
+                    .map(LocalDateSegment::getValue).toList();
 
-                boolean avklaringEndret = erAvklaringEndret(nyAvklaring, gammelAvklaring);
+                boolean avklaringEndret = gamleAvklaringerSomOverlapperMedDenne.stream().anyMatch(gammelAvklaring -> erAvklaringEndret(nyAvklaring, gammelAvklaring));
 
                 if (avklaringEndret) {
                     // Avbryt aktiv
                     var eksisterendeAktive = etterlysningerSomVenterSvar.stream()
-                        .filter(e -> e.getPeriode().getFomDato().equals(periode.getFom()))
+                        .filter(e -> e.getPeriode().tilPeriode().overlaps(periode))
                         .toList();
                     skalAvbryte = skalAvbryte || !eksisterendeAktive.isEmpty();
                     eksisterendeAktive.forEach(Etterlysning::skalAvbrytes);
@@ -187,11 +189,11 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
                     );
                     skalOpprette = true;
                     etterlysningRepository.lagre(etterlysning);
-
                 }
             }
         }
 
+        long fagsakId = behandling.getFagsakId();
         if (skalAvbryte) {
             var task = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
             task.setBehandling(fagsakId, behandlingId);
