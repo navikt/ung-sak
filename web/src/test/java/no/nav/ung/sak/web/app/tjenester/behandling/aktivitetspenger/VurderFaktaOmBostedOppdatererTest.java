@@ -29,6 +29,7 @@ import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -249,7 +250,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private static VurderFaktaOmBostedDto dtoMedEnAvklaring(boolean borITrondheimHelePerioden,
                                                              boolean skalIkkeSendeVarsel,
                                                              BostedsvilkårIkkeOppfyltÅrsak årsak) {
-        var periode = new Periode(FOM, TOM);
+        var periode = new ÅpenPeriode(FOM, TOM);
         var vurdering = !borITrondheimHelePerioden ? new BostedVurderingIkkeOppfyltDto(årsak, "begrunnelse") : null;
         var avklaring = new BostedFaktaavklaringPeriodeDto(periode, vurdering, skalIkkeSendeVarsel);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");

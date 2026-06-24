@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.kontrakt.Patterns;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.typer.Periode;
 
 public record VilkårBostedPeriodeVurderingDto(
@@ -17,7 +18,7 @@ public record VilkårBostedPeriodeVurderingDto(
     @JsonProperty(value = "periode", required = true)
     @Valid
     @NotNull
-    Periode periode,
+    ÅpenPeriode periode,
 
     @JsonProperty(value = "erVilkårOppfylt", required = true)
     @NotNull
