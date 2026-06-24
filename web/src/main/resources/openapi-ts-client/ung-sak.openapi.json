@@ -2216,7 +2216,7 @@
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto" : {
         "properties" : {
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
           },
           "skalIkkeSendeVarsel" : {
             "type" : "boolean"
@@ -2466,7 +2466,7 @@
             "type" : "boolean"
           },
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
           }
         },
         "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
@@ -2561,6 +2561,20 @@
           }
         },
         "required" : [ "antallDager", "gjelderDelerAvMåned", "måned", "satsperioder" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
