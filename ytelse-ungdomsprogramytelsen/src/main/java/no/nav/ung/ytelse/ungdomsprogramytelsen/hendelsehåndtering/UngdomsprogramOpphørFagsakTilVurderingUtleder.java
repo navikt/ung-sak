@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -59,7 +60,10 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         var fagsaker = new HashMap<Fagsak, List<ÅrsakOgPerioder>>();
 
         for (AktørId aktør : aktører) {
-            var relevantFagsak = finnFagsakerForAktørTjeneste.hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, opphørsdatoFraHendelse);
+            var relevantFagsak = finnFagsakerForAktørTjeneste
+                .hentRelevantFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør, opphørsdatoFraHendelse)
+                .or(() -> finnFagsakerForAktørTjeneste.hentSisteFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør)
+                    .filter(f -> !opphørsdatoFraHendelse.isBefore(f.getPeriode().getFomDato())));
             if (relevantFagsak.isEmpty()) {
                 continue;
             }
@@ -81,10 +85,9 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
             if (erNyInformasjonIHendelsen(sisteBehandling, opphørsdatoFraHendelse, hendelseId, saksnummer)) {
-                var årsaker = new ArrayList<ÅrsakOgPerioder>();
-                var opphørsÅrsak = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse));
-                årsaker.add(opphørsÅrsak);
-                fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse))));
+                var opphørsÅrsak = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+                    utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse));
+                fagsaker.put(relevantFagsak.get(), List.of(opphørsÅrsak));
             }
         }
 
@@ -147,10 +150,22 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
      * Dersom vilkårsresultatet er tomt (vilkår ikke vurdert), antas ytelsen å være aktiv.
      */
     private boolean harIngenOppfyltYtelseEtterDato(Behandling behandling, LocalDate opphørsdato, String hendelseId) {
-        // Sjekk 1: Hvis opphørsdato == periodeMaksDato er dette en naturlig avslutning
+        // Sjekk 1: Hvis opphørsdato == periodeMaksDato kunne dette vært en naturlig avslutning,
+        // men vi må kontrollere om vilkårsperioden for ungdomsprogramvilkåret dekker videre enn maksdato.
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId());
         if (maksdato.isPresent() && maksdato.get().equals(opphørsdato)) {
-            logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag. Naturlig avslutning — ignorerer hendelse {}.",
+            var vilkårene = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
+            if (vilkårene.isPresent()) {
+                var ungdomsprogramVilkårTimeline = vilkårene.get().getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET)
+                    .filterValue(v -> v.getGjeldendeUtfall() == Utfall.OPPFYLT);
+                var vilkårsperiodeEtterMaksdato = ungdomsprogramVilkårTimeline.intersection(
+                    new LocalDateInterval(opphørsdato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
+                if (!vilkårsperiodeEtterMaksdato.isEmpty()) {
+                    // Vilkårsperioden strekker seg videre enn maksdato — revurdering nødvendig
+                    return false;
+                }
+            }
+            logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag, og vilkårsperioden dekker ikke videre. Naturlig avslutning — ignorerer hendelse {}.",
                 opphørsdato, hendelseId);
             return true;
         }
