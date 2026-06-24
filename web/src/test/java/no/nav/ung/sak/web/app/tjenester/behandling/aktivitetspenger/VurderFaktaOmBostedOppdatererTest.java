@@ -196,7 +196,7 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     @Test
-    void skal_kalle_fjernResultatFor_med_riktig_vilkartype_og_perioder() {
+    void skal_fjerne_vilkårsvurdering_og_vilkårresultat_for_periode_ved_lagring_av_forslag() {
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.empty());
 
         var dto = dtoMedEnAvklaring(false, true, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
@@ -205,10 +205,11 @@ class VurderFaktaOmBostedOppdatererTest {
 
         var vilkårCaptor = ArgumentCaptor.forClass(VilkårType.class);
         var perioderCaptor = ArgumentCaptor.forClass(List.class);
+        var resultatBuiderCaptor = ArgumentCaptor.forClass(VilkårResultatBuilder.class);
 
         verify(inngangsvilkårVurderingTjeneste).fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(
             eq(BEHANDLING_ID),
-            new VilkårResultatBuilder(),
+            resultatBuiderCaptor.capture(),
             vilkårCaptor.capture(),
             perioderCaptor.capture()
         );
