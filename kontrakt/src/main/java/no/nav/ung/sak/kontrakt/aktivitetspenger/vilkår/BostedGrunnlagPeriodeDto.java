@@ -11,19 +11,13 @@ import java.time.LocalDate;
  * {@code kilde} angir om fakta er satt automatisk fra søknad eller manuelt av saksbehandler.
  */
 public record BostedGrunnlagPeriodeDto(
-    /** Fom-dato i vilkårsperioden. */
     @NotNull LocalDate fom,
-    /** Tom-dato i vilkårsperioden. */
     LocalDate tom,
-    /** Om bruker er bosatt ved skjæringstidspunktet. */
     @NotNull Boolean erBosattITrondheim,
-    /** Årsak til fraflytting eller avslått periode. Null dersom bruker er bosatt hele perioden. */
     BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
-    /** Kilde for fakta — SØKNAD (automatisk) eller SAKSBEHANDLER (manuelt registrert). */
     @NotNull Kilde kilde,
-    /** Hva bruker oppga i søknaden. Null dersom ikke oppgitt. */
     Boolean søknadOppgittErBosattITrondheim,
-    /** Bostedavklaringen (faktagrunnlag) for perioden. */
+    /** Bostedavklaringen (faktagrunnlag) for perioden. Null dersom ikke avklart. */
     BostedAvklaringDto avklaring,
     /** Resultat av vurdering av bostedsvilkår. Null dersom ikke vurdert. */
     BostedResultatDto resultat,

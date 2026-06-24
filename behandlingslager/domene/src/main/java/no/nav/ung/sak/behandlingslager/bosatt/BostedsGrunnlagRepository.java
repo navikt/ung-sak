@@ -60,7 +60,7 @@ public class BostedsGrunnlagRepository {
      * Lagrer saksbehandlers bostedsavklaringer for en behandling.
      * Beholder referanser til {@code oppgittFraSøknad} og {@code resultat} på grunnlaget.
      *
-     * @return Map fra skjæringstidspunkt til periodeAvklaring.referanse
+     * @return Map fra periodestart til periodeAvklaring.referanse
      */
     public Map<LocalDate, UUID> lagreForeslåtteAvklaringer(Long behandlingId, List<BostedsPeriodeAvklaring> nyeAvklaringer) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId)

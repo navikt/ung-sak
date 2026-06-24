@@ -18,21 +18,25 @@ import java.time.LocalDateTime;
 class BostedAvklaringOgUttalelseOgResultat {
 
     private final BostedsfaktaOgAvklaring avklaring;
-    private EtterlysningData etterlysning;
-    private BostedsvilkårResultatPeriode resultat;
+    private final EtterlysningData etterlysning;
+    private final BostedsvilkårResultatPeriode resultat;
 
     BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring avklaring) {
+        this(avklaring, null, null);
+    }
+
+    private BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring avklaring, EtterlysningData etterlysning, BostedsvilkårResultatPeriode resultat) {
         this.avklaring = avklaring;
+        this.etterlysning = etterlysning;
+        this.resultat = resultat;
     }
 
     BostedAvklaringOgUttalelseOgResultat medEtterlysning(EtterlysningData etterlysning) {
-        this.etterlysning = etterlysning;
-        return this;
+        return new BostedAvklaringOgUttalelseOgResultat(this.avklaring, etterlysning, this.resultat);
     }
 
     BostedAvklaringOgUttalelseOgResultat medResultat(BostedsvilkårResultatPeriode resultat) {
-        this.resultat = resultat;
-        return this;
+        return new BostedAvklaringOgUttalelseOgResultat(this.avklaring, this.etterlysning, resultat);
     }
 
     StegUtfall utledUtfall() {

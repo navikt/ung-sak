@@ -164,20 +164,14 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
     private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, EtterlysningData, BostedAvklaringOgUttalelseOgResultat> leggTilEtterlysning() {
         return (di, lhs, rhs) -> {
-            var vurdering = lhs.getValue();
-            if (rhs != null) {
-                vurdering.medEtterlysning(rhs.getValue());
-            }
+            var vurdering = rhs != null ? lhs.getValue().medEtterlysning(rhs.getValue()) : lhs.getValue();
             return new LocalDateSegment<>(di, vurdering);
         };
     }
 
     private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, BostedsvilkårResultatPeriode, BostedAvklaringOgUttalelseOgResultat> leggTilResultat() {
         return (di, lhs, rhs) -> {
-            var vurdering = lhs.getValue();
-            if (rhs != null) {
-                vurdering.medResultat(rhs.getValue());
-            }
+            var vurdering = rhs != null ? lhs.getValue().medResultat(rhs.getValue()) : lhs.getValue();
             return new LocalDateSegment<>(di, vurdering);
         };
     }

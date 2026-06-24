@@ -8,12 +8,6 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 /**
  * Saksbehandlers vurdering av brukers bosted for én periode.
  * Brukes som felles undertype i {@link BostedFaktaavklaringPeriodeDto}
- * <p>
- * Dersom {@code borITrondheimIHelePerioden} er {@code true}, er bruker bosatt i Trondheim hele perioden.
- * Dersom {@code borITrondheimIHelePerioden} er {@code false} og {@code fraflyttingsDato} er satt og etter
- * periodens fom-dato, deles perioden: fra fom bosatt, fra fraflyttingsDato ikke bosatt.
- * Dersom {@code fraflyttingsDato} er null eller ≤ fom, er bruker aldri bosatt i perioden.
- * {@code ikkeOppfyltÅrsak} er påkrevd når {@code borITrondheimIHelePerioden} er {@code false}.
  */
 public record BostedVurderingIkkeOppfyltDto(
     BostedsvilkårIkkeOppfyltÅrsak fraflyttingsÅrsak,

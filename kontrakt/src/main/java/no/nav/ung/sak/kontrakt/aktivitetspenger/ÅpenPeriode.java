@@ -24,7 +24,10 @@ public class ÅpenPeriode extends Periode {
     @Valid
     private LocalDate tom;
 
-    public ÅpenPeriode(LocalDate fom, LocalDate tom) {
+    @JsonCreator
+    public ÅpenPeriode(@JsonProperty("fom") LocalDate fom, @JsonProperty("tom") LocalDate tom) {
         super(fom, tom);
+        this.fom = fom;
+        this.tom = tom;
     }
 }

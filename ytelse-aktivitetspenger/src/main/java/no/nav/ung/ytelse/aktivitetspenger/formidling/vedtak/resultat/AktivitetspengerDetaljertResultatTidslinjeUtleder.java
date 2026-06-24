@@ -99,8 +99,6 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.ENDRET_BOSTED)) {
             if (avslåtteVilkår.isEmpty()) {
                 resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.UENDRET, "Vurdert periode utenfor perioden som ble avslått"));
-            } else if (periode.totalDays() == 1) {
-                resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_SLUTTDATO, "Opphør av ytelse på grunn av bosted"));
             } else {
                 resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslått periode på grunn av bosted"));
             }
@@ -144,5 +142,4 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
             return new LocalDateSegment<>(p, resultat);
         };
     }
-
 }
