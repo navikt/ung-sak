@@ -80,7 +80,6 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         long behandlingId = behandling.getId();
 
         NavigableSet<DatoIntervallEntitet> perioderTilVurdering = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjeneste, behandling.getFagsakYtelseType(), behandling.getType()).utled(behandlingId, VilkårType.BOSTEDSVILKÅR);
-
         var maxTomDato = perioderTilVurdering.stream()
             .map(DatoIntervallEntitet::getTomDato)
             .max(Comparator.naturalOrder())
@@ -97,14 +96,19 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             var fom = avklaring.periode().getFom();
             var tom = avklaring.periode().getTom() != null ? avklaring.periode().getTom() : maxTomDato;
 
+            var vurdering = avklaring.vurdering();
             if (avklaring.skalSendeVarsel()) {
-                nyeAvklaringerSomSkalVarsles.put(new Periode(fom, tom), BostedAvklaringUtil.tilAvklaringData(fom, avklaring.vurdering()));
+                nyeAvklaringerSomSkalVarsles.put(new Periode(fom, tom), BostedAvklaringUtil.tilAvklaringData(fom, vurdering));
             }
 
             nyePeriodeAvklaringer.add(new BostedsPeriodeAvklaring(
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
                 false,
-                avklaring.vurdering().fraflyttingsÅrsak(),
+                vurdering.fraflyttingsÅrsak(),
+                vurdering.begrunnelse(),
+                avklaring.skalSendeVarsel(),
+                vurdering.fritekstTilVarsel(),
+                vurdering.begrunnelseIkkeVarsel(),
                 vurdertAv,
                 vurdertTidspunkt
             ));

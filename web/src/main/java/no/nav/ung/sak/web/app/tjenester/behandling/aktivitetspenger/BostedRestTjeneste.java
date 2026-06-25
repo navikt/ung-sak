@@ -205,11 +205,16 @@ public class BostedRestTjeneste {
                 return null;
             }
 
-            var foreslåttPeriode = faktaOgAvklaring.getForeslåttAvklaring().getPeriode().tilPeriode();
+            var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvklaring();
+
             return new BostedAvklaringDto(
-                foreslåttPeriode,
+                foreslåttAvklaring.getPeriode().tilPeriode(),
                 faktaOgAvklaring.isErBosattITrondheim(),
-                faktaOgAvklaring.getIkkeOppfyltÅrsak()
+                faktaOgAvklaring.getIkkeOppfyltÅrsak(),
+                foreslåttAvklaring.getBegrunnelse(),
+                foreslåttAvklaring.skalSendeVarsel(),
+                foreslåttAvklaring.getFritekstTilVarsel(),
+                foreslåttAvklaring.getBegrunnelseIkkeVarsel()
             );
         }
     }

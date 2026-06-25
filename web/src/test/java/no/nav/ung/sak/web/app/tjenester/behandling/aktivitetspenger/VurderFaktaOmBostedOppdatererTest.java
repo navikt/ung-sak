@@ -240,6 +240,10 @@ class VurderFaktaOmBostedOppdatererTest {
             periode,
             bosattITrondheim,
             årsak,
+            "Begrunnelse for hvilke relevante fakta som er lagt til grunn",
+            false,
+            (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse" : null,
+            "Begrunnelse ikke varsel",
             "A12345",
             LocalDateTime.now()
         );
@@ -251,7 +255,13 @@ class VurderFaktaOmBostedOppdatererTest {
                                                              boolean skalIkkeSendeVarsel,
                                                              BostedsvilkårIkkeOppfyltÅrsak årsak) {
         var periode = new ÅpenPeriode(FOM, TOM);
-        var vurdering = !borITrondheimHelePerioden ? new BostedVurderingIkkeOppfyltDto(årsak, "begrunnelse") : null;
+        var vurdering = !borITrondheimHelePerioden ? new BostedVurderingIkkeOppfyltDto(
+            årsak,
+            "begrunnelse",
+            (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
+            skalIkkeSendeVarsel ? "Begrunnelse for hvorfor det ikke varsles" : null
+        ) : null;
+
         var avklaring = new BostedFaktaavklaringPeriodeDto(periode, vurdering, skalIkkeSendeVarsel);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }

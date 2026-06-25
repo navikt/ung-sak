@@ -18,8 +18,7 @@ alter table bosatt_periode_avklaring
     add column periode daterange;
 
 update bosatt_periode_avklaring
-set periode = daterange(skaeringstidspunkt, (skaeringstidspunkt + interval '1 year')::date, '[)');
-
+    set periode = daterange(skaeringstidspunkt, (skaeringstidspunkt + interval '1 year')::date, '[)');
 
 alter table bosatt_periode_avklaring
     rename column fraflyttings_aarsak to ikke_oppfylt_aarsak;
@@ -27,7 +26,11 @@ alter table bosatt_periode_avklaring
 alter table bosatt_periode_avklaring
     alter column periode set not null,
     drop column skaeringstidspunkt,
-    drop column kilde;
+    drop column kilde,
+    add column begrunnelse text,
+    add column skal_sende_varsel boolean,
+    add column fritekst_til_varsel text,
+    add column begrunnelse_ikke_varsel text;
 
 alter table gr_bosatt_avklaring
     add column bostedsinformasjon_soeknad_holder_id bigint references bostedsinformasjon_soeknad_holder (id);
