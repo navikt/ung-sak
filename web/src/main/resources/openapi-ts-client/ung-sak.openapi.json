@@ -2200,14 +2200,26 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto" : {
         "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "begrunnelseIkkeVarsel" : {
+            "type" : "string"
+          },
           "erBosatt" : {
             "type" : "boolean"
           },
           "foreslåttPeriode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           },
+          "fritekstTilVarsel" : {
+            "type" : "string"
+          },
           "ikkeOppfyltÅrsak" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          },
+          "skalSendeVarsel" : {
+            "type" : "boolean"
           }
         },
         "required" : [ "erBosatt" ],
@@ -2310,8 +2322,20 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
+          "begrunnelseIkkeVarsel" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
+            "type" : "string"
+          },
           "fraflyttingsÅrsak" : {
             "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          },
+          "fritekstTilVarsel" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
+            "type" : "string"
           }
         },
         "type" : "object"
