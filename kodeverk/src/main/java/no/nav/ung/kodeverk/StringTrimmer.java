@@ -1,4 +1,4 @@
-package no.nav.ung;
+package no.nav.ung.kodeverk;
 
 /**
  * Klasse for trimming av string.
