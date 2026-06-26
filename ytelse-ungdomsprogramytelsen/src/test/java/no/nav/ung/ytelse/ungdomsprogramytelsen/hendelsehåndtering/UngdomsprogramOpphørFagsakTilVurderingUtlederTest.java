@@ -388,6 +388,31 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
     }
 
+    @Test
+    void skal_returnere_årsak_dersom_opphørsdato_er_lik_maksdato_men_programperiode_slutter_foer_maksdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        // Forlengelsesscenario: en tidligere revurdering stoppet programperioden 10 dager FØR maksdato.
+        // Ny opphørshendelse setter opphørsdato = maksdato → skal opprette revurdering (forlengelse).
+        final var gammelProgramTom = OPPHØRSDATO.minusDays(10);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelProgramTom))),
+            false,
+            OPPHØRSDATO); // periodeMaksDato == opphørsdato fra hendelse
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+        // Programperiode ender FØR maksdato → forlengelse → skal opprette revurdering
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(gammelProgramTom.plusDays(1), OPPHØRSDATO));
+    }
+
     private static void validerHarÅrsak(Map<Fagsak, List<ÅrsakOgPerioder>> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {
         assertThat(fagsakBehandlingÅrsakTypeMap.keySet().size()).isEqualTo(1);
         assertThat(fagsakBehandlingÅrsakTypeMap.values().iterator().next().getFirst().behandlingÅrsak()).isEqualTo(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);

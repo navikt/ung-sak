@@ -65,6 +65,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
                 .or(() -> finnFagsakerForAktørTjeneste.hentSisteFagsakForAktørSomSøker(FagsakYtelseType.UNGDOMSYTELSE, aktør)
                     .filter(f -> !opphørsdatoFraHendelse.isBefore(f.getPeriode().getFomDato())));
             if (relevantFagsak.isEmpty()) {
+                logger.info("Ingen relevant fagsak funnet for opphørsdato {} og hendelse {}.", opphørsdatoFraHendelse, hendelseId);
                 continue;
             }
 
@@ -85,6 +86,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             // Kan også vurdere om vi skal legge inn sjekk på om bruker har utbetaling etter opphørsdato
             Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
             if (erNyInformasjonIHendelsen(sisteBehandling, opphørsdatoFraHendelse, hendelseId, saksnummer)) {
+                logger.info("Oppretter revurdering for sak {} grunnet opphørshendelse {} med opphørsdato {}.", saksnummer, hendelseId, opphørsdatoFraHendelse);
                 var opphørsÅrsak = new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
                     utledPeriode(relevantFagsak.get(), opphørsdatoFraHendelse));
                 fagsaker.put(relevantFagsak.get(), List.of(opphørsÅrsak));
@@ -154,6 +156,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         // men vi må kontrollere om vilkårsperioden for ungdomsprogramvilkåret dekker videre enn maksdato.
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId());
         if (maksdato.isPresent() && maksdato.get().equals(opphørsdato)) {
+            // Forlengelsesscenario: programperiode slutter FØR maksdato (f.eks. etter tidligere opphørshendelse som ble korrigert).
+            // I slike tilfeller skal revurdering opprettes, selv om opphørsdato == maksdato.
+            var programTidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
+            if (!programTidslinje.isEmpty() && programTidslinje.getMaxLocalDate().isBefore(opphørsdato)) {
+                return false;
+            }
             var vilkårene = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
             if (vilkårene.isPresent()) {
                 var ungdomsprogramVilkårTimeline = vilkårene.get().getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET)
