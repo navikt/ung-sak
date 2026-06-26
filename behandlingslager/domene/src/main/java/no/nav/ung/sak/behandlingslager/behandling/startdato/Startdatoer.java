@@ -23,7 +23,7 @@ import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.ChangeTracked;
 
-@Entity(name = "UngdomsytelseStartdatoer")
+@Entity(name = "Startdatoer")
 @Table(name = "STARTDATOER")
 @Immutable
 public class Startdatoer extends BaseEntitet {
@@ -75,7 +75,7 @@ public class Startdatoer extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "UngdomsytelseStartdatoer{" +
+        return "Startdatoer{" +
             ", perioder=" + startdatoer +
             '}';
     }
