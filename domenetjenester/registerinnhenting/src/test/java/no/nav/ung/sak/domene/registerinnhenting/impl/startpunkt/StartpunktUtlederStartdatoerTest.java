@@ -6,8 +6,8 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -29,14 +29,14 @@ class StartpunktUtlederStartdatoerTest {
 
     @Inject
     private EntityManager em;
-    private UngdomsytelseStartdatoRepository søknadsperiodeRepository;
+    private StartdatoRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private StartpunktUtlederStartdatoer startpunktUtleder;
     private Behandling behandling;
 
     @BeforeEach
     void setUp() {
-        søknadsperiodeRepository = new UngdomsytelseStartdatoRepository(em);
+        søknadsperiodeRepository = new StartdatoRepository(em);
         behandlingRepository = new BehandlingRepository(em);
         startpunktUtleder = new StartpunktUtlederStartdatoer(søknadsperiodeRepository);
         var fom = LocalDate.now();
@@ -87,7 +87,7 @@ class StartpunktUtlederStartdatoerTest {
 
     private Long lagGrunnlagMedJournalpostIder(int... journalpostIder) {
         var søknadsperioder = Arrays.stream(journalpostIder).mapToObj(it ->
-                new UngdomsytelseSøktStartdato(LocalDate.now().plusDays(it), new JournalpostId(Integer.toUnsignedLong(it))))
+                new SøktStartdato(LocalDate.now().plusDays(it), new JournalpostId(Integer.toUnsignedLong(it))))
             .toList();
         søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
         return søknadsperiodeRepository.hentGrunnlag(behandling.getId()).get().getId();

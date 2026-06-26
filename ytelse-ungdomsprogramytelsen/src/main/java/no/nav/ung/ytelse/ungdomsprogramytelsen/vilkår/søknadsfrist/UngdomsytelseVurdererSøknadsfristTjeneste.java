@@ -17,11 +17,11 @@ import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -34,12 +34,12 @@ import no.nav.ung.sak.søknadsfrist.VurderSøknadsfristTjeneste;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
-public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<UngdomsytelseSøktStartdato> {
+public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknadsfristTjeneste<SøktStartdato> {
 
     // TODO: Denne må implementeres
 
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
+    private StartdatoRepository startdatoRepository;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     UngdomsytelseVurdererSøknadsfristTjeneste() {
@@ -47,23 +47,23 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
     }
 
     @Inject
-    public UngdomsytelseVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+    public UngdomsytelseVurdererSøknadsfristTjeneste(MottatteDokumentRepository mottatteDokumentRepository, StartdatoRepository startdatoRepository, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
+        this.startdatoRepository = startdatoRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
 
     @Override
-    public Map<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøktStartdato>>> vurderSøknadsfrist(BehandlingReferanse referanse) {
+    public Map<KravDokument, List<VurdertSøktPeriode<SøktStartdato>>> vurderSøknadsfrist(BehandlingReferanse referanse) {
         var søktePerioder = hentPerioderTilVurdering(referanse);
 
         return vurderSøknadsfrist(referanse.getBehandlingId(), søktePerioder);
     }
 
     @Override
-    public Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
-        var result = new HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>>();
+    public Map<KravDokument, List<SøktPeriode<SøktStartdato>>> hentPerioderTilVurdering(BehandlingReferanse referanse) {
+        var result = new HashMap<KravDokument, List<SøktPeriode<SøktStartdato>>>();
 
         var mottatteDokumenter = mottatteDokumentRepository.hentGyldigeDokumenterMedFagsakId(referanse.getFagsakId())
             .stream()
@@ -81,10 +81,10 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
 
-        ungdomsytelseStartdatoRepository.hentGrunnlag(referanse.getBehandlingId())
+        startdatoRepository.hentGrunnlag(referanse.getBehandlingId())
             .stream()
-            .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
-            .map(UngdomsytelseStartdatoer::getStartdatoer)
+            .map(StartdatoGrunnlag::getOppgitteStartdatoer)
+            .map(Startdatoer::getStartdatoer)
             .flatMap(Collection::stream)
             .filter(it -> mottatteDokumenter.stream().anyMatch(at -> at.getJournalpostId().equals(it.getJournalpostId())))
             .forEach(dokument -> mapTilKravDokumentOgPeriode(result, mottatteDokumenter, ungdomsprogramperioder, dokument));
@@ -92,7 +92,7 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
         return result;
     }
 
-    private void mapTilKravDokumentOgPeriode(HashMap<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> result, Set<MottattDokument> mottatteDokumenter, Set<UngdomsprogramPeriode> ungdomsprogramperioder, UngdomsytelseSøktStartdato dokument) {
+    private void mapTilKravDokumentOgPeriode(HashMap<KravDokument, List<SøktPeriode<SøktStartdato>>> result, Set<MottattDokument> mottatteDokumenter, Set<UngdomsprogramPeriode> ungdomsprogramperioder, SøktStartdato dokument) {
         var mottattDokument = mottatteDokumenter.stream()
             .filter(it -> it.getJournalpostId().equals(dokument.getJournalpostId()))
             .findFirst().orElseThrow();
@@ -103,8 +103,8 @@ public class UngdomsytelseVurdererSøknadsfristTjeneste implements VurderSøknad
 
 
     @Override
-    public Map<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøktStartdato>>> vurderSøknadsfrist(Long behandlingId, Map<KravDokument, List<SøktPeriode<UngdomsytelseSøktStartdato>>> søknaderMedPerioder) {
-        var result = new HashMap<KravDokument, List<VurdertSøktPeriode<UngdomsytelseSøktStartdato>>>();
+    public Map<KravDokument, List<VurdertSøktPeriode<SøktStartdato>>> vurderSøknadsfrist(Long behandlingId, Map<KravDokument, List<SøktPeriode<SøktStartdato>>> søknaderMedPerioder) {
+        var result = new HashMap<KravDokument, List<VurdertSøktPeriode<SøktStartdato>>>();
         return result;
     }
 

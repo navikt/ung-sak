@@ -6,8 +6,8 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.registerinnhenting.SøknadDokumentTjeneste;
 
@@ -15,20 +15,20 @@ import no.nav.ung.sak.domene.registerinnhenting.SøknadDokumentTjeneste;
 @FagsakYtelseTypeRef
 public class UngdomsytelseSøknadDokumentTjeneste implements SøknadDokumentTjeneste {
 
-    private UngdomsytelseStartdatoRepository repository;
+    private StartdatoRepository repository;
 
     UngdomsytelseSøknadDokumentTjeneste() {
     }
 
     @Inject
-    public UngdomsytelseSøknadDokumentTjeneste(UngdomsytelseStartdatoRepository repository) {
+    public UngdomsytelseSøknadDokumentTjeneste(StartdatoRepository repository) {
         this.repository = repository;
     }
 
     @Override
     public EndringsresultatSnapshot finnAktivGrunnlagId(Long behandlingId) {
         return repository.hentGrunnlag(behandlingId)
-            .map(UngdomsytelseStartdatoGrunnlag::getId)
+            .map(StartdatoGrunnlag::getId)
             .map(id -> EndringsresultatSnapshot.medSnapshot(getGrunnlagsKlasse(), id))
             .orElse(EndringsresultatSnapshot.utenSnapshot(getGrunnlagsKlasse()));
     }
@@ -43,6 +43,6 @@ public class UngdomsytelseSøknadDokumentTjeneste implements SøknadDokumentTjen
 
     @Override
     public Class<?> getGrunnlagsKlasse() {
-        return UngdomsytelseStartdatoGrunnlag.class;
+        return StartdatoGrunnlag.class;
     }
 }

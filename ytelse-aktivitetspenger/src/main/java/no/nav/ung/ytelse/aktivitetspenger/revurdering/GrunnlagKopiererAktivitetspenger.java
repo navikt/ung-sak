@@ -8,6 +8,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -29,6 +30,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private StartdatoRepository startdatoRepository;
 
     public GrunnlagKopiererAktivitetspenger() {
         // for CDI proxy
@@ -42,7 +44,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
                                             OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                             AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
-                                            InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
+                                            InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository, StartdatoRepository startdatoRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
@@ -51,6 +53,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.startdatoRepository = startdatoRepository;
     }
 
 
@@ -62,6 +65,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         forutgåendeMedlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
+        startdatoRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         bostedsGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         aktivitetspengerGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         inngangsvilkårVurderingRepository.kopier(originalBehandlingId, nyBehandlingId);

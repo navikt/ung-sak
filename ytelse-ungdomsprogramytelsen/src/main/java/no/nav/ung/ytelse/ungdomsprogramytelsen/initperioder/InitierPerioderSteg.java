@@ -7,9 +7,9 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.typer.JournalpostId;
 
 import java.util.Set;
@@ -25,12 +25,12 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 public class InitierPerioderSteg implements BehandlingSteg {
 
     private BehandlingRepository behandlingRepository;
-    private UngdomsytelseStartdatoRepository startdatoRepository;
+    private StartdatoRepository startdatoRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
 
     @Inject
     public InitierPerioderSteg(BehandlingRepository behandlingRepository,
-                               UngdomsytelseStartdatoRepository startdatoRepository,
+                               StartdatoRepository startdatoRepository,
                                MottatteDokumentRepository mottatteDokumentRepository) {
         this.behandlingRepository = behandlingRepository;
         this.startdatoRepository = startdatoRepository;
@@ -68,8 +68,8 @@ public class InitierPerioderSteg implements BehandlingSteg {
      * @param grunnlag                               Søknadsperiodegrunnlag
      * @return Aggregat for perioder som er relevant for denne behandlingen
      */
-    private UngdomsytelseStartdatoer mapStartdatoerRelevantForBehandlingen(Set<JournalpostId> journalposterMottattIDenneBehandlingen,
-                                                                           UngdomsytelseStartdatoGrunnlag grunnlag) {
+    private Startdatoer mapStartdatoerRelevantForBehandlingen(Set<JournalpostId> journalposterMottattIDenneBehandlingen,
+                                                              StartdatoGrunnlag grunnlag) {
 
         var relevantePerioder = grunnlag.getOppgitteStartdatoer()
             .getStartdatoer()
@@ -77,7 +77,7 @@ public class InitierPerioderSteg implements BehandlingSteg {
             .filter(it -> journalposterMottattIDenneBehandlingen.stream().anyMatch(at -> at.equals(it.getJournalpostId())))
             .collect(Collectors.toSet());
 
-        return new UngdomsytelseStartdatoer(relevantePerioder);
+        return new Startdatoer(relevantePerioder);
     }
 
 }
