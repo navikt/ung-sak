@@ -5566,6 +5566,18 @@
         },
         "type" : "object"
       },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest" : {
+        "properties" : {
+          "journalpostId" : {
+            "type" : "string"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "saksnummer" ],
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk" : {
         "properties" : {
           "antallBarn" : {
@@ -6064,6 +6076,32 @@
           }
         },
         "tags" : [ "redirect" ]
+      }
+    },
+    "/api/TSFF-2756/forvaltning/ugyldigjor-mottatt-dokument" : {
+      "post" : {
+        "description" : "ugyldiggjør mottatt dokument ifm TSFF-2756",
+        "operationId" : "ugyldigjorMottattDokument",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "ugyldiggjør mottatt dokument ifm TSFF-2756",
+        "tags" : [ "forvaltning" ]
       }
     },
     "/api/aksjonspunkt" : {
