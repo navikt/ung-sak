@@ -15,8 +15,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -57,7 +55,6 @@ class VurderFaktaBostedStegTest {
     private ProsessTriggereRepository prosessTriggereRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private StartdatoRepository startdatoRepository;
-    private AktivitetspengerSøktPeriodeRepository aktivitetspengerSøktPeriodeRepository;
     private VurderFaktaBostedSteg steg;
 
     @BeforeEach
@@ -66,7 +63,6 @@ class VurderFaktaBostedStegTest {
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
         startdatoRepository = new StartdatoRepository(entityManager);
-        aktivitetspengerSøktPeriodeRepository = new AktivitetspengerSøktPeriodeRepository(entityManager);
 
         steg = new VurderFaktaBostedSteg(
             behandlingRepository,
@@ -103,12 +99,7 @@ class VurderFaktaBostedStegTest {
 
         startdatoRepository.lagre(behandling.getId(), java.util.List.of(søktStartdato));
         startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(java.util.List.of(søktStartdato)));
-        aktivitetspengerSøktPeriodeRepository.lagreNyPeriode(new AktivitetspengerSøktPeriode(
-            behandling.getId(),
-            new JournalpostId("jp-1"),
-            LocalDateTime.now(),
-            periode));
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-1", FOM, true);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode)));
 

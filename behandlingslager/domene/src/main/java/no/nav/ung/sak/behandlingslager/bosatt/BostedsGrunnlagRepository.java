@@ -38,13 +38,13 @@ public class BostedsGrunnlagRepository {
      * Oppretter et bostedsgrunnlag dersom det ikke finnes fra før. Eksisterende opplysning for
      * samme journalpostId erstattes.
      */
-    public void lagreInformasjonFraSøknad(Long behandlingId, String journalpostId, Periode periode, boolean erBosattITrondheim) {
+    public void lagreInformasjonFraSøknad(Long behandlingId, String journalpostId, LocalDate startdato, boolean erBosattITrondheim) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag
             .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
             .orElse(new BostedsGrunnlag(behandlingId));
 
-        nyttGrunnlag.leggTilInformasjonFraSøknad(new BostedsinformasjonFraSøknad(journalpostId, periode.getFom(), erBosattITrondheim));
+        nyttGrunnlag.leggTilInformasjonFraSøknad(new BostedsinformasjonFraSøknad(journalpostId, startdato, erBosattITrondheim));
 
         if (eksisterendeGrunnlag.isPresent()) {
             if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {

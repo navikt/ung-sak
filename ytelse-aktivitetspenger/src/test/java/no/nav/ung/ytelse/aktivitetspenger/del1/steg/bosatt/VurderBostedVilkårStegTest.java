@@ -21,8 +21,6 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -99,7 +97,7 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_passere_uten_aksjonspunkt_og_uten_opphorsresultat_nar_bruker_er_bosatt_hele_perioden() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
             lagBostedsPeriodeAvklaringErBosatt(FOM, TOM)
         ));
@@ -112,7 +110,7 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_opprette_vilkårvurderingresultat_ved_fraflytting_automatisk() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
         var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(avklaring));
@@ -140,7 +138,7 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_sette_pa_vent_nar_periode_venter_pa_etterlysning() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(FOM, TOM), true);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
             lagBostedsPeriodeAvklaring(FOM, TOM, true, null, false)
         ));
@@ -167,7 +165,7 @@ class VurderBostedVilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", new Periode(fom2, tom2), true);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
             lagBostedsPeriodeAvklaringErBosatt(FOM, TOM),
             lagBostedsPeriodeAvklaringErBosatt(fom2, tom2)
