@@ -167,7 +167,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
             .medBehandlingId(behandling.getId())
             .medPayload(PAYLOAD_UTEN_UTTALELSE)
             .build();
-        mottatteDokumentRepository.lagre(feilBrevkodeDokument, DokumentStatus.MOTTATT);
+        mottatteDokumentRepository.lagre(feilBrevkodeDokument, DokumentStatus.GYLDIG);
 
         var request = lagRequest(NY_UTTALELSE);
 
@@ -195,7 +195,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
             .medBehandlingId(behandling.getId())
             .medPayload(payload)
             .build();
-        mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);
+        mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG);
     }
 
     private void lagreJournalpostMottatt(String payload) {

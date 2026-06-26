@@ -17,15 +17,16 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.sikkerhet.abac.*;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.k9.oppgave.OppgaveBekreftelse;
 import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretSluttdatoBekreftelse;
 import no.nav.k9.søknad.JsonUtils;
 import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
-import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.dokument.Brevkode;
-import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -84,11 +85,10 @@ public class ForvaltningMottattDokumentRestTjeneste {
 
         Behandling behandling = behandlingRepository.hentBehandling(dto.behandlingId.getId());
         JournalpostId journalpostId = dto.journalpostId.getJournalpostId();
-        List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokument(behandling.getFagsakId(), List.of(journalpostId)).stream()
-            .filter(it -> it.getStatus() == DokumentStatus.MOTTATT).toList();
+        List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokument(behandling.getFagsakId(), List.of(journalpostId));
 
-        if (mottattDokuments.size() != 1) {
-            throw new IllegalArgumentException("Forventet 1 dokument fant "+mottattDokuments.size());
+        if (mottattDokuments.size() > 1) {
+            throw new IllegalArgumentException("Forventet maks 1 dokument");
         }
 
         MottattDokument mottattDokument = mottattDokuments.getFirst();
@@ -149,7 +149,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
 
     public record OppdaterMottattDokumentRequest(
         @Valid
-        @StandardAbacAttributt(StandardAbacAttributtType.JOURNALPOST_ID)
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
         JournalpostId journalpostId,
 
         @JsonProperty(value = "behandlingId", required = true)
@@ -161,16 +161,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         @Size(max = 4000)
         @Pattern(regexp = InputValideringRegex.FRITEKST)
         String nyUttalelseFraBruker
-    ) {
-
-        @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
-        public Long getBehandlingId() {
-            return behandlingId.getBehandlingId();
-        }
-
-
-
-    }
+    ) { }
 
 
 }
