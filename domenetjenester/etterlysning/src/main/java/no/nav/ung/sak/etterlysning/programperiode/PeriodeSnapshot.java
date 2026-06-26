@@ -32,7 +32,7 @@ record PeriodeSnapshot(Optional<LocalDate> fomDato, Optional<LocalDate> tomDato,
      * slik at startdatoen kan sammenlignes mot hva bruker faktisk søkte på.
      */
     public static PeriodeSnapshot fraOppgittStartdato(SøktStartdato oppgittStartdato) {
-        return new PeriodeSnapshot(Optional.of(oppgittStartdato.getStartdato()), Optional.empty(), "UngdomsytelseSøktStartdato-JP" + oppgittStartdato.getJournalpostId().getVerdi());
+        return new PeriodeSnapshot(Optional.of(oppgittStartdato.getStartdato()), Optional.empty(), "SøktStartdato-JP" + oppgittStartdato.getJournalpostId().getVerdi());
 
 
     }

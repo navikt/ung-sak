@@ -20,7 +20,7 @@ import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 
-@Entity(name = "UngdomsytelseSøktStartdato")
+@Entity(name = "SøktStartdato")
 @Table(name = "SOEKT_STARTDATO")
 @Immutable
 public class SøktStartdato extends BaseEntitet implements SøktPeriodeData {
@@ -84,7 +84,7 @@ public class SøktStartdato extends BaseEntitet implements SøktPeriodeData {
 
     @Override
     public String toString() {
-        return "UngdomsytelseSøktStartdato{" +
+        return "SøktStartdato{" +
             "id=" + id +
             ", startdato=" + startdato +
             ", journalpostId=" + journalpostId +
