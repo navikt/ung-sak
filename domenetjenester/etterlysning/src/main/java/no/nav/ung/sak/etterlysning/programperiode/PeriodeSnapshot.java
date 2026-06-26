@@ -1,6 +1,6 @@
 package no.nav.ung.sak.etterlysning.programperiode;
 
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -31,8 +31,8 @@ record PeriodeSnapshot(Optional<LocalDate> fomDato, Optional<LocalDate> tomDato,
      * Brukes for å håndtere caset der perioden endres mellom søknadstidspunkt og innhenting av periodeopplysninger,
      * slik at startdatoen kan sammenlignes mot hva bruker faktisk søkte på.
      */
-    public static PeriodeSnapshot fraOppgittStartdato(UngdomsytelseSøktStartdato oppgittStartdato) {
-        return new PeriodeSnapshot(Optional.of(oppgittStartdato.getStartdato()), Optional.empty(), "UngdomsytelseSøktStartdato-JP" + oppgittStartdato.getJournalpostId().getVerdi());
+    public static PeriodeSnapshot fraOppgittStartdato(SøktStartdato oppgittStartdato) {
+        return new PeriodeSnapshot(Optional.of(oppgittStartdato.getStartdato()), Optional.empty(), "SøktStartdato-JP" + oppgittStartdato.getJournalpostId().getVerdi());
 
 
     }

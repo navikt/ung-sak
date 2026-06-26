@@ -16,9 +16,9 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -37,14 +37,14 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
     @Inject
     private EntityManager em;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private UngdomsytelseStartdatoRepository søknadsperiodeRepository;
+    private StartdatoRepository søknadsperiodeRepository;
     private BehandlingRepository behandlingRepository;
     private Behandling behandling;
 
     @BeforeEach
     void setUp() {
         ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(em);
-        søknadsperiodeRepository = new UngdomsytelseStartdatoRepository(em);
+        søknadsperiodeRepository = new StartdatoRepository(em);
         behandlingRepository = new BehandlingRepository(em);
         ungdomsytelseSøknadsperiodeTjeneste = new UngdomsytelseSøknadsperiodeTjeneste(søknadsperiodeRepository,
             new UngdomsprogramPeriodeTjeneste(ungdomsprogramPeriodeRepository),
@@ -62,9 +62,9 @@ class UngdomsytelseSøknadsperiodeTjenesteTest {
     void skal_begrense_ungdomsprogramperiode_uten_opphør_til_fagsakpeiode_tom() {
         var fom = LocalDate.now();
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, TIDENES_ENDE)));
-        var søknadsperioder = List.of(new UngdomsytelseSøktStartdato(fom, new JournalpostId(12455L)));
+        var søknadsperioder = List.of(new SøktStartdato(fom, new JournalpostId(12455L)));
         søknadsperiodeRepository.lagre(behandling.getId(), søknadsperioder);
-        søknadsperiodeRepository.lagreRelevanteSøknader(behandling.getId(), new UngdomsytelseStartdatoer(søknadsperioder));
+        søknadsperiodeRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(søknadsperioder));
 
         var periode = ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandling.getId());
 

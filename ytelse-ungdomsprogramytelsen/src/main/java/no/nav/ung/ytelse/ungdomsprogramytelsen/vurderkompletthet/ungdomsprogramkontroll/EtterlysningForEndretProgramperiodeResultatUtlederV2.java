@@ -65,7 +65,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
         if (behandlingReferanse.getBehandlingType() == BehandlingType.FØRSTEGANGSSØKNAD) {
             // Dersom det er førstegangssøknad må vi også sjekke om det er endringer i start dato fra det som ble oppgitt da bruker sendte inn søknaden.
             return harFjernetPeriode(input) ||
-                harEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag()) ||
+                harEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.startdatoGrunnlag()) ||
                 harSattSluttdato(input.gjeldendePeriodeGrunnlag());
         }
         return false;

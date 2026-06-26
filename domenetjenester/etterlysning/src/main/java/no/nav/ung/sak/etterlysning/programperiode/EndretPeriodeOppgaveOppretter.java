@@ -12,10 +12,9 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretSta
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -39,13 +38,13 @@ public class EndretPeriodeOppgaveOppretter {
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final EtterlysningRepository etterlysningRepository;
-    private final UngdomsytelseStartdatoRepository startdatoRepository;
+    private final StartdatoRepository startdatoRepository;
 
     @Inject
     public EndretPeriodeOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
                                          UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                          EtterlysningRepository etterlysningRepository,
-                                         UngdomsytelseStartdatoRepository startdatoRepository) {
+                                         StartdatoRepository startdatoRepository) {
         this.oppgaveKlient = oppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.etterlysningRepository = etterlysningRepository;
@@ -74,7 +73,7 @@ public class EndretPeriodeOppgaveOppretter {
             var oppgaveDto = mapTilFjernetPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, forrigePeriode);
             oppgaveKlient.opprettOppgave(oppgaveDto);
         } else {
-            Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId());
+            Optional<StartdatoGrunnlag> startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId());
 
             // Dette med å finne diff kan potensielt forenkles dersom vi ikkje trenger å vise kva startdato og sluttdato var før endringen.
             List<PeriodeSnapshot> snapshotsForSammenligning = finnSortertSnapshotlisteForSammenligning(etterlysning, initieltPeriodeGrunnlag, startdatoGrunnlag);
@@ -139,7 +138,7 @@ public class EndretPeriodeOppgaveOppretter {
     private List<PeriodeSnapshot> finnSortertSnapshotlisteForSammenligning(
         Etterlysning etterlysning,
         UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag,
-        Optional<UngdomsytelseStartdatoGrunnlag> startdatoGrunnlag) {
+        Optional<StartdatoGrunnlag> startdatoGrunnlag) {
         List<Etterlysning> sorterteEtterlysninger = etterlysningRepository.hentEtterlysningerMedSisteFørst(etterlysning.getId(), EtterlysningType.UTTALELSE_ENDRET_PERIODE);
 
         // Dersom vi treffer en etterlysning som er mottatt svar eller utløpt, betyr det at bruker har tatt stilling til alle endringer før denne. Det er derfor ikke nødvendig å sjekke flere grunnlag.
@@ -158,8 +157,8 @@ public class EndretPeriodeOppgaveOppretter {
         // Dette håndterer caset der perioden endres mellom søknadstidspunkt og innhenting: kun ett grunnlag finnes, men startdato er endret.
         startdatoGrunnlag
             .stream()
-            .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
-            .map(UngdomsytelseStartdatoer::getStartdatoer)
+            .map(StartdatoGrunnlag::getOppgitteStartdatoer)
+            .map(Startdatoer::getStartdatoer)
             .flatMap(Collection::stream)
             .min(Comparator.comparing(s -> BigDecimal.valueOf(Period.between(s.getStartdato(), etterlysning.getPeriode().getFomDato()).getDays()).abs())) // Finner startdato nærmest aktuell periode
             .map(PeriodeSnapshot::fraOppgittStartdato)
