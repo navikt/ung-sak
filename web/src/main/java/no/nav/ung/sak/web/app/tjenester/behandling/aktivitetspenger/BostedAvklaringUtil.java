@@ -1,38 +1,25 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
-import no.nav.ung.kodeverk.bosatt.FraflyttingsÅrsak;
 import no.nav.ung.kodeverk.bosatt.Kilde;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto;
 
 import java.time.LocalDate;
 
 /**
- * Hjelpemetoder for konvertering av {@link BostedVurderingDto} til {@link BostedAvklaringData}.
+ * Hjelpemetoder for konvertering av {@link BostedVurderingIkkeOppfyltDto} til {@link BostedAvklaringData}.
  */
 class BostedAvklaringUtil {
 
     private BostedAvklaringUtil() {
     }
 
-    /**
-     * Konverterer én {@link BostedVurderingDto} til {@link BostedAvklaringData} med kilde=SAKSBEHANDLER.
-     * <ul>
-     *   <li>borITrondheimIHelePerioden = true → (erBosattITrondheim=true, fraflyttingsDato=null, årsak=null)</li>
-     *   <li>borITrondheimIHelePerioden = false og fraflyttingsDato etter fom → (true, fraflyttingsDato, årsak)</li>
-     *   <li>borITrondheimIHelePerioden = false og fraflyttingsDato null eller ≤ fom → (false, null, årsak)</li>
-     * </ul>
-     */
-    static BostedAvklaringData tilAvklaringData(LocalDate fom, BostedVurderingDto vurdering) {
-        FraflyttingsÅrsak årsak = vurdering.fraflyttingsÅrsak();
-        if (Boolean.TRUE.equals(vurdering.borITrondheimIHelePerioden())) {
+    static BostedAvklaringData tilAvklaringData(LocalDate fom, BostedVurderingIkkeOppfyltDto vurdering) {
+        if (vurdering == null) {
             return new BostedAvklaringData(true, null, null, Kilde.SAKSBEHANDLER);
         }
-        LocalDate fraflyttingsDato = vurdering.fraflyttingsDato();
-        if (fraflyttingsDato != null && fraflyttingsDato.isAfter(fom)) {
-            return new BostedAvklaringData(true, fraflyttingsDato, årsak, Kilde.SAKSBEHANDLER);
-        }
-        return new BostedAvklaringData(false, null, årsak, Kilde.SAKSBEHANDLER);
+        BostedsvilkårIkkeOppfyltÅrsak årsak = vurdering.fraflyttingsÅrsak();
+        return new BostedAvklaringData(false, fom, årsak, Kilde.SAKSBEHANDLER);
     }
 }
-

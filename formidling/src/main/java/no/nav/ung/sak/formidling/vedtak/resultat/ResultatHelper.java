@@ -1,5 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak.resultat;
 
+import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -16,8 +17,9 @@ public class ResultatHelper {
         return resultatTyper.contains(detaljertResultatType);
     }
 
-    public boolean innholderBare(DetaljertResultatType detaljertResultatType) {
-        return !resultatTyper.isEmpty() && resultatTyper.stream().allMatch(it -> it == detaljertResultatType);
+    public boolean innholderBare(DetaljertResultatType... detaljertResultatType) {
+        var ønskedeTyper = Arrays.stream(detaljertResultatType).collect(Collectors.toSet());
+        return !resultatTyper.isEmpty() && ønskedeTyper.containsAll(resultatTyper);
     }
 }
 

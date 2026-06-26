@@ -70,6 +70,13 @@ public class AktivitetspengerGrunnlagRepository {
         lagre(builder, behandlingId);
     }
 
+    public void kopierGrunnlagFraEksisterendeBehandling(Long originalBehandlingId, Long nyBehandlingId) {
+        hentGrunnlag(originalBehandlingId).ifPresent(original -> {
+            var builder = new AktivitetspengerGrunnlagBuilder(original);
+            lagre(builder, nyBehandlingId);
+        });
+    }
+
     public Optional<AktivitetspengerGrunnlag> hentGrunnlag(Long behandlingId) {
         var query = entityManager.createQuery(
                 "SELECT bg FROM AktivitetspengerGrunnlag bg WHERE bg.behandlingId=:id AND bg.aktiv = true",

@@ -96,6 +96,13 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
             resultater.add(DetaljertResultatFelles.nyPeriodeDetaljertResultat(avslåtteVilkår, tilkjentYtelse));
         }
 
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.ENDRET_BOSTED)) {
+            if (avslåtteVilkår.isEmpty()) {
+                resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.UENDRET, "Vurdert periode utenfor perioden som ble avslått"));
+            } else {
+                resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslått periode på grunn av bosted"));
+            }
+        }
 
         relevanteÅrsaker.stream()
             .filter(ÅRSAK_RESULTAT_INNVILGELSE_MAP::containsKey)
@@ -135,5 +142,4 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
             return new LocalDateSegment<>(p, resultat);
         };
     }
-
 }

@@ -9,7 +9,6 @@ import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -36,7 +35,6 @@ public class AktivitetspengerSøknadPersisterer {
     private final AktivitetspengerSøktPeriodeRepository søktPeriodeRepository;
     private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private final BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private final BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
 
 
     @Inject
@@ -44,15 +42,13 @@ public class AktivitetspengerSøknadPersisterer {
                                              AktivitetspengerFagsakperiodeUtleder fagsakperiodeUtleder,
                                              AktivitetspengerSøktPeriodeRepository søktPeriodeRepository,
                                              OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
-                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                             BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository) {
+                                             BostedsGrunnlagRepository bostedsGrunnlagRepository) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = fagsakRepository;
         this.fagsakperiodeUtleder = fagsakperiodeUtleder;
         this.søktPeriodeRepository = søktPeriodeRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
-        this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
     }
 
 
@@ -72,7 +68,7 @@ public class AktivitetspengerSøknadPersisterer {
         AktivitetspengerSøktPeriode søktPeriodeEntity = new AktivitetspengerSøktPeriode(behandlingId, journalpostId, mottattTid, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()));
         søktPeriodeRepository.lagreNyPeriode(søktPeriodeEntity);
         if (erBosattITrondheim != null) {
-            bosattSøknadGrunnlagRepository.lagreSøknadBosted(behandlingId, journalpostId.getVerdi(), periode.getFraOgMed(), erBosattITrondheim);
+            bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), new Periode(periode.getFraOgMed(), periode.getTilOgMed()), erBosattITrondheim);
         }
     }
 

@@ -1323,11 +1323,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
-      "ung.kodeverk.bosatt.FraflyttingsÅrsak" : {
-        "enum" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "ANNET" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "ANNET" ]
-      },
       "ung.kodeverk.bosatt.Kilde" : {
         "enum" : [ "SØKNAD", "SAKSBEHANDLER" ],
         "type" : "string",
@@ -1460,6 +1455,11 @@
         "enum" : [ "IKKE_14A_VEDTAK", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "UDEFINERT" ]
+      },
+      "ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak" : {
+        "enum" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "ANNET", "-" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "ANNET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Utfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
@@ -1944,7 +1944,7 @@
             "5090" : "#/components/schemas/ung.sak.kontrakt.økonomi.tilbakekreving.VurderTilbaketrekkDto",
             "5100" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorForeslåVilkårAksjonspunktDto",
             "5130" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto",
-            "5140" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.ManuellVurderingBostedsvilkårDto",
+            "5140" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto",
             "5141" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto",
             "5142" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto",
             "5200" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto",
@@ -1960,11 +1960,11 @@
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorForeslåVilkårAksjonspunktDto"
         }, {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.ManuellVurderingBostedsvilkårDto"
-        }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto"
         }, {
@@ -2198,16 +2198,43 @@
         "type" : "string",
         "x-enum-varnames" : [ "SØKER_IKKE_MEDLEM" ]
       },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "begrunnelseIkkeVarsel" : {
+            "type" : "string"
+          },
+          "erBosatt" : {
+            "type" : "boolean"
+          },
+          "foreslåttPeriode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "fritekstTilVarsel" : {
+            "type" : "string"
+          },
+          "ikkeOppfyltÅrsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          },
+          "skalSendeVarsel" : {
+            "type" : "boolean"
+          }
+        },
+        "required" : [ "erBosatt" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto" : {
         "properties" : {
           "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
           },
           "skalIkkeSendeVarsel" : {
             "type" : "boolean"
           },
           "vurdering" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto"
           }
         },
         "required" : [ "periode", "vurdering" ],
@@ -2215,6 +2242,9 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagPeriodeDto" : {
         "properties" : {
+          "avklaring" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto"
+          },
           "erBosattITrondheim" : {
             "type" : "boolean"
           },
@@ -2222,21 +2252,24 @@
             "format" : "date",
             "type" : "string"
           },
-          "fraflyttingsDato" : {
-            "format" : "date",
-            "type" : "string"
-          },
-          "fraflyttingsÅrsak" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.bosatt.FraflyttingsÅrsak"
-          },
           "harUttalelse" : {
             "type" : "boolean"
+          },
+          "ikkeOppfyltÅrsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
           },
           "kilde" : {
             "$ref" : "#/components/schemas/ung.kodeverk.bosatt.Kilde"
           },
+          "resultat" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto"
+          },
           "søknadOppgittErBosattITrondheim" : {
             "type" : "boolean"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
           },
           "uttalelseTekst" : {
             "type" : "string"
@@ -2257,7 +2290,31 @@
         "required" : [ "perioder" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "erBosatt" : {
+            "type" : "boolean"
+          },
+          "friteksttilBrev" : {
+            "type" : "string"
+          },
+          "ikkeOppfyltÅrsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          },
+          "manuellVurdering" : {
+            "type" : "boolean"
+          },
+          "vurdertAv" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "erBosatt", "manuellVurdering", "vurdertAv" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto" : {
         "properties" : {
           "begrunnelse" : {
             "maxLength" : 4000,
@@ -2265,18 +2322,22 @@
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
-          "borITrondheimIHelePerioden" : {
-            "type" : "boolean"
-          },
-          "fraflyttingsDato" : {
-            "format" : "date",
+          "begrunnelseIkkeVarsel" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
           },
           "fraflyttingsÅrsak" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.bosatt.FraflyttingsÅrsak"
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          },
+          "fritekstTilVarsel" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
+            "type" : "string"
           }
         },
-        "required" : [ "borITrondheimIHelePerioden" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto" : {
@@ -2307,26 +2368,6 @@
             "type" : "string"
           }
         },
-        "type" : "object"
-      },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.ManuellVurderingBostedsvilkårDto" : {
-        "properties" : {
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "vurdertePerioder" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto"
-            },
-            "maxItems" : 100,
-            "minItems" : 1,
-            "type" : "array"
-          }
-        },
-        "required" : [ "vurdertePerioder" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto" : {
@@ -2400,6 +2441,59 @@
           }
         },
         "required" : [ "vurdertePerioder" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "vurdertePerioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto"
+            },
+            "maxItems" : 100,
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurdertePerioder" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak"
+          },
+          "begrunnelse" : {
+            "maxLength" : 5000,
+            "minLength" : 3,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "erVilkårOppfylt" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "maxLength" : 10000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "harAvslagsårsakSattVedInnvilgelse" : {
+            "type" : "boolean"
+          },
+          "manglerAvslagsårsak" : {
+            "type" : "boolean"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
+          }
+        },
+        "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VilkårLivsoppholdsytelserPeriodeVurderingDto" : {
@@ -2491,6 +2585,20 @@
           }
         },
         "required" : [ "antallDager", "gjelderDelerAvMåned", "måned", "satsperioder" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.arbeidsforhold.ArbeidsgiverOpplysningerDto" : {
@@ -5303,39 +5411,6 @@
         "required" : [ "periode", "vilkarStatus" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.vilkår.VilkårPeriodeVurderingDto" : {
-        "properties" : {
-          "avslagsårsak" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avslagsårsak"
-          },
-          "begrunnelse" : {
-            "maxLength" : 5000,
-            "minLength" : 3,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "erVilkårOppfylt" : {
-            "type" : "boolean"
-          },
-          "fritekstVurderingBrev" : {
-            "maxLength" : 10000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "harAvslagsårsakSattVedInnvilgelse" : {
-            "type" : "boolean"
-          },
-          "manglerAvslagsårsak" : {
-            "type" : "boolean"
-          },
-          "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
-          }
-        },
-        "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
-        "type" : "object"
-      },
       "ung.sak.kontrakt.vilkår.VilkårResultatDto" : {
         "properties" : {
           "avslagsårsak" : {
@@ -6646,6 +6721,7 @@
     },
     "/api/behandling/bosatt-fakta" : {
       "get" : {
+        "deprecated" : true,
         "description" : "Hent bostedsgrunnlag (avklaringer per periode)",
         "operationId" : "hentBosattFakta",
         "parameters" : [ {
