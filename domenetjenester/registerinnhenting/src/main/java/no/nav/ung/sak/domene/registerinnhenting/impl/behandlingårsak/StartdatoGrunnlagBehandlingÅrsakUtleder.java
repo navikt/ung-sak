@@ -12,7 +12,7 @@ import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
 @ApplicationScoped
 @GrunnlagRef(StartdatoGrunnlag.class)
 @FagsakYtelseTypeRef
-public class UngdomsytelseStartdatoGrunnlagBehandlingÅrsakUtleder implements BehandlingÅrsakUtleder {
+public class StartdatoGrunnlagBehandlingÅrsakUtleder implements BehandlingÅrsakUtleder {
 
     @Override
     public Set<BehandlingÅrsakType> utledBehandlingÅrsaker(BehandlingReferanse ref, Object grunnlagId1, Object grunnlagId2) {

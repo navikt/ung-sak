@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Objects;
 
-@Entity(name = "UngdomsytelseStartdatoGrunnlag")
+@Entity(name = "StartdatoGrunnlag")
 @Table(name = "GR_STARTDATO")
 public class StartdatoGrunnlag extends BaseEntitet {
 

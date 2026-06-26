@@ -11,5 +11,5 @@ public record EndretUngdomsprogramEtterlysningInput(
         Optional<EtterlysningOgGrunnlag> gjeldendeEtterlysningOgGrunnlag,
         UngdomsprogramPeriodeGrunnlag gjeldendePeriodeGrunnlag,
         UngdomsprogramPeriodeGrunnlag initiellPeriodegrunnlag,
-        Optional<StartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
+        Optional<StartdatoGrunnlag> startdatoGrunnlag) {
 }

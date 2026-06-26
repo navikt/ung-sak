@@ -150,11 +150,11 @@ public class UngdomsprogramPeriodeTjeneste {
         return finnEndretStartdatoer(ungdomsprogramPeriodeGrunnlag.get(), originaltGrunnlag.get());
     }
 
-    public static List<EndretDato> finnEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<StartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
+    public static List<EndretDato> finnEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<StartdatoGrunnlag> startdatoGrunnlag) {
         // Støtter kun en periode her foreløpig
         var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
         var gjeldendeDato = gjelendePeriode.getFomDato();
-        var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(StartdatoGrunnlag::getOppgitteStartdatoer).map(Startdatoer::getStartdatoer)
+        var oppgittStartdato = startdatoGrunnlag.map(StartdatoGrunnlag::getOppgitteStartdatoer).map(Startdatoer::getStartdatoer)
             .orElse(Set.of())
             .iterator().next().getStartdato();
         if (oppgittStartdato.equals(gjeldendeDato)) {
@@ -181,14 +181,14 @@ public class UngdomsprogramPeriodeTjeneste {
         return List.of(new EndretDato(andreStartdato, førsteStartdato));
     }
 
-    public static boolean harEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<StartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
+    public static boolean harEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<StartdatoGrunnlag> startdatoGrunnlag) {
         // Støtter kun en eller ingen periode her foreløpig
         var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
         if (gjelendePeriode.isEmpty()) {
             return true;
         }
         var gjeldendeDato = gjelendePeriode.get().getFomDato();
-        var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(StartdatoGrunnlag::getOppgitteStartdatoer).map(Startdatoer::getStartdatoer)
+        var oppgittStartdato = startdatoGrunnlag.map(StartdatoGrunnlag::getOppgitteStartdatoer).map(Startdatoer::getStartdatoer)
             .orElse(Set.of())
             .iterator().next().getStartdato();
         return !gjeldendeDato.equals(oppgittStartdato);

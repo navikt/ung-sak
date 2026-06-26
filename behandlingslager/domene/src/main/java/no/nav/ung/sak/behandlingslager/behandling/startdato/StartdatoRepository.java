@@ -66,7 +66,7 @@ public class StartdatoRepository {
     private Optional<StartdatoGrunnlag> hentEksisterendeGrunnlag(Long id) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseStartdatoGrunnlag s " +
+                "FROM StartdatoGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId " +
                 "AND s.aktiv = true", StartdatoGrunnlag.class);
 
@@ -85,7 +85,7 @@ public class StartdatoRepository {
     public Optional<StartdatoGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseStartdatoGrunnlag s " +
+                "FROM StartdatoGrunnlag s " +
                 "WHERE s.id = :grunnlagId", StartdatoGrunnlag.class);
 
         query.setParameter("grunnlagId", grunnlagId);
