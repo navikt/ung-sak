@@ -1,13 +1,17 @@
 package no.nav.ung.fordel.repo.journalpost;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
-
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity(name = "JournalpostMottattEntitet")
 @Table(name = "FORDEL_JOURNALPOST_MOTTATT")
@@ -109,10 +113,6 @@ public class JournalpostMottattEntitet {
 
     public String getPayload() {
         return payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
     }
 
     public LocalDateTime getMottattTidspunkt() {

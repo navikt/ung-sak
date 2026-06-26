@@ -9,7 +9,6 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingBackendRestTjeneste
 import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
-import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.BostedRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
@@ -21,6 +20,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.søknadsfrist.SøknadsfristRe
 import no.nav.ung.sak.web.app.tjenester.behandling.tilbakekreving.TilbakekrevingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vedtak.TotrinnskontrollRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.ForutgåendeMedlemskapRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.BostedRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.vilkår.VilkårRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.dokument.DokumentRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.etterlysning.EtterlysningRestTjeneste;
@@ -100,7 +100,6 @@ public class RestImplementationClasses {
         classes.add(ForvaltningPersonRestTjeneste.class);
         classes.add(ForvaltningStatistikkRestTjeneste.class);
         classes.add(ForvaltningProduksjonsstyringRestTjeneste.class);
-        classes.add(ForvaltningMottattDokumentRestTjeneste.class);
         classes.add(DiagnostikkRestTjeneste.class);
         classes.add(RapporteringRestTjeneste.class);
         classes.add(NotatRestTjeneste.class);
