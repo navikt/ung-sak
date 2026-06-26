@@ -6,7 +6,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -159,16 +158,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             if (!programTidslinje.isEmpty() && programTidslinje.getMaxLocalDate().isBefore(opphørsdato)) {
                 return false;
             }
-            var vilkårene = vilkårTjeneste.hentHvisEksisterer(behandling.getId());
-            if (vilkårene.isPresent()) {
-                var ungdomsprogramVilkårTimeline = vilkårene.get().getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET)
-                    .filterValue(v -> v.getGjeldendeUtfall() == Utfall.OPPFYLT);
-                var vilkårsperiodeEtterMaksdato = ungdomsprogramVilkårTimeline.intersection(
-                    new LocalDateInterval(opphørsdato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
-                if (!vilkårsperiodeEtterMaksdato.isEmpty()) {
-                    // Vilkårsperioden strekker seg videre enn maksdato — revurdering nødvendig
-                    return false;
-                }
+            if (harOppfyltVilkårEtterDato(behandling.getId(), opphørsdato).orElse(false)) {
+                return false; // vilkårsperiode strekker seg videre enn maksdato — revurdering nødvendig
             }
             logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag, og vilkårsperioden dekker ikke videre. Naturlig avslutning — ignorerer hendelse {}.",
                 opphørsdato, hendelseId);
@@ -176,22 +167,25 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         }
 
         // Sjekk 2: Vilkårsresultat etter opphørsdato avgjør om ytelsen er aktiv
-        var resultatEtterOpphørsdato = vilkårTjeneste.samletVilkårsresultat(behandling.getId())
-            .intersection(new LocalDateInterval(opphørsdato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
-
-        if (resultatEtterOpphørsdato.isEmpty()) {
-            // Vilkår ikke vurdert etter opphørsdato — anta aktiv ytelse
-            return false;
+        var harOppfylt = harOppfyltVilkårEtterDato(behandling.getId(), opphørsdato);
+        if (harOppfylt.isEmpty() || harOppfylt.get()) {
+            return false; // vilkår ikke vurdert ennå, eller aktiv ytelse — ikke ignorer
         }
+        logger.info("Ingen oppfylte vilkårsperioder etter opphørsdato {} for behandling {}. Ignorerer hendelse {}.",
+            opphørsdato, behandling.getId(), hendelseId);
+        return true;
+    }
 
-        var oppfyltEtterOpphørsdato = resultatEtterOpphørsdato
-            .filterValue(v -> v.getSamletUtfall() == Utfall.OPPFYLT);
-
-        if (oppfyltEtterOpphørsdato.isEmpty()) {
-            logger.info("Ingen oppfylte vilkårsperioder etter opphørsdato {} for behandling {}. Ignorerer hendelse {}.",
-                opphørsdato, behandling.getId(), hendelseId);
-            return true;
+    /**
+     * Sjekker om det finnes oppfylte vilkårsperioder etter angitt dato basert på samlet vilkårsresultat.
+     * Returnerer empty hvis vilkår ikke er evaluert etter dato (ukjent tilstand).
+     */
+    private Optional<Boolean> harOppfyltVilkårEtterDato(Long behandlingId, LocalDate dato) {
+        var resultat = vilkårTjeneste.samletVilkårsresultat(behandlingId)
+            .intersection(new LocalDateInterval(dato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
+        if (resultat.isEmpty()) {
+            return Optional.empty();
         }
-        return false;
+        return Optional.of(!resultat.filterValue(v -> v.getSamletUtfall() == Utfall.OPPFYLT).isEmpty());
     }
 }
