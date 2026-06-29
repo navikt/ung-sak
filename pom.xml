@@ -57,7 +57,7 @@
         <validation-model-jakarta.version>1.30.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
         <jsoup.version>1.22.2</jsoup.version>
-        <commonmark.version>0.28.0</commonmark.version>
+        <commonmark.version>0.29.0</commonmark.version>
         <tms-mikrofrontend-builder.version>3.0.0</tms-mikrofrontend-builder.version>
         <tms-java-builder.version>2.2.0</tms-java-builder.version>
     </properties>
@@ -592,7 +592,7 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.31.0-GA</version>
+                <version>3.32.0-GA</version>
             </dependency>
 
             <!-- Database -->
