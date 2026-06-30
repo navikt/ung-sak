@@ -42,7 +42,7 @@ class BostedAvklaringOgUttalelseOgResultat {
     StegUtfall utledUtfall() {
         if (erVentende()) {
             return StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
-        } else if (erKildeSøknadOgIkkeTidligereVurdert() || harMottattSvarMedUttalelse() || erÅrsakAnnet()) {
+        } else if (erKildeSøknadOgIkkeTidligereVurdert() || harMottattSvarMedUttalelse() || erÅrsakAnnet() || erValgtÅIkkeVarsleNårIkkeOppfylt()) {
             return StegUtfall.VILKÅR_VURDERES_MANUELT;
         } else if (!avklaring.isErBosattITrondheim()) {
             return StegUtfall.OPPHØR_AUTOMATISK;
@@ -64,6 +64,10 @@ class BostedAvklaringOgUttalelseOgResultat {
 
     private boolean erKildeSøknadOgIkkeTidligereVurdert() {
         return Kilde.SØKNAD.equals(avklaring.getKilde()) && resultat == null;
+    }
+
+    private boolean erValgtÅIkkeVarsleNårIkkeOppfylt() {
+        return avklaring.harForeslåttAvklaring() && !avklaring.erOppfyltEllerSenderVarsel();
     }
 
     private boolean erÅrsakAnnet() {
