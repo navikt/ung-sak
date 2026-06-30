@@ -144,9 +144,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
     /**
      * Avgjør om en opphørshendelse skal ignoreres for denne behandlingen.
-     * Returnerer true (ignorer) ved naturlig avslutning ved maksdato, ingen aktiv ytelse etter opphørsdato,
-     * eller vilkår ikke vurdert etter opphørsdato (antar ingen aktiv ytelse).
-     * Returnerer false (behandle) ved forlengelse eller aktiv ytelse etter opphørsdato.
+     * Returnerer true (ignorer) ved naturlig avslutning ved maksdato eller ingen aktiv ytelse etter opphørsdato.
+     * Returnerer false (behandle) ved forlengelse, aktiv ytelse, eller vilkår ikke vurdert ennå.
      */
     private boolean skalIgnorereOpphørshendelse(Behandling behandling, LocalDate opphørsdato, String hendelseId) {
         // Sjekk 1: Hvis opphørsdato == periodeMaksDato kunne dette vært en naturlig avslutning,
@@ -159,7 +158,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
             if (!programTidslinje.isEmpty() && programTidslinje.getMaxLocalDate().isBefore(opphørsdato)) {
                 return false;
             }
-            if (harOppfyltVilkårEtterDato(behandling.getId(), opphørsdato)) {
+            if (harOppfyltVilkårEtterDato(behandling.getId(), opphørsdato).orElse(false)) {
                 return false; // vilkårsperiode strekker seg videre enn maksdato — revurdering nødvendig
             }
             logger.info("Opphørsdato {} == periodeMaksDato fra grunnlag, og vilkårsperioden dekker ikke videre. Naturlig avslutning — ignorerer hendelse {}.",
@@ -169,7 +168,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
         // Sjekk 2: Vilkårsresultat etter opphørsdato avgjør om ytelsen er aktiv
         var harOppfylt = harOppfyltVilkårEtterDato(behandling.getId(), opphørsdato);
-        if (harOppfylt) {
+        if (harOppfylt.isEmpty() || harOppfylt.get()) {
             return false; // vilkår ikke vurdert ennå, eller aktiv ytelse — ikke ignorer
         }
         logger.info("Ingen oppfylte vilkårsperioder etter opphørsdato {} for behandling {}. Ignorerer hendelse {}.",
@@ -179,14 +178,14 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
 
     /**
      * Sjekker om det finnes oppfylte vilkårsperioder etter angitt dato basert på samlet vilkårsresultat.
-     * Returnerer false både når vilkår ikke er evaluert etter dato og når ingen er OPPFYLT.
+     * Returnerer empty hvis vilkår ikke er evaluert etter dato (ukjent tilstand).
      */
-    private Boolean harOppfyltVilkårEtterDato(Long behandlingId, LocalDate dato) {
+    private Optional<Boolean> harOppfyltVilkårEtterDato(Long behandlingId, LocalDate dato) {
         var resultat = vilkårTjeneste.samletVilkårsresultat(behandlingId)
             .intersection(new LocalDateInterval(dato.plusDays(1), LocalDateInterval.TIDENES_ENDE));
         if (resultat.isEmpty()) {
-            return false;
+            return Optional.empty();
         }
-        return !resultat.filterValue(v -> v.getSamletUtfall() == Utfall.OPPFYLT).isEmpty();
+        return Optional.of(!resultat.filterValue(v -> v.getSamletUtfall() == Utfall.OPPFYLT).isEmpty());
     }
 }

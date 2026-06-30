@@ -321,7 +321,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
     }
 
     @Test
-    void skal_ikke_returnere_årsak_dersom_vilkårsresultat_ikke_dekker_perioden_etter_opphørsdato() {
+    void skal_returnere_årsak_dersom_vilkårsresultat_ikke_dekker_perioden_etter_opphørsdato() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
         // Programperiode som strekker seg forbi opphørsdato
@@ -342,12 +342,12 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         builder.medOpprettet(LocalDateTime.now());
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
-        // Vilkårsresultatet dekker ikke perioden etter opphørsdato → ingen kjent aktiv ytelse → ignorerer hendelse
-        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
+        // Vilkårsresultatet dekker ikke perioden etter opphørsdato → antar aktiv ytelse → skal opprette revurdering
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
     }
 
     @Test
-    void skal_ikke_returnere_årsak_dersom_vilkårsresultat_er_tomt() {
+    void skal_returnere_årsak_dersom_vilkårsresultat_er_tomt() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
         // Programperiode som strekker seg forbi opphørsdato
@@ -367,8 +367,8 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         builder.medOpprettet(LocalDateTime.now());
         var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
 
-        // Tomt vilkårsresultat → ingen kjent aktiv ytelse → ignorerer hendelse
-        assertThat(fagsakBehandlingÅrsakTypeMap.isEmpty()).isTrue();
+        // Når vilkårsresultat er tomt antas ytelsen å være aktiv → skal opprette revurdering
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
     }
 
     @Test
