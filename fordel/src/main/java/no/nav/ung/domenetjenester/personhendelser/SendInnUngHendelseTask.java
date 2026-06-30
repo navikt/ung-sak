@@ -44,6 +44,7 @@ public class SendInnUngHendelseTask implements ProsessTaskHandler {
         var inngåendeHendelseId = Long.valueOf(prosessTaskData.getPropertyValue(INNGÅENDE_HENDELSE_ID));
         var inngåendeHendelse = hendelseRepository.finnEksaktHendelse(inngåendeHendelseId);
         if (inngåendeHendelse.getHåndtertStatus() == InngåendeHendelseEntitet.HåndtertStatusType.HÅNDTERT) {
+            log.info("Hendelse med id={} er allerede håndtert, ignorerer.", inngåendeHendelseId);
             return;
         }
 
