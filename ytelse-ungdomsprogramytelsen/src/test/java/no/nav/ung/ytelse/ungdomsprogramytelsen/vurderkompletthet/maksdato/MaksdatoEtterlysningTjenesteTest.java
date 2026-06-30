@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(JpaExtension.class)
@@ -114,13 +115,16 @@ class MaksdatoEtterlysningTjenesteTest {
     }
 
     @Test
-    void skalIkkeOppretteEtterlysning_nårMaksdatoUtenforVarslingsvindu() {
+    void skalHardfeile_nårVarselOpphørÅrsakOgIngenEtterlysningOpprettet() {
+        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO, men maksdato er utenfor varslingsvinduet slik at ingen
+        // etterlysning opprettes. Da skal behandlingen hardfeile slik at den ikke går videre til vedtak uten varsel.
         var fom = LocalDate.now().minusMonths(6);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
             List.of(new UngdomsprogramPeriode(fom, MAKSDATO_UTENFOR_VARSLINGSVINDU)),
             false, MAKSDATO_UTENFOR_VARSLINGSVINDU);
 
-        tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling));
+        assertThatThrownBy(() -> tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling)))
+            .isInstanceOf(IllegalStateException.class);
 
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
         assertThat(etterlysninger).isEmpty();

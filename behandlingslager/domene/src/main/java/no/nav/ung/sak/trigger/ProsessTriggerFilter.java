@@ -2,6 +2,7 @@ package no.nav.ung.sak.trigger;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +14,14 @@ public final class ProsessTriggerFilter {
     );
 
     private ProsessTriggerFilter() {
+    }
+
+    /**
+     * Returnerer true dersom varsel om opphør ved maksdato er overstyrt av en annen årsak
+     * (forlenget periode eller manuelt opphør). I slike tilfeller skal det ikke sendes varsel om opphør ved maksdato.
+     */
+    public static boolean erVarselOpphørVedMaksdatoOverstyrt(Collection<BehandlingÅrsakType> årsaker) {
+        return årsaker.stream().anyMatch(OVERSTYRER_VARSEL_OPPHØR_VED_MAKSDATO::contains);
     }
 
     public static List<Trigger> forKravperioder(List<Trigger> triggere) {

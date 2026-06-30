@@ -19,6 +19,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
+import no.nav.ung.sak.trigger.ProsessTriggerFilter;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningOgGrunnlag;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningStatusOgType;
 import org.slf4j.Logger;
@@ -102,6 +103,20 @@ public class MaksdatoEtterlysningTjeneste {
             ));
         } catch (IOException e) {
             logger.warn("Feil ved lagring av sporing for etterlysning opphør ved maksdato", e);
+        }
+
+        // Sikkerhetsnett: et rent varsel-om-opphør-ved-maksdato-løp (ikke overstyrt av forlenget periode/opphør)
+        // må ha opprettet en etterlysning slik at behandlingen settes på vent og deltaker varsles før vedtak/brev om opphør.
+        // Dersom det ikke finnes noen etterlysning av denne typen her, ville behandlingen gått videre til opphør uten kontradiksjon.
+        if (!ProsessTriggerFilter.erVarselOpphørVedMaksdatoOverstyrt(behandling.getBehandlingÅrsakerTyper())) {
+            var etterlysningForMaksdato = etterlysningRepository.hentSisteEtterlysning(
+                behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO,
+                EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
+            if (etterlysningForMaksdato.isEmpty()) {
+                throw new IllegalStateException("Forventet etterlysning om opphør ved maksdato for behandling "
+                    + behandlingReferanse.getBehandlingId() + ", men ingen ble opprettet (resultat=" + resultat + "). "
+                    + "Behandlingen skal ikke gå videre til vedtak/brev om opphør uten at deltaker er varslet.");
+            }
         }
 
     }
