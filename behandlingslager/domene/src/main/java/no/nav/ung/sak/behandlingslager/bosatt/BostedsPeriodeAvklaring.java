@@ -69,6 +69,11 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             Objects.requireNonNull(fritekstTilVarsel, "Mangler fritekst for varsel når BostedsvilkårIkkeOppfyltÅrsak.ANNET er valgt");
         }
 
+        if (!erBosattITrondheim) {
+            Objects.requireNonNull(ikkeOppfyltÅrsak, "Mangler årsak for hvorfor bostedsvilkåret ikke er oppfylt");
+        }
+
+        Objects.requireNonNull(begrunnelse, "begrunnelse");
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
 
