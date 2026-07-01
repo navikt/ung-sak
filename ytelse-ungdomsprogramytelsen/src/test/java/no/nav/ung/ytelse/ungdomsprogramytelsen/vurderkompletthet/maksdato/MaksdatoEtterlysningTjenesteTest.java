@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -128,6 +129,24 @@ class MaksdatoEtterlysningTjenesteTest {
 
         var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
         assertThat(etterlysninger).isEmpty();
+    }
+
+    @Test
+    void skalIkkeHardfeile_nårVarselOpphørHarTilleggsårsakOgIngenEtterlysning() {
+        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO + en tilleggsårsak (ikke rent løp) → skal ikke hardfeile
+        // selv om maksdato er utenfor varslingsvinduet og ingen etterlysning opprettes.
+        var lås = behandlingRepository.taSkriveLås(behandling);
+        BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).buildFor(behandling);
+        behandlingRepository.lagre(behandling, lås);
+
+        var fom = LocalDate.now().minusMonths(6);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(fom, MAKSDATO_UTENFOR_VARSLINGSVINDU)),
+            false, MAKSDATO_UTENFOR_VARSLINGSVINDU);
+
+        tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling));
+
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
     }
 
     @Test
