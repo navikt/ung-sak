@@ -58,4 +58,3 @@ class ProsessTriggerFilterTest {
             .containsExactly(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
     }
 }
-

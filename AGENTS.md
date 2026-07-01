@@ -18,6 +18,19 @@
 - Startpunkt for ny vurdering ved forlenget periode avhenger av endring i `periodeMaksDato` (diff-sporing), ikke kun boolsk flagg.
 - Revurdering ved forlenget periode skal vise triggerperioden (de nye 8 ukene), ikke hele opprinnelig programperiode.
 
+## Domain Notes: Opphør ved maksdato
+- Når ungdomsprogramytelsen nærmer seg maksdato (260/300 virkedager), skal deltaker varsles ~3 uker før og få uttale seg før opphør.
+- Batch `VarselOpphørVedMaksdatoBatchTask` (cron ~07:30) spawner `VarselOpphørVedMaksdatoTask`, som henter løpende `UNGDOMSYTELSE`-fagsaker (`AktuelleFagsakerForMaksdatoVarselRepository`), bruker `periodeMaksDato` fra registergrunnlag (kilde til sannhet) og oppretter revurdering med årsak `RE_VARSEL_OPPHOR_VED_MAKSDATO` innenfor 3-ukers vindu (`MaksdatoOpphørVarslingPeriode.VARSEL_UKER_FØR_MAKSDATO = 3`).
+- Batch-tasker bruker felles baseklasse `DuplikatbeskyttetBatchTask` (unngår duplikate child-tasks på FEILET/KLAR/VETO); delt med inntektskontroll- og høysats-batch.
+- Etterlysning av type `UTTALELSE_OPPHOR_VED_MAKSDATO` opprettes i `VurderKompletthetSteg` via `UngEtterlysningOppretter` -> `MaksdatoEtterlysningTjeneste`. Oppgave til deltaker (`BEKREFT_OPPHOR_VED_MAKSDATO`) lages av `OpphørVedMaksdatoOppgaveOppretter`; behandlingen settes på vent (autopunkt `AUTO_SATT_PÅ_VENT_REVURDERING`).
+- Bruker-svar: `EndringType.OPPHOR_VED_MAKSDATO` og bekreftelse `Bekreftelse.Type.UNG_OPPHOR_VED_MAKSDATO` håndteres av `GenerellOppgaveBekreftelseHåndterer`; etterlysning markeres `MOTTATT_SVAR` -> behandling tas av vent.
+- Overstyring: `ProsessTriggerFilter` filtrerer bort `RE_VARSEL_OPPHOR_VED_MAKSDATO` når forlenget periode (`RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM`) eller manuelt opphør (`RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM`) også finnes. Samme overstyringsprinsipp følges i brevregler (`OpphørVedMaksdatoStrategy`, `OpphørStrategy`, `ForlengetPeriodeStrategy`) og i årsaks-/periodevisning.
+- Naturlig avslutning: `UngdomsprogramOpphørFagsakTilVurderingUtleder` ignorerer opphørshendelse når `opphørsdato == periodeMaksDato` (unngår duplikat revurdering).
+- Brev/kodeverk: `DokumentMalType.OPPHOR_VED_MAKSDATO_DOK`, `TemplateType.OPPHOR_VED_MAKSDATO`, `opphør_ved_maksdato.hbs`, `DetaljertResultatType.OPPHØR_VED_MAKSDATO`, `BehandlingVisningsnavn.OPPHØR_VED_MAKSDATO`, `ÅrsakTilVurdering.OPPHØR_VED_MAKSDATO`. `RE_VARSEL_OPPHOR_VED_MAKSDATO` inngår i `BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode()`.
+- Rent varsel-opphør-løp = behandlingen har **utelukkende** årsak `RE_VARSEL_OPPHOR_VED_MAKSDATO`. Da skal det IKKE trigges inntektskontroll/programperiodeendring-varsling (`UngEtterlysningOppretter`), og `MaksdatoEtterlysningTjeneste` hardfeiler dersom ingen etterlysning ble opprettet — for å hindre vedtak/brev om opphør uten kontradiksjon. Har behandlingen tilleggsårsaker (f.eks. inntektskontroll) eller er overstyrt, kjøres alt som før og det hardfeiles ikke.
+- Dedup i utvelgelsen ekskluderer fagsaker med aktiv `RE_VARSEL_OPPHOR_VED_MAKSDATO`-trigger som overlapper maksdato, OG fagsaker med åpen behandling (status != `AVSLU`/`IVED`) med samme årsak.
+- Ved endringer i opphør-ved-maksdato: hold sammen batch/utvelgelse, etterlysning/varsling, mottak av bekreftelse, startpunkt/steg, brev og dedup i samme leveranse.
+
 ## Tech Stack
 - Java 25 (hovedkodebase)
 - Java 21 (`kodeverk` og `kontrakt`)
@@ -81,3 +94,6 @@ dev/generate-openapi-ts-client.sh
   - https://github.com/navikt/ung-sak/pull/1365
   - https://github.com/navikt/ung-sak/pull/1367
   - https://github.com/navikt/ung-sak/pull/1370
+- PR-historikk for opphør ved maksdato:
+  - https://github.com/navikt/ung-sak/pull/1333
+  - https://github.com/navikt/ung-sak/pull/1449
