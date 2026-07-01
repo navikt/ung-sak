@@ -19,6 +19,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
+import no.nav.ung.sak.trigger.ProsessTriggerFilter;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningOgGrunnlag;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningStatusOgType;
 import org.slf4j.Logger;
@@ -104,11 +105,13 @@ public class MaksdatoEtterlysningTjeneste {
             logger.warn("Feil ved lagring av sporing for etterlysning opphør ved maksdato", e);
         }
 
-        // Sikkerhetsnett: et rent varsel-om-opphør-ved-maksdato-løp (behandlingen har KUN denne årsaken)
-        // må ha opprettet en etterlysning slik at behandlingen settes på vent og deltaker varsles før vedtak/brev om opphør.
-        // Dersom det ikke finnes noen etterlysning av denne typen her, ville behandlingen gått videre til opphør uten kontradiksjon.
-        // Har behandlingen andre årsaker i tillegg (f.eks. inntektskontroll eller forlenget periode/opphør), skal den ikke hardfeile her.
-        if (erKunVarselOpphørVedMaksdato(behandling)) {
+        // Sikkerhetsnett: varsel om opphør ved maksdato må ha resultert i en etterlysning, med mindre behandlingen
+        // er overstyrt av forlenget periode/manuelt opphør. Disse hendelsene endrer selve periode-/maksdato-grunnlaget,
+        // og kan derfor legitimt gjøre at varsel ikke lenger er relevant eller skal avbrytes (se ProsessTriggerFilter).
+        // Andre tilleggsårsaker (f.eks. inntektskontroll) påvirker ikke dette grunnlaget, så manglende etterlysning
+        // i den kombinasjonen indikerer fortsatt en feil og skal hardfeile, slik at behandlingen ikke går videre
+        // til vedtak/brev om opphør uten at deltaker er varslet.
+        if (!ProsessTriggerFilter.erOverstyrtAvAnnenHendelse(behandling.getBehandlingÅrsakerTyper())) {
             boolean harEtterlysning = switch (resultat) {
                 case OPPRETT_ETTERLYSNING, ERSTATT_EKSISTERENDE -> true;
                 case INGEN_ENDRING -> eksisterende.isPresent();
@@ -123,10 +126,6 @@ public class MaksdatoEtterlysningTjeneste {
 
     }
 
-    private static boolean erKunVarselOpphørVedMaksdato(Behandling behandling) {
-        var årsaker = behandling.getBehandlingÅrsakerTyper();
-        return !årsaker.isEmpty() && årsaker.stream().allMatch(å -> å == BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
-    }
 
     /**
      * Avbryter eksisterende etterlysning for opphør ved maksdato.

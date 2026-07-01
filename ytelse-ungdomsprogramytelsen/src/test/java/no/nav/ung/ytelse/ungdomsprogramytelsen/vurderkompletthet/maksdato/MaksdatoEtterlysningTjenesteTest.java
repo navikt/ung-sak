@@ -132,11 +132,32 @@ class MaksdatoEtterlysningTjenesteTest {
     }
 
     @Test
-    void skalIkkeHardfeile_nårVarselOpphørHarTilleggsårsakOgIngenEtterlysning() {
-        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO + en tilleggsårsak (ikke rent løp) → skal ikke hardfeile
-        // selv om maksdato er utenfor varslingsvinduet og ingen etterlysning opprettes.
+    void skalHardfeile_nårVarselOpphørHarIkkeOverstyrendeTilleggsårsakOgIngenEtterlysning() {
+        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO + inntektskontroll (ikke overstyrende årsak).
+        // Inntektskontroll påvirker ikke periode-/maksdato-grunnlaget, så manglende etterlysning her
+        // indikerer fortsatt en feil og skal hardfeile.
         var lås = behandlingRepository.taSkriveLås(behandling);
         BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).buildFor(behandling);
+        behandlingRepository.lagre(behandling, lås);
+
+        var fom = LocalDate.now().minusMonths(6);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(fom, MAKSDATO_UTENFOR_VARSLINGSVINDU)),
+            false, MAKSDATO_UTENFOR_VARSLINGSVINDU);
+
+        assertThatThrownBy(() -> tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling)))
+            .isInstanceOf(IllegalStateException.class);
+
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
+    }
+
+    @Test
+    void skalIkkeHardfeile_nårVarselOpphørErOverstyrtAvForlengetPeriodeOgIngenEtterlysning() {
+        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO + forlenget periode (overstyrende årsak).
+        // Forlenget periode endrer selve periode-/maksdato-grunnlaget, og kan derfor legitimt gjøre
+        // at varsel ikke lenger er relevant. Skal ikke hardfeile.
+        var lås = behandlingRepository.taSkriveLås(behandling);
+        BehandlingÅrsak.builder(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM).buildFor(behandling);
         behandlingRepository.lagre(behandling, lås);
 
         var fom = LocalDate.now().minusMonths(6);
