@@ -109,10 +109,12 @@ public class MaksdatoEtterlysningTjeneste {
         // Dersom det ikke finnes noen etterlysning av denne typen her, ville behandlingen gått videre til opphør uten kontradiksjon.
         // Har behandlingen andre årsaker i tillegg (f.eks. inntektskontroll eller forlenget periode/opphør), skal den ikke hardfeile her.
         if (erKunVarselOpphørVedMaksdato(behandling)) {
-            var etterlysningForMaksdato = etterlysningRepository.hentSisteEtterlysning(
-                behandlingReferanse.getBehandlingId(), EtterlysningType.UTTALELSE_OPPHOR_VED_MAKSDATO,
-                EtterlysningStatus.VENTER, EtterlysningStatus.OPPRETTET, EtterlysningStatus.MOTTATT_SVAR, EtterlysningStatus.UTLØPT);
-            if (etterlysningForMaksdato.isEmpty()) {
+            boolean harEtterlysning = switch (resultat) {
+                case OPPRETT_ETTERLYSNING, ERSTATT_EKSISTERENDE -> true;
+                case INGEN_ENDRING -> eksisterende.isPresent();
+                case AVBRYT_ETTERLYSNING -> false;
+            };
+            if (!harEtterlysning) {
                 throw new IllegalStateException("Forventet etterlysning om opphør ved maksdato for behandling "
                     + behandlingReferanse.getBehandlingId() + ", men ingen ble opprettet (resultat=" + resultat + "). "
                     + "Behandlingen skal ikke gå videre til vedtak/brev om opphør uten at deltaker er varslet.");
