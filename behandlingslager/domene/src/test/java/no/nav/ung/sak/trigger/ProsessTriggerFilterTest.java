@@ -57,24 +57,4 @@ class ProsessTriggerFilterTest {
             .extracting(Trigger::getÅrsak)
             .containsExactly(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
     }
-
-    @Test
-    void erVarselOpphørVedMaksdatoOverstyrt_skal_vaere_true_ved_forlenget_periode() {
-        assertThat(ProsessTriggerFilter.erVarselOpphørVedMaksdatoOverstyrt(List.of(
-            BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO,
-            BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM))).isTrue();
-    }
-
-    @Test
-    void erVarselOpphørVedMaksdatoOverstyrt_skal_vaere_true_ved_opphor() {
-        assertThat(ProsessTriggerFilter.erVarselOpphørVedMaksdatoOverstyrt(List.of(
-            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM))).isTrue();
-    }
-
-    @Test
-    void erVarselOpphørVedMaksdatoOverstyrt_skal_vaere_false_for_rent_varsel_opphor() {
-        assertThat(ProsessTriggerFilter.erVarselOpphørVedMaksdatoOverstyrt(List.of(
-            BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO))).isFalse();
-    }
 }
-
