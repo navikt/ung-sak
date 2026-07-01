@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,6 +108,7 @@ class VarselOpphørVedMaksdatoTaskTest {
     private Fagsak lagFagsak(Long id, String aktørId) {
         var fagsak = mock(Fagsak.class);
         when(fagsak.getId()).thenReturn(id);
+        when(fagsak.getSaksnummer()).thenReturn(new Saksnummer("SAK" + id));
         when(fagsak.getAktørId()).thenReturn(new AktørId(aktørId));
         when(fagsak.getPeriode()).thenReturn(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2025, 1, 1), LocalDate.of(2026, 12, 31)));
         when(fagsak.getYtelseType()).thenReturn(FagsakYtelseType.UNGDOMSYTELSE);
