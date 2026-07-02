@@ -67,7 +67,7 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
                     taskGruppe.addNesteSekvensiell(revurderingTask);
                 }
             } catch (Exception e) {
-                log.warn("Feil ved vurdering av fagsak {} for opphør ved maksdato-varsel", fagsak.getId(), e);
+                log.warn("Feil ved vurdering av fagsak {} for opphør ved maksdato-varsel", fagsak.getSaksnummer().getVerdi(), e);
             }
         }
 
@@ -78,7 +78,8 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
     }
 
     private ProsessTaskData opprettTask(Fagsak fagsak) {
-        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId());
+        Long fagsakId = fagsak.getId();
+        var sisteBehandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
         if (sisteBehandling.isEmpty()) {
             return null;
         }
@@ -86,12 +87,12 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
         Behandling behandling = sisteBehandling.get();
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
 
-        log.info("Fagsak {} har periodeMaksDato {} fra register som er innenfor varselvinduet. Oppretter revurdering.", fagsak.getId(), maksdato);
+        log.info("Fagsak {} har periodeMaksDato {} fra register som er innenfor varselvinduet. Oppretter revurdering.", fagsak.getSaksnummer().getVerdi(), maksdato);
 
         var ønsketPeriode = maksdato + "/" + maksdato;
         var ønsketÅrsak = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
         ProsessTaskData tilVurderingTask = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-        tilVurderingTask.setFagsakId(fagsak.getId());
+        tilVurderingTask.setFagsakId(fagsakId);
         tilVurderingTask.setProperty(PERIODER, ønsketPeriode);
         tilVurderingTask.setProperty(BEHANDLING_ÅRSAK, ønsketÅrsak);
         return tilVurderingTask;

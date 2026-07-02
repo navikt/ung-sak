@@ -2,6 +2,7 @@ package no.nav.ung.sak.trigger;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -15,10 +16,19 @@ public final class ProsessTriggerFilter {
     private ProsessTriggerFilter() {
     }
 
+    /**
+     * Returnerer true dersom behandlingen er overstyrt av forlenget periode eller manuelt opphør.
+     * Disse hendelsene endrer selve periode-/maksdato-grunnlaget (utvider maksdato, eller setter tom < maksdato),
+     * og kan derfor legitimt gjøre at varsel om opphør ved maksdato ikke lenger er relevant eller skal avbrytes.
+     * Andre tilleggsårsaker (f.eks. inntektskontroll) endrer ikke dette grunnlaget, og overstyrer derfor ikke varselet.
+     */
+    public static boolean erOverstyrtAvAnnenHendelse(Collection<BehandlingÅrsakType> årsaker) {
+        return årsaker.stream().anyMatch(OVERSTYRER_VARSEL_OPPHØR_VED_MAKSDATO::contains);
+    }
+
     public static List<Trigger> forKravperioder(List<Trigger> triggere) {
-        boolean varselOpphørVedMaksdatoErOverstyrt = triggere.stream()
-            .map(Trigger::getÅrsak)
-            .anyMatch(OVERSTYRER_VARSEL_OPPHØR_VED_MAKSDATO::contains);
+        boolean varselOpphørVedMaksdatoErOverstyrt = erOverstyrtAvAnnenHendelse(
+            triggere.stream().map(Trigger::getÅrsak).toList());
 
         if (!varselOpphørVedMaksdatoErOverstyrt) {
             return triggere;
