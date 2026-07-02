@@ -86,7 +86,7 @@ class VarselOpphørVedMaksdatoTaskTest {
     }
 
     @Test
-    void skal_opprette_task_nar_maksdato_mangler_i_grunnlaget() {
+    void skal_ikke_opprette_task_nar_maksdato_mangler_i_grunnlaget() {
         var fagsak = lagFagsak(1L, "1234567890123");
         var behandling = lagBehandling(fagsak, 100L);
 
@@ -96,9 +96,7 @@ class VarselOpphørVedMaksdatoTaskTest {
 
         task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
-        var captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
-        verify(prosessTaskTjeneste).lagre(captor.capture());
-        assertThat(captor.getValue().getTasks()).hasSize(1);
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
 
     private void mockLøpendeFagsaker(List<Fagsak> fagsaker) {
