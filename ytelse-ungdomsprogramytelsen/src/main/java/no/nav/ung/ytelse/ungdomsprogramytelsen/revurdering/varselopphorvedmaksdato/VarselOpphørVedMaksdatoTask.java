@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static no.nav.ung.sak.behandling.revurdering.OpprettRevurderingEllerOpprettDiffTask.BEHANDLING_ÅRSAK;
@@ -58,21 +59,23 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         log.info("Fant {} aktuelle fagsaker for ungdomsytelse", aktuelleFagsaker.size());
 
-        ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
+        List<ProsessTaskData> revurderingTasker = new ArrayList<>();
 
         for (Fagsak fagsak : aktuelleFagsaker) {
             try {
                 var revurderingTask = opprettTask(fagsak);
                 if (revurderingTask != null) {
-                    taskGruppe.addNesteSekvensiell(revurderingTask);
+                    revurderingTasker.add(revurderingTask);
                 }
             } catch (Exception e) {
                 log.warn("Feil ved vurdering av fagsak {} for opphør ved maksdato-varsel", fagsak.getSaksnummer().getVerdi(), e);
             }
         }
 
-        if (!taskGruppe.getTasks().isEmpty()) {
-            log.info("Oppretter {} revurderinger for varsel om opphør ved maksdato", taskGruppe.getTasks().size());
+        if (!revurderingTasker.isEmpty()) {
+            log.info("Oppretter {} revurderinger for varsel om opphør ved maksdato", revurderingTasker.size());
+            ProsessTaskGruppe taskGruppe = new ProsessTaskGruppe();
+            taskGruppe.addNesteParallell(revurderingTasker);
             prosessTaskTjeneste.lagre(taskGruppe);
         }
     }
@@ -86,6 +89,10 @@ public class VarselOpphørVedMaksdatoTask implements ProsessTaskHandler {
 
         Behandling behandling = sisteBehandling.get();
         var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId()).orElse(null);
+        if (maksdato == null) {
+            log.warn("Fagsak {} mangler periodeMaksDato i registergrunnlaget. Hopper over opprettelse av revurdering for opphør ved maksdato-varsel.", fagsak.getSaksnummer().getVerdi());
+            return null;
+        }
 
         log.info("Fagsak {} har periodeMaksDato {} fra register som er innenfor varselvinduet. Oppretter revurdering.", fagsak.getSaksnummer().getVerdi(), maksdato);
 
