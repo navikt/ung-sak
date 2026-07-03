@@ -45,7 +45,7 @@ public class VLExceptionMapper implements ExceptionMapper<VLException> {
     }
 
     private String avsluttMedPunktum(String tekst) {
-        return (tekst == null ? "" : tekst + (tekst.endsWith(".") ? " " : ". "));
+        return (tekst == null || tekst.isBlank() ? "" : tekst + (tekst.endsWith(".") ? " " : ". "));
     }
 
 }
