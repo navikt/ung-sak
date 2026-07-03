@@ -40,6 +40,12 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
             maksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
             return;
         }
+        // Rene opphevelse-av-opphør-behandlinger skal ikke etterlyse noe fra bruker: bruker har allerede vært
+        // i kontakt med Nav i forkant (f.eks. medhold i klage), og skal derfor ikke varsles på nytt om at
+        // programperioden er gjenåpnet.
+        if (erRentOpphørOpphevetLøp(behandlingReferanse)) {
+            return;
+        }
         kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
         programperiodeendringEtterlysningTjeneste.opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         maksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
@@ -48,5 +54,10 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
     private boolean erRentVarselOpphørVedMaksdatoLøp(BehandlingReferanse behandlingReferanse) {
         var årsaker = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId()).getBehandlingÅrsakerTyper();
         return !årsaker.isEmpty() && årsaker.stream().allMatch(å -> å == BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
+    }
+
+    private boolean erRentOpphørOpphevetLøp(BehandlingReferanse behandlingReferanse) {
+        var årsaker = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId()).getBehandlingÅrsakerTyper();
+        return !årsaker.isEmpty() && årsaker.stream().allMatch(å -> å == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
     }
 }
