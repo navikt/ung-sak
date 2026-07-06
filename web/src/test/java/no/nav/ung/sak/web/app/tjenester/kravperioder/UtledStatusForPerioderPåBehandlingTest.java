@@ -100,6 +100,25 @@ class UtledStatusForPerioderPåBehandlingTest {
     }
 
     @Test
+    void skal_utlede_status_fra_opphevelse_av_opphør_av_ungdomsprogram() {
+        var startdato = LocalDate.now();
+        var tidligereOpphørsdato = startdato.plusWeeks(30);
+        var maksdato = startdato.plusWeeks(52).minusDays(1);
+        var periodeTilVurdering = DatoIntervallEntitet.fraOgMedTilOgMed(tidligereOpphørsdato.plusDays(1), maksdato);
+
+        var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
+                Map.of(),
+            List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM, periodeTilVurdering))
+        );
+
+        var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
+        assertThat(perioderMedÅrsak.size()).isEqualTo(1);
+        var periode = perioderMedÅrsak.get(0);
+        assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
+        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+    }
+
+    @Test
     void skal_ikke_vise_opphor_ved_maksdato_nar_forlenget_periode_overstyrer_varselarsak() {
         var startdato = LocalDate.now();
         var maksdato = startdato.plusWeeks(52).minusDays(1);

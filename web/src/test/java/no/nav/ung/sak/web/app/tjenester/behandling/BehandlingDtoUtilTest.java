@@ -219,6 +219,16 @@ class BehandlingDtoUtilTest {
     }
 
     @Test
+    void forventer_opphør_opphevet_for_hendelse_opphør_opphevet_ungdomsprogram() {
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+
+        BehandlingDto dto = new BehandlingDto();
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
+
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET);
+    }
+
+    @Test
     void forventer_flere_behandlingårsaker_for_blandede_årsaker() {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
             BehandlingÅrsakType.RE_HENDELSE_FØDSEL,
