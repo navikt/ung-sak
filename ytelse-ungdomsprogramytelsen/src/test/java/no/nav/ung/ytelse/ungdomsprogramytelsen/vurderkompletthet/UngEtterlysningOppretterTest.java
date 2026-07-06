@@ -68,13 +68,14 @@ class UngEtterlysningOppretterTest {
 
         oppretter.opprettEtterlysninger(behandlingReferanse);
 
+        verify(programperiodeendringEtterlysningTjeneste).avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
         verify(kontrollerInntektEtterlysningTjeneste, never()).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         verify(maksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
     }
 
     @Test
-    void skalTriggeAlleEtterlysninger_nårOpphørOpphevetHarTilleggsårsaker() {
+    void skalTriggeInntektskontrollOgMaksdatoMenAvbryteProgramperiodeendring_nårOpphørOpphevetHarTilleggsårsaker() {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
             BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
             BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
@@ -82,8 +83,26 @@ class UngEtterlysningOppretterTest {
         oppretter.opprettEtterlysninger(behandlingReferanse);
 
         verify(kontrollerInntektEtterlysningTjeneste).opprettEtterlysninger(behandlingReferanse);
-        verify(programperiodeendringEtterlysningTjeneste).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+        verify(programperiodeendringEtterlysningTjeneste).avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
+        verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         verify(maksdatoEtterlysningTjeneste).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
+    }
+
+    @Test
+    void skalIkkeTriggeNoenEtterlysningerOgAvbryteVentendeProgramperiodeendring_nårOpphørOpphevetErSlåttSammenMedUtdatertOpphørÅrsak() {
+        // Reproduserer race condition: opphevOpphør-hendelsen slås sammen med en fortsatt åpen behandling
+        // som venter på bekreftelse av det (nå opphevede) opphøret. Den utdaterte RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+        // skal ikke føre til at det etterlyses noe, og en eventuell ventende etterlysning skal avbrytes.
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+
+        oppretter.opprettEtterlysninger(behandlingReferanse);
+
+        verify(programperiodeendringEtterlysningTjeneste).avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
+        verify(kontrollerInntektEtterlysningTjeneste, never()).opprettEtterlysninger(behandlingReferanse);
+        verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
+        verify(maksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
     }
 }
 
