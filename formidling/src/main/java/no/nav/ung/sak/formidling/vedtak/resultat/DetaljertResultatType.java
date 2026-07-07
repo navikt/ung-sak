@@ -11,6 +11,7 @@ public enum DetaljertResultatType {
     ENDRING_STARTDATO("Endring startdato"),
     ENDRING_SLUTTDATO("Opphør eller endring sluttdato"),
     OPPHØR_VED_MAKSDATO("Opphør ved maksdato"),
+    OPPHØR_OPPHEVET("Opphør opphevet"),
     ENDRING_FJERNE_PERIODE("Fjerne periode"),
     FORLENGET_PERIODE("Forlenget periode i ungdomsprogrammet"),
     IKKE_VURDERT("Ikke vurdert"),

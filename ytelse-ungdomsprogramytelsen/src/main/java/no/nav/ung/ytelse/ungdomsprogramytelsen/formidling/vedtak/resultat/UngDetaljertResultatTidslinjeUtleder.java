@@ -35,6 +35,7 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_BARN_FØDSEL),
         BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_DELTAKER_DØDSFALL),
         BehandlingÅrsakType.RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.ENDRING_FJERNE_PERIODE),
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM, DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_OPPHEVET),
         BehandlingÅrsakType.RE_SATS_REGULERING, DetaljertResultatInfo.of(DetaljertResultatType.SATS_REGULERING)
     );
 

@@ -168,7 +168,7 @@ public class Etterlysning extends BaseEntitet {
         this.frist = null;
     }
 
-    public void skalAvbrytes() {
+    public void setSkalAvbrytes() {
         if (status == EtterlysningStatus.MOTTATT_SVAR) {
             throw new IllegalStateException("Kan ikke avbryte etterlysning som er mottatt.");
         }

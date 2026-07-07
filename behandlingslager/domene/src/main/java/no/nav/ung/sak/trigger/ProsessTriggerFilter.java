@@ -10,16 +10,18 @@ public final class ProsessTriggerFilter {
 
     private static final Set<BehandlingÅrsakType> OVERSTYRER_VARSEL_OPPHØR_VED_MAKSDATO = Set.of(
         BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
-        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM
     );
 
     private ProsessTriggerFilter() {
     }
 
     /**
-     * Returnerer true dersom behandlingen er overstyrt av forlenget periode eller manuelt opphør.
-     * Disse hendelsene endrer selve periode-/maksdato-grunnlaget (utvider maksdato, eller setter tom < maksdato),
-     * og kan derfor legitimt gjøre at varsel om opphør ved maksdato ikke lenger er relevant eller skal avbrytes.
+     * Returnerer true dersom behandlingen er overstyrt av forlenget periode, manuelt opphør, eller opphevelse av opphør.
+     * Disse hendelsene endrer selve periode-/maksdato-grunnlaget (utvider maksdato, setter tom < maksdato, eller
+     * gjenåpner en tidligere avsluttet periode), og kan derfor legitimt gjøre at varsel om opphør ved maksdato
+     * ikke lenger er relevant for akkurat denne behandlingen eller skal avbrytes.
      * Andre tilleggsårsaker (f.eks. inntektskontroll) endrer ikke dette grunnlaget, og overstyrer derfor ikke varselet.
      */
     public static boolean erOverstyrtAvAnnenHendelse(Collection<BehandlingÅrsakType> årsaker) {

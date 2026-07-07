@@ -140,7 +140,7 @@ public class MaksdatoEtterlysningTjeneste {
 
         if (eksisterende.isPresent()) {
             var etterlysning = eksisterende.get();
-            etterlysning.skalAvbrytes();
+            etterlysning.setSkalAvbrytes();
             etterlysningRepository.lagre(etterlysning);
             logger.info("Markert etterlysning {} for opphør ved maksdato som skal avbrytes for behandling {}", etterlysning.getId(), behandlingId);
 

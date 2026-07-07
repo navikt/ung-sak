@@ -219,6 +219,30 @@ class BehandlingDtoUtilTest {
     }
 
     @Test
+    void forventer_opphør_opphevet_for_hendelse_opphør_opphevet_ungdomsprogram() {
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+
+        BehandlingDto dto = new BehandlingDto();
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
+
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET);
+    }
+
+    @Test
+    void forventer_opphør_opphevet_når_slått_sammen_med_utdatert_opphør_årsak() {
+        // Reproduserer at opphevOpphør-hendelsen kan bli slått sammen med en fortsatt åpen behandling
+        // som venter på bekreftelse av det (nå opphevede) opphøret, jf. UngEtterlysningOppretter.harKunOpphørsÅrsaker.
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+
+        BehandlingDto dto = new BehandlingDto();
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false);
+
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET);
+    }
+
+    @Test
     void forventer_flere_behandlingårsaker_for_blandede_årsaker() {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
             BehandlingÅrsakType.RE_HENDELSE_FØDSEL,

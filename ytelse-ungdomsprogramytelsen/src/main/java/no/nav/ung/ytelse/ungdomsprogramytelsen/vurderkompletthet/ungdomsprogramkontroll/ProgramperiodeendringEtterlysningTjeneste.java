@@ -61,6 +61,34 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         this.endretPeriodeEnabled = endretPeriodeEnabled;
     }
 
+    /**
+     * Avbryter alle ventende (OPPRETTET/VENTER) etterlysninger knyttet til endret sluttdato.
+     * Brukes når opphevelse av opphør gjør en tidligere opprettet sluttdato-etterlysning irrelevant —
+     * f.eks. dersom {@code UngdomsprogramOpphørOpphevetHendelse} blir slått sammen med en fortsatt åpen behandling
+     * som venter på bekreftelse av det (nå opphevede) opphøret.
+     */
+    public void avbrytVentendeSluttdatoEtterlysninger(BehandlingReferanse behandlingReferanse) {
+        var behandlingId = behandlingReferanse.getBehandlingId();
+        // Opphevelse av opphør gjelder kun sluttdato (register-endring fjerner sluttdatoen). Startdato/periode berøres ikke.
+        var etterlysningerSomSkalAvbrytes = etterlysningRepository.hentEtterlysningerMedSisteFørst(
+                behandlingId,
+                EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)
+            .stream()
+            .filter(it -> it.getStatus() == EtterlysningStatus.OPPRETTET || it.getStatus() == EtterlysningStatus.VENTER)
+            .toList();
+
+        if (etterlysningerSomSkalAvbrytes.isEmpty()) {
+            return;
+        }
+
+        logger.info("Avbryter {} ventende etterlysning(er) for endret sluttdato grunnet opphevelse av opphør på behandling {}",
+            etterlysningerSomSkalAvbrytes.size(), behandlingId);
+        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::setSkalAvbrytes);
+        etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
+
+        prosessTaskTjeneste.lagre(lagTaskForAvbrytelseAvEtterlysning(behandlingId, behandlingReferanse.getFagsakId()));
+    }
+
     public void opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse behandlingReferanse) {
         var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet perioder"));
         var initiellPeriodegrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandlingReferanse.getBehandlingId()).orElseThrow(() -> new IllegalStateException("Skal ha innhentet initiell programperiodegrunnlag for behandling " + behandlingReferanse.getBehandlingId()));
