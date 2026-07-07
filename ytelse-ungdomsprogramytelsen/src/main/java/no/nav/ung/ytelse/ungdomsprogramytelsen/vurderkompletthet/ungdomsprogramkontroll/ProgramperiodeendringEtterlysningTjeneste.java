@@ -62,10 +62,10 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     }
 
     /**
-     * Avbryter alle ventende (OPPRETTET/VENTER) etterlysninger knyttet til endring av programperiode
-     * (sluttdato, startdato eller periode). Brukes når opphevelse av opphør gjør en tidligere opprettet
-     * etterlysning irrelevant — f.eks. dersom {@code UngdomsprogramOpphørOpphevetHendelse} blir slått sammen
-     * med en fortsatt åpen behandling som venter på bekreftelse av det (nå opphevede) opphøret.
+     * Avbryter alle ventende (OPPRETTET/VENTER) etterlysninger knyttet til endret sluttdato.
+     * Brukes når opphevelse av opphør gjør en tidligere opprettet sluttdato-etterlysning irrelevant —
+     * f.eks. dersom {@code UngdomsprogramOpphørOpphevetHendelse} blir slått sammen med en fortsatt åpen behandling
+     * som venter på bekreftelse av det (nå opphevede) opphøret.
      */
     public void avbrytVentendeSluttdatoEtterlysninger(BehandlingReferanse behandlingReferanse) {
         var behandlingId = behandlingReferanse.getBehandlingId();
