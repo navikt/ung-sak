@@ -90,7 +90,7 @@ class UngEtterlysningOppretterTest {
 
     @Test
     void skalIkkeTriggeNoenEtterlysningerOgAvbryteVentendeProgramperiodeendring_nårOpphørOpphevetErSlåttSammenMedUtdatertOpphørÅrsak() {
-        // Reproduserer race condition: opphevOpphør-hendelsen slås sammen med en fortsatt åpen behandling
+        // Reproduserer sammenslåing av hendelser: opphevOpphør-hendelsen slås sammen med en fortsatt åpen behandling
         // som venter på bekreftelse av det (nå opphevede) opphøret. Den utdaterte RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
         // skal ikke føre til at det etterlyses noe, og en eventuell ventende etterlysning skal avbrytes.
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
