@@ -24,6 +24,7 @@ class UngEtterlysningOppretterTest {
     private final KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste = mock(KontrollerInntektEtterlysningTjeneste.class);
     private final ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste = mock(ProgramperiodeendringEtterlysningTjeneste.class);
     private final MaksdatoEtterlysningTjeneste maksdatoEtterlysningTjeneste = mock(MaksdatoEtterlysningTjeneste.class);
+    private final OpphevelseAvOpphørEtterlysningHåndterer opphevelseAvOpphørEtterlysningHåndterer = mock(OpphevelseAvOpphørEtterlysningHåndterer.class);
     private final BehandlingRepository behandlingRepository = mock(BehandlingRepository.class);
 
     private final Behandling behandling = mock(Behandling.class);
@@ -33,7 +34,8 @@ class UngEtterlysningOppretterTest {
 
     @BeforeEach
     void setUp() {
-        oppretter = new UngEtterlysningOppretter(kontrollerInntektEtterlysningTjeneste, programperiodeendringEtterlysningTjeneste, maksdatoEtterlysningTjeneste, behandlingRepository);
+        oppretter = new UngEtterlysningOppretter(kontrollerInntektEtterlysningTjeneste, programperiodeendringEtterlysningTjeneste, maksdatoEtterlysningTjeneste,
+            opphevelseAvOpphørEtterlysningHåndterer, behandlingRepository);
         when(behandlingReferanse.getBehandlingId()).thenReturn(BEHANDLING_ID);
         when(behandlingRepository.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
     }
@@ -63,46 +65,31 @@ class UngEtterlysningOppretterTest {
     }
 
     @Test
-    void skalIkkeTriggeNoenEtterlysninger_forRentOpphørOpphevetLøp() {
-        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+    void skalDelegereTilOpphevelseAvOpphørHåndterer_nårBehandlingenHarOpphørOpphevetÅrsak() {
+        var årsaker = List.of(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(årsaker);
 
         oppretter.opprettEtterlysninger(behandlingReferanse);
 
-        verify(programperiodeendringEtterlysningTjeneste).avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
+        verify(opphevelseAvOpphørEtterlysningHåndterer).håndter(behandlingReferanse, årsaker);
         verify(kontrollerInntektEtterlysningTjeneste, never()).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         verify(maksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
     }
 
     @Test
-    void skalTriggeInntektskontrollOgMaksdatoMenAvbryteProgramperiodeendring_nårOpphørOpphevetHarTilleggsårsaker() {
-        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
-            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
-            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
-
-        oppretter.opprettEtterlysninger(behandlingReferanse);
-
-        verify(kontrollerInntektEtterlysningTjeneste).opprettEtterlysninger(behandlingReferanse);
-        verify(programperiodeendringEtterlysningTjeneste).avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
-        verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
-        verify(maksdatoEtterlysningTjeneste).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
-    }
-
-    @Test
-    void skalIkkeTriggeNoenEtterlysningerOgAvbryteVentendeProgramperiodeendring_nårOpphørOpphevetErSlåttSammenMedUtdatertOpphørÅrsak() {
-        // Reproduserer sammenslåing av hendelser: opphevOpphør-hendelsen slås sammen med en fortsatt åpen behandling
-        // som venter på bekreftelse av det (nå opphevede) opphøret. Den utdaterte RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
-        // skal ikke føre til at det etterlyses noe, og en eventuell ventende etterlysning skal avbrytes.
-        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
+    void skalDelegereTilOpphevelseAvOpphørHåndterer_nårOpphørOpphevetErSlåttSammenMedUtdatertOpphørÅrsak() {
+        // Reproduserer sammenslåing av hendelser, se OpphevelseAvOpphørEtterlysningHåndterer for detaljer.
+        var årsaker = List.of(
             BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
-            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+        when(behandling.getBehandlingÅrsakerTyper()).thenReturn(årsaker);
 
         oppretter.opprettEtterlysninger(behandlingReferanse);
 
-        verify(programperiodeendringEtterlysningTjeneste).avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
+        verify(opphevelseAvOpphørEtterlysningHåndterer).håndter(behandlingReferanse, årsaker);
         verify(kontrollerInntektEtterlysningTjeneste, never()).opprettEtterlysninger(behandlingReferanse);
         verify(programperiodeendringEtterlysningTjeneste, never()).opprettEtterlysningerForProgramperiodeEndring(behandlingReferanse);
         verify(maksdatoEtterlysningTjeneste, never()).opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
     }
 }
-

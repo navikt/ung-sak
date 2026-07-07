@@ -21,16 +21,22 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
     private KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste;
     private ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste;
     private MaksdatoEtterlysningTjeneste maksdatoEtterlysningTjeneste;
+    private OpphevelseAvOpphørEtterlysningHåndterer opphevelseAvOpphørEtterlysningHåndterer;
     private BehandlingRepository behandlingRepository;
 
     public UngEtterlysningOppretter() {
     }
 
     @Inject
-    public UngEtterlysningOppretter(KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste, ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste, MaksdatoEtterlysningTjeneste maksdatoEtterlysningTjeneste, BehandlingRepository behandlingRepository) {
+    public UngEtterlysningOppretter(KontrollerInntektEtterlysningTjeneste kontrollerInntektEtterlysningTjeneste,
+                                     ProgramperiodeendringEtterlysningTjeneste programperiodeendringEtterlysningTjeneste,
+                                     MaksdatoEtterlysningTjeneste maksdatoEtterlysningTjeneste,
+                                     OpphevelseAvOpphørEtterlysningHåndterer opphevelseAvOpphørEtterlysningHåndterer,
+                                     BehandlingRepository behandlingRepository) {
         this.kontrollerInntektEtterlysningTjeneste = kontrollerInntektEtterlysningTjeneste;
         this.programperiodeendringEtterlysningTjeneste = programperiodeendringEtterlysningTjeneste;
         this.maksdatoEtterlysningTjeneste = maksdatoEtterlysningTjeneste;
+        this.opphevelseAvOpphørEtterlysningHåndterer = opphevelseAvOpphørEtterlysningHåndterer;
         this.behandlingRepository = behandlingRepository;
     }
 
@@ -46,7 +52,7 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
         }
 
         if (årsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)) {
-            håndterOpphevelseAvOpphør(behandlingReferanse, årsaker);
+            opphevelseAvOpphørEtterlysningHåndterer.håndter(behandlingReferanse, årsaker);
             return;
         }
 
@@ -55,37 +61,7 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
         maksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
     }
 
-    /**
-     * Håndterer behandlinger som har (blant sine årsaker) at et tidligere opphør av ungdomsprogrammet er opphevet.
-     * En ventende uttalelse om endret sluttdato blir alltid avbrutt, siden opphevelsen fjerner sluttdatoen (uendret
-     * maksdato) — dette gjelder også om behandlingen samtidig har den nå utdaterte årsaken
-     * RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, se {@link #harKunOpphørsÅrsaker}. Dersom opphevelsen er eneste reelle
-     * årsak, skal ingen ytterligere etterlysninger opprettes: bruker har allerede vært i kontakt med Nav i forkant
-     * (f.eks. medhold i klage), og skal ikke varsles på nytt om at programperioden er gjenåpnet.
-     */
-    private void håndterOpphevelseAvOpphør(BehandlingReferanse behandlingReferanse, List<BehandlingÅrsakType> årsaker) {
-        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
-
-        if (harKunOpphørsÅrsaker(årsaker)) {
-            return;
-        }
-
-        kontrollerInntektEtterlysningTjeneste.opprettEtterlysninger(behandlingReferanse);
-        maksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
-    }
-
     private boolean erRentVarselOpphørVedMaksdatoLøp(List<BehandlingÅrsakType> årsaker) {
         return !årsaker.isEmpty() && årsaker.stream().allMatch(å -> å == BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
-    }
-
-    /**
-     * Sant når eneste (relevante) årsak er opphevelse av opphør, eventuelt sammen med den nå utdaterte
-     * RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM (artefakt av at hendelsene kan slås sammen på samme åpne behandling,
-     * se OpprettRevurderingEllerOpprettDiffTask). Andre årsaker (f.eks. inntektskontroll) regnes som reelle
-     * tilleggsårsaker.
-     */
-    private boolean harKunOpphørsÅrsaker(List<BehandlingÅrsakType> årsaker) {
-        return årsaker.stream().allMatch(å -> å == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM
-            || å == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM);
     }
 }
