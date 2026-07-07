@@ -31,6 +31,19 @@
 - Dedup i utvelgelsen ekskluderer fagsaker med aktiv `RE_VARSEL_OPPHOR_VED_MAKSDATO`-trigger som overlapper maksdato, OG fagsaker med åpen behandling (status != `AVSLU`/`IVED`) med samme årsak.
 - Ved endringer i opphør-ved-maksdato: hold sammen batch/utvelgelse, etterlysning/varsling, mottak av bekreftelse, startpunkt/steg, brev og dedup i samme leveranse.
 
+## Domain Notes: Opphevelse av opphør
+- Lar en veileder rette et feilaktig opphør ved å slette sluttdatoen i ung-deltakelse-opplyser — typisk aktuelt når bruker får medhold i klage på opphør av ungdomsprogrammet. Det er ikke behov for varsel til bruker i disse tilfellene, siden bruker allerede har vært i kontakt med Nav i forkant.
+- Egen hendelse `UngdomsprogramOpphørOpphevetHendelse` (kontrakt, se PR #1453) brukes i stedet for å gjenbruke opphørshendelsen, siden flyt og brev er forskjellig.
+- `UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder` (`@HendelseTypeRef("UNGDOMSPROGRAM_OPPHØR_OPPHEVET")`) utleder perioden som revurderes: fra dagen etter tidligere opphørsdato og fram til **uendret** `periodeMaksDato` (maksdato forholder seg kun til startdato, og skal ikke endres av opphevelsen). Selve gjenåpningen av programperioden skjer automatisk ved re-innhenting av periodegrunnlag fra register i den påfølgende revurderingen — utlederen avgjør kun hvilken fagsak/periode som skal revurderes, ikke periodeinnholdet. Idempotent dersom periodegrunnlaget allerede strekker seg forbi tidligere opphørsdato.
+- `BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM` inngår i `årsakerForInnhentingAvProgramperiode()` slik at programperioden hentes på nytt fra register ved revurderingen.
+- Rent opphevelse-av-opphør-løp = behandlingens (relevante) årsaker består **kun** av `RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM` (ev. sammen med den nå utdaterte `RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM` — se under). Da opprettes ingen etterlysninger/oppgaver til bruker i det hele tatt (`UngEtterlysningOppretter`). Har behandlingen reelle tilleggsårsaker (f.eks. `RE_KONTROLL_REGISTER_INNTEKT`), kjøres kontroll av inntekt og varsel om opphør ved maksdato som normalt — men programperiodeendring-etterlysningen (sluttdato/periode) hoppes **alltid** over når opphevelses-årsaken er til stede, siden periodegrunnlag-diffen da alltid skyldes selve opphevelsen, som ikke skal gi ny uttalelse.
+- Selvutløst etterkontroll (skill fra punktet over — dette gjelder *nye* årsaker opphevelsen selv skaper, ikke allerede eksisterende tilleggsårsaker): `KontrollerteInntektperioderTjeneste.ryddPerioderFritattForKontrollEllerTilVurderingIBehandlingen` fritar første/siste måned i programperioden for kontroll. Når et tidligere opphør korter ned sluttdatoen slik at en allerede kontrollert måned blir ny (fritatt) siste måned, mister den sin kontrollert-status. Gjenåpner opphevelsen perioden igjen, er måneden ikke lenger siste måned og trenger kontroll på nytt — men den fremstår da som "aldri kontrollert". `VurderManglendeKontrollAvPeriode`/`ManglendeKontrollperioderTjeneste` (kjører etter *ethvert* vedtak, uavhengig av `VurderKompletthetSteg`/`UngEtterlysningOppretter`) oppdager dette og oppretter automatisk en **ny** revurdering med årsak `RE_KONTROLL_REGISTER_INNTEKT` for opphevOpphør-behandlingen. Dette er forventet/riktig — ikke en bug — men kan overraske i saksbilder som viser en ekstra "Kontroll av inntekt"-behandling rett etter opphevelsen.
+- Sammenslåing av hendelser på en åpen behandling: dersom opphevOpphør-hendelsen slås sammen med en fortsatt åpen behandling som venter på bekreftelse av det (nå opphevede) opphøret (jf. `OpprettRevurderingEllerOpprettDiffTask`), kan behandlingen ende opp med både `RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM` og `RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM`. Da avbrytes eventuelle ventende `UTTALELSE_ENDRET_SLUTTDATO`-etterlysninger (`ProgramperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoEtterlysninger`), og den utdaterte opphør-årsaken teller ikke som en reell tilleggsårsak. Etterlysninger om endret startdato/periode berøres ikke.
+- Overstyring: `ProsessTriggerFilter` filtrerer bort `RE_VARSEL_OPPHOR_VED_MAKSDATO` når `RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM` også finnes, på linje med forlenget periode og manuelt opphør.
+- Periodevisning: `UtledStatusForPerioderPåBehandling.RELEVANTE_ÅRSAKER` inkluderer `RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM` slik at behandlingen viser triggerperioden i sidepanelet (samme "diff-vindu"-mønster som forlenget periode, ikke hele programperioden fra startdato).
+- Brev/kodeverk: `DokumentMalType.OPPHOR_OPPHEVET_DOK`, `TemplateType.OPPHOR_OPPHEVET`, mal `opphør_opphevet.hbs`, `OpphørOpphevetStrategy`/`OpphørOpphevetInnholdBygger`/`OpphørOpphevetDto` (viser tidligere sluttdato og gjeldende maksdato), `DetaljertResultatType.OPPHØR_OPPHEVET`, `BehandlingVisningsnavn.OPPHØR_OPPHEVET`, `ÅrsakTilVurdering.OPPHØR_OPPHEVET_UNGDOMSPROGRAM`.
+- Ved endringer i opphevelse av opphør: hold sammen kontrakt (ung-deltakelse-opplyser), hendelsesutleder, etterlysningsunntak, prosesstrigger-overstyring, brev og periodevisning i samme leveranse.
+
 ## Tech Stack
 - Java 25 (hovedkodebase)
 - Java 21 (`kodeverk` og `kontrakt`)
@@ -70,6 +83,7 @@ dev/generate-openapi-ts-client.sh
 - Hold endringer smaaa og fokuserte.
 - Kjor relevante tester for berorte moduler.
 - Verifiser kombinasjonsflyt der forlenget periode samhandler med andre revurderingsaarsaker (f.eks. inntektskontroll).
+- Verifiser kombinasjonsflyt der opphevelse av opphør samhandler med andre revurderingsaarsaker (rent løp vs. tilleggsårsaker).
 
 ### Ask First
 - Store refaktoreringer paa tvers av modulgrenser.
@@ -97,3 +111,6 @@ dev/generate-openapi-ts-client.sh
 - PR-historikk for opphør ved maksdato:
   - https://github.com/navikt/ung-sak/pull/1333
   - https://github.com/navikt/ung-sak/pull/1449
+- PR-historikk for opphevelse av opphør:
+  - https://github.com/navikt/ung-sak/pull/1453
+  - https://github.com/navikt/ung-sak/pull/1454
