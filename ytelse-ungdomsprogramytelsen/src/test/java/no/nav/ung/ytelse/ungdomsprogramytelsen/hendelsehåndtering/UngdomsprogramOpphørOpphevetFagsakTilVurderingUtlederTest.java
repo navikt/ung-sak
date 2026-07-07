@@ -68,7 +68,6 @@ class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtlederTest {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
         behandling.avsluttBehandling();
-        entityManager.flush();
 
         var hendelse = lagHendelse(AktørId.dummy(), TIDLIGERE_OPPHØRSDATO);
         var resultat = utleder.finnFagsakerTilVurdering(hendelse);
@@ -87,7 +86,6 @@ class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtlederTest {
             TIDLIGERE_OPPHØRSDATO.plusDays(50));
 
         behandling.avsluttBehandling();
-        entityManager.flush();
 
         var hendelse = lagHendelse(BRUKER_AKTØR_ID, TIDLIGERE_OPPHØRSDATO);
         var resultat = utleder.finnFagsakerTilVurdering(hendelse);
@@ -107,7 +105,6 @@ class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtlederTest {
             periodeMaksDato);
 
         behandling.avsluttBehandling();
-        entityManager.flush();
 
         var hendelse = lagHendelse(BRUKER_AKTØR_ID, TIDLIGERE_OPPHØRSDATO);
         var resultat = utleder.finnFagsakerTilVurdering(hendelse);
@@ -126,7 +123,6 @@ class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtlederTest {
             TIDLIGERE_OPPHØRSDATO);
 
         behandling.avsluttBehandling();
-        entityManager.flush();
 
         var hendelse = lagHendelse(BRUKER_AKTØR_ID, TIDLIGERE_OPPHØRSDATO);
 

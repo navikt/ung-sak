@@ -231,7 +231,7 @@ class BehandlingDtoUtilTest {
     @Test
     void forventer_opphør_opphevet_når_slått_sammen_med_utdatert_opphør_årsak() {
         // Reproduserer at opphevOpphør-hendelsen kan bli slått sammen med en fortsatt åpen behandling
-        // som venter på bekreftelse av det (nå opphevede) opphøret, jf. UngEtterlysningOppretter.erRentOpphørOpphevetLøp.
+        // som venter på bekreftelse av det (nå opphevede) opphøret, jf. UngEtterlysningOppretter.harKunOpphørsÅrsaker.
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
             BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
             BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));

@@ -83,7 +83,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
 
         logger.info("Avbryter {} ventende etterlysning(er) for endret sluttdato grunnet opphevelse av opphør på behandling {}",
             etterlysningerSomSkalAvbrytes.size(), behandlingId);
-        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
+        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::setSkalAvbrytes);
         etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
 
         prosessTaskTjeneste.lagre(lagTaskForAvbrytelseAvEtterlysning(behandlingId, behandlingReferanse.getFagsakId()));

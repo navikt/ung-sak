@@ -157,12 +157,10 @@ public class BehandlingDtoUtil {
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO == it)) {
             return BehandlingVisningsnavn.OPPHØR_VED_MAKSDATO;
         }
-        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM == it
+        if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
+            && behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM == it
             || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
-            // Toleranse for at opphevOpphør-hendelsen kan være slått sammen med en fortsatt åpen behandling som
-            // venter på bekreftelse av det nå opphevede opphøret (se OpprettRevurderingEllerOpprettDiffTask og
-            // UngEtterlysningOppretter.erRentOpphørOpphevetLøp). Den utdaterte RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
-            // skal ikke gjøre at behandlingen fremstår som "flere behandlingsårsaker".
+            // Se BehandlingDtoUtilTest for dokumentasjon av sammenslåings-scenarioet som tolereres her.
             return BehandlingVisningsnavn.OPPHØR_OPPHEVET;
         }
         return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;

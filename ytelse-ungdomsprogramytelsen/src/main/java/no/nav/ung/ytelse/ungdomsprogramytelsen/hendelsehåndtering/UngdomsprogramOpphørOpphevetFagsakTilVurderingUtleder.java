@@ -73,16 +73,16 @@ public class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder implements F
                 continue;
             }
 
+            Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
             Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
             if (behandlingOpt.isEmpty()) {
-                logger.info("Det er ingen behandling på fagsak. Ignorer hendelse");
+                logger.info("Det er ingen behandling på sak {}. Ignorerer hendelse {}.", saksnummer, hendelseId);
                 continue;
             }
 
             Behandling sisteBehandling = behandlingOpt.get();
-            Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
 
-            if (erAlleredeGjenåpnetIGrunnlag(sisteBehandling, tidligereOpphørsdato, hendelseId, saksnummer)) {
+            if (erAlleredeHåndtertIGrunnlag(sisteBehandling, tidligereOpphørsdato, hendelseId, saksnummer)) {
                 continue;
             }
 
@@ -96,30 +96,32 @@ public class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder implements F
 
     /**
      * Idempotens-sjekk: dersom periodegrunnlaget allerede strekker seg forbi den tidligere opphørsdatoen, er
-     * opphevelsen allerede reflektert (f.eks. fra en tidligere behandling av samme hendelse), og hendelsen skal
+     * opphevelsen allerede håndtert (f.eks. fra en tidligere behandling av samme hendelse), og hendelsen skal
      * ignoreres.
      */
-    private boolean erAlleredeGjenåpnetIGrunnlag(Behandling behandling, LocalDate tidligereOpphørsdato, String hendelseId, Saksnummer saksnummer) {
+    private boolean erAlleredeHåndtertIGrunnlag(Behandling behandling, LocalDate tidligereOpphørsdato, String hendelseId, Saksnummer saksnummer) {
         var tidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandling.getId());
         if (tidslinje.isEmpty()) {
             return false;
         }
-        boolean alleredeGjenåpnet = tidslinje.getMaxLocalDate().isAfter(tidligereOpphørsdato);
-        if (alleredeGjenåpnet) {
+        boolean alleredeHåndtert = tidslinje.getMaxLocalDate().isAfter(tidligereOpphørsdato);
+        if (alleredeHåndtert) {
             logger.info("Periodegrunnlag på behandling {} for {} strekker seg allerede forbi tidligere opphørsdato {}. Ignorerer hendelse {}.",
                 behandling.getUuid(), saksnummer, tidligereOpphørsdato, hendelseId);
         }
-        return alleredeGjenåpnet;
+        return alleredeHåndtert;
     }
 
     /**
      * Perioden som blir gjenåpnet strekker seg fra dagen etter den tidligere opphørsdatoen og frem til
-     * (uendret) periodeMaksDato. Dersom periodeMaksDato av en eller annen grunn ikke finnes i grunnlaget,
-     * faller vi tilbake til gjeldende fagsakperiode.
+     * (uendret) periodeMaksDato. periodeMaksDato er kilde til sannhet og forventes alltid å finnes i
+     * grunnlaget på dette tidspunktet — mangler den, er det en feiltilstand som skal feile hardt fremfor
+     * å falle tilbake til en potensielt feil verdi.
      */
     private DatoIntervallEntitet utledPeriode(Fagsak fagsak, Behandling behandling, LocalDate tidligereOpphørsdato) {
-        var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId());
-        var tom = maksdato.orElseGet(() -> fagsak.getPeriode().getTomDato());
+        var tom = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId())
+            .orElseThrow(() -> new IllegalStateException("Fant ikke periodeMaksDato for behandling %s på sak %s. Kan ikke utlede periode for opphevelse av opphør."
+                .formatted(behandling.getUuid(), fagsak.getSaksnummer())));
         if (!tom.isAfter(tidligereOpphørsdato)) {
             throw new IllegalStateException("Maksdato/tom (%s) er ikke etter tidligere opphørsdato (%s) — hendelsen burde ha blitt ignorert."
                 .formatted(tom, tidligereOpphørsdato));
