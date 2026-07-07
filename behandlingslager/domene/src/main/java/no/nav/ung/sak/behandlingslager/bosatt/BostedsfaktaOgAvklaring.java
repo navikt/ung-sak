@@ -49,6 +49,10 @@ public class BostedsfaktaOgAvklaring {
         return harForeslåttAvklaring() ? foreslåttAvklaring.getIkkeOppfyltÅrsak() : null;
     }
 
+    public boolean erOppfyltEllerSenderVarsel() {
+        return foreslåttAvklaring.isErBosattITrondheim() || foreslåttAvklaring.skalSendeVarsel();
+    }
+
     @Override
     public String toString() {
         return "BostedsfaktaOgAvklaring{"

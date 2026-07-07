@@ -184,10 +184,10 @@ class VurderFaktaOmBostedOppdatererTest {
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
         var grunnlag = mock(BostedsGrunnlag.class);
         when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
-            .thenReturn(tidslinjeMedTidligereAvklaring(false, null));
+            .thenReturn(tidslinjeMedTidligereAvklaring(false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
         when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
 
-        var dto = dtoMedEnAvklaring(false, false, null);
+        var dto = dtoMedEnAvklaring(false, false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
 
         oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
 
