@@ -45,8 +45,8 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
         var årsaker = behandlingRepository.hentBehandling(behandlingReferanse.getBehandlingId()).getBehandlingÅrsakerTyper();
 
         // Rene varsel-om-opphør-ved-maksdato-behandlinger skal kun varsle om opphør, og ikke trigge
-        // inntektskontroll eller programperiodeendring-varsling som del av opphørsløpet.
-        if (erRentVarselOpphørVedMaksdatoLøp(årsaker)) {
+        // inntektskontroll eller programperiodeendring-varsling som del av opphør-behandlingsflyten.
+        if (erRentVarselOpphørVedMaksdatoBehandlingsflyt(årsaker)) {
             maksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
             return;
         }
@@ -61,7 +61,7 @@ public class UngEtterlysningOppretter implements EtterlysningOppretter {
         maksdatoEtterlysningTjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(behandlingReferanse);
     }
 
-    private boolean erRentVarselOpphørVedMaksdatoLøp(List<BehandlingÅrsakType> årsaker) {
+    private boolean erRentVarselOpphørVedMaksdatoBehandlingsflyt(List<BehandlingÅrsakType> årsaker) {
         return !årsaker.isEmpty() && årsaker.stream().allMatch(å -> å == BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO);
     }
 }

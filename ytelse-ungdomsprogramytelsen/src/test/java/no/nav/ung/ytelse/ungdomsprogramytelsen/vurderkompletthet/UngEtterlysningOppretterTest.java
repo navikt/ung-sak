@@ -41,7 +41,7 @@ class UngEtterlysningOppretterTest {
     }
 
     @Test
-    void skalIkkeTriggeInntektskontrollEllerProgramperiodeendring_forRentVarselOpphørVedMaksdatoLøp() {
+    void skalIkkeTriggeInntektskontrollEllerProgramperiodeendring_forRentVarselOpphørVedMaksdatoBehandlingsflyt() {
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO));
 
         oppretter.opprettEtterlysninger(behandlingReferanse);
