@@ -28,7 +28,7 @@ public class OpphørOpphevetInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        // Den tidligere sluttdatoen (som nå oppheves) leses fra prosess-triggeren for RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM
+        // Den tidligere opphørsdatoen (som nå oppheves) leses fra prosess-triggeren for RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM
         // på DENNE behandlingen, ikke fra forrige behandlings periodegrunnlag. Dette fungerer også når opphøret og
         // opphevelsen er slått sammen på samme (fortsatt åpne) behandling, hvor forrige behandling aldri fikk det
         // opprinnelige opphøret persistert (se UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder, som setter
