@@ -40,24 +40,24 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>11.2.8</felles.version>
-        <swagger.version>2.2.51</swagger.version>
-        <junit.version>6.1.0</junit.version>
+        <swagger.version>2.2.52</swagger.version>
+        <junit.version>6.1.1</junit.version>
         <k9format.version>13.4.0</k9format.version>
         <jackson.version>2.22.0</jackson.version>
         <asm.version>9.10.1</asm.version>
         <kotlin-stdlib.version>2.4.0</kotlin-stdlib.version>
         <jandex.version>3.6.0</jandex.version>
         <pdfgen-core.version>1.1.81</pdfgen-core.version>
-        <flyway.version>12.9.0</flyway.version>
+        <flyway.version>12.10.0</flyway.version>
         <confluent.platform.version>8.3.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.11.3</ung-deltakelse-opplyser.version>
         <ung-brukerdialog-api.version>1.0.6</ung-brukerdialog-api.version>
-        <handlebars.version>4.5.2</handlebars.version>
+        <handlebars.version>4.5.3</handlebars.version>
         <validation-model-jakarta.version>1.30.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
         <jsoup.version>1.22.2</jsoup.version>
-        <commonmark.version>0.28.0</commonmark.version>
+        <commonmark.version>0.29.0</commonmark.version>
         <tms-mikrofrontend-builder.version>3.0.0</tms-mikrofrontend-builder.version>
         <tms-java-builder.version>2.2.0</tms-java-builder.version>
     </properties>
@@ -103,7 +103,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>9.1.0.Final</version>
+                <version>9.1.1.Final</version>
             </dependency>
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
@@ -592,14 +592,14 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.31.0-GA</version>
+                <version>3.32.0-GA</version>
             </dependency>
 
             <!-- Database -->
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.11</version>
+                <version>42.7.12</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>

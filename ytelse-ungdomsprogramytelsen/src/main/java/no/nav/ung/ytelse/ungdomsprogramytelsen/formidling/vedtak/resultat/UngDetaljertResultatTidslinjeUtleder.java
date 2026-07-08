@@ -76,7 +76,8 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         var behandlingGrunnlag = new UngDetaljertResultatBehandlingGrunnlag(
             behandling.erManueltOpprettet(),
             grunnlag.getUngdomsprogramMaksPeriode().orElse(null),
-            grunnlag.hentForEksaktEnPeriode());
+            grunnlag.hentForEksaktEnPeriode(),
+            behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
 
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .intersection(samletVilkårTidslinje,
@@ -116,7 +117,10 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
             resultater.add(endretStartdatoDetaljertResultat(avslåtteVilkår));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+        // RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM regnes som utdatert/stale når behandlingen også har
+        // RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM (jf. samme mønster i UngEtterlysningOppretter og
+        // BehandlingDtoUtil) — da skal opphøret ikke lenger gi eget opphørsbrev, kun opphevelsen.
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM) && !behandlingGrunnlag.harOpphevelseAvOpphør()) {
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
         }
 
