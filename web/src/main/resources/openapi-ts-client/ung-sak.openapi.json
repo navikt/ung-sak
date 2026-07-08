@@ -568,6 +568,9 @@
             },
             "type" : "object"
           },
+          "taskParametreGyldig" : {
+            "type" : "boolean"
+          },
           "taskType" : {
             "maxLength" : 100,
             "minLength" : 1,
