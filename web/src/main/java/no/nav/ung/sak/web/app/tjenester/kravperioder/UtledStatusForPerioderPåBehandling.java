@@ -80,8 +80,15 @@ class UtledStatusForPerioderPåBehandling {
 
 
     private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakerFraTriggereTidslinje(List<Trigger> prosesstriggere) {
+        // RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM regnes som utdatert/stale når
+        // RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM også finnes på behandlingen — jf. samme
+        // mønster i UngEtterlysningOppretter og BehandlingDtoUtil.
+        boolean harOpphevelse = prosesstriggere.stream()
+            .anyMatch(it -> it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+
         return prosesstriggere.stream()
             .filter(it -> RELEVANTE_ÅRSAKER.contains(it.getÅrsak()))
+            .filter(it -> !(harOpphevelse && it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM))
             .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(),
                 Set.of(ÅrsakTilVurdering.mapFra(it.getÅrsak()))))
             .reduce(LocalDateTimeline::crossJoin)
