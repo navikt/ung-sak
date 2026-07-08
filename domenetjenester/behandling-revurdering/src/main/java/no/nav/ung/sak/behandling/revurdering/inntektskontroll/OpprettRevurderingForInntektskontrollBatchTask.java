@@ -54,8 +54,10 @@ public class OpprettRevurderingForInntektskontrollBatchTask extends Duplikatbesk
 
     @Override
     protected void leggTilProperties(ProsessTaskData childTask) {
-        var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-        var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        var now = LocalDate.now();
+        var forrigeMåned = now.minusMonths(1);
+        var fom = forrigeMåned.withDayOfMonth(1);
+        var tom = forrigeMåned.with(TemporalAdjusters.lastDayOfMonth());
         childTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
         childTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
