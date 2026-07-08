@@ -71,7 +71,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
      * {@link EtterlysningType#UTTALELSE_ENDRET_PERIODE} (ny flyt, jf. {@code PROGRAMPERIODE_ENDRING_ENABLED}),
      * siden begge typer kan representere en ventende uttalelse om (blant annet) endret sluttdato.
      */
-    public void avbrytVentendeSluttdatoEtterlysninger(BehandlingReferanse behandlingReferanse) {
+    public void avbrytVentendeSluttdatoOgPeriodeEtterlysninger(BehandlingReferanse behandlingReferanse) {
         var behandlingId = behandlingReferanse.getBehandlingId();
         // Opphevelse av opphør gjelder kun sluttdato (register-endring fjerner sluttdatoen). Startdato berøres ikke.
         var etterlysningerSomSkalAvbrytes = etterlysningRepository.hentEtterlysningerMedSisteFørst(

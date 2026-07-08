@@ -38,7 +38,7 @@ public class OpphevelseAvOpphørEtterlysningHåndterer {
     }
 
     public void håndter(BehandlingReferanse behandlingReferanse, List<BehandlingÅrsakType> årsaker) {
-        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoEtterlysninger(behandlingReferanse);
+        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoOgPeriodeEtterlysninger(behandlingReferanse);
 
         if (harKunOpphørsÅrsaker(årsaker)) {
             return;
