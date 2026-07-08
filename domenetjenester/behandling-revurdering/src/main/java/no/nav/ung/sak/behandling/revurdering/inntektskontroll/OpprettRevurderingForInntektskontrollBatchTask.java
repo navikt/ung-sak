@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 
@@ -51,11 +52,19 @@ public class OpprettRevurderingForInntektskontrollBatchTask extends Duplikatbesk
         return new TaskType(OpprettRevurderingForInntektskontrollTask.TASKNAME);
     }
 
+    @Override
+    protected void leggTilProperties(ProsessTaskData childTask) {
+        var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+        var tom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        childTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        childTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_TOM, tom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+    }
 
     @Override
     protected boolean erDuplikat(ProsessTaskData data) {
         var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-        return data.getPropertyValue(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM)
-            .equals(fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        return Objects.equals(
+            data.getPropertyValue(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM),
+            fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 }
