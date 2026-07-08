@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -44,11 +45,25 @@ public class BostedOppgaveOppretter {
                 new BekreftBostedOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),
                     etterlysning.getPeriode().getTomDato(),
-                    periodeAvklaring.isErBosattITrondheim()
+                    periodeAvklaring.isErBosattITrondheim(),
+                    periodeAvklaring.getBegrunnelse(),
+                    map(periodeAvklaring.getIkkeOppfyltÅrsak())
                 ),
                 etterlysning.getFrist()
             );
             oppgaveKlient.opprettOppgave(oppgaveDto);
         }
+    }
+
+    private BostedsvilkårIkkeOppfyltÅrsak map(no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
+        return switch (ikkeOppfyltÅrsak) {
+            case IKKE_BOSATTADRESSE_I_TRONDHEIM -> BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
+            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM ->
+                BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM;
+            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM ->
+                BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
+            case ANNET -> BostedsvilkårIkkeOppfyltÅrsak.ANNET;
+            case UDEFINERT -> BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT;
+        };
     }
 }
