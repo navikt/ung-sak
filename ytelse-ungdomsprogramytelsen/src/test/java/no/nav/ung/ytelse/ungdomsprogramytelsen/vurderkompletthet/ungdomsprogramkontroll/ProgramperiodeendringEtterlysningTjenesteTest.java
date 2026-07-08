@@ -461,7 +461,27 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         opprettEtterlysningPåVent(ungdomsprogramPeriodeGrunnlag, fom, tom, EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO);
 
         // act
-        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoEtterlysninger(BehandlingReferanse.fra(behandling));
+        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoOgPeriodeEtterlysninger(BehandlingReferanse.fra(behandling));
+
+        // assert
+        final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        assertThat(etterlysninger.size()).isEqualTo(1);
+        assertThat(etterlysninger.get(0).getStatus()).isEqualTo(EtterlysningStatus.SKAL_AVBRYTES);
+    }
+
+    @Test
+    void skal_avbryte_ventende_etterlysning_for_endret_periode_ved_ny_flyt() {
+        // Når PROGRAMPERIODE_ENDRING_ENABLED er på, opprettes UTTALELSE_ENDRET_PERIODE i stedet for
+        // UTTALELSE_ENDRET_SLUTTDATO/-STARTDATO. Denne skal også avbrytes ved opphevelse av opphør.
+        final var fom = LocalDate.now();
+        final var tom = fom.plusMonths(1);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
+        final var ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+
+        opprettEtterlysningPåVent(ungdomsprogramPeriodeGrunnlag, fom, tom, EtterlysningType.UTTALELSE_ENDRET_PERIODE);
+
+        // act
+        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoOgPeriodeEtterlysninger(BehandlingReferanse.fra(behandling));
 
         // assert
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
@@ -476,7 +496,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(), List.of(new UngdomsprogramPeriode(fom, tom)));
 
         // act (skal ikke feile selv om det ikke finnes noen etterlysning å avbryte)
-        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoEtterlysninger(BehandlingReferanse.fra(behandling));
+        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoOgPeriodeEtterlysninger(BehandlingReferanse.fra(behandling));
 
         // assert
         assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId()).size()).isEqualTo(0);
@@ -492,7 +512,7 @@ class ProgramperiodeendringEtterlysningTjenesteTest {
         opprettEtterlysningPåVent(ungdomsprogramPeriodeGrunnlag, fom, tom, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
 
         // act
-        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoEtterlysninger(BehandlingReferanse.fra(behandling));
+        programperiodeendringEtterlysningTjeneste.avbrytVentendeSluttdatoOgPeriodeEtterlysninger(BehandlingReferanse.fra(behandling));
 
         // assert (startdato-etterlysning skal ikke påvirkes av opphevelse av opphør, kun sluttdato)
         final var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());

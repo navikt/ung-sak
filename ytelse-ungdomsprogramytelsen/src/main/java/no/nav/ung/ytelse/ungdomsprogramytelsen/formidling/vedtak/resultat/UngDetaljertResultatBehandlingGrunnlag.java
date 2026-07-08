@@ -7,7 +7,8 @@ import java.util.Optional;
 
 public record UngDetaljertResultatBehandlingGrunnlag(boolean manuellOpprettetBehandling,
                                                      UngdomsprogramMaksPeriode ungdomsprogramMaksPeriode,
-                                                     DatoIntervallEntitet ungdomsprogramPeriode) {
+                                                     DatoIntervallEntitet ungdomsprogramPeriode,
+                                                     boolean harOpphevelseAvOpphør) {
 
     public Optional<UngdomsprogramMaksPeriode> ungdomsprogramMaksPeriodeOpt() {
         return Optional.ofNullable(ungdomsprogramMaksPeriode);

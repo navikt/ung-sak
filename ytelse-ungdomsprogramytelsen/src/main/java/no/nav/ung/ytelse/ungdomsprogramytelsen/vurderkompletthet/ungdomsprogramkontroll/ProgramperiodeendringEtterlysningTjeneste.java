@@ -66,13 +66,18 @@ public class ProgramperiodeendringEtterlysningTjeneste {
      * Brukes når opphevelse av opphør gjør en tidligere opprettet sluttdato-etterlysning irrelevant —
      * f.eks. dersom {@code UngdomsprogramOpphørOpphevetHendelse} blir slått sammen med en fortsatt åpen behandling
      * som venter på bekreftelse av det (nå opphevede) opphøret.
+     * <p>
+     * Sjekker både {@link EtterlysningType#UTTALELSE_ENDRET_SLUTTDATO} (gammel flyt) og
+     * {@link EtterlysningType#UTTALELSE_ENDRET_PERIODE} (ny flyt, jf. {@code PROGRAMPERIODE_ENDRING_ENABLED}),
+     * siden begge typer kan representere en ventende uttalelse om (blant annet) endret sluttdato.
      */
-    public void avbrytVentendeSluttdatoEtterlysninger(BehandlingReferanse behandlingReferanse) {
+    public void avbrytVentendeSluttdatoOgPeriodeEtterlysninger(BehandlingReferanse behandlingReferanse) {
         var behandlingId = behandlingReferanse.getBehandlingId();
-        // Opphevelse av opphør gjelder kun sluttdato (register-endring fjerner sluttdatoen). Startdato/periode berøres ikke.
+        // Opphevelse av opphør gjelder kun sluttdato (register-endring fjerner sluttdatoen). Startdato berøres ikke.
         var etterlysningerSomSkalAvbrytes = etterlysningRepository.hentEtterlysningerMedSisteFørst(
                 behandlingId,
-                EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO)
+                EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO,
+                EtterlysningType.UTTALELSE_ENDRET_PERIODE)
             .stream()
             .filter(it -> it.getStatus() == EtterlysningStatus.OPPRETTET || it.getStatus() == EtterlysningStatus.VENTER)
             .toList();

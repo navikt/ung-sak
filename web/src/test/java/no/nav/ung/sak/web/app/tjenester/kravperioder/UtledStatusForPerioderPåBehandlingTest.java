@@ -167,25 +167,28 @@ class UtledStatusForPerioderPåBehandlingTest {
     }
 
     @Test
-    void revurdering_skal_kun_vise_triggerperiode_naar_soknadsperiode_er_filtrert_bort() {
-        // Simulerer at kallstedet har filtrert bort søknadsdokumentet (som tilhører
-        // førstegangsbehandlingen) via relevanteKravdokumentForBehandling. Kun trigger-perioden
-        // skal vises.
+    void skal_ikke_vise_opphør_når_opphevelse_av_opphør_er_på_samme_behandling() {
         var startdato = LocalDate.now();
-        var fomForlenget = startdato.plusWeeks(52);
-        var tomForlenget = fomForlenget.plusWeeks(8).minusDays(1);
-        var forlengetPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(fomForlenget, tomForlenget);
+        var tidligereOpphørsdato = startdato.plusWeeks(30);
+        var maksdato = startdato.plusWeeks(52).minusDays(1);
+        var opphørPeriode = DatoIntervallEntitet.fraOgMedTilOgMed(tidligereOpphørsdato.plusDays(1), maksdato);
+        var ophevelsePeriode = DatoIntervallEntitet.fraOgMedTilOgMed(tidligereOpphørsdato.plusDays(1), maksdato);
 
         var statusForPerioderPåBehandling = UtledStatusForPerioderPåBehandling.utledStatus(
-            Map.of(), // Søknadsdokumentet er allerede filtrert bort av kallstedet
-            List.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, forlengetPeriode))
+            Map.of(),
+            List.of(
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, opphørPeriode),
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM, ophevelsePeriode)
+            )
         );
 
-        var perioderMedÅrsak = statusForPerioderPåBehandling.getPerioderMedÅrsak();
-        assertThat(perioderMedÅrsak.size()).isEqualTo(1);
-        var periode = perioderMedÅrsak.get(0);
-        assertThat(periode.getPeriode()).isEqualTo(new Periode(forlengetPeriode.getFomDato(), forlengetPeriode.getTomDato()));
-        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.FORLENGET_PERIODE_UNGDOMSPROGRAM));
+        var unikeÅrsaker = statusForPerioderPåBehandling.getPerioderMedÅrsak().stream()
+            .flatMap(periode -> periode.getÅrsaker().stream())
+            .collect(Collectors.toSet());
+
+        assertThat(unikeÅrsaker)
+            .contains(ÅrsakTilVurdering.OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
+            .doesNotContain(ÅrsakTilVurdering.OPPHØR_UNGDOMSPROGRAM);
     }
 
 
