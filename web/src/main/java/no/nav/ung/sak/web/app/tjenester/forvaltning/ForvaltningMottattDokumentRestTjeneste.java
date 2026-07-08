@@ -119,7 +119,14 @@ public class ForvaltningMottattDokumentRestTjeneste {
                 .build();
         }
 
-        oppgaveBekreftelse.setBekreftelse(eksisterendeBekreftelse.medUttalelseFraBruker(nyUttalelse));
+        EndretSluttdatoBekreftelse endretBekreftelse = new EndretSluttdatoBekreftelse(
+            eksisterendeBekreftelse.getOppgaveReferanse(),
+            eksisterendeBekreftelse.nySluttdato(),
+            true,
+            nyUttalelse,
+            eksisterendeBekreftelse.dataBruktTilUtledning());
+
+        oppgaveBekreftelse.setBekreftelse(endretBekreftelse);
         String nyPayload = JsonUtils.toString(oppgaveBekreftelse);
 
         // Oppdater MottattDokument (payload er updatable=false, så bruk native oppdatering)
