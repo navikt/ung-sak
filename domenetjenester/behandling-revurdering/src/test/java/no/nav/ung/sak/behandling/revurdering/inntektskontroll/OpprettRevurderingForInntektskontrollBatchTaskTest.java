@@ -35,10 +35,11 @@ class OpprettRevurderingForInntektskontrollBatchTaskTest {
 
     @Test
     void skal_sette_periode_fom_og_tom_på_child_task() {
-        batchTask.doTask(new ProsessTaskData("batch.opprettRevurderingForInntektskontrollBatch"));
+        var now = LocalDate.now();
+        var forventetFom = now.minusMonths(1).withDayOfMonth(1);
+        var forventetTom = now.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
 
-        var forventetFom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-        var forventetTom = LocalDate.now().minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        batchTask.doTask(new ProsessTaskData(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME));
 
         ArgumentCaptor<ProsessTaskData> captor = ArgumentCaptor.forClass(ProsessTaskData.class);
         verify(prosessTaskTjeneste).lagre(captor.capture());
