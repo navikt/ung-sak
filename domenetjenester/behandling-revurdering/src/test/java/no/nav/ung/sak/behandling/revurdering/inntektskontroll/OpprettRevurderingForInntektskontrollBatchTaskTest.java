@@ -7,9 +7,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -35,9 +34,9 @@ class OpprettRevurderingForInntektskontrollBatchTaskTest {
 
     @Test
     void skal_sette_periode_fom_og_tom_på_child_task() {
-        var now = LocalDate.now();
-        var forventetFom = now.minusMonths(1).withDayOfMonth(1);
-        var forventetTom = now.minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        var forrigeMåned = YearMonth.now().minusMonths(1);
+        var forventetFom = forrigeMåned.atDay(1);
+        var forventetTom = forrigeMåned.atEndOfMonth();
 
         batchTask.doTask(new ProsessTaskData(OpprettRevurderingForInntektskontrollBatchTask.TASKNAME));
 
@@ -54,7 +53,7 @@ class OpprettRevurderingForInntektskontrollBatchTaskTest {
 
     @Test
     void skal_ikke_opprette_duplikat_når_feilet_task_for_samme_periode_finnes() {
-        var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
+        var fom = YearMonth.now().minusMonths(1).atDay(1);
         var eksisterendeTask = new ProsessTaskData(OpprettRevurderingForInntektskontrollTask.TASKNAME);
         eksisterendeTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM, fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
 
