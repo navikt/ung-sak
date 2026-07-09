@@ -11,13 +11,13 @@ public enum BehandlingVisningsnavn {
      * Et tidligere opphør av ungdomsprogrammet er reversert, og det tidligere opphøret ble faktisk
      * vedtatt/iverksatt (dvs. bruker mottok et opphørsbrev). Gir eget vedtaksbrev om opphevelsen.
      */
-    OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
+    UNGDOMSPROGRAM_OPPHØR_OPPHEVET,
 
     /**
      * Ingen vedtaksbrev sendes, siden opphøret aldri ble vedtatt/iverksatt (ingen opphørsbrev til bruker
      * å reversere). Kun sporing via behandlingsårsak og historikkinnslag.
      */
-    OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM,
+    UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING,
 
     KONTROLL_AV_INNTEKT,
 

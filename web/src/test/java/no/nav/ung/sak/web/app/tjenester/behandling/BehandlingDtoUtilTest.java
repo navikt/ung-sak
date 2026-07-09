@@ -245,7 +245,7 @@ class BehandlingDtoUtilTest {
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false, ungdomsprogramPeriodeRepository);
 
-        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_OPPHEVET);
     }
 
     @Test
@@ -260,7 +260,7 @@ class BehandlingDtoUtilTest {
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false, ungdomsprogramPeriodeRepository);
 
-        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_OPPHEVET);
     }
 
     @Test
@@ -280,7 +280,7 @@ class BehandlingDtoUtilTest {
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false, ungdomsprogramPeriodeRepository);
 
-        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM);
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING);
     }
 
     @Test

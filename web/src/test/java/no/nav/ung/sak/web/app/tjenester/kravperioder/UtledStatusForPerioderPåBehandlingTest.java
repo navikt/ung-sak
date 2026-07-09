@@ -158,7 +158,7 @@ class UtledStatusForPerioderPåBehandlingTest {
         assertThat(perioderMedÅrsak.size()).isEqualTo(1);
         var periode = perioderMedÅrsak.get(0);
         assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
-        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
+        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.UNGDOMSPROGRAM_OPPHØR_OPPHEVET));
     }
 
     @Test
@@ -180,7 +180,7 @@ class UtledStatusForPerioderPåBehandlingTest {
         assertThat(perioderMedÅrsak.size()).isEqualTo(1);
         var periode = perioderMedÅrsak.get(0);
         assertThat(periode.getPeriode()).isEqualTo(new Periode(periodeTilVurdering.getFomDato(), periodeTilVurdering.getTomDato()));
-        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM));
+        assertThat(periode.getÅrsaker()).isEqualTo(Set.of(ÅrsakTilVurdering.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING));
     }
 
     @Test
@@ -259,7 +259,7 @@ class UtledStatusForPerioderPåBehandlingTest {
             .collect(Collectors.toSet());
 
         assertThat(unikeÅrsaker)
-            .contains(ÅrsakTilVurdering.OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
+            .contains(ÅrsakTilVurdering.UNGDOMSPROGRAM_OPPHØR_OPPHEVET)
             .doesNotContain(ÅrsakTilVurdering.OPPHØR_UNGDOMSPROGRAM);
     }
 
@@ -287,8 +287,8 @@ class UtledStatusForPerioderPåBehandlingTest {
             .collect(Collectors.toSet());
 
         assertThat(unikeÅrsaker)
-            .contains(ÅrsakTilVurdering.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM)
-            .doesNotContain(ÅrsakTilVurdering.OPPHØR_UNGDOMSPROGRAM, ÅrsakTilVurdering.OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+            .contains(ÅrsakTilVurdering.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING)
+            .doesNotContain(ÅrsakTilVurdering.OPPHØR_UNGDOMSPROGRAM, ÅrsakTilVurdering.UNGDOMSPROGRAM_OPPHØR_OPPHEVET);
     }
 
 }

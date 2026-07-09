@@ -18,16 +18,8 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     HENDELSE_FØDSEL_BARN("HENDELSE_FØDSEL_BARN", "Fødsel barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
     OPPHØR_VED_MAKSDATO("OPPHØR_VED_MAKSDATO", "Opphør ved maksdato"),
-    /**
-     * Et tidligere opphør ble faktisk vedtatt/iverksatt (bruker mottok opphørsbrev) og er nå reversert
-     * ved en ny hendelse. Se {@link no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn#OPPHØR_OPPHEVET}.
-     */
-    OPPHØR_OPPHEVET_UNGDOMSPROGRAM("OPPHØR_OPPHEVET_UNGDOMSPROGRAM", "Opphevelse av opphør av ungdomsprogram"),
-    /**
-     * Ingen vedtaksbrev, siden opphøret aldri ble vedtatt/iverksatt (ingen opphørsbrev å reversere).
-     * Se {@link no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn#OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM}.
-     */
-    OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM("OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM", "Opphør mottatt og avbrutt i samme behandling"),
+    UNGDOMSPROGRAM_OPPHØR_OPPHEVET("UNGDOMSPROGRAM_OPPHØR_OPPHEVET", "Opphevelse av opphør av ungdomsprogram"),
+    UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING("UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING", "Opphør mottatt og avbrutt i samme behandling"),
     ENDRET_STARTDATO_UNGDOMSPROGRAM("ENDRET_STARTDATO_UNGDOMSPROGRAM", "Endret startdato for ungdomsprogram"),
     FORLENGET_PERIODE_UNGDOMSPROGRAM("FORLENGET_PERIODE_UNGDOMSPROGRAM", "Forlenget periode"),
     KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll og rapportering av inntekt"),
@@ -48,7 +40,7 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, HENDELSE_FØDSEL_BARN);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, OPPHØR_UNGDOMSPROGRAM);
         sammenheng.put(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, OPPHØR_VED_MAKSDATO);
-        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM, OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+        sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM, UNGDOMSPROGRAM_OPPHØR_OPPHEVET);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, ENDRET_STARTDATO_UNGDOMSPROGRAM);
         sammenheng.put(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, FORLENGET_PERIODE_UNGDOMSPROGRAM);
         sammenheng.put(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, KONTROLL_AV_INNTEKT);

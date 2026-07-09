@@ -89,15 +89,9 @@ class UtledStatusForPerioderPåBehandling {
     private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakerFraTriggereTidslinje(List<Trigger> prosesstriggere,
                                                                                              Behandling behandling,
                                                                                              UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        // RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM regnes som utdatert/stale når
-        // RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM også finnes på behandlingen — jf. samme
-        // mønster i UngEtterlysningOppretter og BehandlingDtoUtil.
         boolean harOpphevelse = prosesstriggere.stream()
             .anyMatch(it -> it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
 
-        // Skiller mellom at opphøret faktisk ble vedtatt i en tidligere behandling, og at opphør og
-        // opphevelse havnet på samme, fortsatt åpne behandling (opphøret ble aldri iverksatt, jf.
-        // UngdomsprogramOpphørUtleder) — samme skille som i BehandlingDtoUtil.
         boolean opphørVarFaktiskIverksatt = harOpphevelse
             && UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository);
 
@@ -112,7 +106,7 @@ class UtledStatusForPerioderPåBehandling {
 
     private static ÅrsakTilVurdering mapTilÅrsakTilVurdering(BehandlingÅrsakType årsak, boolean opphørVarFaktiskIverksatt) {
         if (årsak == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM && !opphørVarFaktiskIverksatt) {
-            return ÅrsakTilVurdering.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM;
+            return ÅrsakTilVurdering.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING;
         }
         return ÅrsakTilVurdering.mapFra(årsak);
     }

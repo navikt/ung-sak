@@ -162,10 +162,9 @@ public class BehandlingDtoUtil {
         if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
             && behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM == it
             || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
-            // Opphør og opphevelse kan havne på samme, fortsatt åpne behandling - se UngdomsprogramOpphørUtleder.
             return UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository)
-                ? BehandlingVisningsnavn.OPPHØR_OPPHEVET_UNGDOMSPROGRAM
-                : BehandlingVisningsnavn.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM;
+                ? BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_OPPHEVET
+                : BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING;
         }
         return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;
     }
