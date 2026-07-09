@@ -269,4 +269,64 @@ public class PipRepository {
         query.setParameter("uuider", behandlingsUUIDer);
         return query.getResultStream().collect(Collectors.toCollection(LinkedHashSet::new));
     }
+
+    public List<no.nav.ung.sak.kontrakt.abac.FagsakPipDto> hentPipDataOgPersonerForBrukersFagsaker(AktørId brukerAktørId) {
+        Set<Saksnummer> saksnumre = hentSaksnumreForBruker(Set.of(brukerAktørId));
+        return saksnumre.stream()
+            .map(this::hentPipDataOgPersonerForFagsak)
+            .flatMap(Optional::stream)
+            .toList();
+    }
+
+    public Set<Saksnummer> hentSaksnumreForBruker(Collection<AktørId> aktørId) {
+        if (aktørId.isEmpty()) {
+            return Collections.emptySet();
+        }
+        String sql = "SELECT f.saksnummer from FAGSAK f where f.bruker_aktoer_id in (:aktørId)";
+        Query query = entityManager.createNativeQuery(sql);
+        query.setParameter("aktørId", aktørId.stream().map(AktørId::getId).collect(Collectors.toList()));
+        var result = (List<String>) query.getResultList();
+        return result.stream().map(Saksnummer::new).collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public Optional<no.nav.ung.sak.kontrakt.abac.FagsakPipDto> hentPipDataOgPersonerForFagsak(Saksnummer saksnummer) {
+        FagsakTypeOgStatus fagsakTypeOgStatus = hentFagsakTypeOgStatus(saksnummer);
+        if (fagsakTypeOgStatus == null){
+            return Optional.empty();
+        }
+        Set<AktørId> aktørIder = hentAktørIdKnyttetTilFagsaker(Set.of(saksnummer));
+        Set<AktørId> aktørIderForSporingslogg = hentAktørIdForSporingslogg(saksnummer);
+        return Optional.of(new no.nav.ung.sak.kontrakt.abac.FagsakPipDto(
+            saksnummer,
+            aktørIder,
+            aktørIderForSporingslogg,
+            fagsakTypeOgStatus.status(),
+            fagsakTypeOgStatus.ytelseType()
+        ));
+    }
+
+
+    public record FagsakTypeOgStatus(FagsakYtelseType ytelseType, FagsakStatus status) {
+    }
+
+    public FagsakTypeOgStatus hentFagsakTypeOgStatus(Saksnummer saksnummer) {
+        Objects.requireNonNull(saksnummer, "saksnummer");
+
+        String sql = "select ytelse_type, fagsak_status from fagsak where saksnummer = :saksnummer";
+        Query query = entityManager.createNativeQuery(sql, Tuple.class);
+        query.setParameter("saksnummer", saksnummer.getVerdi());
+        @SuppressWarnings("unchecked")
+        List<Tuple> resulat = query.getResultList();
+        if (resulat.isEmpty()) {
+            return null;
+        } else if (resulat.size() == 1) {
+            Tuple tuple = resulat.getFirst();
+            return new FagsakTypeOgStatus(
+                FagsakYtelseType.fraKode(tuple.get("ytelse_type", String.class)),
+                FagsakStatus.fraKode(tuple.get("fagsak_status", String.class))
+            );
+        } else {
+            throw new IllegalStateException("Forventet 0 eller 1 treff etter saksnummer, men fikk " + resulat.size());
+        }
+    }
 }
