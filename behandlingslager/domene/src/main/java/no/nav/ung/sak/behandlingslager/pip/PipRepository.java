@@ -293,10 +293,6 @@ public class PipRepository {
         ));
     }
 
-
-    public record FagsakTypeOgStatus(FagsakYtelseType ytelseType, FagsakStatus status) {
-    }
-
     public FagsakTypeOgStatus hentFagsakTypeOgStatus(Saksnummer saksnummer) {
         Objects.requireNonNull(saksnummer, "saksnummer");
 
@@ -316,5 +312,8 @@ public class PipRepository {
         } else {
             throw new IllegalStateException("Forventet 0 eller 1 treff etter saksnummer, men fikk " + resultat.size());
         }
+    }
+
+    public record FagsakTypeOgStatus(FagsakYtelseType ytelseType, FagsakStatus status) {
     }
 }
