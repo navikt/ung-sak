@@ -13,7 +13,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørOpphevetUtleder;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
@@ -78,7 +78,7 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
             grunnlag.getUngdomsprogramMaksPeriode().orElse(null),
             grunnlag.hentForEksaktEnPeriode(),
             behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM),
-            UngdomsprogramOpphørOpphevetUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository));
+            UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository));
 
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .intersection(samletVilkårTidslinje,

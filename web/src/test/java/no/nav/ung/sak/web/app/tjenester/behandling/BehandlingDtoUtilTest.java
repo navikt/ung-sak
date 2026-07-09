@@ -266,7 +266,7 @@ class BehandlingDtoUtilTest {
     @Test
     void forventer_opphør_mottatt_og_avbrutt_i_samme_behandling_når_opphøret_aldri_ble_iverksatt() {
         // Opphør og opphevelse slått sammen på samme, fortsatt åpne behandling — opphøret ble aldri
-        // vedtatt (originalbehandlingen har fortsatt åpen sluttdato, jf. UngdomsprogramOpphørOpphevetUtleder).
+        // vedtatt (originalbehandlingen har fortsatt åpen sluttdato, jf. UngdomsprogramOpphørUtleder).
         when(behandling.getOriginalBehandlingId()).thenReturn(Optional.of(ORIGINAL_BEHANDLING_ID));
         var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
         var perioder = new UngdomsprogramPerioder(Set.of(new UngdomsprogramPeriode(LocalDate.now().minusYears(1), no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE)));

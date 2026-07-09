@@ -9,9 +9,9 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
  * opphøret rakk å bli vedtatt, jf. OpprettRevurderingEllerOpprettDiffTask). I sistnevnte tilfelle finnes det
  * ikke noe opphørsvedtak å reversere, og det skal ikke sendes brev.
  */
-public final class UngdomsprogramOpphørOpphevetUtleder {
+public final class UngdomsprogramOpphørUtleder {
 
-    private UngdomsprogramOpphørOpphevetUtleder() {
+    private UngdomsprogramOpphørUtleder() {
     }
 
     /**
