@@ -238,7 +238,7 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         aktørIdForSaksnummerSøk.addAll(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR)));
         aktørIdForSaksnummerSøk.addAll(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_AKTØR_ID).stream().map(it -> new AktørId((String) it)).collect(Collectors.toSet()));
 
-        saksnumre.addAll(pipRepository.saksnumreForSøker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
+        saksnumre.addAll(pipRepository.hentSaksnumreForBruker(tilAktørId(attributter.getVerdier(AppAbacAttributtType.SAKER_MED_FNR))));
         saksnumre.addAll(pipRepository.saksnumreForJournalpostId(attributter.getVerdier(StandardAbacAttributtType.JOURNALPOST_ID)));
         return saksnumre;
     }

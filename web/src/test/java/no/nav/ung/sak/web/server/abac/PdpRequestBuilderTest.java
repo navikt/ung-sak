@@ -96,7 +96,7 @@ public class PdpRequestBuilderTest {
         Set<Saksnummer> saksnumre = new HashSet<>();
         saksnumre.add(SAKSNUMMER_1);
         saksnumre.add(SAKSNUMMER_2);
-        when(pipRepository.saksnumreForSøker(any())).thenReturn(saksnumre);
+        when(pipRepository.hentSaksnumreForBruker(any())).thenReturn(saksnumre);
         Set<AktørId> aktører = new HashSet<>();
         aktører.add(AKTØR_0);
         aktører.add(AKTØR_1);

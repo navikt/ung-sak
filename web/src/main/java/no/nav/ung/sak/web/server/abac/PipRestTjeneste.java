@@ -6,10 +6,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
@@ -19,12 +16,10 @@ import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
-import no.nav.ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDto;
-import no.nav.ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDtoV2;
-import no.nav.ung.sak.kontrakt.abac.PipDtoV5;
-import no.nav.ung.sak.kontrakt.abac.PipDtoV6;
+import no.nav.ung.sak.kontrakt.abac.*;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.ung.sak.kontrakt.person.AktørIdDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.slf4j.Logger;
@@ -42,8 +37,6 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 @Produces(MediaType.APPLICATION_JSON)
 public class PipRestTjeneste {
 
-    private Logger logger = LoggerFactory.getLogger(PipRestTjeneste.class);
-
     private PipRepository pipRepository;
 
     @Inject
@@ -53,6 +46,24 @@ public class PipRestTjeneste {
 
     public PipRestTjeneste() {
         // Ja gjett tre ganger på hva denne er til for.
+    }
+
+    @GET
+    @Path("/pipdata-for-fagsak")
+    @Operation(description = "Henter aktørIder, fagsakstatus, ytelsestype tilknyttet fra et saksnummer", tags = "pip")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public Optional<FagsakPipDto> hentPipDataTilknyttetFagsak(@NotNull @QueryParam("saksnummer") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) SaksnummerDto saksnummerDto) {
+        return pipRepository.hentPipDataOgPersonerForFagsak(saksnummerDto.getVerdi());
+    }
+
+    @POST
+    @Path("/pipdata-for-brukers-fagsaker")
+    @Operation(description = "Henter aktørIder, fagsakstatus, ytelsestype, saksnummer fra alle brukers saker", tags = "pip")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public List<FagsakPipDto> hentPipDataOgPersonerForBrukersFagsaker(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto brukerAktørId) {
+        return pipRepository.hentPipDataOgPersonerForBrukersFagsaker(new AktørId(brukerAktørId.getAktorId()));
     }
 
     @GET
