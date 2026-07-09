@@ -162,7 +162,7 @@ class UtledStatusForPerioderPåBehandlingTest {
     }
 
     @Test
-    void skal_utlede_status_som_annullert_når_opphør_aldri_ble_iverksatt() {
+    void skal_utlede_status_som_avbrutt_når_opphør_aldri_ble_iverksatt() {
         mockOpphørAldriIverksatt();
         var startdato = LocalDate.now();
         var tidligereOpphørsdato = startdato.plusWeeks(30);
@@ -264,7 +264,7 @@ class UtledStatusForPerioderPåBehandlingTest {
     }
 
     @Test
-    void skal_vise_annullert_når_opphør_og_opphevelse_slås_sammen_uten_at_opphøret_ble_iverksatt() {
+    void skal_vise_avbrutt_når_opphør_og_opphevelse_slås_sammen_uten_at_opphøret_ble_iverksatt() {
         mockOpphørAldriIverksatt();
         var startdato = LocalDate.now();
         var tidligereOpphørsdato = startdato.plusWeeks(30);

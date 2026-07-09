@@ -95,8 +95,9 @@ class UtledStatusForPerioderPåBehandling {
         boolean harOpphevelse = prosesstriggere.stream()
             .anyMatch(it -> it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
 
-        // Skiller mellom reell opphevelse (opphøret ble faktisk vedtatt tidligere) og annullering
-        // (opphøret ble aldri iverksatt, jf. UngdomsprogramOpphørUtleder) — samme skille som i BehandlingDtoUtil.
+        // Skiller mellom at opphøret faktisk ble vedtatt i en tidligere behandling, og at opphør og
+        // opphevelse havnet på samme, fortsatt åpne behandling (opphøret ble aldri iverksatt, jf.
+        // UngdomsprogramOpphørUtleder) — samme skille som i BehandlingDtoUtil.
         boolean opphørVarFaktiskIverksatt = harOpphevelse
             && UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository);
 
