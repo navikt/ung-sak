@@ -25,6 +25,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedUtfall;
@@ -56,6 +57,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     public PerioderTilBehandlingMedKildeRestTjeneste() {
     }
@@ -64,11 +66,13 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                      SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
-                                                     ProsessTriggereRepository prosessTriggereRepository) {
+                                                     ProsessTriggereRepository prosessTriggereRepository,
+                                                     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     @GET
@@ -156,7 +160,9 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
             prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList());
         return UtledStatusForPerioderPåBehandling.utledStatus(
             filtrertKravdokumenter,
-            normaliserteTriggere
+            normaliserteTriggere,
+            behandling,
+            ungdomsprogramPeriodeRepository
         );
     }
 

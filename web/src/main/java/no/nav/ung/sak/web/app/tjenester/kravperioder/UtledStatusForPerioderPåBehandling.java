@@ -11,7 +11,10 @@ import java.util.stream.Collectors;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
+import no.nav.ung.sak.behandlingslager.perioder.OpphørOpphevetUtleder;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentType;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedÅrsaker;
@@ -39,8 +42,10 @@ class UtledStatusForPerioderPåBehandling {
         BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
 
     static StatusForPerioderPåBehandling utledStatus(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
-                                                     List<Trigger> prosesstriggere) {
-        var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere);
+                                                     List<Trigger> prosesstriggere,
+                                                     Behandling behandling,
+                                                     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        var årsakstidslinje = finnÅrsakstidslinje(kravdokumenterTilBehandling, prosesstriggere, behandling, ungdomsprogramPeriodeRepository);
         var periodeMedÅrsaker = mapPeriodeMedÅrsaker(årsakstidslinje);
         var årsakerMedPerioder = finnÅrsakerMedPerioder(periodeMedÅrsaker);
         return new StatusForPerioderPåBehandling(
@@ -58,8 +63,10 @@ class UtledStatusForPerioderPåBehandling {
     }
 
     private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakstidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling,
-                                                                                List<Trigger> prosesstriggere) {
-        var årsakerFraTriggere = finnÅrsakerFraTriggereTidslinje(prosesstriggere);
+                                                                                List<Trigger> prosesstriggere,
+                                                                                Behandling behandling,
+                                                                                UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        var årsakerFraTriggere = finnÅrsakerFraTriggereTidslinje(prosesstriggere, behandling, ungdomsprogramPeriodeRepository);
         var søknadtidslinje = finnFørsteSøknadTidslinje(kravdokumenterTilBehandling);
         return søknadtidslinje.crossJoin(årsakerFraTriggere, StandardCombinators::union);
     }
@@ -79,20 +86,34 @@ class UtledStatusForPerioderPåBehandling {
     }
 
 
-    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakerFraTriggereTidslinje(List<Trigger> prosesstriggere) {
+    private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnÅrsakerFraTriggereTidslinje(List<Trigger> prosesstriggere,
+                                                                                             Behandling behandling,
+                                                                                             UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         // RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM regnes som utdatert/stale når
         // RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM også finnes på behandlingen — jf. samme
         // mønster i UngEtterlysningOppretter og BehandlingDtoUtil.
         boolean harOpphevelse = prosesstriggere.stream()
             .anyMatch(it -> it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
 
+        // Skiller mellom reell opphevelse (opphøret ble faktisk vedtatt tidligere) og annullering
+        // (opphøret ble aldri iverksatt, jf. OpphørOpphevetUtleder) — samme skille som i BehandlingDtoUtil.
+        boolean opphørVarFaktiskIverksatt = harOpphevelse
+            && OpphørOpphevetUtleder.opphørVarFaktiskIverksatt(behandling, ungdomsprogramPeriodeRepository);
+
         return prosesstriggere.stream()
             .filter(it -> RELEVANTE_ÅRSAKER.contains(it.getÅrsak()))
             .filter(it -> !(harOpphevelse && it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM))
             .map(it -> new LocalDateTimeline<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(),
-                Set.of(ÅrsakTilVurdering.mapFra(it.getÅrsak()))))
+                Set.of(mapTilÅrsakTilVurdering(it.getÅrsak(), opphørVarFaktiskIverksatt))))
             .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
+    }
+
+    private static ÅrsakTilVurdering mapTilÅrsakTilVurdering(BehandlingÅrsakType årsak, boolean opphørVarFaktiskIverksatt) {
+        if (årsak == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM && !opphørVarFaktiskIverksatt) {
+            return ÅrsakTilVurdering.OPPHØR_ANNULERT_UNGDOMSPROGRAM;
+        }
+        return ÅrsakTilVurdering.mapFra(årsak);
     }
 
     private static LocalDateTimeline<Set<ÅrsakTilVurdering>> finnFørsteSøknadTidslinje(Map<KravDokument, List<SøktPeriode<VurdertSøktPeriode.SøktPeriodeData>>> kravdokumenterTilBehandling) {

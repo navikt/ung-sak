@@ -34,6 +34,7 @@ public class RegisterdataEndringshåndterer {
     public static final Set<BehandlingÅrsakType> REGISTEROPPLYSNING_BEHANDLINGÅRSAKER = Set.of(
         BehandlingÅrsakType.RE_OPPLYSNINGER_OM_DØD,
         BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+        BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
         BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
         BehandlingÅrsakType.RE_INNTEKTSOPPLYSNING);
 

@@ -18,7 +18,17 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     HENDELSE_FØDSEL_BARN("HENDELSE_FØDSEL_BARN", "Fødsel barn"),
     OPPHØR_UNGDOMSPROGRAM("OPPHØR_UNGDOMSPROGRAM", "Opphør av ungdomsprogram"),
     OPPHØR_VED_MAKSDATO("OPPHØR_VED_MAKSDATO", "Opphør ved maksdato"),
+    /**
+     * Et tidligere opphør ble faktisk vedtatt/iverksatt (bruker mottok opphørsbrev) og er nå reversert
+     * ved en ny hendelse. Se {@link no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn#OPPHØR_OPPHEVET}.
+     */
     OPPHØR_OPPHEVET_UNGDOMSPROGRAM("OPPHØR_OPPHEVET_UNGDOMSPROGRAM", "Opphevelse av opphør av ungdomsprogram"),
+    /**
+     * Et opphør ble avbrutt før det noen gang ble vedtatt/iverksatt (ingen opphørsbrev ble sendt).
+     * Brukes kun som sporingsårsak i periodevisning/behandlingsoversikt, ikke koblet til noe vedtaksbrev.
+     * Se {@link no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn#OPPHØR_ANNULERT}.
+     */
+    OPPHØR_ANNULERT_UNGDOMSPROGRAM("OPPHØR_ANNULERT_UNGDOMSPROGRAM", "Opphør annullert"),
     ENDRET_STARTDATO_UNGDOMSPROGRAM("ENDRET_STARTDATO_UNGDOMSPROGRAM", "Endret startdato for ungdomsprogram"),
     FORLENGET_PERIODE_UNGDOMSPROGRAM("FORLENGET_PERIODE_UNGDOMSPROGRAM", "Forlenget periode"),
     KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll og rapportering av inntekt"),
