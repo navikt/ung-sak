@@ -22,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.kontrakt.ResourceLink;
@@ -57,6 +58,9 @@ public class BehandlingDtoTjenesteImplTest {
     private TotrinnTjeneste totrinnTjeneste;
 
     @Inject
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+
+    @Inject
     @Any
     private Instance<InformasjonselementerUtleder> informasjonselementer;
 
@@ -68,7 +72,7 @@ public class BehandlingDtoTjenesteImplTest {
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
         tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingAnsvarligRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, vilkårResultatRepository,
-            totrinnTjeneste, informasjonselementer);
+            totrinnTjeneste, ungdomsprogramPeriodeRepository, informasjonselementer);
     }
 
     @Test
