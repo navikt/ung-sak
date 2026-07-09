@@ -7,6 +7,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
@@ -44,13 +45,17 @@ class OpphørOpphevetStrategyTest {
     void skal_ikke_sende_brev_når_originalbehandling_fortsatt_hadde_åpen_sluttdato() {
         // Opphør og opphevelse er slått sammen på samme, fortsatt åpne behandling.
         // Opphøret ble dermed aldri faktisk vedtatt/iverksatt, og det finnes ikke noe
-        // opphørsbrev for brukeren å oppheve.
+        // opphørsbrev for brukeren å oppheve. Vi må likevel returnere et eksplisitt
+        // "ingen brev"-resultat (ikke tom liste), ellers tolkes perioden som IKKE_IMPLEMENTERT
+        // og gir feilaktig aksjonspunkt om manuell fatting av vedtak.
         var behandling = mockBehandlingMedOriginal(ORIGINAL_BEHANDLING_ID);
         mockOriginalGrunnlag(new UngdomsprogramPeriode(LocalDate.of(2026, 1, 1), Tid.TIDENES_ENDE));
 
         var resultat = strategy.evaluer(behandling, opphørOpphevetTidslinje());
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat).hasSize(1);
+        assertThat(resultat.get(0).bygger()).isNull();
+        assertThat(resultat.get(0).ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
     }
 
     @Test
@@ -61,7 +66,9 @@ class OpphørOpphevetStrategyTest {
 
         var resultat = strategy.evaluer(behandling, opphørOpphevetTidslinje());
 
-        assertThat(resultat).isEmpty();
+        assertThat(resultat).hasSize(1);
+        assertThat(resultat.get(0).bygger()).isNull();
+        assertThat(resultat.get(0).ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
     }
 
     @Test

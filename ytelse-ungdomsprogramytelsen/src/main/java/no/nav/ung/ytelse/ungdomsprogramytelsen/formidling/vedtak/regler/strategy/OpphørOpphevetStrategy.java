@@ -9,6 +9,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.OpphørOpphevetUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -27,6 +28,11 @@ import java.util.List;
  * {@link OpphørOpphevetUtleder}. Dersom opphøret aldri ble iverksatt (opphør og opphevelse slått sammen på
  * samme, fortsatt åpne behandling), er dette i stedet en <b>annullering</b> av opphøret, og det sendes ikke
  * noe brev — det finnes ikke noe opphørsvedtak for bruker å oppheve.
+ * <p>
+ * NB: i annulleringstilfellet må vi returnere et eksplisitt "ingen brev, årsak IKKE_RELEVANT"-resultat
+ * (ikke tom liste). Tom liste tolkes av {@code YtelseVedtaksbrevRegler} som at strategien ikke er relevant
+ * for behandlingen, og fører da til at perioden faller på fallback-resultatet IKKE_IMPLEMENTERT, som igjen
+ * gir aksjonspunktet FORESLÅ_VEDTAK_MANUELT og krever manuell "Fatt vedtak" i stedet for automatisk vedtak.
  */
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -45,13 +51,16 @@ public final class OpphørOpphevetStrategy implements VedtaksbrevInnholdbyggerSt
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (resultater.innholder(DetaljertResultatType.OPPHØR_OPPHEVET)
-            && OpphørOpphevetUtleder.opphørVarFaktiskIverksatt(behandling, ungdomsprogramPeriodeRepository)) {
+        if (!resultater.innholder(DetaljertResultatType.OPPHØR_OPPHEVET)) {
+            return List.of();
+        }
+        if (OpphørOpphevetUtleder.opphørVarFaktiskIverksatt(behandling, ungdomsprogramPeriodeRepository)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.OPPHOR_OPPHEVET_DOK, opphørOpphevetInnholdBygger,
                 "Automatisk brev ved opphevelse av opphør."));
         }
-        return List.of();
+        return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,
+            "Opphør av ungdomsprogram ble aldri iverksatt/vedtatt før det ble opphevet (annullering) - ikke behov for vedtaksbrev."));
     }
 
 }
