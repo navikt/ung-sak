@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.sak.kontrakt.abac.FagsakPipDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -270,7 +271,7 @@ public class PipRepository {
         return query.getResultStream().collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public List<no.nav.ung.sak.kontrakt.abac.FagsakPipDto> hentPipDataOgPersonerForBrukersFagsaker(AktørId brukerAktørId) {
+    public List<FagsakPipDto> hentPipDataOgPersonerForBrukersFagsaker(AktørId brukerAktørId) {
         Set<Saksnummer> saksnumre = hentSaksnumreForBruker(Set.of(brukerAktørId));
         return saksnumre.stream()
             .map(this::hentPipDataOgPersonerForFagsak)
@@ -289,14 +290,14 @@ public class PipRepository {
         return result.stream().map(Saksnummer::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public Optional<no.nav.ung.sak.kontrakt.abac.FagsakPipDto> hentPipDataOgPersonerForFagsak(Saksnummer saksnummer) {
+    public Optional<FagsakPipDto> hentPipDataOgPersonerForFagsak(Saksnummer saksnummer) {
         FagsakTypeOgStatus fagsakTypeOgStatus = hentFagsakTypeOgStatus(saksnummer);
         if (fagsakTypeOgStatus == null){
             return Optional.empty();
         }
         Set<AktørId> aktørIder = hentAktørIdKnyttetTilFagsaker(Set.of(saksnummer));
         Set<AktørId> aktørIderForSporingslogg = hentAktørIdForSporingslogg(saksnummer);
-        return Optional.of(new no.nav.ung.sak.kontrakt.abac.FagsakPipDto(
+        return Optional.of(new FagsakPipDto(
             saksnummer,
             aktørIder,
             aktørIderForSporingslogg,
