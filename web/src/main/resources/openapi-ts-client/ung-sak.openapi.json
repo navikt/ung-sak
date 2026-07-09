@@ -1682,6 +1682,34 @@
         "required" : [ "systemNavn" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.abac.FagsakPipDto" : {
+        "properties" : {
+          "aktørIder" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "aktørIderForSporingslogg" : {
+            "items" : {
+              "type" : "string"
+            },
+            "type" : "array",
+            "uniqueItems" : true
+          },
+          "fagsakStatus" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakStatus"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          },
+          "ytelseType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.behandling.FagsakYtelseType"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.abac.PipAktørerMedSporingslogghintDto" : {
         "properties" : {
           "aktørIderForSporingslogg" : {
@@ -9531,6 +9559,68 @@
                 "schema" : {
                   "allOf" : [ {
                     "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.PipDtoV6"
+                  } ],
+                  "nullable" : true
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-brukers-fagsaker" : {
+      "post" : {
+        "description" : "Henter aktørIder, fagsakstatus, ytelsestype, saksnummer fra alle brukers saker",
+        "operationId" : "hentPipDataTilknyttetFagsak_1",
+        "requestBody" : {
+          "content" : {
+            "*/*" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.person.AktørIdDto"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "items" : {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.FagsakPipDto"
+                  },
+                  "type" : "array"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "pip" ]
+      }
+    },
+    "/api/pip/pipdata-for-fagsak" : {
+      "get" : {
+        "description" : "Henter aktørIder, fagsakstatus, ytelsestype tilknyttet fra et saksnummer",
+        "operationId" : "hentPipDataTilknyttetFagsak",
+        "parameters" : [ {
+          "in" : "query",
+          "name" : "saksnummer",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.behandling.SaksnummerDto"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "allOf" : [ {
+                    "$ref" : "#/components/schemas/ung.sak.kontrakt.abac.FagsakPipDto"
                   } ],
                   "nullable" : true
                 }
