@@ -234,13 +234,11 @@ public class PipRepository {
     }
 
     @SuppressWarnings({"unchecked"})
-    public Set<Saksnummer> saksnumreForSøker(Collection<AktørId> aktørId) {
+    public Set<Saksnummer> hentSaksnumreForBruker(Collection<AktørId> aktørId) {
         if (aktørId.isEmpty()) {
             return Collections.emptySet();
         }
-        String sql = "SELECT f.saksnummer " +
-            "from FAGSAK f " +
-            "where f.bruker_aktoer_id in (:aktørId)";
+        String sql = "SELECT f.saksnummer from FAGSAK f where f.bruker_aktoer_id in (:aktørId)";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("aktørId", aktørId.stream().map(AktørId::getId).collect(Collectors.toList()));
         var result = (List<String>) query.getResultList();
@@ -277,17 +275,6 @@ public class PipRepository {
             .map(this::hentPipDataOgPersonerForFagsak)
             .flatMap(Optional::stream)
             .toList();
-    }
-
-    public Set<Saksnummer> hentSaksnumreForBruker(Collection<AktørId> aktørId) {
-        if (aktørId.isEmpty()) {
-            return Collections.emptySet();
-        }
-        String sql = "SELECT f.saksnummer from FAGSAK f where f.bruker_aktoer_id in (:aktørId)";
-        Query query = entityManager.createNativeQuery(sql);
-        query.setParameter("aktørId", aktørId.stream().map(AktørId::getId).collect(Collectors.toList()));
-        var result = (List<String>) query.getResultList();
-        return result.stream().map(Saksnummer::new).collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
     public Optional<FagsakPipDto> hentPipDataOgPersonerForFagsak(Saksnummer saksnummer) {

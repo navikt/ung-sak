@@ -81,7 +81,7 @@ public class PipRepositoryTest {
         @SuppressWarnings("unused")
         Fagsak fagsakAnnenAktør = new BasicBehandlingBuilder(entityManager).opprettFagsak(FagsakYtelseType.FORELDREPENGER);
 
-        Set<Saksnummer> resultat = pipRepository.saksnumreForSøker(Collections.singleton(aktørId1));
+        Set<Saksnummer> resultat = pipRepository.hentSaksnumreForBruker(Collections.singleton(aktørId1));
 
         assertThat(resultat).containsOnly(fagsak1.getSaksnummer(), fagsak2.getSaksnummer());
     }
