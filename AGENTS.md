@@ -119,3 +119,4 @@ dev/generate-openapi-ts-client.sh
   - https://github.com/navikt/ung-sak/pull/1453
   - https://github.com/navikt/ung-sak/pull/1454
   - https://github.com/navikt/ung-sak/pull/1463
+  - https://github.com/navikt/ung-sak/pull/1468
