@@ -9573,7 +9573,7 @@
     "/api/pip/pipdata-for-brukers-fagsaker" : {
       "post" : {
         "description" : "Henter aktørIder, fagsakstatus, ytelsestype, saksnummer fra alle brukers saker",
-        "operationId" : "hentPipDataTilknyttetFagsak_1",
+        "operationId" : "hentPipDataOgPersonerForBrukersFagsaker",
         "requestBody" : {
           "content" : {
             "*/*" : {
