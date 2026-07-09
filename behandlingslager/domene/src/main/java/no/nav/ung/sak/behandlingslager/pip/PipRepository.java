@@ -304,17 +304,17 @@ public class PipRepository {
         Query query = entityManager.createNativeQuery(sql, Tuple.class);
         query.setParameter("saksnummer", saksnummer.getVerdi());
         @SuppressWarnings("unchecked")
-        List<Tuple> resulat = query.getResultList();
-        if (resulat.isEmpty()) {
+        List<Tuple> resultat = query.getResultList();
+        if (resultat.isEmpty()) {
             return null;
-        } else if (resulat.size() == 1) {
-            Tuple tuple = resulat.getFirst();
+        } else if (resultat.size() == 1) {
+            Tuple tuple = resultat.getFirst();
             return new FagsakTypeOgStatus(
                 FagsakYtelseType.fraKode(tuple.get("ytelse_type", String.class)),
                 FagsakStatus.fraKode(tuple.get("fagsak_status", String.class))
             );
         } else {
-            throw new IllegalStateException("Forventet 0 eller 1 treff etter saksnummer, men fikk " + resulat.size());
+            throw new IllegalStateException("Forventet 0 eller 1 treff etter saksnummer, men fikk " + resultat.size());
         }
     }
 }
