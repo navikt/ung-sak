@@ -267,6 +267,12 @@ class BehandlingDtoUtilTest {
     void forventer_opphør_annulert_når_opphøret_aldri_ble_iverksatt() {
         // Opphør og opphevelse slått sammen på samme, fortsatt åpne behandling — opphøret ble aldri
         // vedtatt (originalbehandlingen har fortsatt åpen sluttdato, jf. OpphørOpphevetUtleder).
+        when(behandling.getOriginalBehandlingId()).thenReturn(Optional.of(ORIGINAL_BEHANDLING_ID));
+        var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
+        var perioder = new UngdomsprogramPerioder(Set.of(new UngdomsprogramPeriode(LocalDate.now().minusYears(1), no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE)));
+        when(grunnlag.getUngdomsprogramPerioder()).thenReturn(perioder);
+        when(ungdomsprogramPeriodeRepository.hentGrunnlag(ORIGINAL_BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
+
         when(behandling.getBehandlingÅrsakerTyper()).thenReturn(List.of(
             BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
             BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM));
