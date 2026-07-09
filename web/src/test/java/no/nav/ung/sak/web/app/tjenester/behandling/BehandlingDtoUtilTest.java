@@ -264,7 +264,7 @@ class BehandlingDtoUtilTest {
     }
 
     @Test
-    void forventer_opphør_annulert_når_opphøret_aldri_ble_iverksatt() {
+    void forventer_opphør_mottatt_og_opphevet_i_samme_behandling_når_opphøret_aldri_ble_iverksatt() {
         // Opphør og opphevelse slått sammen på samme, fortsatt åpne behandling — opphøret ble aldri
         // vedtatt (originalbehandlingen har fortsatt åpen sluttdato, jf. OpphørOpphevetUtleder).
         when(behandling.getOriginalBehandlingId()).thenReturn(Optional.of(ORIGINAL_BEHANDLING_ID));
@@ -280,7 +280,7 @@ class BehandlingDtoUtilTest {
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false, ungdomsprogramPeriodeRepository);
 
-        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_ANNULERT);
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING);
     }
 
     @Test

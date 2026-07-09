@@ -111,7 +111,7 @@ class UtledStatusForPerioderPåBehandling {
 
     private static ÅrsakTilVurdering mapTilÅrsakTilVurdering(BehandlingÅrsakType årsak, boolean opphørVarFaktiskIverksatt) {
         if (årsak == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM && !opphørVarFaktiskIverksatt) {
-            return ÅrsakTilVurdering.OPPHØR_ANNULERT_UNGDOMSPROGRAM;
+            return ÅrsakTilVurdering.OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM;
         }
         return ÅrsakTilVurdering.mapFra(årsak);
     }

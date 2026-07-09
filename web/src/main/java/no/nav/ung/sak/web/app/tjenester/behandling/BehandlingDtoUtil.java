@@ -162,12 +162,10 @@ public class BehandlingDtoUtil {
         if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
             && behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM == it
             || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
-            // Se BehandlingDtoUtilTest for dokumentasjon av sammenslåings-scenarioet som tolereres her.
-            // Skiller mellom reell opphevelse (opphøret ble faktisk vedtatt tidligere) og annullering
-            // (opphøret ble aldri iverksatt) — se OpphørOpphevetUtleder for begrunnelse.
+            // Opphør og opphevelse kan havne på samme, fortsatt åpne behandling - se OpphørOpphevetUtleder.
             return OpphørOpphevetUtleder.opphørVarFaktiskIverksatt(behandling, ungdomsprogramPeriodeRepository)
                 ? BehandlingVisningsnavn.OPPHØR_OPPHEVET
-                : BehandlingVisningsnavn.OPPHØR_ANNULERT;
+                : BehandlingVisningsnavn.OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING;
         }
         return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;
     }

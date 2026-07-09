@@ -24,12 +24,11 @@ import java.util.List;
  * satt feil eller bruker har fått medhold i klage på opphøret. Denne behandles uavhengig av øvrig
  * programperiode-logikk i {@link ProgramPeriodeStrategy}, siden årsaken er en egen, distinkt behandlingsårsak.
  * <p>
- * Brevet sendes kun dersom opphøret faktisk ble vedtatt/iverksatt tidligere (reell <b>opphevelse</b>), se
- * {@link OpphørOpphevetUtleder}. Dersom opphøret aldri ble iverksatt (opphør og opphevelse slått sammen på
- * samme, fortsatt åpne behandling), er dette i stedet en <b>annullering</b> av opphøret, og det sendes ikke
- * noe brev — det finnes ikke noe opphørsvedtak for bruker å oppheve.
+ * Brevet sendes kun dersom opphøret ble vedtatt i en tidligere, avsluttet behandling, se {@link OpphørOpphevetUtleder}.
+ * Havnet opphør og opphevelse i stedet på samme, fortsatt åpne behandling, finnes det ikke noe opphørsvedtak å
+ * reversere, og det sendes ikke noe brev.
  * <p>
- * NB: i annulleringstilfellet må vi returnere et eksplisitt "ingen brev, årsak IKKE_RELEVANT"-resultat
+ * NB: i sistnevnte tilfelle må vi returnere et eksplisitt "ingen brev, årsak IKKE_RELEVANT"-resultat
  * (ikke tom liste). Tom liste tolkes av {@code YtelseVedtaksbrevRegler} som at strategien ikke er relevant
  * for behandlingen, og fører da til at perioden faller på fallback-resultatet IKKE_IMPLEMENTERT, som igjen
  * gir aksjonspunktet FORESLÅ_VEDTAK_MANUELT og krever manuell "Fatt vedtak" i stedet for automatisk vedtak.
@@ -60,7 +59,7 @@ public final class OpphørOpphevetStrategy implements VedtaksbrevInnholdbyggerSt
                 "Automatisk brev ved opphevelse av opphør."));
         }
         return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,
-            "Opphør av ungdomsprogram ble aldri iverksatt/vedtatt før det ble opphevet (annullering) - ikke behov for vedtaksbrev."));
+            "Opphør og opphevelse havnet på samme, fortsatt åpne behandling - opphøret ble aldri vedtatt, ikke behov for vedtaksbrev."));
     }
 
 }

@@ -14,12 +14,10 @@ public enum BehandlingVisningsnavn {
     OPPHØR_OPPHEVET,
 
     /**
-     * Et opphør av ungdomsprogrammet ble avbrutt før det noen gang ble vedtatt/iverksatt, f.eks. fordi
-     * veileder fjernet sluttdatoen på nytt mens behandlingen med opphørsårsak fortsatt ventet på uttalelse
-     * fra deltaker. Ingen opphørsbrev ble noen gang sendt, og det sendes derfor heller ikke noe eget
-     * vedtaksbrev om annulleringen — kun sporing via behandlingsårsak og historikkinnslag.
+     * Ingen vedtaksbrev sendes, siden opphøret aldri ble vedtatt/iverksatt (ingen opphørsbrev til bruker
+     * å reversere). Kun sporing via behandlingsårsak og historikkinnslag.
      */
-    OPPHØR_ANNULERT,
+    OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING,
 
     KONTROLL_AV_INNTEKT,
 
