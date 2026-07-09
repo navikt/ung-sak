@@ -62,7 +62,7 @@ public class PipRestTjeneste {
     @Operation(description = "Henter aktørIder, fagsakstatus, ytelsestype, saksnummer fra alle brukers saker", tags = "pip")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.PIP)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public List<FagsakPipDto> hentPipDataTilknyttetFagsak(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto brukerAktørId) {
+    public List<FagsakPipDto> hentPipDataOgPersonerForBrukersFagsaker(@NotNull @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto brukerAktørId) {
         return pipRepository.hentPipDataOgPersonerForBrukersFagsaker(new AktørId(brukerAktørId.getAktorId()));
     }
 
