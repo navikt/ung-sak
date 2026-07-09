@@ -25,9 +25,9 @@ public enum ÅrsakTilVurdering implements Kodeverdi {
     OPPHØR_OPPHEVET_UNGDOMSPROGRAM("OPPHØR_OPPHEVET_UNGDOMSPROGRAM", "Opphevelse av opphør av ungdomsprogram"),
     /**
      * Ingen vedtaksbrev, siden opphøret aldri ble vedtatt/iverksatt (ingen opphørsbrev å reversere).
-     * Se {@link no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn#OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING}.
+     * Se {@link no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn#OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM}.
      */
-    OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM("OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM", "Opphør mottatt og annullert i samme behandling"),
+    OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM("OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM", "Opphør mottatt og avbrutt i samme behandling"),
     ENDRET_STARTDATO_UNGDOMSPROGRAM("ENDRET_STARTDATO_UNGDOMSPROGRAM", "Endret startdato for ungdomsprogram"),
     FORLENGET_PERIODE_UNGDOMSPROGRAM("FORLENGET_PERIODE_UNGDOMSPROGRAM", "Forlenget periode"),
     KONTROLL_AV_INNTEKT("KONTROLL_AV_INNTEKT", "Kontroll og rapportering av inntekt"),

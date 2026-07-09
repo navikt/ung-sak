@@ -245,7 +245,7 @@ class BehandlingDtoUtilTest {
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false, ungdomsprogramPeriodeRepository);
 
-        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET);
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
     }
 
     @Test
@@ -260,13 +260,13 @@ class BehandlingDtoUtilTest {
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false, ungdomsprogramPeriodeRepository);
 
-        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET);
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
     }
 
     @Test
-    void forventer_opphør_mottatt_og_opphevet_i_samme_behandling_når_opphøret_aldri_ble_iverksatt() {
+    void forventer_opphør_mottatt_og_avbrutt_i_samme_behandling_når_opphøret_aldri_ble_iverksatt() {
         // Opphør og opphevelse slått sammen på samme, fortsatt åpne behandling — opphøret ble aldri
-        // vedtatt (originalbehandlingen har fortsatt åpen sluttdato, jf. OpphørOpphevetUtleder).
+        // vedtatt (originalbehandlingen har fortsatt åpen sluttdato, jf. UngdomsprogramOpphørOpphevetUtleder).
         when(behandling.getOriginalBehandlingId()).thenReturn(Optional.of(ORIGINAL_BEHANDLING_ID));
         var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
         var perioder = new UngdomsprogramPerioder(Set.of(new UngdomsprogramPeriode(LocalDate.now().minusYears(1), no.nav.k9.felles.konfigurasjon.konfig.Tid.TIDENES_ENDE)));
@@ -280,7 +280,7 @@ class BehandlingDtoUtilTest {
         BehandlingDto dto = new BehandlingDto();
         BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, null, false, ungdomsprogramPeriodeRepository);
 
-        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING);
+        assertThat(dto.getVisningsnavn()).isEqualTo(BehandlingVisningsnavn.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM);
     }
 
     @Test

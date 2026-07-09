@@ -13,7 +13,7 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.OpphørOpphevetUtleder;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørOpphevetUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentMedSøktePerioder;
 import no.nav.ung.sak.kontrakt.krav.KravDokumentType;
@@ -96,9 +96,9 @@ class UtledStatusForPerioderPåBehandling {
             .anyMatch(it -> it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
 
         // Skiller mellom reell opphevelse (opphøret ble faktisk vedtatt tidligere) og annullering
-        // (opphøret ble aldri iverksatt, jf. OpphørOpphevetUtleder) — samme skille som i BehandlingDtoUtil.
+        // (opphøret ble aldri iverksatt, jf. UngdomsprogramOpphørOpphevetUtleder) — samme skille som i BehandlingDtoUtil.
         boolean opphørVarFaktiskIverksatt = harOpphevelse
-            && OpphørOpphevetUtleder.opphørVarFaktiskIverksatt(behandling, ungdomsprogramPeriodeRepository);
+            && UngdomsprogramOpphørOpphevetUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository);
 
         return prosesstriggere.stream()
             .filter(it -> RELEVANTE_ÅRSAKER.contains(it.getÅrsak()))
@@ -111,7 +111,7 @@ class UtledStatusForPerioderPåBehandling {
 
     private static ÅrsakTilVurdering mapTilÅrsakTilVurdering(BehandlingÅrsakType årsak, boolean opphørVarFaktiskIverksatt) {
         if (årsak == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM && !opphørVarFaktiskIverksatt) {
-            return ÅrsakTilVurdering.OPPHØR_MOTTATT_OG_ANNULLERT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM;
+            return ÅrsakTilVurdering.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING_UNGDOMSPROGRAM;
         }
         return ÅrsakTilVurdering.mapFra(årsak);
     }

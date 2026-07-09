@@ -1,12 +1,7 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strategy;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPerioder;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
@@ -15,43 +10,35 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørOppheve
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+/**
+ * Skillet mellom «opphevet» (opphør faktisk vedtatt i tidligere behandling) og «avbrutt i samme behandling»
+ * (opphør og opphevelse slått sammen på samme, fortsatt åpne behandling) avgjøres av
+ * {@code UngDetaljertResultatTidslinjeUtleder} og reflekteres i {@link DetaljertResultatType}. Denne strategien
+ * trenger derfor bare å lese resultattypen direkte, ikke gjøre egen utledning.
+ */
 class OpphørOpphevetStrategyTest {
 
-    private static final Long BEHANDLING_ID = 1000L;
-    private static final Long ORIGINAL_BEHANDLING_ID = 999L;
-
     private final OpphørOpphevetInnholdBygger opphørOpphevetInnholdBygger = mock(OpphørOpphevetInnholdBygger.class);
-    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository = mock(UngdomsprogramPeriodeRepository.class);
-    private final OpphørOpphevetStrategy strategy = new OpphørOpphevetStrategy(opphørOpphevetInnholdBygger, ungdomsprogramPeriodeRepository);
+    private final OpphørOpphevetStrategy strategy = new OpphørOpphevetStrategy(opphørOpphevetInnholdBygger);
 
     @Test
-    void skal_sende_brev_når_originalbehandling_hadde_lukket_sluttdato() {
-        var behandling = mockBehandlingMedOriginal(ORIGINAL_BEHANDLING_ID);
-        mockOriginalGrunnlag(new UngdomsprogramPeriode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 6, 15)));
-
-        var resultat = strategy.evaluer(behandling, opphørOpphevetTidslinje());
+    void skal_sende_brev_når_resultatet_er_opphør_opphevet() {
+        var resultat = strategy.evaluer(mockBehandling(), tidslinjeMed(DetaljertResultatType.OPPHØR_OPPHEVET));
 
         assertThat(resultat).hasSize(1);
+        assertThat(resultat.get(0).bygger()).isNotNull();
     }
 
     @Test
-    void skal_ikke_sende_brev_når_originalbehandling_fortsatt_hadde_åpen_sluttdato() {
-        // Opphør og opphevelse er slått sammen på samme, fortsatt åpne behandling.
-        // Opphøret ble dermed aldri faktisk vedtatt/iverksatt, og det finnes ikke noe
-        // opphørsbrev for brukeren å oppheve. Vi må likevel returnere et eksplisitt
-        // "ingen brev"-resultat (ikke tom liste), ellers tolkes perioden som IKKE_IMPLEMENTERT
-        // og gir feilaktig aksjonspunkt om manuell fatting av vedtak.
-        var behandling = mockBehandlingMedOriginal(ORIGINAL_BEHANDLING_ID);
-        mockOriginalGrunnlag(new UngdomsprogramPeriode(LocalDate.of(2026, 1, 1), Tid.TIDENES_ENDE));
-
-        var resultat = strategy.evaluer(behandling, opphørOpphevetTidslinje());
+    void skal_ikke_sende_brev_men_returnere_eksplisitt_resultat_når_opphør_ble_avbrutt_i_samme_behandling() {
+        // Vi må returnere et eksplisitt "ingen brev"-resultat (ikke tom liste), ellers tolkes perioden
+        // som IKKE_IMPLEMENTERT og gir feilaktig aksjonspunkt om manuell fatting av vedtak.
+        var resultat = strategy.evaluer(mockBehandling(), tidslinjeMed(DetaljertResultatType.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING));
 
         assertThat(resultat).hasSize(1);
         assertThat(resultat.get(0).bygger()).isNull();
@@ -59,44 +46,19 @@ class OpphørOpphevetStrategyTest {
     }
 
     @Test
-    void skal_ikke_sende_brev_når_original_behandling_mangler() {
-        var behandling = mock(Behandling.class);
-        when(behandling.getId()).thenReturn(BEHANDLING_ID);
-        when(behandling.getOriginalBehandlingId()).thenReturn(Optional.empty());
-
-        var resultat = strategy.evaluer(behandling, opphørOpphevetTidslinje());
-
-        assertThat(resultat).hasSize(1);
-        assertThat(resultat.get(0).bygger()).isNull();
-        assertThat(resultat.get(0).ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
-    }
-
-    @Test
-    void skal_ikke_sende_brev_når_resultatet_ikke_inneholder_opphør_opphevet() {
-        var behandling = mockBehandlingMedOriginal(ORIGINAL_BEHANDLING_ID);
-
-        var resultat = strategy.evaluer(behandling, LocalDateTimeline.empty());
+    void skal_ikke_sende_brev_når_resultatet_ikke_inneholder_opphør_opphevet_eller_avbrutt() {
+        var resultat = strategy.evaluer(mockBehandling(), LocalDateTimeline.empty());
 
         assertThat(resultat).isEmpty();
     }
 
-    private Behandling mockBehandlingMedOriginal(Long originalBehandlingId) {
-        var behandling = mock(Behandling.class);
-        when(behandling.getId()).thenReturn(BEHANDLING_ID);
-        when(behandling.getOriginalBehandlingId()).thenReturn(Optional.of(originalBehandlingId));
-        return behandling;
+    private Behandling mockBehandling() {
+        return mock(Behandling.class);
     }
 
-    private void mockOriginalGrunnlag(UngdomsprogramPeriode periode) {
-        var grunnlag = mock(UngdomsprogramPeriodeGrunnlag.class);
-        var perioder = new UngdomsprogramPerioder(Set.of(periode));
-        when(grunnlag.getUngdomsprogramPerioder()).thenReturn(perioder);
-        when(ungdomsprogramPeriodeRepository.hentGrunnlag(ORIGINAL_BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
-    }
-
-    private LocalDateTimeline<DetaljertResultat> opphørOpphevetTidslinje() {
+    private LocalDateTimeline<DetaljertResultat> tidslinjeMed(DetaljertResultatType type) {
         var resultat = new DetaljertResultat(
-            Set.of(DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_OPPHEVET)),
+            Set.of(DetaljertResultatInfo.of(type)),
             Set.of(),
             Set.of(),
             Set.of());
