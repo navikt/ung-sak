@@ -86,6 +86,10 @@ updates:
     cooldown:
       default-days: 7
     open-pull-requests-limit: 15
+    groups:
+      github:
+        patterns:
+          - "*"
 
   - package-ecosystem: docker
     directory: "/"
