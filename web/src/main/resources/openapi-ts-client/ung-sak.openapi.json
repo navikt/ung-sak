@@ -5685,22 +5685,16 @@
         },
         "type" : "object"
       },
-      "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.OppdaterMottattDokumentRequest" : {
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest" : {
         "properties" : {
-          "behandlingId" : {
-            "type" : "string"
-          },
           "journalpostId" : {
             "type" : "string"
           },
-          "nyUttalelseFraBruker" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
+          "saksnummer" : {
             "type" : "string"
           }
         },
-        "required" : [ "behandlingId" ],
+        "required" : [ "saksnummer" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk" : {
@@ -6203,15 +6197,15 @@
         "tags" : [ "redirect" ]
       }
     },
-    "/api/TSFF-2756/forvaltning/oppdater-mottatt-dokument" : {
+    "/api/TSFF-2756/forvaltning/ugyldigjor-mottatt-dokument" : {
       "post" : {
-        "description" : "oppdaterer mottatt dokument ifm TSFF-2756",
-        "operationId" : "oppdaterMottattDokument",
+        "description" : "ugyldiggjør mottatt dokument ifm TSFF-2756",
+        "operationId" : "ugyldigjorMottattDokument",
         "requestBody" : {
           "content" : {
             "application/json" : {
               "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.OppdaterMottattDokumentRequest"
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest"
               }
             }
           },
@@ -6225,7 +6219,7 @@
             "description" : "default response"
           }
         },
-        "summary" : "oppdaterer mottatt dokument ifm TSFF-2756",
+        "summary" : "ugyldiggjør mottatt dokument ifm TSFF-2756",
         "tags" : [ "forvaltning" ]
       }
     },

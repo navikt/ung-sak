@@ -4,12 +4,6 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
-import no.nav.k9.oppgave.OppgaveBekreftelse;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretSluttdatoBekreftelse;
-import no.nav.k9.søknad.JsonUtils;
-import no.nav.ung.fordel.repo.journalpost.JournalpostInnsendingEntitet;
-import no.nav.ung.fordel.repo.journalpost.JournalpostMottattEntitet;
-import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
@@ -21,9 +15,9 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.ung.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,8 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,27 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ForvaltningMottattDokumentRestTjenesteTest {
 
     private static final String JOURNALPOST_ID = "999001";
-    private static final String NY_UTTALELSE = "Jeg ønsker å forlenge perioden";
-
-    // Payload (OppgaveBekreftelse-wrapper) uten uttalelseFraBruker
-    private static final String PAYLOAD_UTEN_UTTALELSE = """
-        {
-          "bekreftelse": {
-            "type": "UNG_ENDRET_SLUTTDATO",
-            "dataBruktTilUtledning": null,
-            "harUttalelse": true,
-            "nySluttdato": "2026-05-11",
-            "oppgaveReferanse": "13c9da9d-815b-4d67-bfd5-2abba88d2d55",
-            "uttalelseFraBruker": null
-          },
-          "mottattDato": "2026-06-17T10:01:18.283489444Z",
-          "språk": "nb",
-          "søker": { "norskIdentitetsnummer": "13420086762" },
-          "søknadId": "13c9da9d-815b-4d67-bfd5-2abba88d2d55",
-          "versjon": "1.0.0",
-          "kildesystem": "søknadsdialog"
-        }
-        """;
+    private static final Saksnummer SAKSNUMMER = new Saksnummer("123456789");
+    private static final String FEILMELDING = "Ugyldiggjort manuelt ifm TSFF-2756";
 
     @Inject
     private EntityManager entityManager;
@@ -69,10 +42,10 @@ class ForvaltningMottattDokumentRestTjenesteTest {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
-    private JournalpostRepository journalpostRepository;
+    private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private ForvaltningMottattDokumentRestTjeneste tjeneste;
 
-    private final Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).build();
+    private final Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).medSaksnummer(SAKSNUMMER).build();
     private Behandling behandling;
 
     @BeforeEach
@@ -80,13 +53,13 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         fagsakRepository = new FagsakRepository(entityManager);
-        journalpostRepository = new JournalpostRepository(entityManager);
+        mottatteDokumentTjeneste = new MottatteDokumentTjeneste(mottatteDokumentRepository);
 
         tjeneste = new ForvaltningMottattDokumentRestTjeneste(
-            behandlingRepository,
+            fagsakRepository,
             mottatteDokumentRepository,
-            entityManager,
-            journalpostRepository
+            mottatteDokumentTjeneste,
+            entityManager
         );
 
         fagsakRepository.opprettNy(fagsak);
@@ -97,16 +70,14 @@ class ForvaltningMottattDokumentRestTjenesteTest {
     }
 
     @Test
-    void skal_oppdatere_uttalelse_i_mottatt_dokument_og_journalpost_mottatt() {
+    void skal_sette_mottatt_dokument_til_ugyldig_og_logge_diagnostikk() {
         // Arrange
-        lagreMottattDokument(PAYLOAD_UTEN_UTTALELSE);
-        lagreJournalpostMottatt(PAYLOAD_UTEN_UTTALELSE);
-        lagreJournalpostInnsending(PAYLOAD_UTEN_UTTALELSE);
+        var dokumentId = lagreMottattDokument();
 
-        var request = lagRequest(NY_UTTALELSE);
+        var request = lagRequest();
 
         // Act
-        Response response = tjeneste.oppdaterMottattDokument(request);
+        Response response = tjeneste.ugyldigjorMottattDokument(request);
 
         // Assert
         assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
@@ -114,46 +85,15 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         entityManager.flush();
         entityManager.clear();
 
-        var oppdatertDokument = mottatteDokumentRepository.hentMottatteDokument(
-            fagsak.getId(), List.of(new JournalpostId(JOURNALPOST_ID))).getFirst();
-        assertThat(uttalelseAv(oppdatertDokument.getPayload())).isEqualTo(NY_UTTALELSE);
+        var oppdatert = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
+        assertThat(oppdatert.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
+        assertThat(oppdatert.getFeilmelding()).isEqualTo(FEILMELDING);
 
-        var oppdatertJournalpost = journalpostRepository.finnJournalpostMottatt(new JournalpostId(JOURNALPOST_ID));
-        assertThat(oppdatertJournalpost).isPresent();
-        assertThat(uttalelseAv(oppdatertJournalpost.get().getPayload())).isEqualTo(NY_UTTALELSE);
-
-        var oppdatertInnsending = journalpostRepository.finnJournalpostInnsending(new JournalpostId(JOURNALPOST_ID));
-        assertThat(oppdatertInnsending).isPresent();
-        assertThat(uttalelseAv(oppdatertInnsending.get().getPayload())).isEqualTo(NY_UTTALELSE);
-    }
-
-    @Test
-    void skal_returnere_400_naar_ny_uttalelse_mangler() {
-        // Arrange
-        lagreMottattDokument(PAYLOAD_UTEN_UTTALELSE);
-
-        var request = lagRequest("   ");
-
-        // Act
-        Response response = tjeneste.oppdaterMottattDokument(request);
-
-        // Assert
-        assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
-    }
-
-    @Test
-    void skal_returnere_400_naar_eksisterende_payload_allerede_har_uttalelse() {
-        // Arrange - lagre dokument der uttalelse allerede er satt
-        var medUttalelse = PAYLOAD_UTEN_UTTALELSE.replace("\"uttalelseFraBruker\": null", "\"uttalelseFraBruker\": \"allerede satt\"");
-        lagreMottattDokument(medUttalelse);
-
-        var request = lagRequest(NY_UTTALELSE);
-
-        // Act
-        Response response = tjeneste.oppdaterMottattDokument(request);
-
-        // Assert
-        assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
+        Long antallDiagnostikk = entityManager.createQuery(
+                "select count(d) from DiagnostikkFagsakLogg d where d.fagsakId = :fagsakId", Long.class)
+            .setParameter("fagsakId", fagsak.getId())
+            .getSingleResult();
+        assertThat(antallDiagnostikk).isEqualTo(1L);
     }
 
     @Test
@@ -165,14 +105,34 @@ class ForvaltningMottattDokumentRestTjenesteTest {
             .medMottattDato(LocalDate.now())
             .medFagsakId(fagsak.getId())
             .medBehandlingId(behandling.getId())
-            .medPayload(PAYLOAD_UTEN_UTTALELSE)
             .build();
         mottatteDokumentRepository.lagre(feilBrevkodeDokument, DokumentStatus.MOTTATT);
 
-        var request = lagRequest(NY_UTTALELSE);
+        var request = lagRequest();
 
         // Act
-        Response response = tjeneste.oppdaterMottattDokument(request);
+        Response response = tjeneste.ugyldigjorMottattDokument(request);
+
+        // Assert
+        assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    void skal_returnere_400_naar_status_ikke_er_mottatt() {
+        // Arrange - dokument med riktig brevkode, men status GYLDIG (ikke MOTTATT)
+        var dokument = new MottattDokument.Builder()
+            .medJournalPostId(new JournalpostId(JOURNALPOST_ID))
+            .medType(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE)
+            .medMottattDato(LocalDate.now())
+            .medFagsakId(fagsak.getId())
+            .medBehandlingId(behandling.getId())
+            .build();
+        mottatteDokumentRepository.lagre(dokument, DokumentStatus.GYLDIG);
+
+        var request = lagRequest();
+
+        // Act
+        Response response = tjeneste.ugyldigjorMottattDokument(request);
 
         // Assert
         assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
@@ -180,60 +140,23 @@ class ForvaltningMottattDokumentRestTjenesteTest {
 
     // --- helpers ---
 
-    private static String uttalelseAv(String payload) {
-        OppgaveBekreftelse ob = JsonUtils.fromString(payload, OppgaveBekreftelse.class);
-        EndretSluttdatoBekreftelse b = ob.getBekreftelse();
-        return b.getUttalelseFraBruker();
-    }
-
-    private void lagreMottattDokument(String payload) {
+    private Long lagreMottattDokument() {
         var dokument = new MottattDokument.Builder()
             .medJournalPostId(new JournalpostId(JOURNALPOST_ID))
             .medType(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE)
             .medMottattDato(LocalDate.now())
             .medFagsakId(fagsak.getId())
             .medBehandlingId(behandling.getId())
-            .medPayload(payload)
             .build();
-        mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT);
+        return mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT).getId();
     }
 
-    private void lagreJournalpostMottatt(String payload) {
-        var journalpostMottatt = new JournalpostMottattEntitet(
-            new JournalpostId(JOURNALPOST_ID),
-            null,
-            new AktørId(fagsak.getAktørId().getId()),
-            Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.getOffisiellKode(),
-            LocalDateTime.now(),
-            "Varsel uttalelse",
-            payload,
-            JournalpostMottattEntitet.Status.UBEHANDLET
-        );
-        journalpostRepository.lagreMottatt(journalpostMottatt);
-    }
-
-    private void lagreJournalpostInnsending(String payload) {
-        var innsending = new JournalpostInnsendingEntitet(
-            FagsakYtelseType.UNGDOMSYTELSE,
-            new Saksnummer("123456789"),
-            new JournalpostId(JOURNALPOST_ID),
-            fagsak.getAktørId(),
-            Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE,
-            LocalDateTime.now(),
-            payload,
-            JournalpostInnsendingEntitet.Status.UBEHANDLET
-        );
-        journalpostRepository.lagreInnsending(innsending);
-    }
-
-    private ForvaltningMottattDokumentRestTjeneste.OppdaterMottattDokumentRequest lagRequest(String nyUttalelse) {
+    private ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest lagRequest() {
         var journalpostIdDto = new JournalpostId(JOURNALPOST_ID);
 
-        return new ForvaltningMottattDokumentRestTjeneste.OppdaterMottattDokumentRequest(
+        return new ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest(
             journalpostIdDto,
-            new BehandlingIdDto(behandling.getId()),
-            nyUttalelse
+            new SaksnummerDto(SAKSNUMMER)
         );
     }
 }
-
