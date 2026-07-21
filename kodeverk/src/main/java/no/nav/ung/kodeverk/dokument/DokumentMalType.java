@@ -25,6 +25,7 @@ public enum DokumentMalType implements Kodeverdi {
     FORLENGET_PERIODE("FORLENGET_PERIODE", "Forlenget periode", true),
     OPPHØR_DOK("OPPHOR", "Opphør", true),
     OPPHOR_VED_MAKSDATO_DOK("OPPHOR_VED_MAKSDATO", "Opphør ved maksdato", true),
+    OPPHOR_OPPHEVET_DOK("OPPHOR_OPPHEVET", "Opphør opphevet", true),
     AVSLAG__DOK("AVSLAG", "Avslag", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekstvedtak", true),
     GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt", false),

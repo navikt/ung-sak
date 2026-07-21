@@ -10,10 +10,9 @@ import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
 import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalAdjusters;
-import java.util.function.Predicate;
+import java.util.Objects;
 
 
 /**
@@ -51,11 +50,18 @@ public class OpprettRevurderingForInntektskontrollBatchTask extends Duplikatbesk
         return new TaskType(OpprettRevurderingForInntektskontrollTask.TASKNAME);
     }
 
+    @Override
+    protected void leggTilProperties(ProsessTaskData childTask) {
+        var forrigeMåned = YearMonth.now().minusMonths(1);
+        childTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM, forrigeMåned.atDay(1).format(DateTimeFormatter.ISO_LOCAL_DATE));
+        childTask.setProperty(OpprettRevurderingForInntektskontrollTask.PERIODE_TOM, forrigeMåned.atEndOfMonth().format(DateTimeFormatter.ISO_LOCAL_DATE));
+    }
 
     @Override
     protected boolean erDuplikat(ProsessTaskData data) {
-        var fom = LocalDate.now().minusMonths(1).withDayOfMonth(1);
-        return data.getPropertyValue(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM)
-            .equals(fom.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        var forrigeMåned = YearMonth.now().minusMonths(1);
+        return Objects.equals(
+            data.getPropertyValue(OpprettRevurderingForInntektskontrollTask.PERIODE_FOM),
+            forrigeMåned.atDay(1).format(DateTimeFormatter.ISO_LOCAL_DATE));
     }
 }

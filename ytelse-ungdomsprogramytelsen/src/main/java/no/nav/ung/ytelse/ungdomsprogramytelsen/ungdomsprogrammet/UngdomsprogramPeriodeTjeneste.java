@@ -8,8 +8,8 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @ApplicationScoped
 public class UngdomsprogramPeriodeTjeneste {
@@ -152,11 +150,11 @@ public class UngdomsprogramPeriodeTjeneste {
         return finnEndretStartdatoer(ungdomsprogramPeriodeGrunnlag.get(), originaltGrunnlag.get());
     }
 
-    public static List<EndretDato> finnEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
+    public static List<EndretDato> finnEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<StartdatoGrunnlag> startdatoGrunnlag) {
         // Støtter kun en periode her foreløpig
         var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode();
         var gjeldendeDato = gjelendePeriode.getFomDato();
-        var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer).map(UngdomsytelseStartdatoer::getStartdatoer)
+        var oppgittStartdato = startdatoGrunnlag.map(StartdatoGrunnlag::getOppgitteStartdatoer).map(Startdatoer::getStartdatoer)
             .orElse(Set.of())
             .iterator().next().getStartdato();
         if (oppgittStartdato.equals(gjeldendeDato)) {
@@ -183,14 +181,14 @@ public class UngdomsprogramPeriodeTjeneste {
         return List.of(new EndretDato(andreStartdato, førsteStartdato));
     }
 
-    public static boolean harEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<UngdomsytelseStartdatoGrunnlag> ungdomsytelseStartdatoGrunnlag) {
+    public static boolean harEndretStartdatoFraOppgittStartdatoer(UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag, Optional<StartdatoGrunnlag> startdatoGrunnlag) {
         // Støtter kun en eller ingen periode her foreløpig
         var gjelendePeriode = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriodeDersomFinnes();
         if (gjelendePeriode.isEmpty()) {
             return true;
         }
         var gjeldendeDato = gjelendePeriode.get().getFomDato();
-        var oppgittStartdato = ungdomsytelseStartdatoGrunnlag.map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer).map(UngdomsytelseStartdatoer::getStartdatoer)
+        var oppgittStartdato = startdatoGrunnlag.map(StartdatoGrunnlag::getOppgitteStartdatoer).map(Startdatoer::getStartdatoer)
             .orElse(Set.of())
             .iterator().next().getStartdato();
         return !gjeldendeDato.equals(oppgittStartdato);

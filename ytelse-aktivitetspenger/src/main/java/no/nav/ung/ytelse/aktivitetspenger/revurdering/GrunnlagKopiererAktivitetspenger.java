@@ -8,12 +8,13 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 
@@ -27,8 +28,9 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
     private UttalelseRepository uttalelseRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
+    private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private StartdatoRepository startdatoRepository;
 
     public GrunnlagKopiererAktivitetspenger() {
         // for CDI proxy
@@ -41,16 +43,17 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
                                             UttalelseRepository uttalelseRepository,
                                             OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                            BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository,
-                                            InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
+                                            AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
+                                            InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository, StartdatoRepository startdatoRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.uttalelseRepository = uttalelseRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
-        this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
+        this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+        this.startdatoRepository = startdatoRepository;
     }
 
 
@@ -62,8 +65,9 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         forutgåendeMedlemskapRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
+        startdatoRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         bostedsGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        bosattSøknadGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        aktivitetspengerGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         inngangsvilkårVurderingRepository.kopier(originalBehandlingId, nyBehandlingId);
 
         // gjør til slutt, innebærer kall til abakus

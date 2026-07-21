@@ -40,24 +40,24 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
         <felles.version>11.2.3</felles.version>
-        <swagger.version>2.2.50</swagger.version>
-        <junit.version>6.1.0</junit.version>
-        <k9format.version>13.2.2</k9format.version>
+        <swagger.version>2.2.52</swagger.version>
+        <junit.version>6.1.1</junit.version>
+        <k9format.version>13.3.0</k9format.version>
         <jackson.version>2.22.0</jackson.version>
         <asm.version>9.10.1</asm.version>
-        <kotlin-stdlib.version>2.3.21</kotlin-stdlib.version>
-        <jandex.version>3.5.3</jandex.version>
+        <kotlin-stdlib.version>2.4.0</kotlin-stdlib.version>
+        <jandex.version>3.6.0</jandex.version>
         <pdfgen-core.version>1.1.81</pdfgen-core.version>
-        <flyway.version>12.7.0</flyway.version>
-        <confluent.platform.version>8.2.1</confluent.platform.version>
+        <flyway.version>12.10.0</flyway.version>
+        <confluent.platform.version>8.3.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.11.2</ung-deltakelse-opplyser.version>
         <ung-brukerdialog-api.version>1.0.4</ung-brukerdialog-api.version>
-        <handlebars.version>4.5.1</handlebars.version>
-        <validation-model-jakarta.version>1.30.1</validation-model-jakarta.version>
+        <handlebars.version>4.5.3</handlebars.version>
+        <validation-model-jakarta.version>1.30.2</validation-model-jakarta.version>
         <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
         <jsoup.version>1.22.2</jsoup.version>
-        <commonmark.version>0.28.0</commonmark.version>
+        <commonmark.version>0.29.0</commonmark.version>
         <tms-mikrofrontend-builder.version>3.0.0</tms-mikrofrontend-builder.version>
         <tms-java-builder.version>2.2.0</tms-java-builder.version>
     </properties>
@@ -103,7 +103,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>9.1.0.Final</version>
+                <version>9.1.1.Final</version>
             </dependency>
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
@@ -160,12 +160,12 @@
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>7.0.2</version>
+                <version>7.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
                 <artifactId>threeten-extra</artifactId>
-                <version>1.9.0</version>
+                <version>1.10.0</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -185,7 +185,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.28.1</version>
+                <version>2.29.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -592,14 +592,14 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.31.0-GA</version>
+                <version>3.32.0-GA</version>
             </dependency>
 
             <!-- Database -->
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.11</version>
+                <version>42.7.12</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
@@ -741,7 +741,7 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.14</version>
+                    <version>0.8.15</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

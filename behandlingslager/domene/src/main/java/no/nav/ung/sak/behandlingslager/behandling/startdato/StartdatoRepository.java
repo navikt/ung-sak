@@ -10,33 +10,33 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
 @Dependent
-public class UngdomsytelseStartdatoRepository {
+public class StartdatoRepository {
 
     private final EntityManager entityManager;
 
     @Inject
-    public UngdomsytelseStartdatoRepository(EntityManager entityManager) {
+    public StartdatoRepository(EntityManager entityManager) {
         Objects.requireNonNull(entityManager, "entityManager"); //$NON-NLS-1$
         this.entityManager = entityManager;
     }
 
-    public Optional<UngdomsytelseStartdatoGrunnlag> hentGrunnlag(Long behandlingId) {
+    public Optional<StartdatoGrunnlag> hentGrunnlag(Long behandlingId) {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void lagre(Long behandlingId, List<UngdomsytelseSøktStartdato> søknadsperioder) {
+    public void lagre(Long behandlingId, List<SøktStartdato> søknadsperioder) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseStartdatoGrunnlag(behandlingId, it))
-            .orElse(new UngdomsytelseStartdatoGrunnlag(behandlingId));
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new StartdatoGrunnlag(behandlingId, it))
+            .orElse(new StartdatoGrunnlag(behandlingId));
         nyttGrunnlag.leggTil(søknadsperioder);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
     }
 
-    public void lagreRelevanteSøknader(Long behandlingId, UngdomsytelseStartdatoer søknader) {
+    public void lagreRelevanteSøknader(Long behandlingId, Startdatoer søknader) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new UngdomsytelseStartdatoGrunnlag(behandlingId, it))
-            .orElse(new UngdomsytelseStartdatoGrunnlag(behandlingId));
+        var nyttGrunnlag = eksisterendeGrunnlag.map(it -> new StartdatoGrunnlag(behandlingId, it))
+            .orElse(new StartdatoGrunnlag(behandlingId));
         nyttGrunnlag.setRelevanteStartdatoer(søknader);
 
         persister(eksisterendeGrunnlag, nyttGrunnlag);
@@ -44,7 +44,7 @@ public class UngdomsytelseStartdatoRepository {
 
 
 
-    private void persister(Optional<UngdomsytelseStartdatoGrunnlag> eksisterendeGrunnlag, UngdomsytelseStartdatoGrunnlag nyttGrunnlag) {
+    private void persister(Optional<StartdatoGrunnlag> eksisterendeGrunnlag, StartdatoGrunnlag nyttGrunnlag) {
         eksisterendeGrunnlag.ifPresent(this::deaktiverEksisterende);
 
         if (nyttGrunnlag.getOppgitteStartdatoer() != null) {
@@ -57,18 +57,18 @@ public class UngdomsytelseStartdatoRepository {
         entityManager.flush();
     }
 
-    private void deaktiverEksisterende(UngdomsytelseStartdatoGrunnlag gr) {
+    private void deaktiverEksisterende(StartdatoGrunnlag gr) {
         gr.setAktiv(false);
         entityManager.persist(gr);
         entityManager.flush();
     }
 
-    private Optional<UngdomsytelseStartdatoGrunnlag> hentEksisterendeGrunnlag(Long id) {
+    private Optional<StartdatoGrunnlag> hentEksisterendeGrunnlag(Long id) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseStartdatoGrunnlag s " +
+                "FROM StartdatoGrunnlag s " +
                 "WHERE s.behandlingId = :behandlingId " +
-                "AND s.aktiv = true", UngdomsytelseStartdatoGrunnlag.class);
+                "AND s.aktiv = true", StartdatoGrunnlag.class);
 
         query.setParameter("behandlingId", id);
 
@@ -78,15 +78,15 @@ public class UngdomsytelseStartdatoRepository {
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(gammelBehandlingId);
         eksisterendeGrunnlag.ifPresent(entitet -> {
-            persister(Optional.empty(), new UngdomsytelseStartdatoGrunnlag(nyBehandlingId, entitet));
+            persister(Optional.empty(), new StartdatoGrunnlag(nyBehandlingId, entitet));
         });
     }
 
-    public Optional<UngdomsytelseStartdatoGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
+    public Optional<StartdatoGrunnlag> hentGrunnlagBasertPåId(Long grunnlagId) {
         var query = entityManager.createQuery(
             "SELECT s " +
-                "FROM UngdomsytelseStartdatoGrunnlag s " +
-                "WHERE s.id = :grunnlagId", UngdomsytelseStartdatoGrunnlag.class);
+                "FROM StartdatoGrunnlag s " +
+                "WHERE s.id = :grunnlagId", StartdatoGrunnlag.class);
 
         query.setParameter("grunnlagId", grunnlagId);
 

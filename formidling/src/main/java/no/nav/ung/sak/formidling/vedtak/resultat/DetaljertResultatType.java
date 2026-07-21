@@ -11,6 +11,8 @@ public enum DetaljertResultatType {
     ENDRING_STARTDATO("Endring startdato"),
     ENDRING_SLUTTDATO("Opphør eller endring sluttdato"),
     OPPHØR_VED_MAKSDATO("Opphør ved maksdato"),
+    OPPHØR_OPPHEVET("Opphør opphevet"),
+    OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING("Opphør mottatt og avbrutt i samme behandling"),
     ENDRING_FJERNE_PERIODE("Fjerne periode"),
     FORLENGET_PERIODE("Forlenget periode i ungdomsprogrammet"),
     IKKE_VURDERT("Ikke vurdert"),
@@ -23,7 +25,9 @@ public enum DetaljertResultatType {
     ENDRING_DELTAKER_DØDSFALL("Endring pga dødsfall av deltaker"),
     INNVILGELSE_ANNET("Innvilgelse pga annen årsak - se forklaring"),
     INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak"),
-    SATS_REGULERING("Innvilgelse etter G-regulering");
+    SATS_REGULERING("Innvilgelse etter G-regulering"),
+    UENDRET("Vurdert, men uendret utfall på vilkår")
+    ;
 
     private final String beskrivelse;
 

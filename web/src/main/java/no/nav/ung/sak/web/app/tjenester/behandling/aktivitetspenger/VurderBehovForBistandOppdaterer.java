@@ -85,17 +85,6 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
             .toList();
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(param.getBehandlingId(), periodeVurderinger);
 
-        LocalDateTimeline<Boolean> vurdertEtterOppdatering = inngangsvilkårVurderingRepository.hentGrunnlag(param.getBehandlingId())
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
-            .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
-                .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
-                .toList()))
-            .orElse(LocalDateTimeline.empty());
-        LocalDateTimeline<?> manglendePerioder = perioderTilVurdering.disjoint(vurdertEtterOppdatering);
-        if (!manglendePerioder.isEmpty()) {
-            throw new IllegalArgumentException("Forventer at alle perioder til vurdering er vurdert. Mangler : " + manglendePerioder);
-        }
-
         inngangsvilkårVurderingTjeneste.settBistandsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());

@@ -20,8 +20,8 @@ import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestS
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.*;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -486,10 +486,10 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder(), ungTestscenario.harForlengetPeriode(), ungTestscenario.periodeMaksDato());
         }
         if (ungTestscenario.søknadStartDato() != null) {
-            List<UngdomsytelseSøktStartdato> starDatoer = ungTestscenario.søknadStartDato().stream().map(it -> new UngdomsytelseSøktStartdato(it, new JournalpostId("123")))
+            List<SøktStartdato> starDatoer = ungTestscenario.søknadStartDato().stream().map(it -> new SøktStartdato(it, new JournalpostId("123")))
                 .toList();
-            repositories.ungdomsytelseStartdatoRepository().lagre(behandling1.getId(), starDatoer);
-            repositories.ungdomsytelseStartdatoRepository().lagreRelevanteSøknader(behandling1.getId(), new UngdomsytelseStartdatoer(starDatoer));
+            repositories.startdatoRepository().lagre(behandling1.getId(), starDatoer);
+            repositories.startdatoRepository().lagreRelevanteSøknader(behandling1.getId(), new Startdatoer(starDatoer));
         }
 
         if (ungTestscenario.tilkjentYtelsePerioder() != null) {

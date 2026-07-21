@@ -9,11 +9,15 @@
     <sequence-generator name="SEQ_LIVSOPPHOLD_RESULTAT_HOLDER" allocation-size="50" sequence-name="seq_livsopphold_resultat_holder"/>
     <sequence-generator name="SEQ_LIVSOPPHOLD_RESULTAT_PERIODE" allocation-size="50" sequence-name="seq_livsopphold_resultat_periode"/>
     <sequence-generator name="SEQ_GR_AKT_INNGANGSVILKAAR_RES" allocation-size="50" sequence-name="seq_gr_akt_inngangsvilkaar_res"/>
+    <sequence-generator name="SEQ_BOSTED_RESULTAT_HOLDER" allocation-size="50" sequence-name="seq_bosted_resultat_holder"/>
+    <sequence-generator name="SEQ_BOSTED_RESULTAT_PERIODE" allocation-size="50" sequence-name="seq_bosted_resultat_periode"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode"/>
     <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode"/>
     <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag"/>
+    <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode"/>
 
 </entity-mappings>

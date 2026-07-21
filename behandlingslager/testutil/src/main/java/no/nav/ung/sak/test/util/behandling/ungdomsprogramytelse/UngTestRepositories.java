@@ -4,7 +4,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
@@ -21,7 +21,7 @@ public record UngTestRepositories(
     BehandlingAnsvarligRepository behandlingAnsvarligRepository,
     UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-    UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
+    StartdatoRepository startdatoRepository,
     TilkjentYtelseRepository tilkjentYtelseRepository,
     ProsessTriggereRepository prosessTriggereRepository,
     InntektArbeidYtelseTjeneste abakusInMemoryInntektArbeidYtelseTjeneste,
@@ -45,7 +45,7 @@ public record UngTestRepositories(
         var ungdomsprogramPeriodeRepository = new UngdomsprogramPeriodeRepository(entityManager);
         var tilkjentYtelseRepository = new TilkjentYtelseRepository(entityManager);
         var prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
-        var ungdomsytelseStartdatoRepository = new UngdomsytelseStartdatoRepository(entityManager);
+        var ungdomsytelseStartdatoRepository = new StartdatoRepository(entityManager);
         var vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
         return new UngTestRepositories(repositoryProvider, behandlingAnsvarligRepository, ungdomsytelseGrunnlagRepository, ungdomsprogramPeriodeRepository, ungdomsytelseStartdatoRepository, tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste, vedtaksbrevValgRepository, klageRepository, fritekstRepository);
     }

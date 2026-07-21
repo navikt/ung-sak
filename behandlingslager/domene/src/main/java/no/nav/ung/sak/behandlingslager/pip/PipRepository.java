@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.sak.kontrakt.abac.FagsakPipDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -233,13 +234,11 @@ public class PipRepository {
     }
 
     @SuppressWarnings({"unchecked"})
-    public Set<Saksnummer> saksnumreForSøker(Collection<AktørId> aktørId) {
+    public Set<Saksnummer> hentSaksnumreForBruker(Collection<AktørId> aktørId) {
         if (aktørId.isEmpty()) {
             return Collections.emptySet();
         }
-        String sql = "SELECT f.saksnummer " +
-            "from FAGSAK f " +
-            "where f.bruker_aktoer_id in (:aktørId)";
+        String sql = "SELECT f.saksnummer from FAGSAK f where f.bruker_aktoer_id in (:aktørId)";
         Query query = entityManager.createNativeQuery(sql);
         query.setParameter("aktørId", aktørId.stream().map(AktørId::getId).collect(Collectors.toList()));
         var result = (List<String>) query.getResultList();
@@ -268,5 +267,53 @@ public class PipRepository {
         TypedQuery<Long> query = entityManager.createQuery(sql, Long.class);
         query.setParameter("uuider", behandlingsUUIDer);
         return query.getResultStream().collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public List<FagsakPipDto> hentPipDataOgPersonerForBrukersFagsaker(AktørId brukerAktørId) {
+        Set<Saksnummer> saksnumre = hentSaksnumreForBruker(Set.of(brukerAktørId));
+        return saksnumre.stream()
+            .map(this::hentPipDataOgPersonerForFagsak)
+            .flatMap(Optional::stream)
+            .toList();
+    }
+
+    public Optional<FagsakPipDto> hentPipDataOgPersonerForFagsak(Saksnummer saksnummer) {
+        FagsakTypeOgStatus fagsakTypeOgStatus = hentFagsakTypeOgStatus(saksnummer);
+        if (fagsakTypeOgStatus == null){
+            return Optional.empty();
+        }
+        Set<AktørId> aktørIder = hentAktørIdKnyttetTilFagsaker(Set.of(saksnummer));
+        Set<AktørId> aktørIderForSporingslogg = hentAktørIdForSporingslogg(saksnummer);
+        return Optional.of(new FagsakPipDto(
+            saksnummer,
+            aktørIder,
+            aktørIderForSporingslogg,
+            fagsakTypeOgStatus.status(),
+            fagsakTypeOgStatus.ytelseType()
+        ));
+    }
+
+    public FagsakTypeOgStatus hentFagsakTypeOgStatus(Saksnummer saksnummer) {
+        Objects.requireNonNull(saksnummer, "saksnummer");
+
+        String sql = "select ytelse_type, fagsak_status from fagsak where saksnummer = :saksnummer";
+        Query query = entityManager.createNativeQuery(sql, Tuple.class);
+        query.setParameter("saksnummer", saksnummer.getVerdi());
+        @SuppressWarnings("unchecked")
+        List<Tuple> resultat = query.getResultList();
+        if (resultat.isEmpty()) {
+            return null;
+        } else if (resultat.size() == 1) {
+            Tuple tuple = resultat.getFirst();
+            return new FagsakTypeOgStatus(
+                FagsakYtelseType.fraKode(tuple.get("ytelse_type", String.class)),
+                FagsakStatus.fraKode(tuple.get("fagsak_status", String.class))
+            );
+        } else {
+            throw new IllegalStateException("Forventet 0 eller 1 treff etter saksnummer, men fikk " + resultat.size());
+        }
+    }
+
+    public record FagsakTypeOgStatus(FagsakYtelseType ytelseType, FagsakStatus status) {
     }
 }

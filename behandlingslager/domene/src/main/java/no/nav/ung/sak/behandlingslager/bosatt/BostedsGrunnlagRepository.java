@@ -5,8 +5,10 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
-import no.nav.ung.kodeverk.bosatt.Kilde;
+import no.nav.ung.sak.typer.Periode;
+
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -32,66 +34,56 @@ public class BostedsGrunnlagRepository {
     }
 
     /**
-     * Lagrer saksbehandlers bostedsavklaringer for en behandling (kilde=SAKSBEHANDLER).
-     * Nøkkel er skjæringstidspunkt (= vilkårsperiode fom); verdi er {@link BostedAvklaringData}.
-     *
-     * @return Map fra skjæringstidspunkt til periodeAvklaring.referanse
+     * Lagrer bostedsopplysning oppgitt av bruker i søknaden på behandlingens bostedsgrunnlag.
+     * Oppretter et bostedsgrunnlag dersom det ikke finnes fra før. Eksisterende opplysning for
+     * samme journalpostId erstattes.
      */
-    public Map<LocalDate, UUID> lagreAvklaringer(Long behandlingId,
-                                                  Map<LocalDate, BostedAvklaringData> avklaringerPerSkjæringstidspunkt) {
-        var eksisterende = hentGrunnlagHvisEksisterer(behandlingId);
+    public void lagreInformasjonFraSøknad(Long behandlingId, String journalpostId, LocalDate startdato, boolean erBosattITrondheim) {
+        var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag
+            .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
+            .orElse(new BostedsGrunnlag(behandlingId));
 
-        var nyHolder = byggHolder(avklaringerPerSkjæringstidspunkt);
+        nyttGrunnlag.leggTilInformasjonFraSøknad(new BostedsinformasjonFraSøknad(journalpostId, startdato, erBosattITrondheim));
 
-        if (eksisterende.isPresent() && eksisterende.get().getHolder().equals(nyHolder)) {
-            return eksisterende.get().getHolder().getPeriodeAvklaringer().stream()
-                .collect(Collectors.toMap(
-                    BostedsPeriodeAvklaring::getSkjæringstidspunkt,
-                    BostedsPeriodeAvklaring::getReferanse));
+        if (eksisterendeGrunnlag.isPresent()) {
+            if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
+                return;
+            }
+            deaktiverEksisterende(eksisterendeGrunnlag.get());
         }
-
-        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, nyHolder);
-        eksisterende.ifPresent(this::deaktiverEksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
-
-        return nyHolder.getPeriodeAvklaringer().stream()
-            .collect(Collectors.toMap(
-                BostedsPeriodeAvklaring::getSkjæringstidspunkt,
-                BostedsPeriodeAvklaring::getReferanse));
     }
 
     /**
-     * Lagrer automatisk fastsatte avklaringer basert på søknadsdata (kilde=SØKNAD).
-     * Avklaringene har erBosattITrondheim fra søknaden, fraflyttingsDato=null, fraflyttingsÅrsak=null.
+     * Lagrer saksbehandlers bostedsavklaringer for en behandling.
+     * Beholder referanser til {@code oppgittFraSøknad} og {@code resultat} på grunnlaget.
      *
-     * @return Map fra skjæringstidspunkt til periodeAvklaring.referanse
+     * @return Map fra periodestart til periodeAvklaring.referanse
      */
-    public Map<LocalDate, UUID> lagreAvklaringerFraSøknad(Long behandlingId,
-                                                            Map<LocalDate, Boolean> søknadErBosattPerFom) {
-        var eksisterende = hentGrunnlagHvisEksisterer(behandlingId);
+    public Map<LocalDate, UUID> lagreForeslåtteAvklaringer(Long behandlingId, List<BostedsPeriodeAvklaring> nyeAvklaringer) {
+        var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Forventer at grunnlag allerede eksisterer ved lagring av avklaring"));
 
-        var holder = new BostedsAvklaringHolder();
-        for (var entry : søknadErBosattPerFom.entrySet()) {
-            holder.leggTilPeriodeAvklaring(new BostedsPeriodeAvklaring(
-                entry.getKey(), entry.getValue(), null, null, Kilde.SØKNAD));
+        var nyttGrunnlag = BostedsGrunnlag.nyttGrunnlagMedReferanserFra(eksisterendeGrunnlag);
+        nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
+
+        if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
+            return hentForeslåttAvklaringsreferanser(eksisterendeGrunnlag.getForeslått());
         }
+        deaktiverEksisterende(eksisterendeGrunnlag);
 
-        if (eksisterende.isPresent() && eksisterende.get().getHolder().equals(holder)) {
-            return eksisterende.get().getHolder().getPeriodeAvklaringer().stream()
-                .collect(Collectors.toMap(
-                    BostedsPeriodeAvklaring::getSkjæringstidspunkt,
-                    BostedsPeriodeAvklaring::getReferanse));
-        }
-
-        var nyttGrunnlag = new BostedsGrunnlag(behandlingId, holder);
-        eksisterende.ifPresent(this::deaktiverEksisterende);
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
 
+        return hentForeslåttAvklaringsreferanser(nyttGrunnlag.getForeslått());
+    }
+
+    private static Map<LocalDate, UUID> hentForeslåttAvklaringsreferanser(BostedsAvklaringHolder holder) {
         return holder.getPeriodeAvklaringer().stream()
             .collect(Collectors.toMap(
-                BostedsPeriodeAvklaring::getSkjæringstidspunkt,
+                p -> p.getPeriode().getFomDato(),
                 BostedsPeriodeAvklaring::getReferanse));
     }
 
@@ -101,21 +93,10 @@ public class BostedsGrunnlagRepository {
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         hentGrunnlagHvisEksisterer(gammelBehandlingId).ifPresent(eksisterende -> {
-            var nyttGrunnlag = new BostedsGrunnlag(nyBehandlingId, eksisterende.getHolder());
+            var nyttGrunnlag = BostedsGrunnlag.nyttGrunnlagForBehandlingMedReferanserFra(nyBehandlingId, eksisterende);
             entityManager.persist(nyttGrunnlag);
             entityManager.flush();
         });
-    }
-
-    private static BostedsAvklaringHolder byggHolder(Map<LocalDate, BostedAvklaringData> avklaringerPerSkjæringstidspunkt) {
-        var holder = new BostedsAvklaringHolder();
-        for (var entry : avklaringerPerSkjæringstidspunkt.entrySet()) {
-            var skjæringstidspunkt = entry.getKey();
-            var data = entry.getValue();
-            holder.leggTilPeriodeAvklaring(new BostedsPeriodeAvklaring(
-                skjæringstidspunkt, data.erBosattITrondheim(), data.fraflyttingsDato(), data.fraflyttingsÅrsak(), data.kilde()));
-        }
-        return holder;
     }
 
     private void deaktiverEksisterende(BostedsGrunnlag gr) {

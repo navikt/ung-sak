@@ -12,9 +12,9 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -45,7 +45,7 @@ class InitierPerioderStegTest {
 
     private BehandlingRepository behandlingRepository;
     private BehandlingVedtakRepository behandlingVedtakRepository;
-    private UngdomsytelseStartdatoRepository startdatoRepository;
+    private StartdatoRepository startdatoRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private InitierPerioderSteg steg;
     private Fagsak fagsak;
@@ -54,7 +54,7 @@ class InitierPerioderStegTest {
     void setUp() {
         behandlingRepository = new BehandlingRepository(em);
         behandlingVedtakRepository = new BehandlingVedtakRepository(em);
-        startdatoRepository = new UngdomsytelseStartdatoRepository(em);
+        startdatoRepository = new StartdatoRepository(em);
         mottatteDokumentRepository = new MottatteDokumentRepository(em);
         steg = new InitierPerioderSteg(behandlingRepository, startdatoRepository, mottatteDokumentRepository);
 
@@ -69,7 +69,7 @@ class InitierPerioderStegTest {
 
         var journalpostId = new JournalpostId("100");
         lagreMottattDokument(behandling, journalpostId);
-        startdatoRepository.lagre(behandling.getId(), List.of(new UngdomsytelseSøktStartdato(STARTDATO, journalpostId)));
+        startdatoRepository.lagre(behandling.getId(), List.of(new SøktStartdato(STARTDATO, journalpostId)));
 
         steg.utførSteg(kontekstFor(behandling));
 
@@ -88,7 +88,7 @@ class InitierPerioderStegTest {
 
         var papirsøknadJournalpostId = new JournalpostId("200");
         lagreMottattDokument(revurdering, papirsøknadJournalpostId);
-        startdatoRepository.lagre(revurdering.getId(), List.of(new UngdomsytelseSøktStartdato(STARTDATO, papirsøknadJournalpostId)));
+        startdatoRepository.lagre(revurdering.getId(), List.of(new SøktStartdato(STARTDATO, papirsøknadJournalpostId)));
 
         steg.utførSteg(kontekstFor(revurdering));
 
@@ -111,8 +111,8 @@ class InitierPerioderStegTest {
         lagreMottattDokument(revurdering, eksisterendeJournalpost);
         lagreMottattDokument(revurdering, nyJournalpost);
         startdatoRepository.lagre(revurdering.getId(), List.of(
-            new UngdomsytelseSøktStartdato(STARTDATO, eksisterendeJournalpost),
-            new UngdomsytelseSøktStartdato(nyStartdato, nyJournalpost)
+            new SøktStartdato(STARTDATO, eksisterendeJournalpost),
+            new SøktStartdato(nyStartdato, nyJournalpost)
         ));
 
         steg.utførSteg(kontekstFor(revurdering));
@@ -131,7 +131,7 @@ class InitierPerioderStegTest {
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
 
         // Grunnlag kopieres fra forrige behandling men ingen nye dokumenter knyttes til revurderingen
-        startdatoRepository.lagre(revurdering.getId(), List.of(new UngdomsytelseSøktStartdato(STARTDATO, new JournalpostId("100"))));
+        startdatoRepository.lagre(revurdering.getId(), List.of(new SøktStartdato(STARTDATO, new JournalpostId("100"))));
 
         steg.utførSteg(kontekstFor(revurdering));
 
@@ -153,10 +153,10 @@ class InitierPerioderStegTest {
     private Behandling lagreFørstegangsbehandlingMedRelevantStartdato(LocalDate startdato, JournalpostId journalpostId) {
         var førstegangsbehandling = Behandling.forFørstegangssøknad(fagsak).build();
         behandlingRepository.lagre(førstegangsbehandling, behandlingRepository.taSkriveLås(førstegangsbehandling));
-        var søktStartdato = new UngdomsytelseSøktStartdato(startdato, journalpostId);
+        var søktStartdato = new SøktStartdato(startdato, journalpostId);
         startdatoRepository.lagre(førstegangsbehandling.getId(), List.of(søktStartdato));
         startdatoRepository.lagreRelevanteSøknader(førstegangsbehandling.getId(),
-            new UngdomsytelseStartdatoer(Set.of(søktStartdato)));
+            new Startdatoer(Set.of(søktStartdato)));
         lagreMottattDokument(førstegangsbehandling, journalpostId);
         var vedtak = BehandlingVedtak.builder(førstegangsbehandling.getId())
             .medVedtakstidspunkt(LocalDateTime.now().minusDays(1))
@@ -177,7 +177,7 @@ class InitierPerioderStegTest {
             .map(g -> g.getRelevanteStartdatoer().getStartdatoer())
             .orElseThrow()
             .stream()
-            .map(UngdomsytelseSøktStartdato::getStartdato)
+            .map(SøktStartdato::getStartdato)
             .collect(Collectors.toSet());
     }
 }

@@ -13,6 +13,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
@@ -75,7 +76,9 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         var behandlingGrunnlag = new UngDetaljertResultatBehandlingGrunnlag(
             behandling.erManueltOpprettet(),
             grunnlag.getUngdomsprogramMaksPeriode().orElse(null),
-            grunnlag.hentForEksaktEnPeriode());
+            grunnlag.hentForEksaktEnPeriode(),
+            behandling.getBehandlingÅrsakerTyper().contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM),
+            UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository));
 
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .intersection(samletVilkårTidslinje,
@@ -115,7 +118,10 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
             resultater.add(endretStartdatoDetaljertResultat(avslåtteVilkår));
         }
 
-        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
+        // RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM regnes som utdatert/stale når behandlingen også har
+        // RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM (jf. samme mønster i UngEtterlysningOppretter og
+        // BehandlingDtoUtil) — da skal opphøret ikke lenger gi eget opphørsbrev, kun opphevelsen.
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM) && !behandlingGrunnlag.harOpphevelseAvOpphør()) {
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
         }
 
@@ -127,6 +133,12 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
             && erRelevantForVarslingOmOpphørVedMaksdato(behandlingGrunnlag)) {
             resultater.add(DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_VED_MAKSDATO));
+        }
+
+        if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)) {
+            resultater.add(behandlingGrunnlag.opphørVarFaktiskIverksatt()
+                ? DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_OPPHEVET)
+                : DetaljertResultatInfo.of(DetaljertResultatType.OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING));
         }
 
         relevanteÅrsaker.stream()

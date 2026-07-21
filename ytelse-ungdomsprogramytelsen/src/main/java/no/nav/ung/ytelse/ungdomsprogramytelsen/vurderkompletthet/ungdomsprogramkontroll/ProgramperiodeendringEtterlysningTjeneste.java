@@ -11,7 +11,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -37,7 +37,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private EtterlysningRepository etterlysningRepository;
     private EtterlysningTjeneste etterlysningTjeneste;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
+    private StartdatoRepository startdatoRepository;
     private BehandingprosessSporingRepository behandingprosessSporingRepository;
     private EtterlysningForEndretProgramperiodeResultatHåndterer resultatHåndterer;
     private boolean endretPeriodeEnabled;
@@ -47,7 +47,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
                                                      ProsessTaskTjeneste prosessTaskTjeneste,
                                                      EtterlysningRepository etterlysningRepository,
                                                      EtterlysningTjeneste EtterlysningTjeneste,
-                                                     UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository,
+                                                     StartdatoRepository startdatoRepository,
                                                      BehandingprosessSporingRepository behandingprosessSporingRepository,
                                                      EtterlysningForEndretProgramperiodeResultatHåndterer resultatHåndterer,
                                                      @KonfigVerdi(value = "PROGRAMPERIODE_ENDRING_ENABLED", defaultVerdi = "false") boolean endretPeriodeEnabled) {
@@ -55,10 +55,43 @@ public class ProgramperiodeendringEtterlysningTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.etterlysningRepository = etterlysningRepository;
         this.etterlysningTjeneste = EtterlysningTjeneste;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
+        this.startdatoRepository = startdatoRepository;
         this.behandingprosessSporingRepository = behandingprosessSporingRepository;
         this.resultatHåndterer = resultatHåndterer;
         this.endretPeriodeEnabled = endretPeriodeEnabled;
+    }
+
+    /**
+     * Avbryter alle ventende (OPPRETTET/VENTER) etterlysninger knyttet til endret sluttdato.
+     * Brukes når opphevelse av opphør gjør en tidligere opprettet sluttdato-etterlysning irrelevant —
+     * f.eks. dersom {@code UngdomsprogramOpphørOpphevetHendelse} blir slått sammen med en fortsatt åpen behandling
+     * som venter på bekreftelse av det (nå opphevede) opphøret.
+     * <p>
+     * Sjekker både {@link EtterlysningType#UTTALELSE_ENDRET_SLUTTDATO} (gammel flyt) og
+     * {@link EtterlysningType#UTTALELSE_ENDRET_PERIODE} (ny flyt, jf. {@code PROGRAMPERIODE_ENDRING_ENABLED}),
+     * siden begge typer kan representere en ventende uttalelse om (blant annet) endret sluttdato.
+     */
+    public void avbrytVentendeSluttdatoOgPeriodeEtterlysninger(BehandlingReferanse behandlingReferanse) {
+        var behandlingId = behandlingReferanse.getBehandlingId();
+        // Opphevelse av opphør gjelder kun sluttdato (register-endring fjerner sluttdatoen). Startdato berøres ikke.
+        var etterlysningerSomSkalAvbrytes = etterlysningRepository.hentEtterlysningerMedSisteFørst(
+                behandlingId,
+                EtterlysningType.UTTALELSE_ENDRET_SLUTTDATO,
+                EtterlysningType.UTTALELSE_ENDRET_PERIODE)
+            .stream()
+            .filter(it -> it.getStatus() == EtterlysningStatus.OPPRETTET || it.getStatus() == EtterlysningStatus.VENTER)
+            .toList();
+
+        if (etterlysningerSomSkalAvbrytes.isEmpty()) {
+            return;
+        }
+
+        logger.info("Avbryter {} ventende etterlysning(er) for endret sluttdato grunnet opphevelse av opphør på behandling {}",
+            etterlysningerSomSkalAvbrytes.size(), behandlingId);
+        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::setSkalAvbrytes);
+        etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
+
+        prosessTaskTjeneste.lagre(lagTaskForAvbrytelseAvEtterlysning(behandlingId, behandlingReferanse.getFagsakId()));
     }
 
     public void opprettEtterlysningerForProgramperiodeEndring(BehandlingReferanse behandlingReferanse) {
@@ -90,7 +123,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             gjeldendeEtterlysning.map(it -> new EtterlysningOgGrunnlag(new EtterlysningStatusOgType(it.status(), etterlysningType), ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(it.grunnlagsreferanse()))),
             ungdomsprogramPeriodeGrunnlag,
             initiellPeriodegrunnlag,
-            ungdomsytelseStartdatoRepository.hentGrunnlag(behandlingReferanse.getBehandlingId())
+            startdatoRepository.hentGrunnlag(behandlingReferanse.getBehandlingId())
         );
 
         // Utled resultat
@@ -111,7 +144,7 @@ public class ProgramperiodeendringEtterlysningTjeneste {
             gjeldendeEtterlysning.map(it -> new EtterlysningOgGrunnlag(new EtterlysningStatusOgType(it.getStatus(), EtterlysningType.UTTALELSE_ENDRET_PERIODE), ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(it.getGrunnlagsreferanse()))),
             ungdomsprogramPeriodeGrunnlag,
             initiellPeriodegrunnlag,
-            ungdomsytelseStartdatoRepository.hentGrunnlag(behandlingReferanse.getBehandlingId())
+            startdatoRepository.hentGrunnlag(behandlingReferanse.getBehandlingId())
         );
 
         // Utled resultat

@@ -8,7 +8,7 @@ import java.util.Objects;
 
 /**
  * Bostedsopplysning oppgitt av bruker i søknaden.
- * Koblet til {@link BosattSøknadGrunnlag} via {@code bosatt_soeknad_grunnlag_id}.
+ * Koblet til {@link BostedsGrunnlag} via {@code bosatt_soeknad_grunnlag_id}.
  */
 @Entity(name = "BostedsinformasjonFraSøknad")
 @Table(name = "BOSATT_INFORMASJON_FRA_SOEKNAD")
