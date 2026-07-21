@@ -94,7 +94,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         }
 
         mottattDokument.setFeilmeldingOgOppdaterStatus("Ugyldiggjort manuelt ifm TSFF-2756");
-        mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
+        mottatteDokumentRepository.oppdater(mottattDokument);
 
         entityManager.persist(new DiagnostikkFagsakLogg(
             fagsakId,
