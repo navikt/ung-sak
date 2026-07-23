@@ -6,9 +6,11 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -167,6 +169,54 @@ class AktuelleFagsakerForMaksdatoVarselRepositoryTest {
         assertThat(fagsaker)
             .extracting(f -> f.getId())
             .contains(behandling.getFagsakId());
+    }
+
+    @Test
+    void skal_ikke_returnere_fagsak_nar_fagsak_allerede_er_avsluttet() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        var maksdato = LocalDate.now().plusWeeks(2);
+        // naturlig avslutning: tom == maksdato, som ellers ville gitt treff på having-betingelsen
+        lagreUngdomsprogramGrunnlag(behandling, maksdato, maksdato);
+
+        new FagsakRepository(entityManager).oppdaterFagsakStatus(behandling.getFagsakId(), FagsakStatus.AVSLUTTET);
+
+        var fagsaker = repository.hentFagsakerRelevantForMaksdatoVarsel();
+
+        assertThat(fagsaker)
+            .extracting(f -> f.getId())
+            .doesNotContain(behandling.getFagsakId());
+    }
+
+    @Test
+    void skal_ikke_returnere_fagsak_nar_maksdato_allerede_har_passert() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        // maksdato ligger i fortiden, f.eks. fordi grunnlaget ikke er oppdatert etter et opphør
+        var maksdatoIFortiden = LocalDate.now().minusWeeks(1);
+        lagreUngdomsprogramGrunnlag(behandling, maksdatoIFortiden, maksdatoIFortiden);
+
+        var fagsaker = repository.hentFagsakerRelevantForMaksdatoVarsel();
+
+        assertThat(fagsaker)
+            .extracting(f -> f.getId())
+            .doesNotContain(behandling.getFagsakId());
+    }
+
+    @Test
+    void skal_ikke_returnere_fagsak_nar_maksdato_har_passert_og_periode_er_forlenget() {
+        var behandling = TestScenarioBuilder.builderMedSøknad().lagre(entityManager);
+        // gammel (allerede passert) maksdato, siden grunnlaget ikke er rukket å bli oppdatert
+        // med den forlengede maksdatoen enda
+        var gammelMaksdatoIFortiden = LocalDate.now().minusWeeks(1);
+        lagreUngdomsprogramGrunnlag(behandling, gammelMaksdatoIFortiden, gammelMaksdatoIFortiden);
+
+        leggTilTrigger(behandling, BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
+            gammelMaksdatoIFortiden.minusDays(1), gammelMaksdatoIFortiden.plusDays(1));
+
+        var fagsaker = repository.hentFagsakerRelevantForMaksdatoVarsel();
+
+        assertThat(fagsaker)
+            .extracting(f -> f.getId())
+            .doesNotContain(behandling.getFagsakId());
     }
 
     @Test

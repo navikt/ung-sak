@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakStatus;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
@@ -50,18 +51,33 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
      * Det ekskluderes også fagsaker som allerede har en åpen (ikke avsluttet/iverksatt) behandling med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO,
      * slik at vi ikke oppretter duplikate behandlinger mens en varselbehandling er under arbeid.
      *
+     * <p>Fagsaker som allerede er avsluttet (deltakeren er ikke lenger med i programmet, f.eks. fordi
+     * opphør allerede er iverksatt) ekskluderes også. Uten dette kan en fagsak der programperioden
+     * naturlig avsluttes akkurat på {@code periodeMaksDato} (tom == periodeMaksDato) bli plukket opp
+     * på nytt av en senere batch-kjøring selv om saken allerede er lukket.
+     *
+     * <p>{@code harPassertVarseldato} sjekker kun en nedre grense (i dag er innenfor eller etter
+     * varselvinduet), uten noen øvre grense mot en {@code periodeMaksDato} som ligger langt tilbake
+     * i tid. Uten en slik øvre grense kan en fagsak der deltakeren allerede har fått satt sluttdato/
+     * opphør (og {@code periodeMaksDato} dermed ligger i fortiden, f.eks. fordi grunnlaget ikke er
+     * ferdig oppdatert etter opphøret) fortsatt bli plukket opp av batchen. Derfor kreves det også at
+     * {@code periodeMaksDato} ikke allerede er passert dagens dato.
+     *
      */
     @SuppressWarnings("unchecked")
     public List<Fagsak> hentFagsakerRelevantForMaksdatoVarsel() {
         // harPassertVarseldato: periodeMaksDato <= now + VARSEL_UKER_FØR_MAKSDATO uker
         LocalDate grensedato = LocalDate.now().plusWeeks(MaksdatoOpphørVarslingPeriode.VARSEL_UKER_FØR_MAKSDATO);
+        LocalDate dagensDato = LocalDate.now();
         String ungdomsytelseKode = FagsakYtelseType.UNGDOMSYTELSE.getKode();
         String varselOpphorKode = BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO.getKode();
+        String avsluttetFagsakStatusKode = FagsakStatus.AVSLUTTET.getKode();
 
         // BT-002 = FØRSTEGANGSSØKNAD, BT-004 = REVURDERING (BehandlingType.getYtelseBehandlingTyper())
         String sql = """
                 select f.* from fagsak f
                 where f.ytelse_type = :ytelseType
+                  and f.fagsak_status <> :avsluttetFagsakStatus
                   and exists (
                     select 1
                     from behandling b
@@ -83,6 +99,7 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
                           limit 1
                       )
                       and mp.periode_maks_dato is not null
+                      and mp.periode_maks_dato >= cast(:dagensDato as date)
                       and mp.periode_maks_dato <= cast(:grensedato as date)
                       and not exists (
                           select 1
@@ -111,8 +128,10 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
 
         Query query = entityManager.createNativeQuery(sql, Fagsak.class); // NOSONAR
         query.setParameter("grensedato", grensedato);
+        query.setParameter("dagensDato", dagensDato);
         query.setParameter("ytelseType", ungdomsytelseKode);
         query.setParameter("varselOpphorArsak", varselOpphorKode);
+        query.setParameter("avsluttetFagsakStatus", avsluttetFagsakStatusKode);
         return query.getResultList();
     }
 }
