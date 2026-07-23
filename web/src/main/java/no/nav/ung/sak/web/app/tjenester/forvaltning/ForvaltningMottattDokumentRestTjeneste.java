@@ -115,6 +115,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         SaksnummerDto saksnummer,
 
         @NotNull
+        @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
         KortTekst begrunnelse
     ) {
