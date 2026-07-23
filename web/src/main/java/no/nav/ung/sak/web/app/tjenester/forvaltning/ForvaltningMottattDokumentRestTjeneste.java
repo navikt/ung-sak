@@ -21,7 +21,6 @@ import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.kontrakt.KortTekst;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
@@ -74,25 +73,33 @@ public class ForvaltningMottattDokumentRestTjeneste {
     @Produces(JSON_UTF8)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response markerMottattDokumentUgyldig(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MarkerDokumentUgyldigRequest dto) {
-        Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(dto.saksnummer)
-            .orElseThrow(() -> new IllegalArgumentException("Fant ikke fagsak for saksnummer: " + dto.saksnummer.getVerdi()));
-        Long fagsakId = fagsak.getId();
-        JournalpostId journalpostId = dto.journalpostId.getJournalpostId();
+        var fagsakOpt = fagsakRepository.hentSakGittSaksnummer(dto.saksnummer());
+        if (fagsakOpt.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity("Fant ikke fagsak for saksnummer: " + dto.saksnummer().getVerdi())
+                .build();
+        }
+        Long fagsakId = fagsakOpt.get().getId();
+        JournalpostId journalpostId = dto.journalpostId().getJournalpostId();
         List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokument(fagsakId, List.of(journalpostId));
 
         if (mottattDokuments.isEmpty()) {
-            throw new IllegalArgumentException("Fant ingen dokumenter");
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity("Fant ingen dokumenter for saksnummer " + dto.saksnummer().getVerdi() + " og journalpostId " + journalpostId.getVerdi())
+                .build();
         }
 
         if (mottattDokuments.size() > 1) {
-            throw new IllegalArgumentException("Forventet maks 1 dokument");
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Forventet maks 1 dokument, men fant " + mottattDokuments.size())
+                .build();
         }
 
         MottattDokument mottattDokument = mottattDokuments.getFirst();
 
         if (!TILLATTE_BREVKODER.contains(mottattDokument.getType())) {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Forventet en av brevkodene " + TILLATTE_BREVKODER + ", men dokumentet har: " + mottattDokument.getType())
+                .entity("Dokumentet har brevkode " + mottattDokument.getType() + ", bare dokumenter med brevkodene " + TILLATTE_BREVKODER + " kan settes ugyldige")
                 .build();
         }
 
