@@ -22,29 +22,32 @@ import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.kontrakt.KortTekst;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
+import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.List;
+import java.util.Set;
 
 
-/**
- * DENNE TJENESTEN ER BARE FOR MIDLERTIDIG BEHOV FOR TSFF-2756, OG SKAL AVVIKLES SÅ RASKT SOM MULIG.
- */
-@Path("/TSFF-2756/forvaltning")
+@Path("/forvaltning")
 @ApplicationScoped
 @Transactional
 public class ForvaltningMottattDokumentRestTjeneste {
 
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
 
+    private static final Set<Brevkode> TILLATTE_BREVKODER = Set.of(
+        Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE,
+        Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING
+    );
+
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private EntityManager entityManager;
 
     public ForvaltningMottattDokumentRestTjeneste() {
@@ -54,21 +57,19 @@ public class ForvaltningMottattDokumentRestTjeneste {
     @Inject
     public ForvaltningMottattDokumentRestTjeneste(FagsakRepository fagsakRepository,
                                                   MottatteDokumentRepository mottatteDokumentRepository,
-                                                  MottatteDokumentTjeneste mottatteDokumentTjeneste,
                                                   EntityManager entityManager) {
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.mottatteDokumentTjeneste = mottatteDokumentTjeneste;
         this.entityManager = entityManager;
     }
 
     @POST
-    @Path("ugyldigjor-mottatt-dokument")
+    @Path("/marker-ugyldig")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "ugyldiggjør mottatt dokument ifm TSFF-2756", summary = ("ugyldiggjør mottatt dokument ifm TSFF-2756"), tags = "forvaltning")
+    @Operation(description = "Markerer et mottatt dokument som ugyldig", summary = ("Markerer angitt dokument som ugyldig"), tags = "forvaltning")
     @Produces(JSON_UTF8)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.DRIFT)
-    public Response ugyldigjorMottattDokument(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) UgyldigjorMottattDokumentRequest dto) {
+    public Response markerMottattDokumentUgyldig(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MarkerDokumentUgyldigRequest dto) {
         Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(dto.saksnummer.getVerdi())
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke fagsak for saksnummer: " + dto.saksnummer.getVerdi()));
         Long fagsakId = fagsak.getId();
@@ -81,9 +82,9 @@ public class ForvaltningMottattDokumentRestTjeneste {
 
         MottattDokument mottattDokument = mottattDokuments.getFirst();
 
-        if (!Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.equals(mottattDokument.getType())) {
+        if (!TILLATTE_BREVKODER.contains(mottattDokument.getType())) {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Forventet brevkode " + Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE + ", men dokumentet har: " + mottattDokument.getType())
+                .entity("Forventet en av brevkodene " + TILLATTE_BREVKODER + ", men dokumentet har: " + mottattDokument.getType())
                 .build();
         }
 
@@ -93,20 +94,17 @@ public class ForvaltningMottattDokumentRestTjeneste {
                 .build();
         }
 
-        mottattDokument.setFeilmeldingOgOppdaterStatus("Ugyldiggjort manuelt ifm TSFF-2756");
+        String formatertBegrunnelse = "Manuelt markert som ugyldig. Begrunnelse: %s".formatted(dto.begrunnelse().getTekst());
+        mottattDokument.setFeilmeldingOgOppdaterStatus(formatertBegrunnelse);
         mottatteDokumentRepository.oppdater(mottattDokument);
 
-        entityManager.persist(new DiagnostikkFagsakLogg(
-            fagsakId,
-            "ForvaltningMottattDokumentRestTjeneste.ugyldigjorMottattDokument (midlertidig)",
-            "Patching ifm TSFF-2756. Satt mottatt dokument for journalpost=%s til UGYLDIG."
-                .formatted(journalpostId.getVerdi())
-        ));
+        entityManager.persist(new DiagnostikkFagsakLogg(fagsakId, "/marker-ugyldig", formatertBegrunnelse));
+        entityManager.flush();
 
         return Response.ok().build();
     }
 
-    public record UgyldigjorMottattDokumentRequest(
+    public record MarkerDokumentUgyldigRequest(
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
         JournalpostId journalpostId,
@@ -114,7 +112,11 @@ public class ForvaltningMottattDokumentRestTjeneste {
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-        SaksnummerDto saksnummer
+        SaksnummerDto saksnummer,
+
+        @NotNull
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        KortTekst begrunnelse
     ) {
         @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
         public Saksnummer getSaksnummer() {
