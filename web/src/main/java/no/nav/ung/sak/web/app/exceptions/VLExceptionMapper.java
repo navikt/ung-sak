@@ -6,7 +6,6 @@ import jakarta.ws.rs.ext.ExceptionMapper;
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FunksjonellFeil;
-import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.ung.sak.kontrakt.FeilDto;
 import no.nav.ung.sak.kontrakt.FeilType;
 import org.slf4j.Logger;
@@ -19,12 +18,10 @@ public class VLExceptionMapper implements ExceptionMapper<VLException> {
 
     @Override
     public Response toResponse(VLException exception) {
-        String callId = MDCOperations.getCallId();
-
         Feil feil = exception.getFeil();
         exception.log(log);
 
-        String feilmelding = getVLExceptionFeilmelding(callId, feil);
+        String feilmelding = getVLExceptionFeilmelding(feil);
         try {
             return Response.serverError()
                 .entity(new FeilDto(FeilType.GENERELL_FEIL, feilmelding, feil.getKode(), null))
@@ -36,23 +33,19 @@ public class VLExceptionMapper implements ExceptionMapper<VLException> {
         }
     }
 
-    private String getVLExceptionFeilmelding(String callId, Feil feil) {
+    private String getVLExceptionFeilmelding(Feil feil) {
         String feilbeskrivelse = feil.getKode() + ": " + feil.getFeilmelding(); //$NON-NLS-1$
         if (feil instanceof FunksjonellFeil) {
             String løsningsforslag = ((FunksjonellFeil) feil).getLøsningsforslag();
-            return "Det oppstod en feil: " //$NON-NLS-1$
-                + avsluttMedPunktum(feilbeskrivelse)
-                + avsluttMedPunktum(løsningsforslag)
-                + ". Referanse-id: " + callId; //$NON-NLS-1$
+            return (avsluttMedPunktum(feilbeskrivelse)
+                + avsluttMedPunktum(løsningsforslag)).trim();
         } else {
-            return "Det oppstod en serverfeil: " //$NON-NLS-1$
-                + avsluttMedPunktum(feilbeskrivelse)
-                + ". Meld til support med referanse-id: " + callId; //$NON-NLS-1$
+            return avsluttMedPunktum(feilbeskrivelse).trim();
         }
     }
 
     private String avsluttMedPunktum(String tekst) {
-        return (tekst == null ? "" : tekst + (tekst.endsWith(".") ? " " : ". "));
+        return (tekst == null || tekst.isBlank() ? "" : tekst + (tekst.endsWith(".") ? " " : ". "));
     }
 
 }

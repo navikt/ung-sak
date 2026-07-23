@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.k9.felles.log.util.LoggerUtils;
 import no.nav.ung.sak.kontrakt.FeilDto;
 import no.nav.ung.sak.kontrakt.FeilType;
@@ -21,8 +20,7 @@ public class ThrowableExceptionMapper implements ExceptionMapper<Throwable> {
     public Response toResponse(Throwable exception) {
         String message = exception.getMessage() != null ? LoggerUtils.removeLineBreaks(exception.getMessage()) : "";
         log.error("Fikk uventet feil: " + message, exception); // NOSONAR //$NON-NLS-1$
-        String callId = MDCOperations.getCallId();
-        String generellFeilmelding = "Det oppstod en serverfeil: " + exception.getMessage() + ". Meld til support med referanse-id: " + callId; //$NON-NLS-1$ //$NON-NLS-2$
+        String generellFeilmelding = exception.getMessage() != null && !exception.getMessage().isBlank() ? exception.getMessage() : "Det oppstod en serverfeil."; //$NON-NLS-1$
         try {
             return Response.serverError()
                 .entity(new FeilDto(FeilType.GENERELL_FEIL, generellFeilmelding))
