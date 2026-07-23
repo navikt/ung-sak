@@ -15,8 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
-import no.nav.ung.sak.mottak.dokumentmottak.MottatteDokumentTjeneste;
+import no.nav.ung.sak.kontrakt.KortTekst;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -34,7 +33,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
 
     private static final String JOURNALPOST_ID = "999001";
     private static final Saksnummer SAKSNUMMER = new Saksnummer("123456789");
-    private static final String FEILMELDING = "Ugyldiggjort manuelt ifm TSFF-2756";
+    private static final String FEILMELDING = "Jira sak: ABCD-1234";
 
     @Inject
     private EntityManager entityManager;
@@ -42,7 +41,6 @@ class ForvaltningMottattDokumentRestTjenesteTest {
     private MottatteDokumentRepository mottatteDokumentRepository;
     private BehandlingRepository behandlingRepository;
     private FagsakRepository fagsakRepository;
-    private MottatteDokumentTjeneste mottatteDokumentTjeneste;
     private ForvaltningMottattDokumentRestTjeneste tjeneste;
 
     private final Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).medSaksnummer(SAKSNUMMER).build();
@@ -53,12 +51,10 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         behandlingRepository = new BehandlingRepository(entityManager);
         fagsakRepository = new FagsakRepository(entityManager);
-        mottatteDokumentTjeneste = new MottatteDokumentTjeneste(mottatteDokumentRepository);
 
         tjeneste = new ForvaltningMottattDokumentRestTjeneste(
             fagsakRepository,
             mottatteDokumentRepository,
-            mottatteDokumentTjeneste,
             entityManager
         );
 
@@ -77,7 +73,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         var request = lagRequest();
 
         // Act
-        Response response = tjeneste.ugyldigjorMottattDokument(request);
+        Response response = tjeneste.markerMottattDokumentUgyldig(request);
 
         // Assert
         assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
@@ -87,7 +83,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
 
         var oppdatert = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
         assertThat(oppdatert.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
-        assertThat(oppdatert.getFeilmelding()).isEqualTo(FEILMELDING);
+        assertThat(oppdatert.getFeilmelding()).isEqualTo("Markert som ugyldig av teknisk forvaltning. Begrunnelse: " + FEILMELDING);
 
         Long antallDiagnostikk = entityManager.createQuery(
                 "select count(d) from DiagnostikkFagsakLogg d where d.fagsakId = :fagsakId", Long.class)
@@ -97,11 +93,39 @@ class ForvaltningMottattDokumentRestTjenesteTest {
     }
 
     @Test
+    void skal_sette_inntektrapportering_dokument_til_ugyldig() {
+        // Arrange
+        var dokument = new MottattDokument.Builder()
+            .medJournalPostId(new JournalpostId(JOURNALPOST_ID))
+            .medType(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)
+            .medMottattDato(LocalDate.now())
+            .medFagsakId(fagsak.getId())
+            .medBehandlingId(behandling.getId())
+            .build();
+        var dokumentId = mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT).getId();
+
+        var request = lagRequest();
+
+        // Act
+        Response response = tjeneste.markerMottattDokumentUgyldig(request);
+
+        // Assert
+        assertThat(response.getStatus()).isEqualTo(Response.Status.OK.getStatusCode());
+
+        entityManager.flush();
+        entityManager.clear();
+
+        var oppdatert = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
+        assertThat(oppdatert.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
+        assertThat(oppdatert.getFeilmelding()).isEqualTo("Markert som ugyldig av teknisk forvaltning. Begrunnelse: " + FEILMELDING);
+    }
+
+    @Test
     void skal_returnere_400_naar_brevkode_er_feil() {
         // Arrange
         var feilBrevkodeDokument = new MottattDokument.Builder()
             .medJournalPostId(new JournalpostId(JOURNALPOST_ID))
-            .medType(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)
+            .medType(Brevkode.UNGDOMSYTELSE_SOKNAD)
             .medMottattDato(LocalDate.now())
             .medFagsakId(fagsak.getId())
             .medBehandlingId(behandling.getId())
@@ -111,7 +135,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         var request = lagRequest();
 
         // Act
-        Response response = tjeneste.ugyldigjorMottattDokument(request);
+        Response response = tjeneste.markerMottattDokumentUgyldig(request);
 
         // Assert
         assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
@@ -132,7 +156,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         var request = lagRequest();
 
         // Act
-        Response response = tjeneste.ugyldigjorMottattDokument(request);
+        Response response = tjeneste.markerMottattDokumentUgyldig(request);
 
         // Assert
         assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
@@ -151,12 +175,13 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         return mottatteDokumentRepository.lagre(dokument, DokumentStatus.MOTTATT).getId();
     }
 
-    private ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest lagRequest() {
+    private ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest lagRequest() {
         var journalpostIdDto = new JournalpostId(JOURNALPOST_ID);
 
-        return new ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest(
+        return new ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest(
             journalpostIdDto,
-            new SaksnummerDto(SAKSNUMMER)
+            SAKSNUMMER,
+            new KortTekst(FEILMELDING)
         );
     }
 }

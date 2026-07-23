@@ -5685,8 +5685,11 @@
         },
         "type" : "object"
       },
-      "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest" : {
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest" : {
         "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
           "journalpostId" : {
             "type" : "string"
           },
@@ -5694,7 +5697,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "saksnummer" ],
+        "required" : [ "begrunnelse", "journalpostId", "saksnummer" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk" : {
@@ -6195,32 +6198,6 @@
           }
         },
         "tags" : [ "redirect" ]
-      }
-    },
-    "/api/TSFF-2756/forvaltning/ugyldigjor-mottatt-dokument" : {
-      "post" : {
-        "description" : "ugyldiggjør mottatt dokument ifm TSFF-2756",
-        "operationId" : "ugyldigjorMottattDokument",
-        "requestBody" : {
-          "content" : {
-            "application/json" : {
-              "schema" : {
-                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.UgyldigjorMottattDokumentRequest"
-              }
-            }
-          },
-          "required" : true
-        },
-        "responses" : {
-          "default" : {
-            "content" : {
-              "application/json; charset=UTF-8" : { }
-            },
-            "description" : "default response"
-          }
-        },
-        "summary" : "ugyldiggjør mottatt dokument ifm TSFF-2756",
-        "tags" : [ "forvaltning" ]
       }
     },
     "/api/aksjonspunkt" : {
@@ -8518,6 +8495,32 @@
           }
         },
         "tags" : [ "formidling" ]
+      }
+    },
+    "/api/forvaltning/marker-ugyldig" : {
+      "post" : {
+        "description" : "Markerer et mottatt dokument som ugyldig",
+        "operationId" : "markerMottattDokumentUgyldig",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Markerer angitt dokument som ugyldig",
+        "tags" : [ "forvaltning" ]
       }
     },
     "/api/forvaltning/person/finnAktørerKobletTilSammeSakSomAktør" : {
