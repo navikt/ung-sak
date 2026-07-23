@@ -80,6 +80,10 @@ public class ForvaltningMottattDokumentRestTjeneste {
         JournalpostId journalpostId = dto.journalpostId.getJournalpostId();
         List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokument(fagsakId, List.of(journalpostId));
 
+        if (mottattDokuments.isEmpty()) {
+            throw new IllegalArgumentException("Fant ingen dokumenter");
+        }
+
         if (mottattDokuments.size() > 1) {
             throw new IllegalArgumentException("Forventet maks 1 dokument");
         }
@@ -99,7 +103,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         }
 
 
-        String formatertBegrunnelse = "Manuelt markert som ugyldig. Begrunnelse: %s".formatted(dto.begrunnelse().getTekst());
+        String formatertBegrunnelse = "Markert som ugyldig av teknisk forvaltning. Begrunnelse: %s".formatted(dto.begrunnelse().getTekst());
         mottattDokument.setFeilmeldingOgOppdaterStatus(formatertBegrunnelse);
         mottatteDokumentRepository.oppdater(mottattDokument);
 
@@ -114,6 +118,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
     public record MarkerDokumentUgyldigRequest(
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
         JournalpostId journalpostId,
 
         @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
