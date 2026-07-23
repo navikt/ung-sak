@@ -16,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.kontrakt.KortTekst;
-import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.test.util.fagsak.FagsakBuilder;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -181,7 +180,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
 
         return new ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest(
             journalpostIdDto,
-            new SaksnummerDto(SAKSNUMMER),
+            SAKSNUMMER,
             new KortTekst(FEILMELDING)
         );
     }

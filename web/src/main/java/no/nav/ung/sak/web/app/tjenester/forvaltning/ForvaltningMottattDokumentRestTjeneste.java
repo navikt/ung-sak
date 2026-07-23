@@ -1,6 +1,7 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -29,6 +30,8 @@ import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Set;
@@ -45,6 +48,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE,
         Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING
     );
+    private static final Logger log = LoggerFactory.getLogger(ForvaltningMottattDokumentRestTjeneste.class);
 
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
@@ -70,7 +74,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
     @Produces(JSON_UTF8)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.DRIFT)
     public Response markerMottattDokumentUgyldig(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MarkerDokumentUgyldigRequest dto) {
-        Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(dto.saksnummer.getVerdi())
+        Fagsak fagsak = fagsakRepository.hentSakGittSaksnummer(dto.saksnummer)
             .orElseThrow(() -> new IllegalArgumentException("Fant ikke fagsak for saksnummer: " + dto.saksnummer.getVerdi()));
         Long fagsakId = fagsak.getId();
         JournalpostId journalpostId = dto.journalpostId.getJournalpostId();
@@ -94,12 +98,15 @@ public class ForvaltningMottattDokumentRestTjeneste {
                 .build();
         }
 
+
         String formatertBegrunnelse = "Manuelt markert som ugyldig. Begrunnelse: %s".formatted(dto.begrunnelse().getTekst());
         mottattDokument.setFeilmeldingOgOppdaterStatus(formatertBegrunnelse);
         mottatteDokumentRepository.oppdater(mottattDokument);
 
         entityManager.persist(new DiagnostikkFagsakLogg(fagsakId, "/marker-ugyldig", formatertBegrunnelse));
         entityManager.flush();
+
+        log.info("Manuelt markert mottatt dokument med journalpostId={} av type {} som ugyldig.", mottattDokument.getJournalpostId().getVerdi(), mottattDokument.getType());
 
         return Response.ok().build();
     }
@@ -109,22 +116,17 @@ public class ForvaltningMottattDokumentRestTjeneste {
         @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
         JournalpostId journalpostId,
 
+        @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
+        @JsonProperty(value = SaksnummerDto.NAME, required = true)
         @NotNull
         @Valid
-        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
-        SaksnummerDto saksnummer,
+        Saksnummer saksnummer,
 
         @NotNull
         @Valid
         @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
         KortTekst begrunnelse
-    ) {
-        @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
-        public Saksnummer getSaksnummer() {
-            return saksnummer.getVerdi();
-        }
-
-    }
+    ) {}
 
 
 }
