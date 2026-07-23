@@ -83,7 +83,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
 
         var oppdatert = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
         assertThat(oppdatert.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
-        assertThat(oppdatert.getFeilmelding()).isEqualTo("Manuelt markert som ugyldig. Begrunnelse: " + FEILMELDING);
+        assertThat(oppdatert.getFeilmelding()).isEqualTo("Markert som ugyldig av teknisk forvaltning. Begrunnelse: " + FEILMELDING);
 
         Long antallDiagnostikk = entityManager.createQuery(
                 "select count(d) from DiagnostikkFagsakLogg d where d.fagsakId = :fagsakId", Long.class)
@@ -117,7 +117,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
 
         var oppdatert = mottatteDokumentRepository.hentMottattDokument(dokumentId).orElseThrow();
         assertThat(oppdatert.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
-        assertThat(oppdatert.getFeilmelding()).isEqualTo("Manuelt markert som ugyldig. Begrunnelse: " + FEILMELDING);
+        assertThat(oppdatert.getFeilmelding()).isEqualTo("Markert som ugyldig av teknisk forvaltning. Begrunnelse: " + FEILMELDING);
     }
 
     @Test
