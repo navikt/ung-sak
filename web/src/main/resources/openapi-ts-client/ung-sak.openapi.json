@@ -5697,7 +5697,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "begrunnelse", "saksnummer" ],
+        "required" : [ "begrunnelse", "journalpostId", "saksnummer" ],
         "type" : "object"
       },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningStatistikkRestTjeneste.AntallDeltakereStatistikk" : {
