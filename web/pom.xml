@@ -15,7 +15,7 @@
 
     <properties>
         <swagger-ui.version>5.32.8</swagger-ui.version>
-        <jetty.version>12.1.10</jetty.version>
+        <jetty.version>12.1.11</jetty.version>
         <metrics.version>4.2.39</metrics.version>
     </properties>
 
