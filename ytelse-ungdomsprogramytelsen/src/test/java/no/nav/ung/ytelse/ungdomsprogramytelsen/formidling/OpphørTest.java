@@ -138,7 +138,7 @@ class OpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 6. \
                 """);
 
-        var behandling = lagOpphevingAvOpphørBehandling(fom, tidligereOpphørsdato, periodeMaksDato);
+        var behandling = lagOpphevingAvOpphørBehandling(fom, tidligereOpphørsdato);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.OPPHOR_OPPHEVET);
@@ -152,12 +152,12 @@ class OpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
             );
     }
 
-    private Behandling lagOpphevingAvOpphørBehandling(LocalDate fom, LocalDate tidligereOpphørsdato, LocalDate periodeMaksDato) {
+    private Behandling lagOpphevingAvOpphørBehandling(LocalDate fom, LocalDate tidligereOpphørsdato) {
         // Original behandling må ha et reelt opphør med lukket sluttdato for at opphevelsen skal gi
         // DetaljertResultatType.OPPHØR_OPPHEVET (og dermed brev), jf. UngdomsprogramOpphørUtleder.
         var opprinneligProgramPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var forrigeBehandlingGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(opprinneligProgramPeriode, tidligereOpphørsdato);
-        var revurderingGrunnlag = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato, periodeMaksDato);
+        var revurderingGrunnlag = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato);
 
         return lagRevurderingMedOriginalBehandling(forrigeBehandlingGrunnlag, revurderingGrunnlag);
     }

@@ -312,7 +312,7 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
 
-        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(fom, opprinneligSluttdato, nySluttdato));
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(fom, nySluttdato));
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
@@ -332,7 +332,7 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
 
-        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(fom, opprinneligSluttdato, nySluttdato));
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(fom, nySluttdato));
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();

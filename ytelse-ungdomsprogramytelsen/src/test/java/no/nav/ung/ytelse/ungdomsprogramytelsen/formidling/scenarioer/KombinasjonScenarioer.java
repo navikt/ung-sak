@@ -27,10 +27,10 @@ public class KombinasjonScenarioer {
      * Skal gi forlenget-brev men ingen inntektskontroll-brev.
      *
      * @param fom                  - startdato for programmet
-     * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
      * @param nySluttdato          - ny sluttdato etter forlengelse
      */
-    public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+    public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(LocalDate fom, LocalDate nySluttdato) {
+        LocalDate opprinneligSluttdato = fom.plusYears(1).minusDays(1);
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
             throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
         }
@@ -55,7 +55,7 @@ public class KombinasjonScenarioer {
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
-            List.of(new UngdomsprogramPeriode(fom, nySluttdato)),
+            List.of(new UngdomsprogramPeriode(fom, LocalDateInterval.TIDENES_ENDE)),
             satser,
             BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
             tilkjentYtelsePerioder,
@@ -71,7 +71,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder, null, true);
+            kontrollerInntektPerioder, nySluttdato, true);
     }
 
 
@@ -80,10 +80,11 @@ public class KombinasjonScenarioer {
      * Skal gi to brev: ENDRING_INNTEKT og FORLENGET_PERIODE.
      *
      * @param fom                  - startdato for programmet
-     * @param opprinneligSluttdato - opprinnelig sluttdato (slik det var i forrige behandling)
      * @param nySluttdato          - ny sluttdato etter forlengelse
      */
-    public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(LocalDate fom, LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+    public static UngTestScenario kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(LocalDate fom, LocalDate nySluttdato) {
+        LocalDate opprinneligSluttdato = fom.plusYears(1).minusDays(1);
+
         if (!nySluttdato.isAfter(opprinneligSluttdato)) {
             throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
         }
@@ -108,7 +109,7 @@ public class KombinasjonScenarioer {
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
-            List.of(new UngdomsprogramPeriode(fom, nySluttdato)),
+            List.of(new UngdomsprogramPeriode(fom, LocalDateInterval.TIDENES_ENDE)),
             satser,
             BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
             tilkjentYtelsePerioder,
@@ -124,7 +125,7 @@ public class KombinasjonScenarioer {
             ),
             Collections.emptyList(),
             null,
-            kontrollerInntektPerioder, null, true);
+            kontrollerInntektPerioder, nySluttdato, true);
     }
 
 
@@ -173,7 +174,7 @@ public class KombinasjonScenarioer {
                     DatoIntervallEntitet.fra(opphørsdato.plusDays(1), nySluttdato))
             ),
             Collections.emptyList(),
-            null, null, null, true);
+            null, null, nySluttdato, true);
     }
 
 
@@ -183,7 +184,7 @@ public class KombinasjonScenarioer {
      **/
     public static UngTestScenario kombinasjon_endringMedInntektOgFødselAvBarn(LocalDate fom) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         var barnFødselsdato = fom.withDayOfMonth(1).plusMonths(1).withDayOfMonth(15);
 
@@ -247,7 +248,7 @@ public class KombinasjonScenarioer {
         var fom = tjuvefemårsdag.with(TemporalAdjusters.firstDayOfMonth()).minusMonths(3);
 
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         var satser = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), BrevScenarioerUtils.lavSatsBuilder(fom).build()),
@@ -417,7 +418,7 @@ public class KombinasjonScenarioer {
     public static UngTestScenario kombinasjon_opphørOgOpphevelseAvOpphørISammeBehandling(LocalDate fom,
                                                                                          LocalDate tidligereOpphørsdato,
                                                                                          LocalDate periodeMaksDato) {
-        UngTestScenario opphevingScenario = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato, periodeMaksDato);
+        UngTestScenario opphevingScenario = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato);
 
         var triggere = new HashSet<>(opphevingScenario.behandlingTriggere());
         triggere.add(new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
@@ -457,7 +458,7 @@ public class KombinasjonScenarioer {
             throw new IllegalArgumentException("Ny maksdato må være etter opprinnelig maksdato (forlengelse)");
         }
 
-        UngTestScenario opphevingScenario = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato, nyMaksDato);
+        UngTestScenario opphevingScenario = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato);
 
         var triggere = new HashSet<>(opphevingScenario.behandlingTriggere());
         triggere.add(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,

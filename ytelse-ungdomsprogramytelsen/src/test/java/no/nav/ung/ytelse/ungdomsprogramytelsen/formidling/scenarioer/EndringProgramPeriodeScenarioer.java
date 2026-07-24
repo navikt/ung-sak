@@ -56,7 +56,7 @@ public class EndringProgramPeriodeScenarioer {
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, DatoIntervallEntitet.fra(sluttdato.plusDays(1), fagsakPeriode.getTomDato()))
             ),
                 Collections.emptyList(),
-            null, null, null, false);
+            null, null, fagsakPeriode.getTomDato(), false);
     }
 
     /**
@@ -198,7 +198,7 @@ public class EndringProgramPeriodeScenarioer {
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
-            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), nyProgramPeriode.getTomDato())),
+            List.of(new UngdomsprogramPeriode(nyProgramPeriode.getFomDato(), LocalDateInterval.TIDENES_ENDE)),
             satser,
             BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
             BrevScenarioerUtils.tilkjentYtelsePerioder(satser, nyProgramPeriode),
@@ -229,8 +229,8 @@ public class EndringProgramPeriodeScenarioer {
                                                    LocalDate opprinneligSluttdato,
                                                    LocalDate nySluttdato,
                                                    LocalDate periodeMaksDato) {
-        if (!nySluttdato.isAfter(opprinneligSluttdato)) {
-            throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
+        if (!periodeMaksDato.isAfter(opprinneligSluttdato)) {
+            throw new IllegalArgumentException("Periode maks dato må være etter opprinnelig sluttdato");
         }
 
 
@@ -241,7 +241,7 @@ public class EndringProgramPeriodeScenarioer {
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
-            List.of(new UngdomsprogramPeriode(fom, nySluttdato)),
+            List.of(new UngdomsprogramPeriode(fom, LocalDateInterval.TIDENES_ENDE)),
             satser,
             BrevScenarioerUtils.uttaksPerioder(nyProgramPeriode),
             BrevScenarioerUtils.tilkjentYtelsePerioder(satser, nyProgramPeriode),
@@ -262,26 +262,22 @@ public class EndringProgramPeriodeScenarioer {
      *
      * @param fom                  - startdato for programmet
      * @param tidligereOpphørsdato - sluttdatoen som nå oppheves
-     * @param periodeMaksDato      - registerets maksdato (uendret av opphevelsen)
      */
     public static UngTestScenario opphevingAvOpphør(LocalDate fom,
-                                                    LocalDate tidligereOpphørsdato,
-                                                    LocalDate periodeMaksDato) {
+                                                    LocalDate tidligereOpphørsdato) {
         if (!tidligereOpphørsdato.isAfter(fom)) {
             throw new IllegalArgumentException("Tidligere opphørsdato må være etter startdato");
         }
-        if (!periodeMaksDato.isAfter(tidligereOpphørsdato)) {
-            throw new IllegalArgumentException("periodeMaksDato må være etter tidligere opphørsdato for at opphøret skal kunne oppheves");
-        }
 
-        var gjenåpnetProgramPeriode = new LocalDateInterval(fom, periodeMaksDato);
+        LocalDate tom = fom.plusYears(1).minusDays(1);
+        var gjenåpnetProgramPeriode = new LocalDateInterval(fom, tom);
         var satser = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, periodeMaksDato, BrevScenarioerUtils.lavSatsBuilder(fom).build())
+            new LocalDateSegment<>(fom, tom, BrevScenarioerUtils.lavSatsBuilder(fom).build())
         ));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
-            List.of(new UngdomsprogramPeriode(gjenåpnetProgramPeriode.getFomDato(), gjenåpnetProgramPeriode.getTomDato())),
+            List.of(new UngdomsprogramPeriode(gjenåpnetProgramPeriode.getFomDato(), LocalDateInterval.TIDENES_ENDE)),
             satser,
             BrevScenarioerUtils.uttaksPerioder(gjenåpnetProgramPeriode),
             BrevScenarioerUtils.tilkjentYtelsePerioder(satser, gjenåpnetProgramPeriode),
@@ -291,9 +287,9 @@ public class EndringProgramPeriodeScenarioer {
             List.of(fom),
             Set.of(
                 new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
-                    DatoIntervallEntitet.fra(tidligereOpphørsdato.plusDays(1), periodeMaksDato))
+                    DatoIntervallEntitet.fra(tidligereOpphørsdato.plusDays(1), tom))
             ),
             Collections.emptyList(),
-            null, null, periodeMaksDato, false);
+            null, null, tom, false);
     }
 }

@@ -25,7 +25,7 @@ public class EndringBarnetilleggScenarioer {
             new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), BrevScenarioerUtils.lavSatsMedBarnBuilder(barnFødselsdato, 1).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
@@ -53,7 +53,7 @@ public class EndringBarnetilleggScenarioer {
             new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), BrevScenarioerUtils.lavSatsMedBarnBuilder(barnFødselsdato, 3).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
@@ -83,7 +83,7 @@ public class EndringBarnetilleggScenarioer {
             new LocalDateSegment<>(barnDødsdato, p.getTomDato(), BrevScenarioerUtils.lavSatsMedBarnBuilder(barnDødsdato, 0).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
