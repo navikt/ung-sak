@@ -354,7 +354,7 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_overstyre_opphor_ved_maksdato_brev_med_forlenget_periode_brev() {
+    void skal_ikke_sende_opphor_ved_maksdato_brev_når_forlenget_periode() {
         LocalDate fom = LocalDate.now().minusWeeks(52).plusWeeks(2);
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
@@ -374,7 +374,7 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_overstyre_opphor_ved_maksdato_brev_med_programperiodeendring_ved_manuelt_opphor() {
+    void skal_ikke_sende_opphor_ved_maksdato_brev_når_kombinert_med_opphør() {
         LocalDate fom = LocalDate.of(2025, 1, 1);
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.minusDays(20);
@@ -382,13 +382,13 @@ class YtelseVedtaksbrevReglerTest {
         var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
             EndringProgramPeriodeScenarioer.endringOpphør(new LocalDateInterval(fom, opprinneligSluttdato), nySluttdato),
             opprinneligSluttdato);
-        var behandling = lagBehandling(scenario);
+        var behandling = lagBehandlingMedOriginalBehandling(FørstegangsbehandlingScenarioer.innvilget19år(fom), scenario);
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
         assertThat(totalresultater.vedtaksbrevResultater())
             .extracting(Vedtaksbrev::dokumentMalType)
-            .contains(DokumentMalType.ENDRING_PROGRAMPERIODE)
+            .contains(DokumentMalType.OPPHØR_DOK)
             .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
     }
 
