@@ -436,6 +436,30 @@ class YtelseVedtaksbrevReglerTest {
         assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
     }
 
+    @Test
+    void skal_gi_både_forlenget_og_opphevelse_brev_ved_forlengelse_kombinert_med_opphevelse_av_opphør() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate tidligereOpphørsdato = LocalDate.of(2025, 6, 15);
+        LocalDate opprinneligMaksDato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nyMaksDato = opprinneligMaksDato.plusWeeks(8);
+
+        // Originalbehandling med reelt (iverksatt) opphør – lukket sluttdato – slik at opphevelsen faktisk gir brev.
+        UngTestScenario forrigeBehandlingScenario = EndringProgramPeriodeScenarioer.endringOpphør(
+            new LocalDateInterval(fom, opprinneligMaksDato), tidligereOpphørsdato);
+        UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgOpphevelseAvOpphør(
+            fom, tidligereOpphørsdato, opprinneligMaksDato, nyMaksDato);
+        var behandling = lagBehandlingMedOriginalBehandling(forrigeBehandlingScenario, ungTestscenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isTrue();
+        // Forlengelse skal fortsatt gi eget brev selv om behandlingen også opphever et tidligere opphør.
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.FORLENGET_PERIODE, DokumentMalType.OPPHOR_OPPHEVET_DOK)
+            .doesNotContain(DokumentMalType.OPPHØR_DOK);
+    }
+
     private Behandling lagBehandlingMedOriginalBehandling(UngTestScenario forrigeBehandlingScenario, UngTestScenario ungTestscenario) {
         // Originalbehandling med innvilget programperiode slik at revurderingen får riktig programperiode
         var builder = TestScenarioBuilder.builderMedSøknad()

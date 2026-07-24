@@ -441,6 +441,46 @@ public class KombinasjonScenarioer {
             opphevingScenario.harForlengetPeriode());
     }
 
+    /**
+     * Kombinasjon - forlengelse av programperioden kombinert med opphevelse av et tidligere opphør på samme behandling.
+     *
+     * @param fom                  - startdato for programmet
+     * @param tidligereOpphørsdato - opphørsdatoen som nå oppheves
+     * @param opprinneligMaksDato  - registerets maksdato før forlengelse
+     * @param nyMaksDato           - registerets maksdato etter forlengelse (harForlengetPeriode = true)
+     */
+    public static UngTestScenario kombinasjon_forlengetPeriodeOgOpphevelseAvOpphør(LocalDate fom,
+                                                                                   LocalDate tidligereOpphørsdato,
+                                                                                   LocalDate opprinneligMaksDato,
+                                                                                   LocalDate nyMaksDato) {
+        if (!nyMaksDato.isAfter(opprinneligMaksDato)) {
+            throw new IllegalArgumentException("Ny maksdato må være etter opprinnelig maksdato (forlengelse)");
+        }
+
+        UngTestScenario opphevingScenario = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato, nyMaksDato);
+
+        var triggere = new HashSet<>(opphevingScenario.behandlingTriggere());
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM,
+            DatoIntervallEntitet.fra(opprinneligMaksDato.plusDays(1), nyMaksDato)));
+
+        return new UngTestScenario(
+            opphevingScenario.navn(),
+            opphevingScenario.programPerioder(),
+            opphevingScenario.satser(),
+            opphevingScenario.uttakPerioder(),
+            opphevingScenario.tilkjentYtelsePerioder(),
+            opphevingScenario.aldersvilkår(),
+            opphevingScenario.ungdomsprogramvilkår(),
+            opphevingScenario.fødselsdato(),
+            opphevingScenario.søknadStartDato(),
+            triggere,
+            opphevingScenario.barn(),
+            opphevingScenario.dødsdato(),
+            opphevingScenario.kontrollerInntektPerioder(),
+            opphevingScenario.periodeMaksDato(),
+            true);
+    }
+
     public static UngTestScenario leggTilVarselOpphørVedMaksdato(UngTestScenario scenario, LocalDate maksdato) {
         var triggere = new HashSet<>(scenario.behandlingTriggere());
         triggere.add(new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fraOgMedTilOgMed(maksdato, maksdato)));

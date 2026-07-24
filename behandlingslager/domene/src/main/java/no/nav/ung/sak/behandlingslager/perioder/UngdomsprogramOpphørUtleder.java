@@ -19,6 +19,8 @@ public final class UngdomsprogramOpphørUtleder {
      * (reell opphevelse av et iverksatt opphørsvedtak). {@code false} dersom opphør og opphevelse havnet
      * i samme, fortsatt åpne behandling (originalbehandling/grunnlag/perioder mangler, eller sluttdato
      * fortsatt var åpen) — da ble opphøret aldri iverksatt.
+     * <p>
+     * Negasjonen svarer på det motsatte spørsmålet: om forrige behandling fortsatt var løpende (åpen sluttdato).
      */
     public static boolean opphørAvUngdomsprogrammetVarInkludertIVedtaket(Behandling behandling, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         return behandling.getOriginalBehandlingId()
@@ -30,3 +32,6 @@ public final class UngdomsprogramOpphørUtleder {
     }
 
 }
+
+
+

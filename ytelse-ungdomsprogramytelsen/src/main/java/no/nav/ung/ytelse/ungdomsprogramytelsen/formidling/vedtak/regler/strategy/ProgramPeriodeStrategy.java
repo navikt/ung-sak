@@ -8,16 +8,15 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringProgramPeriodeInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.ForlengetPeriodeInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørVedMaksdatoInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +30,7 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
     private final EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger;
     private final ForlengetPeriodeInnholdBygger forlengetPeriodeInnholdBygger;
     private final OpphørVedMaksdatoInnholdBygger opphørVedMaksdatoInnholdBygger;
+    private final OpphørOpphevetInnholdBygger opphørOpphevetInnholdBygger;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
@@ -39,18 +39,25 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
         EndringProgramPeriodeInnholdBygger endringProgramPeriodeInnholdBygger,
         ForlengetPeriodeInnholdBygger forlengetPeriodeInnholdBygger,
         OpphørVedMaksdatoInnholdBygger opphørVedMaksdatoInnholdBygger,
+        OpphørOpphevetInnholdBygger opphørOpphevetInnholdBygger,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.opphørInnholdBygger = opphørInnholdBygger;
         this.endringProgramPeriodeInnholdBygger = endringProgramPeriodeInnholdBygger;
         this.forlengetPeriodeInnholdBygger = forlengetPeriodeInnholdBygger;
         this.opphørVedMaksdatoInnholdBygger = opphørVedMaksdatoInnholdBygger;
+        this.opphørOpphevetInnholdBygger = opphørOpphevetInnholdBygger;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        boolean harEndretSluttdato = resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
+
+        boolean harOpphevelseAvOpphør = resultater.innholder(DetaljertResultatType.OPPHØR_OPPHEVET);
+        // Ved opphevelse av opphør er en eventuell ENDRING_SLUTTDATO en utdatert (stale) opphør fra
+        // race-sammenslåing på samme behandling. Den ignoreres da helt, slik at det verken bestilles opphørsbrev
+        // eller blokkeres for forlengelse/opphør ved maksdato-brev som fortsatt kan være aktuelle.
+        boolean harEndretSluttdato = !harOpphevelseAvOpphør && resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO);
         boolean harEndretStartdato = resultater.innholder(DetaljertResultatType.ENDRING_STARTDATO);
         boolean erOpphør = harEndretSluttdato && haddeÅpenSluttdatoIForrigeBehandling(behandling, ungdomsprogramPeriodeRepository);
         boolean harFlyttetSluttdato = harEndretSluttdato && !erOpphør;
@@ -74,7 +81,8 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
             return brev;
         }
 
-        // Forlengelse og opphør ved maksdato er kun aktuelt når det ikke samtidig er endring av sluttdato.
+        // Forlengelse, opphør ved maksdato og opphevelse av opphør er kun aktuelt når det ikke samtidig er en
+        // reell endring av sluttdato, men kan kombineres med hverandre og gir da hvert sitt brev.
         if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)) {
             brev.add(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
@@ -87,7 +95,30 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
                 "Automatisk brev ved opphør grunnet maksdato."));
         }
 
+        if (harOpphevelseAvOpphør) {
+            brev.add(opphevelseAvOpphørResultat(behandling));
+        }
+
         return brev;
+    }
+
+    /**
+     * Opphevelse av opphør: skiller mellom «opphevet» (opphøret ble faktisk vedtatt i en tidligere, avsluttet
+     * behandling → eget vedtaksbrev) og «avbrutt i samme behandling» (opphør og opphevelse slått sammen før
+     * opphøret rakk å bli vedtatt → intet vedtak å reversere, ingen brev). Skillet avgjøres av
+     * {@link UngdomsprogramOpphørUtleder#opphørAvUngdomsprogrammetVarInkludertIVedtaket}.
+     * <p>
+     * NB: for avbrutt-tilfellet returneres et eksplisitt "ingen brev, årsak IKKE_RELEVANT"-resultat (ikke tom liste),
+     * ellers faller perioden på fallback-resultatet IKKE_IMPLEMENTERT og krever manuell "Fatt vedtak".
+     */
+    private VedtaksbrevStrategyResultat opphevelseAvOpphørResultat(Behandling behandling) {
+        if (UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository)) {
+            return VedtaksbrevStrategyResultat.medUredigerbarBrev(
+                DokumentMalType.OPPHOR_OPPHEVET_DOK, opphørOpphevetInnholdBygger,
+                "Automatisk brev ved opphevelse av opphør.");
+        }
+        return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,
+            "Opphør og opphevelse havnet på samme, fortsatt åpne behandling - opphøret ble aldri vedtatt, ikke behov for vedtaksbrev.");
     }
 
 
