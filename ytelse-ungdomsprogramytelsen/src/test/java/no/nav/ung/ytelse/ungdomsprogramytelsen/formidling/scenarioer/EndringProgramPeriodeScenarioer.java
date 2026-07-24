@@ -256,4 +256,44 @@ public class EndringProgramPeriodeScenarioer {
             Collections.emptyList(),
             null, null, periodeMaksDato, true);
     }
+
+    /**
+     * Scenario der et tidligere opphør oppheves (f.eks. når bruker får medhold i klage på opphør).
+     *
+     * @param fom                  - startdato for programmet
+     * @param tidligereOpphørsdato - sluttdatoen som nå oppheves
+     * @param periodeMaksDato      - registerets maksdato (uendret av opphevelsen)
+     */
+    public static UngTestScenario opphevingAvOpphør(LocalDate fom,
+                                                    LocalDate tidligereOpphørsdato,
+                                                    LocalDate periodeMaksDato) {
+        if (!tidligereOpphørsdato.isAfter(fom)) {
+            throw new IllegalArgumentException("Tidligere opphørsdato må være etter startdato");
+        }
+        if (!periodeMaksDato.isAfter(tidligereOpphørsdato)) {
+            throw new IllegalArgumentException("periodeMaksDato må være etter tidligere opphørsdato for at opphøret skal kunne oppheves");
+        }
+
+        var gjenåpnetProgramPeriode = new LocalDateInterval(fom, periodeMaksDato);
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, periodeMaksDato, BrevScenarioerUtils.lavSatsBuilder(fom).build())
+        ));
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(gjenåpnetProgramPeriode.getFomDato(), gjenåpnetProgramPeriode.getTomDato())),
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(gjenåpnetProgramPeriode),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, gjenåpnetProgramPeriode),
+            new LocalDateTimeline<>(gjenåpnetProgramPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(gjenåpnetProgramPeriode, Utfall.OPPFYLT),
+            fom.minusYears(19).plusDays(42),
+            List.of(fom),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
+                    DatoIntervallEntitet.fra(tidligereOpphørsdato.plusDays(1), periodeMaksDato))
+            ),
+            Collections.emptyList(),
+            null, null, periodeMaksDato, false);
+    }
 }
