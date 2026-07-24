@@ -415,6 +415,27 @@ class YtelseVedtaksbrevReglerTest {
         assertFullAutomatiskBrev(opphørResultat, DokumentMalType.OPPHØR_DOK, OpphørInnholdBygger.class);
     }
 
+    @Test
+    void skal_ikke_gi_opphorsbrev_ved_opphor_og_opphevelse_av_opphor_i_samme_behandling() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate tidligereOpphørsdato = LocalDate.of(2025, 6, 15);
+        LocalDate periodeMaksDato = LocalDate.of(2025, 12, 31);
+
+        var behandling = lagBehandling(
+            KombinasjonScenarioer.kombinasjon_opphørOgOpphevelseAvOpphørISammeBehandling(fom, tidligereOpphørsdato, periodeMaksDato));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .doesNotContain(DokumentMalType.OPPHØR_DOK, DokumentMalType.OPPHOR_OPPHEVET_DOK);
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResultat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+    }
+
     private Behandling lagBehandlingMedOriginalBehandling(UngTestScenario forrigeBehandlingScenario, UngTestScenario ungTestscenario) {
         // Originalbehandling med innvilget programperiode slik at revurderingen får riktig programperiode
         var builder = TestScenarioBuilder.builderMedSøknad()
