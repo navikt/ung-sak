@@ -183,7 +183,7 @@ public class FørstegangsbehandlingScenarioer {
             new LocalDateSegment<>(tjuvefemårsdato, p.getTomDato(), BrevScenarioerUtils.høySatsBuilderMedBarn(barnFødselsdato, 2).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,

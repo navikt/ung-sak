@@ -10,8 +10,8 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringBarnetilleggDto;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +35,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
 
         LocalDate satsendringsdato = DetaljertResultat
-            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.ENDRING_BARN_FØDSEL)
+            .filtrerPåÅrsak(resultatTidslinje, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
             .getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())
