@@ -115,8 +115,6 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
             resultater.add(endretStartdatoDetaljertResultat(avslåtteVilkår));
         }
 
-        // RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM gir alltid et sluttdato-resultat. Kombinasjonen med opphevelse av opphør
-        // (og skillet opphevet vs. avbrutt) håndteres i ProgramPeriodeStrategy, ikke her.
         if (relevanteÅrsaker.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)) {
             resultater.add(endretSluttdatoDetaljertResultat(avslåtteVilkår));
         }

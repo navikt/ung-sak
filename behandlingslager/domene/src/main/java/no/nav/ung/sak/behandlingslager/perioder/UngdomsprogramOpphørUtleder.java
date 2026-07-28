@@ -3,32 +3,58 @@ package no.nav.ung.sak.behandlingslager.perioder;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
+import java.util.Set;
+
 /**
- * Avgjør om et tidligere opphør av ungdomsprogrammet ble vedtatt i en <b>annen, allerede avsluttet</b> behandling,
- * eller om opphøret og opphevelsen havnet på <b>samme, fortsatt åpne</b> behandling (dvs. slått sammen før
- * opphøret rakk å bli vedtatt, jf. OpprettRevurderingEllerOpprettDiffTask). I sistnevnte tilfelle finnes det
- * ikke noe opphørsvedtak å reversere, og det skal ikke sendes brev.
+ * Leser periodegrunnlaget for ungdomsprogrammet og svarer på om programperioden er lukket/åpen for en gitt behandling.
  */
 public final class UngdomsprogramOpphørUtleder {
 
     private UngdomsprogramOpphørUtleder() {
     }
 
+    public static boolean harLukketProgramperiode(Long behandlingId, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        return harLukketSluttdato(hentPerioder(behandlingId, ungdomsprogramPeriodeRepository));
+    }
+
     /**
-     * @return {@code true} dersom ungdomsprogrammet hadde en (lukket) sluttdato ved forrige vedtak
-     * (reell opphevelse av et iverksatt opphørsvedtak). {@code false} dersom opphør og opphevelse havnet
-     * i samme, fortsatt åpne behandling (originalbehandling/grunnlag/perioder mangler, eller sluttdato
-     * fortsatt var åpen) — da ble opphøret aldri iverksatt.
-     * <p>
-     * Negasjonen svarer på det motsatte spørsmålet: om forrige behandling fortsatt var løpende (åpen sluttdato).
+     * Merk at dette <em>ikke</em> er negasjonen av {@link #opphørAvUngdomsprogrammetVarInkludertIVedtaket}: når det
+     * ikke finnes en originalbehandling er begge {@code false}.
+     */
+    public static boolean forrigeBehandlingVarLøpende(Behandling behandling, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        return behandling.getOriginalBehandlingId()
+            .map(id -> hentPerioder(id, ungdomsprogramPeriodeRepository))
+            .map(UngdomsprogramOpphørUtleder::harÅpenSluttdato)
+            .orElse(false);
+    }
+
+    /**
+     * @return {@code true} dersom forrige vedtak hadde en lukket sluttdato — dvs. et reelt, iverksatt opphør som nå
+     * kan oppheves. {@code false} dersom det ikke finnes en originalbehandling, eller den fortsatt var løpende.
      */
     public static boolean opphørAvUngdomsprogrammetVarInkludertIVedtaket(Behandling behandling, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         return behandling.getOriginalBehandlingId()
-            .flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag)
-            .map(grunnlag -> grunnlag.getUngdomsprogramPerioder().getPerioder())
-            .filter(perioder -> !perioder.isEmpty())
-            .map(perioder -> perioder.stream().noneMatch(it -> Tid.TIDENES_ENDE.equals(it.getPeriode().getTomDato())))
+            .map(id -> hentPerioder(id, ungdomsprogramPeriodeRepository))
+            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato)
             .orElse(false);
+    }
+
+    private static boolean harLukketSluttdato(Set<UngdomsprogramPeriode> perioder) {
+        return !perioder.isEmpty() && perioder.stream().noneMatch(UngdomsprogramOpphørUtleder::erÅpen);
+    }
+
+    private static boolean harÅpenSluttdato(Set<UngdomsprogramPeriode> perioder) {
+        return perioder.stream().anyMatch(UngdomsprogramOpphørUtleder::erÅpen);
+    }
+
+    private static boolean erÅpen(UngdomsprogramPeriode periode) {
+        return Tid.TIDENES_ENDE.equals(periode.getPeriode().getTomDato());
+    }
+
+    private static Set<UngdomsprogramPeriode> hentPerioder(Long behandlingId, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .map(grunnlag -> grunnlag.getUngdomsprogramPerioder().getPerioder())
+            .orElse(Set.of());
     }
 
 }
