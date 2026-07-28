@@ -180,3 +180,5 @@ public class UngDetaljertResultatTidslinjeUtleder implements DetaljertResultatTi
     }
 
 }
+
+
