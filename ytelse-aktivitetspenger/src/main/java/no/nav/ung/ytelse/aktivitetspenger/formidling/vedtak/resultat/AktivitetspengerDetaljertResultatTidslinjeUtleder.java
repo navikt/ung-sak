@@ -137,7 +137,7 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
 
             var resultatType = bestemDetaljertResultat(p, vilkårResultat, tilkjentYtelse);
 
-            var resultat = new DetaljertResultat(resultatType, behandlingsårsaker, avslåtteVilkår, vilkårSomIkkeErVurdert);
+            var resultat = new DetaljertResultat(resultatType, behandlingsårsaker, avslåtteVilkår, vilkårSomIkkeErVurdert, tilkjentYtelse, true);
 
             return new LocalDateSegment<>(p, resultat);
         };
