@@ -76,6 +76,20 @@ class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtlederTest {
     }
 
     @Test
+    void skal_kaste_exception_dersom_periodemaksdato_mangler() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        // Ingen periodegrunnlag lagret -> finnPeriodeMaksDato returnerer empty -> feiltilstand
+        behandling.avsluttBehandling();
+
+        var hendelse = lagHendelse(BRUKER_AKTØR_ID, TIDLIGERE_OPPHØRSDATO);
+
+        assertThatThrownBy(() -> utleder.finnFagsakerTilVurdering(hendelse))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageContaining("periodeMaksDato");
+    }
+
+    @Test
     void skal_ikke_returnere_årsak_dersom_perioden_allerede_er_gjenåpnet() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
@@ -113,10 +127,10 @@ class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtlederTest {
     }
 
     @Test
-    void skal_kaste_exception_dersom_maksdato_ikke_er_etter_tidligere_opphørsdato() {
+    void skal_ignorere_hendelse_dersom_maksdato_ikke_er_etter_tidligere_opphørsdato() {
         var behandling = scenarioBuilder.lagre(entityManager);
         scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
-        // periodeMaksDato er (feilaktig) ikke etter tidligere opphørsdato -- hendelsen burde vært ignorert av kilden
+        // periodeMaksDato er lik opphørsdato — opphøret er allerede ved maksdato, ingenting å gjenåpne
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
             List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, TIDLIGERE_OPPHØRSDATO))),
             false,
@@ -125,9 +139,27 @@ class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtlederTest {
         behandling.avsluttBehandling();
 
         var hendelse = lagHendelse(BRUKER_AKTØR_ID, TIDLIGERE_OPPHØRSDATO);
+        var resultat = utleder.finnFagsakerTilVurdering(hendelse);
 
-        assertThatThrownBy(() -> utleder.finnFagsakerTilVurdering(hendelse))
-            .isInstanceOf(IllegalStateException.class);
+        assertThat(resultat.isEmpty()).isTrue();
+    }
+
+    @Test
+    void skal_ignorere_hendelse_dersom_maksdato_er_før_tidligere_opphørsdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        // periodeMaksDato er før opphørsdato — opphøret peker forbi maksdato, ingenting å gjenåpne
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, TIDLIGERE_OPPHØRSDATO))),
+            false,
+            TIDLIGERE_OPPHØRSDATO.minusDays(1));
+
+        behandling.avsluttBehandling();
+
+        var hendelse = lagHendelse(BRUKER_AKTØR_ID, TIDLIGERE_OPPHØRSDATO);
+        var resultat = utleder.finnFagsakerTilVurdering(hendelse);
+
+        assertThat(resultat.isEmpty()).isTrue();
     }
 
     private static UngdomsprogramOpphørOpphevetHendelse lagHendelse(AktørId aktørId, LocalDate tidligereOpphørsdato) {

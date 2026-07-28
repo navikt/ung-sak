@@ -76,7 +76,7 @@ public class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder implements F
             Saksnummer saksnummer = relevantFagsak.get().getSaksnummer();
             Optional<Behandling> behandlingOpt = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(relevantFagsak.get().getId());
             if (behandlingOpt.isEmpty()) {
-                logger.info("Det er ingen behandling på sak {}. Ignorerer hendelse {}.", saksnummer, hendelseId);
+                logger.info("Det er ingen behandling på sak {} (fagsakId={}). Ignorerer hendelse {}.", saksnummer, relevantFagsak.get().getId(), hendelseId);
                 continue;
             }
 
@@ -86,7 +86,16 @@ public class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder implements F
                 continue;
             }
 
-            var periode = utledPeriode(relevantFagsak.get(), sisteBehandling, tidligereOpphørsdato);
+            var maksDato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(sisteBehandling.getId())
+                .orElseThrow(() -> new IllegalStateException("Fant ikke periodeMaksDato for behandling %s på sak %s. Kan ikke utlede periode for opphevelse av opphør."
+                    .formatted(sisteBehandling.getId(), saksnummer)));
+            if (!maksDato.isAfter(tidligereOpphørsdato)) {
+                logger.info("PeriodeMaksDato ({}) er ikke etter tidligere opphørsdato ({}) for sak {} (behandling {}) — det er ingen periode å gjenåpne. Ignorerer hendelse {}.",
+                    maksDato, tidligereOpphørsdato, saksnummer, sisteBehandling.getId(), hendelseId);
+                continue;
+            }
+
+            var periode = utledPeriode(tidligereOpphørsdato, maksDato);
             logger.info("Oppretter revurdering for sak {} grunnet opphevelse av opphør fra hendelse {} med tidligere opphørsdato {}.", saksnummer, hendelseId, tidligereOpphørsdato);
             fagsaker.put(relevantFagsak.get(), List.of(new ÅrsakOgPerioder(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM, periode)));
         }
@@ -114,14 +123,10 @@ public class UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder implements F
 
     /**
      * Perioden som blir gjenåpnet strekker seg fra dagen etter den tidligere opphørsdatoen og frem til
-     * (uendret) periodeMaksDato. periodeMaksDato er kilde til sannhet og forventes alltid å finnes i
-     * grunnlaget på dette tidspunktet — mangler den, er det en feiltilstand som skal feile hardt fremfor
-     * å falle tilbake til en potensielt feil verdi.
+     * (uendret) periodeMaksDato. Kalles kun når maksDato.isAfter(tidligereOpphørsdato) er bekreftet av
+     * kalleren; IllegalStateException her er en ren defensiv backstop.
      */
-    private DatoIntervallEntitet utledPeriode(Fagsak fagsak, Behandling behandling, LocalDate tidligereOpphørsdato) {
-        var tom = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId())
-            .orElseThrow(() -> new IllegalStateException("Fant ikke periodeMaksDato for behandling %s på sak %s. Kan ikke utlede periode for opphevelse av opphør."
-                .formatted(behandling.getUuid(), fagsak.getSaksnummer())));
+    private DatoIntervallEntitet utledPeriode(LocalDate tidligereOpphørsdato, LocalDate tom) {
         if (!tom.isAfter(tidligereOpphørsdato)) {
             throw new IllegalStateException("Maksdato/tom (%s) er ikke etter tidligere opphørsdato (%s) — hendelsen burde ha blitt ignorert."
                 .formatted(tom, tidligereOpphørsdato));
