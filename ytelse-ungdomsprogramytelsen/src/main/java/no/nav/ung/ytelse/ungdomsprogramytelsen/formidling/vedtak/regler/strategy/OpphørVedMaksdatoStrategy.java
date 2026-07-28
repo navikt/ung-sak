@@ -15,6 +15,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørVedMaksdatoInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 
 import java.util.List;
 
@@ -36,8 +37,10 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        // Opphør ved maksdato gjelder kun en åpen programperiode; er den lukket har det skjedd en reell sluttdatoendring (opphør/flytting).
+        // Opphør ved maksdato gir kun brev når varselet er innenfor varslingsvinduet og programperioden fortsatt er åpen;
+        // er den lukket har det i stedet skjedd en reell sluttdatoendring (opphør/flytting).
         if (resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO)
+            && erRelevantForVarslingOmOpphørVedMaksdato(behandling)
             && !UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
@@ -46,5 +49,11 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
         return List.of();
     }
 
-}
+    private boolean erRelevantForVarslingOmOpphørVedMaksdato(Behandling behandling) {
+        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+        return MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(
+            grunnlag.hentForEksaktEnPeriode().getTomDato(),
+            grunnlag.getPeriodeMaksDato().orElseThrow());
+    }
 
+}

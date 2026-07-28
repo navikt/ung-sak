@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
@@ -38,6 +39,7 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
         // Forlengelse gjelder kun ved en åpen programperiode; er den lukket har det skjedd en reell sluttdatoendring (opphør/flytting).
         if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)
+            && harForlengetPeriode(behandling)
             && !UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
@@ -46,5 +48,10 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
         return List.of();
     }
 
-}
+    private boolean harForlengetPeriode(Behandling behandling) {
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .map(UngdomsprogramPeriodeGrunnlag::harForlengetPeriode)
+            .orElse(false);
+    }
 
+}
