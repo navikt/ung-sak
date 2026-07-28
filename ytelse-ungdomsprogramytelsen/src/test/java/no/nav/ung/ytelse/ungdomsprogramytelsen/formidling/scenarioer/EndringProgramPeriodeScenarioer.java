@@ -229,6 +229,11 @@ public class EndringProgramPeriodeScenarioer {
                                                    LocalDate opprinneligSluttdato,
                                                    LocalDate nySluttdato,
                                                    LocalDate periodeMaksDato) {
+
+        if (!nySluttdato.isAfter(opprinneligSluttdato)) {
+            throw new IllegalArgumentException("Ny sluttdato må være etter opprinnelig sluttdato");
+        }
+
         if (!periodeMaksDato.isAfter(opprinneligSluttdato)) {
             throw new IllegalArgumentException("Periode maks dato må være etter opprinnelig sluttdato");
         }

@@ -438,7 +438,7 @@ public class KombinasjonScenarioer {
             opphevingScenario.barn(),
             opphevingScenario.dødsdato(),
             opphevingScenario.kontrollerInntektPerioder(),
-            opphevingScenario.periodeMaksDato(),
+            periodeMaksDato,
             opphevingScenario.harForlengetPeriode());
     }
 
