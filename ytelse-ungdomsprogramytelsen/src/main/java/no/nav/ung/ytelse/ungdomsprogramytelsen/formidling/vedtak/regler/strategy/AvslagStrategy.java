@@ -13,27 +13,23 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 
 import java.util.List;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdbyggerStrategy {
-
+public final class AvslagStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     private final TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger;
 
     @Inject
-    public AvslagInngangsvilkårStrategy(TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger) {
+    public AvslagStrategy(TomVedtaksbrevInnholdBygger tomVedtaksbrevInnholdBygger) {
         this.tomVedtaksbrevInnholdBygger = tomVedtaksbrevInnholdBygger;
     }
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)) {
+        if (erHeleBehandlingenAvslag(detaljertResultat)) {
             return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.MANUELT_VEDTAK_DOK,
                 tomVedtaksbrevInnholdBygger,
@@ -51,8 +47,18 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
         return List.of();
     }
 
+    // Fullt avslag = hele vilkårstidslinjen er avslått. Ved opphør/kombinasjoner finnes det oppfylte perioder
+    // (før sluttdato), og da eier ProgramPeriodeStrategy/andre strategier resultatet.
+    private static boolean erHeleBehandlingenAvslag(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return !detaljertResultat.isEmpty()
+            && detaljertResultat.stream().allMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+    }
+
     @Override
     public Presedens presedens() {
         return Presedens.OVERSTYRENDE_ENKELTBREV;
     }
 }
+
+
+

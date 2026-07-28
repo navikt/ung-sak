@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
  *
  */
 public record UngDetaljertResultatPeriodeGrunnlag(List<DetaljertVilkårResultat> vilkårsresultater,
-                                                  Set<BehandlingÅrsakType> behandlingÅrsaker) {
+                                                  Set<BehandlingÅrsakType> behandlingÅrsaker,
+                                                  boolean tilVurdering) {
 
     public Set<Utfall> utfall() {
         return vilkårsresultater.stream().map(DetaljertVilkårResultat::utfall).collect(Collectors.toSet());
