@@ -51,10 +51,8 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
         return List.of();
     }
 
-    // Fullt avslag = alle perioder til vurdering er avslått. Ved delvis avslag/kombinasjoner finnes det oppfylte
-    // perioder, og da eier andre strategier resultatet.
     private static boolean erHeleBehandlingenAvslag(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         return !detaljertResultat.isEmpty()
-            && detaljertResultat.stream().allMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+            && detaljertResultat.stream().noneMatch(it -> it.getValue().avslåtteVilkår().isEmpty());
     }
 }

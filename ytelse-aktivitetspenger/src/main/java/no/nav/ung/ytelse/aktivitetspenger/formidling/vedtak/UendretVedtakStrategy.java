@@ -25,9 +25,10 @@ public final class UendretVedtakStrategy implements VedtaksbrevInnholdbyggerStra
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        // Uendret = vurdert pga bostedsendring, men uten avslag i den vurderte perioden (ingen reell endring).
-        boolean harAvslag = detaljertResultat.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
-        if (new BehandlingÅrsakHelper(detaljertResultat).har(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
+        // Kun perioder til vurdering: et avslag i en tidligere, ikke-vurdert periode skal ikke blokkere uendret-resultatet.
+        var tilVurdering = DetaljertResultat.kunTilVurdering(detaljertResultat);
+        boolean harAvslag = tilVurdering.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+        if (new BehandlingÅrsakHelper(tilVurdering).har(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev( IngenBrevÅrsakType.IKKE_RELEVANT, "Revurdering uten endring. "));
         }
         return List.of();

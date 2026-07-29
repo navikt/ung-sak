@@ -47,8 +47,7 @@ public final class AvslagStrategy implements VedtaksbrevInnholdbyggerStrategy {
         return List.of();
     }
 
-    // Fullt avslag = hele vilkårstidslinjen er avslått. Ved opphør/kombinasjoner finnes det oppfylte perioder
-    // (før sluttdato), og da eier ProgramPeriodeStrategy/andre strategier resultatet.
+
     private static boolean erHeleBehandlingenAvslag(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         return !detaljertResultat.isEmpty()
             && detaljertResultat.stream().noneMatch(it -> it.getValue().avslåtteVilkår().isEmpty());

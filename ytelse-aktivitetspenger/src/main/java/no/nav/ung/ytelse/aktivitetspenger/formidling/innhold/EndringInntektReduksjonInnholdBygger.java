@@ -47,7 +47,7 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
         final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
 
-        var relevantTilkjentYtelse = resultatTidslinje
+        var relevantTilkjentYtelse = DetaljertResultat.kunTilVurdering(resultatTidslinje)
             .filterValue(EndringInntektUtleder::erInntektReduksjon)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);

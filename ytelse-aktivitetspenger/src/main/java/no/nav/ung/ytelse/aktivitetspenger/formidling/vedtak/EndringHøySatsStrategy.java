@@ -46,7 +46,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
     private List<VedtaksbrevStrategyResultat> evaluerEndringØktSats(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var satstidslinje = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
             .map(AktivitetspengerGrunnlag::hentAktivitetspengerSatsTidslinje)
-            .map(it -> it.intersection(detaljertResultat));
+            .map(it -> it.intersection(DetaljertResultat.kunTilVurdering(detaljertResultat)));
 
         if (satstidslinje.isEmpty()) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,
