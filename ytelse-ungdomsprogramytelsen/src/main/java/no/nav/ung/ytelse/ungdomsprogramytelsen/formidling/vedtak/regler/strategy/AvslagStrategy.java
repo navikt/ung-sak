@@ -51,7 +51,7 @@ public final class AvslagStrategy implements VedtaksbrevInnholdbyggerStrategy {
     // (før sluttdato), og da eier ProgramPeriodeStrategy/andre strategier resultatet.
     private static boolean erHeleBehandlingenAvslag(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         return !detaljertResultat.isEmpty()
-            && detaljertResultat.stream().allMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+            && detaljertResultat.stream().noneMatch(it -> it.getValue().avslåtteVilkår().isEmpty());
     }
 
     @Override

@@ -15,7 +15,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringInntektReduksjonDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.endring.inntekt.EndringInntektPeriodeDto;
 
@@ -48,7 +48,7 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
 
         var relevantTilkjentYtelse = resultatTidslinje
-            .filterValue(EndringInntektReduksjonInnholdBygger::erInntektReduksjon)
+            .filterValue(EndringInntektUtleder::erInntektReduksjon)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
@@ -104,11 +104,6 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static boolean erInntektReduksjon(DetaljertResultat r) {
-        return r.harÅrsak(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
-            && r.tilkjentYtelse() != null
-            && r.tilkjentYtelse().utbetalingsgrad().compareTo(BigDecimal.valueOf(100)) < 0;
-    }
 
 }
 
