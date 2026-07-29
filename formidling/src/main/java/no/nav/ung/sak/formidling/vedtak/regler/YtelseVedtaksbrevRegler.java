@@ -15,6 +15,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinjeUtleder;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import org.slf4j.Logger;
@@ -56,11 +57,11 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         var detaljertResultatUtleder = FagsakYtelseTypeRef.Lookup.find(detaljertResultatUtledere, behandling.getFagsakYtelseType()).orElseThrow();
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
+        DetaljertResultatTidslinje detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
-    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, DetaljertResultatTidslinje detaljertResultat) {
         var innholdbyggerStrategies = innholdbyggerStrategiesInstances.select(new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(behandling.getFagsakYtelseType()));
 
         var kandidater = innholdbyggerStrategies.stream().toList();
@@ -117,7 +118,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         return lagIkkeImplementertBrevResultat(detaljertResultat);
     }
 
-    private static BehandlingVedtaksbrevResultat lagIngenBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
+    private static BehandlingVedtaksbrevResultat lagIngenBrevResultat(DetaljertResultatTidslinje detaljertResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
         return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
             ingenBrevResultat.stream()
                 .map(it -> VedtaksbrevRegelResultat.ingenBrev(
@@ -126,7 +127,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         );
     }
 
-    private static BehandlingVedtaksbrevResultat lagBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> brevResultater) {
+    private static BehandlingVedtaksbrevResultat lagBrevResultat(DetaljertResultatTidslinje detaljertResultat, List<VedtaksbrevStrategyResultat> brevResultater) {
         var vedtaksbrev = brevResultater.stream()
             .map(it -> new Vedtaksbrev(
                 it.dokumentMalType(),
@@ -137,7 +138,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, vedtaksbrev);
     }
 
-    private static BehandlingVedtaksbrevResultat lagIkkeImplementertBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private static BehandlingVedtaksbrevResultat lagIkkeImplementertBrevResultat(DetaljertResultatTidslinje detaljertResultat) {
         return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(
             VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, utledForklaring(detaljertResultat)
             )));
@@ -147,8 +148,8 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
      * Ingen strategi kjente seg igjen. Oppsummerer grunnlaget behandlingen ble vurdert på, slik at det er mulig å
      * se hvorfor ingen brev ble utledet.
      */
-    private static String utledForklaring(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var tilVurdering = DetaljertResultat.kunTilVurdering(detaljertResultat);
+    private static String utledForklaring(DetaljertResultatTidslinje detaljertResultat) {
+        var tilVurdering = detaljertResultat.tilVurdering();
         if (tilVurdering.isEmpty()) {
             return "Ingen brev - ingen perioder til vurdering.";
         }

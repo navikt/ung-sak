@@ -38,7 +38,7 @@ public class KlageVedtaksbrevTjeneste {
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("Ingen dokumentmal funnet for behandligen. Resultat fra regler: " + totalresultater.safePrint()));
 
-        VedtaksbrevGenerererInput input = new VedtaksbrevGenerererInput(behandlingId, vedtaksbrev, totalresultater.detaljertResultatTimeline(), kunHtml);
+        VedtaksbrevGenerererInput input = new VedtaksbrevGenerererInput(behandlingId, vedtaksbrev, totalresultater.detaljertResultatTimeline().tilVurdering(), kunHtml);
         return vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(input);
     }
 }

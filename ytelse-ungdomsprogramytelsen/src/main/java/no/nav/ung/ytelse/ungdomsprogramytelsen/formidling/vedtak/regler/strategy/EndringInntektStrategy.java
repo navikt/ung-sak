@@ -18,6 +18,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektReduksjonInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
@@ -46,7 +47,8 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        var detaljertResultat = resultatTidslinje.tilVurdering();
         boolean harReduksjon = EndringInntektUtleder.harInntektReduksjon(detaljertResultat);
         boolean harFullUtbetaling = EndringInntektUtleder.harInntektFullUtbetaling(detaljertResultat);
 

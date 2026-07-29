@@ -51,7 +51,7 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
     }
 
     @Override
-    public LocalDateTimeline<DetaljertResultat> utledDetaljertResultat(Behandling behandling) {
+    public DetaljertResultatTidslinje utledDetaljertResultat(Behandling behandling) {
         var prosessTriggerPeriodeUtleder = FagsakYtelseTypeRef.Lookup
             .find(prosessTriggerPeriodeUtledere, behandling.getFagsakYtelseType())
             .orElseThrow(() -> new IllegalStateException("Fant ingen ProsessTriggerPeriodeUtleder for ytelse " + behandling.getFagsakYtelseType()));
@@ -77,9 +77,9 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
                     return new LocalDateSegment<>(p, new DetaljertResultatPeriodeGrunnlag(vilkår, årsaker, tilVurdering));
                 }, JoinStyle.CROSS_JOIN);
 
-        return vilkårOgBehandlingsårsakerTidslinje
+        return DetaljertResultatTidslinje.av(vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, byggDetaljertResultatCombinator(), JoinStyle.LEFT_JOIN)
-            .compress();
+            .compress());
     }
 
     private LocalDateSegmentCombinator<DetaljertResultatPeriodeGrunnlag, TilkjentYtelseVerdi, DetaljertResultat> byggDetaljertResultatCombinator() {

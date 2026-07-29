@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strateg
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -11,7 +10,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 import java.util.List;
 
@@ -24,7 +23,8 @@ public final class SatsReguleringStrategy implements VedtaksbrevInnholdbyggerStr
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        var detaljertResultat = resultatTidslinje.tilVurdering();
         if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_SATS_REGULERING)) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved G-regulering"));
         }

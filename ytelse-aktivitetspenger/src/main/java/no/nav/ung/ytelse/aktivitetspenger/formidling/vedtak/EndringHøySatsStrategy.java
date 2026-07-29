@@ -13,6 +13,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbygger
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
@@ -34,7 +35,8 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        var detaljertResultat = resultatTidslinje.tilVurdering();
         if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return evaluerEndringØktSats(behandling, detaljertResultat);
         }
@@ -46,7 +48,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
     private List<VedtaksbrevStrategyResultat> evaluerEndringØktSats(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var satstidslinje = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
             .map(AktivitetspengerGrunnlag::hentAktivitetspengerSatsTidslinje)
-            .map(it -> it.intersection(DetaljertResultat.kunTilVurdering(detaljertResultat)));
+            .map(it -> it.intersection(detaljertResultat));
 
         if (satstidslinje.isEmpty()) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,

@@ -1,8 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ public interface VedtaksbrevInnholdbyggerStrategy {
      * Evaluerer egen flyt og returnerer 0..n resultater (brev og/eller ingen-brev-årsaker). Returner tom liste
      * dersom strategien ikke er relevant for behandlingen.
      */
-    List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat);
+    List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje);
 
     /**
      * Presedens som styrer hvordan resolveren kombinerer denne strategien med de andre. Default {@link Presedens#NORMAL}.

@@ -42,7 +42,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        LocalDateTimeline<DetaljertResultat> avslagPeriode = DetaljertResultat.kunTilVurdering(detaljertResultatTidslinje)
+        LocalDateTimeline<DetaljertResultat> avslagPeriode = detaljertResultatTidslinje
             .filterValue(r -> !r.avslåtteVilkår().isEmpty());
         var fom = avslagPeriode.getMinLocalDate();
 
