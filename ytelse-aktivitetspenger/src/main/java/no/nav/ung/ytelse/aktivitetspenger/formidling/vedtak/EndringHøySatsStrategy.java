@@ -11,7 +11,6 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType;
@@ -37,7 +36,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
         var detaljertResultat = resultatTidslinje.tilVurdering();
-        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+        if (resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return evaluerEndringØktSats(behandling, detaljertResultat);
         }
 

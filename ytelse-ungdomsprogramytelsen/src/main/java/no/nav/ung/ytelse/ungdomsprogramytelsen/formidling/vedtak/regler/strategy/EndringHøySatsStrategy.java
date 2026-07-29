@@ -9,7 +9,6 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringHøySatsInnholdBygger;
 
@@ -28,8 +27,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        var detaljertResultat = resultatTidslinje.tilVurdering();
-        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+        if (resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_HØY_SATS, endringHøySatsInnholdBygger, "Automatisk brev ved endring til høy sats."));
         }
         return List.of();
