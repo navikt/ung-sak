@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
@@ -19,17 +18,15 @@ import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektReduksjonInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStrategy {
-
-    private static final BigDecimal FULL_UTBETALING = BigDecimal.valueOf(100);
 
     private final boolean enableEndringUtenReduksjonSjekk;
     private final EndringInntektReduksjonInnholdBygger endringInntektReduksjonInnholdBygger;
@@ -50,8 +47,8 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        boolean harReduksjon = detaljertResultat.stream().anyMatch(it -> erInntektReduksjon(it.getValue()));
-        boolean harFullUtbetaling = detaljertResultat.stream().anyMatch(it -> erInntektFullUtbetaling(it.getValue()));
+        boolean harReduksjon = EndringInntektUtleder.harInntektReduksjon(detaljertResultat);
+        boolean harFullUtbetaling = EndringInntektUtleder.harInntektFullUtbetaling(detaljertResultat);
 
         if (harReduksjon) {
             return List.of(reduksjonResultat(behandling));
@@ -94,7 +91,7 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
     }
 
     private VedtaksbrevStrategyResultat fullUtbetalingResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
+        var kontrollertInntektPerioderTidslinje = EndringInntektUtleder.hentKontrollertInntektTidslinje(tilkjentYtelseRepository, behandling.getId());
 
         var harManueltFastsattInntekt = harManueltFastsattInntekt(behandling, detaljertResultat, kontrollertInntektPerioderTidslinje);
 
@@ -119,45 +116,16 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
         Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat,
         LocalDateTimeline<KontrollertInntektPeriode> kontrollertInntektPerioderTidslinje) {
         if (this.enableEndringUtenReduksjonSjekk) {
-            return detaljertResultat.filterValue(EndringInntektStrategy::erInntektFullUtbetaling)
+            return EndringInntektUtleder.fullUtbetalingTidslinje(detaljertResultat)
                 .combine(kontrollertInntektPerioderTidslinje, StandardCombinators::rightOnly,
                     LocalDateTimeline.JoinStyle.LEFT_JOIN)
                 .stream()
-                .anyMatch(it -> harManuellFastsatt0kr(it.getValue()));
+                .anyMatch(it -> EndringInntektUtleder.harManuellFastsatt0kr(it.getValue()));
         }
 
         return behandling.getAksjonspunkter().stream()
             .filter(Aksjonspunkt::erUtført)
             .anyMatch(it -> it.getAksjonspunktDefinisjon() == AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
-    }
-
-
-    private static boolean harManuellFastsatt0kr(KontrollertInntektPeriode it) {
-        boolean harFastSattInntektTil0kr = it.getInntekt().compareTo(BigDecimal.ZERO) == 0;
-        return it.getErManueltVurdert() && harFastSattInntektTil0kr;
-    }
-
-    private static boolean erInntektReduksjon(DetaljertResultat r) {
-        return r.harÅrsak(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
-            && r.tilkjentYtelse() != null
-            && r.tilkjentYtelse().utbetalingsgrad().compareTo(FULL_UTBETALING) < 0;
-    }
-
-    private static boolean erInntektFullUtbetaling(DetaljertResultat r) {
-        return r.harÅrsak(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
-            && r.tilkjentYtelse() != null
-            && r.tilkjentYtelse().utbetalingsgrad().compareTo(FULL_UTBETALING) >= 0;
-    }
-
-    private LocalDateTimeline<KontrollertInntektPeriode> hentKontrollertInntektTidslinje(Behandling behandling) {
-        return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId())
-            .stream()
-            .flatMap(it -> it.getPerioder().stream())
-            .map(p -> new LocalDateTimeline<>(
-                p.getPeriode().getFomDato(),
-                p.getPeriode().getTomDato(),
-                p)).reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
     }
 
 }

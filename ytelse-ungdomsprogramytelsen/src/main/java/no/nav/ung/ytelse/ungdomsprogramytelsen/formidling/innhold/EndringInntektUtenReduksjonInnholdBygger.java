@@ -10,10 +10,10 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringInntektUtenReduksjonDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringInntektUtenReduksjonDto;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -34,7 +34,7 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         var relevantTilkjentYtelse = resultatTidslinje
-            .filterValue(EndringInntektUtenReduksjonInnholdBygger::erInntektFullUtbetaling)
+            .filterValue(EndringInntektUtleder::erInntektFullUtbetaling)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
@@ -58,10 +58,5 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
         );
     }
 
-    private static boolean erInntektFullUtbetaling(DetaljertResultat r) {
-        return r.harÅrsak(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
-            && r.tilkjentYtelse() != null
-            && r.tilkjentYtelse().utbetalingsgrad().compareTo(BigDecimal.valueOf(100)) >= 0;
-    }
 
 }
