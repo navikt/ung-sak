@@ -47,6 +47,8 @@ public class PdlLeesahOversetter {
         } else if (PersonhendelseUtils.gjelderForelderBarnRelasjon(personhendelse)) {
             return oversettForelderBarnRelasjon(personhendelse, hendelseInfo);
         }
+
+        logger.info("Støtter ikke hendelser med opplysningstype {}.", personhendelse.getOpplysningstype().toString());
         return Optional.empty();
     }
 
@@ -101,7 +103,7 @@ public class PdlLeesahOversetter {
         String rolleForPerson = forelderBarnRelasjon.getMinRolleForPerson().toString();
 
         if (!PersonhendelseUtils.rolleForPersonErForeldre(personhendelse)) {
-            logger.info("Ignorerer forelderBarnRelasjon fordi rollen for personen verken er far eller mor. rolleForPerson {}. endringstype {}, hendelseId {}", rolleForPerson, hendelseInfo.getHendelseId(), endringstype);
+            logger.info("Ignorerer forelderBarnRelasjon fordi rollen for personen verken er far eller mor. rolleForPerson {}. endringstype {}, hendelseId {}", rolleForPerson, endringstype, hendelseInfo.getHendelseId());
             return Optional.empty();
         }
 
