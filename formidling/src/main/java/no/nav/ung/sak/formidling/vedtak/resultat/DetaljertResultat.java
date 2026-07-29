@@ -6,7 +6,6 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 
 import java.math.BigDecimal;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public record DetaljertResultat(
     Set<BehandlingÅrsakType> behandlingsårsaker,
@@ -27,18 +26,5 @@ public record DetaljertResultat(
     public static LocalDateTimeline<DetaljertResultat> filtrerPåÅrsak(LocalDateTimeline<DetaljertResultat> resultatTidslinje, BehandlingÅrsakType... årsaker) {
         var ønskedeÅrsaker = Set.of(årsaker);
         return resultatTidslinje.filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
-    }
-
-
-    public static String timelineToString(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        return detaljertResultatTidslinje == null ? "null" :
-            String.join(", ", detaljertResultatTidslinje.toSegments().stream()
-            .map(it ->
-                it.getLocalDateInterval().toString() + " -> " +
-                    "behandlingÅrsaker: " + it.getValue().behandlingsårsaker()
-                    + ", avslåtteVilkår: " + it.getValue().avslåtteVilkår()
-                    + ", ikkeVurderteVilkår: " + it.getValue().ikkeVurderteVilkår()
-            )
-            .collect(Collectors.toSet()));
     }
 }
