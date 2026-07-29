@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
  *
  */
 public record AktivitetspengerDetaljertResultatGrunnlag(List<DetaljertVilkårResultat> vilkårsresultater,
-                                                        Set<BehandlingÅrsakType> behandlingÅrsaker) {
+                                                        Set<BehandlingÅrsakType> behandlingÅrsaker,
+                                                        boolean tilVurdering) {
 
     public Set<DetaljertVilkårResultat> avslåtteVilkår() {
         return vilkårsresultater.stream()
