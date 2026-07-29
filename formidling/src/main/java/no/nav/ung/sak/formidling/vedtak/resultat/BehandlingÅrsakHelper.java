@@ -11,10 +11,14 @@ public class BehandlingÅrsakHelper {
 
     private final Set<BehandlingÅrsakType> årsaker;
 
-    public BehandlingÅrsakHelper(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private BehandlingÅrsakHelper(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         this.årsaker = detaljertResultat.stream()
             .flatMap(it -> it.getValue().behandlingsårsaker().stream())
             .collect(Collectors.toSet());
+    }
+
+    public static BehandlingÅrsakHelper of(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return new BehandlingÅrsakHelper(detaljertResultat);
     }
 
     public boolean har(BehandlingÅrsakType årsak) {

@@ -41,7 +41,7 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var årsaker = new BehandlingÅrsakHelper(detaljertResultat);
+        var årsaker = BehandlingÅrsakHelper.of(detaljertResultat);
 
         boolean harEndretStartdato = årsaker.har(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
         // En sluttdatoendring er kun reell når programperioden faktisk er lukket. Er den fortsatt åpen, er den

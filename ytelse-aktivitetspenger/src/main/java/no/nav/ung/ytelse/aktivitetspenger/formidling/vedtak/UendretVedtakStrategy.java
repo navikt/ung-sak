@@ -28,7 +28,7 @@ public final class UendretVedtakStrategy implements VedtaksbrevInnholdbyggerStra
         // Kun perioder til vurdering: et avslag i en tidligere, ikke-vurdert periode skal ikke blokkere uendret-resultatet.
         var tilVurdering = DetaljertResultat.kunTilVurdering(detaljertResultat);
         boolean harAvslag = tilVurdering.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
-        if (new BehandlingÅrsakHelper(tilVurdering).har(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
+        if (BehandlingÅrsakHelper.of(tilVurdering).har(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev( IngenBrevÅrsakType.IKKE_RELEVANT, "Revurdering uten endring. "));
         }
         return List.of();

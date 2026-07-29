@@ -29,7 +29,7 @@ public final class EndringBarnetilleggStrategy implements VedtaksbrevInnholdbygg
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        if (new BehandlingÅrsakHelper(detaljertResultat).har(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
+        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_BARNETILLEGG, endringBarnetilleggInnholdBygger, "Automatisk brev ved fødsel av barn."));
         }
         return List.of();

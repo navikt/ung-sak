@@ -25,7 +25,7 @@ public final class SatsReguleringStrategy implements VedtaksbrevInnholdbyggerStr
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        if (new BehandlingÅrsakHelper(detaljertResultat).har(BehandlingÅrsakType.RE_SATS_REGULERING)) {
+        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_SATS_REGULERING)) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved G-regulering"));
         }
         return List.of();
