@@ -12,7 +12,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringInntektUtenReduksjonDto;
 
 import java.math.BigDecimal;
@@ -33,8 +33,8 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
-        var relevantTilkjentYtelse = DetaljertResultat
-            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)
+        var relevantTilkjentYtelse = resultatTidslinje
+            .filterValue(EndringInntektUtenReduksjonInnholdBygger::erInntektFullUtbetaling)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
@@ -56,6 +56,12 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_ENDRING_INNTEKT_UTEN_REDUKSJON,
             new EndringInntektUtenReduksjonDto(fullUtbetalingsperioder)
         );
+    }
+
+    private static boolean erInntektFullUtbetaling(DetaljertResultat r) {
+        return r.harÅrsak(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
+            && r.tilkjentYtelse() != null
+            && r.tilkjentYtelse().utbetalingsgrad().compareTo(BigDecimal.valueOf(100)) >= 0;
     }
 
 }

@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -12,9 +13,8 @@ import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 
@@ -42,9 +42,8 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
             return List.of();
         }
 
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
         boolean erDødsfall = harSatsendringenDødsfall(behandling, detaljertResultat)
-            || resultater.innholder(DetaljertResultatType.ENDRING_BARN_DØDSFALL);
+            || new BehandlingÅrsakHelper(detaljertResultat).har(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
         if (erDødsfall) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "Ingen brev ved dødsfall av barn."));
         }

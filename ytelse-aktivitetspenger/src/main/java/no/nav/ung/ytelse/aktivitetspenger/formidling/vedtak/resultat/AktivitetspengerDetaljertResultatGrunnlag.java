@@ -14,12 +14,7 @@ import java.util.stream.Collectors;
  *
  */
 public record AktivitetspengerDetaljertResultatGrunnlag(List<DetaljertVilkårResultat> vilkårsresultater,
-                                                        Set<BehandlingÅrsakType> behandlingÅrsaker,
-                                                        boolean manuellOpprettetBehandling) {
-
-    public Set<Utfall> utfall() {
-        return vilkårsresultater.stream().map(DetaljertVilkårResultat::utfall).collect(Collectors.toSet());
-    }
+                                                        Set<BehandlingÅrsakType> behandlingÅrsaker) {
 
     public Set<DetaljertVilkårResultat> avslåtteVilkår() {
         return vilkårsresultater.stream()
