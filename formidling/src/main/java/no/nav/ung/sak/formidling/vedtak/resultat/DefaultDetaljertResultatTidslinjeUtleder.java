@@ -90,7 +90,6 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
             }
             var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
             var resultat = new DetaljertResultat(
-                Set.of(),
                 grunnlag.behandlingÅrsaker(),
                 grunnlag.avslåtteVilkår(),
                 grunnlag.ikkeVurderteVilkår(),

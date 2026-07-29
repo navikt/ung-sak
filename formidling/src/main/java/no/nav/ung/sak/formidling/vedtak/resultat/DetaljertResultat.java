@@ -9,21 +9,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public record DetaljertResultat(
-    Set<DetaljertResultatInfo> resultatInfo,
     Set<BehandlingÅrsakType> behandlingsårsaker,
     Set<DetaljertVilkårResultat> avslåtteVilkår,
     Set<DetaljertVilkårResultat> ikkeVurderteVilkår,
     TilkjentYtelseVerdi tilkjentYtelse,
     boolean tilVurdering
 ) {
-
-    public static DetaljertResultat of(
-        DetaljertResultatInfo resultatInfo,
-        Set<BehandlingÅrsakType> behandlingÅrsakTyper,
-        Set<DetaljertVilkårResultat> avslåtteVilkår,
-        Set<DetaljertVilkårResultat> ikkeVurderteVilkår) {
-        return new DetaljertResultat(Set.of(resultatInfo), behandlingÅrsakTyper, avslåtteVilkår, ikkeVurderteVilkår, null, true);
-    }
 
     public boolean harPositivUtbetaling() {
         return tilkjentYtelse != null && tilkjentYtelse.utbetalingsgrad().compareTo(BigDecimal.ZERO) > 0;
@@ -48,18 +39,10 @@ public record DetaljertResultat(
             String.join(", ", detaljertResultatTidslinje.toSegments().stream()
             .map(it ->
                 it.getLocalDateInterval().toString() + " -> " +
-                    "resultatInfo: " + it.getValue().resultatInfo()
-                    + ", behandlingÅrsaker: " + it.getValue().behandlingsårsaker()
+                    "behandlingÅrsaker: " + it.getValue().behandlingsårsaker()
                     + ", avslåtteVilkår: " + it.getValue().avslåtteVilkår()
                     + ", ikkeVurderteVilkår: " + it.getValue().ikkeVurderteVilkår()
             )
             .collect(Collectors.toSet()));
-    }
-
-    public static LocalDateTimeline<DetaljertResultat> filtererTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje, DetaljertResultatType... filter) {
-        var ønskedeTyper = Set.of(filter);
-        return resultatTidslinje
-            .filterValue(it -> it.resultatInfo().stream()
-                .anyMatch(b -> ønskedeTyper.contains(b.detaljertResultatType())));
     }
 }

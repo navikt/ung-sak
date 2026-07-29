@@ -3,11 +3,8 @@ package no.nav.ung.sak.formidling.vedtak.regler.strategy;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Regler for å bestemme riktig bygger av vedtaksbrev. Kan også avgjøre om brev IKKE skal bestilles.
@@ -29,13 +26,6 @@ public interface VedtaksbrevInnholdbyggerStrategy {
      */
     default Presedens presedens() {
         return Presedens.NORMAL;
-    }
-
-    static Set<DetaljertResultatInfo> tilResultatInfo(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        return detaljertResultat
-            .toSegments().stream()
-            .flatMap(it -> it.getValue().resultatInfo().stream())
-            .collect(Collectors.toSet());
     }
 
 }
