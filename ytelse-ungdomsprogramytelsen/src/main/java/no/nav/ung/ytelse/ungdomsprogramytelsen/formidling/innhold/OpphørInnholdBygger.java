@@ -1,17 +1,17 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.OpphørDto;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -19,13 +19,23 @@ import java.time.YearMonth;
 @Dependent
 public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
 
-    private static final Logger LOG = LoggerFactory.getLogger(OpphørInnholdBygger.class);
+    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+
+    @Inject
+    public OpphørInnholdBygger(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
+    }
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        var opphørStartdato = resultatTidslinje.filterValue(it -> it.resultatInfo().stream()
-                .anyMatch(r -> r.detaljertResultatType() == DetaljertResultatType.ENDRING_SLUTTDATO))
-            .getMinLocalDate();
+        var sluttdato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .orElseThrow(() -> new IllegalStateException("Fant ikke ungdomsprogramperiodegrunnlag for behandling " + behandling.getId()))
+            .hentForEksaktEnPeriode().getTomDato();
+        if (sluttdato == LocalDateInterval.TIDENES_ENDE) {
+            throw new IllegalStateException("Sluttdato var TIDENES_ENDE og er ikke satt");
+        }
+
+        var opphørStartdato = sluttdato.plusDays(1);
 
         var sisteUtbetalingsdato = PeriodeBeregner.utledFremtidigUtbetalingsdato(
             opphørStartdato.minusDays(1),

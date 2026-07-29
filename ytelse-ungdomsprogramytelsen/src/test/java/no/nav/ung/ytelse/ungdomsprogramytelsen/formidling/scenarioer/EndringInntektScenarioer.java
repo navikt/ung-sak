@@ -252,7 +252,7 @@ public class EndringInntektScenarioer {
 
     private static UngTestScenario endringMedInntekt(LocalDate fom, LocalDate tom, LocalDateTimeline<BrevScenarioerUtils.KontrollerInntektHolder> kontrollertInntektTidslinje) {
         var p = new LocalDateInterval(fom, tom);
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         var satser = BrevScenarioerUtils.lavSatsBuilder(p);
 

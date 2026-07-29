@@ -9,48 +9,51 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørOpphevetInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørVedMaksdatoInnholdBygger;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.MaksdatoOpphørVarslingPeriode;
 
 import java.util.List;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
-public final class OpphørOpphevetStrategy implements VedtaksbrevInnholdbyggerStrategy {
+public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final OpphørOpphevetInnholdBygger opphørOpphevetInnholdBygger;
+    private final OpphørVedMaksdatoInnholdBygger opphørVedMaksdatoInnholdBygger;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
-    public OpphørOpphevetStrategy(
-        OpphørOpphevetInnholdBygger opphørOpphevetInnholdBygger,
+    public OpphørVedMaksdatoStrategy(
+        OpphørVedMaksdatoInnholdBygger opphørVedMaksdatoInnholdBygger,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        this.opphørOpphevetInnholdBygger = opphørOpphevetInnholdBygger;
+        this.opphørVedMaksdatoInnholdBygger = opphørVedMaksdatoInnholdBygger;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (!resultater.innholder(DetaljertResultatType.OPPHØR_OPPHEVET)) {
-            return List.of();
-        }
-        if (UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository)) {
+        // Opphør ved maksdato gir kun brev når varselet er innenfor varslingsvinduet og programperioden fortsatt er åpen;
+        // er den lukket har det i stedet skjedd en reell sluttdatoendring (opphør/flytting).
+        if (resultater.innholder(DetaljertResultatType.OPPHØR_VED_MAKSDATO)
+            && erRelevantForVarslingOmOpphørVedMaksdato(behandling)
+            && !UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
-                DokumentMalType.OPPHOR_OPPHEVET_DOK, opphørOpphevetInnholdBygger,
-                "Automatisk brev ved opphevelse av opphør."));
+                DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
+                "Automatisk brev ved opphør grunnet maksdato."));
         }
-        // Opphør og opphevelse havnet på samme, fortsatt åpne behandling: opphøret ble aldri vedtatt, så det er ikke
-        // noe å oppheve. Returnerer et eksplisitt ingen-brev-resultat (ikke tom liste, som ville gitt IKKE_IMPLEMENTERT
-        // og krevd manuell «Fatt vedtak» dersom heller ingen annen strategi ga brev).
-        return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,
-            "Opphør og opphevelse havnet på samme, fortsatt åpne behandling - opphøret ble aldri vedtatt, ikke behov for vedtaksbrev."));
+        return List.of();
+    }
+
+    private boolean erRelevantForVarslingOmOpphørVedMaksdato(Behandling behandling) {
+        var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+        return MaksdatoOpphørVarslingPeriode.erRelevantForVarsling(
+            grunnlag.hentForEksaktEnPeriode().getTomDato(),
+            grunnlag.getPeriodeMaksDato().orElseThrow());
     }
 
 }
-
