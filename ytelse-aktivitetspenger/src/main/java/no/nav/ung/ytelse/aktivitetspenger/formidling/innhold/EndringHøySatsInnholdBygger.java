@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringHøySatsDto;
 
@@ -28,7 +28,7 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        LocalDate satsendringsdato = DetaljertResultat.filtererTidslinje(resultatTidslinje, DetaljertResultatType.ENDRING_ØKT_SATS)
+        LocalDate satsendringsdato = DetaljertResultat.filtrerPåÅrsak(resultatTidslinje, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)
             .getMinLocalDate();
 
         var grunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())

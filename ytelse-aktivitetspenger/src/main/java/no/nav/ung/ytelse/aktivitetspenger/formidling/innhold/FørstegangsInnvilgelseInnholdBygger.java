@@ -15,7 +15,6 @@ import no.nav.ung.sak.formidling.innhold.MonthUtils;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringHendelseDto;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtleder;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
@@ -58,7 +57,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        LocalDateTimeline<DetaljertResultat> periode = DetaljertResultat.filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_UTBETALING);
+        LocalDateTimeline<DetaljertResultat> periode = detaljertResultatTidslinje.filterValue(r -> r.tilkjentYtelse() != null);
 
         LocalDate ytelseFom = periode.getMinLocalDate();
         LocalDate ytelseTom = null;

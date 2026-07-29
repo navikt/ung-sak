@@ -12,8 +12,6 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.FørstegangsAvslagInnholdBygger;
 
 import java.util.List;
@@ -36,9 +34,7 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-        if (resultater.innholder(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR)
-            && resultater.innholderBare(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, DetaljertResultatType.UENDRET)) {
+        if (erHeleBehandlingenAvslag(detaljertResultat)) {
             return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.AVSLAG__DOK,
                 førstegangsAvslagInnholdBygger,
@@ -53,5 +49,12 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
             ));
         }
         return List.of();
+    }
+
+    // Fullt avslag = alle perioder til vurdering er avslått. Ved delvis avslag/kombinasjoner finnes det oppfylte
+    // perioder, og da eier andre strategier resultatet.
+    private static boolean erHeleBehandlingenAvslag(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        return !detaljertResultat.isEmpty()
+            && detaljertResultat.stream().allMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
     }
 }

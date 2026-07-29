@@ -6,76 +6,20 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Delte, ytelse-agnostiske forretningsregler og tidslinje-plumbing for utledning av
- * {@link DetaljertResultatInfo} basert utelukkende på tilkjent ytelse og vilkår. Brukes av de
- * ytelse-spesifikke implementasjonene av {@link DetaljertResultatTidslinjeUtleder}.
+ * Delt, ytelse-agnostisk tidslinje-plumbing for utledning av perioder til vurdering og samlet
+ * vilkårstidslinje. Brukes av de ytelse-spesifikke implementasjonene av
+ * {@link DetaljertResultatTidslinjeUtleder}.
  */
 public final class DetaljertResultatFelles {
 
     private DetaljertResultatFelles() {
     }
 
-    public static DetaljertResultatInfo nyPeriodeDetaljertResultat(Set<DetaljertVilkårResultat> avslåtteVilkår, TilkjentYtelseVerdi tilkjentYtelse) {
-        if (tilkjentYtelse == null) {
-            if (!avslåtteVilkår.isEmpty()) {
-                return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslått inngangsvilkår for ny periode");
-            }
-
-            return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_KUN_VILKÅR);
-        }
-
-        return DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_UTBETALING);
-    }
-
-    public static DetaljertResultatInfo kontrollerInntektDetaljertResultat(TilkjentYtelseVerdi tilkjentYtelse) {
-        if (tilkjentYtelse == null) {
-            // Usikker om dette er mulig
-            return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_UTEN_TILKJENT_YTELSE);
-        }
-        if (tilkjentYtelse.utbetalingsgrad().compareTo(BigDecimal.valueOf(100)) >= 0) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING);
-        }
-
-        if (tilkjentYtelse.utbetalingsgrad().compareTo(BigDecimal.ZERO) <= 0) {
-            return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING);
-        }
-
-        return DetaljertResultatInfo.of(DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON);
-    }
-
-    public static DetaljertResultatInfo behandlingsårsakDetaljertResultat(Map<BehandlingÅrsakType, DetaljertResultatInfo> årsakResultatMap, BehandlingÅrsakType key, Set<DetaljertVilkårResultat> avslåtteVilkår) {
-        if (avslåtteVilkår.isEmpty()) {
-            return årsakResultatMap.get(key);
-        }
-        return DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår, med behandlingsårsak %s".formatted(key));
-    }
-
-    public static Optional<DetaljertResultatInfo> håndterUkjenteTilfeller(TilkjentYtelseVerdi tilkjentYtelse, Set<DetaljertVilkårResultat> avslåtteVilkår, Set<BehandlingÅrsakType> relevanteÅrsaker) {
-        if (!avslåtteVilkår.isEmpty()) {
-            return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_INNGANGSVILKÅR, "Avslåtte inngangsvilkår ukjent årsak"));
-        }
-
-        if (tilkjentYtelse == null) {
-            return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGELSE_ANNET, "Innvilgede vilkår uten tilkjent ytelse"));
-        }
-
-        if (tilkjentYtelse.utbetalingsgrad().compareTo(BigDecimal.ZERO) <= 0) {
-            return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.AVSLAG_ANNET, "Innvilgede vilkår 0 kr tilkjent ytelse"));
-        }
-
-        if (relevanteÅrsaker.isEmpty()) {
-            return Optional.of(DetaljertResultatInfo.of(DetaljertResultatType.INNVILGET_UTEN_ÅRSAK, "Innvilget uten årsak"));
-        }
-
-        return Optional.empty();
-    }
 
     //*** Delt tidslinje-plumbing ***
 
