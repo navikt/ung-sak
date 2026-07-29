@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 
 import java.util.stream.Collectors;
 
@@ -23,6 +24,13 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> he
 
     public LocalDateTimeline<DetaljertResultat> tilVurdering() {
         return heleBildet.filterValue(DetaljertResultat::tilVurdering);
+    }
+
+    /**
+     * Om noen av periodene til vurdering har den gitte behandlingsårsaken.
+     */
+    public boolean harÅrsak(BehandlingÅrsakType årsak) {
+        return tilVurdering().stream().anyMatch(it -> it.getValue().harÅrsak(årsak));
     }
 
     @Override

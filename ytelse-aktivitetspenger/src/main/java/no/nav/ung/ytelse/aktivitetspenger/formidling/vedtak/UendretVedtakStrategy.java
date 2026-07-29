@@ -10,7 +10,6 @@ import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 import java.util.List;
@@ -26,7 +25,7 @@ public final class UendretVedtakStrategy implements VedtaksbrevInnholdbyggerStra
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
         var detaljertResultat = resultatTidslinje.tilVurdering();
         boolean harAvslag = detaljertResultat.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
-        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
+        if (resultatTidslinje.harÅrsak(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev( IngenBrevÅrsakType.IKKE_RELEVANT, "Revurdering uten endring. "));
         }
         return List.of();

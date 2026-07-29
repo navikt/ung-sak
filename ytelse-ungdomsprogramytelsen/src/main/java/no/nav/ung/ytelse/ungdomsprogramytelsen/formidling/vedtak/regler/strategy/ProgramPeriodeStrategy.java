@@ -11,7 +11,6 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørInnholdBygger;
@@ -40,13 +39,10 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        var detaljertResultat = resultatTidslinje.tilVurdering();
-        var årsaker = BehandlingÅrsakHelper.of(detaljertResultat);
-
-        boolean harEndretStartdato = årsaker.har(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+        boolean harEndretStartdato = resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
         // En sluttdatoendring er kun reell når programperioden faktisk er lukket. Er den fortsatt åpen, er den
         // gjenåpnet av en opphevelse på samme behandling, og sluttdatoendringen er utdatert (stale) og ignoreres.
-        boolean reellSluttdatoendring = årsaker.har(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+        boolean reellSluttdatoendring = resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
             && UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository);
         boolean erOpphør = reellSluttdatoendring
             && UngdomsprogramOpphørUtleder.forrigeBehandlingVarLøpende(behandling, ungdomsprogramPeriodeRepository);
