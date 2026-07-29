@@ -13,6 +13,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 import java.util.List;
 
@@ -28,7 +29,9 @@ public final class AvslagStrategy implements VedtaksbrevInnholdbyggerStrategy {
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        // Bevisst hele bildet: fullt avslag krever at alle perioder i behandlingen er avslått, ikke bare de til vurdering.
+        var detaljertResultat = resultatTidslinje.heleBildet();
         if (erHeleBehandlingenAvslag(detaljertResultat)) {
             return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.MANUELT_VEDTAK_DOK,

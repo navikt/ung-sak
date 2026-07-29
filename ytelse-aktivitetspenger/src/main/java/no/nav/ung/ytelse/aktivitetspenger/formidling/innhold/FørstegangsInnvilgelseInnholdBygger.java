@@ -57,7 +57,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        var tilVurdering = DetaljertResultat.kunTilVurdering(detaljertResultatTidslinje);
+        var tilVurdering = detaljertResultatTidslinje;
         LocalDateTimeline<DetaljertResultat> periode = tilVurdering.filterValue(r -> r.tilkjentYtelse() != null);
 
         LocalDate ytelseFom = periode.getMinLocalDate();

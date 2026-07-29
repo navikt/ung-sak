@@ -15,6 +15,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbygger
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 
@@ -37,7 +38,8 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        var detaljertResultat = resultatTidslinje.tilVurdering();
         if (enableAutoBrevVedBarnDødsfall) {
             return List.of();
         }
@@ -60,7 +62,7 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
         var grunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId());
         if (grunnlag.isPresent()) {
             LocalDateTimeline<AktivitetspengerSatser> satsTidslinje = grunnlag.get().hentAktivitetspengerSatsTidslinje()
-                .intersection(DetaljertResultat.kunTilVurdering(detaljertResultat));
+                .intersection(detaljertResultat);
             var satsSegments = satsTidslinje.toSegments();
             LocalDateSegment<AktivitetspengerSatser> previous = null;
             for (LocalDateSegment<AktivitetspengerSatser> current : satsSegments) {

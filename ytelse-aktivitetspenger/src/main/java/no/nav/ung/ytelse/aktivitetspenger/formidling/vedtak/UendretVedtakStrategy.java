@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -12,7 +11,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.BehandlingÅrsakHelper;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 import java.util.List;
 
@@ -24,11 +23,10 @@ public final class UendretVedtakStrategy implements VedtaksbrevInnholdbyggerStra
     public UendretVedtakStrategy() {    }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        // Kun perioder til vurdering: et avslag i en tidligere, ikke-vurdert periode skal ikke blokkere uendret-resultatet.
-        var tilVurdering = DetaljertResultat.kunTilVurdering(detaljertResultat);
-        boolean harAvslag = tilVurdering.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
-        if (BehandlingÅrsakHelper.of(tilVurdering).har(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        var detaljertResultat = resultatTidslinje.tilVurdering();
+        boolean harAvslag = detaljertResultat.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev( IngenBrevÅrsakType.IKKE_RELEVANT, "Revurdering uten endring. "));
         }
         return List.of();

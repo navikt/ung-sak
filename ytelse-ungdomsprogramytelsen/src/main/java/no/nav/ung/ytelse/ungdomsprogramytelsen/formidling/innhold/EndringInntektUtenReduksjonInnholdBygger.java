@@ -33,7 +33,7 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
     public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
-        var relevantTilkjentYtelse = DetaljertResultat.kunTilVurdering(resultatTidslinje)
+        var relevantTilkjentYtelse = resultatTidslinje
             .filterValue(EndringInntektUtleder::erInntektFullUtbetaling)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);

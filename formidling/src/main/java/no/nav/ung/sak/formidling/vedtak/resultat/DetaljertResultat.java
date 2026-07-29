@@ -29,10 +29,6 @@ public record DetaljertResultat(
         return resultatTidslinje.filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
     }
 
-    public static LocalDateTimeline<DetaljertResultat> kunTilVurdering(LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        return resultatTidslinje.filterValue(DetaljertResultat::tilVurdering);
-    }
-
 
     public static String timelineToString(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
         return detaljertResultatTidslinje == null ? "null" :

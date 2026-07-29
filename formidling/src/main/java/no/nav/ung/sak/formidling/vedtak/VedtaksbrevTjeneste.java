@@ -17,6 +17,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValg;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgRequest;
 import no.nav.ung.sak.kontrakt.formidling.vedtaksbrev.VedtaksbrevValgResponse;
@@ -183,7 +184,7 @@ public class VedtaksbrevTjeneste {
             new VedtaksbrevGenerererInput(
                 behandlingId,
                 vedtaksbrev,
-                totalresultater.detaljertResultatTimeline(),
+                totalresultater.detaljertResultatTimeline().tilVurdering(),
                 dto.htmlVersjon()
             ));
 
@@ -217,7 +218,7 @@ public class VedtaksbrevTjeneste {
         }
     }
 
-    private GenerertBrev genererFraValg(Long behandlingId, Vedtaksbrev relevantVedtaksbrev, boolean kunHtml, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+    private GenerertBrev genererFraValg(Long behandlingId, Vedtaksbrev relevantVedtaksbrev, boolean kunHtml, DetaljertResultatTidslinje detaljertResultatTidslinje) {
         var dokumentMalType = relevantVedtaksbrev.dokumentMalType();
         var relevantValg = vedtaksbrevValgRepository
             .finnVedtakbrevValg(behandlingId, dokumentMalType).stream()
@@ -236,7 +237,7 @@ public class VedtaksbrevTjeneste {
             new VedtaksbrevGenerererInput(
                 behandlingId,
                 relevantVedtaksbrev,
-                detaljertResultatTidslinje,
+                detaljertResultatTidslinje.tilVurdering(),
                 kunHtml
             ));
     }
