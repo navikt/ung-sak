@@ -51,7 +51,8 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
     private boolean harSatsendringenDødsfall(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId());
         if (ungdomsytelseGrunnlag.isPresent()) {
-            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje().intersection(detaljertResultat);
+            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje()
+                .intersection(DetaljertResultat.kunTilVurdering(detaljertResultat));
             var satsSegments = satsTidslinje.toSegments();
             LocalDateSegment<UngdomsytelseSatser> previous = null;
             for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
