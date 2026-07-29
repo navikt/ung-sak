@@ -2,6 +2,8 @@ package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
+import java.util.stream.Collectors;
+
 /**
  * Grunnlaget brev-strategiene utleder resultatet sitt fra. Inneholder <em>hele</em> vilkårsbildet for behandlingen,
  * ikke bare periodene som er til vurdering. Perioder utenfor vurdering har tomt sett med behandlingsårsaker.
@@ -25,6 +27,16 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> he
 
     @Override
     public String toString() {
-        return DetaljertResultat.timelineToString(heleBildet);
+        return heleBildet.toSegments().stream()
+            .map(it -> {
+                var v = it.getValue();
+                return it.getLocalDateInterval() + " -> "
+                    + (v.tilVurdering() ? "tilVurdering" : "ikkeTilVurdering")
+                    + ", behandlingÅrsaker: " + v.behandlingsårsaker()
+                    + ", avslåtteVilkår: " + v.avslåtteVilkår()
+                    + ", ikkeVurderteVilkår: " + v.ikkeVurderteVilkår()
+                    + ", tilkjentYtelse: " + v.tilkjentYtelse();
+            })
+            .collect(Collectors.joining(", "));
     }
 }
