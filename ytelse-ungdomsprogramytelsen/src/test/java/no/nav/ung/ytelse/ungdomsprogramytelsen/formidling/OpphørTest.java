@@ -153,8 +153,8 @@ class OpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
     }
 
     private Behandling lagOpphevingAvOpphørBehandling(LocalDate fom, LocalDate tidligereOpphørsdato) {
-        // Original behandling må ha et reelt opphør med lukket sluttdato for at opphevelsen skal gi
-        // DetaljertResultatType.OPPHØR_OPPHEVET (og dermed brev), jf. UngdomsprogramOpphørUtleder.
+        // Original behandling må ha et reelt opphør med lukket sluttdato for at opphevelsen skal gi brev,
+        // jf. UngdomsprogramOpphørUtleder.
         var opprinneligProgramPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
         var forrigeBehandlingGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(opprinneligProgramPeriode, tidligereOpphørsdato);
         var revurderingGrunnlag = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato);
