@@ -1,6 +1,8 @@
-package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak.resultat;
+package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
@@ -13,38 +15,47 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatFelles;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinjeUtleder;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Felles, ytelse-agnostisk utleder av detaljert resultat-tidslinje. Produserer en tynn
+ * grunnlagstidslinje (behandlingsårsaker + avslåtte/ikke-vurderte vilkår + tilkjent ytelse) uten
+ * klassifisering; strategiene utleder selv sitt resultat fra behandlingsårsak/vilkår/tilkjent ytelse.
+ *
+ * Registrert for alle ytelser som deler denne flyten. Ytelse-spesifikk {@link ProsessTriggerPeriodeUtleder}
+ * slås opp per behandling.
+ */
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @ApplicationScoped
-public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements DetaljertResultatTidslinjeUtleder {
+public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResultatTidslinjeUtleder {
 
-    private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
-    AktivitetspengerDetaljertResultatTidslinjeUtleder() {
+    DefaultDetaljertResultatTidslinjeUtleder() {
     }
 
     @Inject
-    public AktivitetspengerDetaljertResultatTidslinjeUtleder(
-        @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
+    public DefaultDetaljertResultatTidslinjeUtleder(
+        @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere,
         TilkjentYtelseRepository tilkjentYtelseRepository,
         VilkårResultatRepository vilkårResultatRepository) {
-        this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.prosessTriggerPeriodeUtledere = prosessTriggerPeriodeUtledere;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     @Override
     public LocalDateTimeline<DetaljertResultat> utledDetaljertResultat(Behandling behandling) {
+        var prosessTriggerPeriodeUtleder = FagsakYtelseTypeRef.Lookup
+            .find(prosessTriggerPeriodeUtledere, behandling.getFagsakYtelseType())
+            .orElseThrow(() -> new IllegalStateException("Fant ingen ProsessTriggerPeriodeUtleder for ytelse " + behandling.getFagsakYtelseType()));
+
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
         var kontrollertePerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId()).compress();
 
@@ -56,15 +67,14 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
         var samletVilkårTidslinje = DetaljertResultatFelles.samleVilkårIEnTidslinje(vilkårResultatRepository.hentVilkårResultater(behandling.getId()));
 
         // Kombinerer (ikke intersection) med hele vilkårstidslinjen slik at også oppfylte perioder utenfor perioder-til-
-        // vurdering blir med. Da ser strategiene hele vilkårsbildet (bl.a. AvslagInngangsvilkårStrategy som skiller fullt
-        // avslag fra kombinasjoner). Behandlingsårsaker er kun satt på perioder til vurdering.
+        // vurdering blir med. Da ser strategiene hele vilkårsbildet. Behandlingsårsaker settes kun på perioder til vurdering.
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .combine(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater) -> {
                     boolean tilVurdering = behandlingÅrsaker != null;
                     Set<BehandlingÅrsakType> årsaker = tilVurdering ? behandlingÅrsaker.getValue() : Set.of();
                     List<DetaljertVilkårResultat> vilkår = vilkårResultater != null ? vilkårResultater.getValue() : List.of();
-                    return new LocalDateSegment<>(p, new AktivitetspengerDetaljertResultatGrunnlag(vilkår, årsaker, tilVurdering));
+                    return new LocalDateSegment<>(p, new DetaljertResultatPeriodeGrunnlag(vilkår, årsaker, tilVurdering));
                 }, JoinStyle.CROSS_JOIN);
 
         return vilkårOgBehandlingsårsakerTidslinje
@@ -72,7 +82,7 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
             .compress();
     }
 
-    private LocalDateSegmentCombinator<AktivitetspengerDetaljertResultatGrunnlag, TilkjentYtelseVerdi, DetaljertResultat> byggDetaljertResultatCombinator() {
+    private LocalDateSegmentCombinator<DetaljertResultatPeriodeGrunnlag, TilkjentYtelseVerdi, DetaljertResultat> byggDetaljertResultatCombinator() {
         return (p, lhs, rhs) -> {
             var grunnlag = lhs.getValue();
             if (grunnlag == null) {
@@ -90,3 +100,4 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
         };
     }
 }
+
