@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -15,8 +16,10 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatFelles;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinjeUtleder;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
+import java.util.List;
 import java.util.Set;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -52,12 +55,17 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
 
         var samletVilkårTidslinje = DetaljertResultatFelles.samleVilkårIEnTidslinje(vilkårResultatRepository.hentVilkårResultater(behandling.getId()));
 
-        // Kun perioder til vurdering (intersection) inngår i tidslinjen. Strategiene utleder selv sitt resultat fra
-        // behandlingsårsak/vilkår/tilkjent ytelse, slik at utlederen ikke må oppdateres for hver nye behandlingsårsak.
+        // Kombinerer (ikke intersection) med hele vilkårstidslinjen slik at også oppfylte perioder utenfor perioder-til-
+        // vurdering blir med. Da ser strategiene hele vilkårsbildet (bl.a. AvslagInngangsvilkårStrategy som skiller fullt
+        // avslag fra kombinasjoner). Behandlingsårsaker er kun satt på perioder til vurdering.
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
-            .intersection(samletVilkårTidslinje,
-                (p, behandlingÅrsaker, vilkårResultater)
-                    -> new LocalDateSegment<>(p, new AktivitetspengerDetaljertResultatGrunnlag(vilkårResultater.getValue(), behandlingÅrsaker.getValue())));
+            .combine(samletVilkårTidslinje,
+                (p, behandlingÅrsaker, vilkårResultater) -> {
+                    boolean tilVurdering = behandlingÅrsaker != null;
+                    Set<BehandlingÅrsakType> årsaker = tilVurdering ? behandlingÅrsaker.getValue() : Set.of();
+                    List<DetaljertVilkårResultat> vilkår = vilkårResultater != null ? vilkårResultater.getValue() : List.of();
+                    return new LocalDateSegment<>(p, new AktivitetspengerDetaljertResultatGrunnlag(vilkår, årsaker, tilVurdering));
+                }, JoinStyle.CROSS_JOIN);
 
         return vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, byggDetaljertResultatCombinator(), JoinStyle.LEFT_JOIN)
@@ -77,7 +85,7 @@ public class AktivitetspengerDetaljertResultatTidslinjeUtleder implements Detalj
                 grunnlag.avslåtteVilkår(),
                 grunnlag.ikkeVurderteVilkår(),
                 tilkjentYtelse,
-                true);
+                grunnlag.tilVurdering());
             return new LocalDateSegment<>(p, resultat);
         };
     }
