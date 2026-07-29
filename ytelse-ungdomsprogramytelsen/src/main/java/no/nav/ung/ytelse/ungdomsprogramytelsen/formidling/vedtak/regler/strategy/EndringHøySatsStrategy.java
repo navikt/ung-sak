@@ -29,7 +29,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        if (new BehandlingÅrsakHelper(detaljertResultat).har(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
+        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.ENDRING_HØY_SATS, endringHøySatsInnholdBygger, "Automatisk brev ved endring til høy sats."));
         }
         return List.of();

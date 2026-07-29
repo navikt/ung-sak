@@ -38,7 +38,7 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         // Opphør ved maksdato gir kun brev når varselet er innenfor varslingsvinduet og programperioden fortsatt er åpen;
         // er den lukket har det i stedet skjedd en reell sluttdatoendring (opphør/flytting).
-        if (new BehandlingÅrsakHelper(detaljertResultat).har(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
+        if (BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
             && erRelevantForVarslingOmOpphørVedMaksdato(behandling)
             && !UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(

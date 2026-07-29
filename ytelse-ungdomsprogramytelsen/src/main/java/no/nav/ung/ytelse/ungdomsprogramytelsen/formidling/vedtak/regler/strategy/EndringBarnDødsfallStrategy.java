@@ -34,7 +34,7 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         boolean erDødsfall = harSatsendringenDødsfall(behandling, detaljertResultat)
-            || new BehandlingÅrsakHelper(detaljertResultat).har(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
+            || BehandlingÅrsakHelper.of(detaljertResultat).har(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
 
         if (erDødsfall) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "Ingen brev ved dødsfall av barn."));
