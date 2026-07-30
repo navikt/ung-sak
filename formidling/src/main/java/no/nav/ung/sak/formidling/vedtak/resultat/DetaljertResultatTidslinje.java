@@ -2,6 +2,7 @@ package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,6 +32,17 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> to
     public LocalDateTimeline<DetaljertResultat> filtrerPåÅrsak(BehandlingÅrsakType... årsaker) {
         var ønskedeÅrsaker = Set.of(årsaker);
         return tilVurdering().filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
+    }
+
+    /**
+     * Gjelder hele tidslinjen, ikke bare periodene til vurdering — vilkår er vurdert også utenfor disse.
+     * Krever avslag i samtlige perioder, slik at delvise avslag overlates til de øvrige strategiene.
+     */
+    public boolean harKunAvslåttVilkår(VilkårType... vilkårTyper) {
+        var ønskedeVilkår = Set.of(vilkårTyper);
+        return !totalTidslinje.isEmpty() && totalTidslinje.stream()
+            .allMatch(it -> it.getValue().avslåtteVilkår().stream()
+                .anyMatch(vilkår -> ønskedeVilkår.contains(vilkår.vilkårType())));
     }
 
     @Override
