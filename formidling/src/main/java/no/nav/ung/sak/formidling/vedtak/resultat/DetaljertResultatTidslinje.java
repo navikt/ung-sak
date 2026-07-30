@@ -11,27 +11,39 @@ import java.util.stream.Collectors;
  * Grunnlaget formidling utleder resultatet sitt fra. Oppslag på behandlingsårsak gjelder kun perioder til vurdering,
  * siden øvrige perioder aldri har årsaker.
  */
-public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> totalTidslinje) {
+public final class DetaljertResultatTidslinje {
 
-    public static DetaljertResultatTidslinje av(LocalDateTimeline<DetaljertResultat> heleBildet) {
-        return new DetaljertResultatTidslinje(heleBildet);
+    private final LocalDateTimeline<DetaljertResultat> totalTidslinje;
+    private final LocalDateTimeline<DetaljertResultat> tilVurdering;
+
+    private DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> totalTidslinje) {
+        this.totalTidslinje = totalTidslinje;
+        this.tilVurdering = totalTidslinje.filterValue(DetaljertResultat::tilVurdering);
+    }
+
+    public static DetaljertResultatTidslinje av(LocalDateTimeline<DetaljertResultat> tidslinje) {
+        return new DetaljertResultatTidslinje(tidslinje);
     }
 
     public static DetaljertResultatTidslinje tom() {
-        return new DetaljertResultatTidslinje(LocalDateTimeline.empty());
+        return av(LocalDateTimeline.empty());
+    }
+
+    public LocalDateTimeline<DetaljertResultat> totalTidslinje() {
+        return totalTidslinje;
     }
 
     public LocalDateTimeline<DetaljertResultat> tilVurdering() {
-        return totalTidslinje.filterValue(DetaljertResultat::tilVurdering);
+        return tilVurdering;
     }
 
     public boolean harÅrsak(BehandlingÅrsakType årsak) {
-        return tilVurdering().stream().anyMatch(it -> it.getValue().harÅrsak(årsak));
+        return tilVurdering.stream().anyMatch(it -> it.getValue().harÅrsak(årsak));
     }
 
     public LocalDateTimeline<DetaljertResultat> filtrerPåÅrsak(BehandlingÅrsakType... årsaker) {
         var ønskedeÅrsaker = Set.of(årsaker);
-        return tilVurdering().filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
+        return tilVurdering.filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
     }
 
     /**
