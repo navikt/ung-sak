@@ -31,7 +31,7 @@ public final class AvslagStrategy implements VedtaksbrevInnholdbyggerStrategy {
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
         // Bevisst hele bildet: fullt avslag krever at alle perioder i behandlingen er avslått, ikke bare de til vurdering.
-        var detaljertResultat = resultatTidslinje.heleBildet();
+        var detaljertResultat = resultatTidslinje.totalTidslinje();
         if (erHeleBehandlingenAvslag(detaljertResultat)) {
             return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.MANUELT_VEDTAK_DOK,

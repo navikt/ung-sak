@@ -6,13 +6,9 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import java.util.stream.Collectors;
 
 /**
- * Grunnlaget brev-strategiene utleder resultatet sitt fra. Inneholder <em>hele</em> vilkårsbildet for behandlingen,
- * ikke bare periodene som er til vurdering. Perioder utenfor vurdering har tomt sett med behandlingsårsaker.
- *
- * <p>Strategier og innholdbyggere skal normalt bruke {@link #tilVurdering()}. {@link #heleBildet()} er kun for
- * avslagsvurdering, som må kunne skille fullt avslag fra delvis avslag.</p>
+ * Grunnlaget formidling utleder resultatet sitt fra.
  */
-public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> heleBildet) {
+public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> totalTidslinje) {
 
     public static DetaljertResultatTidslinje av(LocalDateTimeline<DetaljertResultat> heleBildet) {
         return new DetaljertResultatTidslinje(heleBildet);
@@ -23,7 +19,7 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> he
     }
 
     public LocalDateTimeline<DetaljertResultat> tilVurdering() {
-        return heleBildet.filterValue(DetaljertResultat::tilVurdering);
+        return totalTidslinje.filterValue(DetaljertResultat::tilVurdering);
     }
 
     /**
@@ -35,7 +31,7 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> he
 
     @Override
     public String toString() {
-        return heleBildet.toSegments().stream()
+        return totalTidslinje.toSegments().stream()
             .map(it -> {
                 var v = it.getValue();
                 return it.getLocalDateInterval() + " -> "
