@@ -66,7 +66,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         Long behandlingId = behandling.getId();
 
         var innvilgetTidslinje = detaljertResultatTidslinje
-            .filterValue(r -> erInnvilgelseMedUtbetaling(r, behandling.erManueltOpprettet()));
+            .filterValue(r -> erInnvilgelseMedUtbetalingTilVurdering(r, behandling.erManueltOpprettet()));
 
         var ytelseFom = innvilgetTidslinje.getMinLocalDate();
 
@@ -117,15 +117,11 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private LocalDate finnEvtTomDato(Long behandlingId) {
         // Åpen sluttdato (tidenes ende) => løpende program, ingen tom-dato i brevet. Ellers vises faktisk sluttdato.
-        if (!UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandlingId, ungdomsprogramPeriodeRepository)) {
-            return null;
-        }
-        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
-            .orElseThrow(() -> new IllegalStateException("Fant ikke ungdomsprogramperiodegrunnlag for behandling " + behandlingId))
-            .hentForEksaktEnPeriode().getTomDato();
+        return UngdomsprogramOpphørUtleder.finnLukketSluttdato(behandlingId, ungdomsprogramPeriodeRepository)
+            .orElse(null);
     }
 
-    private static boolean erInnvilgelseMedUtbetaling(DetaljertResultat r, boolean manueltOpprettet) {
+    private static boolean erInnvilgelseMedUtbetalingTilVurdering(DetaljertResultat r, boolean manueltOpprettet) {
         boolean nyPeriode = r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
             || (manueltOpprettet && r.harÅrsak(BehandlingÅrsakType.RE_SATS_ENDRING));
         return nyPeriode && r.utbetalingsgrad().erSatt();
