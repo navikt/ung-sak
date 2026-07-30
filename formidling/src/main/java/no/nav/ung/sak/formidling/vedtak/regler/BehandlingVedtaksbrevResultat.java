@@ -1,6 +1,5 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
@@ -55,9 +54,9 @@ public record BehandlingVedtaksbrevResultat(
     public String safePrint() {
         return "BehandlingVedtaksbrevResultat{" +
             "harBrev=" + harBrev +
-            ", detaljertResultatTimeline=[" + detaljertResultatTimeline + "]" +
             ", vedtaksbrevResultater=" + vedtaksbrevResultater +
             ", ingenBrevResultater=" + ingenBrevResultater +
+            ", detaljertResultatTimeline=[" + detaljertResultatTimeline + "]" +
             '}';
     }
 }
