@@ -19,6 +19,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndring;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.InnvilgelseDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.SatsEndringHendelseDto;
@@ -60,7 +61,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     @WithSpan
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        var detaljertResultatTidslinje = tidslinje.tilVurdering();
         Long behandlingId = behandling.getId();
 
         var innvilgetTidslinje = detaljertResultatTidslinje

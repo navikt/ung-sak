@@ -101,7 +101,7 @@ public class VedtaksbrevBestillingTask extends BehandlingProsessTask {
             .orElseThrow(() -> new IllegalStateException("DokumentmalType " + dokumentMalType + " er ikke gyldig. Resultat fra regler: " + totalresultater.safePrint()));
 
         var generertBrev = vedtaksbrevGenerererTjeneste.genererAutomatiskVedtaksbrev(
-            new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline().tilVurdering(), false));
+            new VedtaksbrevGenerererInput(behandling.getId(), vedtaksbrev, totalresultater.detaljertResultatTimeline(), false));
 
         journalføringOgDistribusjonsTjeneste.journalførOgDistribuerISekvens(behandling, brevbestilling, generertBrev);
     }
