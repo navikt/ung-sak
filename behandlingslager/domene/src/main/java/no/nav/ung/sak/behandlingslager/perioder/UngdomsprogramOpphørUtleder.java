@@ -3,6 +3,8 @@ package no.nav.ung.sak.behandlingslager.perioder;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -14,7 +16,18 @@ public final class UngdomsprogramOpphørUtleder {
     }
 
     public static boolean harLukketProgramperiode(Long behandlingId, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        return harLukketSluttdato(hentPerioder(behandlingId, ungdomsprogramPeriodeRepository));
+        return finnLukketSluttdato(behandlingId, ungdomsprogramPeriodeRepository).isPresent();
+    }
+
+    /**
+     * @return sluttdatoen dersom programperioden er lukket, ellers tom — åpen sluttdato betyr løpende program.
+     */
+    public static Optional<LocalDate> finnLukketSluttdato(Long behandlingId, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        var perioder = hentPerioder(behandlingId, ungdomsprogramPeriodeRepository);
+        if (!harLukketSluttdato(perioder)) {
+            return Optional.empty();
+        }
+        return perioder.stream().map(it -> it.getPeriode().getTomDato()).max(LocalDate::compareTo);
     }
 
     /**
