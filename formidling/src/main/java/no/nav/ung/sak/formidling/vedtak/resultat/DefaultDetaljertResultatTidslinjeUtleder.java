@@ -57,12 +57,9 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
             .orElseThrow(() -> new IllegalStateException("Fant ingen ProsessTriggerPeriodeUtleder for ytelse " + behandling.getFagsakYtelseType()));
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
-        var kontrollertePerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId()).compress();
 
         var perioderTilVurdering = DetaljertResultatFelles.utledPerioderTilVurdering(
-            prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId()),
-            tilkjentYtelseTidslinje,
-            kontrollertePerioderTidslinje);
+            prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId()));
 
         var samletVilkårTidslinje = DetaljertResultatFelles.samleVilkårIEnTidslinje(vilkårResultatRepository.hentVilkårResultater(behandling.getId()));
 
