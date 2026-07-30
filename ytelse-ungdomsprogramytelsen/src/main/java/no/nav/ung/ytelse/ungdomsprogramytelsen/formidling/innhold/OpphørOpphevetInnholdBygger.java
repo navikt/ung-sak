@@ -9,37 +9,26 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
-import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.OpphørOpphevetDto;
 
 @Dependent
 public class OpphørOpphevetInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private final ProsessTriggereRepository prosessTriggereRepository;
 
     @Inject
-    public OpphørOpphevetInnholdBygger(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
-                                        ProsessTriggereRepository prosessTriggereRepository) {
+    public OpphørOpphevetInnholdBygger(UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
-        this.prosessTriggereRepository = prosessTriggereRepository;
     }
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        // Den tidligere opphørsdatoen (som nå oppheves) leses fra prosess-triggeren for RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM
-        // på DENNE behandlingen, ikke fra forrige behandlings periodegrunnlag. Dette fungerer også når opphøret og
-        // opphevelsen er slått sammen på samme (fortsatt åpne) behandling, hvor forrige behandling aldri fikk det
-        // opprinnelige opphøret persistert (se UngdomsprogramOpphørOpphevetFagsakTilVurderingUtleder, som setter
-        // triggerens periode.fom til dagen etter tidligere opphørsdato).
-        var triggerPeriodeFom = prosessTriggereRepository.hentGrunnlag(behandling.getId())
-            .flatMap(grunnlag -> grunnlag.getTriggere().stream()
-                .filter(t -> t.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
-                .map(t -> t.getPeriode().getFomDato())
-                .findFirst())
-            .orElseThrow(() -> new IllegalStateException("Fant ikke prosesstrigger for opphevelse av opphør på behandling " + behandling.getId()));
+        var opphevetPerioder = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
+        if (opphevetPerioder.isEmpty()) {
+            throw new IllegalStateException("Fant ingen perioder for opphevelse av opphør på behandling " + behandling.getId());
+        }
 
-        var tidligereSluttdato = triggerPeriodeFom.minusDays(1);
+        var tidligereSluttdato = opphevetPerioder.getMinLocalDate().minusDays(1);
 
         var maksdato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
             .flatMap(grunnlag -> grunnlag.getPeriodeMaksDato())
