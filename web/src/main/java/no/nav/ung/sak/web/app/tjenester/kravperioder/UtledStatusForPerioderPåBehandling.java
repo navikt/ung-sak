@@ -93,7 +93,8 @@ class UtledStatusForPerioderPåBehandling {
             .anyMatch(it -> it.getÅrsak() == BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
 
         boolean opphørVarFaktiskIverksatt = harOpphevelse
-            && UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository);
+            && behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag)
+            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato).orElse(false);
 
         return prosesstriggere.stream()
             .filter(it -> RELEVANTE_ÅRSAKER.contains(it.getÅrsak()))

@@ -43,9 +43,11 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
         // En sluttdatoendring er kun reell når programperioden faktisk er lukket. Er den fortsatt åpen, er den
         // gjenåpnet av en opphevelse på samme behandling, og sluttdatoendringen er utdatert (stale) og ignoreres.
         boolean reellSluttdatoendring = resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
-            && UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository);
+            && ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato).orElse(false);
         boolean erOpphør = reellSluttdatoendring
-            && UngdomsprogramOpphørUtleder.forrigeBehandlingVarLøpende(behandling, ungdomsprogramPeriodeRepository);
+            && behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag)
+            .map(UngdomsprogramOpphørUtleder::harÅpenSluttdato).orElse(false);
         boolean erFlyttetSluttdato = reellSluttdatoendring && !erOpphør;
 
         var brev = new ArrayList<VedtaksbrevStrategyResultat>();

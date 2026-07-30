@@ -12,11 +12,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.kontrakt.ResourceLink;
 import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingAnsvarligDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
+import no.nav.ung.sak.kontrakt.behandling.*;
 import no.nav.ung.sak.web.app.ApplicationConfig;
 import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
 import org.apache.http.client.utils.URIBuilder;
@@ -24,12 +20,7 @@ import org.apache.http.client.utils.URIBuilder;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -162,7 +153,14 @@ public class BehandlingDtoUtil {
         if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
             && behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM == it
             || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
-            return UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository)
+
+            var forrigeBehandlingHaddeSattSluttdato = behandling
+                .getOriginalBehandlingId()
+                .flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag)
+                .map(UngdomsprogramOpphørUtleder::harLukketSluttdato)
+                .orElse(false);
+
+            return forrigeBehandlingHaddeSattSluttdato
                 ? BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_OPPHEVET
                 : BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING;
         }

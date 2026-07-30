@@ -117,7 +117,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private LocalDate finnEvtTomDato(Long behandlingId) {
         // Åpen sluttdato (tidenes ende) => løpende program, ingen tom-dato i brevet. Ellers vises faktisk sluttdato.
-        return UngdomsprogramOpphørUtleder.finnLukketSluttdato(behandlingId, ungdomsprogramPeriodeRepository)
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .flatMap(UngdomsprogramOpphørUtleder::finnLukketSluttdato)
             .orElse(null);
     }
 
