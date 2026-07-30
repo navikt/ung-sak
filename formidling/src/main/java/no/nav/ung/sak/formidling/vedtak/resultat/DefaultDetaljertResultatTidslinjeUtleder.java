@@ -5,6 +5,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
@@ -12,13 +13,16 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Felles, ytelse-agnostisk utleder av detaljert resultat-tidslinje. Produserer en tynn
@@ -58,10 +62,10 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
 
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
-        var perioderTilVurdering = DetaljertResultatFelles.utledPerioderTilVurdering(
+        var perioderTilVurdering = utledPerioderTilVurdering(
             prosessTriggerPeriodeUtleder.utledTidslinje(behandling.getId()));
 
-        var samletVilkårTidslinje = DetaljertResultatFelles.samleVilkårIEnTidslinje(vilkårResultatRepository.hentVilkårResultater(behandling.getId()));
+        var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårResultatRepository.hentVilkårResultater(behandling.getId()));
 
         // Kombinerer (ikke intersection) med hele vilkårstidslinjen slik at også oppfylte perioder utenfor perioder-til-
         // vurdering blir med. Da ser strategiene hele vilkårsbildet. Behandlingsårsaker settes kun på perioder til vurdering.
@@ -77,6 +81,47 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
         return DetaljertResultatTidslinje.av(vilkårOgBehandlingsårsakerTidslinje
             .combine(tilkjentYtelseTidslinje, byggDetaljertResultatCombinator(), JoinStyle.LEFT_JOIN)
             .compress());
+    }
+
+    // Utleder perioder til vurdering med relevante behandlingsårsaker for brev
+    private static LocalDateTimeline<Set<BehandlingÅrsakType>> utledPerioderTilVurdering(
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
+        return prosesstriggerTidslinje
+            .mapValue(DefaultDetaljertResultatTidslinjeUtleder::fjernIkkeRelevanteÅrsaker)
+            .filterValue(it -> !it.isEmpty())
+            .compress();
+    }
+
+    private static Set<BehandlingÅrsakType> fjernIkkeRelevanteÅrsaker(Set<BehandlingÅrsakType> behandlingÅrsaker) {
+        var årsaker = new HashSet<>(behandlingÅrsaker);
+        //Rapportert inntekt er uinterressant uten kontrollert inntekt årsak
+        årsaker.remove(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT);
+        //uttalelse er uinterressant uten en annen årsak
+        årsaker.remove(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
+        return årsaker;
+    }
+
+    private static LocalDateTimeline<List<DetaljertVilkårResultat>> samleVilkårIEnTidslinje(List<VilkårPeriodeResultatDto> vilkårPeriodeResultatDtos) {
+        var vilkårPeriodeResultatMap = vilkårPeriodeResultatDtos.stream()
+            .collect(Collectors.groupingBy(
+                VilkårPeriodeResultatDto::getVilkårType,
+                Collectors.collectingAndThen(
+                    Collectors.mapping(it -> new LocalDateSegment<>(
+                            it.getPeriode().getFom(),
+                            it.getPeriode().getTom(),
+                            new DetaljertVilkårResultat(it.getAvslagsårsak(), it.getVilkårType(), it.getUtfall())
+                        ), Collectors.toList()
+                    ),
+                    list -> new LocalDateTimeline<>(list) // Ikke bruk Method reference da det gir kompilerings feil runtime!
+                )
+            ));
+
+        var samletVilkårTidslinje = LocalDateTimeline.<List<DetaljertVilkårResultat>>empty();
+        for (var entry : vilkårPeriodeResultatMap.entrySet()) {
+            LocalDateTimeline<DetaljertVilkårResultat> v = entry.getValue();
+            samletVilkårTidslinje = samletVilkårTidslinje.crossJoin(v, StandardCombinators::allValues);
+        }
+        return samletVilkårTidslinje;
     }
 
     private LocalDateSegmentCombinator<DetaljertResultatPeriodeGrunnlag, TilkjentYtelseVerdi, DetaljertResultat> byggDetaljertResultatCombinator() {
