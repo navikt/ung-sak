@@ -7,6 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -17,7 +18,6 @@ import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndring;
@@ -66,7 +66,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         Long behandlingId = behandling.getId();
 
         var innvilgetTidslinje = detaljertResultatTidslinje
-            .filterValue(r -> erInnvilgelseMedUtbetalingTilVurdering(r, behandling.erManueltOpprettet()));
+            .filterValue(r -> erInnvilgelseMedUtbetaling(r, behandling.erManueltOpprettet()));
 
         var ytelseFom = innvilgetTidslinje.getMinLocalDate();
 
@@ -122,7 +122,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             .orElse(null);
     }
 
-    private static boolean erInnvilgelseMedUtbetalingTilVurdering(DetaljertResultat r, boolean manueltOpprettet) {
+    private static boolean erInnvilgelseMedUtbetaling(DetaljertResultat r, boolean manueltOpprettet) {
         boolean nyPeriode = r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
             || (manueltOpprettet && r.harÅrsak(BehandlingÅrsakType.RE_SATS_ENDRING));
         return nyPeriode && r.utbetalingsgrad().erSatt();
