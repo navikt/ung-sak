@@ -1,6 +1,5 @@
 package no.nav.ung.sak.formidling.vedtak.resultat;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 
@@ -23,8 +22,4 @@ public record DetaljertResultat(
         return behandlingsårsaker.contains(årsak);
     }
 
-    public static LocalDateTimeline<DetaljertResultat> filtrerPåÅrsak(LocalDateTimeline<DetaljertResultat> resultatTidslinje, BehandlingÅrsakType... årsaker) {
-        var ønskedeÅrsaker = Set.of(årsaker);
-        return resultatTidslinje.filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
-    }
 }

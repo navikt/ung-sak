@@ -3,6 +3,7 @@ package no.nav.ung.sak.formidling.vedtak.resultat;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -27,6 +28,14 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> to
      */
     public boolean harÅrsak(BehandlingÅrsakType årsak) {
         return tilVurdering().stream().anyMatch(it -> it.getValue().harÅrsak(årsak));
+    }
+
+    /**
+     * Periodene til vurdering som har minst én av de gitte behandlingsårsakene.
+     */
+    public LocalDateTimeline<DetaljertResultat> filtrerPåÅrsak(BehandlingÅrsakType... årsaker) {
+        var ønskedeÅrsaker = Set.of(årsaker);
+        return tilVurdering().filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
     }
 
     @Override
