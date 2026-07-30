@@ -7,7 +7,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Grunnlaget formidling utleder resultatet sitt fra.
+ * Grunnlaget formidling utleder resultatet sitt fra. Oppslag på behandlingsårsak gjelder kun perioder til vurdering,
+ * siden øvrige perioder aldri har årsaker.
  */
 public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> totalTidslinje) {
 
@@ -23,16 +24,10 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> to
         return totalTidslinje.filterValue(DetaljertResultat::tilVurdering);
     }
 
-    /**
-     * Om noen av periodene til vurdering har den gitte behandlingsårsaken.
-     */
     public boolean harÅrsak(BehandlingÅrsakType årsak) {
         return tilVurdering().stream().anyMatch(it -> it.getValue().harÅrsak(årsak));
     }
 
-    /**
-     * Periodene til vurdering som har minst én av de gitte behandlingsårsakene.
-     */
     public LocalDateTimeline<DetaljertResultat> filtrerPåÅrsak(BehandlingÅrsakType... årsaker) {
         var ønskedeÅrsaker = Set.of(årsaker);
         return tilVurdering().filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));

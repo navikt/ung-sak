@@ -25,11 +25,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
- * Felles, ytelse-agnostisk utleder av detaljert resultat-tidslinje. Produserer en tynn
- * grunnlagstidslinje (behandlingsårsaker + avslåtte/ikke-vurderte vilkår + tilkjent ytelse) uten
- * klassifisering; strategiene utleder selv sitt resultat fra behandlingsårsak/vilkår/tilkjent ytelse.
- *
- * Registrert for alle ytelser som deler denne flyten. Ytelse-spesifikk {@link ProsessTriggerPeriodeUtleder}
+ * Produserer grunnlagstidslinjen uten å klassifisere den — strategiene utleder selv sitt resultat.
+ * Registrert for alle ytelser som deler denne flyten; ytelse-spesifikk {@link ProsessTriggerPeriodeUtleder}
  * slås opp per behandling.
  */
 @FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
@@ -67,8 +64,8 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
 
         var samletVilkårTidslinje = samleVilkårIEnTidslinje(vilkårResultatRepository.hentVilkårResultater(behandling.getId()));
 
-        // Kombinerer (ikke intersection) med hele vilkårstidslinjen slik at også oppfylte perioder utenfor perioder-til-
-        // vurdering blir med. Da ser strategiene hele vilkårsbildet. Behandlingsårsaker settes kun på perioder til vurdering.
+        // Kombinerer (ikke intersection) med hele vilkårstidslinjen slik at også perioder utenfor perioder-til-vurdering
+        // blir med, så diagnostikken viser hele bildet. Behandlingsårsaker settes kun på perioder til vurdering.
         var vilkårOgBehandlingsårsakerTidslinje = perioderTilVurdering
             .combine(samletVilkårTidslinje,
                 (p, behandlingÅrsaker, vilkårResultater) -> {
@@ -83,7 +80,6 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
             .compress());
     }
 
-    // Utleder perioder til vurdering med relevante behandlingsårsaker for brev
     private static LocalDateTimeline<Set<BehandlingÅrsakType>> utledPerioderTilVurdering(
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
         return prosesstriggerTidslinje
