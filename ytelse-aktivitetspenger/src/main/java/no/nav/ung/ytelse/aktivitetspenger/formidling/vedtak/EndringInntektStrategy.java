@@ -22,6 +22,7 @@ import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringInntektReduksjonInnholdBygger;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @ApplicationScoped
@@ -89,7 +90,7 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
     }
 
     private VedtaksbrevStrategyResultat fullUtbetalingResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var kontrollertInntektPerioderTidslinje = EndringInntektUtleder.hentKontrollertInntektTidslinje(tilkjentYtelseRepository, behandling.getId());
+        var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
 
         var harManueltFastsattInntekt = harManueltFastsattInntekt(detaljertResultat, kontrollertInntektPerioderTidslinje);
 
@@ -118,7 +119,23 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
             .combine(kontrollertInntektPerioderTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .stream()
-            .anyMatch(it -> EndringInntektUtleder.harManuellFastsatt0kr(it.getValue()));
+            .anyMatch(it -> harManuellFastsatt0kr(it.getValue()));
+    }
+
+    private static boolean harManuellFastsatt0kr(KontrollertInntektPeriode kontrollertInntektPeriode) {
+        boolean harFastsattInntektTil0kr = kontrollertInntektPeriode.getInntekt().compareTo(BigDecimal.ZERO) == 0;
+        return kontrollertInntektPeriode.getErManueltVurdert() && harFastsattInntektTil0kr;
+    }
+
+    private LocalDateTimeline<KontrollertInntektPeriode> hentKontrollertInntektTidslinje(Behandling behandling) {
+        return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId())
+            .stream()
+            .flatMap(it -> it.getPerioder().stream())
+            .map(p -> new LocalDateTimeline<>(
+                p.getPeriode().getFomDato(),
+                p.getPeriode().getTomDato(),
+                p)).reduce(LocalDateTimeline::crossJoin)
+            .orElse(LocalDateTimeline.empty());
     }
 
 }
