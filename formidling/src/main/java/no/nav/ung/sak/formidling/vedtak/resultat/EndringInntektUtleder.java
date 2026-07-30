@@ -49,6 +49,10 @@ public final class EndringInntektUtleder {
             .orElse(LocalDateTimeline.empty());
     }
 
+    /**
+     * Tilkjent ytelse beregnes fra de kontrollerte inntektsperiodene, så manglende utbetalingsgrad betyr
+     * at kontrollen ikke har gitt noe resultat for perioden.
+     */
     private static boolean erKontrollAvInntektMedTilkjentYtelse(DetaljertResultat r) {
         return r.harÅrsak(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
             && r.utbetalingsgrad().erSatt();

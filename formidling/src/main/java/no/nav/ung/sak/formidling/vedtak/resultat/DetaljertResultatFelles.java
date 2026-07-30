@@ -1,6 +1,5 @@
 package no.nav.ung.sak.formidling.vedtak.resultat;
 
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
@@ -25,13 +24,9 @@ public final class DetaljertResultatFelles {
 
     // Utleder perioder til vurdering med relevante behandlingsårsaker for brev
     public static LocalDateTimeline<Set<BehandlingÅrsakType>> utledPerioderTilVurdering(
-        LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje,
-        LocalDateTimeline<?> tilkjentYtelseTidslinje,
-        LocalDateTimeline<?> kontrollertePerioderTidslinje) {
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosesstriggerTidslinje) {
         return prosesstriggerTidslinje
             .mapValue(DetaljertResultatFelles::fjernIkkeRelevanteÅrsaker)
-            .combine(tilkjentYtelseTidslinje, DetaljertResultatFelles::fjernIkkeRelevanteKontrollårsaker, LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .combine(kontrollertePerioderTidslinje, DetaljertResultatFelles::fjernIkkeRelevanteKontrollårsaker, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .filterValue(it -> !it.isEmpty())
             .compress();
     }
@@ -44,15 +39,6 @@ public final class DetaljertResultatFelles {
         //uttalelse er uinterressant uten en annen årsak
         årsaker.remove(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER);
         return årsaker;
-    }
-
-    // Fjern kontrollårsak hvis det ikke er noen kontroll eller tilkjent ytelse i perioden
-    public static <T> LocalDateSegment<Set<BehandlingÅrsakType>> fjernIkkeRelevanteKontrollårsaker(LocalDateInterval di, LocalDateSegment<Set<BehandlingÅrsakType>> trigger, LocalDateSegment<T> kontrollEllerYtelseSegment) {
-        var årsaker = new HashSet<>(trigger.getValue());
-        if (kontrollEllerYtelseSegment == null) {
-            årsaker.remove(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT);
-        }
-        return new LocalDateSegment<>(di, årsaker);
     }
 
     public static LocalDateTimeline<List<DetaljertVilkårResultat>> samleVilkårIEnTidslinje(List<VilkårPeriodeResultatDto> vilkårPeriodeResultatDtos) {
