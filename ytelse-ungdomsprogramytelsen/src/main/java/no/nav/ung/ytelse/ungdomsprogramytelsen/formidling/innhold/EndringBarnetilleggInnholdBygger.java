@@ -10,7 +10,6 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringBarnetilleggDto;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +32,8 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        var resultatTidslinje = tidslinje.tilVurdering();
 
-        LocalDate satsendringsdato = DetaljertResultat
-            .filtrerPåÅrsak(resultatTidslinje, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
+        LocalDate satsendringsdato = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
             .getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())

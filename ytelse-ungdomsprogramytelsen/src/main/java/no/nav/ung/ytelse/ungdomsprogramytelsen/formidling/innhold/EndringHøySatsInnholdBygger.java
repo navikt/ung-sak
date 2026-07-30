@@ -11,7 +11,6 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringHøySatsDto;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,9 +33,8 @@ public class EndringHøySatsInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        var resultatTidslinje = tidslinje.tilVurdering();
 
-        LocalDate satsendringsdato = DetaljertResultat.filtrerPåÅrsak(resultatTidslinje, BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)
+        LocalDate satsendringsdato = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS)
             .getMinLocalDate();
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId())

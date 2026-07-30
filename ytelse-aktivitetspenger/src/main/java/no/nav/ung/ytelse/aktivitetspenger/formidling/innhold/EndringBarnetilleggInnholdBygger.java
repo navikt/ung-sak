@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
@@ -27,9 +26,7 @@ public class EndringBarnetilleggInnholdBygger implements VedtaksbrevInnholdBygge
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        var resultatTidslinje = tidslinje.tilVurdering();
-        LocalDate satsendringsdato = DetaljertResultat
-            .filtrerPåÅrsak(resultatTidslinje, BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
+        LocalDate satsendringsdato = tidslinje.filtrerPåÅrsak(BehandlingÅrsakType.RE_HENDELSE_FØDSEL)
             .getMinLocalDate();
 
         var grunnlag = aktivitetspengerGrunnlagRepository.hentGrunnlag(behandling.getId())
