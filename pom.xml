@@ -48,7 +48,7 @@
         <kotlin-stdlib.version>2.4.10</kotlin-stdlib.version>
         <jandex.version>3.6.0</jandex.version>
         <pdfgen-core.version>1.1.81</pdfgen-core.version>
-        <flyway.version>12.10.0</flyway.version>
+        <flyway.version>13.0.0</flyway.version>
         <confluent.platform.version>8.3.0</confluent.platform.version>
         <mockito.version>5.23.0</mockito.version>
         <ung-deltakelse-opplyser.version>2.11.2</ung-deltakelse-opplyser.version>
