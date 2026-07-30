@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
@@ -34,22 +33,20 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        if (!resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)) {
+            return List.of();
+        }
         // Forlengelse gjelder kun ved en åpen programperiode; er den lukket har det skjedd en reell sluttdatoendring (opphør/flytting).
-        if (resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)
-            && harForlengetPeriode(behandling)
-            && !ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato).orElse(false)) {
+        boolean skalHaBrev = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .map(grunnlag -> grunnlag.harForlengetPeriode() && !UngdomsprogramOpphørUtleder.harLukketSluttdato(grunnlag))
+            .orElse(false);
+
+        if (skalHaBrev) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
                 "Automatisk brev ved forlenget periode"));
         }
         return List.of();
-    }
-
-    private boolean harForlengetPeriode(Behandling behandling) {
-        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .map(UngdomsprogramPeriodeGrunnlag::harForlengetPeriode)
-            .orElse(false);
     }
 
 }
