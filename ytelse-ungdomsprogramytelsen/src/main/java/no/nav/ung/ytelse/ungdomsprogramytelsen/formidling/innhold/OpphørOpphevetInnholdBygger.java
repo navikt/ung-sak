@@ -2,14 +2,13 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.OpphørOpphevetDto;
 
@@ -27,7 +26,7 @@ public class OpphørOpphevetInnholdBygger implements VedtaksbrevInnholdBygger {
     }
 
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         // Den tidligere opphørsdatoen (som nå oppheves) leses fra prosess-triggeren for RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM
         // på DENNE behandlingen, ikke fra forrige behandlings periodegrunnlag. Dette fungerer også når opphøret og
         // opphevelsen er slått sammen på samme (fortsatt åpne) behandling, hvor forrige behandling aldri fikk det

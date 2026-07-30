@@ -52,7 +52,7 @@
 ## Domain Notes: Vedtaksbrev-resultat
 - Brev-genereringen har ingen resultatklassifisering (tidligere `DetaljertResultatType`). `DefaultDetaljertResultatTidslinjeUtleder` (felles for begge ytelser) produserer kun en tynn grunnlagstidslinje av `DetaljertResultat` (behandlingsårsaker, avslåtte/ikke-vurderte vilkår, tilkjent ytelse, `tilVurdering`), og hver brev-strategi utleder selv om den er relevant.
 - Grunnlaget krysses (`CROSS_JOIN`) med hele vilkårstidslinjen, så perioder utenfor vurdering er også med — med tomt årsaks-sett og `tilVurdering=false`. Typen `DetaljertResultatTidslinje` gjør skillet eksplisitt: `tilVurdering()` er normalen, `heleBildet()` brukes **kun** av avslagsstrategiene (som må kunne skille fullt avslag fra delvis). `harÅrsak(...)` spør alltid periodene til vurdering.
-- Innholdbyggerne får en ferdigfiltrert `LocalDateTimeline<DetaljertResultat>` (kun perioder til vurdering) fra kallstedet, ikke `DetaljertResultatTidslinje`.
+- Innholdbyggerne får samme `DetaljertResultatTidslinje` som strategiene og velger selv om de trenger hele vilkårsbildet eller kun `tilVurdering()`.
 - Resolveren `YtelseVedtaksbrevRegler` kombinerer strategiene i tre faser (`OVERSTYRENDE_INGEN_BREV` → `OVERSTYRENDE_ENKELTBREV` → `NORMAL`); brev slår ut ingen-brev, og `IKKE_IMPLEMENTERT` er sikkerhetsnettet som gir manuell «Fatt vedtak». En strategi skal aldri inspisere andre strategiers resultater.
 - Felles utledninger som deles av flere ytelser/byggere ligger i `formidling`-modulen (`EndringInntektUtleder`), ikke duplisert per ytelse.
 

@@ -184,7 +184,7 @@ public class VedtaksbrevTjeneste {
             new VedtaksbrevGenerererInput(
                 behandlingId,
                 vedtaksbrev,
-                totalresultater.detaljertResultatTimeline().tilVurdering(),
+                totalresultater.detaljertResultatTimeline(),
                 dto.htmlVersjon()
             ));
 
@@ -237,7 +237,7 @@ public class VedtaksbrevTjeneste {
             new VedtaksbrevGenerererInput(
                 behandlingId,
                 relevantVedtaksbrev,
-                detaljertResultatTidslinje.tilVurdering(),
+                detaljertResultatTidslinje,
                 kunHtml
             ));
     }

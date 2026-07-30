@@ -2,11 +2,10 @@ package no.nav.ung.sak.formidling.innhold;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.template.dto.ManuellVedtaksbrevDto;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 @Dependent
 /**
@@ -27,7 +26,7 @@ public class TomVedtaksbrevInnholdBygger implements VedtaksbrevInnholdBygger {
     }
 
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         return new TemplateInnholdResultat(TemplateType.MANUELT_VEDTAKSBREV, new ManuellVedtaksbrevDto(TOM_VEDTAKSBREV_HTML_MAL));
     }
 }
