@@ -17,7 +17,7 @@ public final class EndringInntektUtleder {
     }
 
     public static boolean erInntektFullUtbetaling(DetaljertResultat r) {
-        return erKontrollAvInntektMedTilkjentYtelse(r) && r.utbetalingsgrad() == Utbetalingsgrad.FULL;
+        return erKontrollAvInntektMedTilkjentYtelse(r) && r.utbetalingsgrad() == UtbetalingsgradType.FULL;
     }
 
     public static boolean harInntektReduksjon(LocalDateTimeline<DetaljertResultat> resultatTidslinje) {

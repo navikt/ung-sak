@@ -8,7 +8,7 @@ import java.math.BigDecimal;
  * Grovklassifisering av utbetalingsgraden. Brev bryr seg kun om hvilken av disse kategoriene perioden faller i,
  * så tidslinjen splittes ikke på beløp/prosent som varierer fra periode til periode.
  */
-public enum Utbetalingsgrad {
+public enum UtbetalingsgradType {
 
     IKKE_SATT,
     INGEN_UTBETALING,
@@ -17,7 +17,7 @@ public enum Utbetalingsgrad {
 
     private static final BigDecimal HUNDRE = BigDecimal.valueOf(100);
 
-    public static Utbetalingsgrad av(TilkjentYtelseVerdi tilkjentYtelse) {
+    public static UtbetalingsgradType av(TilkjentYtelseVerdi tilkjentYtelse) {
         if (tilkjentYtelse == null) {
             return IKKE_SATT;
         }

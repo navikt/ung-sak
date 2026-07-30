@@ -130,7 +130,7 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
                 grunnlag.behandlingÅrsaker(),
                 grunnlag.avslåtteVilkår(),
                 grunnlag.ikkeVurderteVilkår(),
-                Utbetalingsgrad.av(rhs != null ? rhs.getValue() : null),
+                UtbetalingsgradType.av(rhs != null ? rhs.getValue() : null),
                 grunnlag.tilVurdering());
             return new LocalDateSegment<>(p, resultat);
         };
