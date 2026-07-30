@@ -9,19 +9,15 @@ import java.math.BigDecimal;
 
 public final class EndringInntektUtleder {
 
-    private static final BigDecimal FULL_UTBETALING = BigDecimal.valueOf(100);
-
     private EndringInntektUtleder() {
     }
 
     public static boolean erInntektReduksjon(DetaljertResultat r) {
-        return erKontrollAvInntektMedTilkjentYtelse(r)
-            && r.tilkjentYtelse().utbetalingsgrad().compareTo(FULL_UTBETALING) < 0;
+        return erKontrollAvInntektMedTilkjentYtelse(r) && r.utbetalingsgrad().erRedusert();
     }
 
     public static boolean erInntektFullUtbetaling(DetaljertResultat r) {
-        return erKontrollAvInntektMedTilkjentYtelse(r)
-            && r.tilkjentYtelse().utbetalingsgrad().compareTo(FULL_UTBETALING) >= 0;
+        return erKontrollAvInntektMedTilkjentYtelse(r) && r.utbetalingsgrad() == Utbetalingsgrad.FULL;
     }
 
     public static boolean harInntektReduksjon(LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
@@ -30,10 +26,6 @@ public final class EndringInntektUtleder {
 
     public static boolean harInntektFullUtbetaling(LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
         return resultatTidslinje.stream().anyMatch(it -> erInntektFullUtbetaling(it.getValue()));
-    }
-
-    public static LocalDateTimeline<DetaljertResultat> reduksjonTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        return resultatTidslinje.filterValue(EndringInntektUtleder::erInntektReduksjon);
     }
 
     public static LocalDateTimeline<DetaljertResultat> fullUtbetalingTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
@@ -59,7 +51,7 @@ public final class EndringInntektUtleder {
 
     private static boolean erKontrollAvInntektMedTilkjentYtelse(DetaljertResultat r) {
         return r.harÅrsak(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT)
-            && r.tilkjentYtelse() != null;
+            && r.utbetalingsgrad().erSatt();
     }
 
 }

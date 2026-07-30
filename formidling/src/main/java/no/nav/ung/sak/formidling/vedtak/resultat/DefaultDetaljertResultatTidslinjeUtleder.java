@@ -88,12 +88,11 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
             if (grunnlag == null) {
                 throw new IllegalStateException("Ingen vilkårsresultat for periode %s".formatted(p));
             }
-            var tilkjentYtelse = rhs != null ? rhs.getValue() : null;
             var resultat = new DetaljertResultat(
                 grunnlag.behandlingÅrsaker(),
                 grunnlag.avslåtteVilkår(),
                 grunnlag.ikkeVurderteVilkår(),
-                tilkjentYtelse,
+                Utbetalingsgrad.av(rhs != null ? rhs.getValue() : null),
                 grunnlag.tilVurdering());
             return new LocalDateSegment<>(p, resultat);
         };
