@@ -50,15 +50,19 @@ class StartpunktUtlederInntektArbeidYtelse implements EndringStartpunktUtleder {
         var forrigeGrunnlag = grunnlagId2 != null ? iayTjeneste.hentGrunnlagForGrunnlagId(ref.getBehandlingId(), grunnlagId2) : null;
         var diff = new IAYGrunnlagDiff(oppdatertGrunnlag, forrigeGrunnlag);
 
+        leggTilStartpunktForInntektskontroll(ref, grunnlagId1, grunnlagId2, diff, startpunkter);
+
+        return startpunkter;
+    }
+
+    private void leggTilStartpunktForInntektskontroll(BehandlingReferanse ref, UUID grunnlagId1, UUID grunnlagId2, IAYGrunnlagDiff diff, List<StartpunktType> startpunkter) {
         var perioderTilVurdering = relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(ref.getBehandlingId());
 
+        // TODO: Kan vurdere å skille på kilde her (inntekt for kontroll hentes kun fra a-ordningen og ikke fra SIGRUN)
         boolean erInntektEndretForSøker = diff.erEndringPåInntekter(perioderTilVurdering);
         if (erInntektEndretForSøker) {
             leggTilStartpunkt(startpunkter, grunnlagId1, grunnlagId2, StartpunktType.VURDER_KOMPLETTHET, "aktør inntekt for periode " + perioderTilVurdering);
         }
-
-
-        return startpunkter;
     }
 
     private void leggTilStartpunkt(List<StartpunktType> startpunkter, UUID grunnlagId1, UUID grunnlagId2, StartpunktType startpunkt, String endringLoggtekst) {

@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.sak.abac.StandardAbacAttributt;
+import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 import no.nav.ung.sak.behandlingslager.behandling.merknad.BehandlingMerknadType;
 import no.nav.ung.sak.kontrakt.Patterns;
 
@@ -34,7 +34,7 @@ public record MerknadEndretDto(
 
     @JsonProperty(value = "fritekst")
     @Size(max = 500)
-    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
     @Valid
     String fritekst,
 

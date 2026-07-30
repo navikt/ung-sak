@@ -13,9 +13,9 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.DefaultKantIKantVurderer;
-import no.nav.ung.sak.tid.KantIKantVurderer;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.tid.TidslinjeUtil;
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 
 public interface VilkårsPerioderTilVurderingTjeneste {
 

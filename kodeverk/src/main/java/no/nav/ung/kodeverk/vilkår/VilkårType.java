@@ -36,13 +36,28 @@ public enum VilkårType implements Kodeverdi {
         "AKT_VK_1",
         "Bostedsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
-        Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED
+        Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
+        Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE,
+        Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED
+    ),
+    ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR(
+        "AKT_VK_4",
+        "Andre livsoppholdsytelser-vilkåret",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE
     ),
     BISTANDSVILKÅR(
         "AKT_VK_2",
         "Bistandsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
         Avslagsårsak.IKKE_14A_VEDTAK
+    ),
+
+    FORUTGÅENDE_MEDLEMSKAPSVILKÅRET(
+        "AKT_VK_3",
+        "Forutgående medlemskapsvilkåret",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Avslagsårsak.SØKER_ER_IKKE_MEDLEM
     ),
 
     /**

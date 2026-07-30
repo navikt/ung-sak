@@ -1,15 +1,8 @@
 package no.nav.ung.sak.domene.vedtak.observer;
 
-import static no.nav.ung.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.abakus.vedtak.ytelse.Aktør;
-import no.nav.abakus.vedtak.ytelse.Kildesystem;
-import no.nav.abakus.vedtak.ytelse.Periode;
-import no.nav.abakus.vedtak.ytelse.Status;
-import no.nav.abakus.vedtak.ytelse.Ytelse;
-import no.nav.abakus.vedtak.ytelse.Ytelser;
+import no.nav.abakus.vedtak.ytelse.*;
 import no.nav.abakus.vedtak.ytelse.v1.YtelseV1;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.FagsakStatus;
@@ -20,6 +13,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakReposit
 import no.nav.ung.sak.ytelse.DagsatsOgUtbetalingsgrad;
 import no.nav.ung.sak.ytelse.beregning.TilkjentYtelseUtleder;
 import no.nav.ung.sak.ytelse.beregning.UngdomsytelseTilkjentYtelseUtleder;
+
+import static no.nav.ung.sak.domene.vedtak.observer.VedtattYtelseMapper.mapAnvisninger;
 
 @ApplicationScoped
 public class VedtattYtelseTjeneste {
@@ -78,6 +73,7 @@ public class VedtattYtelseTjeneste {
             case OPPLÆRINGSPENGER -> Ytelser.OPPLÆRINGSPENGER;
             case FRISINN -> Ytelser.FRISINN;
             case UNGDOMSYTELSE -> Ytelser.UNGDOMSYTELSE;
+            case AKTIVITETSPENGER -> Ytelser.AKTIVITETSPENGER;
             default -> throw new IllegalStateException("Ukjent ytelsestype " + type);
         };
     }

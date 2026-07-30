@@ -10,7 +10,10 @@ public enum DetaljertResultatType {
     KONTROLLER_INNTEKT_UTEN_TILKJENT_YTELSE("Ingen tilkjent ytelse etter kontroll av inntekt"),
     ENDRING_STARTDATO("Endring startdato"),
     ENDRING_SLUTTDATO("Opphør eller endring sluttdato"),
+    OPPHØR_VED_MAKSDATO("Opphør ved maksdato"),
+    OPPHØR_OPPHEVET("Opphør opphevet"),
     ENDRING_FJERNE_PERIODE("Fjerne periode"),
+    FORLENGET_PERIODE("Forlenget periode i ungdomsprogrammet"),
     IKKE_VURDERT("Ikke vurdert"),
     INNVILGELSE_KUN_VILKÅR("Innvilgelse av vilkår uten utbetaling"),
     INNVILGELSE_UTBETALING("Innvilgelse med utbetaling"),
@@ -20,7 +23,9 @@ public enum DetaljertResultatType {
     ENDRING_BARN_DØDSFALL("Endring pga dødsfall av barn"),
     ENDRING_DELTAKER_DØDSFALL("Endring pga dødsfall av deltaker"),
     INNVILGELSE_ANNET("Innvilgelse pga annen årsak - se forklaring"),
-    INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak")
+    INNVILGET_UTEN_ÅRSAK("Innvilgelse uten behandlingsårsak"),
+    SATS_REGULERING("Innvilgelse etter G-regulering"),
+    UENDRET("Vurdert, men uendret utfall på vilkår")
     ;
 
     private final String beskrivelse;

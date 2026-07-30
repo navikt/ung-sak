@@ -1,5 +1,26 @@
 package no.nav.ung.sak.web.app.tjenester.behandling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
+import no.nav.ung.sak.kontrakt.ResourceLink;
+import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingAnsvarligDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
+import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
+import no.nav.ung.sak.web.app.ApplicationConfig;
+import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
+import org.apache.http.client.utils.URIBuilder;
+
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -12,29 +33,12 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingVisningsnavn;
-import org.apache.http.client.utils.URIBuilder;
-
-import no.nav.ung.kodeverk.behandling.aksjonspunkt.Venteårsak;
-import no.nav.ung.sak.BaseEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
-import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
-import no.nav.ung.sak.kontrakt.ResourceLink;
-import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingStegTilstandDto;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingÅrsakDto;
-import no.nav.ung.sak.web.app.ApplicationConfig;
-import no.nav.ung.sak.web.server.jetty.JettyWebKonfigurasjon;
-
 public class BehandlingDtoUtil {
 
-    static void settStandardfelterUtvidet(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
-                                          boolean erBehandlingMedGjeldendeVedtak) {
-        setStandardfelter(behandling, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
-        dto.setAnsvarligBeslutter(behandling.getAnsvarligBeslutter());
+    static void settStandardfelterUtvidet(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
+                                          boolean erBehandlingMedGjeldendeVedtak, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        setStandardfelter(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak, ungdomsprogramPeriodeRepository);
+
         dto.setBehandlingHenlagt(behandling.isBehandlingHenlagt());
     }
 
@@ -58,12 +62,12 @@ public class BehandlingDtoUtil {
         return Collections.emptyList();
     }
 
-    static void setStandardfelter(Behandling behandling, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
+    static void setStandardfelter(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         if (behandlingVedtak != null) {
             dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
         }
 
-        dto.setVisningsnavn(utledVisningsnavn(behandling));
+        dto.setVisningsnavn(utledVisningsnavn(behandling, ungdomsprogramPeriodeRepository));
         dto.setFagsakId(behandling.getFagsakId());
         dto.setSakstype(behandling.getFagsakYtelseType());
         dto.setId(behandling.getId());
@@ -78,12 +82,16 @@ public class BehandlingDtoUtil {
         dto.setGjeldendeVedtak(erBehandlingMedGjeldendeVedtak);
         dto.setBehandlingsfristTid(behandling.getBehandlingstidFrist());
         dto.setBehandlingPåVent(behandling.isBehandlingPåVent());
-        dto.setAnsvarligSaksbehandler(behandling.getAnsvarligSaksbehandler());
-        dto.setToTrinnsBehandling(behandling.isToTrinnsBehandling());
         dto.setBehandlingResultatType(behandling.getBehandlingResultatType());
 
-        dto.setBehandlendeEnhetId(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetId());
-        dto.setBehandlendeEnhetNavn(behandling.getBehandlendeOrganisasjonsEnhet().getEnhetNavn());
+        BehandlingAnsvarlig behandlingAnsvarligSentralDel = behandlingAnsvarlige.get(BehandlingDel.SENTRAL);
+        dto.setAnsvarligSaksbehandler( behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getAnsvarligSaksbehandler() : null);
+        dto.setAnsvarligBeslutter(behandlingAnsvarligSentralDel != null ? behandlingAnsvarligSentralDel.getAnsvarligBeslutter() : null);
+        dto.setToTrinnsBehandling(behandlingAnsvarligSentralDel != null && behandlingAnsvarligSentralDel.erTotrinnsBehandling());
+        dto.setBehandlendeEnhetId(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetId() : null);
+        dto.setBehandlendeEnhetNavn(behandlingAnsvarligSentralDel != null? behandlingAnsvarligSentralDel.getBehandlendeOrganisasjonsEnhet().getEnhetNavn() : null);
+
+        dto.setBehandlingAnsvarlige(map(behandlingAnsvarlige));
 
         dto.setFørsteÅrsak(førsteÅrsak(behandling).orElse(null));
         dto.setBehandlingArsaker(lagBehandlingÅrsakDto(behandling));
@@ -96,7 +104,22 @@ public class BehandlingDtoUtil {
 
     }
 
-    private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling) {
+    private static Map<BehandlingDel, BehandlingAnsvarligDto> map(Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige){
+        return behandlingAnsvarlige.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> map(e.getValue())));
+    }
+
+    private static BehandlingAnsvarligDto map(BehandlingAnsvarlig behandlingAnsvarlig){
+        return new BehandlingAnsvarligDto(
+            behandlingAnsvarlig.getAnsvarligSaksbehandler(),
+            behandlingAnsvarlig.getAnsvarligBeslutter(),
+            behandlingAnsvarlig.getBehandlendeEnhet(),
+            behandlingAnsvarlig.getBehandlendeEnhetNavn(),
+            behandlingAnsvarlig.erTotrinnsBehandling()
+        );
+    }
+
+    private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         final var relevanteÅrsaker = Set.of(
             BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
             BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
@@ -105,7 +128,9 @@ public class BehandlingDtoUtil {
             BehandlingÅrsakType.RE_HENDELSE_DØD_BARN,
             BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
             BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
-            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO
         );
 
         // Kun behold behandlingsårsaker som faktisk har en spesifikk visningsnavnlogikk
@@ -130,6 +155,16 @@ public class BehandlingDtoUtil {
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM == it || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
             return BehandlingVisningsnavn.UNGDOMSPROGRAMENDRING;
+        }
+        if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO == it)) {
+            return BehandlingVisningsnavn.OPPHØR_VED_MAKSDATO;
+        }
+        if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
+            && behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM == it
+            || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
+            return UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository)
+                ? BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_OPPHEVET
+                : BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING;
         }
         return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;
     }

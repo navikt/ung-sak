@@ -1,16 +1,5 @@
 package no.nav.ung.sak.produksjonsstyring.totrinn;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -24,6 +13,17 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.AktørId;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -82,6 +82,31 @@ public class TotrinnRepositoryImplTest {
         assertThat(optionalNyttTotrinnresultatgrunnlag.get().getId()).isNotEqualTo(gammeltTotrinnresultatgrunnlag.getId());
         assertThat(optionalNyttTotrinnresultatgrunnlag.get().isAktiv()).isTrue();
 
+    }
+
+    @Test
+    public void skal_finne_totrinnsgrunnlag_for_lokal_del_for_lokalkontoraksjonspunkt() {
+
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, AktørId.dummy());
+        fagsakRepository.opprettNy(fagsak);
+
+        Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+
+        // Opprett vurderinger som skal være inaktive
+        AksjonspunktDefinisjon lokalkontorAksjonspunkt = AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR;
+        Totrinnsvurdering inaktivTotrinnsvurdering1 = lagTotrinnsvurdering(behandling, lokalkontorAksjonspunkt, false, "", VurderÅrsak.FEIL_FAKTA);
+        List<Totrinnsvurdering> totrinnsvurderinger = new ArrayList<>();
+        totrinnsvurderinger.add(inaktivTotrinnsvurdering1);
+        totrinnRepository.lagreOgFlush(behandling, totrinnsvurderinger);
+
+        // Hent aktive vurderinger etter flush
+        Collection<Totrinnsvurdering> repoAktiveTotrinnsvurderinger = totrinnRepository.hentTotrinnaksjonspunktvurderinger(behandling);
+
+        Assertions.assertThat(repoAktiveTotrinnsvurderinger).hasSize(1);
+        Totrinnsvurdering totrinnsvurdering = repoAktiveTotrinnsvurderinger.iterator().next();
+        assertThat(totrinnsvurdering.isAktiv()).isTrue();
+        assertThat(totrinnsvurdering.getAksjonspunktDefinisjon()).isEqualTo(lokalkontorAksjonspunkt);
     }
 
     @Test

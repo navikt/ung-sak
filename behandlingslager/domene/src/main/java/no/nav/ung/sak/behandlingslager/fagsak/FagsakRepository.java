@@ -1,9 +1,11 @@
 package no.nav.ung.sak.behandlingslager.fagsak;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -63,23 +65,33 @@ public class FagsakRepository {
         return opt;
     }
 
-    public List<Fagsak> hentAlleFagsakerSomOverlapper(LocalDate fom, LocalDate tom) {
+    public List<Fagsak> hentAlleFagsakerSomOverlapper(LocalDate fom, LocalDate tom, Collection<FagsakYtelseType> ytelsetyper) {
         Objects.requireNonNull(fom, "fom");
         Objects.requireNonNull(tom, "tom");
         String sqlString = """
                     select f.* from Fagsak f
-                      where f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+                      where f.ytelse_type in (:ytelsetyper) and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]')
             """;
 
         Query query = entityManager.createNativeQuery(sqlString, Fagsak.class); // NOSONAR
         query.setParameter("fom", fom);
         query.setParameter("tom", tom);
+        query.setParameter("ytelsetyper", ytelsetyper.stream().map(FagsakYtelseType::getKode).collect(Collectors.toSet()));
 
         return query.getResultList();
     }
 
-    // TODO: Burde kanskje ekskludere OBSOLETE her?
     public List<Fagsak> hentForBruker(AktørId aktørId) {
+        Collection<FagsakYtelseType> notObsolete = FagsakYtelseType.kodeMap()
+            .values()
+            .stream()
+            .filter(it -> it != FagsakYtelseType.OBSOLETE)
+            .toList();
+        return hentForBruker(aktørId, notObsolete); // søk bare opp støtte ytelsetyper
+    }
+
+
+    public List<Fagsak> hentForBruker(AktørId aktørId, Collection<FagsakYtelseType> ytelsetyper) {
         TypedQuery<Fagsak> query = entityManager
             .createQuery("""
                     from Fagsak f
@@ -88,8 +100,8 @@ public class FagsakRepository {
                     """,
                 Fagsak.class);
         query.setParameter("aktørId", aktørId); // NOSONAR
-        query.setParameter("ytelseTyper", FagsakYtelseType.kodeMap().values()); // søk bare opp støtte ytelsetyper
-        return query.getResultList();
+        query.setParameter("ytelseTyper", ytelsetyper);
+            return query.getResultList();
     }
 
     public List<Fagsak> hentForBruker(AktørId aktørId, FagsakYtelseType fagsakYtelseType) {
@@ -213,7 +225,7 @@ public class FagsakRepository {
         entityManager.flush();
     }
 
-    public void fjernIkkedigitalFlagg(Long fagsakId){
+    public void fjernIkkedigitalFlagg(Long fagsakId) {
         Fagsak fagsak = finnEksaktFagsak(fagsakId);
         // fjern flagg om det er en digital sak
         fagsak.setIkkeDigitalBruker(false);

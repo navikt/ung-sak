@@ -6,12 +6,14 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonInformasjonEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningGrunnlagEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -29,20 +31,19 @@ public class BehandlendeEnhetTjeneste {
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private PersonopplysningRepository personopplysningRepository;
-
-    public BehandlendeEnhetTjeneste() {
-        // For CDI
-    }
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     public BehandlendeEnhetTjeneste(EnhetsTjeneste enhetsTjeneste,
                                     BehandlingEnhetEventPubliserer eventPubliserer,
-                                    BehandlingRepositoryProvider provider) {
+                                    BehandlingRepositoryProvider provider,
+                                    BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.enhetsTjeneste = enhetsTjeneste;
         this.eventPubliserer = eventPubliserer;
         this.behandlingRepository = provider.getBehandlingRepository();
         this.historikkinnslagRepository = provider.getHistorikkinnslagRepository();
         this.personopplysningRepository = provider.getPersonopplysningRepository();
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     // Alle aktuelle enheter
@@ -53,8 +54,9 @@ public class BehandlendeEnhetTjeneste {
     // Brukes ved opprettelse av oppgaver før behandling har startet
     public OrganisasjonsEnhet finnBehandlendeEnhetFor(Fagsak fagsak) {
         Optional<OrganisasjonsEnhet> forrigeEnhet = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsak.getId())
-            .filter(b -> gyldigEnhetNfpNk(fagsak.getYtelseType(), b.getBehandlendeEnhet()))
-            .map(Behandling::getBehandlendeOrganisasjonsEnhet);
+            .flatMap(b -> behandlingAnsvarligRepository.hentBehandlingAnsvarlig(b.getId()))
+            .filter(ba -> gyldigEnhetNfpNk(fagsak.getYtelseType(), ba.getBehandlendeEnhet()))
+            .map(BehandlingAnsvarlig::getBehandlendeOrganisasjonsEnhet);
         return forrigeEnhet.orElse(enhetsTjeneste.hentEnhetSjekkKunAktør(fagsak.getAktørId(), fagsak.getYtelseType()));
     }
 
@@ -65,8 +67,9 @@ public class BehandlendeEnhetTjeneste {
 
     // Brukes for å sjekke om behandling skal flyttes etter endringer i NORG2-oppsett
     public Optional<OrganisasjonsEnhet> sjekkOppdatertEnhetEtterReallokering(Behandling behandling) {
+        String behandlingensBehandlendeEnhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null);
         OrganisasjonsEnhet enhet = finnBehandlendeEnhetFor(behandling.getFagsak());
-        if (enhet.getEnhetId().equals(behandling.getBehandlendeEnhet())) {
+        if (enhet.getEnhetId().equals(behandlingensBehandlendeEnhet)) {
             return Optional.empty();
         }
         return Optional.of(getOrganisasjonsEnhetEtterEndring(behandling.getFagsak(), enhet, behandling.getAktørId(), new HashSet<>()).orElse(enhet));
@@ -75,8 +78,8 @@ public class BehandlendeEnhetTjeneste {
 
     // Brukes for å sjekke om det er behov for å flytte eller endre til spesialenheter når saken tas av vent.
     public Optional<OrganisasjonsEnhet> sjekkEnhetEtterEndring(Behandling behandling) {
-        var enhet = behandling.getBehandlendeOrganisasjonsEnhet();
-        if (enhet.equals(enhetsTjeneste.getEnhetKlage())) {
+        OrganisasjonsEnhet enhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).map(BehandlingAnsvarlig::getBehandlendeOrganisasjonsEnhet).orElse(null);
+        if (Objects.equals(enhet, enhetsTjeneste.getEnhetKlage())) {
             return Optional.empty();
         }
         var oppdatertEnhet = getOrganisasjonsEnhetEtterEndring(behandling, enhet).orElse(enhet);
@@ -110,17 +113,18 @@ public class BehandlendeEnhetTjeneste {
     public void oppdaterBehandlendeEnhet(Behandling behandling, OrganisasjonsEnhet nyEnhet, HistorikkAktør endretAv, String begrunnelse) {
         BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
         if (endretAv != null) {
-            lagHistorikkInnslagForByttBehandlendeEnhet(behandling, nyEnhet, begrunnelse, endretAv);
+            BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).orElse(null);
+            lagHistorikkInnslagForByttBehandlendeEnhet(behandling, behandlingAnsvarlig, nyEnhet, begrunnelse, endretAv);
         }
-        behandling.setBehandlendeEnhet(nyEnhet);
-        behandling.setBehandlendeEnhetÅrsak(begrunnelse);
+
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), nyEnhet, begrunnelse);
 
         behandlingRepository.lagre(behandling, lås);
         eventPubliserer.fireEvent(behandling);
     }
 
-    private void lagHistorikkInnslagForByttBehandlendeEnhet(Behandling behandling, OrganisasjonsEnhet nyEnhet, String begrunnelse, HistorikkAktør aktør) {
-        OrganisasjonsEnhet eksisterende = behandling.getBehandlendeOrganisasjonsEnhet();
+    private void lagHistorikkInnslagForByttBehandlendeEnhet(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, OrganisasjonsEnhet nyEnhet, String begrunnelse, HistorikkAktør aktør) {
+        OrganisasjonsEnhet eksisterende = behandlingAnsvarlig != null ? behandlingAnsvarlig.getBehandlendeOrganisasjonsEnhet() : null;
         String fraMessage = eksisterende != null ? eksisterende.getEnhetId() + " " + eksisterende.getEnhetNavn() : "ukjent";
         var innslagBuilder = new Historikkinnslag.Builder();
         innslagBuilder.medAktør(aktør);

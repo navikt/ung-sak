@@ -7,6 +7,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 /** Totrinn tjeneste som eksponeres ut av modulen.*/
@@ -32,11 +33,17 @@ public class TotrinnTjeneste {
         return totrinnRepository.hentTotrinnaksjonspunktvurderinger(behandling);
     }
 
-    /** Deaktiverer alle totrinnsvurderinger for en behandling.
-     * @param behandling
-     */
-    public void deaktiverTotrinnaksjonspunktvurderinger(Behandling behandling) {
-        totrinnRepository.lagreOgFlush(behandling, List.of());
+    public Collection<Totrinnsvurdering> hentTotrinnaksjonspunktvurderinger(Behandling behandling, BehandlingDel behandlingDel) {
+        return totrinnRepository.hentTotrinnaksjonspunktvurderinger(behandling)
+            .stream()
+            .filter(tt -> tt.getAksjonspunktDefinisjon().getBehandlingDel() == behandlingDel)
+            .toList();
+    }
+
+    /** Deaktiverer alle totrinnsvurderinger for en behandlingsDel.  */
+
+    public void deaktiverTotrinnaksjonspunktvurderinger(Behandling behandling, BehandlingDel behandlingDel) {
+        totrinnRepository.deaktiverTotrinnaksjonspunktvurderinger(behandling, behandlingDel);
     }
 
     public void settNyeTotrinnaksjonspunktvurderinger(Behandling behandling, List<Totrinnsvurdering> vurderinger) {

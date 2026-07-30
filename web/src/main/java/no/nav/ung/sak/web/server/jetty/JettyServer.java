@@ -5,7 +5,6 @@ import jakarta.security.auth.message.config.AuthConfigFactory;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.sikkerhet.jaspic.OidcAuthModule;
 import no.nav.ung.sak.web.app.ApplicationConfig;
-import no.nav.ung.sak.web.app.OppgaverApiConfig;
 import no.nav.ung.sak.web.app.FrontendApiConfig;
 import no.nav.ung.sak.web.app.oppgave.OppgaveRedirectApplication;
 import no.nav.ung.sak.web.server.InternalApplicationConfig;
@@ -128,7 +127,7 @@ public class JettyServer {
         System.setProperty("task.manager.runner.threads", "7");
 
         //øker kø-størrelse og antall task som polles om gangen, gjør at systemet oppnår bedre ytelse når det finnes mange klare tasks
-        System.setProperty("task.manager.tasks.queue.size", "20");
+        System.setProperty("task.manager.tasks.queue.size", "100");
         System.setProperty("task.manager.polling.tasks.size", "10");
         System.setProperty("task.manager.polling.scrolling.select.size", "10");
 
@@ -211,7 +210,6 @@ public class JettyServer {
         return new Class<?>[]{
             no.nav.k9.felles.oidc.OidcApplication.class,
             ApplicationConfig.class,
-            OppgaverApiConfig.class,
             InternalApplicationConfig.class,
             OppgaveRedirectApplication.class,
             FrontendApiConfig.class

@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.kontroll.KontrollerteInntektperioderTjeneste;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import org.slf4j.Logger;
@@ -22,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
+import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.AKTIVITETSPENGER;
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
 /**
@@ -32,6 +33,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 @BehandlingStegRef(value = KONTROLLER_REGISTER_INNTEKT)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(UNGDOMSYTELSE)
+@FagsakYtelseTypeRef(AKTIVITETSPENGER)
 public class KontrollerInntektSteg implements BehandlingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(KontrollerInntektSteg.class);

@@ -28,7 +28,7 @@
 		<!-- Integrasjon avhengigheter -->
         <dependency>
             <groupId>no.nav.k9</groupId>
-            <artifactId>soknad</artifactId>
+            <artifactId>soknad-jackson2</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.k9.felles.integrasjon</groupId>

@@ -28,7 +28,7 @@ class BrevXhtmlTilSeksjonKonverterTest {
                     </div>
                     <div class="uten-mellomrom">
                         <p>Til: Ung Testesen</p>
-                        <p>Fødselsnummer: 01017000299</p>
+                        <p>Fødselsnummer: 17420373147</p>
                     </div>
                 </header>
                 <section>

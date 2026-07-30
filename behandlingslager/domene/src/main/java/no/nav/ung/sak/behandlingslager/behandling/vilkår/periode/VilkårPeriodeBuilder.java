@@ -7,7 +7,7 @@ import java.util.Properties;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 public class VilkårPeriodeBuilder {
     private final VilkårPeriode entitet;
@@ -80,6 +80,11 @@ public class VilkårPeriodeBuilder {
         return this;
     }
 
+    public VilkårPeriodeBuilder medFritekstVurderingBrev(String fritekstVurderingBrev) {
+        this.entitet.setFritekstVurderingBrev(fritekstVurderingBrev);
+        return this;
+    }
+
     public VilkårPeriodeBuilder tilbakestillManuellVurdering() {
         this.entitet.setManueltVurdert(false);
         return this;
@@ -94,6 +99,7 @@ public class VilkårPeriodeBuilder {
         this.entitet.setUtfall(eksisteredeVurdering.getUtfall());
         this.entitet.setOverstyrtUtfall(eksisteredeVurdering.getOverstyrtUtfall());
         this.entitet.setBegrunnelse(eksisteredeVurdering.getBegrunnelse());
+        this.entitet.setFritekstVurderingBrev(eksisteredeVurdering.getFritekstVurderingBrev());
         this.entitet.setUtfallMerknad(eksisteredeVurdering.getMerknad());
         return this;
     }

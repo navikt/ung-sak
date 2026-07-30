@@ -2,7 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.klage;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.klage.KlageAvvistÅrsak;
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 import java.util.ArrayList;
 import java.util.List;

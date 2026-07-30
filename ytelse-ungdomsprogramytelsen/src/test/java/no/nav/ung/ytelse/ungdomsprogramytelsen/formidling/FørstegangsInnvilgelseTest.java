@@ -64,7 +64,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
@@ -93,7 +93,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Fra 1. august 2025 til 12. desember 2025 får du ungdomsprogramytelse på 681 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 12. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Den siste utbetalingen får du før den 10. januar 2026. \
+                Den siste utbetalingen får du før den 12. januar 2026. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """
@@ -103,7 +103,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
@@ -147,7 +147,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Fordi du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
                 Det blir 265 657 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt());
 
@@ -169,7 +169,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Fra 1. august 2025 til 15. februar 2026 får du ungdomsprogramytelse på 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene får du utbetalt én gang i måneden før den 12. i måneden. \
                 Den første utbetalingen får du måneden etter at du begynner i ungdomsprogrammet. \
-                Den siste utbetalingen får du før den 10. mars 2026. \
+                Den siste utbetalingen får du før den 12. mars 2026. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPleiepengerAvsnittForOpphør() + """
@@ -179,7 +179,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Fordi du er over 25 år, bruker vi grunnbeløpet ganger 2,041. \
                 Det blir 265 657 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
         );
@@ -217,7 +217,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
@@ -266,7 +266,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Fordi du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
                 Fordi du har ett barn, får du i tillegg 37 kroner per dag i barnetillegg. \
                 """ + meldFraTilOssHvisDuHarEndringerAvsnitt()
@@ -309,7 +309,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
                 Nå er grunnbeløpet på 130 160 kroner. \
                 Når du er under 25 år, bruker vi grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 168 761 kroner i året. \
-                Denne summen har vi delt vi på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 649 kroner per dag. \
                 Når du er over 25 år, bruker vi grunnbeløpet ganger 2,041 som blir 265 657 kroner i året. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
@@ -360,7 +360,7 @@ class FørstegangsInnvilgelseTest extends AbstractUngdomsytelseVedtaksbrevInnhol
     static String meldFraTilOssHvisDuHarEndringerAvsnitt() {
         return """
             Meld fra til oss hvis du har arbeidsinntekt i tillegg til ungdomsprogramytelsen \
-            Hvis du har en arbeidstinntekt i tillegg til ungdomsprogramytelsen, er det viktig at du sier fra til oss om det. \
+            Hvis du har en arbeidsinntekt i tillegg til ungdomsprogramytelsen, er det viktig at du sier fra til oss om det. \
             Du får en SMS den 1. hver måned. \
             Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all arbeidsinntekt du har hatt måneden før. \
             Når du jobber og har en inntekt, får du mindre penger i ungdomsprogramytelsen. \

@@ -29,16 +29,16 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import no.nav.k9.felles.jpa.converters.PropertiesToStringConverter;
-import no.nav.ung.sak.IndexKey;
+import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
-import no.nav.ung.sak.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.IndexKeyComposer;
 import no.nav.ung.sak.behandlingslager.kodeverk.AvslagsårsakKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.UtfallKodeverdiConverter;
 import no.nav.ung.sak.behandlingslager.kodeverk.VurderUtfallMerknadKodeverdiConverter;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 @Entity
 @Table(name = "VR_VILKAR_PERIODE")
@@ -83,6 +83,9 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     @Column(name = "BEGRUNNELSE")
     private String begrunnelse;
 
+    @Column(name = "fritekst_vurdering_brev")
+    private String fritekstVurderingBrev;
+
     @Lob
     @Column(name = "regel_evaluering_oid")
     @DiffIgnore
@@ -121,6 +124,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         this.regelEvaluering = vilkårPeriode.regelEvaluering;
 
         this.begrunnelse = vilkårPeriode.begrunnelse;
+        this.fritekstVurderingBrev = vilkårPeriode.fritekstVurderingBrev;
     }
 
     private static String getPayload(Clob payload, AtomicReference<String> payloadStringRef) {
@@ -235,6 +239,14 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
 
     void setBegrunnelse(String begrunnelse) {
         this.begrunnelse = begrunnelse;
+    }
+
+    public String getFritekstVurderingBrev() {
+        return fritekstVurderingBrev;
+    }
+
+    void setFritekstVurderingBrev(String fritekstVurderingBrev) {
+        this.fritekstVurderingBrev = fritekstVurderingBrev;
     }
 
     public VilkårUtfallMerknad getMerknad() {

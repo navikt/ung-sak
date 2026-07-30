@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.SpanKind;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
@@ -11,22 +12,36 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.sak.behandling.aksjonspunkt.*;
+import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
+import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktProsessResultat;
+import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
+import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.ung.sak.behandling.aksjonspunkt.Overstyringshåndterer;
 import no.nav.ung.sak.behandling.prosessering.BehandlingsprosessApplikasjonTjeneste;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.kontrakt.aksjonspunkt.*;
-import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
+import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.AksjonspunktKode;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetOgOverstyrteAksjonspunkterDto;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunkt;
+import no.nav.ung.sak.kontrakt.aksjonspunkt.OverstyringAksjonspunktDto;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -45,7 +60,9 @@ public class AksjonspunktApplikasjonTjeneste {
         AksjonspunktDefinisjon.FORESLÅ_VEDTAK_MANUELT);
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
+    private Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester;
     private AksjonspunktRepository aksjonspunktRepository;
     private AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste;
     private BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste;
@@ -58,16 +75,20 @@ public class AksjonspunktApplikasjonTjeneste {
     @Inject
     public AksjonspunktApplikasjonTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                            BehandlingskontrollTjeneste behandlingskontrollTjeneste,
-                                           AksjonspunktRepository aksjonspunktRepository, AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste,
-                                           BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste) {
+                                           AksjonspunktRepository aksjonspunktRepository,
+                                           AksjonspunktSporingTjeneste aksjonspunktSporingTjeneste,
+                                           BehandlingsprosessApplikasjonTjeneste behandlingsprosessApplikasjonTjeneste,
+                                           @Any Instance<OppdaterAnsvarligSaksbehandlerTjeneste> oppdaterAnsvarligSaksbehandlerTjenester) {
 
         this.aksjonspunktRepository = aksjonspunktRepository;
         this.aksjonspunktSporingTjeneste = aksjonspunktSporingTjeneste;
         this.behandlingsprosessApplikasjonTjeneste = behandlingsprosessApplikasjonTjeneste;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.behandlingAnsvarligRepository = repositoryProvider.getBehandlingAnsvarligRepository();
         this.vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
 
+        this.oppdaterAnsvarligSaksbehandlerTjenester = oppdaterAnsvarligSaksbehandlerTjenester;
     }
 
     public void bekreftAksjonspunkter(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Long behandlingId, BehandlingskontrollKontekst kontekst) {
@@ -100,10 +121,8 @@ public class AksjonspunktApplikasjonTjeneste {
     }
 
     protected void setAnsvarligSaksbehandler(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Behandling behandling) {
-        if (bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> dto instanceof FatterVedtakAksjonspunktDto)) {
-            return;
-        }
-        behandling.setAnsvarligSaksbehandler(getCurrentUserId());
+        OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste = OppdaterAnsvarligSaksbehandlerTjeneste.finnTjeneste(oppdaterAnsvarligSaksbehandlerTjenester, behandling.getFagsakYtelseType());
+        oppdaterAnsvarligSaksbehandlerTjeneste.oppdaterAnsvarligSaksbehandler(bekreftedeAksjonspunktDtoer, behandling.getId());
     }
 
     protected String getCurrentUserId() {

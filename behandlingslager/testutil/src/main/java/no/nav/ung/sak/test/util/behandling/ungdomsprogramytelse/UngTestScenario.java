@@ -28,6 +28,7 @@ import java.util.Set;
  * @param barn
  * @param dødsdato
  * @param kontrollerInntektPerioder
+ * @param harForlengetPeriode
  */
 public record UngTestScenario(
     String navn,
@@ -42,7 +43,9 @@ public record UngTestScenario(
     Set<Trigger> behandlingTriggere,
     List<PersonInformasjon> barn,
     LocalDate dødsdato,
-    LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder) {
+    LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder,
+    LocalDate periodeMaksDato, boolean harForlengetPeriode) {
+
 }
 
 

@@ -4,8 +4,8 @@ import jakarta.enterprise.context.Dependent;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.tid.TidslinjeUtil;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.typer.Periode;
 
 import java.util.List;

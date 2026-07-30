@@ -8,22 +8,17 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.POST;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.prosesstask.api.PollTaskAfterTransaction;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.brukerdialog.typer.AktørId;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -31,8 +26,8 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.SettEtterlysningTilUtløptDersomVenterTask;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.etterlysning.EndreFristRequest;
 import no.nav.ung.sak.kontrakt.etterlysning.Etterlysning;
@@ -63,23 +58,24 @@ public class EtterlysningRestTjeneste {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste;
     private ProsessTaskTjeneste prosessTaskTjeneste;
-    private UngOppgaveKlient oppgaveRestKlient;
-    private Pdl pdl;
+    private UngBrukerdialogOppgaveKlient oppgaveKlient;
 
     public EtterlysningRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository, BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository,
-                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste, ProsessTaskTjeneste prosessTaskTjeneste, UngOppgaveKlient oppgaveRestKlient, Pdl pdl) {
+    public EtterlysningRestTjeneste(EtterlysningRepository etterlysningRepository,
+                                    BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository,
+                                    BehandlingsutredningApplikasjonTjeneste behandlingsutredningApplikasjonTjeneste,
+                                    ProsessTaskTjeneste prosessTaskTjeneste,
+                                    UngBrukerdialogOppgaveKlient oppgaveKlient) {
         this.etterlysningRepository = etterlysningRepository;
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.behandlingsutredningApplikasjonTjeneste = behandlingsutredningApplikasjonTjeneste;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
-        this.oppgaveRestKlient = oppgaveRestKlient;
-        this.pdl = pdl;
+        this.oppgaveKlient = oppgaveKlient;
     }
 
     @GET
@@ -130,9 +126,7 @@ public class EtterlysningRestTjeneste {
             behandlingsutredningApplikasjonTjeneste.endreBehandlingPaVent(behandlingId, etterlysning.getType());
 
             opprettHistorikkinnslag(behandlingId, behandling.getFagsakId(), etterlysning, frist);
-
-            String personIdent = pdl.hentPersonIdentForAktørId(behandling.getAktørId().getAktørId()).orElseThrow(() -> new IllegalStateException("Finner ikke personident for aktørId for behandling " + behandling.getId()));
-            oppgaveRestKlient.endreFrist(personIdent, etterlysning.getEksternReferanse(), frist);
+            oppgaveKlient.endreFrist(new AktørId(behandling.getAktørId().getAktørId()), etterlysning.getEksternReferanse(), frist);
         });
         return Redirect.tilBehandlingPollStatus(request, behandling.getUuid());
     }

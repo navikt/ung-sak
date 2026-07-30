@@ -27,6 +27,8 @@ import java.util.UUID;
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_SLUTTDATO)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_AVVIK_REGISTERINNTEKT)
 @OppgaveTypeRef(Bekreftelse.Type.UNG_ENDRET_PERIODE)
+@OppgaveTypeRef(Bekreftelse.Type.AVP_BOSTED_AVKLARING)
+@OppgaveTypeRef(Bekreftelse.Type.UNG_OPPHOR_VED_MAKSDATO)
 public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndterer {
 
     private static final Logger log = LoggerFactory.getLogger(GenerellOppgaveBekreftelseHåndterer.class);
@@ -54,7 +56,9 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
 
         if (!etterlysning.getStatus().equals(EtterlysningStatus.VENTER)) {
             if (etterlysning.getStatus().equals(EtterlysningStatus.MOTTATT_SVAR)) {
-                throw  new IllegalStateException("Etterlysning har allerede mottatt svar, kan ikke håndtere ny uttalelse fra bruker.");
+                if (etterlysning.getBehandlingId() != 3009650L) {
+                    throw  new IllegalStateException("Etterlysning har allerede mottatt svar, kan ikke håndtere ny uttalelse fra bruker.");
+                }
             }
             // Dette kan skje dersom bruker bekrefte mens etterlysningen står i SKAL_AVBRYTES status og tasken for å avbryte etterlysningen ikke er kjørt enda.
             // I dette tifellet går vi videre uten å oppdatere etterlysningen
@@ -92,6 +96,8 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             case UTTALELSE_ENDRET_STARTDATO -> EndringType.ENDRET_STARTDATO;
             case UTTALELSE_ENDRET_SLUTTDATO -> EndringType.ENDRET_SLUTTDATO;
             case UTTALELSE_ENDRET_PERIODE -> EndringType.ENDRET_PERIODE;
+            case UTTALELSE_OPPHOR_VED_MAKSDATO -> EndringType.OPPHOR_VED_MAKSDATO;
+            case UTTALELSE_BOSTED -> EndringType.AVKLAR_BOSTED;
         };
     }
 

@@ -16,6 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
 import no.nav.ung.sak.kontrakt.Patterns;
@@ -34,6 +35,7 @@ public class TotrinnskontrollAksjonspunkterDto {
 
         public Builder medAksjonspunktKode(AksjonspunktDefinisjon aksjonspunktKode) {
             kladd.aksjonspunktKode = aksjonspunktKode.getKode();
+            kladd.behandlingDel = aksjonspunktKode.getBehandlingDel();
             return this;
         }
 
@@ -61,7 +63,7 @@ public class TotrinnskontrollAksjonspunkterDto {
     @JsonInclude(value = Include.NON_EMPTY)
     @JsonProperty(value = "besluttersBegrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String besluttersBegrunnelse;
 
     @JsonProperty(value = "totrinnskontrollGodkjent")
@@ -71,6 +73,8 @@ public class TotrinnskontrollAksjonspunkterDto {
     @Size(max = 100)
     @Valid
     private Set<VurderÅrsak> vurderPaNyttArsaker = new HashSet<>();
+
+    private BehandlingDel behandlingDel;
 
     public TotrinnskontrollAksjonspunkterDto() {
         //
@@ -108,4 +112,9 @@ public class TotrinnskontrollAksjonspunkterDto {
     public void setVurderPaNyttArsaker(Set<VurderÅrsak> vurderPaNyttArsaker) {
         this.vurderPaNyttArsaker = vurderPaNyttArsaker;
     }
+
+    public BehandlingDel getBehandlingDel() {
+        return behandlingDel;
+    }
+
 }

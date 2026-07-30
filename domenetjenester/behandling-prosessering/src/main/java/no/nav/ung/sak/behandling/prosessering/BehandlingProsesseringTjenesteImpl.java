@@ -23,13 +23,10 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
 import no.nav.ung.sak.domene.iay.modell.InntektArbeidYtelseGrunnlag;
-import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
-import no.nav.ung.sak.domene.registerinnhenting.EndringsresultatSjekker;
-import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
-import no.nav.ung.sak.domene.registerinnhenting.RegisterdataEndringshåndterer;
+import no.nav.ung.sak.domene.registerinnhenting.*;
 import no.nav.ung.sak.domene.registerinnhenting.impl.OppfriskingAvBehandlingTask;
 import no.nav.ung.sak.domene.registerinnhenting.task.*;
-import no.nav.ung.sak.JsonObjectMapper;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -341,10 +338,11 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
         var tasks = new ArrayList<String>();
         // Rekkefølgen her viktig
         // Innhenting av ungdomsprogramperioder må komme før annen innhenting siden denne påvirker opplysningsperioden
-        if (skalInnhenteProgramperioder(behandling)) {
-            EndringStartpunktUtleder.finnUtleder(startpunktUtledere, UngdomsprogramPeriodeGrunnlag.class, behandling.getFagsakYtelseType())
-                .ifPresent(u -> tasks.add(InnhentUngdomsprogramperioderTask.TASKTYPE));
-        }
+        UtvidetRegisterinnhentingTaskUtleder.finnTjeneste(behandling.getFagsakYtelseType())
+            .stream()
+            .map(u -> u.utledRegisterinnhentingTaskTyper(behandling))
+            .flatMap(Collection::stream)
+            .forEach(tasks::add);
 
         if (skalInnhentePersonopplysningerPåNytt(behandling)) {
             EndringStartpunktUtleder.finnUtleder(startpunktUtledere, PersonInformasjonEntitet.class, behandling.getFagsakYtelseType())
@@ -364,11 +362,15 @@ public class BehandlingProsesseringTjenesteImpl implements BehandlingProsesserin
     }
 
     private boolean skalInnhenteProgramperioder(Behandling behandling) {
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.UNGDOMSYTELSE) {
+            return false;
+        }
         return !behandling.erRevurdering() || BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
     }
 
     private boolean skalInnhenteInntektOgYtelser(Behandling behandling) {
-        if (BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains)) {
+        boolean harÅrsakForInnhenting = BehandlingÅrsakType.årsakerForInnhentingAvInntektOgYtelse().stream().anyMatch(behandling.getBehandlingÅrsakerTyper()::contains);
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER || harÅrsakForInnhenting) {
             var informasjonselementerUtleder = finnTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
             Set<RegisterdataType> registerdata = informasjonselementerUtleder.utled(behandling.getType());
             return registerdata != null && !(registerdata.isEmpty());

@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.kompletthet;
 
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -17,7 +18,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.behandling.steg.kompletthet.registerinntektkontroll.RapporteringsfristAutopunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.InntektAbonnentTjeneste;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -32,6 +33,7 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +41,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(JpaExtension.class)
 class VurderKompletthetStegImplTest {
 
+    public static final DatoIntervallEntitet PERIODE = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now());
     @Inject
     private FagsakRepository fagsakRepository;
     @Inject
@@ -68,6 +71,8 @@ class VurderKompletthetStegImplTest {
 
         behandlingRepository.lagre(revurdering, behandlingRepository.taSkriveLås(revurdering));
 
+        relevanteKontrollperioderUtleder = mock(RelevanteKontrollperioderUtleder.class);
+        when(relevanteKontrollperioderUtleder.utledPerioderForKontrollAvInntekt(anyLong())).thenReturn(new LocalDateTimeline<>(PERIODE.toLocalDateInterval(), true));
         rapporteringsfristAutopunktUtleder = mock(RapporteringsfristAutopunktUtleder.class);
         when(rapporteringsfristAutopunktUtleder.utledAutopunktForRapporteringsfrist(any())).thenReturn(Optional.empty());
         vurderKompletthetSteg = new VurderKompletthetStegImpl(etterlysningRepository,
@@ -76,9 +81,7 @@ class VurderKompletthetStegImplTest {
             rapporteringsfristAutopunktUtleder,
             relevanteKontrollperioderUtleder,
             new UnitTestLookupInstanceImpl<>(mock(EtterlysningOppretter.class)),
-            "P14D",
-            false
-        );
+            "P14D");
     }
 
     @Test
@@ -92,7 +95,7 @@ class VurderKompletthetStegImplTest {
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_er_opprettet() {
         // Arrange
-        etterlysningRepository.lagre(Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT));
+        etterlysningRepository.lagre(Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), PERIODE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT));
 
         // Act
         final var resultat = vurderKompletthetSteg.utførSteg(new BehandlingskontrollKontekst(revurdering.getFagsakId(), aktørId, behandlingRepository.taSkriveLås(revurdering)));
@@ -106,7 +109,7 @@ class VurderKompletthetStegImplTest {
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_der_frist_er_passert() {
         // Arrange
-        final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), PERIODE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         final var frist = LocalDateTime.now().minusMinutes(1);
         etterlysning.vent(frist);
         etterlysningRepository.lagre(etterlysning);
@@ -123,7 +126,7 @@ class VurderKompletthetStegImplTest {
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent() {
         // Arrange
-        final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var etterlysning = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), PERIODE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         final var frist = LocalDateTime.now().plusDays(1);
         etterlysning.vent(frist);
         etterlysningRepository.lagre(etterlysning);
@@ -141,12 +144,12 @@ class VurderKompletthetStegImplTest {
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_som_satt_på_vent_og_opprettet() {
         // Arrange
-        final var etterlysning1 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var etterlysning1 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), PERIODE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         final var frist = LocalDateTime.now().plusDays(1);
         etterlysning1.vent(frist);
         etterlysningRepository.lagre(etterlysning1);
 
-        final var etterlysning2 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var etterlysning2 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), PERIODE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         etterlysningRepository.lagre(etterlysning2);
 
         // Act
@@ -161,10 +164,10 @@ class VurderKompletthetStegImplTest {
     @Test
     void skal_returnere_autopunkt_for_inntektuttalelse_og_bekreftelse_av_startdato() {
         // Arrange
-        final var etterlysning1 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
+        final var etterlysning1 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), PERIODE, EtterlysningType.UTTALELSE_KONTROLL_INNTEKT);
         etterlysningRepository.lagre(etterlysning1);
 
-        final var etterlysning2 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
+        final var etterlysning2 = Etterlysning.opprettForType(revurdering.getId(), UUID.randomUUID(), UUID.randomUUID(), PERIODE, EtterlysningType.UTTALELSE_ENDRET_STARTDATO);
         etterlysningRepository.lagre(etterlysning2);
 
         // Act

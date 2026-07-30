@@ -2,8 +2,11 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
+import no.nav.ung.sak.ytelse.LagTilkjentYtelse;
 import no.nav.ung.sak.ytelse.TilkjentYtelsePeriodeResultat;
 import org.junit.jupiter.api.Test;
 
@@ -227,7 +230,9 @@ class LagTilkjentYtelseTest {
     }
 
     private static LocalDateTimeline<TilkjentYtelseVerdi> getResultat(LocalDateTimeline<Boolean> godkjentTidslinje, LocalDateTimeline<BeregnetSats> totalsatsTidslinje, LocalDateTimeline<BigDecimal> rapportertInntektTidslinje) {
-        return LagTilkjentYtelse.lagTidslinje(godkjentTidslinje.map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonth())))), godkjentTidslinje, totalsatsTidslinje, rapportertInntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
+        final var inntektTidslinje = rapportertInntektTidslinje.mapValue(it -> new KontrollerteInntekter(it, BigDecimal.ZERO));
+        final var konfigurasjon = new InntektsreduksjonKonfigurasjon(new BigDecimal("0.66"), new BigDecimal("0.66"));
+        return new LagTilkjentYtelse(konfigurasjon).lagTidslinje(godkjentTidslinje.map(it -> List.of(new LocalDateSegment<>(it.getLocalDateInterval(), YearMonth.of(it.getFom().getYear(), it.getFom().getMonth())))), godkjentTidslinje, totalsatsTidslinje, inntektTidslinje).mapValue(TilkjentYtelsePeriodeResultat::verdi);
     }
 
 

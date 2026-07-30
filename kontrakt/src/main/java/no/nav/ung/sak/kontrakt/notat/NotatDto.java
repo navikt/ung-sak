@@ -30,7 +30,7 @@ public record NotatDto(
 
         @JsonProperty(value = "notatTekst")
         @Size(max = 4000)
-        @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+        @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
         @NotNull
         String notatTekst,
 

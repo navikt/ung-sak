@@ -114,6 +114,6 @@ public class VurderSøknadsfristSteg implements BehandlingSteg {
 
     private SøknadsfristTjeneste hentVurderingsTjeneste(Behandling behandling) {
         return FagsakYtelseTypeRef.Lookup.find(SøknadsfristTjeneste.class, vurderSøknadsfristTjenester, behandling.getFagsakYtelseType())
-            .orElseThrow(() -> new UnsupportedOperationException("VurderSøknadsfristTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "], behandlingtype [" + behandling.getType() + "]"));
+            .orElseThrow(() -> new UnsupportedOperationException("VurderSøknadsfristTjeneste ikke implementert for ytelse [" + behandling.getFagsakYtelseType() + "]" + " har " + vurderSøknadsfristTjenester.stream().map(it -> it.getClass()).toList()));
     }
 }

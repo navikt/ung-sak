@@ -12,8 +12,8 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.RegelData;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.DiffEntity;
 import no.nav.ung.sak.diff.TraverseGraph;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.tid.Virkedager;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.Virkedager;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -166,14 +166,15 @@ public class TilkjentYtelseRepository {
 
     }
 
-    public LocalDateTimeline<BigDecimal> hentKontrollerInntektTidslinje(Long behandlingId) {
+    public LocalDateTimeline<KontrollerteInntekter> hentKontrollerInntektTidslinje(Long behandlingId) {
         return hentKontrollertInntektPerioder(behandlingId)
             .stream()
             .flatMap(it -> it.getPerioder().stream())
             .map(p -> new LocalDateTimeline<>(
                 p.getPeriode().getFomDato(),
                 p.getPeriode().getTomDato(),
-                p.getInntekt())).reduce(LocalDateTimeline::crossJoin)
+                new KontrollerteInntekter(p.getInntekt(), p.getYtelse())))
+            .reduce(LocalDateTimeline::crossJoin)
             .orElse(LocalDateTimeline.empty());
     }
 

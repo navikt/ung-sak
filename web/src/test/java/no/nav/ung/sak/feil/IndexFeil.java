@@ -40,6 +40,7 @@ class IndexFeil {
     private IndexView getJandexIndex() {
         List<ClassLoader> classLoaders = Arrays.asList(getClass().getClassLoader(), Thread.currentThread().getContextClassLoader());
 
+        Set<String> seenUrls = new LinkedHashSet<>();
         List<IndexView> ivs = new ArrayList<>();
         classLoaders
             .stream()
@@ -50,6 +51,7 @@ class IndexFeil {
                     throw new IllegalArgumentException("Kan ikke lese jandex index fil", e2);
                 }
             })
+            .filter(url -> seenUrls.add(url.toExternalForm()))
             .forEach(url -> {
                 try (InputStream is = url.openStream()) {
                     IndexReader ir = new IndexReader(is);

@@ -39,8 +39,8 @@ class StartpunktUtlederUttalelse implements EndringStartpunktUtleder {
         if (nyesteUttalelser.equals(eldsteUttalelser)) {
             return StartpunktType.UDEFINERT;
         }
-        log.info("Fant endringer i uttalelser. Flytter til Innhent registeropplysninger.");
-        return StartpunktType.INNHENT_REGISTEROPPLYSNINGER;
+        log.info("Fant endringer i uttalelser. Flytter til vurder kompletthet.");
+        return StartpunktType.VURDER_KOMPLETTHET;
     }
 
     private Set<JournalpostId> hentJournalpostIderForUttalelser(Long nyeste) {

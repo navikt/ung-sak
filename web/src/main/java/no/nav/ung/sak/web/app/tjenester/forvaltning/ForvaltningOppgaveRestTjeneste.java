@@ -96,6 +96,7 @@ public class ForvaltningOppgaveRestTjeneste {
         startRapporteringTask.setProperty(OpprettOppgaveForInntektsrapporteringTask.PERIODE_FOM, periode.getFomDato().format(DateTimeFormatter.ISO_LOCAL_DATE));
         startRapporteringTask.setProperty(OpprettOppgaveForInntektsrapporteringTask.PERIODE_TOM, periode.getTomDato().format(DateTimeFormatter.ISO_LOCAL_DATE));
         startRapporteringTask.setProperty(OpprettOppgaveForInntektsrapporteringTask.OPPGAVE_REF, UUID.randomUUID().toString());
+        startRapporteringTask.setSaksnummer(fagsak.get().getSaksnummer().getVerdi());
         prosessTaskTjeneste.lagre(startRapporteringTask);
 
         return Response.ok().build();
@@ -209,7 +210,7 @@ public class ForvaltningOppgaveRestTjeneste {
             throw new IllegalStateException("Kan ikke avbryte etterlysning som har mottatt svar");
         }
 
-        etterlysning.skalAvbrytes();
+        etterlysning.setSkalAvbrytes();
         etterlysningRepository.lagre(etterlysning);
         final var behandling = behandlingRepository.hentBehandling(etterlysning.getBehandlingId());
         final var avbrytTask = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);

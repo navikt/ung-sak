@@ -4,11 +4,11 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
-import no.nav.ung.sak.tid.AbstractLocalDateInterval;
+import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 
 import java.util.List;
 
-import static no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste.*;
+import static no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste.*;
 
 public class EtterlysningForEndretProgramperiodeResultatUtleder {
 
@@ -81,7 +81,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
     }
 
     private static boolean harEndretStartdato(EndretUngdomsprogramEtterlysningInput input) {
-        var endringFraOppgitt = finnEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag());
+        var endringFraOppgitt = finnEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.startdatoGrunnlag());
         var harEndretStartdato = !endringFraOppgitt.isEmpty();
         return harEndretStartdato;
     }

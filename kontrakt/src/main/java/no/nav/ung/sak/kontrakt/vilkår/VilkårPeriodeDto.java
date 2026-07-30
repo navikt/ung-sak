@@ -60,8 +60,13 @@ public class VilkårPeriodeDto {
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String begrunnelse;
+
+    @JsonProperty("fritekstVurderingBrev")
+    @Size(max = 10000)
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
+    private String fritekstVurderingBrev;
 
     /**
      * indikerer om en vilkårsperiode er aktuell for vurdering i inneværende behandling
@@ -130,6 +135,14 @@ public class VilkårPeriodeDto {
 
     public void setBegrunnelse(String begrunnelse) {
         this.begrunnelse = begrunnelse;
+    }
+
+    public String getFritekstVurderingBrev() {
+        return fritekstVurderingBrev;
+    }
+
+    public void setFritekstVurderingBrev(String fritekstVurderingBrev) {
+        this.fritekstVurderingBrev = fritekstVurderingBrev;
     }
 
 

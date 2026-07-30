@@ -7,11 +7,14 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.klage.KlageVurderingType;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
+import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -33,6 +36,7 @@ public class KlageOpprettProsessTaskIverksett implements OpprettProsessTaskIverk
     private static final Logger LOGGER = LoggerFactory.getLogger(KlageOpprettProsessTaskIverksett.class);
 
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private OppgaveTjeneste oppgaveTjeneste;
     private KlageRepository klageRepository;
 
@@ -41,10 +45,11 @@ public class KlageOpprettProsessTaskIverksett implements OpprettProsessTaskIverk
     }
 
     @Inject
-    public KlageOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository,
+    public KlageOpprettProsessTaskIverksett(FagsakProsessTaskRepository fagsakProsessTaskRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                             KlageRepository klageRepository,
                                             OppgaveTjeneste oppgaveTjeneste) {
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.klageRepository = klageRepository;
         this.oppgaveTjeneste = oppgaveTjeneste;
     }
@@ -66,7 +71,11 @@ public class KlageOpprettProsessTaskIverksett implements OpprettProsessTaskIverk
         taskGruppe.addNesteParallell(taskerFørAvsluttBehandling);
         taskGruppe.addNesteSekvensiell(avsluttBehandling);
 
-        opprettTaskDataForKlage(behandling).ifPresent(taskGruppe::addNesteSekvensiell);
+        OrganisasjonsEnhet enhet = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId())
+            .map(BehandlingAnsvarlig::getBehandlendeOrganisasjonsEnhet)
+            .orElse(null);
+
+        opprettTaskDataForKlage(behandling, enhet).ifPresent(taskGruppe::addNesteSekvensiell);
 
         taskGruppe.setBehandling(behandling.getFagsakId(), behandling.getId(), behandling.getAktørId().getId());
         taskGruppe.setCallIdFraEksisterende();
@@ -76,26 +85,26 @@ public class KlageOpprettProsessTaskIverksett implements OpprettProsessTaskIverk
         fagsakProsessTaskRepository.lagreNyGruppeKunHvisIkkeAlleredeFinnesOgIngenHarFeilet(fagsakId, behandlingId.toString(), taskGruppe);
     }
 
-    private Optional<ProsessTaskData> opprettTaskDataForKlage(Behandling behandling) {
+    private Optional<ProsessTaskData> opprettTaskDataForKlage(Behandling behandling, OrganisasjonsEnhet enhet) {
         KlageUtredningEntitet klageUtredning = klageRepository.hentKlageUtredning(behandling.getId());
 
         return klageUtredning.hentKlageVurderingType(KlageVurdertAv.KLAGEINSTANS)
             .map((vurderingTypeKabal) -> {
                 String kabalVurdering = "Klagen er ferdigbehandlet av klageinstansen med vurdering: " + vurderingTypeKabal.getNavn();
-                return opprettVKYoppgave(behandling, kabalVurdering);
+                return opprettVKYoppgave(enhet, kabalVurdering);
             }).or(() -> {
                 var klageVurderingType = klageUtredning.hentGjeldendeKlagevurderingType();
                 if (klageVurderingType == KlageVurderingType.MEDHOLD_I_KLAGE) {
-                    return Optional.of(opprettVKYoppgave(behandling, BESKRIVELSESTEKST));
+                    return Optional.of(opprettVKYoppgave(enhet, BESKRIVELSESTEKST));
                 } else {
                     return Optional.empty();
                 }
             });
     }
 
-    private ProsessTaskData opprettVKYoppgave(Behandling behandling, String vurderingTekst) {
+    private ProsessTaskData opprettVKYoppgave(OrganisasjonsEnhet enhet, String vurderingTekst) {
         ProsessTaskData opprettOppgave = ProsessTaskData.forProsessTask(OpprettOppgaveVurderKonsekvensTask.class);
-        opprettOppgave.setProperty(OpprettOppgaveVurderKonsekvensTask.KEY_BEHANDLENDE_ENHET, behandling.getBehandlendeEnhet());
+        opprettOppgave.setProperty(OpprettOppgaveVurderKonsekvensTask.KEY_BEHANDLENDE_ENHET, enhet.getEnhetId());
         opprettOppgave.setProperty(OpprettOppgaveVurderKonsekvensTask.KEY_PRIORITET, OpprettOppgaveVurderKonsekvensTask.PRIORITET_HØY);
         opprettOppgave.setProperty(OpprettOppgaveVurderKonsekvensTask.KEY_BESKRIVELSE, vurderingTekst);
         return opprettOppgave;

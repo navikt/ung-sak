@@ -1,30 +1,27 @@
 package no.nav.ung.sak.web.app.tjenester;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import no.nav.k9.felles.apptjeneste.AppServiceHandler;
+import no.nav.k9.prosesstask.impl.BatchTaskScheduler;
+import no.nav.k9.prosesstask.impl.TaskManager;
+import no.nav.ung.fordel.kafka.KafkaIntegration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.inject.Any;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import no.nav.k9.felles.apptjeneste.AppServiceHandler;
-import no.nav.k9.felles.integrasjon.sensu.SensuKlient;
-import no.nav.k9.prosesstask.impl.BatchTaskScheduler;
-import no.nav.k9.prosesstask.impl.TaskManager;
-import no.nav.ung.fordel.kafka.KafkaIntegration;
-
 @ApplicationScoped
 public class ApplicationServiceStarterImpl implements ApplicationServiceStarter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationServiceStarterImpl.class);
     private Map<AppServiceHandler, AtomicBoolean> serviceMap = new HashMap<>();
-    private SensuKlient sensuKlient;
     private TaskManager taskManager;
     private BatchTaskScheduler batchTaskScheduler;
 
@@ -34,10 +31,8 @@ public class ApplicationServiceStarterImpl implements ApplicationServiceStarter 
 
     @Inject
     public ApplicationServiceStarterImpl(@Any Instance<KafkaIntegration> serviceHandlers,
-                                         SensuKlient sensuKlient,
                                          TaskManager taskManager,
                                          BatchTaskScheduler batchTaskScheduler) {
-        this.sensuKlient = sensuKlient;
         this.taskManager = taskManager;
         this.batchTaskScheduler = batchTaskScheduler;
         serviceHandlers.forEach(handler -> serviceMap.put(handler, new AtomicBoolean()));
@@ -45,7 +40,6 @@ public class ApplicationServiceStarterImpl implements ApplicationServiceStarter 
 
     @Override
     public void startServices() {
-        sensuKlient.start();
         taskManager.start();
         batchTaskScheduler.start();
         serviceMap.forEach((key, value) -> {
@@ -80,7 +74,6 @@ public class ApplicationServiceStarterImpl implements ApplicationServiceStarter 
 
         batchTaskScheduler.stop();
         taskManager.stop();
-        sensuKlient.stop();
     }
 
 }

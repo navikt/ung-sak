@@ -1,11 +1,12 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg;
 
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.FødselOgDødInfo;
 import org.junit.jupiter.api.Test;
 
 import no.nav.fpsak.tidsserie.LocalDateSegment;

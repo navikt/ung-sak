@@ -2,50 +2,57 @@ package no.nav.ung.sak.etterlysning.sluttdato;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.ung.deltakelseopplyser.kontrakt.oppgave.startdato.EndretSluttdatoOppgaveDTO;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
-import no.nav.ung.sak.etterlysning.MidlertidigOppgaveDelegeringTjeneste;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.UngOppgaveKlient;
-import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
+import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @Dependent
 public class EndretSluttdatoOppgaveOppretter {
 
-    private final MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste;
+    private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     @Inject
     public EndretSluttdatoOppgaveOppretter(
-        MidlertidigOppgaveDelegeringTjeneste delegeringTjeneste,
+        UngBrukerdialogOppgaveKlient oppgaveKlient,
         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        this.delegeringTjeneste = delegeringTjeneste;
+        this.oppgaveKlient = oppgaveKlient;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
-    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, PersonIdent deltakerIdent) {
+    public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
-        var oppgaveDtoer = etterlysninger.stream().map(etterlysning -> mapTilDto(etterlysning, deltakerIdent, originalPeriode)).toList();
-        oppgaveDtoer.forEach(delegeringTjeneste::opprettEndretSluttdatoOppgave);
+        OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
+        etterlysninger.stream()
+            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode))
+            .forEach(oppgaveKlient::opprettOppgave);
     }
 
-    private EndretSluttdatoOppgaveDTO mapTilDto(Etterlysning etterlysning, PersonIdent deltakerIdent, Optional<DatoIntervallEntitet> originalPeriode) {
-        return new EndretSluttdatoOppgaveDTO(
-            deltakerIdent.getIdent(),
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, Optional<DatoIntervallEntitet> originalPeriode) {
+        return new OpprettOppgaveDto(
+            new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
+            ytelsetype,
             etterlysning.getEksternReferanse(),
-            etterlysning.getFrist(),
-            hentSluttdato(etterlysning.getGrunnlagsreferanse()),
-            originalPeriode.map(DatoIntervallEntitet::getTomDato).filter(d -> !d.equals(TIDENES_ENDE)).orElse(null)
+            new EndretSluttdatoDataDto(
+                hentSluttdato(etterlysning.getGrunnlagsreferanse()),
+                originalPeriode.map(DatoIntervallEntitet::getTomDato).filter(d -> !d.equals(TIDENES_ENDE)).orElse(null)
+            ),
+            etterlysning.getFrist()
         );
     }
 

@@ -4,6 +4,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -12,13 +13,15 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningVersjonType;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.*;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -26,7 +29,10 @@ import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.ytelse.BeregnetSats;
+import no.nav.ung.sak.ytelse.InntektsreduksjonKonfigurasjon;
+import no.nav.ung.sak.ytelse.ReduksjonBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.beregnytelse.TotalbeløpForPeriodeMapper;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -70,11 +76,12 @@ public class BrevScenarioerUtils {
 
     static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioderMedReduksjon(LocalDateTimeline<UngdomsytelseSatser> satsperioder, LocalDateInterval tilkjentPeriode, LocalDateTimeline<KontrollerInntektHolder> kontrollerInntektHolder) {
         LocalDateTimeline<Boolean> ytelseTidslinje = splitPrMåned(new LocalDateTimeline<>(tilkjentPeriode, true));
-        LocalDateTimeline<BeregnetSats> beregnetSats = TilkjentYtelseBeregner.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
+        LocalDateTimeline<BeregnetSats> beregnetSats = TotalbeløpForPeriodeMapper.mapSatserTilTotalbeløpForPerioder(satsperioder, ytelseTidslinje);
         return beregnetSats.intersection(ytelseTidslinje).combine(kontrollerInntektHolder,
             (s, lhs, rhs) -> {
                 var inntekt = rhs != null ? bestemInntekt(rhs.getValue()) : BigDecimal.ZERO;
-                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), inntekt).verdi());
+                var beregner = new ReduksjonBeregner(new KontrollerteInntekter(inntekt, BigDecimal.ZERO), new InntektsreduksjonKonfigurasjon(new BigDecimal("0.66"), new BigDecimal("0.66")), s);
+                return new LocalDateSegment<>(s, TilkjentYtelseBeregner.beregn(s, lhs.getValue(), beregner).verdi());
             },
             LocalDateTimeline.JoinStyle.LEFT_JOIN
         );
@@ -162,8 +169,10 @@ public class BrevScenarioerUtils {
     public static Behandling lagAvsluttetBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
         BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
-        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
-        leggTilBeslutter(behandling,behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories1.behandlingAnsvarligRepository();
+
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
+        leggTilBeslutter(behandling,behandlingRepository, behandlingAnsvarligRepository);
         behandling.avsluttBehandling();
 
         return behandling;
@@ -172,14 +181,16 @@ public class BrevScenarioerUtils {
     public static Behandling lagÅpenBehandlingMedAP(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories1, AksjonspunktDefinisjon aksjonspunktDefinisjon) {
         var behandling = lagInnvilgetBehandling(ungTestscenario, ungTestRepositories1);
         BehandlingRepository behandlingRepository = ungTestRepositories1.repositoryProvider().getBehandlingRepository();
-        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories1.behandlingAnsvarligRepository();
+
+        leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling, SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
 
         return behandling;
     }
 
-    public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository) {
+    public static void leggTilAksjonspunkt(AksjonspunktDefinisjon aksjonspunktDefinisjon, Behandling behandling, String ident, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         Aksjonspunkt aksjonspunkt = leggTilAksjonspunkt(aksjonspunktDefinisjon, behandling);
-        behandling.setAnsvarligSaksbehandler(ident);
+        behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), BehandlingDel.SENTRAL, ident);
         aksjonspunkt.setAnsvarligSaksbehandler(ident);
 
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
@@ -193,9 +204,9 @@ public class BrevScenarioerUtils {
         return aksjonspunkt;
     }
 
-    public static void leggTilBeslutter(Behandling behandling, BehandlingRepository behandlingRepository) {
+    public static void leggTilBeslutter(Behandling behandling, BehandlingRepository behandlingRepository, BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, behandling);
-        behandling.setAnsvarligBeslutter(BESLUTTER_IDENT);
+        behandlingAnsvarligRepository.setAnsvarligBeslutter(behandling.getId(), BehandlingDel.SENTRAL, BESLUTTER_IDENT);
 
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
     }

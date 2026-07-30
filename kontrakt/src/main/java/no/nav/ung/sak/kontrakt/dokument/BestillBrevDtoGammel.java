@@ -13,7 +13,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.sikkerhet.abac.StandardAbacAttributtType;
-import no.nav.ung.sak.abac.StandardAbacAttributt;
+import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.kontrakt.Patterns;
 
@@ -31,7 +31,7 @@ public class BestillBrevDtoGammel {
 
     @JsonProperty(value = "fritekst")
     @Size(max = 4000)
-    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
     public String fritekst;
 
     @JsonProperty(value = "behandlingId", required = true)

@@ -33,7 +33,7 @@ public class SettEtterlysningerForBehandlingTilUtløptTask extends UnderBehandli
 
     @Override
     protected void doProsesser(ProsessTaskData prosessTaskData, Behandling behandling) {
-        etterlysningProssesseringTjeneste.settTilUtløpt(behandling.getId());
+        etterlysningProssesseringTjeneste.settTilUtløpt(behandling);
     }
 
 }

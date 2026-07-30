@@ -20,6 +20,7 @@ import no.nav.ung.sak.behandlingskontroll.impl.BehandlingskontrollTjenesteImpl;
 import no.nav.ung.sak.behandlingskontroll.spi.BehandlingskontrollServiceProvider;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
@@ -52,6 +53,9 @@ public class RevurderingTjenesteImplTest {
     @Inject
     private ProsessTriggereRepository prosessTriggereRepository;
 
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
+
     private BehandlingRepositoryProvider repositoryProvider;
 
     @Inject
@@ -80,8 +84,7 @@ public class RevurderingTjenesteImplTest {
 
         var behandlingskontrollTjeneste = new BehandlingskontrollTjenesteImpl(serviceProvider);
         var revurderingTjenesteFelles = new RevurderingTjenesteFelles(repositoryProvider);
-        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste,
-            revurderingTjenesteFelles, grunnlagKopierer, historikkRepository, prosessTriggereRepository);
+        var revurderingTjeneste = new RevurderingTjeneste(behandlingskontrollTjeneste, revurderingTjenesteFelles, grunnlagKopierer, historikkRepository, prosessTriggereRepository, behandlingAnsvarligRepository);
 
         // Act
         Behandling revurdering = revurderingTjeneste

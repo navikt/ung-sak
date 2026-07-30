@@ -10,8 +10,7 @@ import java.util.Set;
 
 public enum BehandlingÅrsakType implements Kodeverdi {
 
-    NY_SØKT_PROGRAM_PERIODE("RE-END-FRA-BRUKER", "Endring fra deltaker"),
-    NY_SØKT_AKTIVITETSPENGER_PERIODE("RE-END-FRA-BRUKER-AKT", "Endring fra søker"),
+    NY_SØKT_PERIODE("RE-END-FRA-BRUKER", "Endring fra bruker"),
     RE_ANNET("RE-ANNET", "Annet"),
     RE_SATS_REGULERING("RE-SATS-REGULERING", "Regulering av grunnbeløp"),
     RE_SATS_ENDRING("RE-SATS-ENDRING", "Generelle endringer som påvirker sats og barnetillegg"),
@@ -24,8 +23,11 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     RE_HENDELSE_DØD_FORELDER("RE-HENDELSE-DØD-F", "Melding om registrert død på bruker i folkeregisteret"),
     RE_HENDELSE_DØD_BARN("RE-HENDELSE-DØD-B", "Melding om registrert død på pleietrengende i folkeregisteret"),
     RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM("RE-HENDELSE-OPPHØR-UNG", "Melding om opphør av ungdomsprogram for deltaker"),
+    RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM("RE-HENDELSE-OPPHØR-OPPHEVET-UNG", "Melding om opphevelse av opphør i ungdomsprogrammet for deltaker"),
     RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM("RE-HENDELSE-ENDRET-STARTDATO-UNG", "Melding om endret startdato av ungdomsprogram for deltaker"),
     RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM("RE-HENDELSE-FJERN-PERIODE-UNG", "Melding om fjerning av deltakelse i ungdomsprogrammet"),
+    RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM("RE-HENDELSE-FORLENGET-PERIODE-UNG", "Forlenget periode i ungdomsprogrammet"),
+    RE_VARSEL_OPPHOR_VED_MAKSDATO("RE-VARSEL-OPPHOR-VED-MAKSDATO", "Varsel om opphør ved maksdato"),
 
     RE_REGISTEROPPLYSNING("RE-REGISTEROPPL", "Nye registeropplysninger"),
     RE_INNTEKTSOPPLYSNING("RE-INNTEKTOPPL", "Nye opplysninger om inntekt"),
@@ -36,6 +38,9 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     // Innrapportering av inntekt
     RE_RAPPORTERING_INNTEKT("RE-RAPPORTERING-INNTEKT", "Rapportering av inntekt"),
     RE_KONTROLL_REGISTER_INNTEKT("RE-KONTROLL-REGISTER-INNTEKT", "Kontroll av registerinntekt"),
+
+    // Bostedsendring
+    ENDRET_BOSTED("ENDRET-BOSTED", "Endret bosted"),
 
     // Generell oppgavebekreftelse
     UTTALELSE_FRA_BRUKER("UTTALELSE-FRA-BRUKER", "Uttalelse fra bruker"),
@@ -117,7 +122,7 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     }
 
     public static Set<BehandlingÅrsakType> årsakerForInnhentingAvProgramperiode() {
-        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM);
+        return Set.of(RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM, RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM, RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM, RE_HENDELSE_FJERN_PERIODE_UNGDOMSPROGRAM, RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM, RE_VARSEL_OPPHOR_VED_MAKSDATO);
     }
 
     public static Set<BehandlingÅrsakType> årsakerForInnhentingAvPersonopplysninger() {

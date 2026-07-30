@@ -6,7 +6,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -17,19 +16,12 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonRelasjonEntitet;
-import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningerAggregat;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.domene.person.personopplysning.BasisPersonopplysningTjeneste;
 import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
-import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.BeregnDagsatsInput;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.beregning.barnetillegg.FødselOgDødInfo;
-
-import java.util.List;
-import java.util.function.Function;
 
 @ApplicationScoped
 @BehandlingStegRef(BehandlingStegType.UNGDOMSYTELSE_BEREGNING)
@@ -71,6 +63,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
         var beregnDagsatsInput = lagInput(behandling, oppfyltVilkårTidslinje);
         var satsTidslinje = UngdomsytelseBeregnDagsats.beregnDagsats(beregnDagsatsInput);
         ungdomsytelseGrunnlagRepository.lagre(behandling.getId(), satsTidslinje);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
@@ -102,7 +95,7 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
             personopplysningerAggregat.getSøker().getFødselsdato(),
             harProsesstriggerForBeregnHøySats(behandling),
             harHøySatsIOriginalBehandling(behandling),
-            utledBarnsFødselOgDødInformasjon(personopplysningerAggregat)
+            personopplysningerAggregat.utledBarnsFødselOgDødInformasjon()
         );
     }
 
@@ -123,26 +116,6 @@ public class UngdomsytelseBeregningSteg implements BehandlingSteg {
      * Sjekker om det finnes prosesstrigger for beregning av høy sats.
      */
     private static boolean harProsesstriggerForBeregnHøySats(Behandling behandling) {
-        return behandling.getBehandlingÅrsaker().stream()
-            .anyMatch(a -> a.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
+        return behandling.harBehandlingÅrsak(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS);
     }
-
-    /**
-     * Henter ut fødsels- og dødsinformasjon for alle barn av søker.
-     * @param personopplysningerAggregat Personopplysninger for behandlingen
-     * @return Liste med FødselOgDødInfo for alle barn
-     */
-    private static List<FødselOgDødInfo> utledBarnsFødselOgDødInformasjon(PersonopplysningerAggregat personopplysningerAggregat) {
-        return personopplysningerAggregat.getRelasjoner().stream()
-            .filter(r -> r.getRelasjonsrolle() == RelasjonsRolleType.BARN)
-            .map(PersonRelasjonEntitet::getTilAktørId)
-            .map(mapFødselOgDødInformasjonForAktør(personopplysningerAggregat))
-            .toList();
-    }
-
-    private static Function<AktørId, FødselOgDødInfo> mapFødselOgDødInformasjonForAktør(PersonopplysningerAggregat personopplysningerAggregat) {
-        return aktørId -> new FødselOgDødInfo(aktørId, personopplysningerAggregat.getPersonopplysning(aktørId).getFødselsdato(), personopplysningerAggregat.getPersonopplysning(aktørId).getDødsdato());
-    }
-
-
 }

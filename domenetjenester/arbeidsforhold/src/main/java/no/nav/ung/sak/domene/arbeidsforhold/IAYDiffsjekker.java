@@ -4,7 +4,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.sak.diff.DiffEntity;
 import no.nav.ung.sak.diff.TraverseGraph;
 import no.nav.ung.sak.diff.TraverseGraphConfig;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Arbeidsgiver;
 import no.nav.ung.sak.typer.Beløp;

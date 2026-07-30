@@ -10,7 +10,7 @@ public class PersonIdentTest {
 
     @Test
     public void gyldigFoedselsnummer_Fnr() {
-        String fnr = "07078518434";
+        String fnr = "17420373147";
         boolean gyldig = PersonIdent.erGyldigFnr(fnr);
         assertThat(gyldig).isEqualTo(true);
 
@@ -19,7 +19,7 @@ public class PersonIdentTest {
 
     @Test
     public void gyldigFoedselsnummer_Dnr() {
-        String dnr = "65038300827";
+        String dnr = "53488838241";
         boolean gyldig = PersonIdent.erGyldigFnr(dnr);
         assertThat(gyldig).isEqualTo(true);
 
@@ -39,7 +39,7 @@ public class PersonIdentTest {
 
     @Test
     void test_personnr() throws Exception {
-        String fnr = "14028121459";
+        String fnr = "24420167209";
         boolean gyldig = PersonIdent.erGyldigFnr(fnr);
         assertThat(gyldig).isEqualTo(true);
 

@@ -2,7 +2,9 @@ package no.nav.ung.sak.kabal.task;
 
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +29,8 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
 
     private KabalRestKlient restKlient;
     private KabalRequestMapperV4 kabalRequestMapper;
-    private BehandlingRepository repository;
+    private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private TpsTjeneste pdlTjeneste;
     private KlageRepository klageRepository;
     private boolean klageEnabled;
@@ -41,14 +44,16 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
     public OverføringTilKabalTask(KabalRestKlient restKlient,
                                   BehandlingRepositoryProvider repositoryProvider,
                                   KabalRequestMapperV4 kabalRequestMapper,
-                                  BehandlingRepository repository,
+                                  BehandlingRepository behandlingRepository,
+                                  BehandlingAnsvarligRepository behandlingAnsvarligRepository,
                                   TpsTjeneste pdlTjeneste,
                                   KlageRepository klageRepository,
                                   @KonfigVerdi(value = "KLAGE_ENABLED", defaultVerdi = "false") boolean klageEnabled) {
         super(repositoryProvider.getBehandlingLåsRepository());
         this.restKlient = restKlient;
         this.kabalRequestMapper = kabalRequestMapper;
-        this.repository = repository;
+        this.behandlingRepository = behandlingRepository;
+        this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.pdlTjeneste = pdlTjeneste;
         this.klageRepository = klageRepository;
         this.klageEnabled = klageEnabled;
@@ -56,7 +61,8 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        var behandling = repository.hentBehandling(prosessTaskData.getBehandlingId());
+        var behandling = behandlingRepository.hentBehandling(prosessTaskData.getBehandlingId());
+        BehandlingAnsvarlig behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId()).orElse(null);
         logContext(behandling);
         var personIdent = pdlTjeneste.hentFnrForAktør(behandling.getAktørId());
         var klageUtredning = klageRepository.hentKlageUtredning(behandling.getId());
@@ -64,7 +70,7 @@ public class OverføringTilKabalTask extends BehandlingProsessTask {
             .orElseThrow(() -> new IllegalStateException("Fann ikke NFP-klageVurdering for klage: " + behandling));
 
         if (klageEnabled) {
-            var request = kabalRequestMapper.map(behandling, personIdent, klageUtredning);
+            var request = kabalRequestMapper.map(behandling, behandlingAnsvarlig, personIdent, klageUtredning);
             log.info("Overfører til kabal - request={}", request);
             restKlient.overførKlagebehandling(request);
         }

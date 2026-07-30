@@ -2,7 +2,6 @@ package no.nav.ung.sak.domene.registerinnhenting.impl.startpunkt;
 
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -56,10 +55,18 @@ class StartpunktUtlederProsessTriggere implements EndringStartpunktUtleder {
     }
 
     private StartpunktType mapTilStartPunktType(Trigger it) {
-        if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak())) {
+        if (BehandlingÅrsakType.RE_SATS_REGULERING.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.årsakerForInnhentingAvPersonopplysninger().contains(it.getÅrsak())) {
             return StartpunktType.BEREGNING;
         }
-        return StartpunktType.INNHENT_REGISTEROPPLYSNINGER;
+        // Disse årsakene gjør ingen endring på behandling før VURDER_KOMPLETTHET. Registerinnhenting skal allerede ha blitt trigget ved opprettelse og diff
+        if (BehandlingÅrsakType.UTTALELSE_FRA_BRUKER.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT.equals(it.getÅrsak()) ||
+            BehandlingÅrsakType.årsakerForInnhentingAvProgramperiode().contains(it.getÅrsak())) {
+            return StartpunktType.VURDER_KOMPLETTHET;
+        }
+        return StartpunktType.START;
     }
 
 

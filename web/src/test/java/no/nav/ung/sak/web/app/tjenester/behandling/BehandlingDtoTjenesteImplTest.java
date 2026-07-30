@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.kontrakt.ResourceLink;
@@ -37,6 +39,8 @@ public class BehandlingDtoTjenesteImplTest {
 
     @Inject
     private BehandlingRepository behandlingRepository;
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     private SøknadRepository søknadRepository;
@@ -54,6 +58,9 @@ public class BehandlingDtoTjenesteImplTest {
     private TotrinnTjeneste totrinnTjeneste;
 
     @Inject
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
+
+    @Inject
     @Any
     private Instance<InformasjonselementerUtleder> informasjonselementer;
 
@@ -64,8 +71,8 @@ public class BehandlingDtoTjenesteImplTest {
     @BeforeEach
     public void setUp() {
         existingRoutes = RestUtils.getRoutes();
-        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, vilkårResultatRepository,
-            totrinnTjeneste, informasjonselementer);
+        tjeneste = new BehandlingDtoTjeneste(behandlingRepository, behandlingAnsvarligRepository, behandlingVedtakRepository, søknadRepository, tilbakekrevingRepository, vilkårResultatRepository,
+            totrinnTjeneste, ungdomsprogramPeriodeRepository, informasjonselementer);
     }
 
     @Test

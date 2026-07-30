@@ -35,6 +35,7 @@ class VilkårDtoMapper {
         dto.setVilkarStatus(it.getGjeldendeUtfall());
         dto.setMerknadParametere(it.getMerknadParametere());
         dto.setBegrunnelse(it.getBegrunnelse());
+        dto.setFritekstVurderingBrev(it.getFritekstVurderingBrev());
         dto.setMerknad(it.getMerknad());
         dto.setVurderesIBehandlingen(true);
 

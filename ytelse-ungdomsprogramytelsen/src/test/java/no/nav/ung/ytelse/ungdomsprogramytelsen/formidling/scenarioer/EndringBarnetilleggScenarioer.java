@@ -6,7 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
 
@@ -25,7 +25,7 @@ public class EndringBarnetilleggScenarioer {
             new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), BrevScenarioerUtils.lavSatsMedBarnBuilder(barnFødselsdato, 1).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
@@ -40,7 +40,7 @@ public class EndringBarnetilleggScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(barnFødselsdato, p.getTomDato()))),
                 List.of(
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
-            ), null, null);
+            ), null, null, null, false);
     }
 
     /**
@@ -53,7 +53,7 @@ public class EndringBarnetilleggScenarioer {
             new LocalDateSegment<>(barnFødselsdato, p.getTomDato(), BrevScenarioerUtils.lavSatsMedBarnBuilder(barnFødselsdato, 3).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
@@ -70,7 +70,7 @@ public class EndringBarnetilleggScenarioer {
                 BrevScenarioerUtils.lagBarn(barnFødselsdato.minusYears(5)),
                 BrevScenarioerUtils.lagBarn(barnFødselsdato),
                 BrevScenarioerUtils.lagBarn(barnFødselsdato)
-            ), null, null);
+            ), null, null, null, false);
     }
 
     /**
@@ -83,7 +83,7 @@ public class EndringBarnetilleggScenarioer {
             new LocalDateSegment<>(barnDødsdato, p.getTomDato(), BrevScenarioerUtils.lavSatsMedBarnBuilder(barnDødsdato, 0).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
@@ -98,6 +98,6 @@ public class EndringBarnetilleggScenarioer {
             Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN, DatoIntervallEntitet.fra(barnDødsdato, p.getTomDato()))),
                 List.of(
                 BrevScenarioerUtils.lagBarnMedDødsdato(fom.minusYears(1), barnDødsdato)
-            ), null, null);
+            ), null, null, null, false);
     }
 }

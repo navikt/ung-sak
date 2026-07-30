@@ -99,9 +99,10 @@ public class SafFake implements Saf {
     }
 
     private DokumentInfo byggDokumentInfo(JournalpostFake input) {
-        return new DokumentInfo(input.dokumentId, "tittel", input.dokumentMalType().getKode(), Dokumentstatus.FERDIGSTILT, LocalDateTime.now(), "origJpId", SkjermingType.POL.name(),
+        Integer filstørrelse = null; //skal kun settes ved avtale med team dokumentløsninger
+        return new DokumentInfo(input.dokumentId, "tittel", input.dokumentMalType().getKode(), Dokumentstatus.FERDIGSTILT, LocalDateTime.now(), "origJpId", SkjermingType.POL.name(), false,
             List.of(new LogiskVedlegg("id", "tittel")),
-            List.of(new Dokumentvariant(Variantformat.ORIGINAL, "filnavn", "fluuid", ArkivFilType.PDF.name(), true, SkjermingType.POL)));
+            List.of(new Dokumentvariant(Variantformat.ORIGINAL, "filnavn", "fluuid", ArkivFilType.PDF.name(), filstørrelse, true, SkjermingType.POL, true, List.of())));
     }
 
 

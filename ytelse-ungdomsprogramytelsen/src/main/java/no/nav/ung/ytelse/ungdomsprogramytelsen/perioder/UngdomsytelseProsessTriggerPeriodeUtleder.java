@@ -52,7 +52,7 @@ public class UngdomsytelseProsessTriggerPeriodeUtleder implements ProsessTrigger
     private LocalDateInterval finnPeriodeForBehandlingsårsak(Long behandligId, Trigger p, BehandlingÅrsakType årsak) {
         // For nye søknader så vil triggerperioden være uendelig fordi vi ikke vet sluttdato ved oppretting av trigger,
         // så vi begresenser det her til programperiode
-        if (årsak == BehandlingÅrsakType.NY_SØKT_PROGRAM_PERIODE) {
+        if (årsak == BehandlingÅrsakType.NY_SØKT_PERIODE) {
             return ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandligId).stream()
                 .filter(it -> it.getTomDato().isAfter(p.getPeriode().getFomDato()))
                 .min(Comparator.naturalOrder())

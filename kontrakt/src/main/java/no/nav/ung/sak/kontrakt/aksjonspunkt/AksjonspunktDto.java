@@ -34,12 +34,12 @@ public class AksjonspunktDto {
 
     @JsonProperty(value = "begrunnelse")
     @Size(max = 5000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String begrunnelse;
 
     @JsonProperty(value = "besluttersBegrunnelse")
     @Size(max = 5000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String besluttersBegrunnelse;
 
     @JsonProperty(value = "definisjon")
@@ -86,6 +86,11 @@ public class AksjonspunktDto {
     @Size(max = 100)
     @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     private String opprettetAv;
+
+    @JsonProperty(value = "ansvarligSaksbehandler")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{Alnum}ÆØÅæøå\\p{Space}\\p{Sc}\\p{L}\\p{N}]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String ansvarligSaksbehandler;
 
     public AksjonspunktDto() {
     }
@@ -208,6 +213,14 @@ public class AksjonspunktDto {
 
     public void setOpprettetAv(String opprettetAv) {
         this.opprettetAv = opprettetAv;
+    }
+
+    public String getAnsvarligSaksbehandler() {
+        return ansvarligSaksbehandler;
+    }
+
+    public void setAnsvarligSaksbehandler(String ansvarligSaksbehandler) {
+        this.ansvarligSaksbehandler = ansvarligSaksbehandler;
     }
 
     @Override

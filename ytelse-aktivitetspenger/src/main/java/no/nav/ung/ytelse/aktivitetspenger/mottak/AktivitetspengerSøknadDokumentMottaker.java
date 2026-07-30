@@ -10,12 +10,8 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
-import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
-import no.nav.ung.sak.mottak.dokumentmottak.HistorikkinnslagTjeneste;
-import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
-import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
@@ -60,8 +56,9 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             LocalDate startdato = ytelse.getSøknadsperiode().getFraOgMed();
             //TODO mulig søknad entitet bør utvides med tom dersom det blir fom/tom i søknaden
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
-            søknadPersisterer.lagreSøknadsperioder(ytelse.getSøknadsperiode(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId);
+            søknadPersisterer.lagreStartdato(ytelse.getSøknadsperiodeFom(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId, ytelse.getErBosattITrondheim());
             søknadPersisterer.oppdaterFagsakperiode(new Periode(ytelse.getSøknadsperiode().getFraOgMed(), ytelse.getSøknadsperiode().getTilOgMed()), behandling);
+            søknadPersisterer.lagreForutgåendeMedlemskapGrunnlag(ytelse.getForutgåendeBosteder(), ytelse.getSøknadsperiode(), dokument.getJournalpostId(), behandlingId);
 
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandlingId, dokument.getJournalpostId());
         }
@@ -72,7 +69,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
     public List<Trigger> getTriggere(Collection<MottattDokument> mottattDokument) {
         return mottattDokument.stream().map(it -> søknadParser.parseSøknad(it))
             .map(it -> it.getYtelse().getSøknadsperiode())
-            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.NY_SØKT_AKTIVITETSPENGER_PERIODE))
+            .map(it -> new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFraOgMed(), it.getTilOgMed()), BehandlingÅrsakType.NY_SØKT_PERIODE))
             .toList();
     }
 

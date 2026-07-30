@@ -4,6 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.sak.behandlingslager.behandling.personopplysning.FødselOgDødInfo;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.BarnetilleggSatsTidslinje;
 
 import java.math.BigDecimal;

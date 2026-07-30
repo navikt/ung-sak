@@ -19,12 +19,9 @@ import no.nav.ung.sak.behandlingslager.behandling.InternalManipulerBehandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.*;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.repository.*;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
@@ -34,13 +31,13 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.behandlingslager.fagsak.*;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsResultat;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.diff.DiffResult;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personas;
@@ -102,6 +99,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     private LocalDateTime opplysningerOppdatertTidspunkt;
     private String behandlendeEnhet;
     private BehandlingRepository mockBehandlingRepository;
+    private BehandlingAnsvarligRepository mockBehandlingAnsvarligRepository;
     private BehandlingVedtak behandlingVedtak;
     private BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
 
@@ -147,12 +145,14 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         VilkårResultatRepository vilkårResultatRepository = mockVilkårResultatRepository();
 
         BehandlingLåsRepository behandlingLåsReposiory = mockBehandlingLåsRepository();
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = mockBehandlingAnsvarligRepository();
 
         BehandlingVedtakRepository behandlingVedtakRepository = mockBehandlingVedtakRepository();
         // ikke ideelt å la mocks returnere mocks, men forenkler enormt mye test kode, forhindrer feil oppsett, så det
         // blir enklere å refactorere
 
         when(repositoryProvider.getBehandlingRepository()).thenReturn(behandlingRepository);
+        when(repositoryProvider.getBehandlingAnsvarligRepository()).thenReturn(behandlingAnsvarligRepository);
         when(repositoryProvider.getFagsakRepository()).thenReturn(mockFagsakRepository);
         when(repositoryProvider.getPersonopplysningRepository()).thenReturn(mockPersonopplysningRepository);
         when(repositoryProvider.getSøknadRepository()).thenReturn(søknadRepository);
@@ -165,7 +165,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     private VilkårResultatRepository mockVilkårResultatRepository() {
-        return new VilkårResultatRepository() {
+        return new VilkårResultatRepository(null) {
             private Map<Long, VilkårsResultat> entiteter = new HashMap<>();
 
             @Override
@@ -340,6 +340,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         return behandlingRepository;
     }
 
+    public BehandlingAnsvarligRepository mockBehandlingAnsvarligRepository() {
+        if (mockBehandlingRepository == null) {
+            mockBehandlingAnsvarligRepository = Mockito.mock(BehandlingAnsvarligRepository.class);
+        }
+        return mockBehandlingAnsvarligRepository;
+    };
+
     public BehandlingRepositoryProvider mockBehandlingRepositoryProvider() {
         mockBehandlingRepository();
         return repositoryProvider;
@@ -382,11 +389,11 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
     }
 
     public Behandling lagre(EntityManager entityManager) {
-        return lagre(new BehandlingRepositoryProvider(entityManager));
+        BehandlingRepositoryProvider repositoryProvider = new BehandlingRepositoryProvider(entityManager);
+        return lagre(repositoryProvider);
     }
 
     public Behandling lagre(BehandlingRepositoryProvider repositoryProvider) {
-
         build(repositoryProvider);
         return behandling;
     }
@@ -476,15 +483,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         }
 
         if (ungTestscenario.programPerioder() != null) {
-            repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder());
-
+            repositories.ungdomsprogramPeriodeRepository().lagre(behandling1.getId(), ungTestscenario.programPerioder(), ungTestscenario.harForlengetPeriode(), ungTestscenario.periodeMaksDato());
         }
-
         if (ungTestscenario.søknadStartDato() != null) {
-            List<UngdomsytelseSøktStartdato> starDatoer = ungTestscenario.søknadStartDato().stream().map(it -> new UngdomsytelseSøktStartdato(it, new JournalpostId("123")))
+            List<SøktStartdato> starDatoer = ungTestscenario.søknadStartDato().stream().map(it -> new SøktStartdato(it, new JournalpostId("123")))
                 .toList();
-            repositories.ungdomsytelseStartdatoRepository().lagre(behandling1.getId(), starDatoer);
-            repositories.ungdomsytelseStartdatoRepository().lagreRelevanteSøknader(behandling1.getId(), new UngdomsytelseStartdatoer(starDatoer));
+            repositories.startdatoRepository().lagre(behandling1.getId(), starDatoer);
+            repositories.startdatoRepository().lagreRelevanteSøknader(behandling1.getId(), new Startdatoer(starDatoer));
         }
 
         if (ungTestscenario.tilkjentYtelsePerioder() != null) {
@@ -558,6 +563,7 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
         validerTilstandVedMocking();
 
         mockBehandlingRepository = mockBehandlingRepository();
+        mockBehandlingAnsvarligRepository = mockBehandlingAnsvarligRepository();
 
         lagre(repositoryProvider); // NOSONAR //$NON-NLS-1$
         return mockBehandlingRepository;
@@ -683,6 +689,13 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
 
         // få med behandlingsresultat etc.
         behandlingRepo1.lagre(nyBehandling, lås);
+
+
+        if (behandlendeEnhet != null) {
+            OrganisasjonsEnhet enhet = new OrganisasjonsEnhet(behandlendeEnhet, null);
+            repositoryProvider.getBehandlingAnsvarligRepository().setBehandlendeEnhet(nyBehandling.getId(), enhet);
+        }
+
         return nyBehandling;
     }
 
@@ -733,9 +746,6 @@ public abstract class AbstractTestScenario<S extends AbstractTestScenario<S>> {
             behandlingBuilder.medBehandlingstidFrist(behandlingstidFrist);
         }
 
-        if (behandlendeEnhet != null) {
-            behandlingBuilder.medBehandlendeEnhet(new OrganisasjonsEnhet(behandlendeEnhet, null));
-        }
 
         behandlingBuilder.medBehandlingStatus(behandlingStatus);
 

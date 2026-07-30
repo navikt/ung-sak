@@ -3,17 +3,15 @@ package no.nav.ung.sak.web.app.exceptions;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.feil.Feil;
 import no.nav.k9.felles.feil.FunksjonellFeil;
 import no.nav.k9.felles.log.mdc.MDCOperations;
 import no.nav.ung.sak.kontrakt.FeilDto;
 import no.nav.ung.sak.kontrakt.FeilType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class VLExceptionMapper implements ExceptionMapper<VLException> {
 
@@ -29,7 +27,7 @@ public class VLExceptionMapper implements ExceptionMapper<VLException> {
         String feilmelding = getVLExceptionFeilmelding(callId, feil);
         try {
             return Response.serverError()
-                .entity(new FeilDto(FeilType.GENERELL_FEIL, feilmelding, feil.getKode()))
+                .entity(new FeilDto(FeilType.GENERELL_FEIL, feilmelding, feil.getKode(), null))
                 .type(MediaType.APPLICATION_JSON)
                 .build();
         } finally {

@@ -59,7 +59,7 @@ public class InntektFilter {
         return filter((inntekt, inntektspost) -> typer.contains(inntektspost.getInntektspostType()));
     }
 
-    public InntektFilter i(LocalDateTimeline<?> tidslinje) {
+    public InntektFilter før(LocalDateTimeline<?> tidslinje) {
         return copyWith(this.inntekter, tidslinje);
     }
 

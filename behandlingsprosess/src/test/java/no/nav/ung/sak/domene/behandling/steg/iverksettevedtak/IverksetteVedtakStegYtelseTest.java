@@ -22,7 +22,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
 import no.nav.ung.sak.domene.iverksett.OpprettProsessTaskIverksett;
-import no.nav.ung.sak.domene.iverksett.UngdomsytelseOpprettProsessTaskIverksett;
+import no.nav.ung.sak.domene.iverksett.YtelseOpprettProsessTaskIverksett;
 import no.nav.ung.sak.domene.vedtak.impl.VurderBehandlingerUnderIverksettelse;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
@@ -86,7 +86,7 @@ public class IverksetteVedtakStegYtelseTest {
         historikkRepository = repositoryProvider.getHistorikkinnslagRepository();
 
 
-        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new UngdomsytelseOpprettProsessTaskIverksett(prosessTaskRepository, stønadstatistikkService));
+        opprettProsessTaskIverksett = new UnitTestLookupInstanceImpl<>(new YtelseOpprettProsessTaskIverksett(prosessTaskRepository, stønadstatistikkService));
         iverksetteVedtakSteg = new IverksetteVedtakSteg(repositoryProvider,
             opprettProsessTaskIverksett,
             vurderBehandlingerUnderIverksettelse);

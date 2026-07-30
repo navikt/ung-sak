@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -48,9 +49,9 @@ public class GjenopptaBehandlingTaskTest {
         final Long behandlingId = 10L;
 
         var scenario = TestScenarioBuilder
-            .builderMedSøknad();
+            .builderMedSøknad()
+            .medBehandlendeEnhet(organisasjonsEnhet.getEnhetId());
         Behandling behandling = scenario.lagMocked();
-        behandling.setBehandlendeEnhet(organisasjonsEnhet);
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockEnhetsTjeneste.sjekkEnhetEtterEndring(any())).thenReturn(Optional.empty());
 
@@ -71,7 +72,7 @@ public class GjenopptaBehandlingTaskTest {
             .builderMedSøknad();
         Behandling behandling = scenario.lagMocked();
 
-        behandling.setBehandlendeEnhet(organisasjonsEnhet);
+        //behandling.setBehandlendeEnhet(organisasjonsEnhet);
         when(mockBehandlingRepository.hentBehandling(Mockito.anyString())).thenReturn(behandling);
         when(mockBehandlingRepository.lagre(any(Behandling.class), any())).thenReturn(0L);
         when(mockBehandlingskontrollTjeneste.initBehandlingskontroll(Mockito.anyLong())).thenReturn(kontekst);

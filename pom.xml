@@ -16,13 +16,12 @@
         <module>behandlingslager</module>
         <module>domenetjenester</module>
         <module>behandlingsprosess</module>
+        <module>formidling-pdfgen-templates</module>
         <module>formidling</module>
         <module>fordel</module>
         <module>klage</module>
         <module>ytelse-ungdomsprogramytelsen</module>
         <module>ytelse-aktivitetspenger</module>
-        <module>felles</module>
-        <module>brukerdialog-oppgave</module>
 
         <!-- Web klient og server -->
         <module>web</module>
@@ -40,26 +39,27 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <maven.deploy.skip>true</maven.deploy.skip>
-        <felles.version>10.0.13</felles.version>
-        <swagger.version>2.2.42</swagger.version>
-        <junit.version>6.0.2</junit.version>
-        <k9format.version>12.8.4</k9format.version>
-        <jackson.version>2.21.0</jackson.version>
-        <asm.version>9.9.1</asm.version>
-        <kotlin-stdlib.version>2.3.10</kotlin-stdlib.version>
-        <jandex.version>3.5.3</jandex.version>
-        <pdfgen-core.version>1.1.70</pdfgen-core.version>
-        <flyway.version>11.20.0</flyway.version>
-        <confluent.platform.version>8.1.1</confluent.platform.version>
-        <mockito.version>5.21.0</mockito.version>
-        <ung-deltakelse-opplyser.version>2.10.0</ung-deltakelse-opplyser.version>
-        <handlebars.version>4.5.0</handlebars.version>
-        <validation-model-jakarta.version>1.28.2</validation-model-jakarta.version>
-        <openhtmltopdf.version>1.1.37</openhtmltopdf.version>
-        <jsoup.version>1.22.1</jsoup.version>
-        <commonmark.version>0.27.1</commonmark.version>
+        <felles.version>11.2.3</felles.version>
+        <swagger.version>2.2.52</swagger.version>
+        <junit.version>6.1.2</junit.version>
+        <k9format.version>13.3.0</k9format.version>
+        <jackson.version>2.22.1</jackson.version>
+        <asm.version>9.10.1</asm.version>
+        <kotlin-stdlib.version>2.4.10</kotlin-stdlib.version>
+        <jandex.version>3.6.0</jandex.version>
+        <pdfgen-core.version>1.1.81</pdfgen-core.version>
+        <flyway.version>12.10.0</flyway.version>
+        <confluent.platform.version>8.3.0</confluent.platform.version>
+        <mockito.version>5.23.0</mockito.version>
+        <ung-deltakelse-opplyser.version>2.11.2</ung-deltakelse-opplyser.version>
+        <ung-brukerdialog-api.version>1.0.4</ung-brukerdialog-api.version>
+        <handlebars.version>4.5.3</handlebars.version>
+        <validation-model-jakarta.version>1.30.2</validation-model-jakarta.version>
+        <openhtmltopdf.version>1.1.58</openhtmltopdf.version>
+        <jsoup.version>1.22.2</jsoup.version>
+        <commonmark.version>0.29.0</commonmark.version>
         <tms-mikrofrontend-builder.version>3.0.0</tms-mikrofrontend-builder.version>
-        <tms-java-builder.version>2.1.1</tms-java-builder.version>
+        <tms-java-builder.version>2.2.0</tms-java-builder.version>
     </properties>
 
     <!-- NB: Unngå å put scope (test, provided) i dependency management. Det
@@ -73,6 +73,11 @@
                 <groupId>no.nav.ung.deltakelseopplyser</groupId>
                 <artifactId>kontrakt</artifactId>
                 <version>${ung-deltakelse-opplyser.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.brukerdialog</groupId>
+                <artifactId>kontrakt</artifactId>
+                <version>${ung-brukerdialog-api.version}</version>
             </dependency>
 
             <dependency>
@@ -98,7 +103,7 @@
             <dependency>
                 <groupId>org.hibernate.validator</groupId>
                 <artifactId>hibernate-validator</artifactId>
-                <version>9.1.0.Final</version>
+                <version>9.1.2.Final</version>
             </dependency>
             <dependency>
                 <!-- Importer først for å sikre samme avhengigheter gjennom hele. -->
@@ -132,16 +137,11 @@
                 <artifactId>k9-felles-db</artifactId>
                 <version>${felles.version}</version>
             </dependency>
-            <dependency>
-                <groupId>no.nav.k9.felles.integrasjon</groupId>
-                <artifactId>k9-sensu-klient</artifactId>
-                <version>${felles.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>no.nav.k9.prosesstask</groupId>
                 <artifactId>prosesstask-root</artifactId>
-                <version>6.0.7</version>
+                <version>6.0.13</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -149,23 +149,23 @@
             <dependency>
                 <groupId>no.nav.k9.oppdrag.kontrakt</groupId>
                 <artifactId>oppdrag-kontrakter</artifactId>
-                <version>2.3.5</version>
+                <version>3.0.4</version>
             </dependency>
             <dependency>
                 <groupId>no.nav.k9.abakus</groupId>
                 <artifactId>abakus-kontrakt</artifactId>
-                <version>1.4.1</version>
+                <version>1.5.4</version>
             </dependency>
 
             <dependency>
                 <groupId>com.zaxxer</groupId>
                 <artifactId>HikariCP</artifactId>
-                <version>7.0.2</version>
+                <version>7.1.0</version>
             </dependency>
             <dependency>
                 <groupId>org.threeten</groupId>
                 <artifactId>threeten-extra</artifactId>
-                <version>1.8.0</version>
+                <version>1.10.0</version>
             </dependency>
             <dependency>
                 <groupId>io.swagger.core.v3</groupId>
@@ -185,7 +185,7 @@
             <dependency>
                 <groupId>io.opentelemetry.instrumentation</groupId>
                 <artifactId>opentelemetry-instrumentation-annotations</artifactId>
-                <version>2.24.0</version>
+                <version>2.30.0</version>
             </dependency>
 
             <!-- Prosjektets egne biblioteker -->
@@ -304,11 +304,6 @@
             </dependency>
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
-                <artifactId>ungdomsprogram</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
                 <artifactId>arbeidsforhold</artifactId>
                 <version>${project.version}</version>
             </dependency>
@@ -347,42 +342,14 @@
             </dependency>
 
             <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>felles-util</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>felles-behandlingslager</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>brukerdialog-oppgave-saksbehandling-api</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>brukerdialog-oppgave-tjeneste</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>no.nav.ung.sak</groupId>
-                <artifactId>brukerdialog-oppgave-min-side-varsel</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-
-            <dependency>
                 <groupId>no.nav.sif.abac</groupId>
                 <artifactId>kontrakt</artifactId>
-                <version>1.7.0</version>
+                <version>1.12.0</version>
             </dependency>
 
             <dependency>
                 <groupId>no.nav.k9</groupId>
-                <artifactId>soknad</artifactId>
+                <artifactId>soknad-jackson2</artifactId>
                 <version>${k9format.version}</version>
             </dependency>
             <dependency>
@@ -398,6 +365,11 @@
             <dependency>
                 <groupId>no.nav.ung.sak</groupId>
                 <artifactId>formidling</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>no.nav.ung.sak</groupId>
+                <artifactId>formidling-pdfgen-templates</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -419,7 +391,7 @@
             <dependency>
                 <groupId>no.nav.fpsak.nare</groupId>
                 <artifactId>fpsak-nare-core</artifactId>
-                <version>2.6.3</version>
+                <version>2.6.4</version>
             </dependency>
 
             <!-- Prosjektets egne TEST AVHENGIGHETER -->
@@ -451,7 +423,7 @@
             <dependency>
                 <groupId>no.nav.teamdokumenthandtering</groupId>
                 <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
-                <version>1.1.8</version>
+                <version>1.1.11</version>
             </dependency>
 
             <dependency>
@@ -477,7 +449,7 @@
             <dependency>
                 <groupId>joda-time</groupId>
                 <artifactId>joda-time</artifactId>
-                <version>2.14.0</version>
+                <version>2.14.2</version>
             </dependency>
             <dependency>
                 <groupId>org.jasypt</groupId>
@@ -547,13 +519,13 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
-                <version>2.21.0</version>
+                <version>2.22.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>commons-codec</groupId>
                 <artifactId>commons-codec</artifactId>
-                <version>1.21.0</version>
+                <version>1.22.0</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -607,7 +579,7 @@
                 <!-- lagt her for å sikre dependencyConvergence -->
                 <groupId>org.jboss.logging</groupId>
                 <artifactId>jboss-logging</artifactId>
-                <version>3.6.2.Final</version>
+                <version>3.6.3.Final</version>
             </dependency>
             <dependency>
                 <!-- lagt her for å sikre dependencyConvergence -->
@@ -620,14 +592,14 @@
             <dependency>
                 <groupId>org.javassist</groupId>
                 <artifactId>javassist</artifactId>
-                <version>3.30.2-GA</version>
+                <version>3.32.0-GA</version>
             </dependency>
 
             <!-- Database -->
             <dependency>
                 <groupId>org.postgresql</groupId>
                 <artifactId>postgresql</artifactId>
-                <version>42.7.9</version>
+                <version>42.7.13</version>
             </dependency>
             <dependency>
                 <groupId>org.flywaydb</groupId>
@@ -769,17 +741,17 @@
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.8.14</version>
+                    <version>0.8.15</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.9.0</version>
+                    <version>3.11.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.4.0</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -811,12 +783,12 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.5.0</version>
+                    <version>3.5.1</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.4</version>
+                    <version>3.5.6</version>
                     <configuration>
                         <argLine>
                             -javaagent:${settings.localRepository}/org/mockito/mockito-core/${mockito.version}/mockito-core-${mockito.version}.jar
@@ -826,7 +798,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
-                    <version>3.5.4</version>
+                    <version>3.5.6</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -841,7 +813,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.2</version>
+                    <version>3.6.3</version>
                 </plugin>
             </plugins>
         </pluginManagement>

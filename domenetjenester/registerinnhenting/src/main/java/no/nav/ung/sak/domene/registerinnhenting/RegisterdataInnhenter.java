@@ -270,6 +270,11 @@ public class RegisterdataInnhenter {
         var innhentRegisterdataRequest = new InnhentRegisterdataRequest(saksnummer, behandlingUuid, ytelseType, periode, aktør, informasjonsElementer);
         innhentRegisterdataRequest.setCallbackUrl(abakusTjeneste.getCallbackUrl());
         innhentRegisterdataRequest.setCallbackScope(abakusTjeneste.getCallbackScope());
+        if (informasjonsElementer.contains(RegisterdataType.LIGNET_NÆRING)) {
+            var opplysningsperiodeSkattegrunnlag = periodeTjeneste.utledOpplysningsperiodeSkattegrunnlag(behandling.getId()).orElseThrow( () -> new IllegalStateException("Mangler opplysningsperiode for skattegrunnlag"));
+            log.info("Opplysningsperiode skattegrunnlag: " + opplysningsperiodeSkattegrunnlag);
+            innhentRegisterdataRequest.setOpplysningsperiodeSkattegrunnlag(new Periode(opplysningsperiodeSkattegrunnlag.getFom(), opplysningsperiodeSkattegrunnlag.getTom()));
+        }
         abakusTjeneste.innhentRegisterdata(innhentRegisterdataRequest);
     }
 

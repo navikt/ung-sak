@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.behandling.steg.vedtak;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
@@ -12,6 +13,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.transisjoner.FellesTransisjoner;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktKontrollRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
@@ -43,6 +45,8 @@ class FatteVedtakTjenesteTest {
     private AksjonspunktKontrollRepository aksjonspunktKontrollRepository;
     @Inject
     private BehandlingRepository behandlingRepository;
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     @Inject
     private TotrinnTjeneste totrinnTjeneste;
 
@@ -144,7 +148,7 @@ class FatteVedtakTjenesteTest {
         testScenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.FORESLÅ_VEDTAK, BehandlingStegType.FORESLÅ_VEDTAK);
         testScenarioBuilder.medBehandlingsresultat(BehandlingResultatType.INNVILGET).medBehandlingStatus(BehandlingStatus.FATTER_VEDTAK);
         var behandling = testScenarioBuilder.lagre(entityManager);
-        behandling.setToTrinnsBehandling();
+        behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId(), BehandlingDel.SENTRAL);
         return behandling;
     }
 
@@ -156,7 +160,7 @@ class FatteVedtakTjenesteTest {
         testScenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, BehandlingStegType.FATTE_VEDTAK);
         testScenarioBuilder.medBehandlingsresultat(BehandlingResultatType.INNVILGET).medBehandlingStatus(BehandlingStatus.FATTER_VEDTAK);
         var behandling = testScenarioBuilder.lagre(entityManager);
-        behandling.setToTrinnsBehandling();
+        behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId(), BehandlingDel.SENTRAL);
         aksjonspunktKontrollRepository.setTilAvbrutt(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FATTER_VEDTAK));
         behandlingRepository.lagre(behandling, behandlingLåsRepository.taLås(behandling.getId()));
         return behandling;
@@ -169,7 +173,7 @@ class FatteVedtakTjenesteTest {
         testScenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, BehandlingStegType.FATTE_VEDTAK);
         testScenarioBuilder.medBehandlingsresultat(BehandlingResultatType.INNVILGET).medBehandlingStatus(BehandlingStatus.FATTER_VEDTAK);
         var behandling = testScenarioBuilder.lagre(entityManager);
-        behandling.setToTrinnsBehandling();
+        behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId(), BehandlingDel.SENTRAL);
         aksjonspunktKontrollRepository.setTilUtført(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FATTER_VEDTAK), "begrunnelse");
 
         var totrinnvurderinBuilder = new Totrinnsvurdering.Builder(behandling, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
@@ -191,7 +195,7 @@ class FatteVedtakTjenesteTest {
             testScenarioBuilder.leggTilAksjonspunkt(AksjonspunktDefinisjon.FATTER_VEDTAK, BehandlingStegType.FATTE_VEDTAK);
             testScenarioBuilder.medBehandlingsresultat(BehandlingResultatType.INNVILGET).medBehandlingStatus(BehandlingStatus.FATTER_VEDTAK);
             var behandling = testScenarioBuilder.lagre(entityManager);
-            behandling.setToTrinnsBehandling();
+            behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId(), BehandlingDel.SENTRAL);
             aksjonspunktKontrollRepository.setTilUtført(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FATTER_VEDTAK), "begrunnelse");
 
             var totrinnvurderinBuilder = new Totrinnsvurdering.Builder(behandling, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);

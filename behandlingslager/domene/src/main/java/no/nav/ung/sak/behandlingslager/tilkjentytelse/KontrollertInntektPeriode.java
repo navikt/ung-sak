@@ -5,10 +5,10 @@ import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.sak.behandlingslager.kodeverk.HjemmelKodeverdiConverter;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.kodeverk.KontrollertInntektKildeKodeverdiConverter;
-import no.nav.ung.sak.BaseEntitet;
-import no.nav.ung.sak.tid.PostgreSQLRangeType;
-import no.nav.ung.sak.tid.Range;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
+import no.nav.ung.sak.domene.typer.tid.Range;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.hibernate.annotations.Type;
 
 import java.math.BigDecimal;
@@ -28,6 +28,9 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     @Column(name = "inntekt")
     private BigDecimal inntekt;
+
+    @Column(name = "ytelse")
+    private BigDecimal ytelse;
 
     @Column(name = "rapportert_inntekt")
     private BigDecimal rapportertInntekt;
@@ -62,12 +65,14 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         this.inntekt = eksisterende.getInntekt();
         this.kilde = eksisterende.getKilde();
         this.erManueltVurdert = eksisterende.getErManueltVurdert();
+        this.ytelse = eksisterende.getYtelse();
     }
 
     private KontrollertInntektPeriode(DatoIntervallEntitet periode,
                                       BigDecimal inntekt,
                                       BigDecimal rapportertInntekt,
                                       BigDecimal registerInntekt,
+                                      BigDecimal ytelse,
                                       KontrollertInntektKilde kilde,
                                       boolean erManueltVurdert,
                                       String begrunnelse) {
@@ -78,6 +83,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         this.begrunnelse = begrunnelse;
         this.registerInntekt = registerInntekt;
         this.rapportertInntekt = rapportertInntekt;
+        this.ytelse = ytelse;
     }
 
     public Long getId() {
@@ -98,6 +104,10 @@ public class KontrollertInntektPeriode extends BaseEntitet {
 
     public BigDecimal getRegisterInntekt() {
         return registerInntekt;
+    }
+
+    public BigDecimal getYtelse() {
+        return ytelse;
     }
 
     public KontrollertInntektKilde getKilde() {
@@ -132,6 +142,7 @@ public class KontrollertInntektPeriode extends BaseEntitet {
         private BigDecimal inntekt;
         private BigDecimal rapportertInntekt;
         private BigDecimal registerInntekt;
+        private BigDecimal ytelse;
         private KontrollertInntektKilde kilde;
         private boolean erManueltVurdert;
         private String begrunnelse;
@@ -162,6 +173,11 @@ public class KontrollertInntektPeriode extends BaseEntitet {
             return this;
         }
 
+        public Builder medYtelse(BigDecimal ytelse) {
+            this.ytelse = ytelse;
+            return this;
+        }
+
         public Builder medKilde(KontrollertInntektKilde kilde) {
             this.kilde = kilde;
             return this;
@@ -177,12 +193,9 @@ public class KontrollertInntektPeriode extends BaseEntitet {
             return this;
         }
 
-
         public KontrollertInntektPeriode build() {
-            return new KontrollertInntektPeriode(periode, inntekt, rapportertInntekt, registerInntekt, kilde, erManueltVurdert, begrunnelse);
+            return new KontrollertInntektPeriode(periode, inntekt, rapportertInntekt, registerInntekt, ytelse, kilde, erManueltVurdert, begrunnelse);
         }
-
-
     }
 
 }

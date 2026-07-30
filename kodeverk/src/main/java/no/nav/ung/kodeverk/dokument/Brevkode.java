@@ -36,17 +36,26 @@ public class Brevkode implements Kodeverdi {
     public static final Brevkode KLAGE = new Brevkode(KLAGE_KODE, "NAV 90-00.08 K", VEDLEGG_RANGERING);
 
     /**
-     * Ung brevkoder.
+     * Aktivitetspenger brevkoder.
      */
     public static final String AKTIVITETSPENGER_SOKNAD_KODE = "AKTIVITETSPENGER_SOKNAD";
     public static final Brevkode AKTIVITETSPENGER_SOKNAD = new Brevkode(AKTIVITETSPENGER_SOKNAD_KODE, "FIXME_AKTIVITETSPENGER_BREVKODE", SØKNAD_RANGERING);
+
+    public static final String AKTIVITETSPENGER_INNTEKTRAPPORTERING_KODE = "AVP_INNTEKTSRAPPORTERING";
+    public static final Brevkode AKTIVITETSPENGER_INNTEKTRAPPORTERING = new Brevkode(AKTIVITETSPENGER_INNTEKTRAPPORTERING_KODE, "FIXME_AVP_INNTEKT_BREVKODE", INNTEKTRAPPORTERING_RANGERING);
+
+
+    public static final String AKTIVITETSPENGER_VARSEL_UTTALELSE_KODE = "AVP_VARSEL_UTTALELSE";
+    public static final Brevkode AKTIVITETSPENGER_VARSEL_UTTALELSE = new Brevkode(AKTIVITETSPENGER_VARSEL_UTTALELSE_KODE, "FIXME_AVP_VARSEL_BREVKODE", VEDLEGG_RANGERING);
 
     // Default
     public static final Brevkode UDEFINERT = new Brevkode("-", null, VEDLEGG_RANGERING);
     public static final String KODEVERK = "DOKUMENT_TYPE_ID";
     private String offisiellKode;
 
-    public static final Set<Brevkode> SØKNAD_TYPER = Set.of(UNGDOMSYTELSE_SOKNAD);
+    public static final Set<Brevkode> SØKNAD_TYPER = Set.of(UNGDOMSYTELSE_SOKNAD, AKTIVITETSPENGER_SOKNAD);
+    public static final Set<Brevkode> INNTEKTSRAPPORTERING_TYPER = Set.of(UNGDOMSYTELSE_INNTEKTRAPPORTERING, AKTIVITETSPENGER_INNTEKTRAPPORTERING);
+    public static final Set<Brevkode> VARSELUTTALELSE_TYPER = Set.of(UNGDOMSYTELSE_VARSEL_UTTALELSE, AKTIVITETSPENGER_VARSEL_UTTALELSE);
 
     @JsonValue
     private String kode;

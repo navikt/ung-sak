@@ -27,7 +27,7 @@ public class UtbetalingstatusUtleder {
      * @param dagensDato
      * @return
      */
-    static LocalDateTimeline<UtbetalingStatus> finnUtbetalingsstatusTidslinje(BehandlingAvsluttetTidspunkt aktuellBehandlingAvsluttetTidspunkt,
+    public static LocalDateTimeline<UtbetalingStatus> finnUtbetalingsstatusTidslinje(BehandlingAvsluttetTidspunkt aktuellBehandlingAvsluttetTidspunkt,
                                                                               Map<BehandlingAvsluttetTidspunkt, LocalDateTimeline<TilkjentYtelseVerdi>> tidslinjeMap, LocalDate dagensDato) {
 
         var kronologisk = sorterKronologisk(tidslinjeMap);

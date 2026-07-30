@@ -7,11 +7,12 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.domene.iay.modell.OppgittOpptjeningBuilder;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
 import no.nav.ung.sak.trigger.Trigger;
@@ -122,9 +123,9 @@ public class EndringInntektScenarioer {
 
     /**
      * 19 år ungdom med
-     * 3. mnd: redusert utbetaling - kun 10 dager - 10 000 kr inntekt hele måneden
+     * Opphør 3. mnd etter 10 dager.
      */
-    public static UngTestScenario endringInntektSisteMåned_10dager_10k(LocalDate fom) {
+    public static UngTestScenario endringInntektSisteMåned_10dager(LocalDate fom, int inntektSisteMåned) {
         LocalDate førsteI3Måned = fom.plusMonths(3).withDayOfMonth(1);
         LocalDate tom = førsteI3Måned.plusDays(9);
         var registerInntektTimeline = new LocalDateTimeline<>(
@@ -132,14 +133,14 @@ public class EndringInntektScenarioer {
                 new LocalDateSegment<>(
                     førsteI3Måned,
                     tom,
-                    BigDecimal.valueOf(10000)) // månedsinntekt = 10 000 men får bare delvis.
+                    BigDecimal.valueOf(inntektSisteMåned)) // inntekt siste måned, men får bare delvis
 
             ));
 
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
 
-        return endringMedInntekt_19år_med_kontroll(fom, tom, kontrollertInntektTidslinje);
+        return endringMedInntekt(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
     }
 
     /**
@@ -186,7 +187,7 @@ public class EndringInntektScenarioer {
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
 
-        return endringMedInntekt_19år_med_kontroll(fom, tom, kontrollertInntektTidslinje);
+        return endringMedInntekt(fom, fom.plusMonths(10), kontrollertInntektTidslinje);
     }
 
     /**
@@ -220,7 +221,7 @@ public class EndringInntektScenarioer {
                     true)
             )));
 
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
+        return endringMedInntekt(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
     }
 
     /**
@@ -240,18 +241,18 @@ public class EndringInntektScenarioer {
                     true)
             )));
 
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
+        return endringMedInntekt(fom, fom.plusWeeks(52).minusDays(1), kontrollerInntektPerioder);
     }
 
     private static UngTestScenario endringMedInntekt_19år(LocalDate fom, LocalDateTimeline<BigDecimal> registerInntektTimeline) {
         var kontrollertInntektTidslinje = registerInntektTimeline.mapValue(
             BrevScenarioerUtils.KontrollerInntektHolder::forRegisterInntekt);
-        return endringMedInntekt_19år_med_kontroll(fom, fom.plusWeeks(52).minusDays(1), kontrollertInntektTidslinje);
+        return endringMedInntekt(fom, fom.plusWeeks(52).minusDays(1), kontrollertInntektTidslinje);
     }
 
-    private static UngTestScenario endringMedInntekt_19år_med_kontroll(LocalDate fom, LocalDate tom, LocalDateTimeline<BrevScenarioerUtils.KontrollerInntektHolder> kontrollertInntektTidslinje) {
+    private static UngTestScenario endringMedInntekt(LocalDate fom, LocalDate tom, LocalDateTimeline<BrevScenarioerUtils.KontrollerInntektHolder> kontrollertInntektTidslinje) {
         var p = new LocalDateInterval(fom, tom);
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         var satser = BrevScenarioerUtils.lavSatsBuilder(p);
 
@@ -270,10 +271,15 @@ public class EndringInntektScenarioer {
             ));
 
         var triggere = HashSet.<Trigger>newHashSet(2);
-        triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode)));
-        kontrollerInntektPerioder.filterValue(it -> it.getInntekt().compareTo(BigDecimal.ZERO) > 0)
-            .forEach(it -> triggere.add(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, DatoIntervallEntitet.fra(it.getLocalDateInterval()))));
+        triggere.add(new Trigger(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, DatoIntervallEntitet.fra(tilkjentPeriode.getFomDato(), tilkjentPeriode.getTomDato().with(TemporalAdjusters.lastDayOfMonth()))));
+        kontrollerInntektPerioder
+            .forEach(it -> {
+                DatoIntervallEntitet periode = DatoIntervallEntitet.fra(it.getFom(), it.getTom().with(TemporalAdjusters.lastDayOfMonth()));
+                triggere.add(new Trigger(BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT, periode));
+                triggere.add(new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, periode));
+            });
 
+        List<LocalDateSegment<Utfall>> ungVilkår = List.of(new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), Utfall.OPPFYLT));
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,
             programPerioder,
@@ -281,20 +287,22 @@ public class EndringInntektScenarioer {
             BrevScenarioerUtils.uttaksPerioder(p),
             tilkjentYtelsePerioder,
             new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(ungVilkår),
             fom.minusYears(19).plusDays(42),
             List.of(p.getFomDato()),
             triggere,
             Collections.emptyList(), null,
-            kontrollerInntektPerioder);
+            kontrollerInntektPerioder, null, false);
     }
 
     public static Behandling lagBehandlingMedAksjonspunktKontrollerInntekt(UngTestScenario ungTestscenario, UngTestRepositories ungTestRepositories) {
         var behandling = BrevScenarioerUtils.lagInnvilgetBehandling(ungTestscenario, ungTestRepositories);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository);
-        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories.behandlingAnsvarligRepository();
+
+        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.KONTROLLER_INNTEKT, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
+        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository, behandlingAnsvarligRepository);
 
         return behandling;
     }
@@ -303,8 +311,10 @@ public class EndringInntektScenarioer {
         var behandling = BrevScenarioerUtils.lagInnvilgetBehandling(ungTestscenario, ungTestRepositories);
 
         BehandlingRepository behandlingRepository = ungTestRepositories.repositoryProvider().getBehandlingRepository();
-        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository);
-        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository);
+        BehandlingAnsvarligRepository behandlingAnsvarligRepository = ungTestRepositories.behandlingAnsvarligRepository();
+
+        BrevScenarioerUtils.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_FEILUTBETALING, behandling, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, behandlingRepository, behandlingAnsvarligRepository);
+        BrevScenarioerUtils.leggTilBeslutter(behandling, behandlingRepository, behandlingAnsvarligRepository);
         return behandling;
     }
 

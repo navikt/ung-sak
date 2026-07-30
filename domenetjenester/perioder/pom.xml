@@ -23,11 +23,6 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingskontroll</artifactId>
         </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>ungdomsprogram</artifactId>
-        </dependency>
-
 
         <dependency>
             <groupId>no.nav.k9.felles</groupId>
@@ -44,6 +39,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>behandlingslager-testutilities</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>behandling</artifactId>
         </dependency>
     </dependencies>
 

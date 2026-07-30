@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -17,6 +18,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -68,6 +70,8 @@ public class ForeslåVedtakTjenesteTest {
 
     @Inject
     private BehandlingRepository behandlingRepository;
+    @Inject
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -113,7 +117,7 @@ public class ForeslåVedtakTjenesteTest {
 
         SjekkTilbakekrevingAksjonspunktUtleder sjekkTilbakekrevingAksjonspunktUtleder = Mockito.mock(SjekkTilbakekrevingAksjonspunktUtleder.class);
         when(sjekkTilbakekrevingAksjonspunktUtleder.sjekkMotÅpenIkkeoverlappendeTilbakekreving(any())).thenReturn(List.of());
-        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevValgRepository, klageVedtakTjeneste, false, new UnitTestLookupInstanceImpl<>(vedtaksbrevRegler));
+        tjeneste = new ForeslåVedtakTjeneste(behandlingskontrollTjeneste, behandlingAnsvarligRepository, sjekkTilbakekrevingAksjonspunktUtleder, vedtaksbrevValgRepository, klageVedtakTjeneste, false, new UnitTestLookupInstanceImpl<>(vedtaksbrevRegler));
         when(vedtaksbrevRegler.kjør(any())).thenReturn(
             new BehandlingVedtaksbrevResultat(
                 false,
@@ -150,7 +154,7 @@ public class ForeslåVedtakTjenesteTest {
         tjeneste.foreslåVedtak(behandling, kontekst);
 
         // Assert
-        assertThat(behandling.isToTrinnsBehandling()).isTrue();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isTrue();
     }
 
     @Test
@@ -175,7 +179,7 @@ public class ForeslåVedtakTjenesteTest {
         tjeneste.foreslåVedtak(behandling, kontekst);
 
         // Assert
-        assertThat(behandling.isToTrinnsBehandling()).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
     }
 
     @Test
@@ -195,7 +199,7 @@ public class ForeslåVedtakTjenesteTest {
 
         // Assert
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        assertThat(behandling.isToTrinnsBehandling()).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
     }
 
     @Test
@@ -224,7 +228,7 @@ public class ForeslåVedtakTjenesteTest {
 
         // Assert
         assertThat(stegResultat.getTransisjon()).isEqualTo(FellesTransisjoner.UTFØRT);
-        assertThat(behandling.isToTrinnsBehandling()).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
     }
 
     @Test
@@ -383,12 +387,12 @@ public class ForeslåVedtakTjenesteTest {
             List.of(new Vedtaksbrev(
                 dokumentMalType,
                 mock(VedtaksbrevInnholdBygger.class),
-                new VedtaksbrevEgenskaper(
-                    false,
-                    false,
-                    true,
-                    false
-                ),
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(false)
+                    .kanOverstyreHindre(false)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(false)
+                    .build(),
                 ""
             )),
             Collections.emptyList()
@@ -402,12 +406,12 @@ public class ForeslåVedtakTjenesteTest {
             List.of(new Vedtaksbrev(
                 dokumentMalType,
                 mock(VedtaksbrevInnholdBygger.class),
-                new VedtaksbrevEgenskaper(
-                    false,
-                    false,
-                    true,
-                    true
-                ),
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(false)
+                    .kanOverstyreHindre(false)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(true)
+                    .build(),
                 ""
             )),
             Collections.emptyList()
@@ -452,7 +456,7 @@ public class ForeslåVedtakTjenesteTest {
     public void utførerUtenAksjonspunktHvisRevurderingIkkeManueltOpprettetOgIkkeTotrinnskontrollBehandling2TrinnIkkeReset() {
         // Arrange
         Behandling behandling = TestScenarioBuilder.builderMedSøknad().medBehandlingType(BehandlingType.REVURDERING).lagre(repositoryProvider);
-        behandling.setToTrinnsBehandling();
+        behandlingAnsvarligRepository.setToTrinnsbehandling(behandling.getId(), BehandlingDel.SENTRAL);
 
         // Act
         BehandleStegResultat stegResultat = tjeneste.foreslåVedtak(behandling, kontekst);
@@ -471,7 +475,8 @@ public class ForeslåVedtakTjenesteTest {
         Behandling revurdering = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
             .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).medManueltOpprettet(true))
             .build();
-        revurdering.setToTrinnsBehandling();
+        behandlingRepository.lagre(revurdering, new BehandlingLås(null));
+        behandlingAnsvarligRepository.setToTrinnsbehandling(revurdering.getId(), BehandlingDel.SENTRAL);
         BehandlingLås lås = behandlingRepository.taSkriveLås(revurdering);
         behandlingRepository.lagre(revurdering, lås);
 
@@ -508,7 +513,7 @@ public class ForeslåVedtakTjenesteTest {
         tjeneste.foreslåVedtak(behandling, kontekst);
 
         // Assert
-        assertThat(behandling.isToTrinnsBehandling()).isFalse();
+        assertThat(behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.SENTRAL)).isFalse();
         assertThat(behandling.getAksjonspunkter()).hasSize(1);
         assertThat(behandling.getAksjonspunktFor(AksjonspunktDefinisjon.FORESLÅ_VEDTAK).getStatus()).isEqualTo(AksjonspunktStatus.AVBRUTT);
     }

@@ -51,14 +51,6 @@ public record BehandlingVedtaksbrevResultat(
             .collect(Collectors.toSet());
     }
 
-    public String forklaringer() {
-        if (harBrev) {
-            return vedtaksbrevResultater.stream().map(Vedtaksbrev::forklaring).collect(Collectors.joining(", "));
-        } else {
-            return ingenBrevResultater.stream().map(IngenBrev::forklaring).collect(Collectors.joining(", "));
-        }
-    }
-
 
     public String safePrint() {
         return "BehandlingVedtaksbrevResultat{" +

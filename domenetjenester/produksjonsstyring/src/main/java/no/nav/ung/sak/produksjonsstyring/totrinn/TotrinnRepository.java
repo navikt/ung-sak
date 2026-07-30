@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 
@@ -58,6 +59,19 @@ public class TotrinnRepository {
             entityManager.flush(); // må flushe pga aktiv flagg
         }
         totrinnaksjonspunktvurderinger.forEach(v -> entityManager.persist(v));
+        entityManager.flush();
+    }
+
+    public void deaktiverTotrinnaksjonspunktvurderinger(Behandling behandling, BehandlingDel behandlingDel) {
+        Collection<Totrinnsvurdering> aktiveVurderinger = getAktiveTotrinnaksjonspunktvurderinger(behandling);
+        if (!aktiveVurderinger.isEmpty()) {
+            aktiveVurderinger.forEach(vurdering -> {
+                if (vurdering.getAksjonspunktDefinisjon().getBehandlingDel() == behandlingDel) {
+                    vurdering.deaktiver();
+                    entityManager.persist(vurdering);
+                }
+            });
+        }
         entityManager.flush();
     }
 

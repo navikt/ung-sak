@@ -5,10 +5,10 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringInntektScenarioer;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.EndringInntektScenarioer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -170,7 +170,8 @@ class EndringInntektTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTe
     @Test
     void endring_inntekt_siste_måned() {
         LocalDate fom = LocalDate.of(2025, 12, 1);
-        var ungTestGrunnlag = EndringInntektScenarioer.endringInntektSisteMåned_10dager_10k(fom);
+        int inntektSisteMåned = 10000;
+        var ungTestGrunnlag = EndringInntektScenarioer.endringInntektSisteMåned_10dager(fom, inntektSisteMåned);
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
             "Vi har endret ungdomsprogramytelsen din " +
                 "Du får 2 667 kroner i ungdomsprogramytelse for perioden fra 1. mars 2026 til 10. mars 2026. " +

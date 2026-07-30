@@ -22,7 +22,10 @@ public enum DokumentMalType implements Kodeverdi {
     ENDRING_INNTEKT("ENDRING_INNTEKT", "Kontroll av inntekt", true),
     ENDRING_INNTEKT_UTEN_REDUKSJON("ENDRING_INNTEKT_UTEN_REDUKSJON", "Kontroll av inntekt uten reduksjon", true),
     ENDRING_HØY_SATS("ENDRING_HØY_SATS", "Endring høy sats", true),
+    FORLENGET_PERIODE("FORLENGET_PERIODE", "Forlenget periode", true),
     OPPHØR_DOK("OPPHOR", "Opphør", true),
+    OPPHOR_VED_MAKSDATO_DOK("OPPHOR_VED_MAKSDATO", "Opphør ved maksdato", true),
+    OPPHOR_OPPHEVET_DOK("OPPHOR_OPPHEVET", "Opphør opphevet", true),
     AVSLAG__DOK("AVSLAG", "Avslag", true),
     MANUELT_VEDTAK_DOK("MANUELL", "Fritekstvedtak", true),
     GENERELT_FRITEKSTBREV("GENERELT_FRITEKSTBREV", "Fritekst generelt", false),
@@ -89,4 +92,12 @@ public enum DokumentMalType implements Kodeverdi {
         return ad.get();
     }
 
+
+    /**
+     * Denne er nødvendig siden enumen brukes som query parameter. Da brukes ikke jackson,
+     * men JAX-RS der denne metoden er konvensjon
+     */
+    public static DokumentMalType fromString(String value) {
+        return fraKode(value);
+    }
 }

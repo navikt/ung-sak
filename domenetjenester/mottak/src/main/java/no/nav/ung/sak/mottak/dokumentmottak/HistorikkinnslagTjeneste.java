@@ -79,10 +79,10 @@ public class HistorikkinnslagTjeneste {
         if (brevkode == null) {
             return INNSENDING;
         }
-        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING)) {
+        if (Brevkode.INNTEKTSRAPPORTERING_TYPER.contains(brevkode)) {
             return INNTEKTSRAPPORTERING;
         }
-        if (brevkode.equals(Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE)) {
+        if (Brevkode.VARSELUTTALELSE_TYPER.contains(brevkode)) {
             return uttalelseRepository.hentEksisterendeGrunnlag(behandlingId).stream()
                 .map(UttalelseGrunnlag::getUttalelser)
                 .map(Uttalelser::getUttalelser)
@@ -105,6 +105,8 @@ public class HistorikkinnslagTjeneste {
             case ENDRET_STARTDATO -> "Svar på varsel: Endret startdato";
             case ENDRET_SLUTTDATO -> "Svar på varsel: Endret sluttdato";
             case ENDRET_PERIODE -> "Svar på varsel: Endret programperiode";
+            case OPPHOR_VED_MAKSDATO -> "Svar på varsel: Opphør ved maksdato";
+            case AVKLAR_BOSTED -> "Svar på varsel: Bostedavklaring";
         };
     }
 

@@ -21,10 +21,11 @@ import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.klage.domenetjenester.KlageVurderingTjeneste;
 import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
@@ -41,6 +42,7 @@ import static no.nav.k9.felles.feil.LogLevel.INFO;
 public class BehandlingsoppretterTjeneste {
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlendeEnhetTjeneste behandlendeEnhetTjeneste;
     private Instance<GyldigePerioderForRevurderingPrÅrsakUtleder> gyldigePerioderForRevurderingUtledere;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
@@ -65,6 +67,7 @@ public class BehandlingsoppretterTjeneste {
         this.gyldigePerioderForRevurderingUtledere = gyldigePerioderForRevurderingUtledere;
         Objects.requireNonNull(behandlingRepositoryProvider, "behandlingRepositoryProvider");
         this.behandlingRepository = behandlingRepositoryProvider.getBehandlingRepository();
+        this.behandlingAnsvarligRepository = behandlingRepositoryProvider.getBehandlingAnsvarligRepository();
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.klageVurderingTjeneste = klageVurderingTjeneste;
         this.personopplysningRepository = personopplysningRepository;
@@ -114,14 +117,15 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private Behandling opprettBehandling(Fagsak fagsak, BehandlingType behandlingType, OrganisasjonsEnhet enhet, BehandlingÅrsakType årsak) {
-        return behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
+        Behandling behandling = behandlingskontrollTjeneste.opprettNyBehandling(fagsak, behandlingType,
             beh -> {
                 if (!BehandlingÅrsakType.UDEFINERT.equals(årsak)) {
                     BehandlingÅrsak.builder(årsak).buildFor(beh);
                 }
                 beh.setBehandlingstidFrist(LocalDate.now().plusWeeks(behandlingType.getBehandlingstidFristUker()));
-                beh.setBehandlendeEnhet(enhet);
             });
+        behandlingAnsvarligRepository.setBehandlendeEnhet(behandling.getId(), enhet);
+        return behandling;
     }
 
     public boolean kanOppretteNyBehandlingAvType(Long fagsakId, BehandlingType type) {
@@ -139,9 +143,14 @@ public class BehandlingsoppretterTjeneste {
         }
     }
 
-    public List<ÅrsakOgPerioderDto> finnGyldigeVurderingsperioderPrÅrsak(Long fagsakId) {
-        return gyldigePerioderForRevurderingUtledere.stream().map(utleder -> utleder.utledPerioder(fagsakId))
+    public List<ÅrsakOgPerioderDto> finnGyldigeVurderingsperioderPrÅrsak(Fagsak fagsak) {
+        return finnUtledereForFagsak(fagsak).stream()
+            .map(utleder -> utleder.utledPerioder(fagsak.getId()))
             .toList();
+    }
+
+    private List<GyldigePerioderForRevurderingPrÅrsakUtleder> finnUtledereForFagsak(Fagsak fagsak) {
+        return FagsakYtelseTypeRef.Lookup.find(gyldigePerioderForRevurderingUtledere, fagsak.getYtelseType()).stream().toList();
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
@@ -180,19 +189,13 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
-        var gyldigePerioderForRevurderingPrÅrsak = finnGyldigeVurderingsperioderPrÅrsak(fagsak.getId());
-        boolean skalSjekkeGyldighetAvPeriode = gyldigePerioderForRevurderingPrÅrsak.stream().anyMatch(dto -> dto.årsak() == behandlingÅrsakType);
-        //Dersom det ikke er utledet gyldige perioder for årsak så aksepteres alle perioder, også ingen periode.
-        if (!skalSjekkeGyldighetAvPeriode) {
+        var relevanteUtledere = finnUtledereForFagsak(fagsak).stream()
+            .filter(utleder -> utleder.støttetÅrsak() == behandlingÅrsakType)
+            .toList();
+        if (relevanteUtledere.isEmpty()) {
             return true;
         }
-        if (periode.isEmpty()) {
-            return false;
-        }
-        return gyldigePerioderForRevurderingPrÅrsak.stream().filter(
-                dto -> dto.årsak() == behandlingÅrsakType).flatMap(dto -> dto.perioder().stream())
-            .map(DatoIntervallEntitet::fra)
-            .anyMatch(periode.get()::equals);
+        return relevanteUtledere.stream()
+            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), periode));
     }
-
 }

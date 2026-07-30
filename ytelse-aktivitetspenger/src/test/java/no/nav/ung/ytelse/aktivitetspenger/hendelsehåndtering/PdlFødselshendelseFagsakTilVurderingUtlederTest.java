@@ -19,12 +19,11 @@ import no.nav.ung.sak.hendelsemottak.tjenester.FinnFagsakerForAktørTjeneste;
 import no.nav.ung.sak.kontrakt.hendelser.FødselHendelse;
 import no.nav.ung.sak.kontrakt.hendelser.HendelseInfo;
 import no.nav.ung.sak.test.util.aktør.FiktiveFnr;
-import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestRepositories;
-import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenario;
-import no.nav.ung.sak.test.util.behandling.aktivitetspenger.AktivitetspengerTestScenarioBuilder;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestRepositories;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.sak.test.util.behandling.personopplysning.PersonInformasjon;
 import no.nav.ung.sak.test.util.behandling.personopplysning.Personopplysning;
-import no.nav.ung.sak.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
@@ -114,6 +113,8 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
             new AktivitetspengerTestScenario(
                 "Test Testesen",
                 List.of(søknadsperiode),
+                LocalDateTimeline.empty(),
+                LocalDateTimeline.empty(),
                 LocalDateTimeline.empty(),
                 LocalDateTimeline.empty(),
                 LocalDate.now().minusYears(19),

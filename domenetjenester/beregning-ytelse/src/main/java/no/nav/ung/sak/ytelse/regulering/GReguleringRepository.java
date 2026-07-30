@@ -1,0 +1,67 @@
+package no.nav.ung.sak.ytelse.regulering;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.Query;
+import no.nav.k9.felles.konfigurasjon.konfig.Tid;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+
+import java.util.Objects;
+
+@Dependent
+public class GReguleringRepository {
+
+    private EntityManager entityManager;
+
+    @Inject
+    public GReguleringRepository(EntityManager entityManager) {
+        this.entityManager = entityManager;
+    }
+
+    public Long dryRun(FagsakYtelseType ytelseType, DatoIntervallEntitet periode) {
+        Query query;
+
+        String sql = """
+            select count(f.saksnummer) from Fagsak f
+             where f.ytelse_type = :ytelseType
+               and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+              """;
+
+        query = entityManager.createNativeQuery(sql); // NOSONAR
+
+        query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
+        query.setParameter("fom", periode.getFomDato() == null ? Tid.TIDENES_BEGYNNELSE : periode.getFomDato());
+        query.setParameter("tom", periode.getTomDato() == null ? Tid.TIDENES_ENDE : periode.getTomDato());
+        return (Long) query.getSingleResult();
+    }
+
+    public Long startGReguleringForPeriode(FagsakYtelseType ytelseType, DatoIntervallEntitet periode, String fomValue, String tomValue) {
+        Objects.requireNonNull(periode);
+
+        String sql = """
+            insert into prosess_task (id, task_type, task_gruppe, neste_kjoering_etter, task_parametere)
+            select nextval('seq_prosess_task'), 'gregulering.kandidatUtprøving',
+                   nextval('seq_prosess_task_gruppe'), null,
+                   'fom=' || :fomValue || '\ntom=' || :tomValue || '\nfagsakId=' || f.id
+              from fagsak f
+             where f.ytelse_type = :ytelseType
+               and f.periode && daterange(cast(:fom as date), cast(:tom as date), '[]') = true
+            """;
+
+        var query = entityManager.createNativeQuery(sql); // NOSONAR
+
+        query.setParameter("ytelseType", Objects.requireNonNull(ytelseType, "ytelseType").getKode());
+        query.setParameter("fom", periode.getFomDato());
+        query.setParameter("tom", periode.getTomDato());
+        query.setParameter("fomValue", fomValue);
+        query.setParameter("tomValue", tomValue);
+
+        return Integer.toUnsignedLong(query.executeUpdate());
+    }
+
+
+
+
+}

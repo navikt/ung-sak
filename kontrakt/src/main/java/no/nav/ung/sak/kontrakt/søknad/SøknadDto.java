@@ -22,7 +22,7 @@ public class SøknadDto {
 
     @JsonProperty(value = "begrunnelseForSenInnsending")
     @Size(max = 5000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String begrunnelseForSenInnsending;
 
     /**

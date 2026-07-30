@@ -18,6 +18,7 @@ public class CacheControlFilterTest {
         final ContainerRequestContext req = mock(ContainerRequestContext.class);
         when(req.getMethod()).thenReturn("GET");
         final ContainerResponseContext res = mock(ContainerResponseContext.class);
+        when(res.getStatus()).thenReturn(200);
         final var responseHeaders = new MultivaluedHashMap<String, Object>();
         when(res.getHeaders()).thenReturn(responseHeaders);
         final CacheControlFilter ccf = new CacheControlFilter(
@@ -42,5 +43,29 @@ public class CacheControlFilterTest {
         assertThat(ecc.isPrivate()).isTrue();
         assertThat(ecc.getStaleWhileRevalidate()).isEqualTo(444);
         assertThat(ecc.getStaleIfError()).isEqualTo(555);
+    }
+
+    @Test
+    public void filter_setter_ikkje_cache_control_header_ved_feilrespons() throws IOException {
+        final ContainerRequestContext req = mock(ContainerRequestContext.class);
+        when(req.getMethod()).thenReturn("GET");
+        final ContainerResponseContext res = mock(ContainerResponseContext.class);
+        when(res.getStatus()).thenReturn(500);
+        final var responseHeaders = new MultivaluedHashMap<String, Object>();
+        when(res.getHeaders()).thenReturn(responseHeaders);
+        final CacheControlFilter ccf = new CacheControlFilter(
+            333,
+            false,
+            true,
+            true,
+            true,
+            false,
+            444,
+            555
+        );
+
+        ccf.filter(req, res);
+        final var cacheControlObjList = responseHeaders.get("Cache-Control");
+        assertThat(cacheControlObjList).isNull();
     }
 }

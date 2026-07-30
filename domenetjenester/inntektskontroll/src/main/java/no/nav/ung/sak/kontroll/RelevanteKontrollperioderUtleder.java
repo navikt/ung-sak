@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -23,9 +22,9 @@ import java.util.stream.Collectors;
 @Dependent
 public class RelevanteKontrollperioderUtleder {
 
-    private Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
-    private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
-    private BehandlingRepository behandlingRepository;
+    private final Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere;
+    private final MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private final BehandlingRepository behandlingRepository;
 
     @Inject
     public RelevanteKontrollperioderUtleder(@Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere,
@@ -64,10 +63,9 @@ public class RelevanteKontrollperioderUtleder {
      * @param behandlingId behandlingId
      * @return Perioder som er relevante for kontroll av inntekt
      */
-    public LocalDateTimeline<Boolean> utledPerioderRelevantForKontrollAvInntekt(Long behandlingId) {
+    public LocalDateTimeline<InfoOmRådata> utledPerioderRelevantForKontrollAvInntekt(Long behandlingId) {
         final var periodisertMånedsvis = månedsvisTidslinjeUtleder.finnMånedsvisPeriodisertePerioder(behandlingId);
-        final var relevantForKontrollTidslinje = utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
-        return relevantForKontrollTidslinje;
+        return utledPerioderRelevantForKontrollAvInntekt(periodisertMånedsvis);
     }
 
 
@@ -77,7 +75,7 @@ public class RelevanteKontrollperioderUtleder {
      * @param ytelsesPerioder Ytelseperioder
      * @return Perioder som er relevante for kontroll av inntekt
      */
-    public LocalDateTimeline<Boolean> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder) {
+    public LocalDateTimeline<InfoOmRådata> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder) {
         LocalDateTimeline<Boolean> perioderForKontroll = LocalDateTimeline.empty();
         if (ytelsesPerioder.toSegments().size() > 1) {
             final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
@@ -86,13 +84,14 @@ public class RelevanteKontrollperioderUtleder {
         return utvidTilHeleMåneder(perioderForKontroll);
     }
 
-    private static LocalDateTimeline<Boolean> utvidTilHeleMåneder(LocalDateTimeline<Boolean> perioderForKontroll) {
+    private static LocalDateTimeline<InfoOmRådata> utvidTilHeleMåneder(LocalDateTimeline<Boolean> perioderForKontroll) {
         var mappedSegments = perioderForKontroll
             .toSegments()
             .stream()
-            .map(it -> new LocalDateSegment<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), it.getValue()))
+            .map(it -> new LocalDateSegment<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), new InfoOmRådata(it.getTom().equals(it.getTom().with(TemporalAdjusters.lastDayOfMonth())))))
             .toList(); // Mapper segmenter til å dekke hele måneder
-        return new LocalDateTimeline<>(mappedSegments, StandardCombinators::alwaysTrueForMatch).compress();
+        // Forventer ikkje overlapp her
+        return new LocalDateTimeline<>(mappedSegments).compress();
     }
 
     public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder) {
@@ -112,6 +111,9 @@ public class RelevanteKontrollperioderUtleder {
     }
 
     public record FritattForKontroll(boolean gjelderFørstePeriode, boolean gjelderSistePeriode) {
+    }
+
+    public record InfoOmRådata(boolean gjelderHelePerioden) {
     }
 
 }

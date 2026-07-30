@@ -25,14 +25,14 @@ import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPeriode;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatsPerioder;
 import no.nav.ung.sak.behandlingslager.ytelse.uttak.UngdomsytelseUttakPerioder;
-import no.nav.ung.sak.tid.Virkedager;
+import no.nav.ung.sak.domene.typer.tid.Virkedager;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.UngdomsprogramInformasjonDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.beregning.UngdomsytelseSatsPeriodeDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.uttak.UngdomsytelseUttakPeriodeDto;
 import no.nav.ung.sak.kontrakt.ungdomsytelse.ytelse.UngdomsytelseUtbetaltMånedDto;
-import no.nav.ung.sak.ungdomsprogram.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.sak.ungdomsprogram.forbruktedager.FinnForbrukteDager;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 
@@ -44,7 +44,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 @Path("")
 @ApplicationScoped
@@ -112,7 +112,7 @@ public class UngdomsytelseRestTjeneste {
         final var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId());
         final var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
         var tidslinjeMap = tilkjentYtelseRepository.hentTidslinjerForFagsak(behandling.getFagsakId());
-        var avsluttetTidTilkjentYtelseMap = tidslinjeMap.entrySet().stream().collect(Collectors.toMap(e -> BehandlingAvsluttetTidspunkt.fraBehandling(e.getKey()), Map.Entry::getValue));
+        var avsluttetTidTilkjentYtelseMap = tidslinjeMap.entrySet().stream().collect(Collectors.toMap(e -> BehandlingAvsluttetTidspunkt.fraBehandling(e.getKey()), Map.Entry::getValue, (v1, v2) -> v2));
         return MånedsvisningDtoMapper.mapSatsOgUtbetalingPrMåned(
             BehandlingAvsluttetTidspunkt.fraBehandling(behandling),
             månedsvisPeriodisering,
@@ -153,9 +153,11 @@ public class UngdomsytelseRestTjeneste {
         }
         final var startDato = programperiodeTidslinje.getMinLocalDate();
         final var opphørsdato = programperiodeTidslinje.getMaxLocalDate().isBefore(TIDENES_ENDE) ? programperiodeTidslinje.getMaxLocalDate() : null;
-        final var maksdato = finnProgramperiodeMaksdato(behandling, programperiodeTidslinje);
-        final var forbrukteDager = finnForbrukteDager(behandling, programperiodeTidslinje);
-        return new UngdomsprogramInformasjonDto(startDato, maksdato, opphørsdato, forbrukteDager.orElse(null));
+        final var harForlengetPeriode = ungdomsprogramPeriodeTjeneste.finnHarForlengetPeriode(behandling.getId());
+        final var maksdato = ungdomsprogramPeriodeTjeneste.finnPeriodeMaksDato(behandling.getId())
+            .orElseGet(() -> finnProgramperiodeMaksdato(behandling, programperiodeTidslinje, harForlengetPeriode));
+        final var forbrukteDager = finnForbrukteDager(behandling, programperiodeTidslinje, harForlengetPeriode);
+        return new UngdomsprogramInformasjonDto(startDato, maksdato, opphørsdato, forbrukteDager.orElse(null), harForlengetPeriode);
     }
 
     private static List<UngdomsytelseSatsPeriodeDto> mapSatsperioder(UngdomsytelseSatsPerioder perioder) {
@@ -177,17 +179,17 @@ public class UngdomsytelseRestTjeneste {
             Virkedager.beregnAntallVirkedager(p.getPeriode().getFomDato(), p.getPeriode().getTomDato()));
     }
 
-    private static LocalDate finnProgramperiodeMaksdato(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje) {
+    private static LocalDate finnProgramperiodeMaksdato(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje, boolean harForlengetPeriode) {
         final var fagsakperiode = behandling.getFagsak().getPeriode();
         final var utvidetProgramperiodeTidslinje = programperiodeTidslinje.crossJoin(new LocalDateTimeline<>(programperiodeTidslinje.getMinLocalDate(), fagsakperiode.getTomDato(), true));
-        final var antallDagerIProgrammetResultat = FinnForbrukteDager.finnForbrukteDager(utvidetProgramperiodeTidslinje);
+        final var antallDagerIProgrammetResultat = FinnForbrukteDager.finnForbrukteDager(utvidetProgramperiodeTidslinje, harForlengetPeriode);
         return antallDagerIProgrammetResultat.tidslinjeNokDager().getMaxLocalDate();
     }
 
-    private Optional<Integer> finnForbrukteDager(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje) {
+    private Optional<Integer> finnForbrukteDager(Behandling behandling, LocalDateTimeline<Boolean> programperiodeTidslinje, boolean harForlengetPeriode) {
         final var tilkjentYtelseTidslinje = behandling.getOriginalBehandlingId().map(tilkjentYtelseRepository::hentTidslinje).orElse(LocalDateTimeline.empty());
         if (!tilkjentYtelseTidslinje.isEmpty()) {
-            final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(programperiodeTidslinje.intersection(tilkjentYtelseTidslinje));
+            final var vurderAntallDagerResultat = FinnForbrukteDager.finnForbrukteDager(programperiodeTidslinje.intersection(tilkjentYtelseTidslinje), harForlengetPeriode);
             return Optional.of(vurderAntallDagerResultat.forbrukteDager());
         }
         return Optional.empty();

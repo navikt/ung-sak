@@ -17,6 +17,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>kodeverk</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>no.nav.k9.prosesstask</groupId>
@@ -26,10 +30,6 @@
         <dependency>
             <groupId>no.nav.k9.felles.sikkerhet</groupId>
             <artifactId>k9-felles-sikkerhet</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.ung.sak</groupId>
-            <artifactId>felles-behandlingslager</artifactId>
         </dependency>
 
         <dependency>

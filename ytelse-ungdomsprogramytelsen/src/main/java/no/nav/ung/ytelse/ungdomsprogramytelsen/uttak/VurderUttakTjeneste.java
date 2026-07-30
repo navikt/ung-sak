@@ -7,14 +7,21 @@ import no.nav.ung.ytelse.ungdomsprogramytelsen.uttak.regler.*;
 import java.time.LocalDate;
 import java.util.*;
 
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
-import static no.nav.ung.sak.tid.AbstractLocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_BEGYNNELSE;
+import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_ENDE;
 
 class VurderUttakTjeneste {
 
     static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
                                                             LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
                                                             Optional<LocalDate> søkersDødsdato) {
+        return vurderUttak(godkjentePerioder, ungdomsprogramtidslinje, søkersDødsdato, false);
+    }
+
+    static Optional<UngdomsytelseUttakPerioder> vurderUttak(LocalDateTimeline<Boolean> godkjentePerioder,
+                                                            LocalDateTimeline<Boolean> ungdomsprogramtidslinje,
+                                                            Optional<LocalDate> søkersDødsdato,
+                                                            boolean harForlengetPeriode) {
         if (godkjentePerioder.isEmpty()) {
             return Optional.empty();
         }
@@ -23,8 +30,8 @@ class VurderUttakTjeneste {
 
         var delresultater = List.of(
             new AvslagVedDødVurderer(levendeBrukerTidslinje).vurder(godkjentePerioder),
-            new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje).vurder(godkjentePerioder),
-            new InnvilgHelePeriodenVurderer().vurder(godkjentePerioder) // innvilger hele perioden og prioriterer så avslag i mapping dersom det finnes
+            new AvslagIkkeNokDagerVurderer(ungdomsprogramtidslinje, harForlengetPeriode).vurder(godkjentePerioder),
+            new InnvilgHelePeriodenVurderer().vurder(godkjentePerioder)
         );
 
         final var resultattidslinjer = delresultater.stream().map(UttakDelResultat::resultatTidslinje).toList();

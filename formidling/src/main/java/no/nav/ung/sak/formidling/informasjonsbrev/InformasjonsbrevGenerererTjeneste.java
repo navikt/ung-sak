@@ -67,7 +67,7 @@ public class InformasjonsbrevGenerererTjeneste {
         BrevAnsvarligDto brevAnsvarlig = lagBrevansvarlig(informasjonsbrevBestillingInput.bestillerIdent());
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brevAnsvarlig),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brevAnsvarlig, behandling.getFagsakYtelseType()),
                 innhold.templateInnholdDto()
             ));
 

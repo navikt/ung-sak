@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.hjemmel.Hjemmel;
 import no.nav.ung.kodeverk.klage.KlageVurdertAv;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.KlageVurderingEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.klage.Vurderingresultat;
@@ -19,9 +20,9 @@ import java.util.List;
 @Dependent
 public class KabalRequestMapperV4 {
 
-    public KabalRequestv4 map(Behandling behandling, PersonIdent personIdent, KlageUtredningEntitet klageUtredning) {
+    public KabalRequestv4 map(Behandling behandling, BehandlingAnsvarlig behandlingAnsvarlig, PersonIdent personIdent, KlageUtredningEntitet klageUtredning) {
         var klagendePart = klageUtredning.getKlagendePart();
-        var opprinneligBehandlendeEnhet = behandling.getBehandlendeEnhet();
+        var opprinneligBehandlendeEnhet = behandlingAnsvarlig != null ? behandlingAnsvarlig.getBehandlendeEnhet() : null;
         var saksnummer = behandling.getFagsak().getSaksnummer().getVerdi();
         var ytelseType = behandling.getFagsakYtelseType();
 

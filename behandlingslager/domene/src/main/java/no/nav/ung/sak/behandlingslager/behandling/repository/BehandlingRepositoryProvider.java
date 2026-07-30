@@ -30,6 +30,7 @@ public class BehandlingRepositoryProvider {
     private VilkårResultatRepository vilkårResultatRepository;
 
     private BehandlingRepository behandlingRepository;
+    private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private FagsakLåsRepository fagsakLåsRepository;
 
     BehandlingRepositoryProvider() {
@@ -45,6 +46,7 @@ public class BehandlingRepositoryProvider {
 
         // behandling repositories
         this.behandlingRepository = new BehandlingRepository(entityManager);
+        this.behandlingAnsvarligRepository = new BehandlingAnsvarligRepository(entityManager, behandlingRepository);
         this.behandlingLåsRepository = new BehandlingLåsRepository(entityManager);
         this.fagsakRepository = new FagsakRepository(entityManager);
         this.fagsakLåsRepository = new FagsakLåsRepository(entityManager);
@@ -73,6 +75,10 @@ public class BehandlingRepositoryProvider {
 
     public BehandlingRepository getBehandlingRepository() {
         return behandlingRepository;
+    }
+
+    public BehandlingAnsvarligRepository getBehandlingAnsvarligRepository() {
+        return behandlingAnsvarligRepository;
     }
 
     public PersonopplysningRepository getPersonopplysningRepository() {
