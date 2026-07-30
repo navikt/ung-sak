@@ -7,10 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * Mellomobjekt for vilkårsresultat og behandlingsårsaker per periode, primært brukt for tidslinje
- * i {@link DetaljertResultatTidslinjeUtleder}.
- */
 public record DetaljertResultatPeriodeGrunnlag(List<DetaljertVilkårResultat> vilkårsresultater,
                                                Set<BehandlingÅrsakType> behandlingÅrsaker,
                                                boolean tilVurdering) {
