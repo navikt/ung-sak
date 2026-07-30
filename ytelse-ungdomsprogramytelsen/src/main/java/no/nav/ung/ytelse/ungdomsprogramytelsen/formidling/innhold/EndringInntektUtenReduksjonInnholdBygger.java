@@ -12,7 +12,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
-import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
+import no.nav.ung.sak.formidling.vedtak.resultat.Inntektskontroll;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringInntektUtenReduksjonDto;
 
 import java.math.BigDecimal;
@@ -35,7 +35,7 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
         var relevantTilkjentYtelse = resultatTidslinje
-            .filterValue(EndringInntektUtleder::erInntektFullUtbetaling)
+            .filterValue(Inntektskontroll::erInntektFullUtbetaling)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 

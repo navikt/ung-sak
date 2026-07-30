@@ -3,9 +3,9 @@ package no.nav.ung.sak.formidling.vedtak.resultat;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 
-public final class EndringInntektUtleder {
+public final class Inntektskontroll {
 
-    private EndringInntektUtleder() {
+    private Inntektskontroll() {
     }
 
     public static boolean erInntektReduksjon(DetaljertResultat r) {
@@ -25,7 +25,7 @@ public final class EndringInntektUtleder {
     }
 
     public static LocalDateTimeline<DetaljertResultat> fullUtbetalingTidslinje(LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
-        return resultatTidslinje.filterValue(EndringInntektUtleder::erInntektFullUtbetaling);
+        return resultatTidslinje.filterValue(Inntektskontroll::erInntektFullUtbetaling);
     }
 
     /**

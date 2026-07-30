@@ -19,7 +19,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbygger
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
-import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
+import no.nav.ung.sak.formidling.vedtak.resultat.Inntektskontroll;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektReduksjonInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringInntektUtenReduksjonInnholdBygger;
 
@@ -50,8 +50,8 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
         var detaljertResultat = resultatTidslinje.tilVurdering();
-        boolean harReduksjon = EndringInntektUtleder.harInntektReduksjon(detaljertResultat);
-        boolean harFullUtbetaling = EndringInntektUtleder.harInntektFullUtbetaling(detaljertResultat);
+        boolean harReduksjon = Inntektskontroll.harInntektReduksjon(detaljertResultat);
+        boolean harFullUtbetaling = Inntektskontroll.harInntektFullUtbetaling(detaljertResultat);
 
         if (harReduksjon) {
             return List.of(reduksjonResultat(behandling));
@@ -122,7 +122,7 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
     }
 
     private boolean harManueltFastsatt0krIFullUtbetalingsperiode(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var fullUtbetaling = EndringInntektUtleder.fullUtbetalingTidslinje(detaljertResultat);
+        var fullUtbetaling = Inntektskontroll.fullUtbetalingTidslinje(detaljertResultat);
         return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId())
             .stream()
             .flatMap(it -> it.getPerioder().stream())

@@ -15,7 +15,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
-import no.nav.ung.sak.formidling.vedtak.resultat.EndringInntektUtleder;
+import no.nav.ung.sak.formidling.vedtak.resultat.Inntektskontroll;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringInntektReduksjonDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.endring.inntekt.EndringInntektPeriodeDto;
 
@@ -49,7 +49,7 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
         final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
 
         var relevantTilkjentYtelse = resultatTidslinje
-            .filterValue(EndringInntektUtleder::erInntektReduksjon)
+            .filterValue(Inntektskontroll::erInntektReduksjon)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
