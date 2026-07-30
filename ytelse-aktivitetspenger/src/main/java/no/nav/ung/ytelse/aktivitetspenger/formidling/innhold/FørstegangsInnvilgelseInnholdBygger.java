@@ -60,7 +60,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var detaljertResultatTidslinje = tidslinje.tilVurdering();
         var tilVurdering = detaljertResultatTidslinje;
-        LocalDateTimeline<DetaljertResultat> periode = tilVurdering.filterValue(r -> r.tilkjentYtelse() != null);
+        LocalDateTimeline<DetaljertResultat> periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
 
         LocalDate ytelseFom = periode.getMinLocalDate();
         LocalDate ytelseTom = null;

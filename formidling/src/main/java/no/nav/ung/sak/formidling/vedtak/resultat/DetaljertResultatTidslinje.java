@@ -48,7 +48,7 @@ public record DetaljertResultatTidslinje(LocalDateTimeline<DetaljertResultat> to
                     + ", behandlingÅrsaker: " + v.behandlingsårsaker()
                     + ", avslåtteVilkår: " + v.avslåtteVilkår()
                     + ", ikkeVurderteVilkår: " + v.ikkeVurderteVilkår()
-                    + ", tilkjentYtelse: " + v.tilkjentYtelse();
+                    + ", utbetalingsgrad: " + v.utbetalingsgrad();
             })
             .collect(Collectors.joining(", "));
     }
