@@ -4,9 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -14,16 +12,12 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinjeUtleder;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 
@@ -144,35 +138,11 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
             )));
     }
 
-    /**
-     * Ingen strategi kjente seg igjen. Oppsummerer grunnlaget behandlingen ble vurdert på, slik at det er mulig å
-     * se hvorfor ingen brev ble utledet.
-     */
     private static String utledForklaring(DetaljertResultatTidslinje detaljertResultat) {
-        var tilVurdering = detaljertResultat.tilVurdering();
-        if (tilVurdering.isEmpty()) {
-            return "Ingen brev - ingen perioder til vurdering.";
+        if (detaljertResultat.totalTidslinje().isEmpty()) {
+            return "Ingen strategy fant resultat for grunnlaget: tom tidslinje.";
         }
-
-        var årsaker = tilVurdering.stream()
-            .flatMap(it -> it.getValue().behandlingsårsaker().stream())
-            .map(BehandlingÅrsakType::getKode)
-            .distinct().sorted().toList();
-
-        var avslåtteVilkår = vilkårTyper(tilVurdering, DetaljertResultat::avslåtteVilkår);
-        var ikkeVurderteVilkår = vilkårTyper(tilVurdering, DetaljertResultat::ikkeVurderteVilkår);
-        var harUtbetaling = tilVurdering.stream().anyMatch(it -> it.getValue().harPositivUtbetaling());
-
-        return "Ingen brev for perioder %s med behandlingsårsaker %s, avslåtte vilkår %s, ikke vurderte vilkår %s, utbetaling: %s."
-            .formatted(tilVurdering.getLocalDateIntervals(), årsaker, avslåtteVilkår, ikkeVurderteVilkår, harUtbetaling ? "ja" : "nei");
+        return "Ingen strategy fant resultat for grunnlaget: " + detaljertResultat;
     }
-
-    private static List<String> vilkårTyper(LocalDateTimeline<DetaljertResultat> tidslinje, Function<DetaljertResultat, Set<DetaljertVilkårResultat>> velger) {
-        return tidslinje.stream()
-            .flatMap(it -> velger.apply(it.getValue()).stream())
-            .map(it -> it.vilkårType().getKode())
-            .distinct().sorted().toList();
-    }
-
 
 }
