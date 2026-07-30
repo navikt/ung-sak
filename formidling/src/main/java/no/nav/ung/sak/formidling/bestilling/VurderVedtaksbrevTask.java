@@ -202,7 +202,8 @@ public class VurderVedtaksbrevTask extends BehandlingProsessTask {
             .toList();
 
         if (!ikkeImplementerteBrev.isEmpty()) {
-            throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring);
+            throw new IllegalStateException("Feiler pga ingen brev implementert for tilfelle: " + forklaring
+                + ", detaljertResultatTimeline=[" + resultat.detaljertResultatTimeline() + "]");
         }
         LOG.info("Ingen brev relevant for tilfelle: {}", forklaring);
         behandlingVedtaksbrevRepository.lagre(BehandlingVedtaksbrev

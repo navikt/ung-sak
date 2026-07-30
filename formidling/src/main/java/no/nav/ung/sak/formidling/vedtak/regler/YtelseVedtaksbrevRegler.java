@@ -142,7 +142,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         if (detaljertResultat.totalTidslinje().isEmpty()) {
             return "Ingen strategy fant resultat for grunnlaget: tom tidslinje.";
         }
-        return "Ingen strategy fant resultat for grunnlaget: " + detaljertResultat;
+        return "Ingen strategy fant resultat for grunnlaget.";
     }
 
 }
