@@ -37,7 +37,8 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
         // Forlengelse gjelder kun ved en åpen programperiode; er den lukket har det skjedd en reell sluttdatoendring (opphør/flytting).
         if (resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)
             && harForlengetPeriode(behandling)
-            && !UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository)) {
+            && !ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato).orElse(false)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
                 "Automatisk brev ved forlenget periode"));

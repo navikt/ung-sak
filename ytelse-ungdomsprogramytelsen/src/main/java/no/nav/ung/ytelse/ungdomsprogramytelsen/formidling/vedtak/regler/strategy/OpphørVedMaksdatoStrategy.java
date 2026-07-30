@@ -38,7 +38,8 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
         // er den lukket har det i stedet skjedd en reell sluttdatoendring (opphør/flytting).
         if (resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
             && erRelevantForVarslingOmOpphørVedMaksdato(behandling)
-            && !UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository)) {
+            && !ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato).orElse(false)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
                 "Automatisk brev ved opphør grunnet maksdato."));

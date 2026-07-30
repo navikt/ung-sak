@@ -37,7 +37,8 @@ public final class OpphørOpphevetStrategy implements VedtaksbrevInnholdbyggerSt
         if (!resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)) {
             return List.of();
         }
-        if (UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository)) {
+        var forrigeGrunnlag = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag);
+        if (forrigeGrunnlag.map(UngdomsprogramOpphørUtleder::harLukketSluttdato).orElse(false)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.OPPHOR_OPPHEVET_DOK, opphørOpphevetInnholdBygger,
                 "Automatisk brev ved opphevelse av opphør."));
