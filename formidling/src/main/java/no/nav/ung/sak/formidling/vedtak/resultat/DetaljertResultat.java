@@ -12,10 +12,6 @@ public record DetaljertResultat(
     boolean tilVurdering
 ) {
 
-    public boolean harPositivUtbetaling() {
-        return utbetalingsgrad.harUtbetaling();
-    }
-
     public boolean harÅrsak(BehandlingÅrsakType årsak) {
         return behandlingsårsaker.contains(årsak);
     }
