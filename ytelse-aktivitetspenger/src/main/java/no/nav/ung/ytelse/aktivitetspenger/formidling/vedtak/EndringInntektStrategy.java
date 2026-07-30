@@ -2,8 +2,8 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
@@ -90,11 +90,7 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
     }
 
     private VedtaksbrevStrategyResultat fullUtbetalingResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var kontrollertInntektPerioderTidslinje = hentKontrollertInntektTidslinje(behandling);
-
-        var harManueltFastsattInntekt = harManueltFastsattInntekt(detaljertResultat, kontrollertInntektPerioderTidslinje);
-
-        if (harManueltFastsattInntekt) {
+        if (harManueltFastsattInntekt(behandling, detaljertResultat)) {
             return new VedtaksbrevStrategyResultat(
                 DokumentMalType.ENDRING_INNTEKT_UTEN_REDUKSJON,
                 endringInntektUtenReduksjonInnholdBygger,
@@ -111,31 +107,24 @@ public final class EndringInntektStrategy implements VedtaksbrevInnholdbyggerStr
         return VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT, "Ingen brev ved full utbetaling etter kontroll av inntekt.");
     }
 
-    private boolean harManueltFastsattInntekt(
-        LocalDateTimeline<DetaljertResultat> detaljertResultat,
-        LocalDateTimeline<KontrollertInntektPeriode> kontrollertInntektPerioderTidslinje) {
-
-        return EndringInntektUtleder.fullUtbetalingTidslinje(detaljertResultat)
-            .combine(kontrollertInntektPerioderTidslinje, StandardCombinators::rightOnly,
-                LocalDateTimeline.JoinStyle.LEFT_JOIN)
+    private boolean harManueltFastsattInntekt(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+        var fullUtbetaling = EndringInntektUtleder.fullUtbetalingTidslinje(detaljertResultat);
+        return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId())
             .stream()
-            .anyMatch(it -> harManuellFastsatt0kr(it.getValue()));
+            .flatMap(it -> it.getPerioder().stream())
+            .filter(EndringInntektStrategy::harManuellFastsatt0kr)
+            .anyMatch(it -> !fullUtbetaling.intersection(tilIntervall(it)).isEmpty());
+    }
+
+    private static LocalDateInterval tilIntervall(KontrollertInntektPeriode kontrollertInntektPeriode) {
+        return new LocalDateInterval(
+            kontrollertInntektPeriode.getPeriode().getFomDato(),
+            kontrollertInntektPeriode.getPeriode().getTomDato());
     }
 
     private static boolean harManuellFastsatt0kr(KontrollertInntektPeriode kontrollertInntektPeriode) {
         boolean harFastsattInntektTil0kr = kontrollertInntektPeriode.getInntekt().compareTo(BigDecimal.ZERO) == 0;
         return kontrollertInntektPeriode.getErManueltVurdert() && harFastsattInntektTil0kr;
-    }
-
-    private LocalDateTimeline<KontrollertInntektPeriode> hentKontrollertInntektTidslinje(Behandling behandling) {
-        return tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId())
-            .stream()
-            .flatMap(it -> it.getPerioder().stream())
-            .map(p -> new LocalDateTimeline<>(
-                p.getPeriode().getFomDato(),
-                p.getPeriode().getTomDato(),
-                p)).reduce(LocalDateTimeline::crossJoin)
-            .orElse(LocalDateTimeline.empty());
     }
 
 }
