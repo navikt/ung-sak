@@ -23,9 +23,9 @@ public final class UendretVedtakStrategy implements VedtaksbrevInnholdbyggerStra
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        var detaljertResultat = resultatTidslinje.tilVurdering();
-        boolean harAvslag = detaljertResultat.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
-        if (resultatTidslinje.harÅrsak(BehandlingÅrsakType.ENDRET_BOSTED) && !harAvslag) {
+        var endretBosted = resultatTidslinje.filtrerPåÅrsak(BehandlingÅrsakType.ENDRET_BOSTED);
+        boolean harAvslag = endretBosted.stream().anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+        if (!endretBosted.isEmpty() && !harAvslag) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev( IngenBrevÅrsakType.IKKE_RELEVANT, "Revurdering uten endring. "));
         }
         return List.of();
