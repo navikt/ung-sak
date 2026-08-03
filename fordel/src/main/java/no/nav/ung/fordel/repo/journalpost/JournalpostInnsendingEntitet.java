@@ -1,17 +1,23 @@
 package no.nav.ung.fordel.repo.journalpost;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+import org.hibernate.annotations.Parameter;
+import org.hibernate.annotations.Type;
+import org.hibernate.usertype.UserTypeLegacyBridge;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.PreUpdate;
+import jakarta.persistence.Table;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
-import org.hibernate.usertype.UserTypeLegacyBridge;
-
-import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity(name = "JournalpostInnsendingEntitet")
 @Table(name = "FORDEL_JOURNALPOST_INNSENDING")
@@ -104,10 +110,6 @@ public class JournalpostInnsendingEntitet {
 
     public String getPayload() {
         return payload;
-    }
-
-    public void setPayload(String payload) {
-        this.payload = payload;
     }
 
     public LocalDateTime getInnsendingstidspunkt() {

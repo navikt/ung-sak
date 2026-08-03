@@ -8,6 +8,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.kontrakt.ResourceLink;
 import no.nav.ung.sak.kontrakt.ResourceLink.HttpMethod;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingAnsvarligDto;
@@ -34,8 +36,8 @@ import java.util.stream.Collectors;
 public class BehandlingDtoUtil {
 
     static void settStandardfelterUtvidet(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak,
-                                          boolean erBehandlingMedGjeldendeVedtak) {
-        setStandardfelter(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+                                          boolean erBehandlingMedGjeldendeVedtak, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
+        setStandardfelter(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak, ungdomsprogramPeriodeRepository);
 
         dto.setBehandlingHenlagt(behandling.isBehandlingHenlagt());
     }
@@ -60,12 +62,12 @@ public class BehandlingDtoUtil {
         return Collections.emptyList();
     }
 
-    static void setStandardfelter(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak) {
+    static void setStandardfelter(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, BehandlingVedtak behandlingVedtak, boolean erBehandlingMedGjeldendeVedtak, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         if (behandlingVedtak != null) {
             dto.setOriginalVedtaksDato(behandlingVedtak.getVedtaksdato());
         }
 
-        dto.setVisningsnavn(utledVisningsnavn(behandling));
+        dto.setVisningsnavn(utledVisningsnavn(behandling, ungdomsprogramPeriodeRepository));
         dto.setFagsakId(behandling.getFagsakId());
         dto.setSakstype(behandling.getFagsakYtelseType());
         dto.setId(behandling.getId());
@@ -117,7 +119,7 @@ public class BehandlingDtoUtil {
         );
     }
 
-    private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling) {
+    private static BehandlingVisningsnavn utledVisningsnavn(Behandling behandling, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         final var relevanteÅrsaker = Set.of(
             BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT,
             BehandlingÅrsakType.RE_RAPPORTERING_INNTEKT,
@@ -127,6 +129,7 @@ public class BehandlingDtoUtil {
             BehandlingÅrsakType.RE_HENDELSE_DØD_FORELDER,
             BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM,
             BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM,
+            BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM,
             BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO
         );
 
@@ -155,6 +158,13 @@ public class BehandlingDtoUtil {
         }
         if (behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO == it)) {
             return BehandlingVisningsnavn.OPPHØR_VED_MAKSDATO;
+        }
+        if (behandlingÅrsakerTyper.contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM)
+            && behandlingÅrsakerTyper.stream().allMatch(it -> BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM == it
+            || BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM == it)) {
+            return UngdomsprogramOpphørUtleder.opphørAvUngdomsprogrammetVarInkludertIVedtaket(behandling, ungdomsprogramPeriodeRepository)
+                ? BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_OPPHEVET
+                : BehandlingVisningsnavn.UNGDOMSPROGRAM_OPPHØR_MOTTATT_OG_AVBRUTT_I_SAMME_BEHANDLING;
         }
         return BehandlingVisningsnavn.FLERE_BEHANDLINGÅRSAKER;
     }

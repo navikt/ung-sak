@@ -27,7 +27,7 @@ public class SatsEndringScenarioer {
             new LocalDateSegment<>(fom, p.getTomDato(), BrevScenarioerUtils.lavSatsBuilder(fom).build())
         ));
 
-        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), p.getTomDato()));
+        var programPerioder = List.of(new UngdomsprogramPeriode(p.getFomDato(), LocalDateInterval.TIDENES_ENDE));
 
         return new UngTestScenario(
             BrevScenarioerUtils.DEFAULT_NAVN,

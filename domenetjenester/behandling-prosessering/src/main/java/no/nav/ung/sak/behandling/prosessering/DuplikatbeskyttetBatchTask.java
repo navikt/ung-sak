@@ -58,6 +58,15 @@ public abstract class DuplikatbeskyttetBatchTask implements BatchProsessTaskHand
         return true;
     }
 
+    /**
+     * Kalles etter at child-tasken er opprettet, men før den lagres. Overstyr for å sette
+     * properties på child-tasken (f.eks. periode) som eventuelt {@link #erDuplikat(ProsessTaskData)}
+     * er avhengig av.
+     */
+    protected void leggTilProperties(ProsessTaskData childTask) {
+        // Standard: ingen ekstra properties
+    }
+
     @Override
     public final void doTask(ProsessTaskData prosessTaskData) {
         if (!isEnabled()) {
@@ -72,6 +81,7 @@ public abstract class DuplikatbeskyttetBatchTask implements BatchProsessTaskHand
         }
 
         ProsessTaskData childTask = ProsessTaskData.forTaskType(getTaskType());
+        leggTilProperties(childTask);
         prosessTaskTjeneste.lagre(childTask);
     }
 

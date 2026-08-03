@@ -1,5 +1,6 @@
 package no.nav.ung.sak.domene.registerinnhenting;
 
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.AbstractTestScenario;
@@ -157,6 +158,16 @@ public class RegisterdataEndringshåndtererTest {
 
         // Assert
         assertThat(harHentetInn).isFalse();
+    }
+
+    @Test
+    public void skal_gi_spesifikt_historikkinnslag_for_opphevelse_av_opphør_som_registeropplysningårsak() {
+        // Regresjonstest: RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM må inngå i settet med årsaker
+        // som gir det spesifikke "Behandlingen oppdatert med nye opplysninger"-historikkinnslaget
+        // (med årsakstekst), i stedet for det generiske "Nye registeropplysninger"-innslaget uten
+        // årsakstekst. Se RegisterdataEndringshåndterer.lagHistorikkinnslag.
+        assertThat(RegisterdataEndringshåndterer.REGISTEROPPLYSNING_BEHANDLINGÅRSAKER)
+            .contains(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_OPPHEVET_UNGDOMSPROGRAM);
     }
 
     private RegisterdataEndringshåndterer lagRegisterdataInnhenter(AbstractTestScenario<?> scenario, String durationInstance, String overstyrtInnhentingDuration) {

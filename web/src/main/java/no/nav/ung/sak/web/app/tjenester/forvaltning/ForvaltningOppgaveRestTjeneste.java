@@ -210,7 +210,7 @@ public class ForvaltningOppgaveRestTjeneste {
             throw new IllegalStateException("Kan ikke avbryte etterlysning som har mottatt svar");
         }
 
-        etterlysning.skalAvbrytes();
+        etterlysning.setSkalAvbrytes();
         etterlysningRepository.lagre(etterlysning);
         final var behandling = behandlingRepository.hentBehandling(etterlysning.getBehandlingId());
         final var avbrytTask = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);

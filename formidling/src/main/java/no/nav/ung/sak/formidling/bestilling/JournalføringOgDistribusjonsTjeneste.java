@@ -142,6 +142,7 @@ public class JournalføringOgDistribusjonsTjeneste {
             case ENDRING_HØY_SATS -> "Endring Høy Sats";
             case FORLENGET_PERIODE -> "Forlenget periode";
             case OPPHOR_VED_MAKSDATO_DOK -> "Opphør ved maksdato";
+            case OPPHOR_OPPHEVET_DOK -> "Opphør opphevet";
             case OPPHØR_DOK -> "Opphør";
             case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";

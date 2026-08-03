@@ -9,8 +9,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -18,159 +16,129 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.*;
-import no.nav.k9.felles.validering.InputValideringRegex;
-import no.nav.k9.oppgave.OppgaveBekreftelse;
-import no.nav.k9.oppgave.bekreftelse.ung.periodeendring.EndretSluttdatoBekreftelse;
-import no.nav.k9.søknad.JsonUtils;
-import no.nav.ung.fordel.repo.journalpost.JournalpostRepository;
 import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingIdDto;
+import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.kontrakt.KortTekst;
+import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
 import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
+import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Set;
 
 
-/**
- * DENNE TJENESTEN ER BARE FOR MIDLERTIDIG BEHOV FOR TSFF-2756, OG SKAL AVVIKLES SÅ RASKT SOM MULIG.
- */
-@Path("/TSFF-2756/forvaltning")
+@Path("/forvaltning")
 @ApplicationScoped
 @Transactional
 public class ForvaltningMottattDokumentRestTjeneste {
 
     private static final String JSON_UTF8 = "application/json; charset=UTF-8";
 
-    private BehandlingRepository behandlingRepository;
+    private static final Set<Brevkode> TILLATTE_BREVKODER = Set.of(
+        Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE,
+        Brevkode.UNGDOMSYTELSE_INNTEKTRAPPORTERING
+    );
+    private static final Logger log = LoggerFactory.getLogger(ForvaltningMottattDokumentRestTjeneste.class);
+
+    private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private EntityManager entityManager;
-    private JournalpostRepository journalpostRepository;
 
     public ForvaltningMottattDokumentRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public ForvaltningMottattDokumentRestTjeneste(BehandlingRepository behandlingRepository,
+    public ForvaltningMottattDokumentRestTjeneste(FagsakRepository fagsakRepository,
                                                   MottatteDokumentRepository mottatteDokumentRepository,
-                                                  EntityManager entityManager,
-                                                  JournalpostRepository journalpostRepository) {
-        this.behandlingRepository = behandlingRepository;
+                                                  EntityManager entityManager) {
+        this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.entityManager = entityManager;
-        this.journalpostRepository = journalpostRepository;
     }
 
     @POST
-    @Path("oppdater-mottatt-dokument")
+    @Path("/marker-ugyldig")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Operation(description = "oppdaterer mottatt dokument ifm TSFF-2756", summary = ("oppdaterer mottatt dokument ifm TSFF-2756"), tags = "forvaltning")
+    @Operation(description = "Markerer et mottatt dokument som ugyldig", summary = ("Markerer angitt dokument som ugyldig"), tags = "forvaltning")
     @Produces(JSON_UTF8)
     @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.DRIFT)
-    public Response oppdaterMottattDokument(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) OppdaterMottattDokumentRequest dto) {
-        String nyUttalelse = dto.nyUttalelseFraBruker;
-        if (nyUttalelse == null || nyUttalelse.isBlank()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity("nyUttalelseFraBruker må ha en verdi")
+    public Response markerMottattDokumentUgyldig(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MarkerDokumentUgyldigRequest dto) {
+        var fagsakOpt = fagsakRepository.hentSakGittSaksnummer(dto.saksnummer());
+        if (fagsakOpt.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity("Fant ikke fagsak for saksnummer: " + dto.saksnummer().getVerdi())
+                .build();
+        }
+        Long fagsakId = fagsakOpt.get().getId();
+        JournalpostId journalpostId = dto.journalpostId().getJournalpostId();
+        List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokument(fagsakId, List.of(journalpostId));
+
+        if (mottattDokuments.isEmpty()) {
+            return Response.status(Response.Status.NOT_FOUND)
+                .entity("Fant ingen dokumenter for saksnummer " + dto.saksnummer().getVerdi() + " og journalpostId " + journalpostId.getVerdi())
                 .build();
         }
 
-        Behandling behandling = behandlingRepository.hentBehandling(dto.behandlingId.getId());
-        JournalpostId journalpostId = dto.journalpostId.getJournalpostId();
-        List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokument(behandling.getFagsakId(), List.of(journalpostId)).stream()
-            .filter(it -> it.getStatus() == DokumentStatus.MOTTATT).toList();
-
-        if (mottattDokuments.size() != 1) {
-            throw new IllegalArgumentException("Forventet 1 dokument fant "+mottattDokuments.size());
+        if (mottattDokuments.size() > 1) {
+            return Response.status(Response.Status.BAD_REQUEST)
+                .entity("Forventet maks 1 dokument, men fant " + mottattDokuments.size())
+                .build();
         }
 
         MottattDokument mottattDokument = mottattDokuments.getFirst();
 
-        // Sjekk at dokumentet er av riktig type
-        if (!Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE.equals(mottattDokument.getType())) {
+        if (!TILLATTE_BREVKODER.contains(mottattDokument.getType())) {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Forventet brevkode " + Brevkode.UNGDOMSYTELSE_VARSEL_UTTALELSE + ", men dokumentet har: " + mottattDokument.getType())
+                .entity("Dokumentet har brevkode " + mottattDokument.getType() + ", bare dokumenter med brevkodene " + TILLATTE_BREVKODER + " kan settes ugyldige")
                 .build();
         }
 
-        OppgaveBekreftelse oppgaveBekreftelse = JsonUtils.fromString(mottattDokument.getPayload(), OppgaveBekreftelse.class);
-
-        if (!(oppgaveBekreftelse.getBekreftelse() instanceof EndretSluttdatoBekreftelse eksisterendeBekreftelse)) {
+        if (mottattDokument.getStatus() != DokumentStatus.MOTTATT) {
             return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Forventet bekreftelse av type EndretSluttdatoBekreftelse, men fikk: " + oppgaveBekreftelse.getBekreftelse().getType())
+                .entity("Forventet at dokument har status MOTTATT, men hadde: " + mottattDokument.getStatus())
                 .build();
         }
 
-        if (!eksisterendeBekreftelse.harUttalelse()) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Eksisterende payload har harUttalelse=false og kan derfor ikke patches")
-                .build();
-        }
-        if (eksisterendeBekreftelse.getUttalelseFraBruker() != null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                .entity("Eksisterende payload har allerede uttalelseFraBruker satt")
-                .build();
-        }
 
-        oppgaveBekreftelse.setBekreftelse(eksisterendeBekreftelse.medUttalelseFraBruker(nyUttalelse));
-        String nyPayload = JsonUtils.toString(oppgaveBekreftelse);
+        String formatertBegrunnelse = "Markert som ugyldig av teknisk forvaltning. Begrunnelse: %s".formatted(dto.begrunnelse().getTekst());
+        mottattDokument.setFeilmeldingOgOppdaterStatus(formatertBegrunnelse);
+        mottatteDokumentRepository.oppdater(mottattDokument);
 
-        // Oppdater MottattDokument (payload er updatable=false, så bruk native oppdatering)
-        mottatteDokumentRepository.oppdaterPayload(mottattDokument.getId(), nyPayload);
+        entityManager.persist(new DiagnostikkFagsakLogg(fagsakId, "/marker-ugyldig", formatertBegrunnelse));
+        entityManager.flush();
 
-        // Oppdater JournalpostMottattEntitet
-        journalpostRepository.finnJournalpostMottatt(journalpostId).ifPresent(mottatt -> {
-            mottatt.setPayload(nyPayload);
-            journalpostRepository.lagreMottatt(mottatt);
-        });
-
-        // Oppdater JournalpostInnsendingEntitet
-        journalpostRepository.finnJournalpostInnsending(journalpostId).ifPresent(innsending -> {
-            innsending.setPayload(nyPayload);
-            journalpostRepository.lagreInnsending(innsending);
-        });
-
-        entityManager.persist(new DiagnostikkFagsakLogg(
-            behandling.getFagsakId(),
-            "ForvaltningMottattDokumentRestTjeneste.oppdaterMottattDokument (midlertidig)",
-            "Patching ifm TSFF-2756. Oppdatert uttalelseFraBruker i journalpost=%s payload i 3 tabeller: MOTTATT_DOKUMENT, FORDEL_JOURNALPOST_INNSENDING og FORDEL_JOURNALPOST_MOTTATT"
-                .formatted(journalpostId.getVerdi())
-        ));
+        log.info("Manuelt markert mottatt dokument med journalpostId={} av type {} som ugyldig.", mottattDokument.getJournalpostId().getVerdi(), mottattDokument.getType());
 
         return Response.ok().build();
     }
 
-    public record OppdaterMottattDokumentRequest(
+    public record MarkerDokumentUgyldigRequest(
         @Valid
-        @StandardAbacAttributt(StandardAbacAttributtType.JOURNALPOST_ID)
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class)
+        @NotNull
         JournalpostId journalpostId,
 
-        @JsonProperty(value = "behandlingId", required = true)
+        @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)
+        @JsonProperty(value = SaksnummerDto.NAME, required = true)
         @NotNull
         @Valid
-        BehandlingIdDto behandlingId,
+        Saksnummer saksnummer,
 
+        @NotNull
         @Valid
-        @Size(max = 4000)
-        @Pattern(regexp = InputValideringRegex.FRITEKST)
-        String nyUttalelseFraBruker
-    ) {
-
-        @StandardAbacAttributt(StandardAbacAttributtType.BEHANDLING_ID)
-        public Long getBehandlingId() {
-            return behandlingId.getBehandlingId();
-        }
-
-
-
-    }
+        @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class)
+        KortTekst begrunnelse
+    ) {}
 
 
 }

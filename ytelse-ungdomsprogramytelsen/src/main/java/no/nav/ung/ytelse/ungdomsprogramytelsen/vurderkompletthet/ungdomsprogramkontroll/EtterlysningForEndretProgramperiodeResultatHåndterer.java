@@ -79,7 +79,7 @@ public class EtterlysningForEndretProgramperiodeResultatHåndterer {
                                      EtterlysningType etterlysningType,
                                      Etterlysning gjeldendeEtterlysning,
                                      UngdomsprogramPeriodeGrunnlag gjeldendeGrunnlag) {
-        gjeldendeEtterlysning.skalAvbrytes();
+        gjeldendeEtterlysning.setSkalAvbrytes();
 
         var nyEtterlysning = Etterlysning.opprettForType(
             behandlingReferanse.getBehandlingId(),
