@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOppgavetypeDataDto;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -13,6 +14,7 @@ import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.util.List;
+import java.util.Objects;
 
 @Dependent
 public class BostedOppgaveOppretter {
@@ -37,6 +39,10 @@ public class BostedOppgaveOppretter {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
 
+            if (periodeAvklaring.getIkkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.ANNET) {
+                Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "Mangler fritekst til varsel når årsak annet er valgt." + etterlysning.getGrunnlagsreferanse());
+            }
+
             var oppgaveDto = new OpprettOppgaveDto(
                 new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
                 ytelsetype,
@@ -44,11 +50,27 @@ public class BostedOppgaveOppretter {
                 new BekreftBostedOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),
                     etterlysning.getPeriode().getTomDato(),
-                    periodeAvklaring.isErBosattITrondheim()
+                    periodeAvklaring.isErBosattITrondheim(),
+                    periodeAvklaring.getFritekstTilVarsel(),
+                    mapTilBrukerDialog(periodeAvklaring.getIkkeOppfyltÅrsak())
                 ),
                 etterlysning.getFrist()
             );
             oppgaveKlient.opprettOppgave(oppgaveDto);
         }
+    }
+
+    public no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak mapTilBrukerDialog(BostedsvilkårIkkeOppfyltÅrsak årsak) {
+        return switch (årsak) {
+            case IKKE_BOSATTADRESSE_I_TRONDHEIM ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
+            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM;
+            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
+            case ANNET ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.ANNET;
+            case UDEFINERT -> throw new IllegalArgumentException("Ukjent årsak: " + årsak);
+        };
     }
 }
