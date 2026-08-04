@@ -14,6 +14,7 @@ import no.nav.ung.sak.typer.Periode;
     @JsonSubTypes.Type(name = Hendelse.FOEDSEL, value = FødselHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.DOEDSFALL, value = DødsfallHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_OPPHOER, value = UngdomsprogramOpphørHendelse.class),
+    @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_OPPHOER_OPPHEVET, value = UngdomsprogramOpphørOpphevetHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_ENDRET_STARTDATO, value = UngdomsprogramEndretStartdatoHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_FJERN_PERIODE, value = UngdomsprogramFjernDeltakelseHendelse.class),
     @JsonSubTypes.Type(name = Hendelse.UNGDOMSPROGRAM_FORLENGET_PERIODE, value = UngdomsprogramForlengetPeriodeHendelse.class),
@@ -24,6 +25,7 @@ public interface Hendelse {
     String FOEDSEL = "FOEDSEL_V1";
     String DOEDSFALL = "DOEDSFALL_V1";
     String UNGDOMSPROGRAM_OPPHOER = "UNGDOMSPROGRAM_OPPHOER";
+    String UNGDOMSPROGRAM_OPPHOER_OPPHEVET = "UNGDOMSPROGRAM_OPPHOER_OPPHEVET";
     String UNGDOMSPROGRAM_ENDRET_STARTDATO = "UNGDOMSPROGRAM_ENDRET_STARTDATO";
     String UNGDOMSPROGRAM_FJERN_PERIODE = "UNGDOMSPROGRAM_FJERN_PERIODE";
     String UNGDOMSPROGRAM_FORLENGET_PERIODE = "UNGDOMSPROGRAM_FORLENGET_PERIODE";

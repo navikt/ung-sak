@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -27,6 +28,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(JpaExtension.class)
@@ -114,7 +116,50 @@ class MaksdatoEtterlysningTjenesteTest {
     }
 
     @Test
-    void skalIkkeOppretteEtterlysning_nårMaksdatoUtenforVarslingsvindu() {
+    void skalHardfeile_nårVarselOpphørÅrsakOgIngenEtterlysningOpprettet() {
+        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO, men maksdato er utenfor varslingsvinduet slik at ingen
+        // etterlysning opprettes. Da skal behandlingen hardfeile slik at den ikke går videre til vedtak uten varsel.
+        var fom = LocalDate.now().minusMonths(6);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(fom, MAKSDATO_UTENFOR_VARSLINGSVINDU)),
+            false, MAKSDATO_UTENFOR_VARSLINGSVINDU);
+
+        assertThatThrownBy(() -> tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling)))
+            .isInstanceOf(IllegalStateException.class);
+
+        var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
+        assertThat(etterlysninger).isEmpty();
+    }
+
+    @Test
+    void skalHardfeile_nårVarselOpphørHarIkkeOverstyrendeTilleggsårsakOgIngenEtterlysning() {
+        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO + inntektskontroll (ikke overstyrende årsak).
+        // Inntektskontroll påvirker ikke periode-/maksdato-grunnlaget, så manglende etterlysning her
+        // indikerer fortsatt en feil og skal hardfeile.
+        var lås = behandlingRepository.taSkriveLås(behandling);
+        BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT).buildFor(behandling);
+        behandlingRepository.lagre(behandling, lås);
+
+        var fom = LocalDate.now().minusMonths(6);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(fom, MAKSDATO_UTENFOR_VARSLINGSVINDU)),
+            false, MAKSDATO_UTENFOR_VARSLINGSVINDU);
+
+        assertThatThrownBy(() -> tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling)))
+            .isInstanceOf(IllegalStateException.class);
+
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
+    }
+
+    @Test
+    void skalIkkeHardfeile_nårVarselOpphørErOverstyrtAvForlengetPeriodeOgIngenEtterlysning() {
+        // Behandling har RE_VARSEL_OPPHOR_VED_MAKSDATO + forlenget periode (overstyrende årsak).
+        // Forlenget periode endrer selve periode-/maksdato-grunnlaget, og kan derfor legitimt gjøre
+        // at varsel ikke lenger er relevant. Skal ikke hardfeile.
+        var lås = behandlingRepository.taSkriveLås(behandling);
+        BehandlingÅrsak.builder(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM).buildFor(behandling);
+        behandlingRepository.lagre(behandling, lås);
+
         var fom = LocalDate.now().minusMonths(6);
         ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
             List.of(new UngdomsprogramPeriode(fom, MAKSDATO_UTENFOR_VARSLINGSVINDU)),
@@ -122,8 +167,7 @@ class MaksdatoEtterlysningTjenesteTest {
 
         tjeneste.opprettEtterlysningForOpphørVedMaksdatoDersomRelevant(BehandlingReferanse.fra(behandling));
 
-        var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
-        assertThat(etterlysninger).isEmpty();
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
     }
 
     @Test

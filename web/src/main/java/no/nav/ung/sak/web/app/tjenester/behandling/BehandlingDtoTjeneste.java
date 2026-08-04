@@ -21,6 +21,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.registerinnhenting.InformasjonselementerUtleder;
 import no.nav.ung.sak.kontrakt.AsyncPollingStatus;
 import no.nav.ung.sak.kontrakt.ResourceLink;
@@ -67,6 +68,7 @@ public class BehandlingDtoTjeneste {
     private final TilbakekrevingRepository tilbakekrevingRepository;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final TotrinnTjeneste totrinnTjeneste;
+    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     private final Instance<InformasjonselementerUtleder> informasjonselementer;
 
@@ -78,6 +80,7 @@ public class BehandlingDtoTjeneste {
                                  TilbakekrevingRepository tilbakekrevingRepository,
                                  VilkårResultatRepository vilkårResultatRepository,
                                  TotrinnTjeneste totrinnTjeneste,
+                                 UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                  @Any Instance<InformasjonselementerUtleder> informasjonselementer) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
 
@@ -87,6 +90,7 @@ public class BehandlingDtoTjeneste {
         this.behandlingRepository = behandlingRepository;
         this.behandlingVedtakRepository = behandlingVedtakRepository;
         this.totrinnTjeneste = totrinnTjeneste;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.informasjonselementer = informasjonselementer;
     }
 
@@ -105,7 +109,7 @@ public class BehandlingDtoTjeneste {
                                            boolean erBehandlingMedGjeldendeVedtak) {
         var dto = new BehandlingDto();
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
-        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+        BehandlingDtoUtil.setStandardfelter(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak, ungdomsprogramPeriodeRepository);
         initBehandlingResourceLinks(behandling, behandlingsresultatDto, dto);
 
         return dto;
@@ -245,7 +249,7 @@ public class BehandlingDtoTjeneste {
         var erBehandlingMedGjeldendeVedtak = erBehandlingMedGjeldendeVedtak(revurdering, originalBehandling);
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(revurdering.getId()).orElse(null);
         Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlige(revurdering.getId());
-        setStandardfelter(revurdering, behandlingAnsvarlig, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+        setStandardfelter(revurdering, behandlingAnsvarlig, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak, ungdomsprogramPeriodeRepository);
 
         var behandlingsresultatDto = lagBehandlingsresultat(revurdering);
         initBehandlingResourceLinks(revurdering, behandlingsresultatDto, dto);
@@ -256,7 +260,7 @@ public class BehandlingDtoTjeneste {
     private void settStandardfelterUtvidet(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, BehandlingDto dto, boolean erBehandlingMedGjeldendeVedtak) {
         var behandlingVedtak = behandlingVedtakRepository.hentBehandlingVedtakForBehandlingId(behandling.getId()).orElse(null);
 
-        BehandlingDtoUtil.settStandardfelterUtvidet(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak);
+        BehandlingDtoUtil.settStandardfelterUtvidet(behandling, behandlingAnsvarlige, dto, behandlingVedtak, erBehandlingMedGjeldendeVedtak, ungdomsprogramPeriodeRepository);
     }
 
     BehandlingDto mapFra(Behandling behandling, Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige, boolean erBehandlingMedGjeldendeVedtak) {

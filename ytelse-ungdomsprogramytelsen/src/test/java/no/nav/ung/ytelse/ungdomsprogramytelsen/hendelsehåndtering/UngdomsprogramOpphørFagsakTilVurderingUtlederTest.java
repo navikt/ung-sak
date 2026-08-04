@@ -132,6 +132,11 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         behandling.avsluttBehandling();
         entityManager.flush();
 
+        // Naturlig avslutning: vilkår evaluert kun opp til og med opphørsdato (ikke utover maksdato)
+        var oppfyltSamlet = new VilkårUtfallSamlet(Utfall.OPPFYLT, List.of());
+        when(vilkårTjeneste.samletVilkårsresultat(anyLong()))
+            .thenReturn(new LocalDateTimeline<>(STP, OPPHØRSDATO, oppfyltSamlet));
+
         var builder = new HendelseInfo.Builder();
         builder.leggTilAktør(BRUKER_AKTØR_ID);
         builder.medHendelseId("1");
@@ -154,12 +159,14 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
         behandling.avsluttBehandling();
         entityManager.flush();
 
-        var vilkåreneMock = mock(Vilkårene.class);
-        var ikkeOppfyltPeriode = mock(VilkårPeriode.class);
-        when(ikkeOppfyltPeriode.getGjeldendeUtfall()).thenReturn(Utfall.IKKE_OPPFYLT);
-        when(vilkåreneMock.getVilkårTimeline(VilkårType.UNGDOMSPROGRAMVILKÅRET))
-            .thenReturn(new LocalDateTimeline<>(OPPHØRSDATO.plusDays(1), gammelOpphørsdato, ikkeOppfyltPeriode));
-        when(vilkårTjeneste.hentHvisEksisterer(anyLong())).thenReturn(Optional.of(vilkåreneMock));
+        // Vilkår: OPPFYLT opp til maksdato, IKKE_OPPFYLT etter — ingen revurdering forventet
+        var oppfyltSamlet = new VilkårUtfallSamlet(Utfall.OPPFYLT, List.of());
+        var ikkeOppfyltSamlet = new VilkårUtfallSamlet(Utfall.IKKE_OPPFYLT, List.of());
+        when(vilkårTjeneste.samletVilkårsresultat(anyLong()))
+            .thenReturn(new LocalDateTimeline<>(List.of(
+                new no.nav.fpsak.tidsserie.LocalDateSegment<>(STP, OPPHØRSDATO, oppfyltSamlet),
+                new no.nav.fpsak.tidsserie.LocalDateSegment<>(OPPHØRSDATO.plusDays(1), gammelOpphørsdato, ikkeOppfyltSamlet)
+            )));
 
         var builder = new HendelseInfo.Builder();
         builder.leggTilAktør(BRUKER_AKTØR_ID);
@@ -386,6 +393,31 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtlederTest {
 
         // periodeMaksDato != opphørsdato, så sjekk 1 treffer ikke → skal opprette revurdering
         validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(OPPHØRSDATO.plusDays(1), gammelOpphørsdato));
+    }
+
+    @Test
+    void skal_returnere_årsak_dersom_opphørsdato_er_lik_maksdato_men_programperiode_slutter_foer_maksdato() {
+        var behandling = scenarioBuilder.lagre(entityManager);
+        scenarioBuilder.lagreFagsak(behandlingRepositoryProvider);
+        // Forlengelsesscenario: en tidligere revurdering stoppet programperioden 10 dager FØR maksdato.
+        // Ny opphørshendelse setter opphørsdato = maksdato → skal opprette revurdering (forlengelse).
+        final var gammelProgramTom = OPPHØRSDATO.minusDays(10);
+        ungdomsprogramPeriodeRepository.lagre(behandling.getId(),
+            List.of(new UngdomsprogramPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(STP, gammelProgramTom))),
+            false,
+            OPPHØRSDATO); // periodeMaksDato == opphørsdato fra hendelse
+
+        behandling.avsluttBehandling();
+        entityManager.flush();
+
+        var builder = new HendelseInfo.Builder();
+        builder.leggTilAktør(BRUKER_AKTØR_ID);
+        builder.medHendelseId("1");
+        builder.medOpprettet(LocalDateTime.now());
+        var fagsakBehandlingÅrsakTypeMap = utleder.finnFagsakerTilVurdering(new UngdomsprogramOpphørHendelse(builder.build(), OPPHØRSDATO));
+
+        // Programperiode ender FØR maksdato → forlengelse → skal opprette revurdering
+        validerHarÅrsak(fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet.fraOgMedTilOgMed(gammelProgramTom.plusDays(1), OPPHØRSDATO));
     }
 
     private static void validerHarÅrsak(Map<Fagsak, List<ÅrsakOgPerioder>> fagsakBehandlingÅrsakTypeMap, DatoIntervallEntitet forventetPeriode) {

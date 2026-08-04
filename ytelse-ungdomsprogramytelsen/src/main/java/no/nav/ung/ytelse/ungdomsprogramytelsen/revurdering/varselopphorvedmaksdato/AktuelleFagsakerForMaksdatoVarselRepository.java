@@ -47,6 +47,9 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
      * I tillegg sjekkes det på om fagsaken har en tidligere behandling med prosesstrigger for RE_VARSEL_OPPHOR_VED_MAKSDATO med periode som overlapper gjeldende maksdato.
      * Dersom det finnes en slik behandling er det sendt varsel tidligere og vi skal ikke sende på nytt.
      *
+     * Det ekskluderes også fagsaker som allerede har en åpen (ikke avsluttet/iverksatt) behandling med årsak RE_VARSEL_OPPHOR_VED_MAKSDATO,
+     * slik at vi ikke oppretter duplikate behandlinger mens en varselbehandling er under arbeid.
+     *
      */
     @SuppressWarnings("unchecked")
     public List<Fagsak> hentFagsakerRelevantForMaksdatoVarsel() {
@@ -91,6 +94,15 @@ public class AktuelleFagsakerForMaksdatoVarselRepository {
                           where b3.fagsak_id = f.id
                             and pt.arsak = :varselOpphorArsak
                             and pt.periode && daterange(cast(mp.periode_maks_dato as date), cast(mp.periode_maks_dato as date), '[]')
+                      )
+                      and not exists (
+                          select 1
+                          from behandling b4
+                          inner join behandling_arsak ba
+                              on ba.behandling_id = b4.id
+                          where b4.fagsak_id = f.id
+                            and ba.behandling_arsak_type = :varselOpphorArsak
+                            and b4.behandling_status not in ('AVSLU', 'IVED')
                       )
                     group by mp.periode_maks_dato
                     having max(p.tom) >= mp.periode_maks_dato

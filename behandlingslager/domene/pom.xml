@@ -17,6 +17,10 @@
             <groupId>no.nav.ung.sak</groupId>
             <artifactId>kodeverk</artifactId>
         </dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>no.nav.k9.prosesstask</groupId>

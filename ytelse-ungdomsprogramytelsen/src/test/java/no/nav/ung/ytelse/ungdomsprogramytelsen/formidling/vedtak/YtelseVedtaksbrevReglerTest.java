@@ -312,7 +312,7 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
 
-        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(fom, opprinneligSluttdato, nySluttdato));
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(fom, nySluttdato));
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
@@ -332,7 +332,7 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
 
-        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(fom, opprinneligSluttdato, nySluttdato));
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(fom, nySluttdato));
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
@@ -354,7 +354,7 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_overstyre_opphor_ved_maksdato_brev_med_forlenget_periode_brev() {
+    void skal_ikke_sende_opphor_ved_maksdato_brev_når_forlenget_periode() {
         LocalDate fom = LocalDate.now().minusWeeks(52).plusWeeks(2);
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
@@ -374,7 +374,7 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     @Test
-    void skal_overstyre_opphor_ved_maksdato_brev_med_programperiodeendring_ved_manuelt_opphor() {
+    void skal_ikke_sende_opphor_ved_maksdato_brev_når_kombinert_med_opphør() {
         LocalDate fom = LocalDate.of(2025, 1, 1);
         LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
         LocalDate nySluttdato = opprinneligSluttdato.minusDays(20);
@@ -382,13 +382,13 @@ class YtelseVedtaksbrevReglerTest {
         var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
             EndringProgramPeriodeScenarioer.endringOpphør(new LocalDateInterval(fom, opprinneligSluttdato), nySluttdato),
             opprinneligSluttdato);
-        var behandling = lagBehandling(scenario);
+        var behandling = lagBehandlingMedOriginalBehandling(FørstegangsbehandlingScenarioer.innvilget19år(fom), scenario);
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
         assertThat(totalresultater.harBrev()).isTrue();
         assertThat(totalresultater.vedtaksbrevResultater())
             .extracting(Vedtaksbrev::dokumentMalType)
-            .contains(DokumentMalType.ENDRING_PROGRAMPERIODE)
+            .contains(DokumentMalType.OPPHØR_DOK)
             .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
     }
 
@@ -413,6 +413,51 @@ class YtelseVedtaksbrevReglerTest {
 
         var opphørResultat = totalresultater.vedtaksbrevResultater().getFirst();
         assertFullAutomatiskBrev(opphørResultat, DokumentMalType.OPPHØR_DOK, OpphørInnholdBygger.class);
+    }
+
+    @Test
+    void skal_ikke_gi_opphorsbrev_ved_opphor_og_opphevelse_av_opphor_i_samme_behandling() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate tidligereOpphørsdato = LocalDate.of(2025, 6, 15);
+        LocalDate periodeMaksDato = LocalDate.of(2025, 12, 31);
+
+        var behandling = lagBehandling(
+            KombinasjonScenarioer.kombinasjon_opphørOgOpphevelseAvOpphørISammeBehandling(fom, tidligereOpphørsdato, periodeMaksDato));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .doesNotContain(DokumentMalType.OPPHØR_DOK, DokumentMalType.OPPHOR_OPPHEVET_DOK);
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResultat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+    }
+
+    @Test
+    void skal_gi_både_forlenget_og_opphevelse_brev_ved_forlengelse_kombinert_med_opphevelse_av_opphør() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate tidligereOpphørsdato = LocalDate.of(2025, 6, 15);
+        LocalDate opprinneligMaksDato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nyMaksDato = opprinneligMaksDato.plusWeeks(8);
+
+        // Originalbehandling med reelt (iverksatt) opphør – lukket sluttdato – slik at opphevelsen faktisk gir brev.
+        UngTestScenario forrigeBehandlingScenario = EndringProgramPeriodeScenarioer.endringOpphør(
+            new LocalDateInterval(fom, opprinneligMaksDato), tidligereOpphørsdato);
+        UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgOpphevelseAvOpphør(
+            fom, tidligereOpphørsdato, opprinneligMaksDato, nyMaksDato);
+        var behandling = lagBehandlingMedOriginalBehandling(forrigeBehandlingScenario, ungTestscenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isTrue();
+        // Forlengelse skal fortsatt gi eget brev selv om behandlingen også opphever et tidligere opphør.
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.FORLENGET_PERIODE, DokumentMalType.OPPHOR_OPPHEVET_DOK)
+            .doesNotContain(DokumentMalType.OPPHØR_DOK);
     }
 
     private Behandling lagBehandlingMedOriginalBehandling(UngTestScenario forrigeBehandlingScenario, UngTestScenario ungTestscenario) {

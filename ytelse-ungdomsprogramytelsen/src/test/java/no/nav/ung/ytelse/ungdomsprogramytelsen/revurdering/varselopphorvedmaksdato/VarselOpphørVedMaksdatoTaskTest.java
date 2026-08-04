@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ class VarselOpphørVedMaksdatoTaskTest {
     }
 
     @Test
-    void skal_opprette_task_nar_maksdato_mangler_i_grunnlaget() {
+    void skal_ikke_opprette_task_nar_maksdato_mangler_i_grunnlaget() {
         var fagsak = lagFagsak(1L, "1234567890123");
         var behandling = lagBehandling(fagsak, 100L);
 
@@ -95,9 +96,7 @@ class VarselOpphørVedMaksdatoTaskTest {
 
         task.doTask(ProsessTaskData.forProsessTask(VarselOpphørVedMaksdatoTask.class));
 
-        var captor = ArgumentCaptor.forClass(ProsessTaskGruppe.class);
-        verify(prosessTaskTjeneste).lagre(captor.capture());
-        assertThat(captor.getValue().getTasks()).hasSize(1);
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
     }
 
     private void mockLøpendeFagsaker(List<Fagsak> fagsaker) {
@@ -107,6 +106,7 @@ class VarselOpphørVedMaksdatoTaskTest {
     private Fagsak lagFagsak(Long id, String aktørId) {
         var fagsak = mock(Fagsak.class);
         when(fagsak.getId()).thenReturn(id);
+        when(fagsak.getSaksnummer()).thenReturn(new Saksnummer("SAK" + id));
         when(fagsak.getAktørId()).thenReturn(new AktørId(aktørId));
         when(fagsak.getPeriode()).thenReturn(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2025, 1, 1), LocalDate.of(2026, 12, 31)));
         when(fagsak.getYtelseType()).thenReturn(FagsakYtelseType.UNGDOMSYTELSE);

@@ -19,6 +19,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
+import no.nav.ung.sak.trigger.ProsessTriggerFilter;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningOgGrunnlag;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll.EtterlysningStatusOgType;
 import org.slf4j.Logger;
@@ -104,6 +105,25 @@ public class MaksdatoEtterlysningTjeneste {
             logger.warn("Feil ved lagring av sporing for etterlysning opphør ved maksdato", e);
         }
 
+        // Sikkerhetsnett: varsel om opphør ved maksdato må ha resultert i en etterlysning, med mindre behandlingen
+        // er overstyrt av forlenget periode/manuelt opphør. Disse hendelsene endrer selve periode-/maksdato-grunnlaget,
+        // og kan derfor legitimt gjøre at varsel ikke lenger er relevant eller skal avbrytes (se ProsessTriggerFilter).
+        // Andre tilleggsårsaker (f.eks. inntektskontroll) påvirker ikke dette grunnlaget, så manglende etterlysning
+        // i den kombinasjonen indikerer fortsatt en feil og skal hardfeile, slik at behandlingen ikke går videre
+        // til vedtak/brev om opphør uten at deltaker er varslet.
+        if (!ProsessTriggerFilter.erOverstyrtAvAnnenHendelse(behandling.getBehandlingÅrsakerTyper())) {
+            boolean harEtterlysning = switch (resultat) {
+                case OPPRETT_ETTERLYSNING, ERSTATT_EKSISTERENDE -> true;
+                case INGEN_ENDRING -> eksisterende.isPresent();
+                case AVBRYT_ETTERLYSNING -> false;
+            };
+            if (!harEtterlysning) {
+                throw new IllegalStateException("Forventet etterlysning om opphør ved maksdato for behandling "
+                    + behandlingReferanse.getBehandlingId() + ", men ingen ble opprettet (resultat=" + resultat + "). "
+                    + "Behandlingen skal ikke gå videre til vedtak/brev om opphør uten at deltaker er varslet.");
+            }
+        }
+
     }
 
 
@@ -120,7 +140,7 @@ public class MaksdatoEtterlysningTjeneste {
 
         if (eksisterende.isPresent()) {
             var etterlysning = eksisterende.get();
-            etterlysning.skalAvbrytes();
+            etterlysning.setSkalAvbrytes();
             etterlysningRepository.lagre(etterlysning);
             logger.info("Markert etterlysning {} for opphør ved maksdato som skal avbrytes for behandling {}", etterlysning.getId(), behandlingId);
 
@@ -160,4 +180,3 @@ public class MaksdatoEtterlysningTjeneste {
 
 
 }
-

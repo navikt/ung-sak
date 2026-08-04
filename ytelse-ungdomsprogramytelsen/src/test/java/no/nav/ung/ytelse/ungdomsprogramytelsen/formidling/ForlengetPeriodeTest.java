@@ -20,7 +20,6 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
 
     private static final LocalDate FOM = LocalDate.of(2025, 1, 1);
     private static final LocalDate OPPRINNELIG_SLUTTDATO = LocalDate.of(2025, 12, 31);
-    private static final LocalDate NY_SLUTTDATO = LocalDate.of(2026, 1, 28);
     private static final LocalDate PERIODE_MAKSDATO = LocalDate.of(2026, 2, 15);
 
     ForlengetPeriodeTest() {
@@ -30,7 +29,7 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
     @DisplayName("Forlenget periode gir korrekt brev")
     @Test
     void forlengetPeriode() {
-        var behandling = lagForlengetPeriodeBehandling(OPPRINNELIG_SLUTTDATO, NY_SLUTTDATO);
+        var behandling = lagForlengetPeriodeBehandling(OPPRINNELIG_SLUTTDATO);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.FORLENGET_PERIODE);
@@ -53,9 +52,9 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
             );
     }
 
-    private Behandling lagForlengetPeriodeBehandling(LocalDate opprinneligSluttdato, LocalDate nySluttdato) {
+    private Behandling lagForlengetPeriodeBehandling(LocalDate opprinneligSluttdato) {
         var forrigeBehandlingGrunnlag = FørstegangsbehandlingScenarioer.innvilget19årMedMaksDato(FOM, opprinneligSluttdato);
-        var forlengetPeriodeGrunnlag = EndringProgramPeriodeScenarioer.forlengetPeriode(FOM, opprinneligSluttdato, nySluttdato, PERIODE_MAKSDATO);
+        var forlengetPeriodeGrunnlag = EndringProgramPeriodeScenarioer.forlengetPeriode(FOM, opprinneligSluttdato, PERIODE_MAKSDATO, PERIODE_MAKSDATO);
 
         TestScenarioBuilder builder = TestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
@@ -78,6 +77,6 @@ class ForlengetPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdBygger
 
     @Override
     protected Behandling lagScenarioForFellesTester() {
-        return lagForlengetPeriodeBehandling(OPPRINNELIG_SLUTTDATO, NY_SLUTTDATO);
+        return lagForlengetPeriodeBehandling(OPPRINNELIG_SLUTTDATO);
     }
 }

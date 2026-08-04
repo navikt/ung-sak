@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
@@ -121,6 +122,44 @@ class OpphørTest extends AbstractUngdomsytelseVedtaksbrevInnholdByggerTest {
                 "<h1>Ungdomsprogramytelsen din opphører</h1>"
             );
 
+    }
+
+    @Test
+    void opphevingAvOpphør() {
+        LocalDate fom = LocalDate.of(2026, 1, 1);
+        LocalDate tidligereOpphørsdato = LocalDate.of(2026, 6, 15);
+        LocalDate periodeMaksDato = LocalDate.of(2026, 12, 31);
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Vi har endret ungdomsprogramytelsen din \
+                Du fikk tidligere melding om at du ville få ungdomsprogramytelsen til og med 15. juni 2026, men denne datoen gjelder ikke lenger. \
+                Pengene får du så lenge du er i ungdomsprogrammet, men du kan som hovedregel ikke få dem i mer enn ett år. For deg vil det si 31. desember 2026. \
+                Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 6. \
+                """);
+
+        var behandling = lagOpphevingAvOpphørBehandling(fom, tidligereOpphørsdato);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.OPPHOR_OPPHEVET);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har endret ungdomsprogramytelsen din</h1>"
+            );
+    }
+
+    private Behandling lagOpphevingAvOpphørBehandling(LocalDate fom, LocalDate tidligereOpphørsdato) {
+        // Original behandling må ha et reelt opphør med lukket sluttdato for at opphevelsen skal gi
+        // DetaljertResultatType.OPPHØR_OPPHEVET (og dermed brev), jf. UngdomsprogramOpphørUtleder.
+        var opprinneligProgramPeriode = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
+        var forrigeBehandlingGrunnlag = EndringProgramPeriodeScenarioer.endringOpphør(opprinneligProgramPeriode, tidligereOpphørsdato);
+        var revurderingGrunnlag = EndringProgramPeriodeScenarioer.opphevingAvOpphør(fom, tidligereOpphørsdato);
+
+        return lagRevurderingMedOriginalBehandling(forrigeBehandlingGrunnlag, revurderingGrunnlag);
     }
 
     private Behandling lagOpphørsbehandling(LocalDate sluttdato) {

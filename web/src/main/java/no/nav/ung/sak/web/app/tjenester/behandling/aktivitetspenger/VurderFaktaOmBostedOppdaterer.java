@@ -180,7 +180,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
                         .filter(e -> e.getPeriode().tilPeriode().overlaps(periode))
                         .toList();
                     skalAvbryte = skalAvbryte || !eksisterendeAktive.isEmpty();
-                    eksisterendeAktive.forEach(Etterlysning::skalAvbrytes);
+                    eksisterendeAktive.forEach(Etterlysning::setSkalAvbrytes);
                     etterlysningRepository.lagre(eksisterendeAktive);
 
                     // Opprett ny

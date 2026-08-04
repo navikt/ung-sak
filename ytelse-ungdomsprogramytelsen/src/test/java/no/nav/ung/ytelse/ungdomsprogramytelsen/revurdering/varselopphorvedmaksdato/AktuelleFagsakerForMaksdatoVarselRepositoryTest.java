@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingStatus;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -166,6 +167,22 @@ class AktuelleFagsakerForMaksdatoVarselRepositoryTest {
         assertThat(fagsaker)
             .extracting(f -> f.getId())
             .contains(behandling.getFagsakId());
+    }
+
+    @Test
+    void skal_ikke_returnere_fagsak_nar_det_finnes_aapen_behandling_med_varsel_opphor_arsak() {
+        var maksdato = LocalDate.now().plusWeeks(2);
+        var behandling = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingÅrsak(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO)
+            .medBehandlingStatus(BehandlingStatus.UTREDES)
+            .lagre(entityManager);
+        lagreUngdomsprogramGrunnlag(behandling, maksdato, maksdato);
+
+        var fagsaker = repository.hentFagsakerRelevantForMaksdatoVarsel();
+
+        assertThat(fagsaker)
+            .extracting(f -> f.getId())
+            .doesNotContain(behandling.getFagsakId());
     }
 
     private void lagreUngdomsprogramGrunnlag(Behandling behandling, LocalDate tom, LocalDate maksdato) {
