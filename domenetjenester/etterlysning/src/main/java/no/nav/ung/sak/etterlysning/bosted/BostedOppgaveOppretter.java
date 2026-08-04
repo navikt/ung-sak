@@ -39,8 +39,9 @@ public class BostedOppgaveOppretter {
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
 
-            if (periodeAvklaring.getIkkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.ANNET) {
-                Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "Mangler fritekst til varsel når årsak annet er valgt." + etterlysning.getGrunnlagsreferanse());
+            var ikkeOppfyltÅrsak = periodeAvklaring.getIkkeOppfyltÅrsak();
+            if (ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET || ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT) {
+                Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "FritekstTilVarsel må være satt når årsak er "+ ikkeOppfyltÅrsak);
             }
 
             var oppgaveDto = new OpprettOppgaveDto(
@@ -52,7 +53,7 @@ public class BostedOppgaveOppretter {
                     etterlysning.getPeriode().getTomDato(),
                     periodeAvklaring.isErBosattITrondheim(),
                     periodeAvklaring.getFritekstTilVarsel(),
-                    mapTilBrukerDialog(periodeAvklaring.getIkkeOppfyltÅrsak())
+                    mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak)
                 ),
                 etterlysning.getFrist()
             );
@@ -60,17 +61,13 @@ public class BostedOppgaveOppretter {
         }
     }
 
-    public no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak mapTilBrukerDialog(BostedsvilkårIkkeOppfyltÅrsak årsak) {
-        return switch (årsak) {
-            case IKKE_BOSATTADRESSE_I_TRONDHEIM ->
-                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
-            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM ->
-                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM;
-            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM ->
-                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
-            case ANNET ->
-                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.ANNET;
-            case UDEFINERT -> throw new IllegalArgumentException("Ukjent årsak: " + årsak);
+    static no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak mapIkkeOppfyltÅrsak(BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
+        return switch (ikkeOppfyltÅrsak) {
+            case IKKE_BOSATTADRESSE_I_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
+            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM;
+            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
+            case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.ANNET;
+            case UDEFINERT -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT;
         };
     }
 }
