@@ -57,8 +57,9 @@ public class UngdomsytelseProsessTriggerPeriodeUtleder implements ProsessTrigger
             return søknadsperioder.stream()
                 .filter(it -> it.getTomDato().isAfter(p.getPeriode().getFomDato()))
                 .min(Comparator.naturalOrder())
-                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode. Trigger-startdato="
-                    + p.getPeriode().getFomDato() + ", kjente søknadsperioder=" + søknadsperioder))
+.orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode. behandlingId=" + behandligId
+    + ", trigger-startdato=" + p.getPeriode().getFomDato().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+    + ", kjente søknadsperioder=" + søknadsperioder))
                 .toLocalDateInterval();
 
         }
