@@ -6,9 +6,11 @@ import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
@@ -24,6 +26,7 @@ import java.util.List;
 public class InngangsvilkårVurderingTjeneste {
 
     private InngangsvilkårVurderingRepository repository;
+    private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
     InngangsvilkårVurderingTjeneste() {
@@ -32,8 +35,10 @@ public class InngangsvilkårVurderingTjeneste {
 
     @Inject
     public InngangsvilkårVurderingTjeneste(InngangsvilkårVurderingRepository repository,
+                                           BehandlingRepository behandlingRepository,
                                            VilkårResultatRepository vilkårResultatRepository) {
         this.repository = repository;
+        this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
@@ -92,6 +97,20 @@ public class InngangsvilkårVurderingTjeneste {
             resultatBuilderForVilkår.leggTil(periodeBuilder);
         });
         vilkårResultatBuilder.leggTil(resultatBuilderForVilkår);
+    }
+
+    public void gjenopprettForrigeVurderingForPerioderIkkeVurdert(Long behandlingId, VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType) {
+        var originalBehandlingId = behandlingRepository.hentBehandling(behandlingId).getOriginalBehandlingId().orElse(null);
+        if (originalBehandlingId == null) {
+            return;
+        }
+        var eksisterendeVilkårsperioder = vilkårResultatBuilder.hentBuilderFor(vilkårType).build().getPerioder();
+        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
+        var vilkårperioderSomSkalKopieres = vilkårResultatRepository.hentVilkårperioderForPerioderIkkeVurdert(originalBehandlingId, vilkårType, eksisterendeVilkårsperioder);
+        for (var vilkårPeriodeBuilder : vilkårperioderSomSkalKopieres) {
+            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        }
+        vilkårResultatBuilder.leggTil(vilkårBuilder);
     }
 
     public void settBostedsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {

@@ -4,12 +4,15 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Tuple;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.diff.DiffEntity;
 import no.nav.ung.sak.diff.TraverseEntityGraphFactory;
 import no.nav.ung.sak.diff.TraverseGraph;
@@ -117,6 +120,27 @@ public class VilkårResultatRepository {
         if (tilBehandlingVilkår.isPresent()) {
             throw new IllegalStateException("Kan ikke kopiere vilkår til en behandling hvor det allerede eksisterer et vilkårsresultat");
         }
+    }
+
+    public List<VilkårPeriodeBuilder> hentVilkårperioderForPerioderIkkeVurdert(Long fraBehandlingId, VilkårType vilkårType, List<VilkårPeriode> gjeldendeVilkårsperioder) {
+        var ikkeVurdertePerioder = gjeldendeVilkårsperioder.stream()
+            .filter(periode -> periode.getUtfall() == Utfall.IKKE_VURDERT)
+            .map(VilkårPeriode::getPeriode).map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
+            .toList();
+
+        var fraVilkårResultatTidslinje = hentHvisEksisterer(fraBehandlingId)
+            .map(v -> v.getVilkårTimeline(vilkårType)
+                .mapValue(VilkårPeriodeBuilder::new)
+            )
+            .orElse(LocalDateTimeline.empty());
+
+        return fraVilkårResultatTidslinje.intersection(new LocalDateTimeline<>(ikkeVurdertePerioder)).segmenter()
+            .stream().map(segment -> segment.getValue()
+                .medPeriode(
+                    segment.getFom(),
+                    segment.getTom()
+                )
+            ).toList();
     }
 
     private DiffEntity vilkårsDiffer() {

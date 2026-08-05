@@ -88,7 +88,7 @@ class VurderBostedVilkårStegTest {
         startdatoRepository = new StartdatoRepository(entityManager);
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
-        inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, vilkårResultatRepository);
+        inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
         behandlingprosessSporingRepository = new BehandingprosessSporingRepository(entityManager);
 
         steg = lagSteg(List.of());

@@ -101,6 +101,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(param.getBehandlingId(), periodeVurderinger);
 
         inngangsvilkårVurderingTjeneste.settBostedsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
+        inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR);
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var historikkinnslag = new Historikkinnslag.Builder()
