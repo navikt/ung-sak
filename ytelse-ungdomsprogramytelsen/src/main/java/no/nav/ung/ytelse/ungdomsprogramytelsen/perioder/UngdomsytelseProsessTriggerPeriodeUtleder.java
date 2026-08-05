@@ -13,6 +13,7 @@ import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
@@ -54,12 +55,13 @@ public class UngdomsytelseProsessTriggerPeriodeUtleder implements ProsessTrigger
         // så vi begresenser det her til programperiode
         if (årsak == BehandlingÅrsakType.NY_SØKT_PERIODE) {
             var søknadsperioder = ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandligId);
+            String triggerperiodeFomDato = p.getPeriode().getFomDato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
             return søknadsperioder.stream()
                 .filter(it -> it.getTomDato().isAfter(p.getPeriode().getFomDato()))
                 .min(Comparator.naturalOrder())
-.orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode. behandlingId=" + behandligId
-    + ", trigger-startdato=" + p.getPeriode().getFomDato().format(java.time.format.DateTimeFormatter.ofPattern("dd.MM.yyyy"))
-    + ", kjente søknadsperioder=" + søknadsperioder))
+                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode. behandlingId=" + behandligId
+                    + ", trigger-startdato=" + triggerperiodeFomDato
+                    + ", kjente søknadsperioder=" + søknadsperioder))
                 .toLocalDateInterval();
 
         }
