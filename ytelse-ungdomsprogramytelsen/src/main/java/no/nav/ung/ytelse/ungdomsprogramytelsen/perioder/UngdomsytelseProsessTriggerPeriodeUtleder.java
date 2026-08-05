@@ -53,10 +53,12 @@ public class UngdomsytelseProsessTriggerPeriodeUtleder implements ProsessTrigger
         // For nye søknader så vil triggerperioden være uendelig fordi vi ikke vet sluttdato ved oppretting av trigger,
         // så vi begresenser det her til programperiode
         if (årsak == BehandlingÅrsakType.NY_SØKT_PERIODE) {
-            return ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandligId).stream()
+            var søknadsperioder = ungdomsytelseSøknadsperiodeTjeneste.utledPeriode(behandligId);
+            return søknadsperioder.stream()
                 .filter(it -> it.getTomDato().isAfter(p.getPeriode().getFomDato()))
                 .min(Comparator.naturalOrder())
-                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode"))
+                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode. Trigger-startdato="
+                    + p.getPeriode().getFomDato() + ", kjente søknadsperioder=" + søknadsperioder))
                 .toLocalDateInterval();
 
         }
