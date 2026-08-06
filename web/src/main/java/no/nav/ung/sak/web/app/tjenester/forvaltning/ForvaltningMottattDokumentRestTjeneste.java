@@ -15,15 +15,25 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.felles.sikkerhet.abac.*;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.ytelse.ung.v1.Ungdomsytelse;
 import no.nav.ung.kodeverk.abac.StandardAbacAttributt;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
+import no.nav.ung.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.KortTekst;
 import no.nav.ung.sak.kontrakt.behandling.SaksnummerDto;
+import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.logg.DiagnostikkFagsakLogg;
@@ -49,8 +59,15 @@ public class ForvaltningMottattDokumentRestTjeneste {
     );
     private static final Logger log = LoggerFactory.getLogger(ForvaltningMottattDokumentRestTjeneste.class);
 
+    private static final Set<Brevkode> TILLATT_BREVKODE_MAKULERING = Set.of(
+        Brevkode.UNGDOMSYTELSE_SOKNAD
+    );
+
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private ProsessTriggereRepository prosessTriggereRepository;
+    private ProsessTaskTjeneste taskTjeneste;
+    private SøknadParser søknadParser;
     private EntityManager entityManager;
 
     public ForvaltningMottattDokumentRestTjeneste() {
@@ -60,9 +77,15 @@ public class ForvaltningMottattDokumentRestTjeneste {
     @Inject
     public ForvaltningMottattDokumentRestTjeneste(FagsakRepository fagsakRepository,
                                                   MottatteDokumentRepository mottatteDokumentRepository,
+                                                  ProsessTriggereRepository prosessTriggereRepository,
+                                                  ProsessTaskTjeneste taskTjeneste,
+                                                  SøknadParser søknadParser,
                                                   EntityManager entityManager) {
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.prosessTriggereRepository = prosessTriggereRepository;
+        this.taskTjeneste = taskTjeneste;
+        this.søknadParser = søknadParser;
         this.entityManager = entityManager;
     }
 
@@ -118,6 +141,105 @@ public class ForvaltningMottattDokumentRestTjeneste {
         entityManager.flush();
 
         log.info("Manuelt markert mottatt dokument med journalpostId={} av type {} som ugyldig.", mottattDokument.getJournalpostId().getVerdi(), mottattDokument.getType());
+
+        return Response.ok().build();
+    }
+
+    /**
+     * Makulerer en duplikat søknad: markerer det mottatte dokumentet som ugyldig, fjerner den tilhørende
+     * NY_SØKT_PERIODE-prosesstriggeren for behandlingen (utledet ved å reparse søknaden på samme måte som
+     * ved opprinnelig mottak), og sender behandlingen tilbake til start slik at perioder/vilkår vurderes på
+     * nytt uten den duplikate søknaden.
+     * <p>
+     * Brukes for tilfeller der en digital søknad viser seg å være et rent duplikat av en allerede
+     * registrert (f.eks. papir-)søknad, og der den digitale søknadens trigger ellers vil føre til at
+     * behandlingen krasjer i vilkårsvurderingen (jf. "Hadde startdato som ikke kunne matches med søknadsperiode").
+     */
+    @POST
+    @Path("/makuler-duplikat-soknad")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Makulerer en duplikat søknad: markerer dokumentet ugyldig, fjerner tilhørende prosesstrigger og sender behandlingen tilbake til start.",
+        summary = ("Makulerer duplikat søknad og resetter behandlingen"), tags = "forvaltning")
+    @Produces(JSON_UTF8)
+    @BeskyttetRessurs(action = BeskyttetRessursActionType.UPDATE, resource = BeskyttetRessursResourceType.DRIFT)
+    public Response makulerDuplikatSøknad(@Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) MarkerDokumentUgyldigRequest dto) {
+        log.info("Starter makulering av duplikat søknad: saksnummer={}, journalpostId={}", dto.saksnummer().getVerdi(), dto.journalpostId().getJournalpostId().getVerdi());
+
+        var fagsakOpt = fagsakRepository.hentSakGittSaksnummer(dto.saksnummer());
+        if (fagsakOpt.isEmpty()) {
+            String feilmelding = "Fant ikke fagsak for saksnummer: " + dto.saksnummer().getVerdi();
+            log.warn(feilmelding);
+            return Response.status(Response.Status.NOT_FOUND).entity(feilmelding).build();
+        }
+        Fagsak fagsak = fagsakOpt.get();
+        Long fagsakId = fagsak.getId();
+        JournalpostId journalpostId = dto.journalpostId().getJournalpostId();
+        List<MottattDokument> mottattDokuments = mottatteDokumentRepository.hentMottatteDokument(fagsakId, List.of(journalpostId));
+
+        if (mottattDokuments.isEmpty()) {
+            String feilmelding = "Fant ingen dokumenter for saksnummer " + dto.saksnummer().getVerdi() + " og journalpostId " + journalpostId.getVerdi();
+            log.warn(feilmelding);
+            return Response.status(Response.Status.NOT_FOUND).entity(feilmelding).build();
+        }
+        if (mottattDokuments.size() > 1) {
+            String feilmelding = "Forventet maks 1 dokument, men fant " + mottattDokuments.size();
+            log.warn(feilmelding);
+            return Response.status(Response.Status.BAD_REQUEST).entity(feilmelding).build();
+        }
+
+        MottattDokument mottattDokument = mottattDokuments.getFirst();
+        Long behandlingId = mottattDokument.getBehandlingId();
+        log.info("Fant mottatt dokument: behandlingId={}, journalpostId={}, status={}, type={}",
+            behandlingId, journalpostId.getVerdi(), mottattDokument.getStatus(), mottattDokument.getType());
+
+        if (!TILLATT_BREVKODE_MAKULERING.contains(mottattDokument.getType())) {
+            String feilmelding = "Dokumentet har brevkode " + mottattDokument.getType() + ", makulering av duplikat er bare støttet for brevkodene " + TILLATT_BREVKODE_MAKULERING;
+            log.warn(feilmelding);
+            return Response.status(Response.Status.BAD_REQUEST).entity(feilmelding).build();
+        }
+
+        if (mottattDokument.getStatus() != DokumentStatus.GYLDIG) {
+            String feilmelding = "Forventet at dokument har status GYLDIG (ferdigbehandlet søknad), men hadde: " + mottattDokument.getStatus();
+            log.warn(feilmelding);
+            return Response.status(Response.Status.BAD_REQUEST).entity(feilmelding).build();
+        }
+
+        if (behandlingId == null) {
+            String feilmelding = "Dokumentet med journalpostId=" + journalpostId.getVerdi() + " har ingen tilknyttet behandlingId";
+            log.warn(feilmelding);
+            return Response.status(Response.Status.BAD_REQUEST).entity(feilmelding).build();
+        }
+
+        log.info("Reparser søknad for journalpostId={} for å utlede periode for trigger-fjerning", journalpostId.getVerdi());
+        Søknad søknad = søknadParser.parseSøknad(mottattDokument);
+        Ungdomsytelse ytelse = (Ungdomsytelse) søknad.getYtelse();
+        var søknadsperiode = ytelse.getSøknadsperiode();
+        DatoIntervallEntitet periode = DatoIntervallEntitet.fraOgMedTilOgMed(søknadsperiode.getFraOgMed(), søknadsperiode.getTilOgMed());
+        log.info("Utledet søknadsperiode={} fra journalpostId={} for behandlingId={}", periode, journalpostId.getVerdi(), behandlingId);
+
+        String formatertBegrunnelse = "Makulert som duplikat søknad av teknisk forvaltning. Begrunnelse: %s".formatted(dto.begrunnelse().getTekst());
+        mottattDokument.setFeilmeldingOgOppdaterStatus(formatertBegrunnelse);
+        mottatteDokumentRepository.oppdater(mottattDokument);
+        log.info("Satt dokument journalpostId={} fra status GYLDIG til UGYLDIG med begrunnelse: {}", journalpostId.getVerdi(), formatertBegrunnelse);
+
+        prosessTriggereRepository.fjern(behandlingId, BehandlingÅrsakType.NY_SØKT_PERIODE, periode);
+
+        log.info("Oppretter TilbakeTilStartBehandlingTask for behandlingId={} (manueltOpprettet=true)", behandlingId);
+        ProsessTaskData prosessTaskData = ProsessTaskData.forProsessTask(TilbakeTilStartBehandlingTask.class);
+        prosessTaskData.setCallIdFraEksisterende();
+        prosessTaskData.setBehandling(fagsakId, behandlingId, fagsak.getAktørId().getId());
+        prosessTaskData.setProperty(TilbakeTilStartBehandlingTask.PROPERTY_MANUELT_OPPRETTET, Boolean.toString(true));
+        taskTjeneste.lagre(prosessTaskData);
+        log.info("Opprettet task id={} for behandlingId={}", prosessTaskData.getId(), behandlingId);
+
+        String diagnostikkTekst = ("Makulert duplikat søknad (journalpostId=%s): dokument satt til UGYLDIG, tilhørende prosesstrigger " +
+            "(NY_SØKT_PERIODE, periode=%s) forsøkt fjernet, behandling sendt tilbake til start. Begrunnelse: %s")
+            .formatted(journalpostId.getVerdi(), periode, dto.begrunnelse().getTekst());
+        entityManager.persist(new DiagnostikkFagsakLogg(fagsakId, "/makuler-duplikat-soknad", diagnostikkTekst));
+        entityManager.flush();
+
+        log.info("Makulering fullført for saksnummer={}, journalpostId={}, behandlingId={}: dokument=UGYLDIG, trigger-fjerning forsøkt for periode={}, task opprettet={}",
+            dto.saksnummer().getVerdi(), journalpostId.getVerdi(), behandlingId, periode, prosessTaskData.getId());
 
         return Response.ok().build();
     }
