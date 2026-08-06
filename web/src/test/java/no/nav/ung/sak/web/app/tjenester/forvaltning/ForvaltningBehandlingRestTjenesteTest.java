@@ -60,7 +60,7 @@ class ForvaltningBehandlingRestTjenesteTest {
     void skal_henlegge_aapen_behandling() {
         // Arrange
         var request = new ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest(
-            BehandlingResultatType.HENLAGT_FEILOPPRETTET, BEGRUNNELSE
+            ForvaltningBehandlingRestTjeneste.HenleggelsesÅrsak.HENLAGT_FEILOPPRETTET, BEGRUNNELSE
         );
 
         // Act
@@ -79,7 +79,7 @@ class ForvaltningBehandlingRestTjenesteTest {
     void skal_returnere_404_naar_behandling_ikke_finnes() {
         // Arrange
         var request = new ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest(
-            BehandlingResultatType.HENLAGT_FEILOPPRETTET, BEGRUNNELSE
+            ForvaltningBehandlingRestTjeneste.HenleggelsesÅrsak.HENLAGT_FEILOPPRETTET, BEGRUNNELSE
         );
 
         // Act
@@ -98,7 +98,7 @@ class ForvaltningBehandlingRestTjenesteTest {
         behandlingRepository.lagre(behandling, lås);
 
         var request = new ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest(
-            BehandlingResultatType.HENLAGT_FEILOPPRETTET, BEGRUNNELSE
+            ForvaltningBehandlingRestTjeneste.HenleggelsesÅrsak.HENLAGT_FEILOPPRETTET, BEGRUNNELSE
         );
 
         // Act
@@ -110,25 +110,10 @@ class ForvaltningBehandlingRestTjenesteTest {
     }
 
     @Test
-    void skal_returnere_400_for_ikke_henleggbar_aarsak() {
-        // Arrange — INNVILGET er ikke en gyldig henleggelseskode
-        var request = new ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest(
-            BehandlingResultatType.INNVILGET, BEGRUNNELSE
-        );
-
-        // Act
-        Response response = tjeneste.henleggBehandling(behandling.getId(), request);
-
-        // Assert
-        assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
-        verifyNoInteractions(henleggBehandlingTjeneste);
-    }
-
-    @Test
     void skal_returnere_404_heller_enn_400_naar_behandling_ikke_finnes_og_ugyldig_aarsak() {
         // Verifiserer at behandling-eksistens sjekkes FØR årsak-validering
         var request = new ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest(
-            BehandlingResultatType.INNVILGET, BEGRUNNELSE
+            ForvaltningBehandlingRestTjeneste.HenleggelsesÅrsak.HENLAGT_FEILOPPRETTET, BEGRUNNELSE
         );
 
         Response response = tjeneste.henleggBehandling(Long.MAX_VALUE, request);
