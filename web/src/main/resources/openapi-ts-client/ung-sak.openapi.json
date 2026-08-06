@@ -5688,6 +5688,24 @@
         },
         "type" : "object"
       },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "årsak" : {
+            "maxLength" : 100,
+            "minLength" : 1,
+            "pattern" : "^[\\p{L}\\p{N}_\\.\\-/]+$",
+            "type" : "string"
+          }
+        },
+        "required" : [ "begrunnelse", "årsak" ],
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest" : {
         "properties" : {
           "begrunnelse" : {
@@ -8498,6 +8516,42 @@
           }
         },
         "tags" : [ "formidling" ]
+      }
+    },
+    "/api/forvaltning/behandling/{behandlingId}/henlegg" : {
+      "post" : {
+        "description" : "Henlegger en åpen behandling med angitt årsak.\n\nBeregnet for bruk av driftsrollen når det er nødvendig å lukke behandlinger som ikke kan eller bør ferdigbehandles på vanlig måte — for eksempel behandlinger som ble opprettet som følge av en feilaktig eller duplikat søknad, og der saksbehandlerrollen ikke er tilgjengelig for å gjøre dette via vanlig GUI.\n\nEndepunktet utfører følgende valideringer før henleggelse:\n- 404 dersom behandlingen ikke finnes\n- 409 dersom behandlingen allerede er avsluttet eller er under iverksettelse av vedtak\n- 400 dersom årsakkoden ikke er en gyldig henleggelseskode for søknader\n\nGyldige årsakkoder:\n- HENLAGT_FEILOPPRETTET — behandlingen ble opprettet ved en feil (f.eks. duplikat søknad)\n- HENLAGT_SØKNAD_TRUKKET — søknaden er trukket av søker\n- HENLAGT_BRUKER_DØD — brukeren er registrert som død\n- HENLAGT_MASKINELT — maskinell henleggelse\n",
+        "operationId" : "henleggBehandling_1",
+        "parameters" : [ {
+          "description" : "Behandlingens numeriske ID",
+          "in" : "path",
+          "name" : "behandlingId",
+          "required" : true,
+          "schema" : {
+            "format" : "int64",
+            "type" : "integer"
+          }
+        } ],
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Henlegger en åpen behandling",
+        "tags" : [ "forvaltning" ]
       }
     },
     "/api/forvaltning/makuler-duplikat-soknad" : {
