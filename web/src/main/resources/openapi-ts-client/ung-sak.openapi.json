@@ -5697,14 +5697,16 @@
             "type" : "string"
           },
           "årsak" : {
-            "maxLength" : 100,
-            "minLength" : 1,
-            "pattern" : "^[\\p{L}\\p{N}_\\.\\-/]+$",
-            "type" : "string"
+            "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningBehandlingRestTjeneste.HenleggelsesÅrsak"
           }
         },
         "required" : [ "begrunnelse", "årsak" ],
         "type" : "object"
+      },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningBehandlingRestTjeneste.HenleggelsesÅrsak" : {
+        "enum" : [ "HENLAGT_FEILOPPRETTET", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_BRUKER_DØD", "HENLAGT_MASKINELT", "HENLAGT_SØKNAD_MANGLER", "MANGLER_BEREGNINGSREGLER" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "HENLAGT_FEILOPPRETTET", "HENLAGT_SØKNAD_TRUKKET", "HENLAGT_BRUKER_DØD", "HENLAGT_MASKINELT", "HENLAGT_SØKNAD_MANGLER", "MANGLER_BEREGNINGSREGLER" ]
       },
       "ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest" : {
         "properties" : {
@@ -8520,7 +8522,7 @@
     },
     "/api/forvaltning/behandling/{behandlingId}/henlegg" : {
       "post" : {
-        "description" : "Henlegger en åpen behandling med angitt årsak.\n\nBeregnet for bruk av driftsrollen når det er nødvendig å lukke behandlinger som ikke kan eller bør ferdigbehandles på vanlig måte — for eksempel behandlinger som ble opprettet som følge av en feilaktig eller duplikat søknad, og der saksbehandlerrollen ikke er tilgjengelig for å gjøre dette via vanlig GUI.\n\nEndepunktet utfører følgende valideringer før henleggelse:\n- 404 dersom behandlingen ikke finnes\n- 409 dersom behandlingen allerede er avsluttet eller er under iverksettelse av vedtak\n- 400 dersom årsakkoden ikke er en gyldig henleggelseskode for søknader\n\nGyldige årsakkoder:\n- HENLAGT_FEILOPPRETTET — behandlingen ble opprettet ved en feil (f.eks. duplikat søknad)\n- HENLAGT_SØKNAD_TRUKKET — søknaden er trukket av søker\n- HENLAGT_BRUKER_DØD — brukeren er registrert som død\n- HENLAGT_MASKINELT — maskinell henleggelse\n",
+        "description" : "Henlegger en åpen behandling med angitt årsak.\n\nBeregnet for bruk av driftsrollen når det er nødvendig å lukke behandlinger som ikke kan eller bør ferdigbehandles på vanlig måte — for eksempel behandlinger som ble opprettet som følge av en feilaktig eller duplikat søknad, og der saksbehandlerrollen ikke er tilgjengelig for å gjøre dette via vanlig GUI.\n\nEndepunktet utfører følgende valideringer før henleggelse:\n- 404 dersom behandlingen ikke finnes\n- 409 dersom behandlingen allerede er avsluttet eller er under iverksettelse av vedtak\n- 400 dersom årsakkoden ikke er en gyldig henleggelseskode for søknader\n",
         "operationId" : "henleggBehandling_1",
         "parameters" : [ {
           "description" : "Behandlingens numeriske ID",
