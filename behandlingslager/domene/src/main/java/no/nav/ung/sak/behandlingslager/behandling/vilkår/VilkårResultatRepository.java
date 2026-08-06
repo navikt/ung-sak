@@ -129,13 +129,11 @@ public class VilkårResultatRepository {
             .toList();
 
         var fraVilkårResultatTidslinje = hentHvisEksisterer(fraBehandlingId)
-            .map(v -> v.getVilkårTimeline(vilkårType)
-                .mapValue(VilkårPeriodeBuilder::new)
-            )
+            .map(v -> v.getVilkårTimeline(vilkårType))
             .orElse(LocalDateTimeline.empty());
 
         return fraVilkårResultatTidslinje.intersection(new LocalDateTimeline<>(ikkeVurdertePerioder)).segmenter()
-            .stream().map(segment -> segment.getValue()
+            .stream().map(segment -> new VilkårPeriodeBuilder(segment.getValue())
                 .medPeriode(
                     segment.getFom(),
                     segment.getTom()
