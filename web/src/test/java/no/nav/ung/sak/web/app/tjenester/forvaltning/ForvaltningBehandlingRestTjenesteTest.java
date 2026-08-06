@@ -123,4 +123,16 @@ class ForvaltningBehandlingRestTjenesteTest {
         assertThat(response.getStatus()).isEqualTo(Response.Status.BAD_REQUEST.getStatusCode());
         verifyNoInteractions(henleggBehandlingTjeneste);
     }
+
+    @Test
+    void skal_returnere_404_heller_enn_400_naar_behandling_ikke_finnes_og_ugyldig_aarsak() {
+        // Verifiserer at behandling-eksistens sjekkes FØR årsak-validering
+        var request = new ForvaltningBehandlingRestTjeneste.HenleggForvaltningRequest(
+            BehandlingResultatType.INNVILGET, BEGRUNNELSE
+        );
+
+        Response response = tjeneste.henleggBehandling(Long.MAX_VALUE, request);
+
+        assertThat(response.getStatus()).isEqualTo(Response.Status.NOT_FOUND.getStatusCode());
+    }
 }

@@ -78,12 +78,6 @@ public class ForvaltningBehandlingRestTjeneste {
         @Parameter(description = "Behandlingens numeriske ID") @PathParam("behandlingId") @NotNull Long behandlingId,
         @Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) HenleggForvaltningRequest request
     ) {
-        var årsak = request.årsak();
-        if (!årsak.isBehandlingsresultatHenlagt()) {
-            return feil(Response.Status.BAD_REQUEST,
-                "Ugyldig henleggelsesårsak: '%s' er ikke en gyldig henleggelseskode for søknader.".formatted(årsak.getKode()));
-        }
-
         var behandlingOpt = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
         if (behandlingOpt.isEmpty()) {
             return feil(Response.Status.NOT_FOUND, "Behandling ikke funnet: " + behandlingId);
@@ -92,8 +86,14 @@ public class ForvaltningBehandlingRestTjeneste {
         var behandling = behandlingOpt.get();
         if (behandling.getStatus().erFerdigbehandletStatus()) {
             return feil(Response.Status.CONFLICT,
-                "Behandling %d kan ikke henlegges fordi den allerede er ferdigbehandlet (status: %s)."
-                    .formatted(behandlingId, behandling.getStatus().getKode()));
+                "Behandling %d kan ikke henlegges fordi den har status: %s (%s)."
+                    .formatted(behandlingId, behandling.getStatus().getKode(), behandling.getStatus().getNavn()));
+        }
+
+        var årsak = request.årsak();
+        if (!årsak.isBehandlingsresultatHenlagt()) {
+            return feil(Response.Status.BAD_REQUEST,
+                "Ugyldig henleggelsesårsak: '%s' er ikke en gyldig henleggelseskode for søknader.".formatted(årsak.getKode()));
         }
 
         henleggBehandlingTjeneste.henleggBehandlingAvSaksbehandler(
