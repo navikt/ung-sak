@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.forvaltning;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -28,8 +29,6 @@ import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.web.server.abac.AbacAttributtEmptySupplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.stream.Collectors;
 
 @Path("/forvaltning/behandling")
 @ApplicationScoped
@@ -71,12 +70,6 @@ public class ForvaltningBehandlingRestTjeneste {
             - 404 dersom behandlingen ikke finnes
             - 409 dersom behandlingen allerede er avsluttet eller er under iverksettelse av vedtak
             - 400 dersom årsakkoden ikke er en gyldig henleggelseskode for søknader
-
-            Gyldige årsakkoder:
-            - HENLAGT_FEILOPPRETTET — behandlingen ble opprettet ved en feil (f.eks. duplikat søknad)
-            - HENLAGT_SØKNAD_TRUKKET — søknaden er trukket av søker
-            - HENLAGT_BRUKER_DØD — brukeren er registrert som død
-            - HENLAGT_MASKINELT — maskinell henleggelse
             """,
         tags = "forvaltning"
     )
@@ -85,14 +78,10 @@ public class ForvaltningBehandlingRestTjeneste {
         @Parameter(description = "Behandlingens numeriske ID") @PathParam("behandlingId") @NotNull Long behandlingId,
         @Valid @NotNull @TilpassetAbacAttributt(supplierClass = AbacAttributtEmptySupplier.class) HenleggForvaltningRequest request
     ) {
-        var årsak = validerHenleggelsesÅrsak(request.årsak());
-        if (årsak == null) {
+        var årsak = request.årsak();
+        if (!årsak.isBehandlingsresultatHenlagt()) {
             return feil(Response.Status.BAD_REQUEST,
-                "Ugyldig henleggelsesårsak: '%s'. Gyldige årsaker: %s".formatted(
-                    request.årsak(),
-                    BehandlingResultatType.getHenleggelseskoderForSøknad()
-                        .stream().map(BehandlingResultatType::getKode).sorted().collect(Collectors.joining(", "))
-                ));
+                "Ugyldig henleggelsesårsak: '%s' er ikke en gyldig henleggelseskode for søknader.".formatted(årsak.getKode()));
         }
 
         var behandlingOpt = behandlingRepository.hentBehandlingHvisFinnes(behandlingId);
@@ -113,16 +102,8 @@ public class ForvaltningBehandlingRestTjeneste {
             request.begrunnelse()
         );
 
-        log.info("Henla behandling {} med årsak {}", behandlingId, årsak.getKode());
+        log.info("Henla behandling {} med årsak {}", behandlingId, request.årsak().getKode());
         return Response.ok().build();
-    }
-
-    private static BehandlingResultatType validerHenleggelsesÅrsak(String kode) {
-        return BehandlingResultatType.getHenleggelseskoderForSøknad()
-            .stream()
-            .filter(k -> k.getKode().equals(kode))
-            .findFirst()
-            .orElse(null);
     }
 
     private Response feil(Response.Status status, String melding) {
@@ -133,9 +114,18 @@ public class ForvaltningBehandlingRestTjeneste {
     public record HenleggForvaltningRequest(
         @JsonProperty(value = "årsak", required = true)
         @NotNull
-        @Size(min = 1, max = 100)
-        @Pattern(regexp = "^[\\p{L}\\p{N}_\\.\\-/]+$")
-        String årsak,
+        @Schema(
+            description = "Henleggelsesårsak. Kun gyldige henleggelseskoder er tillatt.",
+            allowableValues = {
+                "HENLAGT_FEILOPPRETTET",
+                "HENLAGT_SØKNAD_TRUKKET",
+                "HENLAGT_BRUKER_DØD",
+                "HENLAGT_MASKINELT",
+                "HENLAGT_SØKNAD_MANGLER",
+                "MANGLER_BEREGNINGSREGLER"
+            }
+        )
+        BehandlingResultatType årsak,
 
         @JsonProperty(value = "begrunnelse", required = true)
         @NotNull
