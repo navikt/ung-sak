@@ -73,6 +73,7 @@ class ForvaltningMottattDokumentRestTjenesteTest {
         tjeneste = new ForvaltningMottattDokumentRestTjeneste(
             fagsakRepository,
             mottatteDokumentRepository,
+            behandlingRepository,
             prosessTriggereRepository,
             taskTjeneste,
             søknadParser,
@@ -214,6 +215,24 @@ class ForvaltningMottattDokumentRestTjenesteTest {
             .setParameter("fagsakId", fagsak.getId())
             .getSingleResult();
         assertThat(antallDiagnostikk).isEqualTo(1L);
+    }
+
+    @Test
+    void skal_returnere_409_ved_makulering_naar_behandling_er_avsluttet() {
+        // Arrange
+        lagreSøknadDokument();
+
+        behandling.avsluttBehandling();
+        BehandlingLås lås = behandlingRepository.taSkriveLås(behandling);
+        behandlingRepository.lagre(behandling, lås);
+
+        var request = lagRequest();
+
+        // Act
+        Response response = tjeneste.makulerDuplikatSøknad(request);
+
+        // Assert
+        assertThat(response.getStatus()).isEqualTo(Response.Status.CONFLICT.getStatusCode());
     }
 
     @Test

@@ -25,8 +25,10 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.behandling.prosessering.task.TilbakeTilStartBehandlingTask;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -65,6 +67,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
 
     private FagsakRepository fagsakRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
+    private BehandlingRepository behandlingRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
     private ProsessTaskTjeneste taskTjeneste;
     private SøknadParser søknadParser;
@@ -77,12 +80,14 @@ public class ForvaltningMottattDokumentRestTjeneste {
     @Inject
     public ForvaltningMottattDokumentRestTjeneste(FagsakRepository fagsakRepository,
                                                   MottatteDokumentRepository mottatteDokumentRepository,
+                                                  BehandlingRepository behandlingRepository,
                                                   ProsessTriggereRepository prosessTriggereRepository,
                                                   ProsessTaskTjeneste taskTjeneste,
                                                   SøknadParser søknadParser,
                                                   EntityManager entityManager) {
         this.fagsakRepository = fagsakRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.behandlingRepository = behandlingRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
         this.taskTjeneste = taskTjeneste;
         this.søknadParser = søknadParser;
@@ -208,6 +213,13 @@ public class ForvaltningMottattDokumentRestTjeneste {
             String feilmelding = "Dokumentet med journalpostId=" + journalpostId.getVerdi() + " har ingen tilknyttet behandlingId";
             log.warn(feilmelding);
             return Response.status(Response.Status.BAD_REQUEST).entity(feilmelding).build();
+        }
+
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        if (behandling.getStatus().erFerdigbehandletStatus()) {
+            String feilmelding = "Behandling " + behandlingId + " er allerede ferdigbehandlet (status=" + behandling.getStatus() + "), kan ikke makulere søknad";
+            log.warn(feilmelding);
+            return Response.status(Response.Status.CONFLICT).entity(feilmelding).build();
         }
 
         log.info("Reparser søknad for journalpostId={} for å utlede periode for trigger-fjerning", journalpostId.getVerdi());
