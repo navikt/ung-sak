@@ -220,7 +220,7 @@ public class ForvaltningMottattDokumentRestTjeneste {
         String formatertBegrunnelse = "Makulert som duplikat søknad av teknisk forvaltning. Begrunnelse: %s".formatted(dto.begrunnelse().getTekst());
         mottattDokument.setFeilmeldingOgOppdaterStatus(formatertBegrunnelse);
         mottatteDokumentRepository.oppdater(mottattDokument);
-        log.info("Satt dokument journalpostId={} fra status GYLDIG til UGYLDIG med begrunnelse: {}", journalpostId.getVerdi(), formatertBegrunnelse);
+        log.info("Satt dokument journalpostId={} fra status GYLDIG til UGYLDIG.", journalpostId.getVerdi());
 
         prosessTriggereRepository.fjern(behandlingId, BehandlingÅrsakType.NY_SØKT_PERIODE, periode);
 
