@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.startdato;
 
 import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
 import org.hibernate.annotations.Immutable;
 
 import java.util.Collection;
@@ -24,6 +25,7 @@ public class StartdatoGrunnlag extends BaseEntitet {
      */
     @ManyToOne
     @Immutable
+    @ChangeTracked
     @JoinColumn(name = "relevante_startdatoer_id", nullable = true, updatable = false, unique = true)
     private Startdatoer relevanteStartdatoer;
 
@@ -32,6 +34,7 @@ public class StartdatoGrunnlag extends BaseEntitet {
      */
     @ManyToOne
     @Immutable
+    @ChangeTracked
     @JoinColumn(name = "oppgitte_startdatoer_id", nullable = false, updatable = false, unique = true)
     private Startdatoer oppgitteStartdatoer;
 
