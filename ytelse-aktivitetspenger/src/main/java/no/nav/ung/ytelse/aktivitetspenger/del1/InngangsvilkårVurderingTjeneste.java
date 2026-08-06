@@ -2,6 +2,8 @@ package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -10,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
@@ -106,11 +109,30 @@ public class InngangsvilkårVurderingTjeneste {
         }
         var eksisterendeVilkårsperioder = vilkårResultatBuilder.hentBuilderFor(vilkårType).build().getPerioder();
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-        var vilkårperioderSomSkalKopieres = vilkårResultatRepository.hentVilkårperioderForPerioderIkkeVurdert(originalBehandlingId, vilkårType, eksisterendeVilkårsperioder);
+        var vilkårperioderSomSkalKopieres = hentVilkårperioderForPerioderIkkeVurdert(originalBehandlingId, vilkårType, eksisterendeVilkårsperioder);
         for (var vilkårPeriodeBuilder : vilkårperioderSomSkalKopieres) {
             vilkårBuilder.leggTil(vilkårPeriodeBuilder);
         }
         vilkårResultatBuilder.leggTil(vilkårBuilder);
+    }
+
+    private List<VilkårPeriodeBuilder> hentVilkårperioderForPerioderIkkeVurdert(Long fraBehandlingId, VilkårType vilkårType, List<VilkårPeriode> gjeldendeVilkårsperioder) {
+        var ikkeVurdertePerioder = gjeldendeVilkårsperioder.stream()
+            .filter(periode -> periode.getUtfall() == Utfall.IKKE_VURDERT)
+            .map(VilkårPeriode::getPeriode).map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
+            .toList();
+
+        LocalDateTimeline<VilkårPeriode> fraVilkårResultatTidslinje = vilkårResultatRepository.hentHvisEksisterer(fraBehandlingId)
+            .map(v -> v.getVilkårTimeline(vilkårType))
+            .orElse(LocalDateTimeline.empty());
+
+        return fraVilkårResultatTidslinje.intersection(new LocalDateTimeline<>(ikkeVurdertePerioder)).segmenter()
+            .stream().map(segment -> new VilkårPeriodeBuilder(segment.getValue())
+                .medPeriode(
+                    segment.getFom(),
+                    segment.getTom()
+                )
+            ).toList();
     }
 
     public void settBostedsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {

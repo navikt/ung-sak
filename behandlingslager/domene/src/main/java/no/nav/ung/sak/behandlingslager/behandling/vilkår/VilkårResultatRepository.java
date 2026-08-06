@@ -122,25 +122,6 @@ public class VilkårResultatRepository {
         }
     }
 
-    public List<VilkårPeriodeBuilder> hentVilkårperioderForPerioderIkkeVurdert(Long fraBehandlingId, VilkårType vilkårType, List<VilkårPeriode> gjeldendeVilkårsperioder) {
-        var ikkeVurdertePerioder = gjeldendeVilkårsperioder.stream()
-            .filter(periode -> periode.getUtfall() == Utfall.IKKE_VURDERT)
-            .map(VilkårPeriode::getPeriode).map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
-            .toList();
-
-        var fraVilkårResultatTidslinje = hentHvisEksisterer(fraBehandlingId)
-            .map(v -> v.getVilkårTimeline(vilkårType))
-            .orElse(LocalDateTimeline.empty());
-
-        return fraVilkårResultatTidslinje.intersection(new LocalDateTimeline<>(ikkeVurdertePerioder)).segmenter()
-            .stream().map(segment -> new VilkårPeriodeBuilder(segment.getValue())
-                .medPeriode(
-                    segment.getFom(),
-                    segment.getTom()
-                )
-            ).toList();
-    }
-
     private DiffEntity vilkårsDiffer() {
         TraverseGraph traverser = TraverseEntityGraphFactory.build();
         return new DiffEntity(traverser);

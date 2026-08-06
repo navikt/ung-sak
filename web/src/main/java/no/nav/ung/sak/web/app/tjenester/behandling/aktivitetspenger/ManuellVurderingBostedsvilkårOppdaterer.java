@@ -31,6 +31,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.ENDRET_BOSTED;
 
 /**
  * Oppdaterer for aksjonspunkt 5144 – manuell vurdering av bostedsvilkåret.
@@ -101,7 +102,10 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(param.getBehandlingId(), periodeVurderinger);
 
         inngangsvilkårVurderingTjeneste.settBostedsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
-        inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR);
+
+        if (behandlingRepository.hentBehandling(param.getBehandlingId()).harBehandlingÅrsak(ENDRET_BOSTED)) {
+            inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR);
+        }
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var historikkinnslag = new Historikkinnslag.Builder()
