@@ -8500,6 +8500,32 @@
         "tags" : [ "formidling" ]
       }
     },
+    "/api/forvaltning/makuler-duplikat-soknad" : {
+      "post" : {
+        "description" : "Makulerer en duplikat søknad: markerer dokumentet ugyldig, fjerner tilhørende prosesstrigger og sender behandlingen tilbake til start.",
+        "operationId" : "makulerDuplikatSøknad",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningMottattDokumentRestTjeneste.MarkerDokumentUgyldigRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Makulerer duplikat søknad og resetter behandlingen",
+        "tags" : [ "forvaltning" ]
+      }
+    },
     "/api/forvaltning/marker-ugyldig" : {
       "post" : {
         "description" : "Markerer et mottatt dokument som ugyldig",
