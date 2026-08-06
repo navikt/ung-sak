@@ -167,7 +167,7 @@ public class HenleggBehandlingTjeneste {
     }
 
     private void lagHistorikkinnslagForHenleggelse(Behandling behandling, BehandlingResultatType aarsak, String begrunnelse, HistorikkAktør aktør) {
-        var historikkinnslag = opprettHistorikkinnslagForHenleggelse(behandling, aarsak, begrunnelse, HistorikkAktør.VEDTAKSLØSNINGEN);
+        var historikkinnslag = opprettHistorikkinnslagForHenleggelse(behandling, aarsak, begrunnelse, aktør);
         historikkinnslagRepository.lagre(historikkinnslag);
     }
 
