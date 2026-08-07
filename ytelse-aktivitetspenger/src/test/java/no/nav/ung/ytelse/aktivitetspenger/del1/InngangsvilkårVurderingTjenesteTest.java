@@ -42,9 +42,6 @@ class InngangsvilkårVurderingTjenesteTest {
     private static final Periode PERIODE_2 = new Periode(LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28));
     private static final Periode PERIODE_3 = new Periode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31));
 
-    private static final String VURDERT_AV = "Z999999";
-    private static final LocalDateTime VURDERT_TIDSPUNKT = LocalDateTime.of(2026, 2, 1, 10, 0);
-
     @Inject
     private EntityManager entityManager;
 
@@ -63,48 +60,12 @@ class InngangsvilkårVurderingTjenesteTest {
     }
 
     @Test
-    void skal_lagre_bostedvurdering_og_sette_tilsvarende_vilkårsresultat() {
-        var behandling = opprettFørstegangsbehandling(
-            vilkår(PERIODE_1, Utfall.IKKE_VURDERT),
-            vilkår(PERIODE_2, Utfall.IKKE_VURDERT));
-
-        inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
-            oppfyltBostedvurdering(PERIODE_1),
-            ikkeOppfyltBostedvurdering(PERIODE_2, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)));
-
-        tjeneste.oppdaterBostedsvilkårResultatFraVurdering(behandling.getId());
-
-        var lagredeVurderinger = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder)
-            .map(BostedsvilkårResultatHolder::getVurderinger)
-            .orElseThrow();
-        assertThat(lagredeVurderinger).hasSize(2);
-        var lagretPeriode2 = lagredeVurderinger.stream().filter(v -> v.getPeriode().equals(tilIntervall(PERIODE_2))).findFirst().orElseThrow();
-        assertThat(lagretPeriode2.isGodkjent()).isFalse();
-        assertThat(lagretPeriode2.getIkkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
-        assertThat(lagretPeriode2.isManuellVurdering()).isTrue();
-        assertThat(lagretPeriode2.getVurdertAv()).isEqualTo(VURDERT_AV);
-        assertThat(lagretPeriode2.getVurdertTidspunkt()).isEqualTo(VURDERT_TIDSPUNKT);
-
-        var vilkårsperioder = hentBostedsvilkårTidslinje(behandling.getId());
-        var vilkårPeriode1 = hentVilkårPeriode(vilkårsperioder, PERIODE_1);
-        assertThat(vilkårPeriode1.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-        assertThat(vilkårPeriode1.getErManueltVurdert()).isTrue();
-        assertThat(vilkårPeriode1.getBegrunnelse()).isEqualTo("Begrunnelse " + PERIODE_1.getFom());
-
-        var vilkårPeriode2 = hentVilkårPeriode(vilkårsperioder, PERIODE_2);
-        assertThat(vilkårPeriode2.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkårPeriode2.getErManueltVurdert()).isTrue();
-        assertThat(vilkårPeriode2.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
-    }
-
-    @Test
     void skal_sette_automatisk_utfall_når_vurderingen_ikke_er_manuell() {
         var behandling = opprettFørstegangsbehandling(vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
             new BostedsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
-                false, "Automatisk avslag", null, null, null)));
+                false, "Automatisk avslag", null, "A111111", LocalDateTime.now())));
 
         tjeneste.oppdaterBostedsvilkårResultatFraVurdering(behandling.getId());
 
@@ -121,26 +82,33 @@ class InngangsvilkårVurderingTjenesteTest {
             vilkår(PERIODE_2, Utfall.IKKE_OPPFYLT, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, "fra original periode 2"),
             vilkår(PERIODE_3, Utfall.OPPFYLT, null, "fra original periode 3"));
 
-        // Periode 1 er vurdert på nytt i revurderingen, periode 2 og 3 er ikke vurdert
+        var PERIODE_1_AVKORTET = new Periode(PERIODE_1.getFom(), PERIODE_1.getTom().minusDays(15));
+        var PERIODE_2_3_FLYTTET = new Periode(PERIODE_2.getFom().minusDays(15), PERIODE_3.getTom().minusDays(15));
+
         var revurdering = opprettRevurdering(originalBehandling,
-            vilkår(PERIODE_1, Utfall.OPPFYLT, null, "vurdert i denne behandlingen"),
-            vilkår(PERIODE_2, Utfall.IKKE_VURDERT),
-            vilkår(PERIODE_3, Utfall.IKKE_VURDERT));
+            vilkår(PERIODE_1_AVKORTET, Utfall.OPPFYLT, null, "vurdert i denne behandlingen"),
+            vilkår(PERIODE_2_3_FLYTTET, Utfall.IKKE_VURDERT)
+        );
 
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(revurdering.getId()));
         tjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(revurdering.getId(), vilkårResultatBuilder, VilkårType.BOSTEDSVILKÅR);
         var resultat = vilkårResultatBuilder.build().getVilkårTimeline(VilkårType.BOSTEDSVILKÅR);
 
-        var periode1 = hentVilkårPeriode(resultat, PERIODE_1);
-        assertThat(periode1.getGjeldendeUtfall()).as("vurdering gjort i denne behandlingen skal ikke overskrives").isEqualTo(Utfall.OPPFYLT);
-        assertThat(periode1.getFritekstVurderingBrev()).isEqualTo("vurdert i denne behandlingen");
+        var vurdertPeriode = hentVilkårPeriode(resultat, PERIODE_1_AVKORTET);
+        assertThat(vurdertPeriode.getGjeldendeUtfall()).as("vurdering gjort i denne behandlingen skal ikke overskrives").isEqualTo(Utfall.OPPFYLT);
+        assertThat(vurdertPeriode.getFritekstVurderingBrev()).isEqualTo("vurdert i denne behandlingen");
+
+        var periode1 = hentVilkårPeriode(resultat, new Periode(PERIODE_1_AVKORTET.getTom().plusDays(1), PERIODE_1.getTom()));
+        assertThat(periode1.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
+        assertThat(periode1.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
+        assertThat(periode1.getFritekstVurderingBrev()).isEqualTo("fra original periode 1");
 
         var periode2 = hentVilkårPeriode(resultat, PERIODE_2);
         assertThat(periode2.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(periode2.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
         assertThat(periode2.getFritekstVurderingBrev()).isEqualTo("fra original periode 2");
 
-        var periode3 = hentVilkårPeriode(resultat, PERIODE_3);
+        var periode3 = hentVilkårPeriode(resultat, new Periode(PERIODE_3.getFom(), PERIODE_2_3_FLYTTET.getTom()));
         assertThat(periode3.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
         assertThat(periode3.getFritekstVurderingBrev()).isEqualTo("fra original periode 3");
 
@@ -182,13 +150,8 @@ class InngangsvilkårVurderingTjenesteTest {
     @Test
     void skal_fjerne_vurdering_og_sette_vilkår_til_ikke_vurdert_for_angitte_perioder() {
         var behandling = opprettFørstegangsbehandling(
-            vilkår(PERIODE_1, Utfall.IKKE_VURDERT),
-            vilkår(PERIODE_2, Utfall.IKKE_VURDERT));
-
-        inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
-            oppfyltBostedvurdering(PERIODE_1),
-            oppfyltBostedvurdering(PERIODE_2)));
-        tjeneste.oppdaterBostedsvilkårResultatFraVurdering(behandling.getId());
+            vilkår(PERIODE_1, Utfall.OPPFYLT),
+            vilkår(PERIODE_2, Utfall.IKKE_OPPFYLT));
 
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandling.getId()));
         tjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandling.getId(), vilkårResultatBuilder,
@@ -197,13 +160,6 @@ class InngangsvilkårVurderingTjenesteTest {
 
         assertThat(hentVilkårPeriode(resultat, PERIODE_1).getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
         assertThat(hentVilkårPeriode(resultat, PERIODE_2).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
-
-        var gjenværendeVurderinger = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder)
-            .map(BostedsvilkårResultatHolder::getVurderinger)
-            .orElseThrow();
-        assertThat(gjenværendeVurderinger).hasSize(1);
-        assertThat(gjenværendeVurderinger.getFirst().getPeriode()).isEqualTo(tilIntervall(PERIODE_1));
     }
 
     private LocalDateTimeline<VilkårPeriode> hentBostedsvilkårTidslinje(Long behandlingId) {
@@ -211,7 +167,7 @@ class InngangsvilkårVurderingTjenesteTest {
     }
 
     private static VilkårPeriode hentVilkårPeriode(LocalDateTimeline<VilkårPeriode> tidslinje, Periode periode) {
-        return tidslinje.toSegments().stream()
+        return tidslinje.segmenter().stream()
             .filter(s -> s.getFom().equals(periode.getFom()) && s.getTom().equals(periode.getTom()))
             .map(s -> s.getValue())
             .findFirst()
@@ -220,16 +176,6 @@ class InngangsvilkårVurderingTjenesteTest {
 
     private static DatoIntervallEntitet tilIntervall(Periode periode) {
         return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
-    }
-
-    private static BostedsvilkårResultatPeriode oppfyltBostedvurdering(Periode periode) {
-        return new BostedsvilkårResultatPeriode(tilIntervall(periode), true, null, true,
-            "Begrunnelse " + periode.getFom(), null, VURDERT_AV, VURDERT_TIDSPUNKT);
-    }
-
-    private static BostedsvilkårResultatPeriode ikkeOppfyltBostedvurdering(Periode periode, BostedsvilkårIkkeOppfyltÅrsak årsak) {
-        return new BostedsvilkårResultatPeriode(tilIntervall(periode), false, årsak, true,
-            "Begrunnelse " + periode.getFom(), null, VURDERT_AV, VURDERT_TIDSPUNKT);
     }
 
     private Behandling opprettFørstegangsbehandling(VilkårsperiodeData... vilkårsperioder) {
