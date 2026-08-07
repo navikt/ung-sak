@@ -198,7 +198,7 @@ public class InngangsvilkårVurderingRepository {
             .map(BostedsvilkårResultatHolder::getVurderinger)
             .orElse(List.of()));
 
-        var oppdaterte = eksisterendeVurderingerTidslinje.disjoint(perioderSomSkalFjernes).toSegments().stream().map(seg -> {
+        var oppdaterte = eksisterendeVurderingerTidslinje.disjoint(perioderSomSkalFjernes).segmenter().stream().map(seg -> {
             var periode = DatoIntervallEntitet.fraOgMedTilOgMed(seg.getFom(), seg.getTom());
             var v = seg.getValue();
             return v.getPeriode().equals(periode) ? v : new BostedsvilkårResultatPeriode(periode, v);
@@ -213,7 +213,7 @@ public class InngangsvilkårVurderingRepository {
             .map(BistandsvilkårResultatHolder::getVurderinger)
             .orElse(List.of()));
 
-        var oppdaterte = eksisterendeVurderingerTidslinje.disjoint(perioderSomSkalFjernes).toSegments().stream().map(seg -> {
+        var oppdaterte = eksisterendeVurderingerTidslinje.disjoint(perioderSomSkalFjernes).segmenter().stream().map(seg -> {
             var periode = DatoIntervallEntitet.fraOgMedTilOgMed(seg.getFom(), seg.getTom());
             var v = seg.getValue();
             return v.getPeriode().equals(periode) ? v : new BistandsvilkårResultatPeriode(periode, v);
@@ -228,7 +228,7 @@ public class InngangsvilkårVurderingRepository {
             .map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
             .orElse(List.of()));
 
-        var oppdaterte = eksisterendeVurderingerTidslinje.disjoint(perioderSomSkalFjernes).toSegments().stream().map(seg -> {
+        var oppdaterte = eksisterendeVurderingerTidslinje.disjoint(perioderSomSkalFjernes).segmenter().stream().map(seg -> {
             var periode = DatoIntervallEntitet.fraOgMedTilOgMed(seg.getFom(), seg.getTom());
             var v = seg.getValue();
             return v.getPeriode().equals(periode) ? v : new AndreLivsoppholdsytelserResultatPeriode(periode, v);
