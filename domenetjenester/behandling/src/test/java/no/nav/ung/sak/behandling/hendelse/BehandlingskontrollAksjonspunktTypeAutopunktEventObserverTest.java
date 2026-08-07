@@ -52,7 +52,7 @@ public class BehandlingskontrollAksjonspunktTypeAutopunktEventObserverTest {
         when(behandlingskontrollKontekst.getBehandlingId()).thenReturn(behandlingId);
 
         historikkinnslagRepository = mock(HistorikkinnslagRepository.class);
-        observer = new HistorikkInnslagForAksjonspunktEventObserver(historikkinnslagRepository, "srvung-sak", "ung-sak");
+        observer = new HistorikkInnslagForAksjonspunktEventObserver(historikkinnslagRepository, "ung-sak");
     }
 
     @Test
