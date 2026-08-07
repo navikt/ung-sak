@@ -71,9 +71,8 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
-        var erEndretBostedOgKunAvslagEllerOpphør =
-            behandlingRepository.hentBehandling(param.getBehandlingId()).harBehandlingÅrsak(ENDRET_BOSTED) &&
-                dto.getVurdertePerioder().stream().noneMatch(VilkårBostedPeriodeVurderingDto::erVilkårOppfylt);
+        var erEndretBosted =
+            behandlingRepository.hentBehandling(param.getBehandlingId()).harBehandlingÅrsak(ENDRET_BOSTED);
 
 
         var senesteDatoFraVilkårsperiode = eksisterendeVilkårperioder.getMaxLocalDate();
@@ -91,7 +90,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), it))
             .toList());
 
-        validerLukkedePerioder(vurderteLukkedePerioder, eksisterendeVilkårperioder, erEndretBostedOgKunAvslagEllerOpphør);
+        validerLukkedePerioder(vurderteLukkedePerioder, eksisterendeVilkårperioder, erEndretBosted);
 
         var periodeVurderinger = vurderteÅpnePerioder.crossJoin(vurderteLukkedePerioder).segmenter().stream()
             .map(it ->
@@ -113,7 +112,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
 
         inngangsvilkårVurderingTjeneste.settBostedsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
-        if (erEndretBostedOgKunAvslagEllerOpphør) {
+        if (erEndretBosted) {
             inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR);
         }
 
@@ -130,14 +129,14 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         return OppdateringResultat.nyttResultat();
     }
 
-    private static void validerLukkedePerioder(LocalDateTimeline<VilkårBostedPeriodeVurderingDto> vurderteLukkedePerioder, LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperiode, boolean erEndretBostedOgKunAvslagEllerOpphør) {
+    private static void validerLukkedePerioder(LocalDateTimeline<VilkårBostedPeriodeVurderingDto> vurderteLukkedePerioder, LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperiode, boolean erEndretBosted) {
         LocalDateTimeline<VilkårBostedPeriodeVurderingDto> uforventedePerioder = vurderteLukkedePerioder.disjoint(eksisterendeVilkårperiode);
         if (!uforventedePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
 
         LocalDateTimeline<?> manglendePerioder = eksisterendeVilkårperiode.disjoint(vurderteLukkedePerioder);
-        if (!manglendePerioder.isEmpty() && !erEndretBostedOgKunAvslagEllerOpphør) {
+        if (!manglendePerioder.isEmpty() && !erEndretBosted) {
             // Brukers uttalelse kan føre til at ikke hele perioden opprinnelig satt til IKKE_VURDERT skal revurderes likevel.
             throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);
         }
