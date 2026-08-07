@@ -7,25 +7,25 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.UngdomsytelseGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndring;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.InnvilgelseDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.SatsEndringHendelseDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.innvilgelse.beregning.SatsOgBeregningDto;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FinnForbrukteDager;
 import org.slf4j.Logger;
 
 import java.time.LocalDate;
@@ -44,34 +44,33 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     private static final Logger LOG = org.slf4j.LoggerFactory.getLogger(FørstegangsInnvilgelseInnholdBygger.class);
 
     private final UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
-    private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
+    private final UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private final boolean ignoreIkkeStøttedeBrev;
-    private final TilkjentYtelseRepository tilkjentYtelseRepository;
 
     @Inject
     public FørstegangsInnvilgelseInnholdBygger(
         UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository,
-        UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste,
-        TilkjentYtelseRepository tilkjentYtelseRepository,
+        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
         @KonfigVerdi(value = "IGNORE_FEIL_INNVILGELSESBREV", defaultVerdi = "false") boolean ignoreFeil) {
 
         this.ungdomsytelseGrunnlagRepository = ungdomsytelseGrunnlagRepository;
-        this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.ignoreIkkeStøttedeBrev = ignoreFeil;
-        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
     }
 
 
     @WithSpan
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        var detaljertResultatTidslinje = tidslinje.tilVurdering();
         Long behandlingId = behandling.getId();
 
-        var ytelseFom = DetaljertResultat
-            .filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_UTBETALING)
-            .getMinLocalDate();
+        var innvilgetTidslinje = detaljertResultatTidslinje
+            .filterValue(r -> erInnvilgelseMedUtbetaling(r, behandling.erManueltOpprettet()));
 
-        var ytelseTom = finnEvtTomDato(detaljertResultatTidslinje, behandlingId);
+        var ytelseFom = innvilgetTidslinje.getMinLocalDate();
+
+        var ytelseTom = finnEvtTomDato(behandlingId);
 
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Mangler grunnlag"));
@@ -85,7 +84,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments());
 
-        var erEtterbetaling = erEtterbetaling(behandling, detaljertResultatTidslinje);
+        var erEtterbetaling = erEtterbetaling(innvilgetTidslinje);
 
         var sisteUtbetalingsdato = ytelseTom != null ? PeriodeBeregner.utledFremtidigUtbetalingsdato(ytelseTom, YearMonth.from(bestemDagensDato())) : null;
 
@@ -102,15 +101,12 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 sisteUtbetalingsdato));
     }
 
-    private boolean erEtterbetaling(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        var tilkjentYtelseTimeline = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).intersection(detaljertResultatTidslinje);
-        if (tilkjentYtelseTimeline.isEmpty()) {
-            throw new IllegalStateException("Fant ingen tilkjent ytelse tidslinje for behandling i perioden %s".formatted(detaljertResultatTidslinje.getLocalDateIntervals()));
+    private boolean erEtterbetaling(LocalDateTimeline<DetaljertResultat> innvilgetTidslinje) {
+        if (innvilgetTidslinje.isEmpty()) {
+            throw new IllegalStateException("Fant ingen innvilget tidslinje med utbetaling for behandlingen");
         }
-        var førsteTilkjentMåned = tilkjentYtelseTimeline.getMinLocalDate().withDayOfMonth(1);
-        var dagensDato = bestemDagensDato();
-
-        return førsteTilkjentMåned.isBefore(dagensDato.withDayOfMonth(1));
+        var førsteUtbetalingsmåned = innvilgetTidslinje.getMinLocalDate().withDayOfMonth(1);
+        return førsteUtbetalingsmåned.isBefore(bestemDagensDato().withDayOfMonth(1));
     }
 
     private LocalDate bestemDagensDato() {
@@ -119,14 +115,17 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
     }
 
-    private LocalDate finnEvtTomDato(LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje, Long behandlingId) {
-        var vurderAntallDagerResultat = ungdomsprogramPeriodeTjeneste.finnVirkedagerTidslinje(behandlingId);
+    private LocalDate finnEvtTomDato(Long behandlingId) {
+        // Åpen sluttdato (tidenes ende) => løpende program, ingen tom-dato i brevet. Ellers vises faktisk sluttdato.
+        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .flatMap(UngdomsprogramOpphørUtleder::finnLukketSluttdato)
+            .orElse(null);
+    }
 
-        long antallDager = vurderAntallDagerResultat.forbrukteDager();
-        if (antallDager <= 0) {
-            throw new IllegalStateException("Antall virkedager i programmet = %d, kan ikke sende innvilgelsesbrev da".formatted(antallDager));
-        }
-        return FinnForbrukteDager.MAKS_ANTALL_DAGER != antallDager ? detaljertResultatTidslinje.getMaxLocalDate() : null;
+    private static boolean erInnvilgelseMedUtbetaling(DetaljertResultat r, boolean manueltOpprettet) {
+        boolean nyPeriode = r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
+            || (manueltOpprettet && r.harÅrsak(BehandlingÅrsakType.RE_SATS_ENDRING));
+        return nyPeriode && r.utbetalingsgrad().erSatt();
     }
 
     private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {

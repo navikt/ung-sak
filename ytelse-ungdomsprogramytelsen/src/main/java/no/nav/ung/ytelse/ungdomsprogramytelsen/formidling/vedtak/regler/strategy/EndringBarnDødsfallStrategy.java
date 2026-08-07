@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -14,8 +15,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.SatsEndringUtleder;
 
 import java.util.List;
@@ -32,10 +32,10 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        var detaljertResultat = resultatTidslinje.tilVurdering();
         boolean erDødsfall = harSatsendringenDødsfall(behandling, detaljertResultat)
-            || resultater.innholder(DetaljertResultatType.ENDRING_BARN_DØDSFALL);
+            || resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_DØD_BARN);
 
         if (erDødsfall) {
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "Ingen brev ved dødsfall av barn."));
@@ -52,7 +52,8 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
     private boolean harSatsendringenDødsfall(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
         var ungdomsytelseGrunnlag = ungdomsytelseGrunnlagRepository.hentGrunnlag(behandling.getId());
         if (ungdomsytelseGrunnlag.isPresent()) {
-            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje().intersection(detaljertResultat);
+            LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje()
+                .intersection(detaljertResultat);
             var satsSegments = satsTidslinje.toSegments();
             LocalDateSegment<UngdomsytelseSatser> previous = null;
             for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {

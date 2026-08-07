@@ -518,7 +518,7 @@ class YtelseVedtaksbrevReglerTest {
 
         var regelResultat = totalresultater.ingenBrevResultater().getFirst();
         assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
-        assertThat(regelResultat.forklaring()).containsIgnoringCase("Ingen brev ved resultater");
+        assertThat(regelResultat.forklaring()).containsIgnoringCase("Ingen strategy fant resultat for grunnlaget");
     }
 
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {

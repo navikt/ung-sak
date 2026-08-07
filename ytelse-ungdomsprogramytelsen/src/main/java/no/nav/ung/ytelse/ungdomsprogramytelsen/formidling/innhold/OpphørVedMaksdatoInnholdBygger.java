@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -10,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.OpphørVedMaksdatoDto;
 
 import java.time.LocalDate;
@@ -27,7 +26,7 @@ public class OpphørVedMaksdatoInnholdBygger implements VedtaksbrevInnholdBygger
     }
 
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var opphørStartdato = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
             .flatMap(UngdomsprogramPeriodeGrunnlag::getPeriodeMaksDato)
             .orElseThrow(() -> new IllegalStateException("Fant ikke maksdato for behandling " + behandling.getId()));

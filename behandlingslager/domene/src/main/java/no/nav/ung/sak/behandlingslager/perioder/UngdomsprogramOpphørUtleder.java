@@ -1,63 +1,55 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
+import java.time.LocalDate;
+import java.util.Optional;
 import java.util.Set;
 
 /**
- * Leser periodegrunnlaget for ungdomsprogrammet og svarer på om programperioden er lukket/åpen for en gitt behandling.
+ * Svarer på om programperioden i et periodegrunnlag er lukket eller åpen. Kallestedet henter selv grunnlaget det
+ * er interessert i - for behandlingen selv eller for originalbehandlingen.
  */
 public final class UngdomsprogramOpphørUtleder {
 
     private UngdomsprogramOpphørUtleder() {
     }
 
-    public static boolean harLukketProgramperiode(Long behandlingId, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        return harLukketSluttdato(hentPerioder(behandlingId, ungdomsprogramPeriodeRepository));
+    /**
+     * @return sluttdatoen dersom programperioden er lukket, ellers tom — åpen sluttdato betyr løpende program.
+     */
+    public static Optional<LocalDate> finnLukketSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        var perioder = hentPerioder(grunnlag);
+        if (!harLukketSluttdato(perioder)) {
+            return Optional.empty();
+        }
+        return perioder.stream().map(it -> it.getPeriode().getTomDato()).max(LocalDate::compareTo);
+    }
+
+    public static boolean harLukketSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        return harLukketSluttdato(hentPerioder(grunnlag));
     }
 
     /**
-     * Merk at dette <em>ikke</em> er negasjonen av {@link #opphørAvUngdomsprogrammetVarInkludertIVedtaket}: når det
-     * ikke finnes en originalbehandling er begge {@code false}.
+     * Merk at dette <em>ikke</em> er negasjonen av {@link #harLukketSluttdato}: et grunnlag uten perioder er hverken
+     * lukket eller åpent.
      */
-    public static boolean forrigeBehandlingVarLøpende(Behandling behandling, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        return behandling.getOriginalBehandlingId()
-            .map(id -> hentPerioder(id, ungdomsprogramPeriodeRepository))
-            .map(UngdomsprogramOpphørUtleder::harÅpenSluttdato)
-            .orElse(false);
-    }
-
-    /**
-     * @return {@code true} dersom forrige vedtak hadde en lukket sluttdato — dvs. et reelt, iverksatt opphør som nå
-     * kan oppheves. {@code false} dersom det ikke finnes en originalbehandling, eller den fortsatt var løpende.
-     */
-    public static boolean opphørAvUngdomsprogrammetVarInkludertIVedtaket(Behandling behandling, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        return behandling.getOriginalBehandlingId()
-            .map(id -> hentPerioder(id, ungdomsprogramPeriodeRepository))
-            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato)
-            .orElse(false);
+    public static boolean harÅpenSluttdato(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        return hentPerioder(grunnlag).stream().anyMatch(UngdomsprogramOpphørUtleder::erÅpen);
     }
 
     private static boolean harLukketSluttdato(Set<UngdomsprogramPeriode> perioder) {
         return !perioder.isEmpty() && perioder.stream().noneMatch(UngdomsprogramOpphørUtleder::erÅpen);
     }
 
-    private static boolean harÅpenSluttdato(Set<UngdomsprogramPeriode> perioder) {
-        return perioder.stream().anyMatch(UngdomsprogramOpphørUtleder::erÅpen);
-    }
-
     private static boolean erÅpen(UngdomsprogramPeriode periode) {
         return Tid.TIDENES_ENDE.equals(periode.getPeriode().getTomDato());
     }
 
-    private static Set<UngdomsprogramPeriode> hentPerioder(Long behandlingId, UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
-        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
-            .map(grunnlag -> grunnlag.getUngdomsprogramPerioder().getPerioder())
-            .orElse(Set.of());
+    private static Set<UngdomsprogramPeriode> hentPerioder(UngdomsprogramPeriodeGrunnlag grunnlag) {
+        return grunnlag == null || grunnlag.getUngdomsprogramPerioder() == null
+            ? Set.of()
+            : grunnlag.getUngdomsprogramPerioder().getPerioder();
     }
 
 }
-
-
-

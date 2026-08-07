@@ -15,7 +15,7 @@ import no.nav.ung.sak.formidling.innhold.MonthUtils;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringHendelseDto;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtleder;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
@@ -57,8 +57,9 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     @WithSpan
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        LocalDateTimeline<DetaljertResultat> periode = DetaljertResultat.filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_UTBETALING);
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        var tilVurdering = tidslinje.tilVurdering();
+        LocalDateTimeline<DetaljertResultat> periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
 
         LocalDate ytelseFom = periode.getMinLocalDate();
         LocalDate ytelseTom = null;
@@ -67,12 +68,12 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
         );
 
-        var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje().intersection(detaljertResultatTidslinje);
+        var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje().intersection(tilVurdering);
         var førsteSegment = satsTidslinje.toSegments().first();
         var førsteSatser = førsteSegment.getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
-        var utbetalingDto = opprettUtbetalingDto(behandling, detaljertResultatTidslinje);
+        var utbetalingDto = opprettUtbetalingDto(behandling, tilVurdering);
 
         var satsendringer = lagSatsEndringHendelser(satsTidslinje);
 

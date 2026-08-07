@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringProgramPeriodeDto;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.endring.programperiode.EndretSluttDato;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.endring.programperiode.EndretStartDato;
@@ -36,7 +36,7 @@ public class EndringProgramPeriodeInnholdBygger implements VedtaksbrevInnholdByg
 
 
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var denneProgramPerioder = hentProgramperiodeTidslinje(behandling.getId());
         if (denneProgramPerioder.size() > 1) {
             LOG.warn("Fant flere enn 1 programperiode={} i denne behandlingen. Bruker den siste", denneProgramPerioder);

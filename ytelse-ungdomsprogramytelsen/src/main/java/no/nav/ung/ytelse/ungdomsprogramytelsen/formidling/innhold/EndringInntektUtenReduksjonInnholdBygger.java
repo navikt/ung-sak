@@ -10,10 +10,10 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringInntektUtenReduksjonDto;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
+import no.nav.ung.sak.formidling.vedtak.resultat.Inntektskontroll;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.dto.EndringInntektUtenReduksjonDto;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -30,11 +30,12 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
     }
 
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        var resultatTidslinje = tidslinje.tilVurdering();
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
 
-        var relevantTilkjentYtelse = DetaljertResultat
-            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.KONTROLLER_INNTEKT_FULL_UTBETALING)
+        var relevantTilkjentYtelse = resultatTidslinje
+            .filterValue(Inntektskontroll::erInntektFullUtbetaling)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
@@ -57,5 +58,6 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
             new EndringInntektUtenReduksjonDto(fullUtbetalingsperioder)
         );
     }
+
 
 }
