@@ -44,8 +44,6 @@ public class SaksbehandlerRestTjeneste {
 
     private MicrosoftGraphTjeneste microsoftGraphTjeneste;
 
-    private String systembruker;
-
     private String appName;
     private HistorikkinnslagRepository historikkRepository;
     private BehandlingRepository behandlingRepository;
@@ -57,12 +55,10 @@ public class SaksbehandlerRestTjeneste {
     @Inject
     public SaksbehandlerRestTjeneste(
         MicrosoftGraphTjeneste microsoftGraphTjeneste,
-        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
         @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
         HistorikkinnslagRepository historikkRepository,
         BehandlingRepository behandlingRepository) {
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
-        this.systembruker = systembruker;
         this.appName = appName;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
@@ -101,7 +97,6 @@ public class SaksbehandlerRestTjeneste {
             .filter(Objects::nonNull)
             .toList());
 
-        unikeIdenter.remove(systembruker); //bare relevant lokat
         unikeIdenter.remove(appName);
 
         Map<String, String> identTilNavn;
