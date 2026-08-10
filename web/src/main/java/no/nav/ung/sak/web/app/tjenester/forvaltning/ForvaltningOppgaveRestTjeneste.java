@@ -159,10 +159,13 @@ public class ForvaltningOppgaveRestTjeneste {
         }
 
         final var behandlingId = Long.parseLong(behandlingIdDto.getId());
-        entityManager.createNativeQuery("DELETE FROM UTTALELSE WHERE etterlysning_id in (select id from ETTERLYSNING where behandling_id = :behandlingId)")
+        entityManager.createNativeQuery("delete from uttalelse_v2 where uttalelser_id in (select uttalelser_id from gr_uttalelse where behandling_id = :behandlingId)")
             .setParameter("behandlingId", behandlingId)
             .executeUpdate();
 
+        entityManager.createNativeQuery("delete from gr_uttalelse where behandling_id = :behandlingId")
+            .setParameter("behandlingId", behandlingId)
+            .executeUpdate();
 
         entityManager.createNativeQuery("DELETE FROM ETTERLYSNING WHERE behandling_id = :behandlingId")
             .setParameter("behandlingId", behandlingId)
