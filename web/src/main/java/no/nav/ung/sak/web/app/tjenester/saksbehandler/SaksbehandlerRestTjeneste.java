@@ -12,6 +12,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphRestKlient;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -98,6 +99,11 @@ public class SaksbehandlerRestTjeneste {
             .toList());
 
         unikeIdenter.remove(appName);
+        unikeIdenter.remove(null);
+
+        unikeIdenter.stream().filter(it -> !MicrosoftGraphRestKlient.NAVIDENT_PATTERN.matcher(it).matches())
+            .forEach(it -> logger.warn("Uforventet format på saksbehandler ident: {}", it));
+        unikeIdenter.removeIf(it -> !MicrosoftGraphRestKlient.NAVIDENT_PATTERN.matcher(it).matches());
 
         Map<String, String> identTilNavn;
         try {
