@@ -409,7 +409,7 @@ class FinnSakerForInntektkontrollTest {
         b.avsluttBehandling();
         behandlingRepository.lagreOgClear(b, behandlingRepository.taSkriveLås(b));
         var vedtak = BehandlingVedtak.builder(b.getId())
-            .medVedtakstidspunkt(LocalDateTime.now().minusMinutes(1))
+            .medVedtakstidspunkt(LocalDateTime.of(2025, 9, 1, 0, 0))
             .medAnsvarligSaksbehandler("system")
             .build();
         behandlingVedtakRepository.lagre(vedtak, behandlingRepository.taSkriveLås(b));
