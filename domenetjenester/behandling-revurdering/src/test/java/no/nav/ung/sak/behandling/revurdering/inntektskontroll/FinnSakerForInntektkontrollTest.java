@@ -329,12 +329,9 @@ class FinnSakerForInntektkontrollTest {
         return finnSakerForInntektkontroll.finnFagsaker(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER);
     }
 
-    /**
-     * Skal finne fagsak når siste behandling er henlagt, men det finnes en vedtatt behandling.
-     * Forventer at fagsaken inkluderes som kandidat til inntektskontroll basert på den vedtatte behandlingen.
-     */
+
     @Test
-    void skal_finne_fagsak_naar_siste_behandling_er_henlagt_men_vedtatt_behandling_finnes() {
+    void skal_finne_fagsak_når_siste_behandling_er_henlagt_men_vedtatt_behandling_finnes() {
         // Arrange
         opprettPeriode(LANGT_BAK, TIDENES_ENDE);
         avsluttSomVedtatt(behandling);
@@ -355,11 +352,8 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(1, fagsaker.size());
     }
 
-    /**
-     * Skal ikke finne fagsak når det kun finnes henlagte behandlinger — ingen vedtatt behandling å revurdere.
-     */
     @Test
-    void skal_ikke_finne_fagsak_naar_det_kun_finnes_henlagte_behandlinger() {
+    void skal_ikke_finne_fagsak_når_det_kun_finnes_henlagte_behandlinger() {
         // Arrange
         opprettPeriode(LANGT_BAK, TIDENES_ENDE);
         behandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
@@ -373,12 +367,8 @@ class FinnSakerForInntektkontrollTest {
         assertEquals(0, fagsaker.size());
     }
 
-    /**
-     * Skal ikke finne fagsak når vedtatt behandling allerede har kontrollert inntekt for perioden,
-     * selv om siste (henlagte) behandling mangler kontrollen.
-     */
     @Test
-    void skal_ikke_finne_fagsak_naar_vedtatt_behandling_allerede_har_kontrollert_inntekt_for_perioden() {
+    void skal_ikke_finne_fagsak_når_vedtatt_behandling_allerede_har_kontrollert_inntekt_for_perioden() {
         // Arrange
         opprettPeriode(LANGT_BAK, TIDENES_ENDE);
         tilkjentYtelseRepository.lagre(behandling.getId(), List.of(KontrollertInntektPeriode.ny()
