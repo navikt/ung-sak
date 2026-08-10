@@ -5,11 +5,16 @@ import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
+import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -35,6 +40,7 @@ import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.List;
 import java.util.Set;
@@ -76,6 +82,9 @@ class FinnSakerForInntektkontrollTest {
     private UngdomsytelseGrunnlagRepository ungdomsytelseGrunnlagRepository;
     @Inject
     private TilkjentYtelseRepository tilkjentYtelseRepository;
+
+    @Inject
+    private BehandlingVedtakRepository behandlingVedtakRepository;
 
     @Inject
     private EntityManager entityManager;
@@ -318,6 +327,92 @@ class FinnSakerForInntektkontrollTest {
 
     private List<Fagsak> finnFagsakerForInntektskontrollISeptember() {
         return finnSakerForInntektkontroll.finnFagsaker(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER);
+    }
+
+    /**
+     * Skal finne fagsak når siste behandling er henlagt, men det finnes en vedtatt behandling.
+     * Forventer at fagsaken inkluderes og inntektskontroll opprettes basert på den vedtatte behandlingen.
+     */
+    @Test
+    void skal_finne_fagsak_naar_siste_behandling_er_henlagt_men_vedtatt_behandling_finnes() {
+        // Arrange
+        opprettPeriode(LANGT_BAK, TIDENES_ENDE);
+        avsluttSomVedtatt(behandling);
+
+        Behandling henlagtBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT))
+            .build();
+        behandlingRepository.lagreOgClear(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+        henlagtBehandling = behandlingRepository.hentBehandling(henlagtBehandling.getId());
+        henlagtBehandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
+        henlagtBehandling.avsluttBehandling();
+        behandlingRepository.lagreOgClear(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert
+        assertEquals(1, fagsaker.size());
+    }
+
+    /**
+     * Skal ikke finne fagsak når det kun finnes henlagte behandlinger — ingen vedtatt behandling å revurdere.
+     */
+    @Test
+    void skal_ikke_finne_fagsak_naar_det_kun_finnes_henlagte_behandlinger() {
+        // Arrange
+        opprettPeriode(LANGT_BAK, TIDENES_ENDE);
+        behandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
+        behandling.avsluttBehandling();
+        behandlingRepository.lagreOgClear(behandling, behandlingRepository.taSkriveLås(behandling));
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert
+        assertEquals(0, fagsaker.size());
+    }
+
+    /**
+     * Skal ikke finne fagsak når vedtatt behandling allerede har kontrollert inntekt for perioden,
+     * selv om siste (henlagte) behandling mangler kontrollen.
+     */
+    @Test
+    void skal_ikke_finne_fagsak_naar_vedtatt_behandling_allerede_har_kontrollert_inntekt_for_perioden() {
+        // Arrange
+        opprettPeriode(LANGT_BAK, TIDENES_ENDE);
+        tilkjentYtelseRepository.lagre(behandling.getId(), List.of(KontrollertInntektPeriode.ny()
+            .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(FØRSTE_SEPTEMBER, SISTE_DAG_I_SEPTEMBER))
+            .medKilde(KontrollertInntektKilde.BRUKER)
+            .medInntekt(BigDecimal.valueOf(1000))
+            .build()));
+        avsluttSomVedtatt(behandling);
+
+        Behandling henlagtBehandling = Behandling.fraTidligereBehandling(behandling, BehandlingType.REVURDERING)
+            .medBehandlingÅrsak(BehandlingÅrsak.builder(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT))
+            .build();
+        behandlingRepository.lagreOgClear(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+        henlagtBehandling = behandlingRepository.hentBehandling(henlagtBehandling.getId());
+        henlagtBehandling.setBehandlingResultatType(BehandlingResultatType.HENLAGT_FEILOPPRETTET);
+        henlagtBehandling.avsluttBehandling();
+        behandlingRepository.lagreOgClear(henlagtBehandling, behandlingRepository.taSkriveLås(henlagtBehandling));
+
+        // Act
+        List<Fagsak> fagsaker = finnFagsakerForInntektskontrollISeptember();
+
+        // Assert
+        assertEquals(0, fagsaker.size());
+    }
+
+    private void avsluttSomVedtatt(Behandling b) {
+        b.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        b.avsluttBehandling();
+        behandlingRepository.lagreOgClear(b, behandlingRepository.taSkriveLås(b));
+        var vedtak = BehandlingVedtak.builder(b.getId())
+            .medVedtakstidspunkt(LocalDateTime.now().minusMinutes(1))
+            .medAnsvarligSaksbehandler("system")
+            .build();
+        behandlingVedtakRepository.lagre(vedtak, behandlingRepository.taSkriveLås(b));
     }
 
 
