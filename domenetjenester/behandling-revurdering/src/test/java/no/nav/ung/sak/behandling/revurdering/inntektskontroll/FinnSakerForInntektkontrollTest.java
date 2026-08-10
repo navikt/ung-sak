@@ -331,7 +331,7 @@ class FinnSakerForInntektkontrollTest {
 
     /**
      * Skal finne fagsak når siste behandling er henlagt, men det finnes en vedtatt behandling.
-     * Forventer at fagsaken inkluderes og inntektskontroll opprettes basert på den vedtatte behandlingen.
+     * Forventer at fagsaken inkluderes som kandidat til inntektskontroll basert på den vedtatte behandlingen.
      */
     @Test
     void skal_finne_fagsak_naar_siste_behandling_er_henlagt_men_vedtatt_behandling_finnes() {
