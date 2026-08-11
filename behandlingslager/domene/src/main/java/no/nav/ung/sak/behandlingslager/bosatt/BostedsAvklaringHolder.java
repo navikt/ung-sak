@@ -43,7 +43,7 @@ public class BostedsAvklaringHolder extends BaseEntitet {
     void leggTilEllerErstattPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
         periodeAvklaringer = byggAvklaringTidslinje(nyePeriodeAvklaring)
             .crossJoin(hentSomTidslinje())
-            .toSegments().stream()
+            .segmenter().stream()
             .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
