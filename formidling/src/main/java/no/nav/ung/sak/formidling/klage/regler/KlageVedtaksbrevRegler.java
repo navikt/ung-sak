@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.klage.KlageUtredningEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.*;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,7 +86,7 @@ public class KlageVedtaksbrevRegler implements VedtaksbrevRegel {
         }
 
         var automatiskVedtaksbrevResultater = byggAutomatiskVedtaksbrevResultat(automatiskBrevResultat);
-        return BehandlingVedtaksbrevResultat.medBrev(null, automatiskVedtaksbrevResultater);
+        return BehandlingVedtaksbrevResultat.medBrev(DetaljertResultatTidslinje.tom(), automatiskVedtaksbrevResultater);
     }
 
     private static List<Vedtaksbrev> byggAutomatiskVedtaksbrevResultat(List<VedtaksbrevStrategyResultat> resultat) {

@@ -2,19 +2,16 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strateg
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.ForlengetPeriodeInnholdBygger;
 
 import java.util.List;
@@ -35,23 +32,21 @@ public final class ForlengetPeriodeStrategy implements VedtaksbrevInnholdbyggerS
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        if (!resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_FORLENGET_PERIODE_UNGDOMSPROGRAM)) {
+            return List.of();
+        }
         // Forlengelse gjelder kun ved en åpen programperiode; er den lukket har det skjedd en reell sluttdatoendring (opphør/flytting).
-        if (resultater.innholder(DetaljertResultatType.FORLENGET_PERIODE)
-            && harForlengetPeriode(behandling)
-            && !UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository)) {
+        boolean skalHaBrev = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .map(grunnlag -> grunnlag.harForlengetPeriode() && !UngdomsprogramOpphørUtleder.harLukketSluttdato(grunnlag))
+            .orElse(false);
+
+        if (skalHaBrev) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.FORLENGET_PERIODE, forlengetPeriodeInnholdBygger,
                 "Automatisk brev ved forlenget periode"));
         }
         return List.of();
-    }
-
-    private boolean harForlengetPeriode(Behandling behandling) {
-        return ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
-            .map(UngdomsprogramPeriodeGrunnlag::harForlengetPeriode)
-            .orElse(false);
     }
 
 }

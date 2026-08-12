@@ -1,8 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak.regler;
 
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 
 import java.util.Collections;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
  */
 public record BehandlingVedtaksbrevResultat(
     boolean harBrev,
-    LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+    DetaljertResultatTidslinje detaljertResultatTimeline,
     List<Vedtaksbrev> vedtaksbrevResultater,
     List<IngenBrev> ingenBrevResultater) {
 
@@ -33,12 +32,12 @@ public record BehandlingVedtaksbrevResultat(
     }
 
     public static BehandlingVedtaksbrevResultat medBrev(
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+        DetaljertResultatTidslinje detaljertResultatTimeline,
         List<Vedtaksbrev> vedtaksbrevResultater) {
         return new BehandlingVedtaksbrevResultat(true, detaljertResultatTimeline, vedtaksbrevResultater, Collections.emptyList());
     }
 
-    public static BehandlingVedtaksbrevResultat utenBrev(LocalDateTimeline<DetaljertResultat> detaljertResultatTimeline,
+    public static BehandlingVedtaksbrevResultat utenBrev(DetaljertResultatTidslinje detaljertResultatTimeline,
                                                          List<IngenBrev> ingenBrevResultater) {
                 return new BehandlingVedtaksbrevResultat(false, detaljertResultatTimeline, Collections.emptyList() , ingenBrevResultater );
     }
@@ -55,9 +54,9 @@ public record BehandlingVedtaksbrevResultat(
     public String safePrint() {
         return "BehandlingVedtaksbrevResultat{" +
             "harBrev=" + harBrev +
-            ", detaljertResultatTimeline=[" + DetaljertResultat.timelineToString(detaljertResultatTimeline)+ "]" +
             ", vedtaksbrevResultater=" + vedtaksbrevResultater +
             ", ingenBrevResultater=" + ingenBrevResultater +
+            ", detaljertResultatTimeline=[" + detaljertResultatTimeline + "]" +
             '}';
     }
 }

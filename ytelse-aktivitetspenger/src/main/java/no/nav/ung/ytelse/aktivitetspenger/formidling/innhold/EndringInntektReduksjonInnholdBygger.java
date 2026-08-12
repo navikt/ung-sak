@@ -14,8 +14,8 @@ import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.template.dto.felles.PeriodeDto;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
+import no.nav.ung.sak.formidling.vedtak.resultat.Inntektskontroll;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringInntektReduksjonDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.endring.inntekt.EndringInntektPeriodeDto;
 
@@ -43,12 +43,13 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
     }
 
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> resultatTidslinje) {
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        var resultatTidslinje = tidslinje.tilVurdering();
         var tilkjentYtelseTidslinje = tilkjentYtelseRepository.hentTidslinje(behandling.getId()).compress();
         final var kontrollertInntektPerioderTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
 
-        var relevantTilkjentYtelse = DetaljertResultat
-            .filtererTidslinje(resultatTidslinje, DetaljertResultatType.KONTROLLER_INNTEKT_REDUKSJON, DetaljertResultatType.KONTROLLER_INNTEKT_INGEN_UTBETALING)
+        var relevantTilkjentYtelse = resultatTidslinje
+            .filterValue(Inntektskontroll::erInntektReduksjon)
             .combine(tilkjentYtelseTidslinje, StandardCombinators::rightOnly,
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
@@ -103,6 +104,7 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
                 ufullstendigMåned)
         );
     }
+
 
 }
 

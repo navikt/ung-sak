@@ -16,11 +16,11 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslagInngangsvilkårDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslagInngangsvilkårDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,8 +42,10 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
 
     @WithSpan
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        LocalDateTimeline<DetaljertResultat> avslagPeriode = DetaljertResultat.filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.AVSLAG_INNGANGSVILKÅR);
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        var detaljertResultatTidslinje = tidslinje.tilVurdering();
+        LocalDateTimeline<DetaljertResultat> avslagPeriode = detaljertResultatTidslinje
+            .filterValue(r -> !r.avslåtteVilkår().isEmpty());
         var fom = avslagPeriode.getMinLocalDate();
 
         Set<DetaljertVilkårResultat> alleAvslåtteVilkår = avslagPeriode.stream()

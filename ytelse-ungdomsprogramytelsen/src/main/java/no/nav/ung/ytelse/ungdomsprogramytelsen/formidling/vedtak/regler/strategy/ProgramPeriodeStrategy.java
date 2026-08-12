@@ -2,7 +2,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak.regler.strateg
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -11,9 +11,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
-import no.nav.ung.sak.formidling.vedtak.resultat.ResultatHelper;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.EndringProgramPeriodeInnholdBygger;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.innhold.OpphørInnholdBygger;
 
@@ -40,16 +38,16 @@ public final class ProgramPeriodeStrategy implements VedtaksbrevInnholdbyggerStr
     }
 
     @Override
-    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultater = new ResultatHelper(VedtaksbrevInnholdbyggerStrategy.tilResultatInfo(detaljertResultat));
-
-        boolean harEndretStartdato = resultater.innholder(DetaljertResultatType.ENDRING_STARTDATO);
-        // En ENDRING_SLUTTDATO er kun reell når programperioden faktisk er lukket. Er den fortsatt åpen, er den
+    public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        boolean harEndretStartdato = resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_ENDRET_STARTDATO_UNGDOMSPROGRAM);
+        // En sluttdatoendring er kun reell når programperioden faktisk er lukket. Er den fortsatt åpen, er den
         // gjenåpnet av en opphevelse på samme behandling, og sluttdatoendringen er utdatert (stale) og ignoreres.
-        boolean reellSluttdatoendring = resultater.innholder(DetaljertResultatType.ENDRING_SLUTTDATO)
-            && UngdomsprogramOpphørUtleder.harLukketProgramperiode(behandling.getId(), ungdomsprogramPeriodeRepository);
+        boolean reellSluttdatoendring = resultatTidslinje.harÅrsak(BehandlingÅrsakType.RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+            && ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId())
+            .map(UngdomsprogramOpphørUtleder::harLukketSluttdato).orElse(false);
         boolean erOpphør = reellSluttdatoendring
-            && UngdomsprogramOpphørUtleder.forrigeBehandlingVarLøpende(behandling, ungdomsprogramPeriodeRepository);
+            && behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag)
+            .map(UngdomsprogramOpphørUtleder::harÅpenSluttdato).orElse(false);
         boolean erFlyttetSluttdato = reellSluttdatoendring && !erOpphør;
 
         var brev = new ArrayList<VedtaksbrevStrategyResultat>();
