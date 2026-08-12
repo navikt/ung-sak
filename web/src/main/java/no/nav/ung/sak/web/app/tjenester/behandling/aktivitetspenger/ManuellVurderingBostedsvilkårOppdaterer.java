@@ -24,6 +24,7 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPer
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
@@ -31,6 +32,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
+import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.ENDRET_BOSTED;
 
 /**
  * Oppdaterer for aksjonspunkt 5144 – manuell vurdering av bostedsvilkåret.
@@ -66,34 +68,42 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
     @Override
     public OppdateringResultat oppdater(ManuellVurderingBostedsvilkårDto dto, AksjonspunktOppdaterParameter param) {
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
+        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
-        var senesteDatoFraVilkårsperiode = perioderTilVurdering.getMaxLocalDate();
+        var erEndretBosted =
+            behandlingRepository.hentBehandling(param.getBehandlingId()).harBehandlingÅrsak(ENDRET_BOSTED);
 
-        LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it ->
-            new LocalDateSegment<>(it.periode().getFom(), hentMaksDatoVedÅpenPeriode(it.periode(), senesteDatoFraVilkårsperiode), true)).toList()
-        );
 
-        LocalDateTimeline<Boolean> uforventedePerioder = inputOppdateres.disjoint(perioderTilVurdering);
-        if (!uforventedePerioder.isEmpty()) {
-            throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
-        }
-
+        var senesteDatoFraVilkårsperiode = eksisterendeVilkårperioder.getMaxLocalDate();
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        var periodeVurderinger = dto.getVurdertePerioder().stream()
-            .map(it -> new BostedsvilkårResultatPeriode(
+        var vurderteÅpnePerioder = new LocalDateTimeline<>(dto.getVurdertePerioder().stream()
+            .filter(it -> it.periode().getTom() == null)
+            .map(it -> new LocalDateSegment<>(it.periode().getFom(), hentMaksDatoVedÅpenPeriode(it.periode(), senesteDatoFraVilkårsperiode), it))
+            .toList())
+            .intersection(eksisterendeVilkårperioder);    // For å ikke innføre avslag der det er hull i eksisterende vilkårsperiode
+
+        var vurderteLukkedePerioder = new LocalDateTimeline<>(dto.getVurdertePerioder().stream()
+            .filter(it -> it.periode().getTom() != null)
+            .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), it))
+            .toList());
+
+        validerLukkedePerioder(vurderteLukkedePerioder, eksisterendeVilkårperioder, erEndretBosted);
+
+        var periodeVurderinger = vurderteÅpnePerioder.crossJoin(vurderteLukkedePerioder).segmenter().stream()
+            .map(it ->
+                new BostedsvilkårResultatPeriode(
                 DatoIntervallEntitet.fraOgMedTilOgMed(
-                    it.periode().getFom(),
-                    hentMaksDatoVedÅpenPeriode(it.periode(), senesteDatoFraVilkårsperiode)
+                    it.getFom(),
+                    it.getTom()
                 ),
-                it.erVilkårOppfylt(),
-                it.avslagsårsak(),
+                it.getValue().erVilkårOppfylt(),
+                it.getValue().avslagsårsak(),
                 true,
-                it.begrunnelse(),
-                it.fritekstVurderingBrev(),
+                it.getValue().begrunnelse(),
+                it.getValue().fritekstVurderingBrev(),
                 vurdertAv,
                 vurdertTidspunkt))
             .toList();
@@ -101,6 +111,10 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(param.getBehandlingId(), periodeVurderinger);
 
         inngangsvilkårVurderingTjeneste.settBostedsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
+
+        if (erEndretBosted) {
+            inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR);
+        }
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var historikkinnslag = new Historikkinnslag.Builder()
@@ -114,6 +128,20 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
 
         return OppdateringResultat.nyttResultat();
     }
+
+    private static void validerLukkedePerioder(LocalDateTimeline<VilkårBostedPeriodeVurderingDto> vurderteLukkedePerioder, LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperiode, boolean erEndretBosted) {
+        LocalDateTimeline<VilkårBostedPeriodeVurderingDto> uforventedePerioder = vurderteLukkedePerioder.disjoint(eksisterendeVilkårperiode);
+        if (!uforventedePerioder.isEmpty()) {
+            throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
+        }
+
+        LocalDateTimeline<?> manglendePerioder = eksisterendeVilkårperiode.disjoint(vurderteLukkedePerioder);
+        if (!manglendePerioder.isEmpty() && !erEndretBosted) {
+            // Brukers uttalelse kan føre til at ikke hele perioden opprinnelig satt til IKKE_VURDERT skal revurderes likevel.
+            throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);
+        }
+    }
+
     static LocalDate hentMaksDatoVedÅpenPeriode(Periode periode, LocalDate senesteTomVilkårsperiode) {
         var erÅpenPeriode = periode.getTom() == null || periode.getFom().equals(TIDENES_ENDE);
         return erÅpenPeriode ? senesteTomVilkårsperiode : periode.getTom();
