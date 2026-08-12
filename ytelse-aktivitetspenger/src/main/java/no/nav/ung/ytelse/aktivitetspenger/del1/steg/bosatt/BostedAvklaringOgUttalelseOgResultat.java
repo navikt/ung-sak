@@ -17,26 +17,26 @@ import java.time.LocalDateTime;
  */
 class BostedAvklaringOgUttalelseOgResultat {
 
-    private final BostedsfaktaOgAvklaring avklaring;
+    private final BostedsfaktaOgAvklaring faktaOgAvklaring;
     private final EtterlysningData etterlysning;
     private final BostedsvilkårResultatPeriode resultat;
 
-    BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring avklaring) {
-        this(avklaring, null, null);
+    BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring faktaOgAvklaring) {
+        this(faktaOgAvklaring, null, null);
     }
 
-    private BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring avklaring, EtterlysningData etterlysning, BostedsvilkårResultatPeriode resultat) {
-        this.avklaring = avklaring;
+    private BostedAvklaringOgUttalelseOgResultat(BostedsfaktaOgAvklaring faktaOgAvklaring, EtterlysningData etterlysning, BostedsvilkårResultatPeriode resultat) {
+        this.faktaOgAvklaring = faktaOgAvklaring;
         this.etterlysning = etterlysning;
         this.resultat = resultat;
     }
 
     BostedAvklaringOgUttalelseOgResultat medEtterlysning(EtterlysningData etterlysning) {
-        return new BostedAvklaringOgUttalelseOgResultat(this.avklaring, etterlysning, this.resultat);
+        return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, etterlysning, this.resultat);
     }
 
     BostedAvklaringOgUttalelseOgResultat medResultat(BostedsvilkårResultatPeriode resultat) {
-        return new BostedAvklaringOgUttalelseOgResultat(this.avklaring, this.etterlysning, resultat);
+        return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, this.etterlysning, resultat);
     }
 
     StegUtfall utledUtfall() {
@@ -44,7 +44,7 @@ class BostedAvklaringOgUttalelseOgResultat {
             return StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
         } else if (erKildeSøknadOgIkkeTidligereVurdert() || harMottattSvarMedUttalelse() || erÅrsakAnnet() || erValgtÅIkkeVarsleNårIkkeOppfylt()) {
             return StegUtfall.VILKÅR_VURDERES_MANUELT;
-        } else if (!avklaring.isErBosattITrondheim()) {
+        } else if (!faktaOgAvklaring.isErBosattITrondheim()) {
             return StegUtfall.OPPHØR_AUTOMATISK;
         }
         return StegUtfall.BOSATT_HELE_PERIODEN;
@@ -55,7 +55,7 @@ class BostedAvklaringOgUttalelseOgResultat {
     }
 
     BostedsPeriodeAvklaring getForeslåttAvklaring() {
-        return avklaring.harForeslåttAvklaring() ? avklaring.getForeslåttAvklaring() : null;
+        return faktaOgAvklaring.harForeslåttAvslagsavklaring() ? faktaOgAvklaring.getForeslåttAvslagsavklaring() : null;
     }
 
     EtterlysningData getEtterlysning() {
@@ -63,15 +63,15 @@ class BostedAvklaringOgUttalelseOgResultat {
     }
 
     private boolean erKildeSøknadOgIkkeTidligereVurdert() {
-        return Kilde.SØKNAD.equals(avklaring.getKilde()) && resultat == null;
+        return Kilde.SØKNAD.equals(faktaOgAvklaring.getKilde()) && resultat == null;
     }
 
     private boolean erValgtÅIkkeVarsleNårIkkeOppfylt() {
-        return avklaring.harForeslåttAvklaring() && !avklaring.erOppfyltEllerSenderVarsel();
+        return faktaOgAvklaring.harForeslåttAvslagsavklaring() && !faktaOgAvklaring.getForeslåttAvslagsavklaring().skalSendeVarsel();
     }
 
     private boolean erÅrsakAnnet() {
-        return BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(avklaring.getIkkeOppfyltÅrsak());
+        return BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(faktaOgAvklaring.getIkkeOppfyltÅrsak());
     }
 
     private boolean erVentende() {

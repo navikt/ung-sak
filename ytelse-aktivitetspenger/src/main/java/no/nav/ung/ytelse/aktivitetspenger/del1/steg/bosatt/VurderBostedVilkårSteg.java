@@ -17,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
@@ -120,7 +121,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(new LocalDateTimeline<>(List.of()));
 
-            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering);
+            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.AVKLARES).intersection(tidslinjeTilVurdering);
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
             .intersection(tidslinjeTilVurdering)
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new)
@@ -153,7 +154,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 var foreslåttAvklaring = s.getValue().getForeslåttAvklaring();
                 return new BostedsvilkårResultatPeriode(
                     DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
-                    foreslåttAvklaring.isErBosattITrondheim(),
+                    false,
                     foreslåttAvklaring.getIkkeOppfyltÅrsak(),
                     false,
                     null,

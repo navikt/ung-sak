@@ -76,7 +76,7 @@ public class BostedsGrunnlag extends BaseEntitet {
      */
     void setForeslåttAvklaring(List<BostedsPeriodeAvklaring> avklaringer) {
         var nyHolder = new BostedsAvklaringHolder(this.foreslått);
-        nyHolder.leggTilEllerErstattPeriodeAvklaringer(avklaringer);
+        nyHolder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(avklaringer);
 
         if (nyHolder.equals(this.foreslått)) {
             return;
@@ -134,9 +134,9 @@ public class BostedsGrunnlag extends BaseEntitet {
      * avklaring fra saksbehandler. Foreslått avklaring er kilde til sannhet der de overlapper.
      * Baserer seg på {@link #hentSøknadsfaktaSomTidslinje()} og mapper til {@link BostedsfaktaOgAvklaring}.
      */
-    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaSomTidslinje() {
+    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus... status) {
         var søknadsTidslinje = hentSøknadsfaktaSomTidslinje();
-        var foreslåttTidslinje = foreslått == null ? LocalDateTimeline.<BostedsPeriodeAvklaring>empty() : foreslått.hentSomTidslinje();
+        var foreslåttTidslinje = foreslått == null ? LocalDateTimeline.<BostedsPeriodeAvklaring>empty() : foreslått.hentAvklaringMedStatusSomTidslinje(status);
 
         return søknadsTidslinje.combine(foreslåttTidslinje,
             (di, søknad, avklaring) -> new LocalDateSegment<>(di, new BostedsfaktaOgAvklaring(

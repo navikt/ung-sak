@@ -51,7 +51,7 @@ public class BostedOppgaveOppretter {
                 new BekreftBostedOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),
                     etterlysning.getPeriode().getTomDato(),
-                    periodeAvklaring.isErBosattITrondheim(),
+                    false,
                     periodeAvklaring.getFritekstTilVarsel(),
                     mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak)
                 ),

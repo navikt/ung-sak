@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
+import no.nav.ung.sak.behandlingslager.bosatt.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -23,14 +24,12 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -106,7 +105,7 @@ class VurderFaktaBostedStegTest {
         utførSteg(behandling);
 
         var lagretGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
-        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().stream().findFirst().orElseThrow();
+        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.AVKLARES).stream().findFirst().orElseThrow();
         assertThat(periodeAvklaring.getValue().isErBosattITrondheim()).isTrue();
         assertThat(periodeAvklaring.getValue().getKilde()).isEqualTo(Kilde.SØKNAD);
     }

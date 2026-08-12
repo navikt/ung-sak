@@ -20,7 +20,9 @@ public record BostedAvklaringDto(
     /** IkkeOppfyltÅrsak.ANNET må begrunnes med fritekst. Null for andre årsaker */
     String fritekstTilVarsel,
     /** Begrunnelse for hvorfor det ikke skal sendes varsel til bruker. */
-    String begrunnelseIkkeVarsel
+    String begrunnelseIkkeVarsel,
+    /** Kun avklaringer opprettet i denne behandlingen kan redigeres. */
+    boolean kanRedigeres
 ) {
 }
 

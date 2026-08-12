@@ -22,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -85,7 +86,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             .max(Comparator.naturalOrder())
             .orElseThrow(() -> new IllegalStateException("Må ha perioder til vurdering"));
 
-        LocalDateTimeline<BostedAvklaringData> tidligereAvklaringer = hentTidligereAvklaringer(perioderTilVurdering, behandlingId);
+        LocalDateTimeline<BostedAvklaringData> tidligereAvklaringerUnderArbeid = hentTidligereAvklaringerUnderArbeid(perioderTilVurdering, behandlingId);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -103,7 +104,6 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
             nyePeriodeAvklaringer.add(new BostedsPeriodeAvklaring(
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-                false,
                 vurdering.fraflyttingsÅrsak(),
                 vurdering.begrunnelse(),
                 avklaring.skalSendeVarsel(),
@@ -119,7 +119,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         var perioderSomSkalVurderesPåNytt = nyePeriodeAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
         inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
 
-        opprettEtterlysning(behandling, nyeAvklaringerSomSkalVarsles, tidligereAvklaringer, periodeReferanser);
+        opprettEtterlysning(behandling, nyeAvklaringerSomSkalVarsles, tidligereAvklaringerUnderArbeid, periodeReferanser);
 
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
@@ -133,12 +133,12 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         return OppdateringResultat.nyttResultat();
     }
 
-    private LocalDateTimeline<BostedAvklaringData> hentTidligereAvklaringer(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, long behandlingId) {
+    private LocalDateTimeline<BostedAvklaringData> hentTidligereAvklaringerUnderArbeid(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, long behandlingId) {
         var perioderTilVurderingTidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(periode-> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true)).toList());
 
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g ->
-                g.hentOppgittOgForeslåttFaktaSomTidslinje()
+                g.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.AVKLARES)
                     .intersection(perioderTilVurderingTidslinje).map(p ->
                         List.of(new LocalDateSegment<>(p.getLocalDateInterval(), new BostedAvklaringData(p.getValue().isErBosattITrondheim(), p.getValue().isErBosattITrondheim() ? null : p.getFom(), p.getValue().getIkkeOppfyltÅrsak(), p.getValue().getKilde())))
                  ))
@@ -147,12 +147,11 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
     private void opprettEtterlysning(Behandling behandling,
                                      Map<Periode, BostedAvklaringData> nyeAvklaringerSomSkalVarsles,
-                                     LocalDateTimeline<BostedAvklaringData> tidligereTidslinje,
+                                     LocalDateTimeline<BostedAvklaringData> tidligereAvklaringerUnderArbeidTidslinje,
                                      Map<LocalDate, UUID> periodeReferanser) {
 
         long behandlingId = behandling.getId();
 
-        // Hent eksisterende aktive etterlysninger (OPPRETTET/VENTER) per fom
         List<Etterlysning> etterlysningerSomVenterSvar = etterlysningRepository
             .hentEtterlysningerSomVenterPåSvar(behandlingId).stream()
             .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
@@ -165,7 +164,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             BostedAvklaringData nyAvklaring = avklaringSomKreverVarsel.getValue();
             Periode periode = avklaringSomKreverVarsel.getKey();
 
-            LocalDateTimeline<BostedAvklaringData> tidligereOverlappendeAvklaringerTidslinje = tidligereTidslinje.intersection(new LocalDateInterval(periode.getFom(), periode.getTom()));
+            LocalDateTimeline<BostedAvklaringData> tidligereOverlappendeAvklaringerTidslinje = tidligereAvklaringerUnderArbeidTidslinje.intersection(new LocalDateInterval(periode.getFom(), periode.getTom()));
             if (tidligereOverlappendeAvklaringerTidslinje.isEmpty()) {
                 skalOpprette = true;
             } else {

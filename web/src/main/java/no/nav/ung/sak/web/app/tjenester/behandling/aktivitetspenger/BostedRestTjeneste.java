@@ -114,7 +114,7 @@ public class BostedRestTjeneste {
 
                 var info = segment.getValue();
                 var faktaOgAvklaring = info.getFaktaOgAvklaring();
-                var uttalelse = faktaOgAvklaring.harForeslåttAvklaring() ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvklaring().getReferanse()) : null;
+                var uttalelse = faktaOgAvklaring.harForeslåttAvslagsavklaring() ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvslagsavklaring().getReferanse()) : null;
                 boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
                 String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
@@ -143,7 +143,7 @@ public class BostedRestTjeneste {
     }
 
     private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedsGrunnlag grunnlag, Behandling behandling) {
-        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje();
+        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.AVKLARES, AvklaringStatus.FERDIG);
 
         LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
@@ -201,11 +201,11 @@ public class BostedRestTjeneste {
         }
 
         public BostedAvklaringDto byggAvklaringDtoHvisFinnes() {
-            if (faktaOgAvklaring == null || !faktaOgAvklaring.harForeslåttAvklaring()) {
+            if (faktaOgAvklaring == null || !faktaOgAvklaring.harForeslåttAvslagsavklaring()) {
                 return null;
             }
 
-            var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvklaring();
+            var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvslagsavklaring();
 
             return new BostedAvklaringDto(
                 foreslåttAvklaring.getPeriode().tilPeriode(),
@@ -214,7 +214,8 @@ public class BostedRestTjeneste {
                 foreslåttAvklaring.getBegrunnelse(),
                 foreslåttAvklaring.skalSendeVarsel(),
                 foreslåttAvklaring.getFritekstTilVarsel(),
-                foreslåttAvklaring.getBegrunnelseIkkeVarsel()
+                foreslåttAvklaring.getBegrunnelseIkkeVarsel(),
+                foreslåttAvklaring.kanRedigeres()
             );
         }
     }

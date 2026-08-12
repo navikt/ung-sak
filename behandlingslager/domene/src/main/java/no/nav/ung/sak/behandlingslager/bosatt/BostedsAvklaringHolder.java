@@ -5,7 +5,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.Periode;
 import org.hibernate.annotations.BatchSize;
 
 import java.util.*;
@@ -40,16 +39,32 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         }
     }
 
-    void leggTilEllerErstattPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
+    void leggTilEllerErstattPeriodeAvklaringerUnderArbeid(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
+        leggTilEllerErstattPeriodeAvklaringer(nyePeriodeAvklaring, AvklaringStatus.AVKLARES);
+    }
+
+    void settAlleAvklaringerTilFerdig() {
+        var avklaringerEndretTilFerdig = hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream().peek(BostedsPeriodeAvklaring::setFerdig).toList();
+        leggTilEllerErstattPeriodeAvklaringer(avklaringerEndretTilFerdig, AvklaringStatus.FERDIG);
+    }
+
+    private void leggTilEllerErstattPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring, AvklaringStatus status) {
         periodeAvklaringer = byggAvklaringTidslinje(nyePeriodeAvklaring)
-            .crossJoin(hentSomTidslinje())
-            .toSegments().stream()
+            .crossJoin(hentAvklaringMedStatusSomTidslinje(status))
+            .segmenter().stream()
             .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    public LocalDateTimeline<BostedsPeriodeAvklaring> hentSomTidslinje() {
-        return byggAvklaringTidslinje(periodeAvklaringer);
+    public LocalDateTimeline<BostedsPeriodeAvklaring> hentAvklaringMedStatusSomTidslinje(AvklaringStatus... status) {
+        return byggAvklaringTidslinje(
+            hentAvklaringerMedStatus(status)
+        );
+    }
+
+    public List<BostedsPeriodeAvklaring> hentAvklaringerMedStatus(AvklaringStatus... status) {
+        var statusSet = Set.of(status);
+        return periodeAvklaringer.stream().filter(it -> statusSet.contains(it.getStatus())).toList();
     }
 
     public Long getId() {
