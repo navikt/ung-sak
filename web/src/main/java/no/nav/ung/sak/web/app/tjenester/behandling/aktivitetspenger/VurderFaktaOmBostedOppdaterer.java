@@ -22,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.Avklaringtype;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -95,6 +96,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer().stream().filter(a -> a.vurdering() != null).toList()) {
             var fom = avklaring.periode().getFom();
             var tom = avklaring.periode().getTom() != null ? avklaring.periode().getTom() : maxTomDato;
+            var avklaringtype = avklaring.periode().getTom() != null ? Avklaringtype.AVSLAG : Avklaringtype.OPPHØR;
 
             var vurdering = avklaring.vurdering();
             if (avklaring.skalSendeVarsel()) {
@@ -110,7 +112,8 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
                 vurdering.fritekstTilVarsel(),
                 vurdering.begrunnelseIkkeVarsel(),
                 vurdertAv,
-                vurdertTidspunkt
+                vurdertTidspunkt,
+                avklaringtype
             ));
         }
 

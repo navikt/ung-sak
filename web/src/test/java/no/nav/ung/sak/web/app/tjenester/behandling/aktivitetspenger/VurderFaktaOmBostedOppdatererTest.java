@@ -16,10 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.*;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
@@ -245,7 +242,8 @@ class VurderFaktaOmBostedOppdatererTest {
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse" : null,
             "Begrunnelse ikke varsel",
             "A12345",
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            Avklaringtype.OPPHØR
         );
         var fakta = new BostedsfaktaOgAvklaring(null, avklaring);
         return new LocalDateTimeline<>(List.of(new LocalDateSegment<>(FOM, TOM, fakta)));

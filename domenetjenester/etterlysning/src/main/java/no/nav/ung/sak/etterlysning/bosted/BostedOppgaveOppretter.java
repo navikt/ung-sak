@@ -3,10 +3,13 @@ package no.nav.ung.sak.etterlysning.bosted;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOpphørOppgavetypeDataDto;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.bosatt.Avklaringtype;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
@@ -44,17 +47,32 @@ public class BostedOppgaveOppretter {
                 Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "FritekstTilVarsel må være satt når årsak er "+ ikkeOppfyltÅrsak);
             }
 
-            var oppgaveDto = new OpprettOppgaveDto(
-                new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
-                ytelsetype,
-                etterlysning.getEksternReferanse(),
-                new BekreftBostedOppgavetypeDataDto(
+            var mappetÅrsak = mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak);
+            var avklaringtype = periodeAvklaring.getAvklaringtype();
+
+            OppgavetypeDataDto oppgavetypeData;
+            if (avklaringtype == Avklaringtype.OPPHØR) {
+                oppgavetypeData = new BekreftBostedOpphørOppgavetypeDataDto(
+                    etterlysning.getPeriode().getFomDato(),
+                    periodeAvklaring.isErBosattITrondheim(),
+                    periodeAvklaring.getFritekstTilVarsel(),
+                    mappetÅrsak
+                );
+            } else {
+                oppgavetypeData = new BekreftBostedOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),
                     etterlysning.getPeriode().getTomDato(),
                     periodeAvklaring.isErBosattITrondheim(),
                     periodeAvklaring.getFritekstTilVarsel(),
-                    mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak)
-                ),
+                    mappetÅrsak
+                );
+            }
+
+            var oppgaveDto = new OpprettOppgaveDto(
+                new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
+                ytelsetype,
+                etterlysning.getEksternReferanse(),
+                oppgavetypeData,
                 etterlysning.getFrist()
             );
             oppgaveKlient.opprettOppgave(oppgaveDto);

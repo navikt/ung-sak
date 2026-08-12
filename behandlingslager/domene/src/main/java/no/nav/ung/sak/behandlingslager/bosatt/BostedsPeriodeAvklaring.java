@@ -52,6 +52,10 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Column(name = "begrunnelse_ikke_varsel", updatable = false)
     private String begrunnelseIkkeVarsel;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "avklaringtype", updatable = false, nullable = false)
+    private Avklaringtype avklaringtype;
+
     @Column(name = "vurdert_av", updatable = false)
     private String vurdertAv;
 
@@ -62,7 +66,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt, Avklaringtype avklaringtype) {
         if (!skalSendeVarsel) {
             Objects.requireNonNull(begrunnelseIkkeVarsel, "Mangler begrunnelse for hvorfor det ikke varsles");
         } else if (BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak)) {
@@ -86,6 +90,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.begrunnelseIkkeVarsel = begrunnelseIkkeVarsel;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.avklaringtype = avklaringtype;
     }
 
     public BostedsPeriodeAvklaring(BostedsPeriodeAvklaring annenAvklaring) {
@@ -99,9 +104,10 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.begrunnelseIkkeVarsel = annenAvklaring.getBegrunnelseIkkeVarsel();
         this.vurdertAv = annenAvklaring.getVurdertAv();
         this.vurdertTidspunkt = annenAvklaring.getVurdertTidspunkt();
+        this.avklaringtype = annenAvklaring.getAvklaringtype();
     }
 
-    private BostedsPeriodeAvklaring(DatoIntervallEntitet periode, UUID referanse, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    private BostedsPeriodeAvklaring(DatoIntervallEntitet periode, UUID referanse, boolean erBosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt, Avklaringtype avklaringtype) {
         this.periode = periode.toRange();
         this.referanse = referanse;
         this.erBosattITrondheim = erBosattITrondheim;
@@ -112,6 +118,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.begrunnelseIkkeVarsel = begrunnelseIkkeVarsel;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.avklaringtype = avklaringtype;
     }
 
     public BostedsPeriodeAvklaring medNyPeriode(DatoIntervallEntitet nyPeriode) {
@@ -125,7 +132,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             this.fritekstTilVarsel,
             this.begrunnelseIkkeVarsel,
             this.vurdertAv,
-            this.vurdertTidspunkt
+            this.vurdertTidspunkt,
+            this.avklaringtype
         );
     }
 
@@ -169,6 +177,10 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return begrunnelseIkkeVarsel;
     }
 
+    public Avklaringtype getAvklaringtype() {
+        return avklaringtype;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
@@ -180,12 +192,13 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             && Objects.equals(fritekstTilVarsel, that.fritekstTilVarsel)
             && Objects.equals(begrunnelseIkkeVarsel, that.begrunnelseIkkeVarsel)
             && Objects.equals(vurdertAv, that.vurdertAv)
-            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt)
+            && avklaringtype == that.avklaringtype;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, erBosattITrondheim, ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt);
+        return Objects.hash(periode, erBosattITrondheim, ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype);
     }
 
     @Override
@@ -195,6 +208,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             + ", erBosattITrondheim=" + erBosattITrondheim
             + ", ikkeOppfyltÅrsak=" + ikkeOppfyltÅrsak
             + ", skalSendeVarsel=" + skalSendeVarsel
+            + ", avklaringtype=" + avklaringtype
             + ", vurdertAv=" + vurdertAv
             + ", vurdertTidspunkt=" + vurdertTidspunkt + '}';
     }
