@@ -18,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
 import no.nav.ung.sak.typer.JournalpostId;
 
 @Entity(name = "SøktStartdato")
@@ -30,9 +31,11 @@ public class SøktStartdato extends BaseEntitet implements SøktPeriodeData {
     private Long id;
 
 
+    @ChangeTracked
     @Column(name = "startdato", nullable = false)
     private LocalDate startdato;
 
+    @ChangeTracked
     @Embedded
     @AttributeOverrides(@AttributeOverride(name = "journalpostId", column = @Column(name = "journalpost_id")))
     private JournalpostId journalpostId;

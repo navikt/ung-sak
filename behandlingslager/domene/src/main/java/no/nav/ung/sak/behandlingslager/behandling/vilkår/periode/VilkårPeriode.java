@@ -311,6 +311,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         return manueltVurdert == that.manueltVurdert &&
             utfall == that.utfall &&
             Objects.equals(begrunnelse, that.begrunnelse) &&
+            Objects.equals(fritekstVurderingBrev, that.fritekstVurderingBrev) &&
             avslagsårsak == that.avslagsårsak &&
             utfallMerknad == that.utfallMerknad &&
             merknadParametere == that.merknadParametere &&
@@ -319,7 +320,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
 
     @Override
     public int hashCode() {
-        return Objects.hash(manueltVurdert, utfall, begrunnelse, avslagsårsak, utfallMerknad, merknadParametere, overstyrtUtfall);
+        return Objects.hash(manueltVurdert, utfall, begrunnelse, avslagsårsak, utfallMerknad, merknadParametere, overstyrtUtfall, fritekstVurderingBrev);
     }
 
     @Override

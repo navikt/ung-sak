@@ -10,13 +10,19 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatDiff;
 import no.nav.ung.sak.behandlingslager.behandling.EndringsresultatSnapshot;
 import no.nav.ung.sak.behandlingslager.behandling.RegisterdataDiffsjekker;
 import no.nav.ung.sak.diff.DiffResult;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Dependent
 public class ProsessTriggereRepository {
+
+    private static final Logger log = LoggerFactory.getLogger(ProsessTriggereRepository.class);
 
     private EntityManager entityManager;
 
@@ -41,6 +47,44 @@ public class ProsessTriggereRepository {
             entityManager.persist(oppdatert);
             entityManager.flush();
         }
+    }
+
+    /**
+     * Fjerner en spesifikk trigger (identifisert ved årsak + periode) fra aktivt grunnlag for en behandling.
+     * Brukes bl.a. av forvaltning for å nøytralisere en trigger som ble opprettet av et dokument som i
+     * ettertid er markert ugyldig (f.eks. en duplikat søknad), slik at den ikke lenger forsøkes matchet
+     * mot søknadsperioder ved senere vurdering.
+     * <p>
+     * Gjør ingenting (no-op) dersom det ikke finnes noe aktivt grunnlag, eller ingen trigger matcher
+     * angitt årsak+periode - dette logges eksplisitt siden det er en stille situasjon som ellers er
+     * vanskelig å oppdage.
+     */
+    public void fjern(Long behandlingId, BehandlingÅrsakType årsak, DatoIntervallEntitet periode) {
+        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
+        if (eksisterende.isEmpty()) {
+            log.warn("Fant ingen aktivt ProsessTriggere-grunnlag for behandlingId={}, ingenting å fjerne (årsak={}, periode={})", behandlingId, årsak, periode);
+            return;
+        }
+
+        var eksisterendeTriggere = eksisterende.get().getTriggere();
+        var gjenværende = eksisterendeTriggere.stream()
+            .filter(t -> !(t.getÅrsak() == årsak && t.getPeriode().equals(periode)))
+            .map(Trigger::new)
+            .collect(Collectors.toSet());
+
+        if (gjenværende.size() == eksisterendeTriggere.size()) {
+            log.warn("Fant ingen trigger som matchet årsak={} og periode={} for behandlingId={} - ingen endring gjort. Eksisterende triggere: {}",
+                årsak, periode, behandlingId, eksisterendeTriggere);
+            return;
+        }
+
+        deaktiver(eksisterende.get());
+        var oppdatert = new ProsessTriggere(behandlingId, new Triggere(gjenværende));
+        entityManager.persist(oppdatert.getTriggereEntity());
+        entityManager.persist(oppdatert);
+        entityManager.flush();
+
+        log.info("Fjernet trigger årsak={} periode={} fra behandlingId={}. Gjenværende triggere: {}", årsak, periode, behandlingId, gjenværende);
     }
 
     public Optional<ProsessTriggere> hentGrunnlagBasertPåId(Long grunnlagId) {
