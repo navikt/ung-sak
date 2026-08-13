@@ -81,7 +81,7 @@ public class BostedsGrunnlagRepository {
     }
 
     private static Map<LocalDate, UUID> hentForeslåttAvklaringsreferanser(BostedsAvklaringHolder holder) {
-        return holder.getPeriodeAvklaringer().stream()
+        return holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream()
             .collect(Collectors.toMap(
                 p -> p.getPeriode().getFomDato(),
                 BostedsPeriodeAvklaring::getReferanse));

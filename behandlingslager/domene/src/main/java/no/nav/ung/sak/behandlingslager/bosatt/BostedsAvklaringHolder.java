@@ -39,18 +39,31 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         }
     }
 
+    /**
+     * Erstatter avklaringer under arbeid istedenfor å legge til eller splitte eksisterende — slik at referansen til én periodeavklaring under arbeid alltid dekker
+     * ett segment og kan varsles entydig. Avklaringer som allerede er ferdigstilte beholdes urørt.
+     */
     void leggTilEllerErstattPeriodeAvklaringerUnderArbeid(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
-        leggTilEllerErstattPeriodeAvklaringer(nyePeriodeAvklaring, AvklaringStatus.AVKLARES);
+        var beholdte = periodeAvklaringer.stream()
+            .filter(eksisterende -> eksisterende.getStatus() == AvklaringStatus.FERDIG)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        beholdte.addAll(nyePeriodeAvklaring);
+        periodeAvklaringer = beholdte;
     }
 
+    /**
+     * Ferdigstiller alle avklaringer under arbeid. Ferdigstilte avklaringer kan splittes av senere
+     * ferdigstillinger og kan derfor dele referanse på tvers av segmenter — det etterlyses aldri
+     * uttalelse på en ferdigstilt avklaring.
+     */
     void settAlleAvklaringerTilFerdig() {
-        var avklaringerEndretTilFerdig = hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream().peek(BostedsPeriodeAvklaring::setFerdig).toList();
-        leggTilEllerErstattPeriodeAvklaringer(avklaringerEndretTilFerdig, AvklaringStatus.FERDIG);
-    }
+        var avklaringerEndretTilFerdig = hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream()
+            .map(BostedsPeriodeAvklaring::medStatusFerdig)
+            .toList();
 
-    private void leggTilEllerErstattPeriodeAvklaringer(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring, AvklaringStatus status) {
-        periodeAvklaringer = byggAvklaringTidslinje(nyePeriodeAvklaring)
-            .crossJoin(hentAvklaringMedStatusSomTidslinje(status))
+        periodeAvklaringer = byggAvklaringTidslinje(avklaringerEndretTilFerdig)
+            .crossJoin(hentAvklaringMedStatusSomTidslinje(AvklaringStatus.FERDIG))
             .segmenter().stream()
             .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
             .collect(Collectors.toCollection(LinkedHashSet::new));

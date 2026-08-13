@@ -54,7 +54,7 @@ public class BostedOppgaveOppretter {
             if (avklaringtype == Avklaringtype.OPPHØR) {
                 oppgavetypeData = new BekreftBostedOpphørOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),
-                    periodeAvklaring.isErBosattITrondheim(),
+                    false,
                     periodeAvklaring.getFritekstTilVarsel(),
                     mappetÅrsak
                 );

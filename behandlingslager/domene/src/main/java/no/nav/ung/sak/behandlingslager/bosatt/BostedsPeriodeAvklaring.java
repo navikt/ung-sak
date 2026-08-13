@@ -136,6 +136,22 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         );
     }
 
+    public BostedsPeriodeAvklaring medStatusFerdig() {
+        return new BostedsPeriodeAvklaring(
+            getPeriode(),
+            this.referanse,
+            this.ikkeOppfyltÅrsak,
+            this.begrunnelse,
+            this.skalSendeVarsel,
+            this.fritekstTilVarsel,
+            this.begrunnelseIkkeVarsel,
+            this.vurdertAv,
+            this.vurdertTidspunkt,
+            this.avklaringtype,
+            AvklaringStatus.FERDIG
+        );
+    }
+
     public Long getId() {
         return id;
     }
@@ -218,9 +234,5 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
 
     public boolean kanRedigeres() {
         return status == AvklaringStatus.AVKLARES;
-    }
-
-    public void setFerdig() {
-        status = AvklaringStatus.FERDIG;
     }
 }
