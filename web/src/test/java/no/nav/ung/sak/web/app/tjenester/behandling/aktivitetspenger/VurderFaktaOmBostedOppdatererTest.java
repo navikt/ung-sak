@@ -20,11 +20,8 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
+import no.nav.ung.sak.behandlingslager.bosatt.*;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -260,7 +257,8 @@ class VurderFaktaOmBostedOppdatererTest {
             BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(årsak) ? "Fritekstbegrunnelse til bruker" : null,
             null,
             SAKSBEHANDLER,
-            LocalDateTime.now()
+            LocalDateTime.now(),
+            Avklaringtype.OPPHØR
         )));
     }
 
