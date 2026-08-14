@@ -17,6 +17,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.bosatt.Avklaringtype;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EndringType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -214,7 +215,9 @@ public class BostedRestTjeneste {
                 foreslåttAvklaring.getBegrunnelse(),
                 foreslåttAvklaring.skalSendeVarsel(),
                 foreslåttAvklaring.getFritekstTilVarsel(),
-                foreslåttAvklaring.getBegrunnelseIkkeVarsel()
+                foreslåttAvklaring.getBegrunnelseIkkeVarsel(),
+                foreslåttAvklaring.getAvklaringtype(),
+                true // TODO: Publiserer kontrakt med hardkoding. Må oppdateres
             );
         }
     }
