@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import jakarta.persistence.*;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.hibernate.annotations.BatchSize;

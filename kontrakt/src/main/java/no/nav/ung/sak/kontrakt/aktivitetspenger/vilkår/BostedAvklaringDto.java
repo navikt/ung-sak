@@ -1,6 +1,7 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
 import jakarta.validation.constraints.NotNull;
+import no.nav.ung.kodeverk.bosatt.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.typer.Periode;
 
@@ -21,8 +22,11 @@ public record BostedAvklaringDto(
     String fritekstTilVarsel,
     /** Begrunnelse for hvorfor det ikke skal sendes varsel til bruker. */
     String begrunnelseIkkeVarsel,
+    /** Opphør eller avslag som ble foreslått i aksjonspunktet.
+     * Utledes i aksjonspunktet basert på perioden, før perioden lukkes med vilkårsperiodens ende. */
+    Avklaringtype avklaringtype,
     /** Kun avklaringer opprettet i denne behandlingen kan redigeres. */
-    boolean kanRedigeres
+     boolean kanRedigeres
 ) {
 }
 

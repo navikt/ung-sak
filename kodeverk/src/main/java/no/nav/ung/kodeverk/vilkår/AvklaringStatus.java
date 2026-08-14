@@ -1,4 +1,4 @@
-package no.nav.ung.sak.behandlingslager.bosatt;
+package no.nav.ung.kodeverk.vilkår;
 
 /**
  *  Brukes for å unngå å utføre vilkårsvurdering på avklaringen mer enn én gang.
