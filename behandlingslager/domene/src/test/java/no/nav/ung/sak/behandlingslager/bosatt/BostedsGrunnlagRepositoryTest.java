@@ -104,8 +104,8 @@ class BostedsGrunnlagRepositoryTest {
         var referanser = repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(første, andre));
 
         assertThat(referanser)
-            .containsEntry(FOM, første.getReferanse())
-            .containsEntry(LocalDate.of(2026, 1, 16), andre.getReferanse())
+            .contains(første.getReferanse())
+            .contains(andre.getReferanse())
             .hasSize(2);
     }
 

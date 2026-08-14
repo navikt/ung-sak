@@ -38,7 +38,7 @@ public class BostedsfaktaOgAvklaring {
     }
 
     public boolean isErBosattITrondheim() {
-        return !harForeslåttAvslagsavklaring() || søknadsinformasjon.isErBosattITrondheim();
+        return !harForeslåttAvslagsavklaring() && søknadsinformasjon.isErBosattITrondheim();
     }
 
     public BostedsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {

@@ -4,15 +4,12 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
-import no.nav.ung.kodeverk.bosatt.Avklaringtype;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -24,23 +21,19 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedAvklaringData;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.*;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderFaktaOmBostedDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -87,42 +80,21 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             .max(Comparator.naturalOrder())
             .orElseThrow(() -> new IllegalStateException("Må ha perioder til vurdering"));
 
-        LocalDateTimeline<BostedAvklaringData> tidligereAvklaringerUnderArbeid = hentTidligereAvklaringerUnderArbeid(perioderTilVurdering, behandlingId);
+        List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(g ->
+                g.getForeslått().hentAvklaringerMedStatus(AvklaringStatus.AVKLARES)
+            ).orElse(List.of());
+
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        Map<Periode, BostedAvklaringData> nyeAvklaringerSomSkalVarsles = new LinkedHashMap<>();
-        List<BostedsPeriodeAvklaring> nyePeriodeAvklaringer = new ArrayList<>();
-        for (BostedFaktaavklaringPeriodeDto avklaring : dto.getAvklaringer().stream().filter(a -> a.vurdering() != null).toList()) {
-            var fom = avklaring.periode().getFom();
-            var tom = avklaring.periode().getTom() != null ? avklaring.periode().getTom() : maxTomDato;
-            var avklaringtype = avklaring.periode().getTom() != null ? Avklaringtype.AVSLAG : Avklaringtype.OPPHØR;
+        List<BostedAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
+            .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringData(a, maxTomDato)).toList();
 
-            var vurdering = avklaring.vurdering();
-            if (avklaring.skalSendeVarsel()) {
-                nyeAvklaringerSomSkalVarsles.put(new Periode(fom, tom), BostedAvklaringUtil.tilAvklaringData(fom, vurdering));
-            }
+        Set<UUID> alleGrunnlagsreferanserUnderArbeid = lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(param, nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
 
-            nyePeriodeAvklaringer.add(new BostedsPeriodeAvklaring(
-                DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-                vurdering.fraflyttingsÅrsak(),
-                vurdering.begrunnelse(),
-                avklaring.skalSendeVarsel(),
-                vurdering.fritekstTilVarsel(),
-                vurdering.begrunnelseIkkeVarsel(),
-                vurdertAv,
-                vurdertTidspunkt,
-                avklaringtype
-            ));
-        }
-
-        Map<LocalDate, UUID> periodeReferanser = bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
-
-        var perioderSomSkalVurderesPåNytt = nyePeriodeAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
-        inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
-
-        opprettEtterlysning(behandling, nyeAvklaringerSomSkalVarsles, tidligereAvklaringerUnderArbeid, periodeReferanser);
+        oppdaterEtterlysninger(behandling, nyeAvklaringer, tidligereAvklaringerUnderArbeid, alleGrunnlagsreferanserUnderArbeid);
 
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
@@ -136,22 +108,22 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         return OppdateringResultat.nyttResultat();
     }
 
-    private LocalDateTimeline<BostedAvklaringData> hentTidligereAvklaringerUnderArbeid(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, long behandlingId) {
-        var perioderTilVurderingTidslinje = new LocalDateTimeline<>(perioderTilVurdering.stream().map(periode-> new LocalDateSegment<>(periode.getFomDato(), periode.getTomDato(), true)).toList());
+    private Set<UUID> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
+        var nyePeriodeAvklaringer = nyeAvklaringer.stream()
+            .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
+            .toList();
 
-        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g ->
-                g.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.AVKLARES)
-                    .intersection(perioderTilVurderingTidslinje).map(p ->
-                        List.of(new LocalDateSegment<>(p.getLocalDateInterval(), new BostedAvklaringData(p.getValue().isErBosattITrondheim(), p.getValue().isErBosattITrondheim() ? null : p.getFom(), p.getValue().getIkkeOppfyltÅrsak(), p.getValue().getKilde())))
-                 ))
-            .orElse(LocalDateTimeline.empty());
+        Set<UUID> alleGrunnlagsreferanserUnderArbeid = bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
+
+        var perioderSomSkalVurderesPåNytt = nyePeriodeAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
+        inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
+        return alleGrunnlagsreferanserUnderArbeid;
     }
 
-    private void opprettEtterlysning(Behandling behandling,
-                                     Map<Periode, BostedAvklaringData> nyeAvklaringerSomSkalVarsles,
-                                     LocalDateTimeline<BostedAvklaringData> tidligereAvklaringerUnderArbeidTidslinje,
-                                     Map<LocalDate, UUID> periodeReferanser) {
+    private void oppdaterEtterlysninger(Behandling behandling,
+                                        List<BostedAvklaringInnhold> nyeAvklaringInnhold,
+                                        List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid,
+                                        Set<UUID> alleGrunnlagsreferanserUnderArbeid) {
 
         long behandlingId = behandling.getId();
 
@@ -160,63 +132,49 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
             .toList();
 
-        boolean skalAvbryte = false;
-        boolean skalOpprette = false;
+        var avklaringerSomSkalVarsles = nyeAvklaringInnhold.stream()
+            .filter(BostedAvklaringInnhold::skalSendeVarsel)
+            .collect(Collectors.toSet());
 
-        for (var avklaringSomKreverVarsel : nyeAvklaringerSomSkalVarsles.entrySet()) {
-            BostedAvklaringData nyAvklaring = avklaringSomKreverVarsel.getValue();
-            Periode periode = avklaringSomKreverVarsel.getKey();
+        var tidligereAvklaringerInnhold = tidligereAvklaringerUnderArbeid.stream()
+            .collect(Collectors.toMap(
+                BostedsAvklaringDataMapper::mapTilBostedAvklaringData,
+                it -> it,
+                (første, _) -> første,
+                LinkedHashMap::new));
 
-            LocalDateTimeline<BostedAvklaringData> tidligereOverlappendeAvklaringerTidslinje = tidligereAvklaringerUnderArbeidTidslinje.intersection(new LocalDateInterval(periode.getFom(), periode.getTom()));
-            if (tidligereOverlappendeAvklaringerTidslinje.isEmpty()) {
-                skalOpprette = true;
-            } else {
-                List<BostedAvklaringData> gamleAvklaringerSomOverlapperMedDenne = tidligereOverlappendeAvklaringerTidslinje.stream()
-                    .map(LocalDateSegment::getValue).toList();
+        // Beholder kun nye avklaringer og avklaringer med endret innhold
+        avklaringerSomSkalVarsles.removeAll(tidligereAvklaringerInnhold.keySet());
 
-                boolean avklaringEndret = gamleAvklaringerSomOverlapperMedDenne.stream().anyMatch(gammelAvklaring -> erAvklaringEndret(nyAvklaring, gammelAvklaring));
+        var avklaringsreferanserSomErEndret = tidligereAvklaringerInnhold.entrySet().stream().map(entry -> {
+            var tidligereAvklaringInnhold = entry.getKey();
+            var tidligereBostedsPeriodeAvklaring = entry.getValue();
 
-                if (avklaringEndret) {
-                    // Avbryt aktiv
-                    var eksisterendeAktive = etterlysningerSomVenterSvar.stream()
-                        .filter(e -> e.getPeriode().tilPeriode().overlaps(periode))
-                        .toList();
-                    skalAvbryte = skalAvbryte || !eksisterendeAktive.isEmpty();
-                    eksisterendeAktive.forEach(Etterlysning::setSkalAvbrytes);
-                    etterlysningRepository.lagre(eksisterendeAktive);
-
-                    // Opprett ny
-                    var etterlysning = Etterlysning.opprettForType(
-                        behandlingId,
-                        periodeReferanser.get(periode.getFom()),
-                        UUID.randomUUID(),
-                        DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()),
-                        EtterlysningType.UTTALELSE_BOSTED
-                    );
-                    skalOpprette = true;
-                    etterlysningRepository.lagre(etterlysning);
-                }
+            if (!avklaringerSomSkalVarsles.contains(tidligereAvklaringInnhold)) {
+                return tidligereBostedsPeriodeAvklaring.getReferanse();
             }
-        }
+            return null;
+        }).filter(Objects::nonNull).toList();
 
-        long fagsakId = behandling.getFagsakId();
+        var eksisterendeVarsler = etterlysningerSomVenterSvar.stream()
+            .filter(etterlysning -> !alleGrunnlagsreferanserUnderArbeid.contains(etterlysning.getGrunnlagsreferanse()) || avklaringsreferanserSomErEndret.contains(etterlysning.getGrunnlagsreferanse()))
+            .peek(Etterlysning::setSkalAvbrytes)
+            .toList();
+
+        etterlysningRepository.lagre(eksisterendeVarsler);
+
+        var skalAvbryte = eksisterendeVarsler.stream().anyMatch(it -> it.getStatus() == EtterlysningStatus.AVBRUTT);
         if (skalAvbryte) {
             var task = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
-            task.setBehandling(fagsakId, behandlingId);
+            task.setBehandling(behandling.getFagsakId(), behandlingId);
             prosessTaskTjeneste.lagre(task);
         }
-        if (skalOpprette) {
+
+        if (!avklaringerSomSkalVarsles.isEmpty()) {
             var task = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
-            task.setBehandling(fagsakId, behandlingId);
+            task.setBehandling(behandling.getFagsakId(), behandlingId);
             task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_BOSTED.getKode());
             prosessTaskTjeneste.lagre(task);
         }
     }
-
-    private static boolean erAvklaringEndret(BostedAvklaringData nyAvklaring, BostedAvklaringData gammelAvklaring) {
-        return nyAvklaring.erBosattITrondheim() != gammelAvklaring.erBosattITrondheim() ||
-            !Objects.equals(nyAvklaring.fraflyttingsDato(), gammelAvklaring.fraflyttingsDato()) ||
-             nyAvklaring.fraflyttingsÅrsak() != gammelAvklaring.fraflyttingsÅrsak();
-    }
-
 }
