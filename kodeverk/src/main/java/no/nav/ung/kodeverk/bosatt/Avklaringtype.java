@@ -1,4 +1,4 @@
-package no.nav.ung.sak.behandlingslager.bosatt;
+package no.nav.ung.kodeverk.bosatt;
 
 /**
  * Type avklaring for bostedsvilkåret. Avgjør hvilken oppgavetype som sendes til bruker
