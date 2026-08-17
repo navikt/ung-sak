@@ -45,6 +45,13 @@ public enum Avslagsårsak implements Kodeverdi {
     SØKER_ER_IKKE_MEDLEM("4001", "Søker er ikke medlem.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
+    /**
+     * Denne årsaken brukes med noe som funksjonelt sett ikke er avslag - at saksbehandler velger å innvilge
+     * en kortere periode enn det saksbehandlingssystemet tillater.
+     */
+    AVKORTET("9000", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.",
+     Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
     UDEFINERT("-", "Ikke definert",
         Map.of());
 
