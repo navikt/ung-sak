@@ -42,6 +42,7 @@ import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -87,6 +88,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private VurderFaktaOmBostedOppdaterer oppdaterer;
     private Behandling behandling;
+    private BostedAvklaringTjeneste bostedAvklaringTjeneste;
 
     @BeforeAll
     static void beforeAll() {
@@ -106,15 +108,13 @@ class VurderFaktaOmBostedOppdatererTest {
         bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
         etterlysningRepository = new EtterlysningRepository(entityManager);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
+        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, inngangsvilkårVurderingTjeneste, etterlysningRepository, prosessTaskTjeneste);
 
         oppdaterer = new VurderFaktaOmBostedOppdaterer(
             behandlingRepository,
             historikkinnslagRepository,
-            bostedsGrunnlagRepository,
-            etterlysningRepository,
-            prosessTaskTjeneste,
             vilkårsPerioderTilVurderingTjenester,
-            inngangsvilkårVurderingTjeneste
+            bostedAvklaringTjeneste
         );
 
         behandling = opprettBehandlingMedVilkårOgPeriode();

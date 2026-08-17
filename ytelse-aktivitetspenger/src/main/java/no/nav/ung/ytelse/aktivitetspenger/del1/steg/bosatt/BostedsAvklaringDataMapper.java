@@ -1,6 +1,7 @@
-package no.nav.ung.sak.behandlingslager.bosatt;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import no.nav.ung.kodeverk.bosatt.Avklaringtype;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.typer.Periode;
 

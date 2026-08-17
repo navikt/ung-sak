@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -82,6 +83,24 @@ public class BostedsGrunnlagRepository {
 
     private static Set<UUID> hentForeslåttAvklaringsreferanser(BostedsAvklaringHolder holder) {
         return holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream().map(BostedsPeriodeAvklaring::getReferanse).collect(Collectors.toSet());
+    }
+
+    public void lagre(Long behandlingId, Consumer<BostedsGrunnlag> grunnlagsoperasjon) {
+        var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag
+            .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
+            .orElse(new BostedsGrunnlag(behandlingId));
+
+        grunnlagsoperasjon.accept(nyttGrunnlag);
+
+        if (eksisterendeGrunnlag.isPresent()) {
+            if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
+                return;
+            }
+            deaktiverEksisterende(eksisterendeGrunnlag.get());
+        }
+        entityManager.persist(nyttGrunnlag);
+        entityManager.flush();
     }
 
     /**

@@ -58,7 +58,7 @@ public class BostedsAvklaringHolder extends BaseEntitet {
      * ferdigstillinger og kan derfor dele referanse på tvers av segmenter — det etterlyses aldri
      * uttalelse på en ferdigstilt avklaring.
      */
-    void settAlleAvklaringerTilFerdig() {
+    public void settAlleAvklaringerTilFerdig() {
         var avklaringerEndretTilFerdig = hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream()
             .map(BostedsPeriodeAvklaring::medStatusFerdig)
             .toList();

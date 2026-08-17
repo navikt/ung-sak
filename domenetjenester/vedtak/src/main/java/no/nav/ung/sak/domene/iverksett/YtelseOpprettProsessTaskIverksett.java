@@ -11,7 +11,9 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
+import no.nav.ung.sak.domene.vedtak.intern.VilkårsavklaringFerdigstillerTask;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
 import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 
 import java.time.OffsetDateTime;
@@ -57,6 +59,7 @@ public class YtelseOpprettProsessTaskIverksett implements OpprettProsessTaskIver
 
         List<ProsessTaskData> parallelle = new ArrayList<>();
         parallelle.add(opprettTaskSendTilØkonomi());
+        parallelle.add(ProsessTaskData.forProsessTask(VilkårsavklaringFerdigstillerTask.class));
 
         taskData.addNesteParallell(parallelle);
         taskData.addNesteSekvensiell(ProsessTaskData.forProsessTask(AvsluttBehandlingTask.class));
