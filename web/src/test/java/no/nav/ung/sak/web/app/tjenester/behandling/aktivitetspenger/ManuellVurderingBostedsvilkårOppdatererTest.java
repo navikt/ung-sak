@@ -39,6 +39,7 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -70,6 +71,8 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     private VilkårResultatRepository vilkårResultatRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private ManuellVurderingBostedsvilkårOppdaterer oppdaterer;
+    @Inject
+    private AvkortTjeneste avkortTjeneste;
 
     private Fagsak fagsak;
 
@@ -98,7 +101,8 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
             vilkårResultatRepository,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
-            new HistorikkinnslagRepository(entityManager));
+            new HistorikkinnslagRepository(entityManager),
+            avkortTjeneste);
 
         fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, new AktørId("1122334455667"), new Saksnummer("BOSTED1"),
             LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));

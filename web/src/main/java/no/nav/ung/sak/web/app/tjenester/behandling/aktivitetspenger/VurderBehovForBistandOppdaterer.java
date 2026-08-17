@@ -27,6 +27,7 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingR
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
 
 import java.time.LocalDateTime;
 
@@ -39,6 +40,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
     private VilkårResultatRepository vilkårResultatRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private AvkortTjeneste avkortTjeneste;
 
     VurderBehovForBistandOppdaterer() {
         // for CDI proxy
@@ -49,12 +51,14 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
                                            HistorikkinnslagRepository historikkinnslagRepository,
                                            VilkårResultatRepository vilkårResultatRepository,
                                            InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                           InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
+                                           InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
+                                           AvkortTjeneste avkortTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
+        this.avkortTjeneste = avkortTjeneste;
     }
 
     @Override
@@ -69,6 +73,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         if (!uforventedePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
+        validerAvkortingBruktRiktig(dto, param.getBehandlingId());
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -99,6 +104,18 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
         historikkinnslagRepository.lagre(historikkinnslag);
 
         return OppdateringResultat.nyttResultat();
+    }
+
+    private void validerAvkortingBruktRiktig(VurderBehovForBistandDto dto, Long behandlingId) {
+        LocalDateTimeline<Boolean> perioderSattTilAvkortet = new LocalDateTimeline<>(dto.getVurdertePerioder().stream()
+            .filter(f -> f.avslagsårsak() == BistandsvilkårIkkeOppfyltÅrsak.AVKORTET)
+            .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
+            .toList());
+        LocalDateTimeline<Boolean> perioderSomKanSettesTilAvkortet = avkortTjeneste.tidslinjeForMuligAvkorting(behandlingId);
+        LocalDateTimeline<Boolean> feilaktigAvkortet = perioderSomKanSettesTilAvkortet.disjoint(perioderSattTilAvkortet);
+        if (!feilaktigAvkortet.isEmpty()) {
+            throw new IllegalArgumentException("Følgende perioder kan ikke settes til avkortet: " + feilaktigAvkortet.getLocalDateIntervals());
+        }
     }
 
 }

@@ -7,6 +7,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -25,8 +27,10 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingR
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,6 +51,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private AvkortTjeneste avkortTjeneste;
 
     ManuellVurderingBostedsvilkårOppdaterer() {
         // for CDI proxy
@@ -57,12 +62,14 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
                                                    VilkårResultatRepository vilkårResultatRepository,
                                                    InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
-                                                   HistorikkinnslagRepository historikkinnslagRepository) {
+                                                   HistorikkinnslagRepository historikkinnslagRepository,
+                                                   AvkortTjeneste avkortTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.historikkinnslagRepository = historikkinnslagRepository;
+        this.avkortTjeneste = avkortTjeneste;
     }
 
     @Override
@@ -91,6 +98,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
             .toList());
 
         validerLukkedePerioder(vurderteLukkedePerioder, eksisterendeVilkårperioder, erEndretBosted);
+        validerAvkortingBruktRiktig(dto, param.getBehandlingId());
 
         var periodeVurderinger = vurderteÅpnePerioder.crossJoin(vurderteLukkedePerioder).segmenter().stream()
             .map(it ->
@@ -145,5 +153,17 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
     static LocalDate hentMaksDatoVedÅpenPeriode(Periode periode, LocalDate senesteTomVilkårsperiode) {
         var erÅpenPeriode = periode.getTom() == null || periode.getFom().equals(TIDENES_ENDE);
         return erÅpenPeriode ? senesteTomVilkårsperiode : periode.getTom();
+    }
+
+    private void validerAvkortingBruktRiktig(ManuellVurderingBostedsvilkårDto dto, Long behandlingId) {
+        LocalDateTimeline<Boolean> perioderSattTilAvkortet = new LocalDateTimeline<>(dto.getVurdertePerioder().stream()
+            .filter(f -> f.avslagsårsak() == BostedsvilkårIkkeOppfyltÅrsak.AVKORTET)
+            .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
+            .toList());
+        LocalDateTimeline<Boolean> perioderSomKanSettesTilAvkortet = avkortTjeneste.tidslinjeForMuligAvkorting(behandlingId);
+        LocalDateTimeline<Boolean> feilaktigAvkortet = perioderSomKanSettesTilAvkortet.disjoint(perioderSattTilAvkortet);
+        if (!feilaktigAvkortet.isEmpty()) {
+            throw new IllegalArgumentException("Følgende perioder kan ikke settes til avkortet: " + feilaktigAvkortet.getLocalDateIntervals());
+        }
     }
 }
