@@ -7,6 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -20,8 +21,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -111,11 +110,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
             .filter(f -> f.avslagsårsak() == BistandsvilkårIkkeOppfyltÅrsak.AVKORTET)
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
             .toList());
-        LocalDateTimeline<Boolean> perioderSomKanSettesTilAvkortet = avkortTjeneste.tidslinjeForMuligAvkorting(behandlingId);
-        LocalDateTimeline<Boolean> feilaktigAvkortet = perioderSomKanSettesTilAvkortet.disjoint(perioderSattTilAvkortet);
-        if (!feilaktigAvkortet.isEmpty()) {
-            throw new IllegalArgumentException("Følgende perioder kan ikke settes til avkortet: " + feilaktigAvkortet.getLocalDateIntervals());
-        }
+        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, VilkårType.BISTANDSVILKÅR);
     }
 
 }
