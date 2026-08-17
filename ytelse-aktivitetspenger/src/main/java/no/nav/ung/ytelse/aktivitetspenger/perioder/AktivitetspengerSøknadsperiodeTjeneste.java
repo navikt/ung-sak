@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.NavigableSet;
 import java.util.function.Function;
@@ -57,10 +58,14 @@ public class AktivitetspengerSøknadsperiodeTjeneste {
                 .orElse(Collections.emptySet())
                 .stream()
                 .map(SøktStartdato::getStartdato)
-                .map(d -> new LocalDateTimeline<>(d, d.plusWeeks(52).minusDays(1), true))
+                .map(AktivitetspengerSøknadsperiodeTjeneste::tidslinjeFraSøktDato)
                 .reduce(LocalDateTimeline::crossJoin)
                 .orElse(LocalDateTimeline.empty());
         }
+    }
+
+    public static LocalDateTimeline<Boolean> tidslinjeFraSøktDato(LocalDate søktDato){
+        return new LocalDateTimeline<>(søktDato, søktDato.plusWeeks(52).minusDays(1), true);
     }
 
 
