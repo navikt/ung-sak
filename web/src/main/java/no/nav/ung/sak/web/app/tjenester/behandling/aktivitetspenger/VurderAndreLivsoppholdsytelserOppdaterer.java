@@ -124,11 +124,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
             .filter(f -> f.avslagsårsak() == AndreLivsoppholdsytelserIkkeOppfyltÅrsak.AVKORTET)
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
             .toList());
-        LocalDateTimeline<Boolean> perioderSomKanSettesTilAvkortet = avkortTjeneste.tidslinjeForMuligAvkorting(behandlingId);
-        LocalDateTimeline<Boolean> feilaktigAvkortet = perioderSomKanSettesTilAvkortet.disjoint(perioderSattTilAvkortet);
-        if (!feilaktigAvkortet.isEmpty()) {
-            throw new IllegalArgumentException("Følgende perioder kan ikke settes til avkortet: " + feilaktigAvkortet.getLocalDateIntervals());
-        }
+        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
     }
 
 }

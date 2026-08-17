@@ -18,7 +18,7 @@ class AvkortTjenesteTest {
 
     @Test
     void skal_gi_tom_tidslinje_når_grunnlag_ikke_finnes() {
-        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkorting(null);
+        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkortingFraStartdatoer(null);
 
         assertThat(tidslinje.isEmpty()).isTrue();
     }
@@ -27,7 +27,7 @@ class AvkortTjenesteTest {
     void skal_gi_tom_tidslinje_når_ingen_startdatoer_finnes() {
         StartdatoGrunnlag grunnlag = grunnlagMedStartdatoer();
 
-        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkorting(grunnlag);
+        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkortingFraStartdatoer(grunnlag);
 
         assertThat(tidslinje.isEmpty()).isTrue();
     }
@@ -37,7 +37,7 @@ class AvkortTjenesteTest {
         LocalDate startdato = LocalDate.of(2026, 1, 1);
         StartdatoGrunnlag grunnlag = grunnlagMedStartdatoer(startdato);
 
-        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkorting(grunnlag);
+        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkortingFraStartdatoer(grunnlag);
 
         assertThat(tidslinje.isEmpty()).isFalse();
         assertThat(tidslinje.getMinLocalDate()).isEqualTo(startdato.plusDays(1));
@@ -51,7 +51,7 @@ class AvkortTjenesteTest {
         LocalDate seneste = LocalDate.of(2026, 3, 1);
         StartdatoGrunnlag grunnlag = grunnlagMedStartdatoer(tidligste, seneste);
 
-        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkorting(grunnlag);
+        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkortingFraStartdatoer(grunnlag);
 
         assertThat(tidslinje.getMinLocalDate()).isEqualTo(seneste.plusDays(1));
         assertThat(tidslinje.getMaxLocalDate()).isEqualTo(seneste.plusWeeks(52).minusDays(1));
