@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 public final class BostedsAvklaringDataMapper {
 
-    public static BostedAvklaringInnhold mapTilBostedAvklaringData(BostedsPeriodeAvklaring bostedsPeriodeAvklaring) {
+    public static BostedAvklaringInnhold mapTilBostedAvklaringInnhold(BostedsPeriodeAvklaring bostedsPeriodeAvklaring) {
         return new BostedAvklaringInnhold(
             bostedsPeriodeAvklaring.getPeriode().tilPeriode(),
             bostedsPeriodeAvklaring.getIkkeOppfyltÅrsak(),
@@ -36,7 +36,7 @@ public final class BostedsAvklaringDataMapper {
         );
     }
 
-    public static BostedAvklaringInnhold mapTilBostedAvklaringData(BostedFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode) {
+    public static BostedAvklaringInnhold mapTilBostedAvklaringInnhold(BostedFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode) {
         var avklaringtype = dto.periode().getTom() != null ? Avklaringtype.AVSLAG : Avklaringtype.OPPHØR;
         var fom = dto.periode().getFom();
         // Konverterer opphør til en lukket periode, slik at det i ettertid er tydelig hvilken periode opphøret er utført på.

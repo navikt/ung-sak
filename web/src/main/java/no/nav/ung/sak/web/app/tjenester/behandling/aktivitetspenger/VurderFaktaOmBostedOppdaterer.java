@@ -70,11 +70,11 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
         List<BostedAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
-            .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringData(a, maxTomDato)).toList();
+            .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(a, maxTomDato)).toList();
 
-        Set<UUID> alleGrunnlagsreferanserUnderArbeid = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(param, nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
+        Set<BostedsPeriodeAvklaring> alleGrunnlagsreferanserUnderArbeid = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(param, nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
 
-        bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, nyeAvklaringer, tidligereAvklaringerUnderArbeid, alleGrunnlagsreferanserUnderArbeid);
+        bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereAvklaringerUnderArbeid, alleGrunnlagsreferanserUnderArbeid);
 
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)

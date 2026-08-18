@@ -8,12 +8,8 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 @Dependent
 public class BostedsGrunnlagRepository {
@@ -63,7 +59,7 @@ public class BostedsGrunnlagRepository {
      *
      * @return Map fra periodestart til periodeAvklaring.referanse
      */
-    public Set<UUID> lagreForeslåtteAvklaringer(Long behandlingId, List<BostedsPeriodeAvklaring> nyeAvklaringer) {
+    public Set<BostedsPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, List<BostedsPeriodeAvklaring> nyeAvklaringer) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer at grunnlag allerede eksisterer ved lagring av avklaring"));
 
@@ -81,8 +77,8 @@ public class BostedsGrunnlagRepository {
         return hentForeslåttAvklaringsreferanser(nyttGrunnlag.getForeslått());
     }
 
-    private static Set<UUID> hentForeslåttAvklaringsreferanser(BostedsAvklaringHolder holder) {
-        return holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream().map(BostedsPeriodeAvklaring::getReferanse).collect(Collectors.toSet());
+    private static Set<BostedsPeriodeAvklaring> hentForeslåttAvklaringsreferanser(BostedsAvklaringHolder holder) {
+        return new HashSet<>(holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES));
     }
 
     public void lagre(Long behandlingId, Consumer<BostedsGrunnlag> grunnlagsoperasjon) {

@@ -13,7 +13,6 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.domene.vedtak.intern.AvsluttBehandlingTask;
 import no.nav.ung.sak.domene.vedtak.intern.VilkårsavklaringFerdigstillerTask;
 import no.nav.ung.sak.hendelse.stønadstatistikk.StønadstatistikkService;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
 import no.nav.ung.sak.økonomi.SendØkonomiOppdragTask;
 
 import java.time.OffsetDateTime;

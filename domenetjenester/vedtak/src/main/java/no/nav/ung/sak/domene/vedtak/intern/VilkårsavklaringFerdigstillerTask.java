@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.vedtak.intern;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
@@ -16,11 +17,14 @@ import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
 public class VilkårsavklaringFerdigstillerTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "iverksetteVedtak.vilkårsavklaringFerdigstillerTask";
-    Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere;
+
+    private Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere;
 
     public VilkårsavklaringFerdigstillerTask() {
+        // for CDI proxy
     }
 
+    @Inject
     public VilkårsavklaringFerdigstillerTask(BehandlingLåsRepository BehandlingLåsRepository,
                                              @Any Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere) {
         super(BehandlingLåsRepository);
@@ -29,8 +33,9 @@ public class VilkårsavklaringFerdigstillerTask extends BehandlingProsessTask {
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
-        alleVilkårAvklaringOppdaterere.stream().forEach(oppdaterer ->
-            oppdaterer.settAlleAvklaringerTilFerdig(prosessTaskData.getId())
+        long behandlingId = Long.parseLong(prosessTaskData.getBehandlingId());
+        alleVilkårAvklaringOppdaterere.forEach(oppdaterer ->
+            oppdaterer.settAlleAvklaringerTilFerdig(behandlingId)
         );
     }
 }

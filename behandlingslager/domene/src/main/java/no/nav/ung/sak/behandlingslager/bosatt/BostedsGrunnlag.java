@@ -97,6 +97,10 @@ public class BostedsGrunnlag extends BaseEntitet {
         return foreslått;
     }
 
+    public Optional<BostedsAvklaringHolder> getForeslåttHvisEksisterer() {
+        return Optional.ofNullable(foreslått);
+    }
+
     public BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
         return oppgittFraSøknad;
     }
