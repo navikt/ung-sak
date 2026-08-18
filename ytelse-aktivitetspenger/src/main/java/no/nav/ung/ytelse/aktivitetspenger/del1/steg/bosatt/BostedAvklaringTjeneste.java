@@ -151,4 +151,10 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
             }
         });
     }
+
+    @Override
+    public void settAvklartPeriodeUnderArbeidTilIkkeVurdert(long behandlingId) {
+        var perioderTidligereVurdertEtterAvklaring = hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
+        inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, VilkårType.BOSTEDSVILKÅR, perioderTidligereVurdertEtterAvklaring);
+    }
 }

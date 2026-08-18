@@ -92,6 +92,13 @@ public class InngangsvilkårVurderingTjeneste {
         vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
     }
 
+    public void fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(Long behandlingId, VilkårType vilkårType, List<DatoIntervallEntitet> perioder) {
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+        fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, vilkårResultatBuilder, vilkårType, perioder);
+        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
+    }
+
     public void fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(Long behandlingId, VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, List<DatoIntervallEntitet> perioder) {
         repository.fjernResultatFor(behandlingId, vilkårType, perioder.stream().map(DatoIntervallEntitet::tilPeriode).toList());
         var resultatBuilderForVilkår = vilkårResultatBuilder.hentBuilderFor(vilkårType);

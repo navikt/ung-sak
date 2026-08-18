@@ -1,6 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1.steg.foreslåvlkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
@@ -10,11 +11,14 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
 import org.slf4j.Logger;
 
 import java.util.List;
 
-@BehandlingStegRef(value = BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR;
+
+@BehandlingStegRef(value = LOKALKONTOR_FORESLÅ_VILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef
 @ApplicationScoped
@@ -24,15 +28,18 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
 
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingRepository behandlingRepository;
+    private Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere;
 
     LokalkontorForeslåVilkårSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public LokalkontorForeslåVilkårSteg(BehandlingAnsvarligRepository behandlingAnsvarligRepository, BehandlingRepository behandlingRepository) {
+    public LokalkontorForeslåVilkårSteg(BehandlingAnsvarligRepository behandlingAnsvarligRepository, BehandlingRepository behandlingRepository,
+                                        Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingRepository = behandlingRepository;
+        this.alleVilkårAvklaringOppdaterere = alleVilkårAvklaringOppdaterere;
     }
 
 
@@ -56,5 +63,12 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-
+    @Override
+    public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
+        if (!LOKALKONTOR_FORESLÅ_VILKÅR.equals(tilSteg)) {
+            alleVilkårAvklaringOppdaterere.forEach(vilkårAvklaringOppdaterer ->
+                vilkårAvklaringOppdaterer.settAvklartPeriodeUnderArbeidTilIkkeVurdert(kontekst.getBehandlingId())
+            );
+        }
+    }
 }
