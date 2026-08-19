@@ -67,7 +67,7 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
 
     public void oppdaterEtterlysninger(Behandling behandling,
                                        Collection<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid,
-                                       Collection<BostedsPeriodeAvklaring> alleGrunnlagsreferanserUnderArbeid) {
+                                       Collection<BostedsPeriodeAvklaring> alleAvklaringerUnderArbeid) {
 
         long behandlingId = behandling.getId();
 
@@ -82,19 +82,18 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
                 BostedsPeriodeAvklaring::getReferanse
             ));
 
-        Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles = alleGrunnlagsreferanserUnderArbeid.stream()
+        Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles = alleAvklaringerUnderArbeid.stream()
             .filter(BostedsPeriodeAvklaring::skalSendeVarsel)
             .collect(Collectors.toMap(
                 BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold,
                 BostedsPeriodeAvklaring::getReferanse)
-        );
-
-        // Beholder kun nye avklaringer og avklaringer med endret innhold
-        avklaringerSomSkalVarsles.keySet().removeAll(tidligereAvklaringer.keySet());
+            );
 
         var etterlysningerSomSkalAvbrytes = hentEtterlysningerForEndretEllerSlettetAvklaring(tidligereAvklaringer, avklaringerSomSkalVarsles, etterlysningerSomVenterSvar);
         etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
 
+        // Beholder kun nye avklaringer og avklaringer med endret innhold
+        avklaringerSomSkalVarsles.keySet().removeAll(tidligereAvklaringer.keySet());
         var nyeEtterlysninger = avklaringerSomSkalVarsles.entrySet().stream().map(avklaring ->
             Etterlysning.opprettForType(
                 behandlingId,
@@ -106,7 +105,7 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
         etterlysningRepository.lagre(nyeEtterlysninger);
 
 
-        var skalAvbryte = etterlysningerSomSkalAvbrytes.stream().anyMatch(it -> it.getStatus() == EtterlysningStatus.AVBRUTT);
+        var skalAvbryte = etterlysningerSomSkalAvbrytes.stream().anyMatch(it -> it.getStatus() == EtterlysningStatus.SKAL_AVBRYTES);
         if (skalAvbryte) {
             var task = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
             task.setBehandling(behandling.getFagsakId(), behandlingId);
@@ -125,14 +124,13 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
                                                                                        Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles,
                                                                                        List<Etterlysning> etterlysningerSomVenterSvar) {
 
-        var avklaringInneholdSomSkalVarsles = avklaringerSomSkalVarsles.keySet();
-        var tidligereAvklaringerSomErEndretEllerIkkeLengerEksisterer = tidligereAvklaringerInnhold.entrySet().stream()
-            .filter(entry -> avklaringInneholdSomSkalVarsles.contains(entry.getKey()))
+        var referanserForUendretInnhold = tidligereAvklaringerInnhold.entrySet().stream()
+            .filter(entry -> avklaringerSomSkalVarsles.containsKey(entry.getKey()))
             .map(Map.Entry::getValue)
-            .toList();
+            .collect(Collectors.toSet());
 
         return etterlysningerSomVenterSvar.stream()
-            .filter(etterlysning -> tidligereAvklaringerSomErEndretEllerIkkeLengerEksisterer.contains(etterlysning.getGrunnlagsreferanse()))
+            .filter(etterlysning -> !referanserForUendretInnhold.contains(etterlysning.getGrunnlagsreferanse()))
             .peek(Etterlysning::setSkalAvbrytes)
             .toList();
     }

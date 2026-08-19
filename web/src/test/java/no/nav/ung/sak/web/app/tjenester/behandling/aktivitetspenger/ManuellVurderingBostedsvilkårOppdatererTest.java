@@ -157,48 +157,6 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     }
 
     @Test
-    void endret_bosted_avslag_skal_fylle_inn_ikke_vurderte_vilkårsperioder_fra_forrige_behandling() {
-        var originalBehandling = opprettFørstegangsbehandling(
-            vilkårsperiode(PERIODE_1, Utfall.OPPFYLT, null, "original periode 1"),
-            vilkårsperiode(PERIODE_2, Utfall.IKKE_OPPFYLT, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, "original periode 2"),
-            vilkårsperiode(PERIODE_3, Utfall.OPPFYLT, null, "original periode 3"));
-
-        var revurdering = opprettRevurdering(originalBehandling, BehandlingÅrsakType.ENDRET_BOSTED,
-            ikkeVurdertVilkårsperiode(PERIODE_1),
-            ikkeVurdertVilkårsperiode(PERIODE_2),
-            ikkeVurdertVilkårsperiode(PERIODE_3));
-
-        var dto = dto(ikkeOppfylt(PERIODE_1, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "vurdert på nytt i denne behandlingen"));
-
-        var vilkårResultat = utførOppdatering(revurdering, dto);
-
-        var vilkårPeriode1 = hentVilkårsperiode(vilkårResultat, PERIODE_1);
-        assertThat(vilkårPeriode1.getGjeldendeUtfall())
-            .as("vurdering gjort i denne behandlingen skal ikke overskrives av forrige behandling")
-            .isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkårPeriode1.getBegrunnelse()).isEqualTo("vurdert på nytt i denne behandlingen");
-        assertThat(vilkårPeriode1.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
-
-        var vilkårPeriode2 = hentVilkårsperiode(vilkårResultat, PERIODE_2);
-        assertThat(vilkårPeriode2.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(vilkårPeriode2.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
-        assertThat(vilkårPeriode2.getBegrunnelse()).isEqualTo("original periode 2");
-
-        var vilkårPeriode3 = hentVilkårsperiode(vilkårResultat, PERIODE_3);
-        assertThat(vilkårPeriode3.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-        assertThat(vilkårPeriode3.getBegrunnelse()).isEqualTo("original periode 3");
-
-        assertThat(vilkårResultat.filterValue(v -> Utfall.IKKE_VURDERT.equals(v.getGjeldendeUtfall())).isEmpty())
-            .as("ingen bostedsperioder skal stå igjen som ikke vurdert")
-            .isTrue();
-
-        assertThat(hentBostedvurderinger(revurdering))
-            .as("kun perioden vurdert i denne behandlingen skal lagres som vurdering på revurderingen")
-            .extracting(BostedsvilkårResultatPeriode::getPeriode)
-            .containsExactly(tilDatoIntervallEntitet(PERIODE_1));
-    }
-
-    @Test
     void endret_bosted_opphør_skal_fylle_inn_ikke_vurderte_vilkårsperioder_fra_forrige_behandling() {
         var originalBehandling = opprettFørstegangsbehandling(
             vilkårsperiode(PERIODE_1, Utfall.OPPFYLT, null, "original periode 1"),

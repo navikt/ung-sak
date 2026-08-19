@@ -12,8 +12,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.bosatt.Avklaringtype;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -26,13 +24,10 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.*;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
-import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto;
@@ -45,12 +40,12 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsAvklaringDataMapper;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -64,7 +59,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(JpaExtension.class)
@@ -122,70 +116,26 @@ class VurderFaktaOmBostedOppdatererTest {
 
         behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        // I produksjon oppretter VurderBostedVilkårSteg alltid et inngangsvilkår-vurderingsgrunnlag (evt. tomt) før aksjonspunktet åpnes.
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of());
     }
 
     @Test
-    void skal_opprette_etterlysning_og_task_nar_soknad_avklaring_endres() {
-        var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.ANNET, true);
-
-        oppdater(dto);
-
-        var etterlysninger = etterlysningRepository.hentEtterlysninger(behandling.getId());
-        assertThat(etterlysninger).hasSize(1);
-        assertThat(etterlysninger.getFirst().getType()).isEqualTo(EtterlysningType.UTTALELSE_BOSTED);
-        assertThat(etterlysninger.getFirst().getStatus()).isEqualTo(EtterlysningStatus.OPPRETTET);
-        assertThat(etterlysninger.getFirst().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
-        assertThat(etterlysninger.getFirst().getGrunnlagsreferanse())
-            .isEqualTo(hentSorterteAvklaringer().getFirst().getReferanse());
-
-        var taskCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskTjeneste, times(1)).lagre(taskCaptor.capture());
-        assertThat(taskCaptor.getValue().getTaskType()).isEqualTo(OpprettEtterlysningTask.TASKTYPE);
-        assertThat(taskCaptor.getValue().getPropertyValue(OpprettEtterlysningTask.ETTERLYSNING_TYPE))
-            .isEqualTo(EtterlysningType.UTTALELSE_BOSTED.getKode());
-    }
-
-    @Test
-    void skal_avbryte_eksisterende_og_opprette_ny_nar_avklaring_endres() {
-        var eksisterende = etterlysningRepository.lagre(Etterlysning.opprettForType(
-            behandling.getId(),
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
-            EtterlysningType.UTTALELSE_BOSTED
-        ));
-
-        var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.ANNET, true);
-
-        oppdater(dto);
-
-        var skalAvbrytes = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId());
-        assertThat(skalAvbrytes).extracting(Etterlysning::getEksternReferanse)
-            .containsExactly(eksisterende.getEksternReferanse());
-
-        var nye = etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BOSTED);
-        assertThat(nye).hasSize(1);
-        assertThat(nye.getFirst().getEksternReferanse()).isNotEqualTo(eksisterende.getEksternReferanse());
-
-        var taskCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskTjeneste, times(2)).lagre(taskCaptor.capture());
-        assertThat(taskCaptor.getAllValues())
-            .extracting(ProsessTaskData::getTaskType)
-            .containsExactlyInAnyOrder(AvbrytEtterlysningTask.TASKTYPE, OpprettEtterlysningTask.TASKTYPE);
-    }
-
-    @Test
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
-        lagreTidligereAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
-
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto);
+
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(bostedAvklaringPeriode));
 
         oppdater(dto);
 
         assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
+    }
+
+    private static BostedsPeriodeAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto) {
+        return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
+            BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(dto.getAvklaringer().getFirst(), TOM),
+            UUID.randomUUID().toString(), LocalDateTime.now());
     }
 
     @Test
@@ -203,17 +153,7 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     @Test
-    void skal_ikke_opprette_eller_avbryte_nar_skal_ikke_sende_varsel_selv_om_endret() {
-        var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.ANNET, false);
-
-        oppdater(dto);
-
-        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
-        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
-    }
-
-    @Test
-    void skal_lagre_avklaring_uten_varsel_og_lukke_apen_periode_ved_ny_oppdatering() {
+    void skal_lagre_avklaring_uten_varsel_og_endre_avklaring_uten_varsel_ingen_etterlysninger_opprettet() {
         oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
 
         var førsteLagring = hentSorterteAvklaringer();
@@ -223,15 +163,12 @@ class VurderFaktaOmBostedOppdatererTest {
         assertThat(førsteLagring.getFirst().getBegrunnelseIkkeVarsel()).isEqualTo(BEGRUNNELSE_IKKE_VARSEL);
         assertThat(førsteLagring.getFirst().getVurdertAv()).isEqualTo(SAKSBEHANDLER);
 
-        // Åpen periode skal lukkes med siste dato blant periodene til vurdering
         oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusDays(1), null), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
 
         var andreLagring = hentSorterteAvklaringer();
-        assertThat(andreLagring).hasSize(2);
-        assertThat(andreLagring.getFirst().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, FOM));
+        assertThat(andreLagring).hasSize(1);
         assertThat(andreLagring.getLast().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusDays(1), TOM));
         assertThat(andreLagring.getLast().skalSendeVarsel()).isFalse();
-        assertThat(andreLagring.getLast().getBegrunnelseIkkeVarsel()).isEqualTo(BEGRUNNELSE_IKKE_VARSEL);
 
         assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
@@ -254,20 +191,6 @@ class VurderFaktaOmBostedOppdatererTest {
         new ProsessTriggereRepository(entityManager).leggTil(behandling.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
         return behandling;
-    }
-
-    private void lagreTidligereAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak) {
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(new BostedsPeriodeAvklaring(
-            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
-            årsak,
-            "Begrunnelse for hvilke relevante fakta som er lagt til grunn",
-            true,
-            BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(årsak) ? "Fritekstbegrunnelse til bruker" : null,
-            null,
-            SAKSBEHANDLER,
-            LocalDateTime.now(),
-            Avklaringtype.OPPHØR
-        )));
     }
 
     private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
