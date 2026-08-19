@@ -21,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -101,12 +102,69 @@ class BostedsGrunnlagRepositoryTest {
         var første = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
         var andre = lagAvklaring(LocalDate.of(2026, 1, 16), TOM);
 
-        var referanser = repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(første, andre));
+        Set<BostedsPeriodeAvklaring> lagredeAvklaringer = repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(første, andre));
 
-        assertThat(referanser)
-            .contains(første.getReferanse())
-            .contains(andre.getReferanse())
+        assertThat(lagredeAvklaringer)
+            .contains(første)
+            .contains(andre)
             .hasSize(2);
+    }
+
+    @Test
+    void skal_opprette_nytt_grunnlag_med_ny_soeknad_uten_å_mutere_grunnlaget_pa_tidligere_behandling() {
+        Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
+        behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
+
+        repository.kopierGrunnlagFraEksisterendeBehandling(behandling.getId(), nyBehandling.getId());
+        repository.lagreInformasjonFraSøknad(nyBehandling.getId(), "jp-2", LocalDate.of(2026, 2, 1), false);
+
+        var informasjonPåNyBehandling = repository.hentGrunnlagHvisEksisterer(nyBehandling.getId())
+            .orElseThrow()
+            .getOppgittFraSøknad()
+            .getInformasjon();
+
+        assertThat(informasjonPåNyBehandling).hasSize(2);
+        assertThat(informasjonPåNyBehandling)
+            .extracting(BostedsinformasjonFraSøknad::getJournalpostId)
+            .containsExactlyInAnyOrder("jp-1", "jp-2");
+
+        var informasjonPåGammelBehandling = repository.hentGrunnlagHvisEksisterer(behandling.getId())
+            .orElseThrow()
+            .getOppgittFraSøknad()
+            .getInformasjon();
+
+        assertThat(informasjonPåGammelBehandling).hasSize(1);
+        assertThat(informasjonPåGammelBehandling.iterator().next().getJournalpostId()).isEqualTo("jp-1");
+    }
+
+    @Test
+    void skal_opprette_nytt_grunnlag_med_ny_avklaring_uten_å_mutere_avklaringer_pa_tidligere_behandling() {
+        var opprinnelig = lagAvklaring(FOM, TOM);
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(opprinnelig));
+
+        Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
+        behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
+
+        repository.kopierGrunnlagFraEksisterendeBehandling(behandling.getId(), nyBehandling.getId());
+        var ny = lagAvklaring(LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28));
+        repository.lagreForeslåtteAvklaringer(nyBehandling.getId(), List.of(opprinnelig, ny));
+
+        var avklaringerPåNyBehandling = repository.hentGrunnlagHvisEksisterer(nyBehandling.getId())
+            .orElseThrow()
+            .getForeslått()
+            .getPeriodeAvklaringer();
+
+        assertThat(avklaringerPåNyBehandling)
+            .extracting(BostedsPeriodeAvklaring::getReferanse)
+            .containsExactlyInAnyOrder(opprinnelig.getReferanse(), ny.getReferanse());
+
+        var avklaringerPåGammelBehandling = repository.hentGrunnlagHvisEksisterer(behandling.getId())
+            .orElseThrow()
+            .getForeslått()
+            .getPeriodeAvklaringer();
+
+        assertThat(avklaringerPåGammelBehandling).hasSize(1);
+        assertThat(avklaringerPåGammelBehandling.iterator().next().getReferanse()).isEqualTo(opprinnelig.getReferanse());
     }
 
     private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {

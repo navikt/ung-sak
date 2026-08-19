@@ -72,4 +72,8 @@ public class BostedsinformasjonFraSøknad extends BaseEntitet {
             + ", fomDato=" + fomDato
             + ", erBosattITrondheim=" + erBosattITrondheim + '}';
     }
+
+    public static BostedsinformasjonFraSøknad kopierDataFra(BostedsinformasjonFraSøknad annen) {
+        return new BostedsinformasjonFraSøknad(annen.journalpostId, annen.fomDato, annen.erBosattITrondheim);
+    }
 }

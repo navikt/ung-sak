@@ -63,13 +63,14 @@ public class BostedsAvklaringHolder extends BaseEntitet {
             .map(BostedsPeriodeAvklaring::medStatusFerdig)
             .toList();
 
-        periodeAvklaringer.clear();
-        periodeAvklaringer.addAll(byggAvklaringTidslinje(avklaringerEndretTilFerdig)
+        var alleFerdige = byggAvklaringTidslinje(avklaringerEndretTilFerdig)
             .crossJoin(hentAvklaringMedStatusSomTidslinje(AvklaringStatus.FERDIG))
             .segmenter().stream()
             .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
-            .collect(Collectors.toCollection(LinkedHashSet::new))
-        );
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        periodeAvklaringer.clear();
+        periodeAvklaringer.addAll(alleFerdige);
     }
 
     public LocalDateTimeline<BostedsPeriodeAvklaring> hentAvklaringMedStatusSomTidslinje(AvklaringStatus... status) {

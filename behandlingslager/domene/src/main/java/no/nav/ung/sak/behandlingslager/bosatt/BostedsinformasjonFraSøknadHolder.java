@@ -32,7 +32,10 @@ public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
 
     public BostedsinformasjonFraSøknadHolder(BostedsinformasjonFraSøknadHolder oppgittFraSøknad) {
         if (oppgittFraSøknad != null) {
-            this.informasjon.addAll(oppgittFraSøknad.getInformasjon());
+             this.informasjon.addAll(oppgittFraSøknad.getInformasjon()
+                .stream()
+                .map(BostedsinformasjonFraSøknad::kopierDataFra).collect(Collectors.toSet())
+            );
         }
     }
 
