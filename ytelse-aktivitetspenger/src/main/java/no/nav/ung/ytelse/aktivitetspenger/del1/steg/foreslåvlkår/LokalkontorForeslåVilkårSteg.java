@@ -67,7 +67,7 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!LOKALKONTOR_FORESLÅ_VILKÅR.equals(tilSteg)) {
             alleVilkårAvklaringOppdaterere.forEach(vilkårAvklaringOppdaterer ->
-                vilkårAvklaringOppdaterer.settAvklartPeriodeUnderArbeidTilIkkeVurdert(kontekst.getBehandlingId())
+                vilkårAvklaringOppdaterer.settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(kontekst.getBehandlingId())
             );
         }
     }

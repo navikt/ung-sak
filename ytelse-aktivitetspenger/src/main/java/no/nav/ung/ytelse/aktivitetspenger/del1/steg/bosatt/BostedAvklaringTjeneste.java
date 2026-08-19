@@ -2,6 +2,8 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
@@ -18,6 +20,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
 import java.time.LocalDateTime;
@@ -59,12 +62,7 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
             .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
             .toList();
-
-        Set<BostedsPeriodeAvklaring> alleForeslåtteAvklaringerUnderArbeid = bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
-
-        var perioderSomSkalVurderesPåNytt = nyePeriodeAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
-        inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
-        return alleForeslåtteAvklaringerUnderArbeid;
+        return bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
     }
 
     public void oppdaterEtterlysninger(Behandling behandling,
@@ -139,6 +137,23 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
             .toList();
     }
 
+    // Hvis saksbehandler endrer perioden det avklares for etter at vilkårsvurdering er utført, gjelder ikke lenger vurderingen og den delen som ikke overlapper med ny avklaring må gjenopprettes fra forrige behandling.
+    // Vilkårsperioden som avklaringen gjelder for settes til ikke vurdert, slik at den kan vurderes på nytt (automatisk eller i aksjonspunkt)
+    public void gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid, List<BostedAvklaringInnhold> nyeAvklaringer) {
+        var tidligereTidslinje = new LocalDateTimeline<>(tidligereAvklaringerUnderArbeid.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true)).toList());
+        var nyTidslinje = new LocalDateTimeline<>(nyeAvklaringer.stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
+        var periodeSomIkkeHåndteresAvNyAvklaring = tidligereTidslinje.disjoint(nyTidslinje)
+            .segmenter().stream()
+            .map(it -> new Periode(it.getFom(), it.getTom()))
+            .toList();
+
+        inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, periodeSomIkkeHåndteresAvNyAvklaring);
+        inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(param.getBehandlingId());
+
+        var perioderSomSkalVurderesPåNytt = nyTidslinje.stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).toList();
+        inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
+    }
+
     @Override
     public void settAlleAvklaringerTilFerdig(long behandlingId) {
         if (bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId).isEmpty()) {
@@ -153,8 +168,9 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
     }
 
     @Override
-    public void settAvklartPeriodeUnderArbeidTilIkkeVurdert(long behandlingId) {
+    public void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId) {
         var perioderTidligereVurdertEtterAvklaring = hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
-        inngangsvilkårVurderingTjeneste.fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(behandlingId, VilkårType.BOSTEDSVILKÅR, perioderTidligereVurdertEtterAvklaring);
+        inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(behandlingId, VilkårType.BOSTEDSVILKÅR, perioderTidligereVurdertEtterAvklaring);
     }
+
 }

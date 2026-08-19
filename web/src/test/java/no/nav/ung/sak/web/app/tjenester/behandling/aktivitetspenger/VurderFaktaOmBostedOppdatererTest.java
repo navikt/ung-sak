@@ -24,9 +24,11 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.*;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
@@ -80,10 +82,8 @@ class VurderFaktaOmBostedOppdatererTest {
     @Inject
     private @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
-    @Inject
-    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
-
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private VurderFaktaOmBostedOppdaterer oppdaterer;
@@ -106,8 +106,11 @@ class VurderFaktaOmBostedOppdatererTest {
         var behandlingRepository = new BehandlingRepository(entityManager);
         var historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
         bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
+        inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         etterlysningRepository = new EtterlysningRepository(entityManager);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
+        var vilkårResultatRepository = new VilkårResultatRepository(entityManager);
+        var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
         bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, inngangsvilkårVurderingTjeneste, etterlysningRepository, prosessTaskTjeneste);
 
         oppdaterer = new VurderFaktaOmBostedOppdaterer(
@@ -119,6 +122,8 @@ class VurderFaktaOmBostedOppdatererTest {
 
         behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        // I produksjon oppretter VurderBostedVilkårSteg alltid et inngangsvilkår-vurderingsgrunnlag (evt. tomt) før aksjonspunktet åpnes.
+        inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of());
     }
 
     @Test

@@ -74,6 +74,8 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
         Set<BostedsPeriodeAvklaring> alleGrunnlagsreferanserUnderArbeid = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(param, nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
 
+        bostedAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereAvklaringerUnderArbeid, nyeAvklaringer);
+
         bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereAvklaringerUnderArbeid, alleGrunnlagsreferanserUnderArbeid);
 
         var historikkinnslag = new Historikkinnslag.Builder()
