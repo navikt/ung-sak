@@ -1,3 +1,11 @@
+alter table bosatt_periode_avklaring
+    add column if not exists status varchar(50) default 'UNDER_ARBEID' not null;
+
+-- Fjernes fordi avklaring og varsling kun utføres når vilkåret er foreslått ikke-oppfylt. Dette feltet er derfor alltid false.
+alter table bosatt_periode_avklaring
+    drop column if exists er_bosatt_i_trondheim;
+
+
 -- Referanse kopieres til nytt grunnlag, og følger periodeavklaringen i senere behandlinger.
 -- Hvis deler av periodeavklaringen senere overskrives, slik at avklaringen splittes i to segmenter, bør begge segmentene ha samme grunnlagsreferanse for sporbarhet mot brukers varsel.
 -- Eks: Behandling 1: | R1 |
