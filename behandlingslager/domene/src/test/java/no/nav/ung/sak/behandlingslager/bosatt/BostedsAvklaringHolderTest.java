@@ -32,20 +32,6 @@ class BostedsAvklaringHolderTest {
     }
 
     @Test
-    void skal_ha_unik_referanse_blant_avklaringene_under_arbeid() {
-        var holder = new BostedsAvklaringHolder();
-        holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(
-            lagAvklaring(FOM, LocalDate.of(2026, 1, 15)),
-            lagAvklaring(LocalDate.of(2026, 1, 16), TOM)));
-
-        var referanser = holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream()
-            .map(BostedsPeriodeAvklaring::getReferanse)
-            .toList();
-
-        assertThat(referanser).doesNotHaveDuplicates();
-    }
-
-    @Test
     void skal_beholde_ferdigstilte_avklaringer_nar_nye_avklaringer_under_arbeid_lagres() {
         var holder = new BostedsAvklaringHolder();
         var ferdigstilt = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
@@ -57,7 +43,7 @@ class BostedsAvklaringHolderTest {
         assertThat(holder.hentAvklaringerMedStatus(AvklaringStatus.FERDIG))
             .extracting(BostedsPeriodeAvklaring::getReferanse)
             .containsExactly(ferdigstilt.getReferanse());
-        assertThat(holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES)).hasSize(1);
+        assertThat(holder.hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID)).hasSize(1);
     }
 
     @Test

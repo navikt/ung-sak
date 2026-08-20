@@ -121,7 +121,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(new LocalDateTimeline<>(List.of()));
 
-            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.AVKLARES).intersection(tidslinjeTilVurdering);
+            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.UNDER_ARBEID).intersection(tidslinjeTilVurdering);
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
             .intersection(tidslinjeTilVurdering)
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new)

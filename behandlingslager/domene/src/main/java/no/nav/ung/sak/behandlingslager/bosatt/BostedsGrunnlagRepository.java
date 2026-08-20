@@ -67,18 +67,18 @@ public class BostedsGrunnlagRepository {
         nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
 
         if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
-            return hentForeslåttAvklaringerUnderAreid(eksisterendeGrunnlag.getForeslått());
+            return hentForeslåttAvklaringerUnderArbeid(eksisterendeGrunnlag.getForeslått());
         }
         deaktiverEksisterende(eksisterendeGrunnlag);
 
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
 
-        return hentForeslåttAvklaringerUnderAreid(nyttGrunnlag.getForeslått());
+        return hentForeslåttAvklaringerUnderArbeid(nyttGrunnlag.getForeslått());
     }
 
-    private static Set<BostedsPeriodeAvklaring> hentForeslåttAvklaringerUnderAreid(BostedsAvklaringHolder holder) {
-        return new HashSet<>(holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES));
+    private static Set<BostedsPeriodeAvklaring> hentForeslåttAvklaringerUnderArbeid(BostedsAvklaringHolder holder) {
+        return new HashSet<>(holder.hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
     }
 
     public void lagre(Long behandlingId, Consumer<BostedsGrunnlag> grunnlagsoperasjon) {

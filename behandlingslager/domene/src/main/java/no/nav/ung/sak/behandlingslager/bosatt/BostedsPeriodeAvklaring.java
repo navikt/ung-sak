@@ -3,7 +3,6 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.bosatt.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
-import no.nav.ung.kodeverk.bosatt.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -92,7 +91,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
         this.avklaringtype = avklaringtype;
-        this.status = AvklaringStatus.AVKLARES;
+        this.status = AvklaringStatus.UNDER_ARBEID;
     }
 
     public BostedsPeriodeAvklaring(BostedsPeriodeAvklaring annenAvklaring) {
@@ -219,10 +218,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     public String toString() {
         return "BostedsPeriodeAvklaring{referanse=" + referanse
             + ", periode=" + periode
-            + ", ikkeOppfyltÅrsak=" + ikkeOppfyltÅrsak
             + ", skalSendeVarsel=" + skalSendeVarsel
             + ", avklaringtype=" + avklaringtype
-            + ", vurdertAv=" + vurdertAv
             + ", vurdertTidspunkt=" + vurdertTidspunkt
             + ", status=" + status + '}';
     }
@@ -236,6 +233,6 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     }
 
     public boolean kanRedigeres() {
-        return status == AvklaringStatus.AVKLARES;
+        return status == AvklaringStatus.UNDER_ARBEID;
     }
 }

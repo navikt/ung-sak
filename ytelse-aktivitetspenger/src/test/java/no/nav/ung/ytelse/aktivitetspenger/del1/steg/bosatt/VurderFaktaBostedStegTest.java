@@ -105,7 +105,7 @@ class VurderFaktaBostedStegTest {
         utførSteg(behandling);
 
         var lagretGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
-        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.AVKLARES).stream().findFirst().orElseThrow();
+        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.UNDER_ARBEID).stream().findFirst().orElseThrow();
         assertThat(periodeAvklaring.getValue().isErBosattITrondheim()).isTrue();
         assertThat(periodeAvklaring.getValue().getKilde()).isEqualTo(Kilde.SØKNAD);
     }

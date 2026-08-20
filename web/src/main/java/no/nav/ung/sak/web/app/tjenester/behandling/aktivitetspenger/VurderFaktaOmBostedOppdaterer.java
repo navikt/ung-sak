@@ -72,7 +72,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         List<BostedAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
             .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(a, maxTomDato)).toList();
 
-        Set<BostedsPeriodeAvklaring> alleGrunnlagsreferanserUnderArbeid = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(param, nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
+        Set<BostedsPeriodeAvklaring> alleGrunnlagsreferanserUnderArbeid = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
 
         bostedAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereAvklaringerUnderArbeid, nyeAvklaringer);
 

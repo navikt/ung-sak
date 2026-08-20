@@ -54,11 +54,11 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
     public List<BostedsPeriodeAvklaring> hentBostedPeriodeAvklaringUnderArbeid(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .flatMap(g ->
-                g.getForeslåttHvisEksisterer().map(f -> f.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES))
+                g.getForeslåttHvisEksisterer().map(f -> f.hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID))
             ).orElse(List.of());
     }
 
-    public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
+    public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
             .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
             .toList();
@@ -146,7 +146,7 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
             .toList();
 
         inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, periodeSomIkkeHåndteresAvNyAvklaring);
-        inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(param.getBehandlingId());
+        inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
         var perioderSomSkalVurderesPåNytt = nyTidslinje.stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).toList();
         inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);

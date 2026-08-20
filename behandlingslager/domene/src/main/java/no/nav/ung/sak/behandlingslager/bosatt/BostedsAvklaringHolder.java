@@ -59,7 +59,7 @@ public class BostedsAvklaringHolder extends BaseEntitet {
      * uttalelse på en ferdigstilt avklaring.
      */
     public void settAlleAvklaringerTilFerdig() {
-        var avklaringerEndretTilFerdig = hentAvklaringerMedStatus(AvklaringStatus.AVKLARES).stream()
+        var avklaringerEndretTilFerdig = hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID).stream()
             .map(BostedsPeriodeAvklaring::medStatusFerdig)
             .toList();
 

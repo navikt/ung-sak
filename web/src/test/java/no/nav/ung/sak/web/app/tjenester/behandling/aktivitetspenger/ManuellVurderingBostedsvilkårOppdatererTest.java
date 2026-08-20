@@ -157,7 +157,7 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     }
 
     @Test
-    void endret_bosted_opphør_skal_fylle_inn_ikke_vurderte_vilkårsperioder_fra_forrige_behandling() {
+    void endret_bosted_opphør_skal_skal_tillate_å_lagre_uavhengig_av_vurdering() {
         var originalBehandling = opprettFørstegangsbehandling(
             vilkårsperiode(PERIODE_1, Utfall.OPPFYLT, null, "original periode 1"),
             vilkårsperiode(PERIODE_2, Utfall.IKKE_OPPFYLT, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, "original periode 2"),
@@ -205,41 +205,6 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
             .as("kun perioden vurdert i denne behandlingen skal lagres som vurdering på revurderingen")
             .extracting(BostedsvilkårResultatPeriode::getPeriode)
             .containsExactlyInAnyOrder(tilDatoIntervallEntitet(periode1_rest), tilDatoIntervallEntitet(PERIODE_2), tilDatoIntervallEntitet(PERIODE_3));
-    }
-
-    @Test
-    void skal_ikke_gjenopprette_periode_som_ikke_var_vurdert_i_forrige_behandling() {
-        var originalBehandling = opprettFørstegangsbehandling(
-            vilkårsperiode(PERIODE_1, Utfall.OPPFYLT, null, "original periode 1"));
-
-        var revurdering = opprettRevurdering(originalBehandling, BehandlingÅrsakType.ENDRET_BOSTED,
-            ikkeVurdertVilkårsperiode(PERIODE_1),
-            ikkeVurdertVilkårsperiode(PERIODE_2));
-
-        var dto = dto(ikkeOppfylt(PERIODE_1, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "flyttet"));
-
-        var vilkårResultat = utførOppdatering(revurdering, dto);
-
-        assertThat(hentVilkårsperiode(vilkårResultat, PERIODE_1).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
-        assertThat(hentVilkårsperiode(vilkårResultat, PERIODE_2).getGjeldendeUtfall())
-            .as("periode uten vurdering i forrige behandling skal fortsatt være til vurdering")
-            .isEqualTo(Utfall.IKKE_VURDERT);
-    }
-
-    @Test
-    void skal_ikke_gjenopprette_fra_forrige_behandling_når_behandlingen_ikke_har_årsak_endret_bosted() {
-        var originalBehandling = opprettFørstegangsbehandling(
-            vilkårsperiode(PERIODE_1, Utfall.OPPFYLT, null, "original periode 1"),
-            vilkårsperiode(PERIODE_2, Utfall.OPPFYLT, null, "original periode 2"));
-
-        var revurdering = opprettRevurdering(originalBehandling, BehandlingÅrsakType.NY_SØKT_PERIODE,
-            ikkeVurdertVilkårsperiode(PERIODE_1),
-            ikkeVurdertVilkårsperiode(PERIODE_2));
-
-        var dto = dto(oppfylt(PERIODE_1, "vurdert i denne behandlingen"));
-
-        assertThatThrownBy(() -> utførOppdatering(revurdering, dto))
-            .isInstanceOf(IllegalArgumentException.class).hasMessageContaining("Forventer at alle perioder til vurdering vurderes");
     }
 
     private LocalDateTimeline<VilkårPeriode> utførOppdatering(Behandling behandling, ManuellVurderingBostedsvilkårDto dto) {

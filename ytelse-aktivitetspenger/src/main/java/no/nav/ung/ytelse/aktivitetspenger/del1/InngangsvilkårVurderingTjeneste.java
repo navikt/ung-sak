@@ -92,6 +92,10 @@ public class InngangsvilkårVurderingTjeneste {
         vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
     }
 
+    public void oppdaterBostedsvilkårResultatFraVurdering(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
+        settBostedsvilkårResultat(behandlingId, resultatBuilder);
+    }
+
     public void settVilkårResultatIkkeVurdertForPeriode(Long behandlingId, VilkårType vilkårType, List<DatoIntervallEntitet> perioder) {
         var vilkårene = vilkårResultatRepository.hent(behandlingId);
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);

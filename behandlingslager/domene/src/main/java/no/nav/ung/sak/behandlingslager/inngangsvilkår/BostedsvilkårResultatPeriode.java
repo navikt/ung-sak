@@ -112,5 +112,39 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BostedsvilkårResultatPeriode that)) {
+            return false;
+        }
+        return godkjent == that.godkjent
+            && manuellVurdering == that.manuellVurdering
+            && Objects.equals(periode, that.periode)
+            && ikkeOppfyltÅrsak == that.ikkeOppfyltÅrsak
+            && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(fritekstVurderingBrev, that.fritekstVurderingBrev)
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(periode, godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+    }
+
+    @Override
+    public String toString() {
+        return "BostedsvilkårResultatPeriode{" +
+            "id=" + id +
+            ", periode=" + periode +
+            ", godkjent=" + godkjent +
+            ", manuellVurdering=" + manuellVurdering +
+            ", vurdertTidspunkt=" + vurdertTidspunkt +
+            '}';
+    }
 }
 
