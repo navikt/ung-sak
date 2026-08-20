@@ -27,8 +27,8 @@ class BostedsAvklaringHolderTest {
         var ny = lagAvklaring(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20));
         holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(ny));
 
-        assertThat(holder.getPeriodeAvklaringer()).hasSize(1);
-        assertThat(holder.getPeriodeAvklaringer().iterator().next().getReferanse()).isEqualTo(ny.getReferanse());
+        assertThat(holder.hentPeriodeAvklaringer()).hasSize(1);
+        assertThat(holder.hentPeriodeAvklaringer().iterator().next().getReferanse()).isEqualTo(ny.getReferanse());
     }
 
     @Test
@@ -40,10 +40,10 @@ class BostedsAvklaringHolderTest {
 
         holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(lagAvklaring(LocalDate.of(2026, 1, 16), TOM)));
 
-        assertThat(holder.hentAvklaringerMedStatus(AvklaringStatus.FERDIG))
+        assertThat(holder.hentPeriodeAvklaringerMedStatus(AvklaringStatus.FERDIG))
             .extracting(BostedsPeriodeAvklaring::getReferanse)
             .containsExactly(ferdigstilt.getReferanse());
-        assertThat(holder.hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID)).hasSize(1);
+        assertThat(holder.hentPeriodeAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID)).hasSize(1);
     }
 
     @Test
@@ -57,7 +57,7 @@ class BostedsAvklaringHolderTest {
         holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(overlappende));
         holder.settAlleAvklaringerTilFerdig();
 
-        var ferdigstilte = holder.hentAvklaringerMedStatus(AvklaringStatus.FERDIG).stream()
+        var ferdigstilte = holder.hentPeriodeAvklaringerMedStatus(AvklaringStatus.FERDIG).stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
             .toList();
 

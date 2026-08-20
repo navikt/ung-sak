@@ -10,7 +10,7 @@ import java.util.List;
 
 @Entity(name = "BostedsvilkårResultatHolder")
 @Table(name = "bosted_resultat_holder")
-public class BostedsvilkårResultatHolder extends BaseEntitet {
+class BostedsvilkårResultatHolder extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSTED_RESULTAT_HOLDER")
@@ -33,7 +33,7 @@ public class BostedsvilkårResultatHolder extends BaseEntitet {
         return id;
     }
 
-    public List<BostedsvilkårResultatPeriode> getVurderinger() {
+    List<BostedsvilkårResultatPeriode> getVurderinger() {
         return Collections.unmodifiableList(vurderinger);
     }
 }

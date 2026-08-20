@@ -76,8 +76,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
     }
 
-    public Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
+    Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
         return Optional.ofNullable(bostedsvilkårResultatHolder);
+    }
+
+    public List<BostedsvilkårResultatPeriode> hentBostedsvilkårResultatPerioder() {
+        return getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(List.of());
     }
 
     public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {

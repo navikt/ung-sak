@@ -75,9 +75,19 @@ public class BostedsGrunnlag extends BaseEntitet {
      * Bygger ny holder fra avklaringene og setter foreslått — kun hvis innholdet faktisk er endret.
      * Beholder gammel holder-referanse ved ingen endring (tilsvarende {@link #leggTilInformasjonFraSøknad}).
      */
-    void setForeslåttAvklaring(List<BostedsPeriodeAvklaring> avklaringer) {
-        var nyHolder = new BostedsAvklaringHolder(this.foreslått);
+    void setForeslåttAvklaring(Set<BostedsPeriodeAvklaring> avklaringer) {
+        var nyHolder = BostedsAvklaringHolder.lagSkrivbarKopi(this.foreslått);
         nyHolder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(avklaringer);
+
+        if (nyHolder.equals(this.foreslått)) {
+            return;
+        }
+        this.foreslått = nyHolder;
+    }
+
+    void settAlleAvklaringerTilFerdig() {
+        var nyHolder = BostedsAvklaringHolder.lagSkrivbarKopi(this.foreslått);
+        nyHolder.settAlleAvklaringerTilFerdig();
 
         if (nyHolder.equals(this.foreslått)) {
             return;
@@ -93,15 +103,27 @@ public class BostedsGrunnlag extends BaseEntitet {
         return behandlingId;
     }
 
-    public BostedsAvklaringHolder getForeslått() {
+    public BostedsAvklaringHolderSkrivebeskyttet getForeslått() {
         return foreslått;
     }
 
-    public Optional<BostedsAvklaringHolder> getForeslåttHvisEksisterer() {
-        return Optional.ofNullable(foreslått);
+    public Set<BostedsPeriodeAvklaring> getForeslåtteAvklaringerEllerTomListe() {
+        return Optional.ofNullable(getForeslått())
+            .map(BostedsAvklaringHolderSkrivebeskyttet::hentPeriodeAvklaringer)
+            .orElse(Set.of());
     }
 
-    public BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
+    public List<BostedsPeriodeAvklaring> getForeslåtteAvklaringerMedStatus(AvklaringStatus... status) {
+        return Optional.ofNullable(getForeslått())
+            .map(f -> f.hentPeriodeAvklaringerMedStatus(status))
+            .orElse(List.of());
+    }
+
+    public LocalDateTimeline<BostedsPeriodeAvklaring> getForeslåtteAvklaringerMedStatusSomTidslinje(AvklaringStatus... status) {
+        return BostedsAvklaringHolder.byggAvklaringTidslinje(getForeslåtteAvklaringerMedStatus(status));
+    }
+
+    BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
         return oppgittFraSøknad;
     }
 
@@ -141,7 +163,7 @@ public class BostedsGrunnlag extends BaseEntitet {
      */
     public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus... status) {
         var søknadsTidslinje = hentSøknadsfaktaSomTidslinje();
-        var foreslåttTidslinje = getForeslåttHvisEksisterer().map(it -> it.hentAvklaringMedStatusSomTidslinje(status)).orElse(LocalDateTimeline.empty());
+        var foreslåttTidslinje = getForeslåtteAvklaringerMedStatusSomTidslinje(status);
 
         return søknadsTidslinje.combine(foreslåttTidslinje,
             (di, søknad, avklaring) -> new LocalDateSegment<>(di, new BostedsfaktaOgAvklaring(
@@ -186,7 +208,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             grunnlag.getBehandlingId(),
             grunnlag.getOppgittFraSøknad(),
-            grunnlag.getForeslått()
+            (BostedsAvklaringHolder) grunnlag.getForeslått()
         );
     }
 
@@ -194,7 +216,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             behandlingId,
             grunnlag.getOppgittFraSøknad(),
-            grunnlag.getForeslått()
+            (BostedsAvklaringHolder) grunnlag.getForeslått()
         );
     }
 }

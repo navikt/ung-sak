@@ -12,13 +12,13 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Aggregat/holder for bostedsavklaringer. Kan deles mellom behandlinger
- * ved revurdering uten endringer i grunnlaget.
+ * Aggregat/holder for bostedsavklaringer. Holderen kan deles i sin helhet mellom behandlinger ved revurdering uten endringer i grunnlaget.
+ * Enhver endring fører til en ny instans av holderen med kopier. Dette er ivaretatt av setter på grunnlag!
  * Inneholder ett {@link BostedsPeriodeAvklaring} per vilkårsperiode.
  */
 @Entity(name = "BostedsAvklaringHolder")
 @Table(name = "BOSATT_AVKLARING_HOLDER")
-public class BostedsAvklaringHolder extends BaseEntitet {
+class BostedsAvklaringHolder extends BaseEntitet implements BostedsAvklaringHolderSkrivebeskyttet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSATT_AVKLARING_HOLDER")
@@ -32,7 +32,7 @@ public class BostedsAvklaringHolder extends BaseEntitet {
     public BostedsAvklaringHolder() {
     }
 
-    BostedsAvklaringHolder(BostedsAvklaringHolder other) {
+    private BostedsAvklaringHolder(BostedsAvklaringHolder other) {
         if (other != null && other.periodeAvklaringer != null) {
             this.periodeAvklaringer = other.periodeAvklaringer.stream()
                 .map(BostedsPeriodeAvklaring::new)
@@ -40,9 +40,14 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         }
     }
 
+    static BostedsAvklaringHolder lagSkrivbarKopi(BostedsAvklaringHolder other) {
+        return new BostedsAvklaringHolder(other);
+    }
+
     /**
      * Erstatter avklaringer under arbeid istedenfor å legge til eller splitte eksisterende — slik at referansen til én periodeavklaring under arbeid alltid dekker
      * ett segment og kan varsles entydig. Avklaringer som allerede er ferdigstilte beholdes urørt.
+     * Obs: Denne muterer og må kun kalles gjennom setter på grunnlag, slik at deduplisering gjøres korrekt.
      */
     void leggTilEllerErstattPeriodeAvklaringerUnderArbeid(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
         var beholdte = periodeAvklaringer.stream()
@@ -57,9 +62,10 @@ public class BostedsAvklaringHolder extends BaseEntitet {
      * Ferdigstiller alle avklaringer under arbeid. Ferdigstilte avklaringer kan splittes av senere
      * ferdigstillinger og kan derfor dele referanse på tvers av segmenter — det etterlyses aldri
      * uttalelse på en ferdigstilt avklaring.
+     * Obs: Denne muterer og må kun kalles gjennom setter på grunnlag, slik at deduplisering gjøres korrekt.
      */
-    public void settAlleAvklaringerTilFerdig() {
-        var avklaringerEndretTilFerdig = hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID).stream()
+    void settAlleAvklaringerTilFerdig() {
+        var avklaringerEndretTilFerdig = hentPeriodeAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID).stream()
             .map(BostedsPeriodeAvklaring::medStatusFerdig)
             .toList();
 
@@ -73,30 +79,29 @@ public class BostedsAvklaringHolder extends BaseEntitet {
         periodeAvklaringer.addAll(alleFerdige);
     }
 
-    public LocalDateTimeline<BostedsPeriodeAvklaring> hentAvklaringMedStatusSomTidslinje(AvklaringStatus... status) {
+    private LocalDateTimeline<BostedsPeriodeAvklaring> hentAvklaringMedStatusSomTidslinje(AvklaringStatus... status) {
         return byggAvklaringTidslinje(
-            hentAvklaringerMedStatus(status)
+            hentPeriodeAvklaringerMedStatus(status)
         );
     }
 
-    public List<BostedsPeriodeAvklaring> hentAvklaringerMedStatus(AvklaringStatus... status) {
+    @Override
+    public List<BostedsPeriodeAvklaring> hentPeriodeAvklaringerMedStatus(AvklaringStatus... status) {
         var statusSet = Set.of(status);
-        return periodeAvklaringer.stream().filter(it -> statusSet.contains(it.getStatus())).toList();
+        return hentPeriodeAvklaringer().stream().filter(it -> statusSet.contains(it.getStatus())).toList();
     }
 
+    @Override
     public Long getId() {
         return id;
     }
 
-    public Set<BostedsPeriodeAvklaring> getPeriodeAvklaringer() {
+    @Override
+    public Set<BostedsPeriodeAvklaring> hentPeriodeAvklaringer() {
         return Collections.unmodifiableSet(periodeAvklaringer);
     }
 
-    public Optional<BostedsPeriodeAvklaring> getPeriodeAvklaring(UUID ref) {
-        return periodeAvklaringer.stream().filter(it -> it.getReferanse().equals(ref)).findFirst();
-    }
-
-    private static LocalDateTimeline<BostedsPeriodeAvklaring> byggAvklaringTidslinje(Collection<BostedsPeriodeAvklaring> avklaringer) {
+    static LocalDateTimeline<BostedsPeriodeAvklaring> byggAvklaringTidslinje(Collection<BostedsPeriodeAvklaring> avklaringer) {
         return new LocalDateTimeline<>(
             avklaringer.stream().map(avklaring ->
                 new LocalDateSegment<>(

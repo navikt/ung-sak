@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -20,6 +21,7 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPer
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +41,7 @@ class InngangsvilkårVurderingTjenesteTest {
     private static final Periode PERIODE_1 = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
     private static final Periode PERIODE_2 = new Periode(LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28));
     private static final Periode PERIODE_3 = new Periode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31));
-    private static final List<Periode> UBEGRENSET_AVGRENSNING = List.of(new Periode(LocalDate.of(2020, 1, 1), LocalDate.of(2030, 12, 31)));
+    private static final LocalDateTimeline<Boolean> UBEGRENSET_AVGRENSNING = TidslinjeUtil.tilTidslinje(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2020, 1, 1), LocalDate.of(2030, 12, 31))));
 
     @Inject
     private EntityManager entityManager;

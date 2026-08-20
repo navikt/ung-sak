@@ -33,7 +33,6 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -135,7 +134,7 @@ class VurderFaktaOmBostedOppdatererTest {
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
         var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto);
 
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(bostedAvklaringPeriode));
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(bostedAvklaringPeriode));
 
         oppdater(dto);
 
@@ -295,8 +294,7 @@ class VurderFaktaOmBostedOppdatererTest {
 
     private List<BostedsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
         return inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder)
-            .map(BostedsvilkårResultatHolder::getVurderinger)
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
             .orElseThrow();
     }
 
@@ -403,8 +401,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
-            .getForeslått()
-            .getPeriodeAvklaringer()
+            .getForeslåtteAvklaringerEllerTomListe()
             .stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
             .toList();

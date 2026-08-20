@@ -27,7 +27,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -123,7 +122,7 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
         var vurderingPeriode1 = lagredeVurderinger.stream().filter(v -> v.getPeriode().equals(tilDatoIntervallEntitet(PERIODE_1))).findFirst().orElseThrow();
         assertThat(vurderingPeriode1.isGodkjent()).isTrue();
         assertThat(vurderingPeriode1.getIkkeOppfyltÅrsak()).isNull();
-        assertThat(vurderingPeriode1.isManuellVurdering()).isTrue();
+        assertThat(vurderingPeriode1.erManuellVurdering()).isTrue();
         assertThat(vurderingPeriode1.getBegrunnelse()).isEqualTo("bor i Trondheim");
         assertThat(vurderingPeriode1.getVurdertAv()).isEqualTo(SAKSBEHANDLER);
         assertThat(vurderingPeriode1.getVurdertTidspunkt()).isNotNull();
@@ -220,8 +219,7 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
 
     private List<BostedsvilkårResultatPeriode> hentBostedvurderinger(Behandling behandling) {
         return inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder)
-            .map(BostedsvilkårResultatHolder::getVurderinger)
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
             .orElseThrow();
     }
 

@@ -17,18 +17,22 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
+public class BostedAvklaringTjeneste implements VilkårsavklaringOppdaterer {
+
+    private static final Logger log = LoggerFactory.getLogger(BostedAvklaringTjeneste.class);
 
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
@@ -53,15 +57,14 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
 
     public List<BostedsPeriodeAvklaring> hentBostedPeriodeAvklaringUnderArbeid(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .flatMap(g ->
-                g.getForeslåttHvisEksisterer().map(f -> f.hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID))
-            ).orElse(List.of());
+            .map(g -> g.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID))
+            .orElse(List.of());
     }
 
     public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
             .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
-            .toList();
+            .collect(Collectors.toSet());
         return bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
     }
 
@@ -89,7 +92,15 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
                 BostedsPeriodeAvklaring::getReferanse)
             );
 
-        var etterlysningerSomSkalAvbrytes = hentEtterlysningerForEndretEllerSlettetAvklaring(tidligereAvklaringer, avklaringerSomSkalVarsles, etterlysningerSomVenterSvar);
+        var referanserForUendretInnhold = tidligereAvklaringer.entrySet().stream()
+            .filter(entry -> avklaringerSomSkalVarsles.containsKey(entry.getKey()))
+            .map(Map.Entry::getValue)
+            .collect(Collectors.toSet());
+
+        var etterlysningerSomSkalAvbrytes = etterlysningerSomVenterSvar.stream()
+            .filter(etterlysning -> !referanserForUendretInnhold.contains(etterlysning.getGrunnlagsreferanse()))
+            .peek(Etterlysning::setSkalAvbrytes)
+            .toList();
         etterlysningRepository.lagre(etterlysningerSomSkalAvbrytes);
 
         // Beholder kun nye avklaringer og avklaringer med endret innhold
@@ -107,12 +118,14 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
 
         var skalAvbryte = etterlysningerSomSkalAvbrytes.stream().anyMatch(it -> it.getStatus() == EtterlysningStatus.SKAL_AVBRYTES);
         if (skalAvbryte) {
+            log.info("Avbryter etterlysninger {}", etterlysningerSomSkalAvbrytes);
             var task = ProsessTaskData.forProsessTask(AvbrytEtterlysningTask.class);
             task.setBehandling(behandling.getFagsakId(), behandlingId);
             prosessTaskTjeneste.lagre(task);
         }
 
         if (!avklaringerSomSkalVarsles.isEmpty()) {
+            log.info("Oppretter etterlysninger {}", avklaringerSomSkalVarsles);
             var task = ProsessTaskData.forProsessTask(OpprettEtterlysningTask.class);
             task.setBehandling(behandling.getFagsakId(), behandlingId);
             task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_BOSTED.getKode());
@@ -120,49 +133,23 @@ public class BostedAvklaringTjeneste implements VilkårAvklaringOppdaterer {
         }
     }
 
-    private static List<Etterlysning> hentEtterlysningerForEndretEllerSlettetAvklaring(Map<BostedAvklaringInnhold, UUID> tidligereAvklaringerInnhold,
-                                                                                       Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles,
-                                                                                       List<Etterlysning> etterlysningerSomVenterSvar) {
-
-        var referanserForUendretInnhold = tidligereAvklaringerInnhold.entrySet().stream()
-            .filter(entry -> avklaringerSomSkalVarsles.containsKey(entry.getKey()))
-            .map(Map.Entry::getValue)
-            .collect(Collectors.toSet());
-
-        return etterlysningerSomVenterSvar.stream()
-            .filter(etterlysning -> !referanserForUendretInnhold.contains(etterlysning.getGrunnlagsreferanse()))
-            .peek(Etterlysning::setSkalAvbrytes)
-            .toList();
-    }
-
     // Hvis saksbehandler endrer perioden det avklares for etter at vilkårsvurdering er utført, gjelder ikke lenger vurderingen og den delen som ikke overlapper med ny avklaring må gjenopprettes fra forrige behandling.
     // Vilkårsperioden som avklaringen gjelder for settes til ikke vurdert, slik at den kan vurderes på nytt (automatisk eller i aksjonspunkt)
     public void gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid, List<BostedAvklaringInnhold> nyeAvklaringer) {
-        var tidligereTidslinje = new LocalDateTimeline<>(tidligereAvklaringerUnderArbeid.stream().map(it -> new LocalDateSegment<>(it.getPeriode().getFomDato(), it.getPeriode().getTomDato(), true)).toList());
-        var nyTidslinje = new LocalDateTimeline<>(nyeAvklaringer.stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
-        var periodeSomIkkeHåndteresAvNyAvklaring = tidligereTidslinje.disjoint(nyTidslinje)
-            .segmenter().stream()
-            .map(it -> new Periode(it.getFom(), it.getTom()))
-            .toList();
+        var tidligereTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(tidligereAvklaringerUnderArbeid.stream().map(BostedsPeriodeAvklaring::getPeriode).toList());
+        var nyTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nyeAvklaringer.stream().map(BostedAvklaringInnhold::periode).toList());
+        var tidslinjeSomIkkeHåndteresAvNyAvklaring = tidligereTidslinje.disjoint(nyTidslinje);
 
-        inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, periodeSomIkkeHåndteresAvNyAvklaring);
+        inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, tidslinjeSomIkkeHåndteresAvNyAvklaring);
         inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
-        var perioderSomSkalVurderesPåNytt = nyTidslinje.stream().map(it -> DatoIntervallEntitet.fra(it.getLocalDateInterval())).toList();
+        var perioderSomSkalVurderesPåNytt = TidslinjeUtil.tilDatoIntervallEntiteter(nyTidslinje);
         inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
     }
 
     @Override
     public void settAlleAvklaringerTilFerdig(long behandlingId) {
-        if (bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId).isEmpty()) {
-            // behandlingen har ikke bostedsgrunnlag (f.eks. annen ytelse) - ikke opprett et tomt
-            return;
-        }
-        bostedsGrunnlagRepository.lagre(behandlingId, grunnlag -> {
-            if (grunnlag.getForeslått() != null) {
-                grunnlag.getForeslått().settAlleAvklaringerTilFerdig();
-            }
-        });
+        bostedsGrunnlagRepository.settAlleAvklaringerFerdig(behandlingId);
     }
 
     @Override

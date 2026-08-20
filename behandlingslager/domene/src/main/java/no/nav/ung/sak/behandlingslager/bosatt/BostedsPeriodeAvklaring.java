@@ -197,7 +197,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
-        return periode.equals(that.periode)
+        return getPeriode().equals(that.getPeriode())
             && ikkeOppfyltÅrsak == that.ikkeOppfyltÅrsak
             && Objects.equals(begrunnelse, that.begrunnelse)
             && skalSendeVarsel == that.skalSendeVarsel
@@ -211,7 +211,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype, status);
+        return Objects.hash(getPeriode(), ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype, status);
     }
 
     @Override

@@ -9,7 +9,9 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
+
+import java.util.List;
 
 @ApplicationScoped
 @ProsessTask(VilkårsavklaringFerdigstillerTask.TASKTYPE)
@@ -18,7 +20,7 @@ public class VilkårsavklaringFerdigstillerTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "iverksetteVedtak.vilkårsavklaringFerdigstillerTask";
 
-    private Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere;
+    private List<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere;
 
     public VilkårsavklaringFerdigstillerTask() {
         // for CDI proxy
@@ -26,15 +28,15 @@ public class VilkårsavklaringFerdigstillerTask extends BehandlingProsessTask {
 
     @Inject
     public VilkårsavklaringFerdigstillerTask(BehandlingLåsRepository BehandlingLåsRepository,
-                                             @Any Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere) {
+                                             @Any Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere) {
         super(BehandlingLåsRepository);
-        this.alleVilkårAvklaringOppdaterere = alleVilkårAvklaringOppdaterere;
+        this.alleVilkårsavklaringOppdaterere = VilkårsavklaringOppdaterer.sortert(alleVilkårsavklaringOppdaterere);
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         long behandlingId = Long.parseLong(prosessTaskData.getBehandlingId());
-        alleVilkårAvklaringOppdaterere.forEach(oppdaterer ->
+        alleVilkårsavklaringOppdaterere.forEach(oppdaterer ->
             oppdaterer.settAlleAvklaringerTilFerdig(behandlingId)
         );
     }

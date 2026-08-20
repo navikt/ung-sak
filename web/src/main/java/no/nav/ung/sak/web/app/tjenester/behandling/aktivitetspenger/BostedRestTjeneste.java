@@ -50,6 +50,7 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 public class BostedRestTjeneste {
 
     public static final String BOSATT_PATH = "/behandling/bosatt";
+    public static final String BOSATT_FAKTA_PATH = "/behandling/bosatt-fakta";
 
     private BehandlingRepository behandlingRepository;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
@@ -80,6 +81,19 @@ public class BostedRestTjeneste {
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         return hentBostedGrunnlagInternal(behandlingUuid);
     }
+
+    @Deprecated // Duplikatimplementasjon av hentBostedGrunnlag
+    @GET
+    @Path(BOSATT_FAKTA_PATH)
+    @Operation(description = "Hent bostedsgrunnlag (avklaringer per periode)", tags = "aktivitetspenger")
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
+    public BostedGrunnlagResponseDto hentBosattFakta(
+        @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC)
+        @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        return hentBostedGrunnlagInternal(behandlingUuid);
+    }
+
 
     private BostedGrunnlagResponseDto hentBostedGrunnlagInternal(BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
@@ -181,7 +195,7 @@ public class BostedRestTjeneste {
             return new BostedResultatDto(
                 resultat.isGodkjent(),
                 resultat.getIkkeOppfyltÅrsak(),
-                resultat.isManuellVurdering(),
+                resultat.erManuellVurdering(),
                 resultat.getBegrunnelse(),
                 resultat.getFritekstVurderingBrev(),
                 resultat.getVurdertAv()

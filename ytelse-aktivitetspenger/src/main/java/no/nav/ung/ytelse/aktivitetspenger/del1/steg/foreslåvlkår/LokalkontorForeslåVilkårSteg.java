@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårAvklaringOppdaterer;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
 
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingRepository behandlingRepository;
-    private Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere;
+    private List<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere;
 
     LokalkontorForeslåVilkårSteg() {
         // for CDI proxy
@@ -36,10 +36,10 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
 
     @Inject
     public LokalkontorForeslåVilkårSteg(BehandlingAnsvarligRepository behandlingAnsvarligRepository, BehandlingRepository behandlingRepository,
-                                        Instance<VilkårAvklaringOppdaterer> alleVilkårAvklaringOppdaterere) {
+                                        Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingRepository = behandlingRepository;
-        this.alleVilkårAvklaringOppdaterere = alleVilkårAvklaringOppdaterere;
+        this.alleVilkårsavklaringOppdaterere = VilkårsavklaringOppdaterer.sortert(alleVilkårsavklaringOppdaterere);
     }
 
 
@@ -66,8 +66,12 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
         if (!LOKALKONTOR_FORESLÅ_VILKÅR.equals(tilSteg)) {
-            alleVilkårAvklaringOppdaterere.forEach(vilkårAvklaringOppdaterer ->
-                vilkårAvklaringOppdaterer.settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(kontekst.getBehandlingId())
+            // I flyten for avslag/opphør er det ikke behandlingstrigger som styrer vurdert periode, men perioden som til enhver tid er foreslått avklart.
+            // Det er fordi vi ikke kan gjøre en vurdering før brukeren har blitt varslet om forslaget og har hatt rett til å uttale seg.
+            // Når behandlingen hopper tilbake fra foreslå vedtak, er det vilkårsperioden for tilsvarende den avklarte periode som settes til vurdering.
+            // Vilkårsvurdering beholdes intakt, slik at saksbehandler kan redigere den foreslåtte vurderingen.
+            alleVilkårsavklaringOppdaterere.forEach(vilkårsavklaringOppdaterer ->
+                vilkårsavklaringOppdaterer.settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(kontekst.getBehandlingId())
             );
         }
     }

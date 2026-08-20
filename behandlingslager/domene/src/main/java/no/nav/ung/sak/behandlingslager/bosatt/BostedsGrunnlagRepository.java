@@ -4,6 +4,8 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 
@@ -13,6 +15,8 @@ import java.util.function.Consumer;
 
 @Dependent
 public class BostedsGrunnlagRepository {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BostedsGrunnlagRepository.class);
 
     private final EntityManager entityManager;
 
@@ -45,6 +49,7 @@ public class BostedsGrunnlagRepository {
 
         if (eksisterendeGrunnlag.isPresent()) {
             if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
+                LOG.info("lagreInformasjonFraSøknad ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
                 return;
             }
             deaktiverEksisterende(eksisterendeGrunnlag.get());
@@ -59,7 +64,7 @@ public class BostedsGrunnlagRepository {
      *
      * @return Map fra periodestart til periodeAvklaring.referanse
      */
-    public Set<BostedsPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, List<BostedsPeriodeAvklaring> nyeAvklaringer) {
+    public Set<BostedsPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, Set<BostedsPeriodeAvklaring> nyeAvklaringer) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer at grunnlag allerede eksisterer ved lagring av avklaring"));
 
@@ -67,18 +72,19 @@ public class BostedsGrunnlagRepository {
         nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
 
         if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
-            return hentForeslåttAvklaringerUnderArbeid(eksisterendeGrunnlag.getForeslått());
+            LOG.info("lagreForeslåtteAvklaringer ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
+            return new HashSet<>(eksisterendeGrunnlag.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
         }
         deaktiverEksisterende(eksisterendeGrunnlag);
 
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
 
-        return hentForeslåttAvklaringerUnderArbeid(nyttGrunnlag.getForeslått());
+        return new HashSet<>(nyttGrunnlag.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
     }
 
-    private static Set<BostedsPeriodeAvklaring> hentForeslåttAvklaringerUnderArbeid(BostedsAvklaringHolder holder) {
-        return new HashSet<>(holder.hentAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
+    public void settAlleAvklaringerFerdig(long behandlingId) {
+        lagre(behandlingId, BostedsGrunnlag::settAlleAvklaringerTilFerdig);
     }
 
     public void lagre(Long behandlingId, Consumer<BostedsGrunnlag> grunnlagsoperasjon) {

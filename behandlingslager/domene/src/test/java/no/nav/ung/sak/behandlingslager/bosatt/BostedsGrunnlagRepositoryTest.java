@@ -56,10 +56,10 @@ class BostedsGrunnlagRepositoryTest {
     @Test
     void skal_erstatte_avklaringer_under_arbeid_nar_nye_avklaringer_lagres() {
         var første = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(første));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(første));
 
         var andre = lagAvklaring(LocalDate.of(2026, 1, 16), TOM);
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(andre));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(andre));
 
         var avklaringer = hentSorterteAvklaringer();
         assertThat(avklaringer).hasSize(1);
@@ -69,10 +69,10 @@ class BostedsGrunnlagRepositoryTest {
     @Test
     void skal_erstatte_hele_den_eksisterende_avklaringen_under_arbeid_når_ny_avklaring_overlapper() {
         var eksisterende = lagAvklaring(FOM, TOM);
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(eksisterende));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(eksisterende));
 
         var overlappende = lagAvklaring(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20));
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(overlappende));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(overlappende));
 
         var avklaringer = hentSorterteAvklaringer();
 
@@ -85,17 +85,17 @@ class BostedsGrunnlagRepositoryTest {
     @Test
     void skal_beholde_avklaringen_og_referanse_ved_ny_lagring_hvis_innhold_er_uendret() {
         var opprinneligAvklaring = lagAvklaring(FOM, TOM);
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(opprinneligAvklaring));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(opprinneligAvklaring));
 
         // Lagre på nytt med ny instans av samme innhold (ny referanse)
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(lagAvklaring(FOM, TOM)));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(lagAvklaring(FOM, TOM)));
 
         var avklaringer = hentSorterteAvklaringer();
         assertThat(avklaringer).hasSize(1);
         assertThat(avklaringer.getFirst().getReferanse()).isEqualTo(opprinneligAvklaring.getReferanse());
 
         var endretAvklaring = lagAvklaring(FOM, TOM, "ny begrunnelse");
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(endretAvklaring));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(endretAvklaring));
         var avklaringerEtterEndretAvklaring = hentSorterteAvklaringer();
         assertThat(avklaringerEtterEndretAvklaring).hasSize(1);
         assertThat(avklaringerEtterEndretAvklaring.getFirst().getReferanse()).isEqualTo(endretAvklaring.getReferanse());
@@ -131,19 +131,19 @@ class BostedsGrunnlagRepositoryTest {
     @Test
     void skal_opprette_nytt_grunnlag_med_ny_avklaring_uten_å_mutere_avklaringer_pa_tidligere_behandling() {
         var opprinnelig = lagAvklaring(FOM, TOM);
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(opprinnelig));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(opprinnelig));
 
         Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
 
         repository.kopierGrunnlagFraEksisterendeBehandling(behandling.getId(), nyBehandling.getId());
         var ny = lagAvklaring(LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28));
-        repository.lagreForeslåtteAvklaringer(nyBehandling.getId(), List.of(opprinnelig, ny));
+        repository.lagreForeslåtteAvklaringer(nyBehandling.getId(), Set.of(opprinnelig, ny));
 
         var avklaringerPåNyBehandling = repository.hentGrunnlagHvisEksisterer(nyBehandling.getId())
             .orElseThrow()
             .getForeslått()
-            .getPeriodeAvklaringer();
+            .hentPeriodeAvklaringer();
 
         assertThat(avklaringerPåNyBehandling)
             .extracting(BostedsPeriodeAvklaring::getReferanse)
@@ -152,7 +152,7 @@ class BostedsGrunnlagRepositoryTest {
         var avklaringerPåGammelBehandling = repository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
             .getForeslått()
-            .getPeriodeAvklaringer();
+            .hentPeriodeAvklaringer();
 
         assertThat(avklaringerPåGammelBehandling).hasSize(1);
         assertThat(avklaringerPåGammelBehandling.iterator().next().getReferanse()).isEqualTo(opprinnelig.getReferanse());
@@ -162,7 +162,7 @@ class BostedsGrunnlagRepositoryTest {
         return repository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
             .getForeslått()
-            .getPeriodeAvklaringer()
+            .hentPeriodeAvklaringer()
             .stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
             .toList();
