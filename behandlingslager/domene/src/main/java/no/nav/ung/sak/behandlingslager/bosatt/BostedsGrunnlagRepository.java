@@ -67,17 +67,17 @@ public class BostedsGrunnlagRepository {
         nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
 
         if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
-            return hentForeslåttAvklaringsreferanser(eksisterendeGrunnlag.getForeslått());
+            return hentForeslåttAvklaringerUnderAreid(eksisterendeGrunnlag.getForeslått());
         }
         deaktiverEksisterende(eksisterendeGrunnlag);
 
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
 
-        return hentForeslåttAvklaringsreferanser(nyttGrunnlag.getForeslått());
+        return hentForeslåttAvklaringerUnderAreid(nyttGrunnlag.getForeslått());
     }
 
-    private static Set<BostedsPeriodeAvklaring> hentForeslåttAvklaringsreferanser(BostedsAvklaringHolder holder) {
+    private static Set<BostedsPeriodeAvklaring> hentForeslåttAvklaringerUnderAreid(BostedsAvklaringHolder holder) {
         return new HashSet<>(holder.hentAvklaringerMedStatus(AvklaringStatus.AVKLARES));
     }
 

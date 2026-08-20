@@ -141,7 +141,7 @@ public class BostedsGrunnlag extends BaseEntitet {
      */
     public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus... status) {
         var søknadsTidslinje = hentSøknadsfaktaSomTidslinje();
-        var foreslåttTidslinje = foreslått == null ? LocalDateTimeline.<BostedsPeriodeAvklaring>empty() : foreslått.hentAvklaringMedStatusSomTidslinje(status);
+        var foreslåttTidslinje = getForeslåttHvisEksisterer().map(it -> it.hentAvklaringMedStatusSomTidslinje(status)).orElse(LocalDateTimeline.empty());
 
         return søknadsTidslinje.combine(foreslåttTidslinje,
             (di, søknad, avklaring) -> new LocalDateSegment<>(di, new BostedsfaktaOgAvklaring(

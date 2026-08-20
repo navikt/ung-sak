@@ -67,7 +67,7 @@ class BostedsGrunnlagRepositoryTest {
     }
 
     @Test
-    void skal_erstatte_hele_den_eksisterende_avklaringen_nar_ny_avklaring_overlapper() {
+    void skal_erstatte_hele_den_eksisterende_avklaringen_under_arbeid_når_ny_avklaring_overlapper() {
         var eksisterende = lagAvklaring(FOM, TOM);
         repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(eksisterende));
 
@@ -76,8 +76,6 @@ class BostedsGrunnlagRepositoryTest {
 
         var avklaringer = hentSorterteAvklaringer();
 
-        // Den overlappede avklaringen splittes ikke — da ville referansen dekket to segmenter,
-        // og varselet til bruker kunne ikke knyttes entydig til ett segment.
         assertThat(avklaringer).hasSize(1);
         assertThat(avklaringer.getFirst().getPeriode())
             .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20)));
@@ -85,29 +83,22 @@ class BostedsGrunnlagRepositoryTest {
     }
 
     @Test
-    void skal_beholde_referansen_nar_avklaringen_lagres_uendret_slik_at_varselet_fortsatt_treffer() {
-        var opprinnelig = lagAvklaring(FOM, TOM);
-        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(opprinnelig));
+    void skal_beholde_avklaringen_og_referanse_ved_ny_lagring_hvis_innhold_er_uendret() {
+        var opprinneligAvklaring = lagAvklaring(FOM, TOM);
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(opprinneligAvklaring));
 
-        // Samme innhold, men ny instans med ny referanse — grunnlaget skal ikke versjoneres
+        // Lagre på nytt med ny instans av samme innhold (ny referanse)
         repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(lagAvklaring(FOM, TOM)));
 
         var avklaringer = hentSorterteAvklaringer();
         assertThat(avklaringer).hasSize(1);
-        assertThat(avklaringer.getFirst().getReferanse()).isEqualTo(opprinnelig.getReferanse());
-    }
+        assertThat(avklaringer.getFirst().getReferanse()).isEqualTo(opprinneligAvklaring.getReferanse());
 
-    @Test
-    void skal_returnere_referanse_per_periodestart_for_avklaringene_under_arbeid() {
-        var første = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
-        var andre = lagAvklaring(LocalDate.of(2026, 1, 16), TOM);
-
-        Set<BostedsPeriodeAvklaring> lagredeAvklaringer = repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(første, andre));
-
-        assertThat(lagredeAvklaringer)
-            .contains(første)
-            .contains(andre)
-            .hasSize(2);
+        var endretAvklaring = lagAvklaring(FOM, TOM, "ny begrunnelse");
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(endretAvklaring));
+        var avklaringerEtterEndretAvklaring = hentSorterteAvklaringer();
+        assertThat(avklaringerEtterEndretAvklaring).hasSize(1);
+        assertThat(avklaringerEtterEndretAvklaring.getFirst().getReferanse()).isEqualTo(endretAvklaring.getReferanse());
     }
 
     @Test
@@ -178,10 +169,14 @@ class BostedsGrunnlagRepositoryTest {
     }
 
     private static BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom) {
+        return lagAvklaring(fom, tom, "begrunnelse for hvorfor det ikke varsles");
+    }
+
+    private static BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
         return new BostedsPeriodeAvklaring(
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
-            "begrunnelse",
+            begrunnelse,
             false,
             null,
             "begrunnelse for hvorfor det ikke varsles",

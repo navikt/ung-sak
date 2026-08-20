@@ -21,9 +21,6 @@ public record BostedGrunnlagPeriodeDto(
     BostedAvklaringDto avklaring,
     /** Resultat av vurdering av bostedsvilkår. Null dersom ikke vurdert. */
     BostedResultatDto resultat,
-    ForeslåttUtfall utfallAvklaring,
-    /** Kan vilkårvurderes når bostedsavklaring er under arbeid og vilkår er satt til IKKE_VURDERT */
-    ForeslåttUtfall utfallVurdering,
     /** Settes hvis bruker har avgitt uttalelse om bosted. False dersom etterlysning ikke er besvart. */
     boolean harUttalelse,
     /** Brukerens uttalelsetekst. Null dersom bruker ikke har svart. */
