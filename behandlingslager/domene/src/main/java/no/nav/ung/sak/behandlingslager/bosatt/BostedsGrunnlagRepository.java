@@ -4,18 +4,19 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.function.Consumer;
 
 @Dependent
 public class BostedsGrunnlagRepository {
+
+    private static final Logger LOG = LoggerFactory.getLogger(BostedsGrunnlagRepository.class);
 
     private final EntityManager entityManager;
 
@@ -48,6 +49,7 @@ public class BostedsGrunnlagRepository {
 
         if (eksisterendeGrunnlag.isPresent()) {
             if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
+                LOG.info("lagreInformasjonFraSøknad ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
                 return;
             }
             deaktiverEksisterende(eksisterendeGrunnlag.get());
@@ -62,7 +64,7 @@ public class BostedsGrunnlagRepository {
      *
      * @return Map fra periodestart til periodeAvklaring.referanse
      */
-    public Map<LocalDate, UUID> lagreForeslåtteAvklaringer(Long behandlingId, List<BostedsPeriodeAvklaring> nyeAvklaringer) {
+    public Set<BostedsPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, Set<BostedsPeriodeAvklaring> nyeAvklaringer) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer at grunnlag allerede eksisterer ved lagring av avklaring"));
 
@@ -70,21 +72,41 @@ public class BostedsGrunnlagRepository {
         nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
 
         if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
-            return hentForeslåttAvklaringsreferanser(eksisterendeGrunnlag.getForeslått());
+            LOG.info("lagreForeslåtteAvklaringer ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
+            return new HashSet<>(eksisterendeGrunnlag.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
         }
         deaktiverEksisterende(eksisterendeGrunnlag);
 
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
 
-        return hentForeslåttAvklaringsreferanser(nyttGrunnlag.getForeslått());
+        return new HashSet<>(nyttGrunnlag.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
     }
 
-    private static Map<LocalDate, UUID> hentForeslåttAvklaringsreferanser(BostedsAvklaringHolder holder) {
-        return holder.getPeriodeAvklaringer().stream()
-            .collect(Collectors.toMap(
-                p -> p.getPeriode().getFomDato(),
-                BostedsPeriodeAvklaring::getReferanse));
+    public void settAlleAvklaringerFerdig(long behandlingId) {
+        var bleEndret = lagre(behandlingId, BostedsGrunnlag::settAlleAvklaringerTilFerdig);
+        if (!bleEndret) {
+            LOG.info("settAlleAvklaringerFerdig ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
+        }
+    }
+
+    public boolean lagre(Long behandlingId, Consumer<BostedsGrunnlag> grunnlagsoperasjon) {
+        var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
+        var nyttGrunnlag = eksisterendeGrunnlag
+            .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
+            .orElse(new BostedsGrunnlag(behandlingId));
+
+        grunnlagsoperasjon.accept(nyttGrunnlag);
+
+        if (eksisterendeGrunnlag.isPresent()) {
+            if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
+                return false;
+            }
+            deaktiverEksisterende(eksisterendeGrunnlag.get());
+        }
+        entityManager.persist(nyttGrunnlag);
+        entityManager.flush();
+        return true;
     }
 
     /**

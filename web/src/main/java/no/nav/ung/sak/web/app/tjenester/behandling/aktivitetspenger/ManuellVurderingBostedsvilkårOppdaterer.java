@@ -112,10 +112,6 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
 
         inngangsvilkårVurderingTjeneste.settBostedsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
-        if (erEndretBosted) {
-            inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR);
-        }
-
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)

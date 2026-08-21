@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  */
 @Entity(name = "BostedsinformasjonFraSøknadHolder")
 @Table(name = "BOSTEDSINFORMASJON_SOEKNAD_HOLDER")
-public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
+class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSTEDSINFORMASJON_SOEKNAD_HOLDER")
@@ -30,9 +30,12 @@ public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
     public BostedsinformasjonFraSøknadHolder() {
     }
 
-    public BostedsinformasjonFraSøknadHolder(BostedsinformasjonFraSøknadHolder oppgittFraSøknad) {
+    BostedsinformasjonFraSøknadHolder(BostedsinformasjonFraSøknadHolder oppgittFraSøknad) {
         if (oppgittFraSøknad != null) {
-            this.informasjon.addAll(oppgittFraSøknad.getInformasjon());
+             this.informasjon.addAll(oppgittFraSøknad.getInformasjon()
+                .stream()
+                .map(BostedsinformasjonFraSøknad::kopierDataFra).collect(Collectors.toSet())
+            );
         }
     }
 
@@ -45,12 +48,12 @@ public class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
         return id;
     }
 
-    public Set<BostedsinformasjonFraSøknad> getInformasjon() {
+    Set<BostedsinformasjonFraSøknad> getInformasjon() {
         return Collections.unmodifiableSet(informasjon);
     }
 
-    public Map<LocalDate, BostedsinformasjonFraSøknad> hentSomMap() {
-        return informasjon.stream()
+    Map<LocalDate, BostedsinformasjonFraSøknad> hentSomMap() {
+        return getInformasjon().stream()
             .collect(Collectors.toMap(BostedsinformasjonFraSøknad::getFomDato, i -> i));
     }
 

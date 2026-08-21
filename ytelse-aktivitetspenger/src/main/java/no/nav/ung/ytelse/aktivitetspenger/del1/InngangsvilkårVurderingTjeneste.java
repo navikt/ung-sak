@@ -12,14 +12,13 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.util.List;
+import java.util.SequencedCollection;
 
 /**
  * Leser saksbehandlers lagrede vurderinger fra {@link AktivitetspengerInngangsvilkårResultatGrunnlag}
@@ -28,7 +27,7 @@ import java.util.List;
 @ApplicationScoped
 public class InngangsvilkårVurderingTjeneste {
 
-    private InngangsvilkårVurderingRepository repository;
+    private InngangsvilkårVurderingRepository vilkårVurderingRepository;
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
 
@@ -37,16 +36,16 @@ public class InngangsvilkårVurderingTjeneste {
     }
 
     @Inject
-    public InngangsvilkårVurderingTjeneste(InngangsvilkårVurderingRepository repository,
+    public InngangsvilkårVurderingTjeneste(InngangsvilkårVurderingRepository vilkårVurderingRepository,
                                            BehandlingRepository behandlingRepository,
                                            VilkårResultatRepository vilkårResultatRepository) {
-        this.repository = repository;
+        this.vilkårVurderingRepository = vilkårVurderingRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public void settBistandsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
-        var grunnlag = repository.hentGrunnlag(behandlingId)
+        var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
         var holder = grunnlag.getBistandsvilkårResultatHolder()
             .orElseThrow(() -> new IllegalStateException("Bistandsvilkår-holder mangler i grunnlag for behandling " + behandlingId));
@@ -66,7 +65,7 @@ public class InngangsvilkårVurderingTjeneste {
     }
 
     public void settAndreLivsoppholdsytelserResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
-        var grunnlag = repository.hentGrunnlag(behandlingId)
+        var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
         var holder = grunnlag.getAndreLivsoppholdsytelserResultatHolder()
             .orElseThrow(() -> new IllegalStateException("Andre livsoppholdsytelser-holder mangler i grunnlag for behandling " + behandlingId));
@@ -92,8 +91,18 @@ public class InngangsvilkårVurderingTjeneste {
         vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
     }
 
-    public void fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(Long behandlingId, VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, List<DatoIntervallEntitet> perioder) {
-        repository.fjernResultatFor(behandlingId, vilkårType, perioder.stream().map(DatoIntervallEntitet::tilPeriode).toList());
+    public void oppdaterBostedsvilkårResultatFraVurdering(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
+        settBostedsvilkårResultat(behandlingId, resultatBuilder);
+    }
+
+    public void settVilkårResultatIkkeVurdertForPeriode(Long behandlingId, VilkårType vilkårType, SequencedCollection<DatoIntervallEntitet> perioder) {
+        var vilkårene = vilkårResultatRepository.hent(behandlingId);
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårene);
+        settVilkårResultatIkkeVurdertForPeriode(vilkårResultatBuilder, vilkårType, perioder);
+        vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
+    }
+
+    public void settVilkårResultatIkkeVurdertForPeriode(VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, SequencedCollection<DatoIntervallEntitet> perioder) {
         var resultatBuilderForVilkår = vilkårResultatBuilder.hentBuilderFor(vilkårType);
         perioder.forEach(periode -> {
             var periodeBuilder = resultatBuilderForVilkår.hentBuilderFor(periode).medUtfall(Utfall.IKKE_VURDERT);
@@ -102,50 +111,48 @@ public class InngangsvilkårVurderingTjeneste {
         vilkårResultatBuilder.leggTil(resultatBuilderForVilkår);
     }
 
-    public void gjenopprettForrigeVurderingForPerioderIkkeVurdert(Long behandlingId, VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType) {
+    public void gjenopprettForrigeVurderingForPerioderIkkeVurdert(Long behandlingId, VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, LocalDateTimeline<Boolean> avgrensningstidslinje) {
         var originalBehandlingId = behandlingRepository.hentBehandling(behandlingId).getOriginalBehandlingId().orElse(null);
         if (originalBehandlingId == null) {
             return;
         }
-        var eksisterendeVilkårsperioder = vilkårResultatBuilder.hentBuilderFor(vilkårType).build().getPerioder();
-        var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-        var vilkårperioderSomSkalKopieres = hentVilkårperioderForPerioderIkkeVurdert(originalBehandlingId, vilkårType, eksisterendeVilkårsperioder);
-        for (var vilkårPeriodeBuilder : vilkårperioderSomSkalKopieres) {
-            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        var perioderSomSkalGjenopprettes = hentPerioderSomSkalGjenopprettes(vilkårResultatBuilder, vilkårType, avgrensningstidslinje);
+        if (perioderSomSkalGjenopprettes.isEmpty()) {
+            return;
         }
-        vilkårResultatBuilder.leggTil(vilkårBuilder);
+
+        var tidligereVurderTidslinje = vilkårVurderingRepository.hentGrunnlag(originalBehandlingId)
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke vilkårvurdering på originalbehandling ved gjenoppretting" + originalBehandlingId));
+
+        var tidligereVurderingerSomSkalGjenopprettes = tidligereVurderTidslinje.intersection(perioderSomSkalGjenopprettes)
+            .segmenter().stream()
+            .map(it ->
+                new BostedsvilkårResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue())
+            ).toList();
+
+        vilkårVurderingRepository.lagreBostedVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
     }
 
-    private List<VilkårPeriodeBuilder> hentVilkårperioderForPerioderIkkeVurdert(Long fraBehandlingId, VilkårType vilkårType, List<VilkårPeriode> gjeldendeVilkårsperioder) {
-        var ikkeVurdertePerioder = gjeldendeVilkårsperioder.stream()
+    private static LocalDateTimeline<Boolean> hentPerioderSomSkalGjenopprettes(VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, LocalDateTimeline<Boolean> avgrensningstidslinje) {
+        var vilkårsperioderIkkeVurdert = new LocalDateTimeline<>(vilkårResultatBuilder.hentBuilderFor(vilkårType).build().getPerioder().stream()
             .filter(periode -> periode.getUtfall() == Utfall.IKKE_VURDERT)
-            .map(VilkårPeriode::getPeriode).map(p -> new LocalDateSegment<>(p.getFomDato(), p.getTomDato(), true))
-            .toList();
+            .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), true))
+            .toList());
 
-        LocalDateTimeline<VilkårPeriode> fraVilkårResultatTidslinje = vilkårResultatRepository.hentHvisEksisterer(fraBehandlingId)
-            .map(v -> v.getVilkårTimeline(vilkårType))
-            .orElse(LocalDateTimeline.empty());
-
-        return fraVilkårResultatTidslinje.intersection(new LocalDateTimeline<>(ikkeVurdertePerioder)).segmenter()
-            .stream().map(segment -> new VilkårPeriodeBuilder(segment.getValue())
-                .medPeriode(
-                    segment.getFom(),
-                    segment.getTom()
-                )
-            ).toList();
+        return vilkårsperioderIkkeVurdert.intersection(avgrensningstidslinje);
     }
 
     public void settBostedsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
-        var grunnlag = repository.hentGrunnlag(behandlingId)
+        var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
-        var holder = grunnlag.getBostedsvilkårResultatHolder()
-            .orElseThrow(() -> new IllegalStateException("Bostedsvilkår-holder mangler i grunnlag for behandling " + behandlingId));
-        byggVilkårIBuilder(resultatBuilder, holder, VilkårType.BOSTEDSVILKÅR);
+        var vurderinger = grunnlag.hentBostedsvilkårResultatPerioder();
+        byggVilkårIBuilder(resultatBuilder, vurderinger, VilkårType.BOSTEDSVILKÅR);
     }
 
-    private void byggVilkårIBuilder(VilkårResultatBuilder resultatBuilder, BostedsvilkårResultatHolder holder, VilkårType vilkårType) {
+    private void byggVilkårIBuilder(VilkårResultatBuilder resultatBuilder, List<BostedsvilkårResultatPeriode> vurderinger, VilkårType vilkårType) {
         var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
-        for (var vurdering : holder.getVurderinger()) {
+        for (var vurdering : vurderinger) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT
@@ -157,7 +164,7 @@ public class InngangsvilkårVurderingTjeneste {
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medAvslagsårsak(avslagsårsak);
 
-            if (vurdering.isManuellVurdering()) {
+            if (vurdering.erManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
             } else {
                 vilkårPeriodeBuilder.tilbakestillManuellVurdering().medUtfall(utfall);

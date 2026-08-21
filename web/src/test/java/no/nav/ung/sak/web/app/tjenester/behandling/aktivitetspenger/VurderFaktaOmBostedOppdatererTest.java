@@ -1,267 +1,431 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
+import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.sikkerhet.StaticSubjectHandler;
+import no.nav.k9.felles.testutilities.sikkerhet.SubjectHandlerUtils;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.bosatt.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
-import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
-import no.nav.ung.sak.behandlingslager.bosatt.*;
-import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
-import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedVurderingIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.trigger.ProsessTriggereRepository;
+import no.nav.ung.sak.trigger.Trigger;
+import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsAvklaringDataMapper;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.lang.annotation.Annotation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
-import static no.nav.ung.kodeverk.vilkår.VilkårType.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(JpaExtension.class)
+@ExtendWith(CdiAwareExtension.class)
 class VurderFaktaOmBostedOppdatererTest {
 
-    private static final long BEHANDLING_ID = 123L;
-    private static final long FAGSAK_ID = 456L;
     private static final LocalDate FOM = LocalDate.of(2026, 1, 1);
-    private static final LocalDate TOM = LocalDate.of(2026, 1, 31);
+    private static final LocalDate TOM = LocalDate.of(2026, 12, 31);
 
-    private BehandlingRepository behandlingRepository;
-    private HistorikkinnslagRepository historikkinnslagRepository;
+    private static final Periode PERIODE_1 = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31));
+    private static final Periode PERIODE_2 = new Periode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31));
+    private static final Periode PERIODE_3 = new Periode(LocalDate.of(2026, 5, 1), LocalDate.of(2026, 5, 31));
+
+    private static final String SAKSBEHANDLER = "saksbehandler1";
+    private static final String BEGRUNNELSE_IKKE_VARSEL = "Begrunnelse for hvorfor det ikke varsles";
+
+    @Inject
+    private EntityManager entityManager;
+
+    @Inject
+    private @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private VurderFaktaOmBostedOppdaterer oppdaterer;
     private Behandling behandling;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
-    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private BostedAvklaringTjeneste bostedAvklaringTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
+
+    @BeforeAll
+    static void beforeAll() {
+        SubjectHandlerUtils.useSubjectHandler(StaticSubjectHandler.class);
+        SubjectHandlerUtils.setInternBruker(SAKSBEHANDLER);
+    }
+
+    @AfterAll
+    static void afterAll() {
+        SubjectHandlerUtils.reset();
+    }
 
     @BeforeEach
     void setUp() {
-        behandlingRepository = mock(BehandlingRepository.class);
-        historikkinnslagRepository = mock(HistorikkinnslagRepository.class);
-        bostedsGrunnlagRepository = mock(BostedsGrunnlagRepository.class);
-        etterlysningRepository = mock(EtterlysningRepository.class);
+        var behandlingRepository = new BehandlingRepository(entityManager);
+        var historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
+        bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
+        inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
+        etterlysningRepository = new EtterlysningRepository(entityManager);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
-        vilkårsPerioderTilVurderingTjeneste = mock(Instance.class);
-        inngangsvilkårVurderingTjeneste = mock(InngangsvilkårVurderingTjeneste.class);
-
-        mockPerioderTilVurdering(FOM, TOM);
+        vilkårResultatRepository = new VilkårResultatRepository(entityManager);
+        var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
+        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, inngangsvilkårVurderingTjeneste, etterlysningRepository, prosessTaskTjeneste);
 
         oppdaterer = new VurderFaktaOmBostedOppdaterer(
             behandlingRepository,
             historikkinnslagRepository,
-            bostedsGrunnlagRepository,
-            etterlysningRepository,
-            prosessTaskTjeneste,
-            vilkårsPerioderTilVurderingTjeneste,
-            inngangsvilkårVurderingTjeneste
+            vilkårsPerioderTilVurderingTjenester,
+            bostedAvklaringTjeneste
         );
 
-        behandling = mock(Behandling.class);
-        when(behandling.getId()).thenReturn(BEHANDLING_ID);
-        when(behandling.getFagsakId()).thenReturn(FAGSAK_ID);
-        when(behandling.getOriginalBehandlingId()).thenReturn(Optional.empty());
-        when(behandling.getFagsakYtelseType()).thenReturn(FagsakYtelseType.AKTIVITETSPENGER);
-        when(behandling.getType()).thenReturn(BehandlingType.FØRSTEGANGSSØKNAD);
-
-        var fagsak = mock(Fagsak.class);
-        when(fagsak.getSaksnummer()).thenReturn(new Saksnummer("SAK1"));
-        when(fagsak.getPeriode()).thenReturn(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
-        when(behandling.getFagsak()).thenReturn(fagsak);
-
-        when(behandlingRepository.hentBehandling(BEHANDLING_ID)).thenReturn(behandling);
-
-        when(bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(eq(BEHANDLING_ID), any()))
-            .thenReturn(Map.of(FOM, UUID.randomUUID()));
-        when(etterlysningRepository.hentEtterlysningerSomVenterPåSvar(BEHANDLING_ID)).thenReturn(List.of());
-    }
-
-    private void mockPerioderTilVurdering(LocalDate fom, LocalDate tom) {
-        var vilkårsTjenesteMock = mock(VilkårsPerioderTilVurderingTjeneste.class);
-        when(vilkårsTjenesteMock.utled(any(), any()))
-            .thenReturn(new TreeSet<>(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom))));
-
-        @SuppressWarnings("unchecked")
-        Instance<VilkårsPerioderTilVurderingTjeneste> behandlingInstans = mock(Instance.class);
-        when(behandlingInstans.isResolvable()).thenReturn(true);
-        when(behandlingInstans.get()).thenReturn(vilkårsTjenesteMock);
-
-        @SuppressWarnings("unchecked")
-        Instance<VilkårsPerioderTilVurderingTjeneste> fagsakInstans = mock(Instance.class);
-        when(fagsakInstans.isUnsatisfied()).thenReturn(false);
-        when(fagsakInstans.select(any(Class.class), any(Annotation.class))).thenReturn(behandlingInstans);
-
-        when(vilkårsPerioderTilVurderingTjeneste.select(any(Class.class), any(Annotation.class))).thenReturn(fagsakInstans);
-    }
-
-    @Test
-    void skal_opprette_etterlysning_og_task_nar_soknad_avklaring_endres() {
-        var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
-            .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
-        when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
-
-        var dto = dtoMedEnAvklaring(false, false, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
-
-        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-
-        var etterlysningCaptor = ArgumentCaptor.forClass(Etterlysning.class);
-        verify(etterlysningRepository).lagre(etterlysningCaptor.capture());
-        assertThat(etterlysningCaptor.getValue().getType()).isEqualTo(EtterlysningType.UTTALELSE_BOSTED);
-        assertThat(etterlysningCaptor.getValue().getPeriode().getFomDato()).isEqualTo(FOM);
-
-        var taskCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskTjeneste).lagre(taskCaptor.capture());
-        assertThat(taskCaptor.getValue().getTaskType()).isEqualTo(OpprettEtterlysningTask.TASKTYPE);
-        assertThat(taskCaptor.getValue().getPropertyValue(OpprettEtterlysningTask.ETTERLYSNING_TYPE))
-            .isEqualTo(EtterlysningType.UTTALELSE_BOSTED.getKode());
-
-        verify(prosessTaskTjeneste, times(1)).lagre(any(ProsessTaskData.class));
-    }
-
-    @Test
-    void skal_avbryte_eksisterende_og_opprette_ny_nar_avklaring_endres() {
-        var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
-            .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
-        when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
-
-        var eksisterende = Etterlysning.opprettForType(
-            BEHANDLING_ID,
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
-            EtterlysningType.UTTALELSE_BOSTED
-        );
-        when(etterlysningRepository.hentEtterlysningerSomVenterPåSvar(BEHANDLING_ID)).thenReturn(List.of(eksisterende));
-
-        var dto = dtoMedEnAvklaring(false, false, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
-
-        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-
-        verify(etterlysningRepository).lagre(anyList());
-        assertThat(eksisterende.getStatus()).isEqualTo(EtterlysningStatus.SKAL_AVBRYTES);
-        verify(etterlysningRepository).lagre(any(Etterlysning.class));
-
-        var taskCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
-        verify(prosessTaskTjeneste, times(2)).lagre(taskCaptor.capture());
-        assertThat(taskCaptor.getAllValues())
-            .extracting(ProsessTaskData::getTaskType)
-            .containsExactlyInAnyOrder(AvbrytEtterlysningTask.TASKTYPE, OpprettEtterlysningTask.TASKTYPE);
+        behandling = opprettBehandlingMedVilkårOgPeriode();
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of());
     }
 
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
-        var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
-            .thenReturn(tidslinjeMedTidligereAvklaring(false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
-        when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
+        var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto);
 
-        var dto = dtoMedEnAvklaring(false, false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(bostedAvklaringPeriode));
 
-        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+        oppdater(dto);
 
-        verify(etterlysningRepository, never()).lagre(any(Etterlysning.class));
-        verify(etterlysningRepository, never()).lagre(anyList());
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
+    }
+
+    private static BostedsPeriodeAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto) {
+        return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
+            BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(dto.getAvklaringer().getFirst(), TOM),
+            UUID.randomUUID().toString(),
+            LocalDateTime.now()
+        );
     }
 
     @Test
     void skal_fjerne_vilkårsvurdering_og_vilkårresultat_for_periode_ved_lagring_av_forslag() {
-        when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.empty());
+        var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.ANNET, false);
+        var param = new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto);
 
-        var dto = dtoMedEnAvklaring(false, true, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
+        oppdaterer.oppdater(dto, param);
 
-        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
-
-        var vilkårCaptor = ArgumentCaptor.forClass(VilkårType.class);
-        var perioderCaptor = ArgumentCaptor.forClass(List.class);
-        var resultatBuiderCaptor = ArgumentCaptor.forClass(VilkårResultatBuilder.class);
-
-        verify(inngangsvilkårVurderingTjeneste).fjernVilkårVurderingOgSettVilkårResultatIkkeVurdertForPeriode(
-            eq(BEHANDLING_ID),
-            resultatBuiderCaptor.capture(),
-            vilkårCaptor.capture(),
-            perioderCaptor.capture()
-        );
-        assertThat(vilkårCaptor.getValue()).isEqualTo(BOSTEDSVILKÅR);
-        assertThat(perioderCaptor.getValue()).containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
+        var bostedsvilkår = param.getVilkårResultatBuilder().build().getVilkår(VilkårType.BOSTEDSVILKÅR).orElseThrow();
+        assertThat(bostedsvilkår.getPerioder()).hasSize(1);
+        assertThat(bostedsvilkår.getPerioder().getFirst().getPeriode())
+            .isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
+        assertThat(bostedsvilkår.getPerioder().getFirst().getUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
     }
 
     @Test
-    void skal_ikke_opprette_eller_avbryte_nar_skal_ikke_sende_varsel_selv_om_endret() {
-        var grunnlag = mock(BostedsGrunnlag.class);
-        when(grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje())
-            .thenReturn(tidslinjeMedTidligereAvklaring(true, null));
-        when(bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID)).thenReturn(Optional.of(grunnlag));
+    void skal_lagre_avklaring_uten_varsel_og_endre_avklaring_uten_varsel_ingen_etterlysninger_opprettet() {
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
 
-        var dto = dtoMedEnAvklaring(false, true, BostedsvilkårIkkeOppfyltÅrsak.ANNET);
+        var førsteLagring = hentSorterteAvklaringer();
+        assertThat(førsteLagring).hasSize(1);
+        assertThat(førsteLagring.getFirst().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
+        assertThat(førsteLagring.getFirst().skalSendeVarsel()).isFalse();
+        assertThat(førsteLagring.getFirst().getBegrunnelseIkkeVarsel()).isEqualTo(BEGRUNNELSE_IKKE_VARSEL);
+        assertThat(førsteLagring.getFirst().getVurdertAv()).isEqualTo(SAKSBEHANDLER);
 
-        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusDays(1), null), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
 
-        verify(etterlysningRepository, never()).lagre(any(Etterlysning.class));
-        verify(etterlysningRepository, never()).lagre(anyList());
+        var andreLagring = hentSorterteAvklaringer();
+        assertThat(andreLagring).hasSize(1);
+        assertThat(andreLagring.getLast().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM.plusDays(1), TOM));
+        assertThat(andreLagring.getLast().skalSendeVarsel()).isFalse();
+
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
-    private static LocalDateTimeline<BostedsfaktaOgAvklaring> tidslinjeMedTidligereAvklaring(boolean bosattITrondheim, BostedsvilkårIkkeOppfyltÅrsak årsak) {
-        var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
-        var avklaring = new BostedsPeriodeAvklaring(
-            periode,
-            bosattITrondheim,
-            årsak,
-            "Begrunnelse for hvilke relevante fakta som er lagt til grunn",
-            false,
-            (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse" : null,
-            "Begrunnelse ikke varsel",
-            "A12345",
-            LocalDateTime.now(),
-            Avklaringtype.OPPHØR
+    @Test
+    void endret_avklaring_som_ikke_dekker_hele_tidligere_avklaring_skal_gjenopprette_resten_fra_forrige_behandling() {
+        var heleperioden = new Periode(FOM, TOM);
+        var originalBehandling = opprettOriginalBehandling(vilkårsperiode(heleperioden, Utfall.OPPFYLT));
+        lagreVilkårsvurderinger(originalBehandling,
+            oppfyltVurdering(heleperioden, "original vilkårsvurdering"));
+
+        var revurdering = opprettRevurderingMedGrunnlagKopiert(originalBehandling,
+            vilkårsperiode(heleperioden, Utfall.OPPFYLT)
         );
-        var fakta = new BostedsfaktaOgAvklaring(null, avklaring);
-        return new LocalDateTimeline<>(List.of(new LocalDateSegment<>(FOM, TOM, fakta)));
+
+        var avklaring1 = dtoUtenVarsel(PERIODE_1, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
+        var vilkårResultat1 = oppdater(revurdering, avklaring1);
+
+        assertThat(hentAllePerioderMedIkkeVurdert(vilkårResultat1))
+            .as("det skal finnes nøyaktig én periode med IKKE_VURDERT, og den skal være lik perioden for ny avklaring")
+            .containsExactly(PERIODE_1);
+
+        // Simulerer at saksbehandler har utført vilkårsvurderingen, men at behandlingen er retur fra beslutter.
+        // Vilkårsperioden vil da være IKKE_VURDERT, men med den nye vilkårsvurderingen intakt.
+        lagreVilkårsvurderinger(revurdering,
+            ikkeOppfyltVurdering(PERIODE_1, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "vilkårsvurdering etter avklaring1"));
+
+        assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_1).getFirst().getBegrunnelse())
+            .as("Sjekker at perioden for tidligere har fått ny begrunnelse")
+            .isEqualTo("vilkårsvurdering etter avklaring1");
+
+        var vilkårResultat = oppdater(revurdering, dtoUtenVarsel(PERIODE_2, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
+
+        // Verifiserer periode for tidligere avklaring
+        assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_1).getFirst().getBegrunnelse())
+            .as("vilkårsvurderingen for tidligere avklaring skal være erstattet av gjenopprettet vilkårsvurdering fra forrige behandling")
+            .isEqualTo("original vilkårsvurdering");
+
+        var vilkårsperiodeForTidligereAvklartPeriode = hentVilkårsperiode(vilkårResultat, PERIODE_1);
+        assertThat(vilkårsperiodeForTidligereAvklartPeriode.getGjeldendeUtfall())
+            .as("perioden som ikke lenger er dekket av avklaringen skal gjenopprettes fra forrige behandling")
+            .isEqualTo(Utfall.OPPFYLT);
+
+        // Verifiserer periode for ny avklaring
+        assertThat(hentAllePerioderMedIkkeVurdert(vilkårResultat))
+            .as("det skal finnes nøyaktig én periode med IKKE_VURDERT, og den skal være lik perioden for ny avklaring")
+            .containsExactly(PERIODE_2);
+
+        assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_2).getFirst().getBegrunnelse())
+            .as("vilkårsvurdering som overlapper med ny avklaring skal ikke påvirkes i dette aksjonspunktet")
+            .isEqualTo("original vilkårsvurdering");
     }
 
-    private static VurderFaktaOmBostedDto dtoMedEnAvklaring(boolean borITrondheimHelePerioden,
-                                                             boolean skalIkkeSendeVarsel,
-                                                             BostedsvilkårIkkeOppfyltÅrsak årsak) {
-        var periode = new ÅpenPeriode(FOM, TOM);
-        var vurdering = !borITrondheimHelePerioden ? new BostedVurderingIkkeOppfyltDto(
+    @Test
+    void endret_avklaring_som_dekker_hele_tidligere_avklaring_skal_ikke_gjenopprette_noe() {
+        var heleperioden = new Periode(FOM, TOM);
+        var originalBehandling = opprettOriginalBehandling(vilkårsperiode(heleperioden, Utfall.OPPFYLT));
+        lagreVilkårsvurderinger(originalBehandling, oppfyltVurdering(heleperioden, "original vurdering"));
+
+        var revurdering = opprettRevurderingMedGrunnlagKopiert(originalBehandling, ikkeVurdertVilkårsperiode(heleperioden));
+
+        // Første runde: saksbehandler avklarer hele perioden
+        oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BostedsvilkårIkkeOppfyltÅrsak.ANNET));
+
+        // Andre runde: saksbehandler avklarer på nytt for hele perioden
+        var vilkårResultat = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
+
+        var vilkårHeleperioden = hentVilkårsperiode(vilkårResultat, heleperioden);
+        assertThat(vilkårHeleperioden.getGjeldendeUtfall())
+            .as("hele perioden det avklares på nytt for skal vurderes på nytt")
+            .isEqualTo(Utfall.IKKE_VURDERT);
+
+        assertThat(hentVilkårsvurderinger(revurdering))
+            .as("ingenting skal gjenopprettes når ny avklaring dekker hele forrige avklaring")
+            .extracting(BostedsvilkårResultatPeriode::getPeriode, BostedsvilkårResultatPeriode::isGodkjent, BostedsvilkårResultatPeriode::getBegrunnelse)
+            .containsExactly(tuple(tilDatoIntervallEntitet(heleperioden), true, "original vurdering"));
+    }
+
+    private void oppdater(VurderFaktaOmBostedDto dto) {
+        oppdaterer.oppdater(dto, new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto));
+    }
+
+    private LocalDateTimeline<VilkårPeriode> oppdater(Behandling behandling, VurderFaktaOmBostedDto dto) {
+        var param = oppdaterParameter(behandling, dto);
+        oppdaterer.oppdater(dto, param);
+        var vilkårResultat = param.getVilkårResultatBuilder().build();
+        vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat);
+        return vilkårResultat.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR);
+    }
+
+    private AksjonspunktOppdaterParameter oppdaterParameter(Behandling behandling, VurderFaktaOmBostedDto dto) {
+        VilkårResultatBuilder vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandling.getId()));
+        return new AksjonspunktOppdaterParameter(behandling, Optional.empty(), vilkårResultatBuilder, dto);
+    }
+
+    private static VilkårPeriode hentVilkårsperiode(LocalDateTimeline<VilkårPeriode> tidslinje, Periode periode) {
+        return tidslinje.intersection(new LocalDateInterval(periode.getFom(), periode.getTom()))
+            .segmenter().stream()
+            .map(LocalDateSegment::getValue)
+            .findFirst()
+            .orElseThrow(() -> new AssertionError("Fant ikke vilkårsperiode " + periode + " i " + tidslinje));
+    }
+
+    private static List<Periode> hentAllePerioderMedIkkeVurdert(LocalDateTimeline<VilkårPeriode> tidslinje) {
+        return tidslinje.segmenter().stream()
+            .filter(s -> s.getValue().getGjeldendeUtfall() == Utfall.IKKE_VURDERT)
+        .map(s -> new Periode(s.getFom(), s.getTom()))
+        .toList();
+    }
+
+    private List<BostedsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
+        return inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
+            .orElseThrow();
+    }
+
+    // Lagrede vurderingsperioder kan bli splittet/slått sammen med andre grenser enn den etterspurte perioden
+    // (jf. InngangsvilkårVurderingRepository#kombinerBosted), så vi matcher på overlapp i stedet for eksakt periode.
+    private List<BostedsvilkårResultatPeriode> hentVilkårsvurderingerForPeriode(Behandling behandling, Periode periode) {
+        return hentVilkårsvurderinger(behandling).stream()
+            .filter(it -> !it.getPeriode().getFomDato().isAfter(periode.getTom()) && !it.getPeriode().getTomDato().isBefore(periode.getFom()))
+            .toList();
+    }
+
+    private Behandling opprettOriginalBehandling(VilkårsperiodeData... vilkårsperioder) {
+        var builder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER);
+        leggTilVilkårsperioder(builder, vilkårsperioder);
+        var original = builder.lagre(entityManager);
+
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(original.getId(), "jp-original", FOM, true);
+        inngangsvilkårVurderingRepository.lagreBostedVurderinger(original.getId(), List.of());
+        new ProsessTriggereRepository(entityManager).leggTil(original.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
+        return original;
+    }
+
+    private Behandling opprettRevurderingMedGrunnlagKopiert(Behandling originalBehandling, VilkårsperiodeData... vilkårsperioder) {
+        var builder = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER)
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medOriginalBehandling(originalBehandling, BehandlingÅrsakType.ENDRET_BOSTED);
+        leggTilVilkårsperioder(builder, vilkårsperioder);
+        var revurdering = builder.lagre(entityManager);
+
+        bostedsGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandling.getId(), revurdering.getId());
+        inngangsvilkårVurderingRepository.kopier(originalBehandling.getId(), revurdering.getId());
+        new ProsessTriggereRepository(entityManager).leggTil(revurdering.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
+        return revurdering;
+    }
+
+    private static void leggTilVilkårsperioder(TestScenarioBuilder builder, VilkårsperiodeData... vilkårsperioder) {
+        for (var v : vilkårsperioder) {
+            builder.leggTilVilkår(VilkårType.BOSTEDSVILKÅR, v.utfall(), v.periode());
+        }
+    }
+
+    private void lagreVilkårsvurderinger(Behandling behandling, BostedVurderingData... vurderinger) {
+        var perioder = Arrays.stream(vurderinger)
+            .map(v -> new BostedsvilkårResultatPeriode(
+                tilDatoIntervallEntitet(v.periode()),
+                v.godkjent(),
+                v.ikkeOppfyltÅrsak(),
+                true,
+                v.begrunnelse(),
+                null,
+                SAKSBEHANDLER,
+                LocalDateTime.now()))
+            .toList();
+        inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), perioder);
+    }
+
+    private static VilkårsperiodeData vilkårsperiode(Periode periode, Utfall utfall) {
+        return new VilkårsperiodeData(periode, utfall);
+    }
+
+    private static VilkårsperiodeData ikkeVurdertVilkårsperiode(Periode periode) {
+        return new VilkårsperiodeData(periode, Utfall.IKKE_VURDERT);
+    }
+
+    private record VilkårsperiodeData(Periode periode, Utfall utfall) {
+    }
+
+    private static BostedVurderingData oppfyltVurdering(Periode periode, String begrunnelse) {
+        return new BostedVurderingData(periode, true, null, begrunnelse);
+    }
+
+    private static BostedVurderingData ikkeOppfyltVurdering(Periode periode, BostedsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse) {
+        return new BostedVurderingData(periode, false, årsak, begrunnelse);
+    }
+
+    /**
+     * Representerer en tidligere lagret bostedsvurdering (jf. {@link BostedsvilkårResultatPeriode}) som skal
+     * kunne gjenopprettes fra forrige behandling når en ny avklaring ikke lenger dekker hele den tidligere avklarte perioden.
+     */
+    private record BostedVurderingData(Periode periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse) {
+    }
+
+    private static DatoIntervallEntitet tilDatoIntervallEntitet(Periode periode) {
+        return DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom());
+    }
+
+    private Behandling opprettBehandlingMedVilkårOgPeriode() {
+        var behandling = TestScenarioBuilder.builderMedSøknad(FagsakYtelseType.AKTIVITETSPENGER)
+            .leggTilVilkår(VilkårType.BOSTEDSVILKÅR, Utfall.IKKE_VURDERT, new Periode(FOM, TOM))
+            .lagre(entityManager);
+
+        var søktStartdato = new SøktStartdato(FOM, new JournalpostId("jp-søknad-1"));
+        var startdatoRepository = new StartdatoRepository(entityManager);
+        startdatoRepository.lagre(behandling.getId(), List.of(søktStartdato));
+        startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(List.of(søktStartdato)));
+
+        new ProsessTriggereRepository(entityManager).leggTil(behandling.getId(), Set.of(
+            new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
+        return behandling;
+    }
+
+    private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
+        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
+            .orElseThrow()
+            .getForeslåtteAvklaringerEllerTomListe()
+            .stream()
+            .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
+            .toList();
+    }
+
+    private static VurderFaktaOmBostedDto dtoUtenVarsel(Periode periode, BostedsvilkårIkkeOppfyltÅrsak årsak) {
+        var vurdering = new BostedVurderingIkkeOppfyltDto(
             årsak,
             "begrunnelse",
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
-            skalIkkeSendeVarsel ? "Begrunnelse for hvorfor det ikke varsles" : null
-        ) : null;
+            BEGRUNNELSE_IKKE_VARSEL
+        );
+        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), vurdering, true);
+        return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
+    }
 
-        var avklaring = new BostedFaktaavklaringPeriodeDto(periode, vurdering, skalIkkeSendeVarsel);
+    private static VurderFaktaOmBostedDto dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel) {
+        var vurdering = new BostedVurderingIkkeOppfyltDto(
+            årsak,
+            "begrunnelse",
+            (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
+            skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL
+        );
+        var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering, !skalSendeVarsel);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }
 }

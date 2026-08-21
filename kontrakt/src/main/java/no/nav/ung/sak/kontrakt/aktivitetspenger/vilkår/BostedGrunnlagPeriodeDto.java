@@ -21,10 +21,16 @@ public record BostedGrunnlagPeriodeDto(
     BostedAvklaringDto avklaring,
     /** Resultat av vurdering av bostedsvilkår. Null dersom ikke vurdert. */
     BostedResultatDto resultat,
-    /** Om bruker har avgitt uttalelse om bosted. False dersom etterlysning ikke er besvart. */
+    /** Settes hvis bruker har avgitt uttalelse om bosted. False dersom etterlysning ikke er besvart. */
     boolean harUttalelse,
     /** Brukerens uttalelsetekst. Null dersom bruker ikke har svart. */
     String uttalelseTekst
 ) {
+
+    public enum ForeslåttUtfall {
+        OPPFYLT,
+        IKKE_OPPFYLT,
+        IKKE_VURDERT
+    }
 }
 

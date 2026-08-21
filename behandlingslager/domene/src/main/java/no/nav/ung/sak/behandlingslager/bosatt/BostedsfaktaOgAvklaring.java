@@ -2,10 +2,6 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * Fletter sammen oppgitt fakta fra søknad ({@link BostedsinformasjonFraSøknad}) og eventuell foreslått
@@ -18,39 +14,35 @@ import java.util.UUID;
 public class BostedsfaktaOgAvklaring {
 
     private final BostedsinformasjonFraSøknad søknadsinformasjon;
-    private final BostedsPeriodeAvklaring foreslåttAvklaring;
+    private final BostedsPeriodeAvklaring foreslåttAvslagsavklaring;
 
-    public BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, BostedsPeriodeAvklaring foreslåttAvklaring) {
+    public BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, BostedsPeriodeAvklaring foreslåttAvslagsavklaring) {
         this.søknadsinformasjon = søknadsinformasjon;
-        this.foreslåttAvklaring = foreslåttAvklaring;
+        this.foreslåttAvslagsavklaring = foreslåttAvslagsavklaring;
     }
 
     public BostedsinformasjonFraSøknad getSøknadsinformasjon() {
         return søknadsinformasjon;
     }
 
-    public BostedsPeriodeAvklaring getForeslåttAvklaring() {
-        return foreslåttAvklaring;
+    public BostedsPeriodeAvklaring getForeslåttAvslagsavklaring() {
+        return foreslåttAvslagsavklaring;
     }
 
-    public boolean harForeslåttAvklaring() {
-        return foreslåttAvklaring != null;
+    public boolean harForeslåttAvslagsavklaring() {
+        return foreslåttAvslagsavklaring != null;
     }
 
     public Kilde getKilde() {
-        return harForeslåttAvklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
+        return harForeslåttAvslagsavklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
     }
 
     public boolean isErBosattITrondheim() {
-        return harForeslåttAvklaring() ? foreslåttAvklaring.isErBosattITrondheim() : søknadsinformasjon.isErBosattITrondheim();
+        return !harForeslåttAvslagsavklaring() && søknadsinformasjon.isErBosattITrondheim();
     }
 
     public BostedsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {
-        return harForeslåttAvklaring() ? foreslåttAvklaring.getIkkeOppfyltÅrsak() : null;
-    }
-
-    public boolean erOppfyltEllerSenderVarsel() {
-        return foreslåttAvklaring.isErBosattITrondheim() || foreslåttAvklaring.skalSendeVarsel();
+        return harForeslåttAvslagsavklaring() ? foreslåttAvslagsavklaring.getIkkeOppfyltÅrsak() : null;
     }
 
     @Override

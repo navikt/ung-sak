@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -120,7 +121,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(new LocalDateTimeline<>(List.of()));
 
-            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering);
+            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.UNDER_ARBEID).intersection(tidslinjeTilVurdering);
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
             .intersection(tidslinjeTilVurdering)
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new)
@@ -141,7 +142,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         }
 
         var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals))
-            .toSegments()
+            .segmenter()
             .stream().map(s -> {
                 if (s.getValue().getEtterlysning() != null) {
                     if (!s.getValue().getEtterlysning().grunnlagsreferanse().equals(s.getValue().getForeslåttAvklaring().getReferanse())) {
@@ -153,7 +154,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 var foreslåttAvklaring = s.getValue().getForeslåttAvklaring();
                 return new BostedsvilkårResultatPeriode(
                     DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
-                    foreslåttAvklaring.isErBosattITrondheim(),
+                    false,
                     foreslåttAvklaring.getIkkeOppfyltÅrsak(),
                     false,
                     null,
@@ -203,7 +204,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
     private static BehandleStegResultat settPåVent(LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje) {
         LocalDateTime frist = vurderingTidslinje
             .filterValue(v -> v.utledUtfall() == StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
-            .toSegments().stream()
+            .segmenter().stream()
             .map(seg -> seg.getValue().getFrist())
             .filter(Objects::nonNull)
             .max(Comparator.naturalOrder())

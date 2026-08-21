@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 import java.time.LocalDate;
@@ -74,9 +75,19 @@ public class BostedsGrunnlag extends BaseEntitet {
      * Bygger ny holder fra avklaringene og setter foreslått — kun hvis innholdet faktisk er endret.
      * Beholder gammel holder-referanse ved ingen endring (tilsvarende {@link #leggTilInformasjonFraSøknad}).
      */
-    void setForeslåttAvklaring(List<BostedsPeriodeAvklaring> avklaringer) {
-        var nyHolder = new BostedsAvklaringHolder(this.foreslått);
-        nyHolder.leggTilEllerErstattPeriodeAvklaringer(avklaringer);
+    void setForeslåttAvklaring(Set<BostedsPeriodeAvklaring> avklaringer) {
+        var nyHolder = BostedsAvklaringHolder.lagSkrivbarKopi(this.foreslått);
+        nyHolder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(avklaringer);
+
+        if (nyHolder.equals(this.foreslått)) {
+            return;
+        }
+        this.foreslått = nyHolder;
+    }
+
+    void settAlleAvklaringerTilFerdig() {
+        var nyHolder = BostedsAvklaringHolder.lagSkrivbarKopi(this.foreslått);
+        nyHolder.settAlleAvklaringerTilFerdig();
 
         if (nyHolder.equals(this.foreslått)) {
             return;
@@ -92,11 +103,27 @@ public class BostedsGrunnlag extends BaseEntitet {
         return behandlingId;
     }
 
-    public BostedsAvklaringHolder getForeslått() {
+    public BostedsAvklaringHolderSkrivebeskyttet getForeslått() {
         return foreslått;
     }
 
-    public BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
+    public Set<BostedsPeriodeAvklaring> getForeslåtteAvklaringerEllerTomListe() {
+        return Optional.ofNullable(getForeslått())
+            .map(BostedsAvklaringHolderSkrivebeskyttet::hentPeriodeAvklaringer)
+            .orElse(Set.of());
+    }
+
+    public List<BostedsPeriodeAvklaring> getForeslåtteAvklaringerMedStatus(AvklaringStatus... status) {
+        return Optional.ofNullable(getForeslått())
+            .map(f -> f.hentPeriodeAvklaringerMedStatus(status))
+            .orElse(List.of());
+    }
+
+    public LocalDateTimeline<BostedsPeriodeAvklaring> getForeslåtteAvklaringerMedStatusSomTidslinje(AvklaringStatus... status) {
+        return BostedsAvklaringHolder.byggAvklaringTidslinje(getForeslåtteAvklaringerMedStatus(status));
+    }
+
+    BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
         return oppgittFraSøknad;
     }
 
@@ -134,9 +161,9 @@ public class BostedsGrunnlag extends BaseEntitet {
      * avklaring fra saksbehandler. Foreslått avklaring er kilde til sannhet der de overlapper.
      * Baserer seg på {@link #hentSøknadsfaktaSomTidslinje()} og mapper til {@link BostedsfaktaOgAvklaring}.
      */
-    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaSomTidslinje() {
+    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus... status) {
         var søknadsTidslinje = hentSøknadsfaktaSomTidslinje();
-        var foreslåttTidslinje = foreslått == null ? LocalDateTimeline.<BostedsPeriodeAvklaring>empty() : foreslått.hentSomTidslinje();
+        var foreslåttTidslinje = getForeslåtteAvklaringerMedStatusSomTidslinje(status);
 
         return søknadsTidslinje.combine(foreslåttTidslinje,
             (di, søknad, avklaring) -> new LocalDateSegment<>(di, new BostedsfaktaOgAvklaring(
@@ -181,7 +208,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             grunnlag.getBehandlingId(),
             grunnlag.getOppgittFraSøknad(),
-            grunnlag.getForeslått()
+            (BostedsAvklaringHolder) grunnlag.getForeslått()
         );
     }
 
@@ -189,7 +216,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             behandlingId,
             grunnlag.getOppgittFraSøknad(),
-            grunnlag.getForeslått()
+            (BostedsAvklaringHolder) grunnlag.getForeslått()
         );
     }
 }

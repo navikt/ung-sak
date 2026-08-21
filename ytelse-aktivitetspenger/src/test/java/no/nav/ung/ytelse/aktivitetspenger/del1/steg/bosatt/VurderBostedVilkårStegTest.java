@@ -26,7 +26,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatHolder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -50,6 +49,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -96,25 +96,29 @@ class VurderBostedVilkårStegTest {
     }
 
     @Test
-    void skal_passere_uten_aksjonspunkt_og_uten_opphorsresultat_nar_bruker_er_bosatt_hele_perioden() {
+    void skal_ikke_utføre_vilkårsvurdering_automatisk_for_nye_perioder() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
-            lagBostedsPeriodeAvklaringErBosatt(FOM, TOM)
-        ));
 
+        steg = lagSteg(List.of());
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe()).isEmpty();
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
+        var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
+        assertThat(inngangsvilkårVurderinger.get()).isEmpty();
+
+        var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BOSTEDSVILKÅR).get().getPerioder().stream();
+        assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
     }
 
     @Test
-    void skal_opprette_vilkårvurderingresultat_ved_fraflytting_automatisk() {
+    void skal_utføre_vilkårsvurdering_automatisk_når_standardkode_og_bruker_ikke_har_uttalelse() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
-        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(avklaring));
+        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = new EtterlysningData(
@@ -130,19 +134,48 @@ class VurderBostedVilkårStegTest {
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
         var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
-        var bostedsvurdering = vilkårVurderingResultat.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder).map(BostedsvilkårResultatHolder::getVurderinger).map(Collection::stream).orElseThrow().findFirst().orElseThrow();
+        var bostedsvurdering = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder).map(Collection::stream).orElseThrow().findFirst().orElseThrow();
         assertThat(bostedsvurdering.getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(bostedsvurdering.getPeriode().getTomDato()).isEqualTo(TOM);
         assertThat(bostedsvurdering.getIkkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
     }
 
     @Test
-    void skal_vilkårvurdere_manuelt_når_det_ikke_varsles() {
+    void skal_ikke_utføre_vilkårsvurdering_automatisk_når_bruker_har_uttalelse() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
-        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(avklaring));
+        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
+
+        var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
+        var ventendeEtterlysning = new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            frist,
+            avklaring.getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(true, "Jeg bor i Trondheim", new JournalpostId("jp-uttalelse-1"))
+        );
+        steg = lagSteg(List.of(ventendeEtterlysning));
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
+        var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
+        assertThat(inngangsvilkårVurderinger.get()).isEmpty();
+
+        var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BOSTEDSVILKÅR).get().getPerioder().stream();
+        assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
+    }
+
+    @Test
+    void skal_ikke_utføre_vilkårsvurdering_automatisk_når_det_er_valgt_å_ikke_varsle() {
+        var behandling = opprettBehandlingMedVilkårOgPeriode();
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+
+        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = new EtterlysningData(
@@ -157,14 +190,17 @@ class VurderBostedVilkårStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
+        var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
+        assertThat(inngangsvilkårVurderinger.get()).isEmpty();
     }
 
     @Test
     void skal_sette_pa_vent_nar_periode_venter_pa_etterlysning() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
-            lagBostedsPeriodeAvklaring(FOM, TOM, true, null, false)
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+            lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false)
         ));
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -190,9 +226,9 @@ class VurderBostedVilkårStegTest {
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), List.of(
-            lagBostedsPeriodeAvklaringErBosatt(FOM, TOM),
-            lagBostedsPeriodeAvklaringErBosatt(fom2, tom2)
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+            lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true),
+            lagBostedsPeriodeAvklaring(fom2, tom2, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, true)
         ));
         var frist = LocalDateTime.of(2026, 3, 1, 10, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -289,16 +325,11 @@ class VurderBostedVilkårStegTest {
         return steg.utførSteg(kontekst);
     }
 
-    private BostedsPeriodeAvklaring lagBostedsPeriodeAvklaringErBosatt(LocalDate fom, LocalDate tom) {
-        return lagBostedsPeriodeAvklaring(fom, tom, true, null, false);
-    }
-
-    private BostedsPeriodeAvklaring lagBostedsPeriodeAvklaring(LocalDate fom, LocalDate tom, boolean bosatt,
+    private BostedsPeriodeAvklaring lagBostedsPeriodeAvklaring(LocalDate fom, LocalDate tom,
                                                                BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
                                                                boolean skalSendeVarsel) {
         return new BostedsPeriodeAvklaring(
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-            bosatt,
             ikkeOppfyltÅrsak,
             "Begrunnelse for relevante fakta lagt til grunn i avklaring",
             skalSendeVarsel,
@@ -310,4 +341,3 @@ class VurderBostedVilkårStegTest {
         );
     }
 }
-

@@ -17,9 +17,9 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.kodeverk.bosatt.Avklaringtype;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EndringType;
+import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.*;
@@ -94,6 +94,7 @@ public class BostedRestTjeneste {
         return hentBostedGrunnlagInternal(behandlingUuid);
     }
 
+
     private BostedGrunnlagResponseDto hentBostedGrunnlagInternal(BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
@@ -113,15 +114,15 @@ public class BostedRestTjeneste {
             .filter(it -> it.getValue().harAvklaringEllerVilkårsVurdering())
             .map(segment -> {
 
-                var info = segment.getValue();
-                var faktaOgAvklaring = info.getFaktaOgAvklaring();
-                var uttalelse = faktaOgAvklaring.harForeslåttAvklaring() ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvklaring().getReferanse()) : null;
+                var verdi = segment.getValue();
+                var faktaOgAvklaring = verdi.getFaktaOgAvklaring();
+                var uttalelse = faktaOgAvklaring.harForeslåttAvslagsavklaring() ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvslagsavklaring().getReferanse()) : null;
                 boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
                 String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
                 var søknadsinformasjon = faktaOgAvklaring.getSøknadsinformasjon();
-                var avklaringDto = info.byggAvklaringDtoHvisFinnes();
-                var resultatDto = info.byggResultatDtoHvisFinnes();
+                var avklaringDto = verdi.byggAvklaringDtoHvisFinnes();
+                var resultatDto = verdi.byggResultatDtoHvisFinnes();
 
                 var erBosatt = resultatDto != null ? resultatDto.erBosatt() : null;
                 var erIkkeOppfyltÅrsak = resultatDto != null ? resultatDto.ikkeOppfyltÅrsak() : null;
@@ -144,7 +145,7 @@ public class BostedRestTjeneste {
     }
 
     private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedsGrunnlag grunnlag, Behandling behandling) {
-        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje();
+        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.UNDER_ARBEID, AvklaringStatus.FERDIG);
 
         LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
@@ -194,7 +195,7 @@ public class BostedRestTjeneste {
             return new BostedResultatDto(
                 resultat.isGodkjent(),
                 resultat.getIkkeOppfyltÅrsak(),
-                resultat.isManuellVurdering(),
+                resultat.erManuellVurdering(),
                 resultat.getBegrunnelse(),
                 resultat.getFritekstVurderingBrev(),
                 resultat.getVurdertAv()
@@ -202,11 +203,11 @@ public class BostedRestTjeneste {
         }
 
         public BostedAvklaringDto byggAvklaringDtoHvisFinnes() {
-            if (faktaOgAvklaring == null || !faktaOgAvklaring.harForeslåttAvklaring()) {
+            if (faktaOgAvklaring == null || !faktaOgAvklaring.harForeslåttAvslagsavklaring()) {
                 return null;
             }
 
-            var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvklaring();
+            var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvslagsavklaring();
 
             return new BostedAvklaringDto(
                 foreslåttAvklaring.getPeriode().tilPeriode(),
@@ -217,8 +218,9 @@ public class BostedRestTjeneste {
                 foreslåttAvklaring.getFritekstTilVarsel(),
                 foreslåttAvklaring.getBegrunnelseIkkeVarsel(),
                 foreslåttAvklaring.getAvklaringtype(),
-                true // TODO: Publiserer kontrakt med hardkoding. Må oppdateres
+                foreslåttAvklaring.kanRedigeres()
             );
         }
     }
+
 }

@@ -35,7 +35,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     private BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak;
 
     @Column(name = "manuell_vurdering", nullable = false, updatable = false)
-    private boolean manuellVurdering;
+    private boolean erManuellVurdering;
 
     @Column(name = "begrunnelse", updatable = false)
     private String begrunnelse;
@@ -53,14 +53,13 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         // Hibernate
     }
 
-    /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
-    BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, BostedsvilkårResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+    public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, BostedsvilkårResultatPeriode kilde) {
+        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.erManuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
     }
 
-    public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
-        if (manuellVurdering) {
+        if (erManuellVurdering) {
             Objects.requireNonNull(vurdertAv, "vurdertAv");
             Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
         }
@@ -71,7 +70,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         this.periode = Range.closed(periode.getFomDato(), periode.getTomDato());
         this.godkjent = godkjent;
         this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
-        this.manuellVurdering = manuellVurdering;
+        this.erManuellVurdering = erManuellVurdering;
         this.begrunnelse = begrunnelse;
         this.fritekstVurderingBrev = fritekstVurderingBrev;
         this.vurdertAv = vurdertAv;
@@ -94,8 +93,8 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         return ikkeOppfyltÅrsak;
     }
 
-    public boolean isManuellVurdering() {
-        return manuellVurdering;
+    public boolean erManuellVurdering() {
+        return erManuellVurdering;
     }
 
     public String getBegrunnelse() {
@@ -112,6 +111,40 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof BostedsvilkårResultatPeriode that)) {
+            return false;
+        }
+        return godkjent == that.godkjent
+            && erManuellVurdering == that.erManuellVurdering
+            && Objects.equals(getPeriode(), that.getPeriode())
+            && ikkeOppfyltÅrsak == that.ikkeOppfyltÅrsak
+            && Objects.equals(begrunnelse, that.begrunnelse)
+            && Objects.equals(fritekstVurderingBrev, that.fritekstVurderingBrev)
+            && Objects.equals(vurdertAv, that.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getPeriode(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+    }
+
+    @Override
+    public String toString() {
+        return "BostedsvilkårResultatPeriode{" +
+            "id=" + id +
+            ", periode=" + periode +
+            ", godkjent=" + godkjent +
+            ", erManuellVurdering=" + erManuellVurdering +
+            ", vurdertTidspunkt=" + vurdertTidspunkt +
+            '}';
     }
 }
 
