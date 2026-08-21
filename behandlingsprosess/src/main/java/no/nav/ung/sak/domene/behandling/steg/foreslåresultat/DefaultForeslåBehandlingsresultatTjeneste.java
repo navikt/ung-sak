@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 import java.util.List;
@@ -46,10 +47,10 @@ public class DefaultForeslåBehandlingsresultatTjeneste extends ForeslåBehandli
         var timeline = new LocalDateTimeline<Boolean>(List.of());
 
         for (VilkårType vilkårType : definerendeVilkår) {
-            timeline = timeline.combine(new LocalDateTimeline<>(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)
-                .stream()
-                .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-                .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            timeline = timeline.combine(
+                TidslinjeUtil.tilTidslinje(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)),
+                StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN
+            );
         }
         if (timeline.isEmpty()) {
             return behandling.getFagsak().getPeriode();
@@ -58,7 +59,7 @@ public class DefaultForeslåBehandlingsresultatTjeneste extends ForeslåBehandli
     }
 
     @Override
-    protected boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingResultatSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
         var maksPeriode = getMaksPeriode(ref.getBehandlingId());
         var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(maksPeriode);
         return vilkårTidslinjer.entrySet().stream()

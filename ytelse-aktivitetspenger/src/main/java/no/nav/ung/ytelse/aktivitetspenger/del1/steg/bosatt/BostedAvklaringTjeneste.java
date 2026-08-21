@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -30,6 +31,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
+@BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED)
 public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(BostedAvklaringTjeneste.class);
@@ -156,11 +158,6 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     public void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId) {
         var perioderTidligereVurdertEtterAvklaring = hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
         inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(behandlingId, VilkårType.BOSTEDSVILKÅR, perioderTidligereVurdertEtterAvklaring);
-    }
-
-    @Override
-    public boolean gjelderFor(BehandlingÅrsakType behandlingÅrsakType) {
-        return behandlingÅrsakType == BehandlingÅrsakType.ENDRET_BOSTED;
     }
 
     @Override

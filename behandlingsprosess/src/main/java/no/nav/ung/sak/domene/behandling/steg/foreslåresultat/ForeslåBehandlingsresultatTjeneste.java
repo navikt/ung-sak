@@ -44,12 +44,12 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
         log.info("Foreslår Vedtak. Behandling {}. BehandlingResultatType={} (før)", ref.getBehandlingId(), behandling.getBehandlingResultatType());
 
-        if (skalBehandlingenSettesTilAvslått(ref, vilkårene)) {
+        if (skalBehandlingResultatSettesTilAvslått(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);
-        } else if (skalBehandlingenSettesTilDelvisInnvilget(ref, vilkårene)) {
+        } else if (skalBehandlingResultatSettesTilDelvisInnvilget(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.DELVIS_INNVILGET);
             log.info("Behandling {} delvis innvilget", ref.getBehandlingId());
-        } else if (skalBehandlingenSettesTilOpphør(ref, vilkårene)) {
+        } else if (skalBehandlingResultatSettesTilOpphør(ref, vilkårene)) {
             behandling.setBehandlingResultatType(BehandlingResultatType.OPPHØR);
             log.info("Behandling {} opphørt", ref.getBehandlingId());
         } else {
@@ -61,15 +61,15 @@ public abstract class ForeslåBehandlingsresultatTjeneste {
         behandlingRepository.lagre(behandling, kontekst.getSkriveLås());
     }
 
-    protected boolean skalBehandlingenSettesTilDelvisInnvilget(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingResultatSettesTilDelvisInnvilget(BehandlingReferanse ref, Vilkårene vilkårene) {
         return false;
     }
 
-    protected boolean skalBehandlingenSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingResultatSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
         return false;
     }
 
-    protected boolean skalBehandlingenSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingResultatSettesTilAvslått(BehandlingReferanse ref, Vilkårene vilkårene) {
         var behandlingId = ref.getBehandlingId();
         Optional<VilkårType> førsteAvslåttVilkår = sjekkAllePerioderAvslåttForVilkår(vilkårene, behandlingId);
         if (førsteAvslåttVilkår.isPresent()) {

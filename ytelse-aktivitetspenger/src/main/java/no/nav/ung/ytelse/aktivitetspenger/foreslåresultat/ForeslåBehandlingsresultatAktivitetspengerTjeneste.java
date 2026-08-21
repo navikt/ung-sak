@@ -23,15 +23,17 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @ApplicationScoped
 public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends ForeslåBehandlingsresultatTjeneste {
 
     private BehandlingRepository behandlingRepository;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private AktivitetspengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
     private Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester;
 
     ForeslåBehandlingsresultatAktivitetspengerTjeneste() {
@@ -40,26 +42,25 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
     @Inject
     public ForeslåBehandlingsresultatAktivitetspengerTjeneste(BehandlingRepositoryProvider repositoryProvider,
-                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                                                               @Any Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester) {
+                                                              @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) AktivitetspengerVilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste,
+                                                              @Any Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester) {
         super(repositoryProvider);
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
-        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.alleVilkårsavklaringTjenester = alleVilkårsavklaringTjenester;
     }
 
     @Override
     protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
         var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
         var timeline = new LocalDateTimeline<Boolean>(List.of());
 
         for (VilkårType vilkårType : definerendeVilkår) {
-            timeline = timeline.combine(new LocalDateTimeline<>(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)
-                .stream()
-                .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
-                .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+            timeline = timeline.combine(
+                TidslinjeUtil.tilTidslinje(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)),
+                StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN
+            );
         }
         if (timeline.isEmpty()) {
             return behandling.getFagsak().getPeriode();
@@ -73,7 +74,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
      * og det finnes en avslått vilkårsperiode som overlapper avklaringens periode.
      */
     @Override
-    protected boolean skalBehandlingenSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
+    protected boolean skalBehandlingResultatSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
         // Avgrenser hvilke behandlingsårsaker vi leter etter opphør for
         var behandlingårsakerSomSkalKunneEndreBehandlingResultat = Set.of(
             BehandlingÅrsakType.ENDRET_BOSTED
