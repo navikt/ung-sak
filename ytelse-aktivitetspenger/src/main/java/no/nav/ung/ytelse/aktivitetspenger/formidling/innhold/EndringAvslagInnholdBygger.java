@@ -2,6 +2,8 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
@@ -13,32 +15,37 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.OpphørInngangsvilkårDto;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Dependent
-public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
+public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final VilkårResultatRepository vilkårResultatRepository;
     private final LocalDate overrideDagensDatoForTest;
+    private final List<VilkårsavklaringOppdaterer> vilkårsavklaringTjenester;
 
     @Inject
-    public OpphørInnholdBygger(VilkårResultatRepository vilkårResultatRepository,
-                               @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
+    public EndringAvslagInnholdBygger(VilkårResultatRepository vilkårResultatRepository,
+                                      @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest,
+                                      @Any Instance<VilkårsavklaringOppdaterer> vilkårsavklaringTjenester) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.overrideDagensDatoForTest = overrideDagensDatoForTest;
+        this.vilkårsavklaringTjenester = VilkårsavklaringOppdaterer.sortert(vilkårsavklaringTjenester);
     }
 
     @WithSpan
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        LocalDateTimeline<DetaljertResultat> opphørPeriode = DetaljertResultat.filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.ENDRING_SLUTTDATO);
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        LocalDateTimeline<DetaljertResultat> opphørPeriode = LocalDateTimeline.empty();
 
         var opphørStartdato = opphørPeriode.getMinLocalDate();
         var sisteUtbetalingsdato = utledFremtidigUtbetalingsdato(opphørStartdato.minusDays(1), bestemInneværendeMåned());
@@ -71,5 +78,6 @@ public class OpphørInnholdBygger implements VedtaksbrevInnholdBygger {
         return sluttMåned.isBefore(denneMåneden) ? null
             : sluttMåned.plusMonths(1).atDay(10);
     }
+
 }
 
