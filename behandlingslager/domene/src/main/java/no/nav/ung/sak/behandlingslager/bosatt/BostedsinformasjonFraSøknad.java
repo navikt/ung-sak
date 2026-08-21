@@ -8,7 +8,7 @@ import java.util.Objects;
 
 /**
  * Bostedsopplysning oppgitt av bruker i søknaden.
- * Koblet til {@link BosattSøknadGrunnlag} via {@code bosatt_soeknad_grunnlag_id}.
+ * Koblet til {@link BostedsGrunnlag} via {@code bosatt_soeknad_grunnlag_id}.
  */
 @Entity(name = "BostedsinformasjonFraSøknad")
 @Table(name = "BOSATT_INFORMASJON_FRA_SOEKNAD")
@@ -71,5 +71,9 @@ public class BostedsinformasjonFraSøknad extends BaseEntitet {
         return "BostedsinformasjonFraSøknad{journalpostId=" + journalpostId
             + ", fomDato=" + fomDato
             + ", erBosattITrondheim=" + erBosattITrondheim + '}';
+    }
+
+    public static BostedsinformasjonFraSøknad kopierDataFra(BostedsinformasjonFraSøknad annen) {
+        return new BostedsinformasjonFraSøknad(annen.journalpostId, annen.fomDato, annen.erBosattITrondheim);
     }
 }

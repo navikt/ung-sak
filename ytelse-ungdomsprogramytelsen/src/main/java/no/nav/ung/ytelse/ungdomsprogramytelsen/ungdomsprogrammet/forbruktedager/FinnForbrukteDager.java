@@ -11,18 +11,18 @@ import no.nav.ung.sak.domene.typer.tid.Hjelpetidslinjer;
 public class FinnForbrukteDager {
 
     public static final long MAKS_ANTALL_DAGER = 260;
-    public static final long MAKS_ANTALL_DAGER_UTVIDET = 300;
+    public static final long MAKS_ANTALL_DAGER_FORLENGET = 300;
 
-    public static long getMaksAntallDager(boolean harUtvidetKvote) {
-        return harUtvidetKvote ? MAKS_ANTALL_DAGER_UTVIDET : MAKS_ANTALL_DAGER;
+    public static long getMaksAntallDager(boolean harForlengetPeriode) {
+        return harForlengetPeriode ? MAKS_ANTALL_DAGER_FORLENGET : MAKS_ANTALL_DAGER;
     }
 
     public static VurderAntallDagerResultat finnForbrukteDager(LocalDateTimeline<Boolean> ungdomsprogramperiode) {
         return finnForbrukteDager(ungdomsprogramperiode, false);
     }
 
-    public static VurderAntallDagerResultat finnForbrukteDager(LocalDateTimeline<Boolean> ungdomsprogramperiode, boolean harUtvidetKvote) {
-        long maksAntallDager = getMaksAntallDager(harUtvidetKvote);
+    public static VurderAntallDagerResultat finnForbrukteDager(LocalDateTimeline<Boolean> ungdomsprogramperiode, boolean harForlengetPeriode) {
+        long maksAntallDager = getMaksAntallDager(harForlengetPeriode);
 
         var helger = Hjelpetidslinjer.lagTidslinjeMedKunHelger(ungdomsprogramperiode);
 

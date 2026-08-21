@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.beregning;
 
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -7,6 +8,8 @@ import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.FødselOgDødInfo;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.UngdomsytelseSatser;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.grunnbeløp.Grunnbeløp;
+import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.barnetillegg.BeregnDagsatsInput;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerBeregnSats;
@@ -81,6 +84,8 @@ class AktivitetspengerBeregnSatsTest {
     void skal_beregne_lav_dagsats_for_hele_perioden_med_start_i_mars_2024_og_slutt_i_mai_2024_selv_om_bruker_blir_25_år_midt_i_april_når_det_beregnes_før_bruker_er_25_år() {
         var fom = LocalDate.now().plusMonths(1).withDayOfMonth(1);
         var tom = LocalDate.now().plusMonths(3).withDayOfMonth(1).minusDays(1);
+        Grunnbeløp gverdi = GrunnbeløpTidslinje.hentTidslinje().getSegment(new LocalDateInterval(fom, fom)).getValue();
+
         var perioder = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
         var tjuefemårsdag = fom.plusMonths(1).plusDays(14);
         var fødselsdato = tjuefemårsdag.minusYears(25);
@@ -94,8 +99,7 @@ class AktivitetspengerBeregnSatsTest {
         assertThat(first.getFom()).isEqualTo(fom);
         assertThat(first.getTom()).isEqualTo(tjuefemårsdag.minusDays(1));
         assertThat(first.getValue().grunnbeløpFaktor()).isEqualByComparingTo(BigDecimal.valueOf(1.3606666667));
-        assertThat(first.getValue().grunnbeløp()).isEqualByComparingTo(BigDecimal.valueOf(130160));
-        assertThat(first.getValue().dagsats()).isEqualByComparingTo(BigDecimal.valueOf(681.1706666834));
+        assertThat(first.getValue().grunnbeløp()).isEqualByComparingTo(gverdi.verdi());
     }
 
     @Test

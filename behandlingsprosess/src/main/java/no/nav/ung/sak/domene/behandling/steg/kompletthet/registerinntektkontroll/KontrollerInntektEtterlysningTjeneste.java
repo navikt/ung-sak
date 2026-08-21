@@ -182,7 +182,7 @@ public class KontrollerInntektEtterlysningTjeneste {
             .toList();
 
 
-        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::skalAvbrytes);
+        etterlysningerSomSkalAvbrytes.forEach(Etterlysning::setSkalAvbrytes);
 
         return etterlysningerSomSkalAvbrytes;
     }

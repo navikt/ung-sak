@@ -81,7 +81,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtleder {
     }
 
     private static boolean harEndretStartdato(EndretUngdomsprogramEtterlysningInput input) {
-        var endringFraOppgitt = finnEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag());
+        var endringFraOppgitt = finnEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.startdatoGrunnlag());
         var harEndretStartdato = !endringFraOppgitt.isEmpty();
         return harEndretStartdato;
     }

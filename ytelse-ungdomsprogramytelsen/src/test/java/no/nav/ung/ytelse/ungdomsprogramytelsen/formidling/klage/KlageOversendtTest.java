@@ -10,6 +10,8 @@ import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuil
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngKlageTestScenario;
 import org.junit.jupiter.api.Test;
 
+import org.junit.jupiter.api.DisplayName;
+
 import static no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -27,7 +29,7 @@ class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
         var klage = KlageScenarioer.lagKlageBehandling(ungTestRepositories, klageScenario);
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuellUtenBeslutter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medOversendtHeaderOgFooterManuellUtenBeslutter(fnr,
             """
                 Vi har sendt saken til NAV Klageinstans \
                 Vi har vurdert klagen på vedtaket om ungdomsprogramytelse, og kommet fram til at vedtaket ikke \
@@ -35,7 +37,7 @@ class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
                 de har mottatt saken. Du finner oversikt over saksbehandlingstidene på nav.no/saksbehandlingstider. \
                 Dette har vi lagt vekt på i vurderingen vår \
                 FRITEKST I BREV \
-                Har du nye opplysninger eller ønsker å uttale deg, kan du sende dette via klage.nav.no/nb/ettersendelse/klage/SYKDOM_I_FAMILIEN. Velg NAV-enhet: NAV Klageinstans Sør. \
+                Har du nye opplysninger eller ønsker å uttale deg, kan du sende dette via klage.nav.no/nb/ettersendelse/klage/ungdomsprogrammet/begrunnelse. Velg NAV-enhet: NAV Klageinstans Sør. \
                 """);
 
 
@@ -52,6 +54,21 @@ class KlageOversendtTest extends AbstractKlageVedtaksbrevInnholdByggerTest {
 
     }
 
+
+    @Override
+    @Test
+    @DisplayName("Verifiserer formatering på overskrifter")
+    void verifiserOverskrifter() {
+        var behandling = lagScenarioForFellesTester();
+
+        GenerertBrev brev = vedtaksbrevTjeneste.forhåndsvis(behandling.getId(), true);
+
+        var brevtekst = brev.dokument().html();
+
+        assertThatHtml(brevtekst).containsHtmlSubSequenceOnce(
+            "<h2>Trenger du mer informasjon?</h2>"
+        );
+    }
 
     @Override
     protected Behandling lagScenarioForFellesTester() {

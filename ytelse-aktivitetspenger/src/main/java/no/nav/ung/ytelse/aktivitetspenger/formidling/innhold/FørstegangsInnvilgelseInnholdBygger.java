@@ -6,16 +6,16 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.formidling.innhold.MonthUtils;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatType;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringHendelseDto;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtleder;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
@@ -29,7 +29,6 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.UtbetalingD
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.SatsgrunnlagDto;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -45,24 +44,22 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private final AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository;
     private final TilkjentYtelseRepository tilkjentYtelseRepository;
-    private final LocalDate overrideDagensDatoForTest;
 
     @Inject
     public FørstegangsInnvilgelseInnholdBygger(
         AktivitetspengerGrunnlagRepository beregningsgrunnlagRepository,
-        TilkjentYtelseRepository tilkjentYtelseRepository,
-        @KonfigVerdi(value = "BREV_DAGENS_DATO_TEST", required = false) LocalDate overrideDagensDatoForTest) {
+        TilkjentYtelseRepository tilkjentYtelseRepository) {
 
         this.beregningsgrunnlagRepository = beregningsgrunnlagRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
-        this.overrideDagensDatoForTest = overrideDagensDatoForTest;
     }
 
 
     @WithSpan
     @Override
-    public TemplateInnholdResultat bygg(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
-        LocalDateTimeline<DetaljertResultat> periode = DetaljertResultat.filtererTidslinje(detaljertResultatTidslinje, DetaljertResultatType.INNVILGELSE_UTBETALING);
+    public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
+        var tilVurdering = tidslinje.tilVurdering();
+        LocalDateTimeline<DetaljertResultat> periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
 
         LocalDate ytelseFom = periode.getMinLocalDate();
         LocalDate ytelseTom = null;
@@ -71,12 +68,12 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
         );
 
-        var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje().intersection(detaljertResultatTidslinje);
+        var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje().intersection(tilVurdering);
         var førsteSegment = satsTidslinje.toSegments().first();
         var førsteSatser = førsteSegment.getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
-        var utbetalingDto = opprettUtbetalingDto(behandling, detaljertResultatTidslinje);
+        var utbetalingDto = opprettUtbetalingDto(behandling, tilVurdering);
 
         var satsendringer = lagSatsEndringHendelser(satsTidslinje);
 
@@ -200,6 +197,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     }
 
     private LocalDate bestemDagensDato() {
+        //Kan ikke injectes i konstruktør fordi den settes én gang for hele testkjøringen pga application scoped
+        var overrideDagensDatoForTest = Environment.current().getProperty("BREV_DAGENS_DATO_TEST", LocalDate.class);
         return Environment.current().isLocal() && overrideDagensDatoForTest != null ? overrideDagensDatoForTest : LocalDate.now();
     }
 }

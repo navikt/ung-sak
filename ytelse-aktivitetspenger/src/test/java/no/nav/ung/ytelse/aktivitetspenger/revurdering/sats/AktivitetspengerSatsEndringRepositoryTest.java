@@ -14,6 +14,8 @@ import no.nav.ung.sak.behandlingslager.behandling.personopplysning.Personopplysn
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -151,14 +153,7 @@ class AktivitetspengerSatsEndringRepositoryTest {
     }
 
     private void opprettSøktPeriode(Behandling behandling, Periode søktPeriode) {
-        var søktPeriodeEntitet = new no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode(
-            behandling.getId(),
-            new JournalpostId("JP-1"),
-            LocalDateTime.now(),
-            DatoIntervallEntitet.fraOgMedTilOgMed(søktPeriode.getFom(), søktPeriode.getTom())
-        );
-        entityManager.persist(søktPeriodeEntitet);
-        entityManager.flush();
+        new StartdatoRepository(entityManager).lagre(behandling.getId(), java.util.List.of(new SøktStartdato(søktPeriode.getFom(), new JournalpostId("JP-1"))));
     }
 
     private void opprettSatsPeriode(Behandling behandling) {

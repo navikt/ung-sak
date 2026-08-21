@@ -24,20 +24,13 @@ import java.util.Objects;
 public class HistorikkInnslagForAksjonspunktEventObserver {
 
     private HistorikkinnslagRepository historikkinnslagRepository;
-    private String systembruker;
     private String appName;
 
     @Inject
     public HistorikkInnslagForAksjonspunktEventObserver(
         HistorikkinnslagRepository historikkinnslagRepository,
-        /*
-         * FIXME property vil være satt i produksjon, men ikke i tester. Uansett er løsningen ikke er god. Kan
-         * heller bruker IdentType når det fikses.
-         */
-        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
         @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName) {
         this.historikkinnslagRepository = historikkinnslagRepository;
-        this.systembruker = systembruker;
         this.appName = appName;
     }
 
@@ -85,7 +78,7 @@ public class HistorikkInnslagForAksjonspunktEventObserver {
 
     private boolean erSystembruker() {
         var innloggetBrukerId = SubjectHandler.getSubjectHandler().getUid();
-        return Objects.equals(systembruker, innloggetBrukerId) || Objects.equals(appName, innloggetBrukerId);
+        return Objects.equals(appName, innloggetBrukerId);
     }
 
     public void oppretteHistorikkForGjenopptattBehandling(@Observes AksjonspunktStatusEvent aksjonspunkterFunnetEvent) {

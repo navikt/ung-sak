@@ -8,8 +8,8 @@ import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.forbruktedager.FagsakperiodeUtleder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -25,17 +25,17 @@ public class UngdomsytelseSøknadPersisterer {
     private final SøknadRepository søknadRepository;
     private final FagsakRepository fagsakRepository;
     private final FagsakperiodeUtleder fagsakperiodeUtleder;
-    private final UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
+    private final StartdatoRepository startdatoRepository;
 
 
     @Inject
     public UngdomsytelseSøknadPersisterer(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository,
                                           FagsakperiodeUtleder fagsakperiodeUtleder,
-                                          UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository) {
+                                          StartdatoRepository startdatoRepository) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = fagsakRepository;
         this.fagsakperiodeUtleder = fagsakperiodeUtleder;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
+        this.startdatoRepository = startdatoRepository;
     }
 
 
@@ -52,12 +52,12 @@ public class UngdomsytelseSøknadPersisterer {
     }
 
     public void lagreSøknadsperioder(List<LocalDate> startDatoer, JournalpostId journalpostId, Long behandlingId) {
-        final List<UngdomsytelseSøktStartdato> søknadsperiodeliste = new ArrayList<>();
+        final List<SøktStartdato> søknadsperiodeliste = new ArrayList<>();
         startDatoer.stream()
-            .map(it -> new UngdomsytelseSøktStartdato(it, journalpostId))
+            .map(it -> new SøktStartdato(it, journalpostId))
             .forEach(søknadsperiodeliste::add);
 
-        ungdomsytelseStartdatoRepository.lagre(behandlingId, søknadsperiodeliste);
+        startdatoRepository.lagre(behandlingId, søknadsperiodeliste);
     }
 
 

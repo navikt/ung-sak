@@ -28,12 +28,8 @@ import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.vedtak.impl.KlageVedtakTjeneste;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.IngenBrev;
-import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
-import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
-import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevRegel;
+import no.nav.ung.sak.formidling.vedtak.regler.*;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.OppgaveTjeneste;
 import no.nav.ung.sak.produksjonsstyring.oppgavebehandling.Oppgaveinfo;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
@@ -374,7 +370,7 @@ public class ForeslåVedtakTjenesteTest {
         when(vedtaksbrevRegler.kjør(behandling.getId())).thenReturn(
             new BehandlingVedtaksbrevResultat(
                 false,
-                LocalDateTimeline.empty(),
+                DetaljertResultatTidslinje.av(LocalDateTimeline.empty()),
                 Collections.emptyList(),
                 List.of(new IngenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, "")
                 )
@@ -388,16 +384,16 @@ public class ForeslåVedtakTjenesteTest {
     private static BehandlingVedtaksbrevResultat vedtaksbrevResultatMåRedigere(DokumentMalType dokumentMalType) {
         return new BehandlingVedtaksbrevResultat(
             true,
-            LocalDateTimeline.empty(),
+            DetaljertResultatTidslinje.av(LocalDateTimeline.empty()),
             List.of(new Vedtaksbrev(
                 dokumentMalType,
                 mock(VedtaksbrevInnholdBygger.class),
-                new VedtaksbrevEgenskaper(
-                    false,
-                    false,
-                    true,
-                    false
-                ),
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(false)
+                    .kanOverstyreHindre(false)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(false)
+                    .build(),
                 ""
             )),
             Collections.emptyList()
@@ -407,16 +403,16 @@ public class ForeslåVedtakTjenesteTest {
     private static BehandlingVedtaksbrevResultat vedtaksbrevResultatMåIkkeRedigere(DokumentMalType dokumentMalType) {
         return new BehandlingVedtaksbrevResultat(
             true,
-            LocalDateTimeline.empty(),
+            DetaljertResultatTidslinje.av(LocalDateTimeline.empty()),
             List.of(new Vedtaksbrev(
                 dokumentMalType,
                 mock(VedtaksbrevInnholdBygger.class),
-                new VedtaksbrevEgenskaper(
-                    false,
-                    false,
-                    true,
-                    true
-                ),
+                VedtaksbrevEgenskaper.builder()
+                    .kanHindre(false)
+                    .kanOverstyreHindre(false)
+                    .kanRedigere(true)
+                    .kanOverstyreRediger(true)
+                    .build(),
                 ""
             )),
             Collections.emptyList()

@@ -25,9 +25,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -38,8 +39,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.fagsak.*;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsResultat;
 import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
@@ -52,6 +51,8 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsResultat;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
@@ -498,7 +499,9 @@ public class AktivitetspengerTestScenarioBuilder {
             for (Periode periode : aktivitetspengerTestscenario.søknadsperioder()) {
                 JournalpostId dummyJournalpostId = new JournalpostId("dummy-journalpostid");
                 LocalDateTime journalpostMottattTid = LocalDateTime.now();
-                repositories.aktivitetspengerSøktPeriodeRepository().lagreNyPeriode(new AktivitetspengerSøktPeriode(behandling1.getId(), dummyJournalpostId, journalpostMottattTid, DatoIntervallEntitet.fra(periode)));
+                repositories.startdatoRepository().lagre(behandling1.getId(), List.of(new SøktStartdato(periode.getFom(), dummyJournalpostId)));
+                repositories.startdatoRepository().lagreRelevanteSøknader(behandling1.getId(), new Startdatoer(List.of(new SøktStartdato(periode.getFom(), dummyJournalpostId))));
+
             }
         }
 

@@ -197,5 +197,25 @@ class FagsakperiodeUtlederTest {
         assertThat(periode.getTomDato()).isEqualTo(nySøknadFom.plusWeeks(51).plusDays(3));
     }
 
+    @Test
+    void returnerer_periodeMaksDato_direkte_uavhengig_av_ukedag() {
+        // periodeMaksDato er allerede beregnet som virkedag av ung-deltakelse-opplyser,
+        // så finnTomDato skal returnere den uendret.
+        var fom = LocalDate.of(2025, 1, 1);
+        var maksDatoFredag = LocalDate.of(2026, 2, 27); // fredag
+        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, maksDatoFredag);
+        assertThat(tom).isEqualTo(maksDatoFredag);
+    }
+
+    @Test
+    void uten_maks_dato_beregnes_tom_fra_virkedager() {
+        // Uten maksDato skal vanlig virkedagsberegning brukes
+        var fom = LocalDate.of(2025, 1, 1); // onsdag
+        var tom = FagsakperiodeUtleder.finnTomDato(fom, no.nav.fpsak.tidsserie.LocalDateTimeline.empty(), true, null);
+        // 300 virkedager fra 01.01.2025 (onsdag) uten tidligere perioder
+        assertThat(tom).isAfter(fom.plusWeeks(52));
+        assertThat(tom.getDayOfWeek()).isNotEqualTo(java.time.DayOfWeek.SATURDAY);
+        assertThat(tom.getDayOfWeek()).isNotEqualTo(java.time.DayOfWeek.SUNDAY);
+    }
 
 }

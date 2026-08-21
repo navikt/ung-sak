@@ -12,6 +12,7 @@ import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -65,6 +66,11 @@ public class FinnFagsakerForAktørTjeneste {
 
     public Optional<Fagsak> hentRelevantFagsakForAktørSomSøker(FagsakYtelseType fagsakYtelseType, AktørId aktør, LocalDate relevantDato) {
         return fagsakRepository.hentForBruker(aktør, fagsakYtelseType).stream().filter(f -> f.getPeriode().overlapper(relevantDato, AbstractLocalDateInterval.TIDENES_ENDE)).findFirst();
+    }
+
+    public Optional<Fagsak> hentSisteFagsakForAktørSomSøker(FagsakYtelseType fagsakYtelseType, AktørId aktør) {
+        return fagsakRepository.hentForBruker(aktør, fagsakYtelseType).stream()
+            .max(Comparator.comparing((Fagsak f) -> f.getPeriode().getTomDato()).thenComparing(Fagsak::getId));
     }
 
     private boolean finnesSakMedSøker(AktørId søkerAktørId) {

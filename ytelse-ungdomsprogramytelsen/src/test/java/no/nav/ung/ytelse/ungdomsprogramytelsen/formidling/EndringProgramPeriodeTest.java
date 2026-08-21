@@ -56,7 +56,7 @@ class EndringProgramPeriodeTest extends AbstractUngdomsytelseVedtaksbrevInnholdB
                 Fra 23. august 2025 får du ikke lenger penger fordi du ikke lenger er med i ungdomsprogrammet. \
                 Du fikk tidligere melding om at du skulle få penger til og med 15. august 2025, \
                 men den datoen gjelder ikke lenger fordi du sluttet i ungdomsprogrammet 22. august 2025. \
-                Den siste utbetalingen får du før den 10. september 2025. \
+                Den siste utbetalingen får du før den 12. september 2025. \
                 Vedtaket er gjort etter arbeidsmarkedsloven §§ 12 tredje ledd og 13 fjerde ledd og forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jf. § 3 og § 6. \
                 """);
 

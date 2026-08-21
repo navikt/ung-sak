@@ -9,21 +9,20 @@ import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BosattSøknadGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriode;
-import no.nav.ung.sak.behandlingslager.behandling.søknadsperiode.AktivitetspengerSøktPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.AktivitetspengerFagsakperiodeUtleder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,26 +32,23 @@ public class AktivitetspengerSøknadPersisterer {
     private final SøknadRepository søknadRepository;
     private final FagsakRepository fagsakRepository;
     private final AktivitetspengerFagsakperiodeUtleder fagsakperiodeUtleder;
-    private final AktivitetspengerSøktPeriodeRepository søktPeriodeRepository;
     private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
+    private final StartdatoRepository startdatoRepository;
     private final BostedsGrunnlagRepository bostedsGrunnlagRepository;
-    private final BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository;
 
 
     @Inject
     public AktivitetspengerSøknadPersisterer(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository,
                                              AktivitetspengerFagsakperiodeUtleder fagsakperiodeUtleder,
-                                             AktivitetspengerSøktPeriodeRepository søktPeriodeRepository,
                                              OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
                                              BostedsGrunnlagRepository bostedsGrunnlagRepository,
-                                             BosattSøknadGrunnlagRepository bosattSøknadGrunnlagRepository) {
+                                             StartdatoRepository startdatoRepository) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = fagsakRepository;
         this.fagsakperiodeUtleder = fagsakperiodeUtleder;
-        this.søktPeriodeRepository = søktPeriodeRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
+        this.startdatoRepository = startdatoRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
-        this.bosattSøknadGrunnlagRepository = bosattSøknadGrunnlagRepository;
     }
 
 
@@ -68,11 +64,10 @@ public class AktivitetspengerSøknadPersisterer {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    public void lagreSøknadsperioder(no.nav.k9.søknad.felles.type.Periode periode, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId, Boolean erBosattITrondheim) {
-        AktivitetspengerSøktPeriode søktPeriodeEntity = new AktivitetspengerSøktPeriode(behandlingId, journalpostId, mottattTid, DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFraOgMed(), periode.getTilOgMed()));
-        søktPeriodeRepository.lagreNyPeriode(søktPeriodeEntity);
+    public void lagreStartdato(LocalDate startdato, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId, Boolean erBosattITrondheim) {
+        startdatoRepository.lagre(behandlingId, List.of(new SøktStartdato(startdato, journalpostId)));
         if (erBosattITrondheim != null) {
-            bosattSøknadGrunnlagRepository.lagreSøknadBosted(behandlingId, journalpostId.getVerdi(), periode.getFraOgMed(), erBosattITrondheim);
+            bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), startdato, erBosattITrondheim);
         }
     }
 

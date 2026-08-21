@@ -3,8 +3,12 @@ package no.nav.ung.sak.etterlysning.bosted;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOppgavetypeDataDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOpphørOppgavetypeDataDto;
+import no.nav.ung.kodeverk.bosatt.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -13,6 +17,7 @@ import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.util.List;
+import java.util.Objects;
 
 @Dependent
 public class BostedOppgaveOppretter {
@@ -33,22 +38,55 @@ public class BostedOppgaveOppretter {
         for (Etterlysning etterlysning : etterlysninger) {
             var periodeAvklaring = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
                 .stream()
-                .flatMap(g -> g.getHolder().getPeriodeAvklaring(etterlysning.getGrunnlagsreferanse()).stream())
+                .flatMap(g -> g.getForeslåtteAvklaringerEllerTomListe().stream())
+                .filter(avklaring -> avklaring.getReferanse().equals(etterlysning.getGrunnlagsreferanse()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
+
+            var ikkeOppfyltÅrsak = periodeAvklaring.getIkkeOppfyltÅrsak();
+            if (ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET || ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT) {
+                Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "FritekstTilVarsel må være satt når årsak er "+ ikkeOppfyltÅrsak);
+            }
+
+            var mappetÅrsak = mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak);
+            var avklaringtype = periodeAvklaring.getAvklaringtype();
+
+            OppgavetypeDataDto oppgavetypeData;
+            if (avklaringtype == Avklaringtype.OPPHØR) {
+                oppgavetypeData = new BekreftBostedOpphørOppgavetypeDataDto(
+                    etterlysning.getPeriode().getFomDato(),
+                    false,
+                    periodeAvklaring.getFritekstTilVarsel(),
+                    mappetÅrsak
+                );
+            } else {
+                oppgavetypeData = new BekreftBostedOppgavetypeDataDto(
+                    etterlysning.getPeriode().getFomDato(),
+                    etterlysning.getPeriode().getTomDato(),
+                    false,
+                    periodeAvklaring.getFritekstTilVarsel(),
+                    mappetÅrsak
+                );
+            }
 
             var oppgaveDto = new OpprettOppgaveDto(
                 new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
                 ytelsetype,
                 etterlysning.getEksternReferanse(),
-                new BekreftBostedOppgavetypeDataDto(
-                    etterlysning.getPeriode().getFomDato(),
-                    etterlysning.getPeriode().getTomDato(),
-                    periodeAvklaring.isErBosattITrondheim()
-                ),
+                oppgavetypeData,
                 etterlysning.getFrist()
             );
             oppgaveKlient.opprettOppgave(oppgaveDto);
         }
+    }
+
+    static no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak mapIkkeOppfyltÅrsak(BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
+        return switch (ikkeOppfyltÅrsak) {
+            case IKKE_BOSATTADRESSE_I_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
+            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM;
+            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
+            case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.ANNET;
+            case UDEFINERT -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT;
+        };
     }
 }

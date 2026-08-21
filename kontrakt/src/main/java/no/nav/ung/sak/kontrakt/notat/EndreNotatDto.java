@@ -27,7 +27,7 @@ public record EndreNotatDto(
 
     @JsonProperty(value = "notatTekst", required = true)
     @Size(max = 4000)
-    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String notatTekst,
 
     @StandardAbacAttributt(StandardAbacAttributtType.SAKSNUMMER)

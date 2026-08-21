@@ -38,7 +38,7 @@ public class AvklartKravDto {
 
     @JsonProperty("begrunnelse")
     @Size(max = 4000)
-    @Pattern(regexp = Patterns.FRITEKST, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String begrunnelse;
 
     public AvklartKravDto() {

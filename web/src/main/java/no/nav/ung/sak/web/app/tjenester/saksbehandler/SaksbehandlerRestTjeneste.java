@@ -12,6 +12,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphRestKlient;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
@@ -26,11 +27,10 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.saksbehandler.SaksbehandlerDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -40,12 +40,10 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 @ApplicationScoped
 @Transactional
 public class SaksbehandlerRestTjeneste {
-    public static final String SAKSBEHANDLER_PATH = "/saksbehandler";
-    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(480, TimeUnit.MINUTES);
+
+    private static final Logger logger = LoggerFactory.getLogger(SaksbehandlerRestTjeneste.class);
 
     private MicrosoftGraphTjeneste microsoftGraphTjeneste;
-
-    private String systembruker;
 
     private String appName;
     private HistorikkinnslagRepository historikkRepository;
@@ -58,12 +56,10 @@ public class SaksbehandlerRestTjeneste {
     @Inject
     public SaksbehandlerRestTjeneste(
         MicrosoftGraphTjeneste microsoftGraphTjeneste,
-        @KonfigVerdi(value = "systembruker.username", required = false) String systembruker,
         @KonfigVerdi(value = "NAIS_APP_NAME", defaultVerdi = "ung-sak") String appName,
         HistorikkinnslagRepository historikkRepository,
         BehandlingRepository behandlingRepository) {
         this.microsoftGraphTjeneste = microsoftGraphTjeneste;
-        this.systembruker = systembruker;
         this.appName = appName;
         this.historikkRepository = historikkRepository;
         this.behandlingRepository = behandlingRepository;
@@ -102,11 +98,20 @@ public class SaksbehandlerRestTjeneste {
             .filter(Objects::nonNull)
             .toList());
 
-        unikeIdenter.remove(systembruker); //bare relevant lokat
         unikeIdenter.remove(appName);
+        unikeIdenter.remove(null);
 
-        Map<String, String> identTilNavn = microsoftGraphTjeneste.navnPåNavAnsatte(unikeIdenter);
+        unikeIdenter.stream().filter(it -> !MicrosoftGraphRestKlient.NAVIDENT_PATTERN.matcher(it).matches())
+            .forEach(it -> logger.warn("Uforventet format på saksbehandler ident: {}", it));
+        unikeIdenter.removeIf(it -> !MicrosoftGraphRestKlient.NAVIDENT_PATTERN.matcher(it).matches());
 
+        Map<String, String> identTilNavn;
+        try {
+             identTilNavn = microsoftGraphTjeneste.navnPåNavAnsatte(unikeIdenter);
+        } catch (Exception e) {
+            logger.warn("Feil ved henting av navn for saksbehandlere fra Microsoft Graph. Returnerer tomt liste.", e);
+            identTilNavn = Collections.emptyMap();
+        }
         return new SaksbehandlerDto(identTilNavn);
     }
 

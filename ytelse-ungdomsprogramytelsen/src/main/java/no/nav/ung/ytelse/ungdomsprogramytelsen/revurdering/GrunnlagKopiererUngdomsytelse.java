@@ -7,7 +7,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
@@ -22,7 +22,7 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     private PersonopplysningRepository personopplysningRepository;
     private InntektArbeidYtelseTjeneste iayTjeneste;
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
-    private UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository;
+    private StartdatoRepository startdatoRepository;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private UttalelseRepository uttalelseRepository;
 
@@ -33,11 +33,11 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
     @Inject
     public GrunnlagKopiererUngdomsytelse(BehandlingRepositoryProvider repositoryProvider,
                                          InntektArbeidYtelseTjeneste iayTjeneste,
-                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, UngdomsytelseStartdatoRepository ungdomsytelseStartdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository, UttalelseRepository uttalelseRepository) {
+                                         UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository, StartdatoRepository startdatoRepository, TilkjentYtelseRepository tilkjentYtelseRepository, UttalelseRepository uttalelseRepository) {
         this.iayTjeneste = iayTjeneste;
         this.personopplysningRepository = repositoryProvider.getPersonopplysningRepository();
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
-        this.ungdomsytelseStartdatoRepository = ungdomsytelseStartdatoRepository;
+        this.startdatoRepository = startdatoRepository;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.uttalelseRepository = uttalelseRepository;
     }
@@ -49,7 +49,7 @@ public class GrunnlagKopiererUngdomsytelse implements GrunnlagKopierer {
         Long nyBehandlingId = ny.getId();
         personopplysningRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         ungdomsprogramPeriodeRepository.kopier(originalBehandlingId, nyBehandlingId);
-        ungdomsytelseStartdatoRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        startdatoRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
 

@@ -4,10 +4,10 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.ytelse.ungdomsprogramytelsen.ungdomsprogrammet.UngdomsprogramPeriodeTjeneste;
 
@@ -20,12 +20,12 @@ import static no.nav.ung.sak.domene.typer.tid.TidslinjeUtil.tilTidslinje;
 @Dependent
 public class UngdomsytelseSøknadsperiodeTjeneste {
 
-    private final UngdomsytelseStartdatoRepository startdatoRepository;
+    private final StartdatoRepository startdatoRepository;
     private final UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste;
     private BehandlingRepository behandlingRepository;
 
     @Inject
-    public UngdomsytelseSøknadsperiodeTjeneste(UngdomsytelseStartdatoRepository startdatoRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
+    public UngdomsytelseSøknadsperiodeTjeneste(StartdatoRepository startdatoRepository, UngdomsprogramPeriodeTjeneste ungdomsprogramPeriodeTjeneste, BehandlingRepository behandlingRepository) {
         this.startdatoRepository = startdatoRepository;
         this.ungdomsprogramPeriodeTjeneste = ungdomsprogramPeriodeTjeneste;
         this.behandlingRepository = behandlingRepository;
@@ -38,11 +38,11 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
      * @return Relevante søknadsperioder for denne behandlingen
      */
     public NavigableSet<DatoIntervallEntitet> utledPeriode(Long behandlingId) {
-        return finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getRelevanteStartdatoer);
+        return finnPerioder(behandlingId, StartdatoGrunnlag::getRelevanteStartdatoer);
     }
 
     public LocalDateTimeline<Boolean> utledTidslinje(Long behandlingId) {
-        return tilTidslinje(finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getRelevanteStartdatoer));
+        return tilTidslinje(finnPerioder(behandlingId, StartdatoGrunnlag::getRelevanteStartdatoer));
     }
 
     /**
@@ -52,20 +52,20 @@ public class UngdomsytelseSøknadsperiodeTjeneste {
      * @return Alle perioder fra alle behandlinger
      */
     public NavigableSet<DatoIntervallEntitet> utledFullstendigPeriode(Long behandlingId) {
-        return finnPerioder(behandlingId, UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer);
+        return finnPerioder(behandlingId, StartdatoGrunnlag::getOppgitteStartdatoer);
     }
 
     private NavigableSet<DatoIntervallEntitet> finnPerioder(Long behandlingId,
-                                                            Function<UngdomsytelseStartdatoGrunnlag, UngdomsytelseStartdatoer> finnPeriodeHolder) {
+                                                            Function<StartdatoGrunnlag, Startdatoer> finnPeriodeHolder) {
         var startdatoer = startdatoRepository.hentGrunnlag(behandlingId).map(finnPeriodeHolder);
 
         if (startdatoer.isEmpty() || startdatoer.get().getStartdatoer().isEmpty()) {
             return Collections.emptyNavigableSet();
         } else {
-            var førsteRelevanteStartdato = startdatoer.map(UngdomsytelseStartdatoer::getStartdatoer)
+            var førsteRelevanteStartdato = startdatoer.map(Startdatoer::getStartdatoer)
                 .stream()
                 .flatMap(Collection::stream)
-                .map(UngdomsytelseSøktStartdato::getStartdato)
+                .map(SøktStartdato::getStartdato)
                 .min(Comparator.naturalOrder())
                 .orElseThrow(() -> new IllegalStateException("Fant ingen startdatoer for behandlingId: " + behandlingId));
             LocalDateTimeline<Boolean> ungdomsprogramtidslinje = ungdomsprogramPeriodeTjeneste.finnPeriodeTidslinje(behandlingId);

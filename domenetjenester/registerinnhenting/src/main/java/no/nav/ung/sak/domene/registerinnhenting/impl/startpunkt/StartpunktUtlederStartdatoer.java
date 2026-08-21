@@ -4,10 +4,10 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoGrunnlag;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseStartdatoer;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 import no.nav.ung.sak.domene.registerinnhenting.EndringStartpunktUtleder;
 import no.nav.ung.sak.domene.registerinnhenting.GrunnlagRef;
@@ -16,19 +16,19 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-@GrunnlagRef(UngdomsytelseStartdatoGrunnlag.class)
+@GrunnlagRef(StartdatoGrunnlag.class)
 @FagsakYtelseTypeRef
 class StartpunktUtlederStartdatoer implements EndringStartpunktUtleder {
     private String klassenavn = this.getClass().getSimpleName();
 
-    private UngdomsytelseStartdatoRepository startdatoRepository;
+    private StartdatoRepository startdatoRepository;
 
     public StartpunktUtlederStartdatoer() {
         // For CDI
     }
 
     @Inject
-    StartpunktUtlederStartdatoer(UngdomsytelseStartdatoRepository uttakPerioderGrunnlagRepository) {
+    StartpunktUtlederStartdatoer(StartdatoRepository uttakPerioderGrunnlagRepository) {
         this.startdatoRepository = uttakPerioderGrunnlagRepository;
     }
 
@@ -47,19 +47,19 @@ class StartpunktUtlederStartdatoer implements EndringStartpunktUtleder {
         // Finner alle originale journalposter
         var orginaleJournalposter = startdatoRepository.hentGrunnlagBasertPåId(gammeltGrunnlag)
             .stream()
-            .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
-            .map(UngdomsytelseStartdatoer::getStartdatoer)
+            .map(StartdatoGrunnlag::getOppgitteStartdatoer)
+            .map(Startdatoer::getStartdatoer)
             .flatMap(Collection::stream)
-            .map(UngdomsytelseSøktStartdato::getJournalpostId)
+            .map(SøktStartdato::getJournalpostId)
             .collect(Collectors.toSet());
 
         // Finner alle nye journalposter
         var nyeJournalposter = startdatoRepository.hentGrunnlagBasertPåId(nyttGrunnlag)
             .stream()
-            .map(UngdomsytelseStartdatoGrunnlag::getOppgitteStartdatoer)
-            .map(UngdomsytelseStartdatoer::getStartdatoer)
+            .map(StartdatoGrunnlag::getOppgitteStartdatoer)
+            .map(Startdatoer::getStartdatoer)
             .flatMap(Collection::stream)
-            .map(UngdomsytelseSøktStartdato::getJournalpostId)
+            .map(SøktStartdato::getJournalpostId)
             .collect(Collectors.toSet());
 
         nyeJournalposter.removeAll(orginaleJournalposter);

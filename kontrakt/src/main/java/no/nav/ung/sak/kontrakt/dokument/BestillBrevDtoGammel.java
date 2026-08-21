@@ -31,7 +31,7 @@ public class BestillBrevDtoGammel {
 
     @JsonProperty(value = "fritekst")
     @Size(max = 4000)
-    @Pattern(regexp = Patterns.FRITEKSTBREV, message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = Patterns.FRITEKSTBREV, message = Patterns.FRITEKST_MISMATCH_MELDING)
     public String fritekst;
 
     @JsonProperty(value = "behandlingId", required = true)

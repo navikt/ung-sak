@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.ungdomsprogramytelsen.vurderkompletthet.ungdomsprogramkontroll;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
@@ -64,7 +65,7 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
         if (behandlingReferanse.getBehandlingType() == BehandlingType.FØRSTEGANGSSØKNAD) {
             // Dersom det er førstegangssøknad må vi også sjekke om det er endringer i start dato fra det som ble oppgitt da bruker sendte inn søknaden.
             return harFjernetPeriode(input) ||
-                harEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.ungdomsytelseStartdatoGrunnlag()) ||
+                harEndretStartdatoFraOppgittStartdatoer(input.gjeldendePeriodeGrunnlag(), input.startdatoGrunnlag()) ||
                 harSattSluttdato(input.gjeldendePeriodeGrunnlag());
         }
         return false;
@@ -83,7 +84,18 @@ public class EtterlysningForEndretProgramperiodeResultatUtlederV2 {
     }
 
     private static boolean harEndring(UngdomsprogramPeriodeGrunnlag førsteGrunnlag, UngdomsprogramPeriodeGrunnlag andreGrunnlag) {
-        return !UngdomsprogramPeriodeTjeneste.finnEndretTidslinje(Optional.of(andreGrunnlag), Optional.of(førsteGrunnlag)).isEmpty();
+        LocalDateTimeline<Boolean> endretTidslinje = UngdomsprogramPeriodeTjeneste.finnEndretTidslinje(Optional.of(andreGrunnlag), Optional.of(førsteGrunnlag));
+        if (endretTidslinje.isEmpty()) {
+            return false;
+        }
+
+        return andreGrunnlag.getPeriodeMaksDato()
+            .filter(maksDato -> {
+                // Hele endringen ligger etter maksdato
+                // dette håndteres av varsel ved opphør på maksdato
+                return maksDato.isBefore(endretTidslinje.getMinLocalDate());
+            })
+            .isEmpty();
     }
 
     private static void validerHøystEnProgramperiode(EndretUngdomsprogramEtterlysningInput input) {

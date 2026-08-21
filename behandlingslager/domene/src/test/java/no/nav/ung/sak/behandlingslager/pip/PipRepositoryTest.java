@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Journalpost;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.db.util.Repository;
+import no.nav.ung.sak.kontrakt.abac.FagsakPipDto;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -80,7 +81,7 @@ public class PipRepositoryTest {
         @SuppressWarnings("unused")
         Fagsak fagsakAnnenAktør = new BasicBehandlingBuilder(entityManager).opprettFagsak(FagsakYtelseType.FORELDREPENGER);
 
-        Set<Saksnummer> resultat = pipRepository.saksnumreForSøker(Collections.singleton(aktørId1));
+        Set<Saksnummer> resultat = pipRepository.hentSaksnumreForBruker(Collections.singleton(aktørId1));
 
         assertThat(resultat).containsOnly(fagsak1.getSaksnummer(), fagsak2.getSaksnummer());
     }
@@ -116,6 +117,50 @@ public class PipRepositoryTest {
 
         Set<String> resultat2 = pipRepository.hentAksjonspunktTypeForAksjonspunktKoder(List.of(AksjonspunktDefinisjon.OVERSTYRING_AV_INNTEKT.getKode(), AksjonspunktDefinisjon.KONTROLLER_INNTEKT.getKode()));
         assertThat(resultat2).containsOnly("OVST", "MANU");
+    }
+
+    @Test
+    public void skal_hente_pipdata_og_personer_for_fagsak() {
+        AktørId aktørId = AktørId.dummy();
+        Fagsak fagsak = behandlingBuilder.opprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId);
+
+        Optional<FagsakPipDto> resultat = pipRepository.hentPipDataOgPersonerForFagsak(fagsak.getSaksnummer());
+
+        assertThat(resultat).isPresent();
+        FagsakPipDto pipDto = resultat.get();
+        assertThat(pipDto.saksnummer()).isEqualTo(fagsak.getSaksnummer());
+        assertThat(pipDto.fagsakStatus()).isEqualTo(fagsak.getStatus());
+        assertThat(pipDto.ytelseType()).isEqualTo(FagsakYtelseType.UNGDOMSYTELSE);
+        assertThat(pipDto.aktørIder()).containsOnly(aktørId);
+        assertThat(pipDto.aktørIderForSporingslogg()).containsOnly(aktørId);
+    }
+
+    @Test
+    public void skal_returnere_tomt_resultat_for_fagsak_som_ikke_finnes() {
+        Optional<FagsakPipDto> resultat = pipRepository.hentPipDataOgPersonerForFagsak(new Saksnummer("9999999"));
+        assertThat(resultat).isNotPresent();
+    }
+
+    @Test
+    public void skal_hente_pipdata_og_personer_for_brukers_fagsaker() {
+        AktørId aktørId = AktørId.dummy();
+        Fagsak fagsak1 = behandlingBuilder.opprettFagsak(FagsakYtelseType.UNGDOMSYTELSE, aktørId);
+        Fagsak fagsak2 = behandlingBuilder.opprettFagsak(FagsakYtelseType.AKTIVITETSPENGER, aktørId);
+        @SuppressWarnings("unused")
+        Fagsak fagsakAnnenBruker = new BasicBehandlingBuilder(entityManager).opprettFagsak(FagsakYtelseType.UNGDOMSYTELSE);
+
+        List<FagsakPipDto> resultat = pipRepository.hentPipDataOgPersonerForBrukersFagsaker(aktørId);
+
+        assertThat(resultat).hasSize(2);
+        assertThat(resultat).extracting(FagsakPipDto::saksnummer)
+            .containsExactlyInAnyOrder(fagsak1.getSaksnummer(), fagsak2.getSaksnummer());
+        assertThat(resultat).allSatisfy(pipDto -> assertThat(pipDto.aktørIder()).contains(aktørId));
+    }
+
+    @Test
+    public void skal_returnere_tom_liste_for_bruker_uten_fagsaker() {
+        List<FagsakPipDto> resultat = pipRepository.hentPipDataOgPersonerForBrukersFagsaker(AktørId.dummy());
+        assertThat(resultat).isEmpty();
     }
 }
 

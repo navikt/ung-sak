@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 @ProsessTask(HåndterPdlHendelseTask.TASKNAME)
@@ -58,7 +59,14 @@ public class HåndterPdlHendelseTask implements ProsessTaskHandler {
             LOG.info("HendelseId={} er annullert, ignorerer hendelsen", personhendelse.getHendelseId());
             return;
         }
-        final Hendelse oversattHendelse = pdlLeesahOversetter.oversettStøttetPersonhendelse(personhendelse).orElseThrow();
+        Optional<Hendelse> hendelseOpt = pdlLeesahOversetter.oversettStøttetPersonhendelse(personhendelse);
+        if (hendelseOpt.isEmpty()) {
+           LOG.info("Ignorerer hendelseId={} da den ikke kunne oversettes til en støttet hendelse.", personhendelse.getHendelseId());
+           return;
+        }
+
+        final Hendelse oversattHendelse = hendelseOpt.orElseThrow();
+
 
         LOG.info("Håndterer hendelseId={}", oversattHendelse.getHendelseInfo().getHendelseId());
 

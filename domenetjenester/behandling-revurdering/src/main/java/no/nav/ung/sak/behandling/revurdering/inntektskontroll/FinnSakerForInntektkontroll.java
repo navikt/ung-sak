@@ -52,11 +52,9 @@ public class FinnSakerForInntektkontroll {
     }
 
     List<Fagsak> finnFagsaker(LocalDate fom, LocalDate tom) {
-        var fagsaker = fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom).stream()
-            .filter(f -> STØTTEDE_YTELSE_TYPER.contains(f.getYtelseType()))
-            .toList();
+        var fagsaker = fagsakRepository.hentAlleFagsakerSomOverlapper(fom, tom, STØTTEDE_YTELSE_TYPER);
 
-        var behandlinger = fagsaker.stream().map(Fagsak::getId).map(fagsakId -> behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId)).flatMap(Optional::stream).toList();
+        var behandlinger = fagsaker.stream().map(Fagsak::getId).map(this::hentRelevantBehandling).flatMap(Optional::stream).toList();
 
         /* Filtrere ut behandlinger som skal ha inntektskontroll:
             - Har ikke allerede opprettet trigger for inntektskontroll
@@ -102,6 +100,16 @@ public class FinnSakerForInntektkontroll {
     private boolean harIkkeUtførtKontroll(Behandling behandling, LocalDate fom, LocalDate tom) {
         var kontrollertInntektTidslinje = tilkjentYtelseRepository.hentKontrollerInntektTidslinje(behandling.getId());
         return kontrollertInntektTidslinje.intersection(new LocalDateInterval(fom, tom)).isEmpty();
+    }
+
+    private Optional<Behandling> hentRelevantBehandling(Long fagsakId) {
+        var siste = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
+        if (siste.isEmpty() || !siste.get().isBehandlingHenlagt()) {
+            return siste;
+        }
+        // Siste behandling er henlagt — bruk siste vedtatte (ikke-henlagte) behandling for sjekker.
+        // Fagsaker uten noen vedtatt behandling ekskluderes, da det ikke finnes noe å revurdere.
+        return behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
     }
 
 

@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.vedtak;
 import jakarta.enterprise.inject.Any;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -149,6 +150,57 @@ class YtelseVedtaksbrevReglerTest {
 
     }
 
+
+    @Test
+    void skal_gi_ingen_brev_ved_g_regulering() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(SatsEndringScenarioer.gRegulering(fom));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isFalse();
+
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
+    void skal_ignorere_g_regulering_kombinert_med_full_utbetaling() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(SatsEndringScenarioer.leggTilGRegulering(EndringInntektScenarioer.endring0KrInntekt_19år(fom)));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(2);
+
+        var regelResulat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResulat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+
+        assertThat(regelResulat.forklaring()).containsIgnoringCase("ingen brev");
+
+    }
+
+    @Test
+    void skal_ignorere_g_regulering_kombinert_med_kontorller_inntekt_brev() {
+        LocalDate fom = LocalDate.of(2024, 12, 1);
+        var behandling = lagBehandling(SatsEndringScenarioer.leggTilGRegulering(
+            EndringInntektScenarioer.endringMedInntektPå10k_19år(fom))
+        );
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        var regelResulat = totalresultater.vedtaksbrevResultater().getFirst();
+
+        assertFullAutomatiskBrev(regelResulat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
+
+    }
+
     @Test
     void skal_gi_tomt_brev_som_må_redigeres_ved_avslag_aldersvilkår() {
         LocalDate fom = LocalDate.of(2025, 8, 1);
@@ -254,7 +306,182 @@ class YtelseVedtaksbrevReglerTest {
         assertThat(barnetilleggResultat.forklaring()).contains("barn");
     }
 
-     static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
+    @Test
+    void skal_gi_forlenget_brev_selv_om_inntektskontroll_gir_ingen_brev() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
+
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektFullUtbetaling(fom, nySluttdato));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        var forlengetResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.FORLENGET_PERIODE))
+            .findFirst()
+            .orElseThrow();
+
+        assertFullAutomatiskBrev(forlengetResultat, DokumentMalType.FORLENGET_PERIODE, ForlengetPeriodeInnholdBygger.class);
+    }
+
+    @Test
+    void skal_gi_to_brev_ved_forlenget_periode_og_kontroll_inntekt_med_reduksjon() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.plusDays(28);
+
+        var behandling = lagBehandling(KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgKontrollInntektMedReduksjon(fom, nySluttdato));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(2);
+
+        var forlengetResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.FORLENGET_PERIODE))
+            .findFirst()
+            .orElseThrow();
+
+        assertFullAutomatiskBrev(forlengetResultat, DokumentMalType.FORLENGET_PERIODE, ForlengetPeriodeInnholdBygger.class);
+
+        var inntektResultat = totalresultater.vedtaksbrevResultater().stream()
+            .filter(resultat -> resultat.dokumentMalType().equals(DokumentMalType.ENDRING_INNTEKT))
+            .findFirst()
+            .orElseThrow();
+
+        assertFullAutomatiskBrev(inntektResultat, DokumentMalType.ENDRING_INNTEKT, EndringInntektReduksjonInnholdBygger.class);
+    }
+
+    @Test
+    void skal_ikke_sende_opphor_ved_maksdato_brev_når_forlenget_periode() {
+        LocalDate fom = LocalDate.now().minusWeeks(52).plusWeeks(2);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.plusWeeks(8).minusDays(1);
+        LocalDate periodeMaksDato = nySluttdato;
+
+        var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
+            EndringProgramPeriodeScenarioer.forlengetPeriode(fom, opprinneligSluttdato, nySluttdato, periodeMaksDato),
+            nySluttdato);
+        var behandling = lagBehandling(scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.FORLENGET_PERIODE)
+            .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
+    }
+
+    @Test
+    void skal_ikke_sende_opphor_ved_maksdato_brev_når_kombinert_med_opphør() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nySluttdato = opprinneligSluttdato.minusDays(20);
+
+        var scenario = KombinasjonScenarioer.leggTilVarselOpphørVedMaksdato(
+            EndringProgramPeriodeScenarioer.endringOpphør(new LocalDateInterval(fom, opprinneligSluttdato), nySluttdato),
+            opprinneligSluttdato);
+        var behandling = lagBehandlingMedOriginalBehandling(FørstegangsbehandlingScenarioer.innvilget19år(fom), scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.OPPHØR_DOK)
+            .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
+    }
+
+    @Test
+    void skal_gi_kun_opphorsbrev_ved_forlenget_periode_og_opphor() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate opprinneligSluttdato = fom.plusWeeks(52).minusDays(1);
+        LocalDate opphørsdato = opprinneligSluttdato.plusDays(14);
+
+        UngTestScenario forrigeBehandlingScenario = FørstegangsbehandlingScenarioer.innvilget19år(fom);
+        UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgOpphør(fom, opphørsdato);
+        var behandling = lagBehandlingMedOriginalBehandling(forrigeBehandlingScenario, ungTestscenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .containsExactly(DokumentMalType.OPPHØR_DOK)
+            .doesNotContain(DokumentMalType.FORLENGET_PERIODE);
+
+        var opphørResultat = totalresultater.vedtaksbrevResultater().getFirst();
+        assertFullAutomatiskBrev(opphørResultat, DokumentMalType.OPPHØR_DOK, OpphørInnholdBygger.class);
+    }
+
+    @Test
+    void skal_ikke_gi_opphorsbrev_ved_opphor_og_opphevelse_av_opphor_i_samme_behandling() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate tidligereOpphørsdato = LocalDate.of(2025, 6, 15);
+        LocalDate periodeMaksDato = LocalDate.of(2025, 12, 31);
+
+        var behandling = lagBehandling(
+            KombinasjonScenarioer.kombinasjon_opphørOgOpphevelseAvOpphørISammeBehandling(fom, tidligereOpphørsdato, periodeMaksDato));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .doesNotContain(DokumentMalType.OPPHØR_DOK, DokumentMalType.OPPHOR_OPPHEVET_DOK);
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResultat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_RELEVANT);
+    }
+
+    @Test
+    void skal_gi_både_forlenget_og_opphevelse_brev_ved_forlengelse_kombinert_med_opphevelse_av_opphør() {
+        LocalDate fom = LocalDate.of(2025, 1, 1);
+        LocalDate tidligereOpphørsdato = LocalDate.of(2025, 6, 15);
+        LocalDate opprinneligMaksDato = fom.plusWeeks(52).minusDays(1);
+        LocalDate nyMaksDato = opprinneligMaksDato.plusWeeks(8);
+
+        // Originalbehandling med reelt (iverksatt) opphør – lukket sluttdato – slik at opphevelsen faktisk gir brev.
+        UngTestScenario forrigeBehandlingScenario = EndringProgramPeriodeScenarioer.endringOpphør(
+            new LocalDateInterval(fom, opprinneligMaksDato), tidligereOpphørsdato);
+        UngTestScenario ungTestscenario = KombinasjonScenarioer.kombinasjon_forlengetPeriodeOgOpphevelseAvOpphør(
+            fom, tidligereOpphørsdato, opprinneligMaksDato, nyMaksDato);
+        var behandling = lagBehandlingMedOriginalBehandling(forrigeBehandlingScenario, ungTestscenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isTrue();
+        // Forlengelse skal fortsatt gi eget brev selv om behandlingen også opphever et tidligere opphør.
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .contains(DokumentMalType.FORLENGET_PERIODE, DokumentMalType.OPPHOR_OPPHEVET_DOK)
+            .doesNotContain(DokumentMalType.OPPHØR_DOK);
+    }
+
+    private Behandling lagBehandlingMedOriginalBehandling(UngTestScenario forrigeBehandlingScenario, UngTestScenario ungTestscenario) {
+        // Originalbehandling med innvilget programperiode slik at revurderingen får riktig programperiode
+        var builder = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(forrigeBehandlingScenario);
+
+        var originalBehandling = builder.buildOgLagreMedUng(ungTestRepositories);
+        originalBehandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        originalBehandling.avsluttBehandling();
+
+        builder
+            .medBehandlingType(BehandlingType.REVURDERING)
+            .medUngTestGrunnlag(ungTestscenario)
+            .medOriginalBehandling(originalBehandling, null);
+
+        var behandling = builder.buildOgLagreNyUngBehandlingPåEksisterendeSak(ungTestRepositories);
+        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
+        behandling.avsluttBehandling();
+        return behandling;
+    }
+
+    static void assertRedigerbarBrev(Vedtaksbrev vedtaksbrev, DokumentMalType dokumentMalType, Class<? extends VedtaksbrevInnholdBygger> type) {
         var egenskaper = vedtaksbrev.vedtaksbrevEgenskaper();
         assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(type);
         assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(dokumentMalType);
@@ -273,6 +500,26 @@ class YtelseVedtaksbrevReglerTest {
         assertThat(egenskaper.kanOverstyreRediger()).isFalse();
     }
 
+
+    /**
+     * Invariant: Når et reelt detaljert resultat foreligger, men ingen strategi gjør krav på det,
+     * skal resolveren feile tydelig med IKKE_IMPLEMENTERT i stedet for å stille produsere ingen brev.
+     * Dette beskytter mot at en fremtidig endring gjør alle relevante strategier irrelevante for en
+     * gyldig resultatkombinasjon uten at noe varsles.
+     */
+    @Test
+    void skal_gi_ikke_implementert_nar_ingen_strategi_gjor_krav_pa_resultatet() {
+        var behandling = lagBehandling(FørstegangsbehandlingScenarioer.innvilget19årUtenTrigger(LocalDate.of(2024, 12, 1)));
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isFalse();
+        assertThat(totalresultater.ingenBrevResultater()).hasSize(1);
+
+        var regelResultat = totalresultater.ingenBrevResultater().getFirst();
+        assertThat(regelResultat.ingenBrevÅrsakType()).isEqualTo(IngenBrevÅrsakType.IKKE_IMPLEMENTERT);
+        assertThat(regelResultat.forklaring()).containsIgnoringCase("Ingen strategy fant resultat for grunnlaget");
+    }
 
     private Behandling lagBehandling(UngTestScenario ungTestGrunnlag) {
         TestScenarioBuilder scenarioBuilder = TestScenarioBuilder.builderMedSøknad()

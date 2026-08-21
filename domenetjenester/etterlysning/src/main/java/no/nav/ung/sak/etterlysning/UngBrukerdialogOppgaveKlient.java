@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.brukerdialog.kontrakt.AktørIdDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreFristDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.EndreOppgaveStatusDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveRequest;
@@ -83,7 +84,7 @@ public class UngBrukerdialogOppgaveKlient {
         }
     }
 
-    public void løsSøkYtelseOppgave(AktørId aktørId) {
+    public void løsSøkYtelseOppgave(AktørIdDto aktørId) {
         try {
             restClient.post(løsSøkYtelseBaseURI, aktørId);
         } catch (Exception e) {

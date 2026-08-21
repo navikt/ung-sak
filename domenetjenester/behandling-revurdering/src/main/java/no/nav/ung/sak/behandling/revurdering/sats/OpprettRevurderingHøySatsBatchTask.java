@@ -2,10 +2,13 @@ package no.nav.ung.sak.behandling.revurdering.sats;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.prosesstask.api.*;
+import no.nav.k9.prosesstask.api.ProsessTask;
+import no.nav.k9.prosesstask.api.ProsessTaskData;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.k9.prosesstask.api.TaskType;
 import no.nav.k9.prosesstask.impl.cron.CronExpression;
-
-import java.util.List;
+import no.nav.ung.sak.behandling.prosessering.DuplikatbeskyttetBatchTask;
+import no.nav.ung.sak.behandling.revurdering.inntektskontroll.OpprettRevurderingForInntektskontrollTask;
 
 
 /**
@@ -15,10 +18,9 @@ import java.util.List;
  */
 @ApplicationScoped
 @ProsessTask(value = OpprettRevurderingHøySatsBatchTask.TASKNAME, maxFailedRuns = 1)
-public class OpprettRevurderingHøySatsBatchTask implements BatchProsessTaskHandler {
+public class OpprettRevurderingHøySatsBatchTask extends DuplikatbeskyttetBatchTask {
 
     public static final String TASKNAME = "batch.opprettRevurderingHøySats";
-    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     OpprettRevurderingHøySatsBatchTask() {
         // for CDI proxy
@@ -26,23 +28,12 @@ public class OpprettRevurderingHøySatsBatchTask implements BatchProsessTaskHand
 
     @Inject
     public OpprettRevurderingHøySatsBatchTask(ProsessTaskTjeneste prosessTaskTjeneste) {
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
+        super(prosessTaskTjeneste);
     }
 
     @Override
-    public void doTask(ProsessTaskData prosessTaskData) {
-
-        List<ProsessTaskData> feiletTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.FEILET).stream().filter(it -> it.getSaksnummer() == null).toList();
-        List<ProsessTaskData> klarTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.KLAR).stream().filter(it -> it.getSaksnummer() == null).toList();
-        List<ProsessTaskData> vetoTask = prosessTaskTjeneste.finnAlle(OpprettRevurderingHøySatsTask.TASKNAME, ProsessTaskStatus.VETO).stream().filter(it -> it.getSaksnummer() == null).toList();
-        if (!feiletTask.isEmpty() || !klarTask.isEmpty() || !vetoTask.isEmpty()) {
-            // Hvis det finnes noen task i noen av disse statusene, så betyr det at de enten kjører, eller skal kjøres.
-            // Vi ønsker ikke å opprette duplikater av disse.
-            return;
-        }
-
-        ProsessTaskData taskData = ProsessTaskData.forProsessTask(OpprettRevurderingHøySatsTask.class);
-        prosessTaskTjeneste.lagre(taskData);
+    protected TaskType getTaskType() {
+        return new TaskType(OpprettRevurderingHøySatsTask.TASKNAME);
     }
 
     @Override

@@ -7,15 +7,12 @@ public class PeriodeBeregner {
 
     /**
      * Utleder fremtidig utbetalingsdato basert på sluttdato.
-     * For siste måned i ungdomsprogrammet kontrolleres ikke inntekt
-     * Oppdrag utbetaler siste måneden første virkedag i påfølgende måned.
-     * Hvis sluttdato var forrige måned så utbetales det neste virkedag.
-     * Nevner da ikke noe dato
+     * Hvis sluttdato var forrige måned, oppgis ikke fremtidig utbetalingsdato i brevet.
      */
     static LocalDate utledFremtidigUtbetalingsdato(LocalDate sluttdato, YearMonth denneMåneden) {
         YearMonth sluttMåned = YearMonth.from(sluttdato);
 
         return sluttMåned.isBefore(denneMåneden) ? null
-            : sluttMåned.plusMonths(1).atDay(10);
+            : sluttMåned.plusMonths(1).atDay(12);
     }
 }

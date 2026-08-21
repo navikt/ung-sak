@@ -6,7 +6,7 @@ import java.time.LocalDate;
 
 public class VedtaksbrevVerifikasjon {
 
-    private static final String STANDARD_HEADER_FOOTER = """
+    private static final String VEDTAK_HEADER_FOOTER = """
         Brev for ungdomsprogramytelsen %s \
         Til: %s \
         Fødselsnummer: %s \
@@ -27,10 +27,24 @@ public class VedtaksbrevVerifikasjon {
         %s \
         side av""";
 
+    private static final String HEADER_FOOTER = """
+        Brev for ungdomsprogramytelsen %s \
+        Til: %s \
+        Fødselsnummer: %s \
+        %s\
+        Trenger du mer informasjon? \
+        Du finner mer informasjon på nav.no/ungdomsprogrammet. \
+        På nav.no/kontakt kan du chatte eller skrive til oss. \
+        Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
+        Med vennlig hilsen \
+        Nav Tiltak Oslo \
+        %s \
+        side av""";
+
     public static String medHeaderOgFooter(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
 
-        return STANDARD_HEADER_FOOTER
+        return VEDTAK_HEADER_FOOTER
             .formatted(
                 BrevTestUtils.brevDatoString(brevdato),
                 BrevScenarioerUtils.DEFAULT_NAVN,
@@ -41,7 +55,7 @@ public class VedtaksbrevVerifikasjon {
 
     public static String medHeaderOgFooterManuell(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
-        return STANDARD_HEADER_FOOTER
+        return VEDTAK_HEADER_FOOTER
             .formatted(
                 BrevTestUtils.brevDatoString(brevdato),
                 BrevScenarioerUtils.DEFAULT_NAVN,
@@ -52,7 +66,18 @@ public class VedtaksbrevVerifikasjon {
 
     public static String medHeaderOgFooterManuellUtenBeslutter(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
-        return STANDARD_HEADER_FOOTER
+        return VEDTAK_HEADER_FOOTER
+            .formatted(
+                BrevTestUtils.brevDatoString(brevdato),
+                BrevScenarioerUtils.DEFAULT_NAVN,
+                fnr,
+                body,
+                BrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN);
+    }
+
+    public static String medOversendtHeaderOgFooterManuellUtenBeslutter(String fnr, String body) {
+        LocalDate brevdato = LocalDate.now();
+        return HEADER_FOOTER
             .formatted(
                 BrevTestUtils.brevDatoString(brevdato),
                 BrevScenarioerUtils.DEFAULT_NAVN,

@@ -195,8 +195,8 @@ public class UngdomsytelseKombinasjonsScenarioTest {
             .asPlainTextContains(BrevTestUtils.brevDatoString(nyStartdato))
             .asPlainTextNotContains(BrevTestUtils.brevDatoString(nySluttdato));
 
-        var endringHøySatsBrev = generertBrev.stream().filter(it -> it.malType() == DokumentMalType.OPPHØR_DOK).findFirst().orElseThrow();
-        assertThatHtml(endringHøySatsBrev.dokument().html())
+        var endringOpphørBrev = generertBrev.stream().filter(it -> it.malType() == DokumentMalType.OPPHØR_DOK).findFirst().orElseThrow();
+        assertThatHtml(endringOpphørBrev.dokument().html())
             .asPlainTextContains(BrevTestUtils.brevDatoString(nySluttdato.plusDays(1)));
 
     }

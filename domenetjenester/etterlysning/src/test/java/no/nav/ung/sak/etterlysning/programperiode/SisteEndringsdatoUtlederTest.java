@@ -1,6 +1,6 @@
 package no.nav.ung.sak.etterlysning.programperiode;
 
-import no.nav.ung.sak.behandlingslager.behandling.startdato.UngdomsytelseSøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -174,7 +173,7 @@ class SisteEndringsdatoUtlederTest {
     }
 
     private static PeriodeSnapshot getOppgittSnapshot(LocalDate fom) {
-        return PeriodeSnapshot.fraOppgittStartdato(new UngdomsytelseSøktStartdato(fom, new JournalpostId("123")));
+        return PeriodeSnapshot.fraOppgittStartdato(new SøktStartdato(fom, new JournalpostId("123")));
     }
 
 

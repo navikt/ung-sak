@@ -64,14 +64,14 @@ public class VurderUttakSteg implements BehandlingSteg {
             // Fjerner deler av programperiode som er etter søkte perioder.
             .intersection(new LocalDateTimeline<>(TIDENES_BEGYNNELSE, godkjentePerioder.getMaxLocalDate(), true));
 
-        var harUtvidetKvote = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
-            .map(gr -> gr.isHarUtvidetKvote())
+        var harForlengetPeriode = ungdomsprogramPeriodeRepository.hentGrunnlag(behandlingId)
+            .map(gr -> gr.harForlengetPeriode())
             .orElse(false);
 
         LOGGER.info(() -> String.format(
-            "VurderUttakSteg behandling=%d: harUtvidetKvote=%s, samletVilkårsresultat=[%s..%s], godkjentePerioder=[%s..%s], ungdomsprogramtidslinje=[%s..%s]",
+            "VurderUttakSteg behandling=%d: harForlengetPeriode=%s, samletVilkårsresultat=[%s..%s], godkjentePerioder=[%s..%s], ungdomsprogramtidslinje=[%s..%s]",
             behandlingId,
-            harUtvidetKvote,
+            harForlengetPeriode,
             samletVilkårResultatTidslinje.isEmpty() ? "tom" : samletVilkårResultatTidslinje.getMinLocalDate(),
             samletVilkårResultatTidslinje.isEmpty() ? "tom" : samletVilkårResultatTidslinje.getMaxLocalDate(),
             godkjentePerioder.getMinLocalDate(),
@@ -92,7 +92,7 @@ public class VurderUttakSteg implements BehandlingSteg {
             godkjentePerioder,
             ungdomsprogramtidslinje,
             søkersDødsdato,
-            harUtvidetKvote
+            harForlengetPeriode
         );
         ungdomsytelseUttakPerioder.ifPresent(it -> ungdomsytelseGrunnlagRepository.lagre(behandlingId, it));
         return BehandleStegResultat.utførtUtenAksjonspunkter();

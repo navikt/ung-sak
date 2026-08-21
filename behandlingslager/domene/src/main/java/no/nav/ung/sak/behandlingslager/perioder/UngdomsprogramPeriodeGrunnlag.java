@@ -1,5 +1,6 @@
 package no.nav.ung.sak.behandlingslager.perioder;
 
+import java.time.LocalDate;
 import java.util.*;
 
 import no.nav.ung.sak.diff.ChangeTracked;
@@ -42,8 +43,8 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     @ManyToOne
     @Immutable
     @ChangeTracked
-    @JoinColumn(name = "ung_ungdomsprogramp_utvidet_kvote_id", nullable = true, updatable = false)
-    private UngdomsprogramUtvidetKvote ungdomsprogramUtvidetKvote;
+    @JoinColumn(name = "ung_ungdomsprogram_maks_periode_id", nullable = true, updatable = false)
+    private UngdomsprogramMaksPeriode ungdomsprogramMaksPeriode;
 
     public UngdomsprogramPeriodeGrunnlag() {
     }
@@ -51,7 +52,7 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
     UngdomsprogramPeriodeGrunnlag(Long behandlingId, UngdomsprogramPeriodeGrunnlag grunnlag) {
         this.behandlingId = behandlingId;
         this.ungdomsprogramPerioder = grunnlag.ungdomsprogramPerioder;
-        this.ungdomsprogramUtvidetKvote = grunnlag.ungdomsprogramUtvidetKvote;
+        this.ungdomsprogramMaksPeriode = grunnlag.ungdomsprogramMaksPeriode;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -122,16 +123,21 @@ public class UngdomsprogramPeriodeGrunnlag extends BaseEntitet {
         this.aktiv = aktiv;
     }
 
-    public Optional<UngdomsprogramUtvidetKvote> getUngdomsprogramUtvidetKvote() {
-        return Optional.ofNullable(ungdomsprogramUtvidetKvote);
+    public Optional<UngdomsprogramMaksPeriode> getUngdomsprogramMaksPeriode() {
+        return Optional.ofNullable(ungdomsprogramMaksPeriode);
     }
 
-    public void setUngdomsprogramUtvidetKvote(UngdomsprogramUtvidetKvote ungdomsprogramUtvidetKvote) {
-        this.ungdomsprogramUtvidetKvote = ungdomsprogramUtvidetKvote;
+    public void setUngdomsprogramMaksPeriode(UngdomsprogramMaksPeriode ungdomsprogramMaksPeriode) {
+        this.ungdomsprogramMaksPeriode = ungdomsprogramMaksPeriode;
     }
 
-    public boolean isHarUtvidetKvote() {
-        return ungdomsprogramUtvidetKvote != null && ungdomsprogramUtvidetKvote.isHarUtvidetKvote();
+    public boolean harForlengetPeriode() {
+        return ungdomsprogramMaksPeriode != null && ungdomsprogramMaksPeriode.harForlengetPeriode();
+    }
+
+    public Optional<LocalDate> getPeriodeMaksDato() {
+        return Optional.ofNullable(ungdomsprogramMaksPeriode)
+            .flatMap(UngdomsprogramMaksPeriode::getPeriodeMaksDato);
     }
 
     @Override

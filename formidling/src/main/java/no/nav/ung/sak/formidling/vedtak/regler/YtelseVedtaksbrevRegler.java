@@ -4,22 +4,22 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatInfo;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinjeUtleder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
 
 @ApplicationScoped
 @FagsakYtelseTypeRef
@@ -30,7 +30,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     private static final Logger LOG = LoggerFactory.getLogger(YtelseVedtaksbrevRegler.class);
 
     private BehandlingRepository behandlingRepository;
-    private DetaljertResultatTidslinjeUtleder detaljertResultatUtleder;
+    private Instance<DetaljertResultatTidslinjeUtleder> detaljertResultatUtledere;
     private Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances;
 
     public YtelseVedtaksbrevRegler() {
@@ -39,57 +39,80 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
     @Inject
     public YtelseVedtaksbrevRegler(
         BehandlingRepository behandlingRepository,
-        DetaljertResultatTidslinjeUtleder detaljertResultatUtleder,
+        @Any Instance<DetaljertResultatTidslinjeUtleder> detaljertResultatUtledere,
         @Any Instance<VedtaksbrevInnholdbyggerStrategy> innholdbyggerStrategiesInstances
     ) {
         this.behandlingRepository = behandlingRepository;
-        this.detaljertResultatUtleder = detaljertResultatUtleder;
+        this.detaljertResultatUtledere = detaljertResultatUtledere;
         this.innholdbyggerStrategiesInstances = innholdbyggerStrategiesInstances;
     }
 
     @Override
     public BehandlingVedtaksbrevResultat kjør(Long behandlingId) {
         var behandling = behandlingRepository.hentBehandling(behandlingId);
-        LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
+        var detaljertResultatUtleder = FagsakYtelseTypeRef.Lookup.find(detaljertResultatUtledere, behandling.getFagsakYtelseType()).orElseThrow();
+        DetaljertResultatTidslinje detaljertResultatTidslinje = detaljertResultatUtleder.utledDetaljertResultat(behandling);
         return bestemResultat(behandling, detaljertResultatTidslinje);
     }
 
-    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultat) {
+    private BehandlingVedtaksbrevResultat bestemResultat(Behandling behandling, DetaljertResultatTidslinje detaljertResultat) {
         var innholdbyggerStrategies = innholdbyggerStrategiesInstances.select(new FagsakYtelseTypeRef.FagsakYtelseTypeRefLiteral(behandling.getFagsakYtelseType()));
 
-        var strategyResultater = innholdbyggerStrategies.stream()
-            .filter(it -> it.skalEvaluere(behandling, detaljertResultat))
-            .map(it -> it.evaluer(behandling, detaljertResultat))
+        var kandidater = innholdbyggerStrategies.stream().toList();
+
+        var overstyrendeIngenBrev = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.OVERSTYRENDE_INGEN_BREV)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
+            .toList();
+        if (!overstyrendeIngenBrev.isEmpty()) {
+            return lagIngenBrevResultat(detaljertResultat, overstyrendeIngenBrev);
+        }
+
+        var overstyrendeEnkeltbrev = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.OVERSTYRENDE_ENKELTBREV)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
+            .toList().stream()
+            .filter(it -> it.bygger() != null)
+            .toList();
+        if (overstyrendeEnkeltbrev.size() > 1) {
+            throw new IllegalStateException("Flere overstyrende enkeltbrev-strategier ga resultat, forventet maks ett: "
+                + overstyrendeEnkeltbrev.stream().map(VedtaksbrevStrategyResultat::forklaring).collect(Collectors.joining(", ")));
+        }
+        if (!overstyrendeEnkeltbrev.isEmpty()) {
+            return lagBrevResultat(detaljertResultat, overstyrendeEnkeltbrev);
+        }
+
+        // 3. Normale, additive strategier.
+        var normaleResultater = kandidater.stream()
+            .filter(it -> it.presedens() == Presedens.NORMAL)
+            .flatMap(it -> it.evaluer(behandling, detaljertResultat).stream())
             .toList();
 
-
-        if (strategyResultater.size() > 1) {
-            LOG.info("Flere resultater for strategier: {}", strategyResultater.stream()
+        if (normaleResultater.size() > 1) {
+            LOG.info("Flere resultater for strategier: {}", normaleResultater.stream()
                 .map(VedtaksbrevStrategyResultat::forklaring)
                 .collect(Collectors.joining(", ")));
         }
 
-        var ingenBrevResultat = strategyResultater.stream()
-            .filter(it -> it.bygger() == null)
-            .toList();
-
-        if (!ingenBrevResultat.isEmpty()) {
-            return lagIngenBrevResultat(detaljertResultat, ingenBrevResultat);
-        }
-
-        var brevResultater = strategyResultater.stream()
+        var brevResultater = normaleResultater.stream()
             .filter(it -> it.bygger() != null)
             .toList();
-
         if (!brevResultater.isEmpty()) {
             return lagBrevResultat(detaljertResultat, brevResultater);
+        }
+
+        var ingenBrevResultat = normaleResultater.stream()
+            .filter(it -> it.bygger() == null)
+            .toList();
+        if (!ingenBrevResultat.isEmpty()) {
+            return lagIngenBrevResultat(detaljertResultat, ingenBrevResultat);
         }
 
         //Fallback for ukjente brev
         return lagIkkeImplementertBrevResultat(detaljertResultat);
     }
 
-    private static BehandlingVedtaksbrevResultat lagIngenBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
+    private static BehandlingVedtaksbrevResultat lagIngenBrevResultat(DetaljertResultatTidslinje detaljertResultat, List<VedtaksbrevStrategyResultat> ingenBrevResultat) {
         return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat,
             ingenBrevResultat.stream()
                 .map(it -> VedtaksbrevRegelResultat.ingenBrev(
@@ -98,7 +121,7 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         );
     }
 
-    private static BehandlingVedtaksbrevResultat lagBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat, List<VedtaksbrevStrategyResultat> brevResultater) {
+    private static BehandlingVedtaksbrevResultat lagBrevResultat(DetaljertResultatTidslinje detaljertResultat, List<VedtaksbrevStrategyResultat> brevResultater) {
         var vedtaksbrev = brevResultater.stream()
             .map(it -> new Vedtaksbrev(
                 it.dokumentMalType(),
@@ -109,17 +132,17 @@ public class YtelseVedtaksbrevRegler implements VedtaksbrevRegel {
         return BehandlingVedtaksbrevResultat.medBrev(detaljertResultat, vedtaksbrev);
     }
 
-    private static BehandlingVedtaksbrevResultat lagIkkeImplementertBrevResultat(LocalDateTimeline<DetaljertResultat> detaljertResultat) {
-        var resultaterInfo = detaljertResultat
-            .toSegments().stream()
-            .flatMap(it -> it.getValue().resultatInfo().stream())
-            .collect(Collectors.toSet());
-
-        String forklaring = "Ingen brev ved resultater: %s".formatted(String.join(", ", resultaterInfo.stream().map(DetaljertResultatInfo::utledForklaring).toList()));
+    private static BehandlingVedtaksbrevResultat lagIkkeImplementertBrevResultat(DetaljertResultatTidslinje detaljertResultat) {
         return BehandlingVedtaksbrevResultat.utenBrev(detaljertResultat, List.of(
-            VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, forklaring
+            VedtaksbrevRegelResultat.ingenBrev(IngenBrevÅrsakType.IKKE_IMPLEMENTERT, utledForklaring(detaljertResultat)
             )));
     }
 
+    private static String utledForklaring(DetaljertResultatTidslinje detaljertResultat) {
+        if (detaljertResultat.totalTidslinje().isEmpty()) {
+            return "Ingen strategy fant resultat for grunnlaget: tom tidslinje.";
+        }
+        return "Ingen strategy fant resultat for grunnlaget.";
+    }
 
 }

@@ -16,10 +16,12 @@ public record VedtaksbrevStrategyResultat(
         return new VedtaksbrevStrategyResultat(
             null,
             null,
-            new VedtaksbrevEgenskaper(false,
-                false,
-                false,
-                false),
+            VedtaksbrevEgenskaper.builder()
+                .kanHindre(false)
+                .kanOverstyreHindre(false)
+                .kanRedigere(false)
+                .kanOverstyreRediger(false)
+                .build(),
             ingenBrevÅrsakType, forklaring
         );
     }
@@ -31,10 +33,12 @@ public record VedtaksbrevStrategyResultat(
         return new VedtaksbrevStrategyResultat(
             dokumentMalType,
             bygger,
-            new VedtaksbrevEgenskaper(false,
-                false,
-                false,
-                false),
+            VedtaksbrevEgenskaper.builder()
+                .kanHindre(false)
+                .kanOverstyreHindre(false)
+                .kanRedigere(false)
+                .kanOverstyreRediger(false)
+                .build(),
             null,
             forklaring
         );

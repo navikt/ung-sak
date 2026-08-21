@@ -25,6 +25,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.krav.PeriodeMedUtfall;
@@ -33,11 +34,13 @@ import no.nav.ung.sak.kontrakt.krav.StatusForPerioderPåBehandlingInkludertVilk�
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.søknadsfrist.SøknadsfristTjenesteProvider;
 import no.nav.ung.sak.trigger.ProsessTriggere;
+import no.nav.ung.sak.trigger.ProsessTriggerFilter;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -54,6 +57,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
     private SøknadsfristTjenesteProvider søknadsfristTjenesteProvider;
     private ProsessTriggereRepository prosessTriggereRepository;
+    private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
 
     public PerioderTilBehandlingMedKildeRestTjeneste() {
     }
@@ -62,11 +66,13 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public PerioderTilBehandlingMedKildeRestTjeneste(BehandlingRepository behandlingRepository,
                                                      @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                                      SøknadsfristTjenesteProvider søknadsfristTjenesteProvider,
-                                                     ProsessTriggereRepository prosessTriggereRepository) {
+                                                     ProsessTriggereRepository prosessTriggereRepository,
+                                                     UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository) {
         this.behandlingRepository = behandlingRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.søknadsfristTjenesteProvider = søknadsfristTjenesteProvider;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
     }
 
     @GET
@@ -82,7 +88,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     public StatusForPerioderPåBehandling hentPerioderTilBehandling(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
-        return getStatusForPerioderPåBehandling(ref);
+        return getStatusForPerioderPåBehandling(ref, behandling);
     }
 
     @GET
@@ -101,7 +107,7 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         var ref = BehandlingReferanse.fra(behandling);
         var perioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, ref.getFagsakYtelseType(), ref.getBehandlingType());
-        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref);
+        StatusForPerioderPåBehandling statusForPerioderPåBehandling = getStatusForPerioderPåBehandling(ref, behandling);
 
         var timelineTilVurdering = utledTidslinjeTilVurdering(behandling, perioderTilVurderingTjeneste);
 
@@ -136,13 +142,29 @@ public class PerioderTilBehandlingMedKildeRestTjeneste {
     }
 
 
-    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref) {
-        var kravdokumenterTilBehandling = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref).hentPerioderTilVurdering(ref);
+    private StatusForPerioderPåBehandling getStatusForPerioderPåBehandling(BehandlingReferanse ref, Behandling behandling) {
+        var vurderSøknadsfristTjeneste = søknadsfristTjenesteProvider.finnVurderSøknadsfristTjeneste(ref);
+        var kravdokumenterTilBehandling = vurderSøknadsfristTjeneste.hentPerioderTilVurdering(ref);
+
+        // Filtrer til kun kravdokumenter som er relevante for denne behandlingen.
+        // For revurderinger betyr dette at søknaden (som tilhører førstegangsbehandlingen) utelates,
+        // slik at kun dokumenter/triggere som faktisk har tilkommet i behandlingen vises.
+        var relevanteKravdokumenter = vurderSøknadsfristTjeneste.relevanteKravdokumentForBehandling(ref);
+        var filtrertKravdokumenter = kravdokumenterTilBehandling.entrySet().stream()
+            .filter(entry -> relevanteKravdokumenter.stream()
+                .anyMatch(relevantt -> relevantt.getJournalpostId().equals(entry.getKey().getJournalpostId())))
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
         var prosesstriggere = prosessTriggereRepository.hentGrunnlag(ref.getBehandlingId());
+        var normaliserteTriggere = ProsessTriggerFilter.forKravperioder(
+            prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList());
         return UtledStatusForPerioderPåBehandling.utledStatus(
-            kravdokumenterTilBehandling,
-            prosesstriggere.stream().map(ProsessTriggere::getTriggere).flatMap(Collection::stream).toList()
+            filtrertKravdokumenter,
+            normaliserteTriggere,
+            behandling,
+            ungdomsprogramPeriodeRepository
         );
     }
+
 
 }
