@@ -23,8 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -33,7 +32,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
     private BehandlingRepository behandlingRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
-    private Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere;
+    private Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester;
 
     ForeslåBehandlingsresultatAktivitetspengerTjeneste() {
         // for proxy
@@ -42,11 +41,11 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
     @Inject
     public ForeslåBehandlingsresultatAktivitetspengerTjeneste(BehandlingRepositoryProvider repositoryProvider,
                                                                @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
-                                                               @Any Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere) {
+                                                               @Any Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester) {
         super(repositoryProvider);
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
-        this.alleVilkårsavklaringOppdaterere = alleVilkårsavklaringOppdaterere;
+        this.alleVilkårsavklaringTjenester = alleVilkårsavklaringTjenester;
     }
 
     @Override
@@ -69,12 +68,13 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
     }
 
     /**
-     * Behandlingen skal opphøres dersom det finnes en {@link VilkårsavklaringOppdaterer} som gjelder for en av
+     * Behandlingen skal opphøres dersom det finnes en {@link VilkårsavklaringTjeneste} som gjelder for en av
      * behandlingens årsaker, hvis seneste avklaring under arbeid er av typen {@link Avklaringtype#OPPHØR},
      * og det finnes en avslått vilkårsperiode som overlapper avklaringens periode.
      */
     @Override
     protected boolean skalBehandlingenSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
+        // Avgrenser hvilke behandlingsårsaker vi leter etter opphør for
         var behandlingårsakerSomSkalKunneEndreBehandlingResultat = Set.of(
             BehandlingÅrsakType.ENDRET_BOSTED
         );
@@ -86,7 +86,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
         // Det er kun opphør dersom avklaringen faktisk gjelder en periode med avslått vilkår (overlapp).
         return behandlingÅrsakerTyper.stream()
-            .flatMap(årsak -> VilkårsavklaringOppdaterer.finnForÅrsak(alleVilkårsavklaringOppdaterere, årsak).stream())
+            .flatMap(årsak -> VilkårsavklaringTjeneste.finnForÅrsak(alleVilkårsavklaringTjenester, årsak).stream())
             .flatMap(oppdaterer -> oppdaterer.hentSenesteAvklaringUnderArbeid(ref.getBehandlingId()).stream())
             .filter(avklaring -> Avklaringtype.OPPHØR.equals(avklaring.avklaringtype()))
             .anyMatch(avklaring -> harOverlappendeAvslåttVilkårsperiode(vilkårene, avklaring.periode()));

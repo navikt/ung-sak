@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import org.slf4j.Logger;
 
 import java.util.List;
@@ -28,7 +28,7 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
 
     private BehandlingAnsvarligRepository behandlingAnsvarligRepository;
     private BehandlingRepository behandlingRepository;
-    private List<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere;
+    private List<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester;
 
     LokalkontorForeslåVilkårSteg() {
         // for CDI proxy
@@ -36,10 +36,10 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
 
     @Inject
     public LokalkontorForeslåVilkårSteg(BehandlingAnsvarligRepository behandlingAnsvarligRepository, BehandlingRepository behandlingRepository,
-                                        Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere) {
+                                        Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester) {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
         this.behandlingRepository = behandlingRepository;
-        this.alleVilkårsavklaringOppdaterere = VilkårsavklaringOppdaterer.sortert(alleVilkårsavklaringOppdaterere);
+        this.alleVilkårsavklaringTjenester = VilkårsavklaringTjeneste.sortert(alleVilkårsavklaringTjenester);
     }
 
 
@@ -70,8 +70,8 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
             // Det er fordi vi ikke kan gjøre en vurdering før brukeren har blitt varslet om forslaget og har hatt rett til å uttale seg.
             // Når behandlingen hopper tilbake fra foreslå vedtak, er det vilkårsperioden for tilsvarende den avklarte periode som settes til vurdering.
             // Vilkårsvurdering beholdes intakt, slik at saksbehandler kan redigere den foreslåtte vurderingen.
-            alleVilkårsavklaringOppdaterere.forEach(vilkårsavklaringOppdaterer ->
-                vilkårsavklaringOppdaterer.settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(kontekst.getBehandlingId())
+            alleVilkårsavklaringTjenester.forEach(vilkårsavklaringTjeneste ->
+                vilkårsavklaringTjeneste.settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(kontekst.getBehandlingId())
             );
         }
     }

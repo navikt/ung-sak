@@ -9,7 +9,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.task.BehandlingProsessTask;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class VilkårsavklaringFerdigstillerTask extends BehandlingProsessTask {
 
     public static final String TASKTYPE = "iverksetteVedtak.vilkårsavklaringFerdigstillerTask";
 
-    private List<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere;
+    private List<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester;
 
     public VilkårsavklaringFerdigstillerTask() {
         // for CDI proxy
@@ -28,15 +28,15 @@ public class VilkårsavklaringFerdigstillerTask extends BehandlingProsessTask {
 
     @Inject
     public VilkårsavklaringFerdigstillerTask(BehandlingLåsRepository BehandlingLåsRepository,
-                                             @Any Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere) {
+                                             @Any Instance<VilkårsavklaringTjeneste> alleVilkårsavklaringTjenester) {
         super(BehandlingLåsRepository);
-        this.alleVilkårsavklaringOppdaterere = VilkårsavklaringOppdaterer.sortert(alleVilkårsavklaringOppdaterere);
+        this.alleVilkårsavklaringTjenester = VilkårsavklaringTjeneste.sortert(alleVilkårsavklaringTjenester);
     }
 
     @Override
     protected void prosesser(ProsessTaskData prosessTaskData) {
         long behandlingId = Long.parseLong(prosessTaskData.getBehandlingId());
-        alleVilkårsavklaringOppdaterere.forEach(oppdaterer ->
+        alleVilkårsavklaringTjenester.forEach(oppdaterer ->
             oppdaterer.settAlleAvklaringerTilFerdig(behandlingId)
         );
     }

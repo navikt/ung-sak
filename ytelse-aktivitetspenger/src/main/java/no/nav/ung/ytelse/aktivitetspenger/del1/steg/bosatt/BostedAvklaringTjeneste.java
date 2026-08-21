@@ -19,7 +19,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class BostedAvklaringTjeneste implements VilkårsavklaringOppdaterer {
+public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(BostedAvklaringTjeneste.class);
 
