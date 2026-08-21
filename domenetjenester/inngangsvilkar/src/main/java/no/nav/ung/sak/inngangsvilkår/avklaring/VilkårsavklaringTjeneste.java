@@ -14,6 +14,15 @@ public interface VilkårsavklaringTjeneste {
 
     void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId);
 
+
+    /**
+     * Angir om denne tjenesten gjelder for gitt {@link BehandlingÅrsakType}.
+     * <p>
+     * Vilkårsavklaringer styres av behandlingstriggere representert som {@link BehandlingÅrsakType}.
+     * For hvert vilkår skal det finnes en entydig kobling til én årsak.
+     * Brukes for å avgjøre hvilken {@code AvklaringTjeneste} (implementasjon av
+     * {@link VilkårsavklaringTjeneste}) som skal håndtere en gitt trigger.
+     */
     boolean gjelderFor(BehandlingÅrsakType behandlingÅrsakType);
 
     Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringUnderArbeid(long behandlingId);

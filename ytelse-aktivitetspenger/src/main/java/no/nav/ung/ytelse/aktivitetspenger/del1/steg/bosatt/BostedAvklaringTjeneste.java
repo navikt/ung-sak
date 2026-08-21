@@ -160,7 +160,7 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     @Override
     public boolean gjelderFor(BehandlingÅrsakType behandlingÅrsakType) {
-        return BehandlingÅrsakType.ENDRET_BOSTED.equals(behandlingÅrsakType);
+        return behandlingÅrsakType == BehandlingÅrsakType.ENDRET_BOSTED;
     }
 
     @Override
