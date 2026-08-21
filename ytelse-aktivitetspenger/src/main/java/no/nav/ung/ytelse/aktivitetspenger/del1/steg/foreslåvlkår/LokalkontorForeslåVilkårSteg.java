@@ -65,7 +65,7 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
 
     @Override
     public void vedHoppOverBakover(BehandlingskontrollKontekst kontekst, BehandlingStegModell modell, BehandlingStegType tilSteg, BehandlingStegType fraSteg) {
-        if (!LOKALKONTOR_FORESLÅ_VILKÅR.equals(tilSteg)) {
+        if (tilSteg != LOKALKONTOR_FORESLÅ_VILKÅR) {
             // I flyten for avslag/opphør er det ikke behandlingstrigger som styrer vurdert periode, men perioden som til enhver tid er foreslått avklart.
             // Det er fordi vi ikke kan gjøre en vurdering før brukeren har blitt varslet om forslaget og har hatt rett til å uttale seg.
             // Når behandlingen hopper tilbake fra foreslå vedtak, er det vilkårsperioden for tilsvarende den avklarte periode som settes til vurdering.

@@ -7,7 +7,8 @@ import no.nav.ung.sak.typer.Periode;
 
 // OBS: Det utføres set-operasjoner vha denne recorden.
 // Feltene brukes for å avgjøre om en avklaring har endret innhold og må varsles på nytt.
-// Referanse, vurdertAv og tidspunkt er derfor utelatt.
+// Feltet skalVarsle regnes som en del av innholdet, da en endring av dette feltet gjør at etterlysningene må oppdateres.
+// Feltene Referanse, vurdertAv og tidspunkt er utelatt.
 public record BostedAvklaringInnhold(
     Periode periode,
     BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,

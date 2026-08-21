@@ -123,7 +123,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         }
         return godkjent == that.godkjent
             && erManuellVurdering == that.erManuellVurdering
-            && Objects.equals(periode, that.periode)
+            && Objects.equals(getPeriode(), that.getPeriode())
             && ikkeOppfyltÅrsak == that.ikkeOppfyltÅrsak
             && Objects.equals(begrunnelse, that.begrunnelse)
             && Objects.equals(fritekstVurderingBrev, that.fritekstVurderingBrev)
@@ -133,7 +133,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+        return Objects.hash(getPeriode(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     @Override

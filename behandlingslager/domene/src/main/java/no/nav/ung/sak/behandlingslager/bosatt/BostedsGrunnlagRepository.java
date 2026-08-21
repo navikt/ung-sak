@@ -84,10 +84,13 @@ public class BostedsGrunnlagRepository {
     }
 
     public void settAlleAvklaringerFerdig(long behandlingId) {
-        lagre(behandlingId, BostedsGrunnlag::settAlleAvklaringerTilFerdig);
+        var bleEndret = lagre(behandlingId, BostedsGrunnlag::settAlleAvklaringerTilFerdig);
+        if (!bleEndret) {
+            LOG.info("settAlleAvklaringerFerdig ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
+        }
     }
 
-    public void lagre(Long behandlingId, Consumer<BostedsGrunnlag> grunnlagsoperasjon) {
+    public boolean lagre(Long behandlingId, Consumer<BostedsGrunnlag> grunnlagsoperasjon) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId);
         var nyttGrunnlag = eksisterendeGrunnlag
             .map(BostedsGrunnlag::nyttGrunnlagMedReferanserFra)
@@ -97,12 +100,13 @@ public class BostedsGrunnlagRepository {
 
         if (eksisterendeGrunnlag.isPresent()) {
             if (eksisterendeGrunnlag.get().equals(nyttGrunnlag)) {
-                return;
+                return false;
             }
             deaktiverEksisterende(eksisterendeGrunnlag.get());
         }
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
+        return true;
     }
 
     /**
