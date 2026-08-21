@@ -1,0 +1,99 @@
+package no.nav.ung.ytelse.aktivitetspenger.foreslåresultat;
+
+import java.util.List;
+import java.util.Set;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandling.BehandlingReferanse;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandlingsresultatTjeneste;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
+@ApplicationScoped
+public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends ForeslåBehandlingsresultatTjeneste {
+
+    private BehandlingRepository behandlingRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere;
+
+    ForeslåBehandlingsresultatAktivitetspengerTjeneste() {
+        // for proxy
+    }
+
+    @Inject
+    public ForeslåBehandlingsresultatAktivitetspengerTjeneste(BehandlingRepositoryProvider repositoryProvider,
+                                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester,
+                                                               @Any Instance<VilkårsavklaringOppdaterer> alleVilkårsavklaringOppdaterere) {
+        super(repositoryProvider);
+        this.behandlingRepository = repositoryProvider.getBehandlingRepository();
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
+        this.alleVilkårsavklaringOppdaterere = alleVilkårsavklaringOppdaterere;
+    }
+
+    @Override
+    protected DatoIntervallEntitet getMaksPeriode(Long behandlingId) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+        var definerendeVilkår = vilkårsPerioderTilVurderingTjeneste.definerendeVilkår();
+        var timeline = new LocalDateTimeline<Boolean>(List.of());
+
+        for (VilkårType vilkårType : definerendeVilkår) {
+            timeline = timeline.combine(new LocalDateTimeline<>(vilkårsPerioderTilVurderingTjeneste.utled(behandlingId, vilkårType)
+                .stream()
+                .map(it -> new LocalDateSegment<>(it.getFomDato(), it.getTomDato(), true))
+                .toList()), StandardCombinators::coalesceRightHandSide, LocalDateTimeline.JoinStyle.CROSS_JOIN);
+        }
+        if (timeline.isEmpty()) {
+            return behandling.getFagsak().getPeriode();
+        }
+        return DatoIntervallEntitet.fraOgMedTilOgMed(timeline.getMinLocalDate(), timeline.getMaxLocalDate());
+    }
+
+    /**
+     * Behandlingen skal opphøres dersom det finnes en {@link VilkårsavklaringOppdaterer} som gjelder for en av
+     * behandlingens årsaker, hvis seneste avklaring under arbeid er av typen {@link Avklaringtype#OPPHØR},
+     * og det finnes en avslått vilkårsperiode som overlapper avklaringens periode.
+     */
+    @Override
+    protected boolean skalBehandlingenSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
+        var behandlingårsakerSomSkalKunneEndreBehandlingResultat = Set.of(
+            BehandlingÅrsakType.ENDRET_BOSTED
+        );
+
+        Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
+        var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper()
+                .stream().filter(behandlingårsakerSomSkalKunneEndreBehandlingResultat::contains)
+                .toList();
+
+        // Det er kun opphør dersom avklaringen faktisk gjelder en periode med avslått vilkår (overlapp).
+        return behandlingÅrsakerTyper.stream()
+            .flatMap(årsak -> VilkårsavklaringOppdaterer.finnForÅrsak(alleVilkårsavklaringOppdaterere, årsak).stream())
+            .flatMap(oppdaterer -> oppdaterer.hentSenesteAvklaringUnderArbeid(ref.getBehandlingId()).stream())
+            .filter(avklaring -> Avklaringtype.OPPHØR.equals(avklaring.avklaringtype()))
+            .anyMatch(avklaring -> harOverlappendeAvslåttVilkårsperiode(vilkårene, avklaring.periode()));
+    }
+
+    private boolean harOverlappendeAvslåttVilkårsperiode(Vilkårene vilkårene, DatoIntervallEntitet periode) {
+        var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(periode);
+        return vilkårTidslinjer.values().stream().anyMatch(this::harAvslåtteVilkårsPerioder);
+    }
+}
