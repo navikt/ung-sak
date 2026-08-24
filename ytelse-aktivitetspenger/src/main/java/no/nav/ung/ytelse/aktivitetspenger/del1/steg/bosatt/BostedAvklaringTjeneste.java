@@ -2,15 +2,15 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -20,7 +20,8 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOppdaterer;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class BostedAvklaringTjeneste implements VilkårsavklaringOppdaterer {
+@BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED)
+public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     private static final Logger log = LoggerFactory.getLogger(BostedAvklaringTjeneste.class);
 
@@ -156,6 +158,13 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringOppdaterer {
     public void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId) {
         var perioderTidligereVurdertEtterAvklaring = hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
         inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(behandlingId, VilkårType.BOSTEDSVILKÅR, perioderTidligereVurdertEtterAvklaring);
+    }
+
+    @Override
+    public Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringUnderArbeid(long behandlingId) {
+        return hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream()
+            .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt))
+            .map(avklaring -> new VilkårsavklaringUnderArbeid(avklaring.getAvklaringtype(), avklaring.getPeriode()));
     }
 
 }

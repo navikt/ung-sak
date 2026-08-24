@@ -1,6 +1,6 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
-import no.nav.ung.kodeverk.bosatt.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;

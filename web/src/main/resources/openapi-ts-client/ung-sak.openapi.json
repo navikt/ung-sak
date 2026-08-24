@@ -1326,11 +1326,6 @@
         "type" : "string",
         "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
-      "ung.kodeverk.bosatt.Avklaringtype" : {
-        "enum" : [ "AVSLAG", "OPPHØR" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "AVSLAG", "OPPHØR" ]
-      },
       "ung.kodeverk.bosatt.Kilde" : {
         "enum" : [ "SØKNAD", "SAKSBEHANDLER" ],
         "type" : "string",
@@ -1453,6 +1448,11 @@
         "enum" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "UDEFINERT" ]
+      },
+      "ung.kodeverk.vilkår.Avklaringtype" : {
+        "enum" : [ "AVSLAG", "OPPHØR" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLAG", "OPPHØR" ]
       },
       "ung.kodeverk.vilkår.Avslagsårsak" : {
         "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "3001", "3003", "3004", "3005", "3002", "4001", "-" ],
@@ -2237,7 +2237,7 @@
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto" : {
         "properties" : {
           "avklaringtype" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.bosatt.Avklaringtype"
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avklaringtype"
           },
           "begrunnelse" : {
             "type" : "string"

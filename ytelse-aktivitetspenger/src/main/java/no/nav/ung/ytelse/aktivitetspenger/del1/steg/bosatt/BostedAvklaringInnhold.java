@@ -1,6 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
-import no.nav.ung.kodeverk.bosatt.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;

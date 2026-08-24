@@ -22,6 +22,8 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderFaktaOmBostedDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringTjeneste;
 
 import java.time.LocalDateTime;
@@ -46,7 +48,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     public VurderFaktaOmBostedOppdaterer(BehandlingRepository behandlingRepository,
                                          HistorikkinnslagRepository historikkinnslagRepository,
                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                         BostedAvklaringTjeneste bostedAvklaringTjeneste) {
+                                         @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;

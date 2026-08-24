@@ -176,7 +176,7 @@ public class InngangsvilkårVurderingTjeneste {
 
     public static Avslagsårsak mapBostedsvilkårÅrsak(BostedsvilkårIkkeOppfyltÅrsak årsak) {
         if (årsak == null || årsak == BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT) {
-            return Avslagsårsak.UDEFINERT;
+            return null;
         }
         return switch (årsak) {
             case IKKE_BOSATTADRESSE_I_TRONDHEIM,
@@ -184,7 +184,7 @@ public class InngangsvilkårVurderingTjeneste {
                  STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
                  ANNET ->
                 Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
-            default -> Avslagsårsak.UDEFINERT;
+            default -> null;
         };
     }
 }

@@ -1,8 +1,10 @@
-package no.nav.ung.kodeverk.bosatt;
+package no.nav.ung.kodeverk.vilkår;
 
 /**
- * Type avklaring for bostedsvilkåret. Avgjør hvilken oppgavetype som sendes til bruker
+ * Type avklaring for et vilkår. Avgjør hvilken oppgavetype som sendes til bruker
  * og for readonly-visning av tidligere forslag, siden tom konverteres til gjeldende vilkårsperiode ende ved lagring forslag.
+ * <p>
+ * Felles for alle vilkårsavklaringer
  */
 public enum Avklaringtype {
     AVSLAG,

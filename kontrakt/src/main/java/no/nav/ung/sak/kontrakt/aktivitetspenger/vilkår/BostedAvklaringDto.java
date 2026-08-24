@@ -1,7 +1,7 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
 import jakarta.validation.constraints.NotNull;
-import no.nav.ung.kodeverk.bosatt.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.typer.Periode;
 
