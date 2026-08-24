@@ -15,29 +15,34 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.arbeidsforhold.InntektspostType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.domene.iay.modell.Inntektspost;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BeregningsgrunnlagDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto;
-import no.nav.ung.sak.web.app.ungdomsytelse.BehandlingAvsluttetTidspunkt;
-import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.BesteBeregningResultatType;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.PgiÅrsinntektDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.typer.Beløp;
+import no.nav.ung.sak.web.app.ungdomsytelse.BehandlingAvsluttetTidspunkt;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.sak.ytelseperioder.MånedsvisTidslinjeUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.*;
+import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.Year;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,12 +59,14 @@ public class AktivitetspengerRestTjeneste {
     public static final String AKTIVITETSPENGER_BASE_PATH = "/aktivitetspenger";
     public static final String BEREGNINGSGRUNNLAG_PATH = AKTIVITETSPENGER_BASE_PATH + "/beregningsgrunnlag";
     public static final String SATS_OG_UTBETALING_PATH = AKTIVITETSPENGER_BASE_PATH + "/månedsvis-sats-og-utbetaling";
+    public static final String PERIODER_SOM_KAN_AVKORTES_PATH = AKTIVITETSPENGER_BASE_PATH + "/perioder-som-kan-avkortes";
 
     private BehandlingRepository behandlingRepository;
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private BeregningTjeneste beregningTjeneste;
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder;
+    private AvkortTjeneste avkortTjeneste;
 
     public AktivitetspengerRestTjeneste() {
         // for CDI proxy
@@ -70,12 +77,13 @@ public class AktivitetspengerRestTjeneste {
                                         AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
                                         BeregningTjeneste beregningTjeneste,
                                         TilkjentYtelseRepository tilkjentYtelseRepository,
-                                        MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder) {
+                                        MånedsvisTidslinjeUtleder månedsvisTidslinjeUtleder, AvkortTjeneste avkortTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.beregningTjeneste = beregningTjeneste;
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.månedsvisTidslinjeUtleder = månedsvisTidslinjeUtleder;
+        this.avkortTjeneste = avkortTjeneste;
     }
 
     @GET
@@ -125,6 +133,41 @@ public class AktivitetspengerRestTjeneste {
             return null;
         }
         return mapTilBeregningsgrunnlagDto(beregningsgrunnlag.get(), inntektsposter);
+    }
+
+
+    @GET
+    @Operation(description = "Henter perioder som kan avkortes av saksbehandler ved nav-kontor", tags = "avp", responses = {
+        @ApiResponse(responseCode = "200", description = "Perioder pr vilkår hvor saksbehandler kan avkorte", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AvkortingsperioderResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Input-validering feiler, inkludert at tjenesten er forsøkt brukt for annen ytelse enn aktivitetspenger eller for klage/tilbakekrevingsbehandlinger"),
+    })
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
+    @Path(PERIODER_SOM_KAN_AVKORTES_PATH)
+    public Response hentPerioderSomKanAvkortesAvNavKontor(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Tjenesten er kun for aktivitetspenger").build();
+        }
+        if (!behandling.erYtelseBehandling()){
+            return Response.status(Response.Status.BAD_REQUEST).entity("Tjenesten er kun for ytelsesbehandlinger").build();
+        }
+
+        Map<VilkårType, LocalDateTimeline<Boolean>> resultat = avkortTjeneste.utledTidslinjerForMuligAvkorting(behandling.getId());
+        AvkortingsperioderResponse dto = new AvkortingsperioderResponse(resultat.entrySet().stream().map(e -> new VilkårMedMuligAvkortingPeriode(e.getKey(), e.getValue().segmenter().stream().map(s -> new MuligAvkortingPeriode(s.getFom(), s.getTom())).toList())).toList());
+        return Response.ok(dto).build();
+    }
+
+    public record AvkortingsperioderResponse(@NotNull List<@NotNull @Valid VilkårMedMuligAvkortingPeriode> resultat) {
+
+    }
+
+    public record VilkårMedMuligAvkortingPeriode(@NotNull @Valid VilkårType vilkårType,
+                                                 @NotNull List<@Valid @NotNull MuligAvkortingPeriode> perioder) {
+
+    }
+
+    public record MuligAvkortingPeriode(@NotNull LocalDate fom, @NotNull LocalDate tom) {
+
     }
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag, List<Inntektspost> inntektsposter) {

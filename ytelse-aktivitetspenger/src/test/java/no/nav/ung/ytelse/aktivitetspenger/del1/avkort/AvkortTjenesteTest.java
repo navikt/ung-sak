@@ -17,13 +17,6 @@ import static org.mockito.Mockito.when;
 class AvkortTjenesteTest {
 
     @Test
-    void skal_gi_tom_tidslinje_når_grunnlag_ikke_finnes() {
-        LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkortingFraStartdatoer(null);
-
-        assertThat(tidslinje.isEmpty()).isTrue();
-    }
-
-    @Test
     void skal_gi_tom_tidslinje_når_ingen_startdatoer_finnes() {
         StartdatoGrunnlag grunnlag = grunnlagMedStartdatoer();
 

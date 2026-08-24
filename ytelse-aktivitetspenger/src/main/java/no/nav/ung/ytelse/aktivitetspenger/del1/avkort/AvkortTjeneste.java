@@ -9,15 +9,21 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.ytelse.aktivitetspenger.perioder.AktivitetspengerSøknadsperiodeTjeneste;
 
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Dependent
 public class AvkortTjeneste {
+
+    private final static Set<VilkårType> STØTTEDE_VILKÅR_TYPER = Set.of(VilkårType.BOSTEDSVILKÅR, VilkårType.BISTANDSVILKÅR, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
 
     private final StartdatoRepository startdatoRepository;
     private final VilkårResultatRepository vilkårResultatRepository;
@@ -28,16 +34,30 @@ public class AvkortTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
+    public Map<VilkårType, LocalDateTimeline<Boolean>> utledTidslinjerForMuligAvkorting(Long behandlingId) {
+        StartdatoGrunnlag startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandlingId).orElse(null);
+        Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
+        return STØTTEDE_VILKÅR_TYPER.stream().collect(Collectors.toMap(Function.identity(),
+                vilkårType -> utledTidslinjeForMuligAvkorting(vilkårType, vilkårene, startdatoGrunnlag)
+            ));
+    }
+
     public LocalDateTimeline<Boolean> utledTidslinjeForMuligAvkorting(Long behandlingId, VilkårType vilkårType) {
-        if (!Set.of(VilkårType.BOSTEDSVILKÅR, VilkårType.BISTANDSVILKÅR, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR).contains(vilkårType)) {
+        if (!STØTTEDE_VILKÅR_TYPER.contains(vilkårType)) {
             throw new IllegalArgumentException("AvkortTjeneste er tenkt brukt for vilkårtyper knyttet til nav-kontor-vilkår. Endre dette ved behov.");
         }
 
         StartdatoGrunnlag startdatoGrunnlagOpt = startdatoRepository.hentGrunnlag(behandlingId).orElse(null);
-        LocalDateTimeline<VilkårPeriode> tidslinjeIkkeRelevantForVilkåret = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
-            .map(vilkårene -> vilkårene.getVilkårTimeline(vilkårType).filterValue(vilkårperiode -> vilkårperiode.getUtfall() == Utfall.IKKE_RELEVANT))
-            .orElse(LocalDateTimeline.empty());
-        return utledTidslinjeForMuligAvkorting(startdatoGrunnlagOpt, tidslinjeIkkeRelevantForVilkåret);
+        Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElse(null);
+        return utledTidslinjeForMuligAvkorting(vilkårType, vilkårene, startdatoGrunnlagOpt);
+    }
+
+    private static LocalDateTimeline<Boolean> utledTidslinjeForMuligAvkorting(VilkårType vilkårType, Vilkårene vilkårene, StartdatoGrunnlag startdatoGrunnlag) {
+        if(vilkårene == null || startdatoGrunnlag == null){
+            return LocalDateTimeline.empty();
+        }
+        LocalDateTimeline<VilkårPeriode> tidslinjeIkkeRelevantForVilkåret = vilkårene.getVilkårTimeline(vilkårType).filterValue(vilkårperiode -> vilkårperiode.getUtfall() == Utfall.IKKE_RELEVANT);
+        return utledTidslinjeForMuligAvkorting(startdatoGrunnlag, tidslinjeIkkeRelevantForVilkåret);
     }
 
     public void validerAvkortBruktRiktig(Long behandlingId, LocalDateTimeline<?> perioderSattTilAvkortet, VilkårType vilkårType) {
@@ -62,9 +82,6 @@ public class AvkortTjeneste {
     }
 
     static LocalDateTimeline<Boolean> utledTidslinjeForMuligAvkortingFraStartdatoer(StartdatoGrunnlag startdatoGrunnlag) {
-        if (startdatoGrunnlag == null) {
-            return LocalDateTimeline.empty();
-        }
         LocalDate sistSøkteStartdatoIBehandlingen = startdatoGrunnlag.getRelevanteStartdatoer().getStartdatoer()
             .stream()
             .map(SøktStartdato::getStartdato)
