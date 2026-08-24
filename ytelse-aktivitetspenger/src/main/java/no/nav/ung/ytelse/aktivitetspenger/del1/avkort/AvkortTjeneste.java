@@ -60,9 +60,9 @@ public class AvkortTjeneste {
         return utledTidslinjeForMuligAvkorting(startdatoGrunnlag, tidslinjeIkkeRelevantForVilkåret);
     }
 
-    public void validerAvkortBruktRiktig(Long behandlingId, LocalDateTimeline<?> perioderSattTilAvkortet, VilkårType vilkårType) {
+    public void validerAvkortBruktRiktig(Long behandlingId, LocalDateTimeline<Boolean> perioderSattTilAvkortet, VilkårType vilkårType) {
         LocalDateTimeline<Boolean> perioderSomKanSettesTilAvkortet = utledTidslinjeForMuligAvkorting(behandlingId, vilkårType);
-        LocalDateTimeline<Boolean> manglendeOverlapp = perioderSomKanSettesTilAvkortet.disjoint(perioderSattTilAvkortet);
+        LocalDateTimeline<Boolean> manglendeOverlapp = perioderSattTilAvkortet.disjoint(perioderSomKanSettesTilAvkortet);
         if (!manglendeOverlapp.isEmpty()) {
             throw new IllegalArgumentException("Følgende perioder kan ikke settes til avkortet: " + manglendeOverlapp.getLocalDateIntervals());
         }
