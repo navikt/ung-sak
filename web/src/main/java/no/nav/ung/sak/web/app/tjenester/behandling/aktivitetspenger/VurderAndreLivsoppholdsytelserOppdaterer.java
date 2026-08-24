@@ -7,6 +7,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -24,8 +26,10 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsv
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
 
 import java.time.LocalDateTime;
 
@@ -38,6 +42,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
     private VilkårResultatRepository vilkårResultatRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private AvkortTjeneste avkortTjeneste;
 
     VurderAndreLivsoppholdsytelserOppdaterer() {
         // for CDI proxy
@@ -48,12 +53,14 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                                                     HistorikkinnslagRepository historikkinnslagRepository,
                                                     VilkårResultatRepository vilkårResultatRepository,
                                                     InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
+                                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
+                                                    AvkortTjeneste avkortTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
+        this.avkortTjeneste = avkortTjeneste;
     }
 
     @Override
@@ -68,6 +75,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
         if (!uforventedePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
+        validerAvkortingBruktRiktig(dto, param.getBehandlingId());
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -109,6 +117,14 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
         historikkinnslagRepository.lagre(historikkinnslag);
 
         return OppdateringResultat.nyttResultat();
+    }
+
+    private void validerAvkortingBruktRiktig(VurderAndreLivsoppholdsytelserDto dto, Long behandlingId) {
+        LocalDateTimeline<Boolean> perioderSattTilAvkortet = new LocalDateTimeline<>(dto.getVurdertePerioder().stream()
+            .filter(f -> f.avslagsårsak() == AndreLivsoppholdsytelserIkkeOppfyltÅrsak.AVKORTET)
+            .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
+            .toList());
+        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
     }
 
 }

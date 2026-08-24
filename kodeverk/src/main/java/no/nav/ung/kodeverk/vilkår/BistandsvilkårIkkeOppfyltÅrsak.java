@@ -10,6 +10,7 @@ import java.util.Map;
 public enum BistandsvilkårIkkeOppfyltÅrsak implements Kodeverdi {
 
     IKKE_14A_VEDTAK("IKKE_14A_VEDTAK", "Søker har ikke oppfølgingsvedtak etter Navloven §14a."),
+    AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge."),
     UDEFINERT("-", "Ikke definert"),
     ;
 

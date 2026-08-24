@@ -4,10 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -18,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingR
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.SequencedCollection;
 
 /**
@@ -54,7 +52,7 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : holder.getVurderinger()) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? Avslagsårsak.IKKE_14A_VEDTAK : null;
+            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapBistandsvilkårAvslagsårsk(vurdering.getIkkeOppfyltÅrsak()) : null;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
@@ -62,6 +60,15 @@ public class InngangsvilkårVurderingTjeneste {
                 .medAvslagsårsak(avslagsårsak));
         }
         resultatBuilder.leggTil(vilkårBuilder);
+    }
+
+    private Avslagsårsak mapBistandsvilkårAvslagsårsk(BistandsvilkårIkkeOppfyltÅrsak årsak) {
+        Objects.requireNonNull(årsak, "avslagsårsak må være satt ved avslag");
+        return switch (årsak) {
+            case IKKE_14A_VEDTAK -> Avslagsårsak.IKKE_14A_VEDTAK;
+            case AVKORTET -> Avslagsårsak.AVKORTET;
+            case UDEFINERT -> throw new IllegalStateException("UDEFINERT avslagsårsak ikke tillatt ved avslag");
+        };
     }
 
     public void settAndreLivsoppholdsytelserResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
@@ -74,7 +81,7 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : holder.getVurderinger()) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE : null;
+            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAndreLivsoppholdsytelseAvslagsårsak(vurdering.getIkkeOppfyltÅrsak()) : null;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
@@ -82,6 +89,15 @@ public class InngangsvilkårVurderingTjeneste {
                 .medAvslagsårsak(avslagsårsak));
         }
         resultatBuilder.leggTil(vilkårBuilder);
+    }
+
+    private Avslagsårsak mapAndreLivsoppholdsytelseAvslagsårsak(AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak) {
+        Objects.requireNonNull(årsak, "avslagsårsak må være satt ved avslag");
+        return switch (årsak) {
+            case HAR_ANNEN_LIVSOPPHOLDSYTELSE -> Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE;
+            case AVKORTET -> Avslagsårsak.AVKORTET;
+            case UDEFINERT -> throw new IllegalStateException("UDEFINERT avslagsårsak ikke tillatt ved avslag");
+        };
     }
 
     public void oppdaterBostedsvilkårResultatFraVurdering(Long behandlingId) {
@@ -175,16 +191,14 @@ public class InngangsvilkårVurderingTjeneste {
     }
 
     public static Avslagsårsak mapBostedsvilkårÅrsak(BostedsvilkårIkkeOppfyltÅrsak årsak) {
-        if (årsak == null || årsak == BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT) {
-            return null;
-        }
+        Objects.requireNonNull(årsak, "avslagsårsak må være satt ved avslag");
         return switch (årsak) {
             case IKKE_BOSATTADRESSE_I_TRONDHEIM,
                  IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM,
                  STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
-                 ANNET ->
-                Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
-            default -> null;
+                 ANNET -> Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
+            case AVKORTET -> Avslagsårsak.AVKORTET;
+            case UDEFINERT -> throw new IllegalStateException("UDEFINERT avslagsårsak ikke tillatt");
         };
     }
 }
