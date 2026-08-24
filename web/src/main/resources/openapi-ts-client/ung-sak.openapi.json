@@ -5657,6 +5657,47 @@
         "type" : "string",
         "x-enum-varnames" : [ "ARBEIDSGIVER", "BRUKER" ]
       },
+      "ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.AvkortingsperioderResponse" : {
+        "properties" : {
+          "resultat" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.VilkårMedMuligAvkortingPeriode"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "resultat" ],
+        "type" : "object"
+      },
+      "ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.MuligAvkortingPeriode" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.VilkårMedMuligAvkortingPeriode" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.MuligAvkortingPeriode"
+            },
+            "type" : "array"
+          },
+          "vilkårType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          }
+        },
+        "required" : [ "perioder", "vilkårType" ],
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste.HentFnr" : {
         "properties" : {
           "aktørIder" : {
@@ -6326,6 +6367,38 @@
               }
             },
             "description" : "default response"
+          }
+        },
+        "tags" : [ "avp" ]
+      }
+    },
+    "/api/aktivitetspenger/perioder-som-kan-avkortes" : {
+      "get" : {
+        "description" : "Henter perioder som kan avkortes av saksbehandler ved nav-kontor",
+        "operationId" : "hentPerioderSomKanAvkortesAvNavKontor",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.AvkortingsperioderResponse"
+                }
+              }
+            },
+            "description" : "Perioder pr vilkår hvor saksbehandler kan avkorte"
+          },
+          "400" : {
+            "description" : "Input-validering feiler, inkludert at tjenesten er forsøkt brukt for annen ytelse enn aktivitetspenger eller for klage/tilbakekrevingsbehandlinger"
           }
         },
         "tags" : [ "avp" ]
