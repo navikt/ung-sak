@@ -81,7 +81,8 @@ class BostedAvklaringTjenesteTest {
             skalSendeVarsel ? null : "begrunnelse for at det ikke varsles",
             UUID.randomUUID().toString(),
             LocalDateTime.now(),
-            Avklaringtype.AVSLAG
+            Avklaringtype.AVSLAG,
+            behandling.getId()
         );
     }
 

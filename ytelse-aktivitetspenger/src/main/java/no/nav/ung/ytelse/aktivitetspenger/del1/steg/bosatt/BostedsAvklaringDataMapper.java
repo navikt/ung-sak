@@ -22,7 +22,7 @@ public final class BostedsAvklaringDataMapper {
         );
     }
 
-    public static BostedsPeriodeAvklaring mapTilBostedsPeriodeAvklaring(BostedAvklaringInnhold bostedAvklaringInnhold, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public static BostedsPeriodeAvklaring mapTilBostedsPeriodeAvklaring(BostedAvklaringInnhold bostedAvklaringInnhold, long behandlingId, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         return new BostedsPeriodeAvklaring(
             bostedAvklaringInnhold.hentPeriodeSomDatoIntervallEntitet(),
             bostedAvklaringInnhold.ikkeOppfyltÅrsak(),
@@ -32,7 +32,8 @@ public final class BostedsAvklaringDataMapper {
             bostedAvklaringInnhold.begrunnelseIkkeVarsel(),
             vurdertAv,
             vurdertTidspunkt,
-            bostedAvklaringInnhold.avklaringtype()
+            bostedAvklaringInnhold.avklaringtype(),
+            behandlingId
         );
     }
 

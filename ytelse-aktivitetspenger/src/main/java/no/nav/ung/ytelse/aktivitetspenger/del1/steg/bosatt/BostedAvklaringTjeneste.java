@@ -12,6 +12,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -65,7 +66,7 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
-            .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
+            .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, behandlingId, vurdertAv, vurdertTidspunkt))
             .collect(Collectors.toSet());
         return bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
     }
@@ -161,10 +162,12 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     @Override
-    public Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringUnderArbeid(long behandlingId) {
-        return hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream()
+    public Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringForBehandling(long behandlingId) {
+        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(BostedsGrunnlag::getForeslåtteAvklaringerForBehandlingen)
+            .orElse(Collections.emptyList())
+            .stream()
             .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt))
             .map(avklaring -> new VilkårsavklaringUnderArbeid(avklaring.getAvklaringtype(), avklaring.getPeriode()));
     }
-
 }

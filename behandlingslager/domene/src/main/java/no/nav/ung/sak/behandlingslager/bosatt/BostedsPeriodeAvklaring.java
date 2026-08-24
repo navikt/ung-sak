@@ -59,6 +59,9 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
     @Column(name = "status", updatable = false)
     private AvklaringStatus status;
 
+    @Column(name = "behandlingId", updatable = false, nullable = false)
+    private Long behandlingId;
+
     @Column(name = "vurdert_av", updatable = false)
     private String vurdertAv;
 
@@ -69,7 +72,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt, Avklaringtype avklaringtype) {
+    public BostedsPeriodeAvklaring(DatoIntervallEntitet periode, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt, Avklaringtype avklaringtype, long behandlingId) {
         if (!skalSendeVarsel) {
             Objects.requireNonNull(begrunnelseIkkeVarsel, "Mangler begrunnelse for hvorfor det ikke varsles");
         } else if (BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak)) {
@@ -92,6 +95,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.vurdertTidspunkt = vurdertTidspunkt;
         this.avklaringtype = avklaringtype;
         this.status = AvklaringStatus.UNDER_ARBEID;
+        this.behandlingId = behandlingId;
     }
 
     public BostedsPeriodeAvklaring(BostedsPeriodeAvklaring annenAvklaring) {
@@ -106,9 +110,10 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.vurdertTidspunkt = annenAvklaring.getVurdertTidspunkt();
         this.avklaringtype = annenAvklaring.getAvklaringtype();
         this.status = annenAvklaring.getStatus();
+        this.behandlingId = annenAvklaring.getBehandlingId();
     }
 
-    private BostedsPeriodeAvklaring(DatoIntervallEntitet periode, UUID referanse, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt, Avklaringtype avklaringtype, AvklaringStatus status) {
+    private BostedsPeriodeAvklaring(DatoIntervallEntitet periode, UUID referanse, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String begrunnelse, boolean skalSendeVarsel, String fritekstTilVarsel, String begrunnelseIkkeVarsel, String vurdertAv, LocalDateTime vurdertTidspunkt, Avklaringtype avklaringtype, AvklaringStatus status, long behandlingId) {
         this.periode = periode.toRange();
         this.referanse = referanse;
         this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
@@ -120,6 +125,7 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         this.vurdertTidspunkt = vurdertTidspunkt;
         this.avklaringtype = avklaringtype;
         this.status = status;
+        this.behandlingId = behandlingId;
     }
 
     public BostedsPeriodeAvklaring medNyPeriode(DatoIntervallEntitet nyPeriode) {
@@ -134,7 +140,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             this.vurdertAv,
             this.vurdertTidspunkt,
             this.avklaringtype,
-            this.status
+            this.status,
+            this.behandlingId
         );
     }
 
@@ -150,7 +157,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             this.vurdertAv,
             this.vurdertTidspunkt,
             this.avklaringtype,
-            AvklaringStatus.FERDIG
+            AvklaringStatus.FERDIG,
+            this.behandlingId
         );
     }
 
@@ -194,6 +202,10 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
         return avklaringtype;
     }
 
+    public Long getBehandlingId() {
+        return behandlingId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsPeriodeAvklaring that)) return false;
@@ -206,12 +218,13 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt)
             && avklaringtype == that.avklaringtype
-            && status == that.status;
+            && status == that.status
+            && behandlingId.equals(that.behandlingId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype, status);
+        return Objects.hash(getPeriode(), ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype, status, behandlingId);
     }
 
     @Override
@@ -221,7 +234,8 @@ public class BostedsPeriodeAvklaring extends BaseEntitet {
             + ", skalSendeVarsel=" + skalSendeVarsel
             + ", avklaringtype=" + avklaringtype
             + ", vurdertTidspunkt=" + vurdertTidspunkt
-            + ", status=" + status + '}';
+            + ", status=" + status
+            + ", behandlingId=" + behandlingId + '}';
     }
 
     public DatoIntervallEntitet getPeriode() {

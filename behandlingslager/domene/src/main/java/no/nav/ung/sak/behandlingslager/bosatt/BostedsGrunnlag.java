@@ -113,6 +113,12 @@ public class BostedsGrunnlag extends BaseEntitet {
             .orElse(Set.of());
     }
 
+    public List<BostedsPeriodeAvklaring> getForeslåtteAvklaringerForBehandlingen() {
+        return getForeslåtteAvklaringerEllerTomListe().stream()
+            .filter(a -> a.getBehandlingId().equals(behandlingId))
+            .toList();
+    }
+
     public List<BostedsPeriodeAvklaring> getForeslåtteAvklaringerMedStatus(AvklaringStatus... status) {
         return Optional.ofNullable(getForeslått())
             .map(f -> f.hentPeriodeAvklaringerMedStatus(status))

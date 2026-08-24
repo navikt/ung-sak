@@ -117,7 +117,7 @@ class VurderBostedVilkårStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
-        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        var avklaring = lagBostedsPeriodeAvklaring(behandling.getId(), FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
@@ -145,7 +145,7 @@ class VurderBostedVilkårStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
-        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        var avklaring = lagBostedsPeriodeAvklaring(behandling.getId(), FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
@@ -174,7 +174,7 @@ class VurderBostedVilkårStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
-        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false);
+        var avklaring = lagBostedsPeriodeAvklaring(behandling.getId(), FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
@@ -200,7 +200,7 @@ class VurderBostedVilkårStegTest {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
-            lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false)
+            lagBostedsPeriodeAvklaring(behandling.getId(), FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false)
         ));
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -227,8 +227,8 @@ class VurderBostedVilkårStegTest {
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
-            lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true),
-            lagBostedsPeriodeAvklaring(fom2, tom2, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, true)
+            lagBostedsPeriodeAvklaring(behandling.getId(), FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true),
+            lagBostedsPeriodeAvklaring(behandling.getId(), fom2, tom2, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, true)
         ));
         var frist = LocalDateTime.of(2026, 3, 1, 10, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -325,19 +325,23 @@ class VurderBostedVilkårStegTest {
         return steg.utførSteg(kontekst);
     }
 
-    private BostedsPeriodeAvklaring lagBostedsPeriodeAvklaring(LocalDate fom, LocalDate tom,
-                                                               BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
-                                                               boolean skalSendeVarsel) {
+    private BostedsPeriodeAvklaring lagBostedsPeriodeAvklaring(
+            long behandlingId,
+            LocalDate fom, LocalDate tom,
+            BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
+            boolean skalSendeVarsel) {
+
         return new BostedsPeriodeAvklaring(
-            DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-            ikkeOppfyltÅrsak,
-            "Begrunnelse for relevante fakta lagt til grunn i avklaring",
-            skalSendeVarsel,
-            skalSendeVarsel && BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak) ? "Fritekst til varselet" : null,
-            skalSendeVarsel ? null : "Fritekst for ikke varsling",
-            "A12345",
-            LocalDateTime.now(),
-            Avklaringtype.AVSLAG
+                DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
+                ikkeOppfyltÅrsak,
+                "Begrunnelse for relevante fakta lagt til grunn i avklaring",
+                skalSendeVarsel,
+                skalSendeVarsel && BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak) ? "Fritekst til varselet" : null,
+                skalSendeVarsel ? null : "Fritekst for ikke varsling",
+                "A12345",
+                LocalDateTime.now(),
+                Avklaringtype.AVSLAG,
+                behandlingId
         );
     }
 }

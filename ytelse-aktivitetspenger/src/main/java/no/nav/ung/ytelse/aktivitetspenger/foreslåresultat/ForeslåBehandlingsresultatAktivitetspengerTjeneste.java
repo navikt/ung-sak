@@ -8,7 +8,6 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -25,7 +24,6 @@ import no.nav.ung.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandling
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
-import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -88,7 +86,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
         // Det er kun opphør dersom avklaringen faktisk gjelder en periode med avslått vilkår (overlapp).
         return behandlingÅrsakerTyper.stream()
             .flatMap(årsak -> VilkårsavklaringTjeneste.finnForÅrsak(alleVilkårsavklaringTjenester, årsak).stream())
-            .flatMap(oppdaterer -> oppdaterer.hentSenesteAvklaringUnderArbeid(ref.getBehandlingId()).stream())
+            .flatMap(oppdaterer -> oppdaterer.hentSenesteAvklaringForBehandling(ref.getBehandlingId()).stream())
             .filter(avklaring -> Avklaringtype.OPPHØR.equals(avklaring.avklaringtype()))
             .anyMatch(avklaring -> harOverlappendeAvslåttVilkårsperiode(vilkårene, avklaring.periode()));
     }

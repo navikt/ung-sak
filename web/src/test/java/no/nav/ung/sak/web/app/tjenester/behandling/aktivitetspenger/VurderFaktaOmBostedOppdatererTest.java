@@ -132,7 +132,7 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
-        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto);
+        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto, behandling);
 
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(bostedAvklaringPeriode));
 
@@ -142,9 +142,10 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
-    private static BostedsPeriodeAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto) {
+    private static BostedsPeriodeAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
         return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
             BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(dto.getAvklaringer().getFirst(), TOM),
+            behandling.getId(),
             UUID.randomUUID().toString(),
             LocalDateTime.now()
         );

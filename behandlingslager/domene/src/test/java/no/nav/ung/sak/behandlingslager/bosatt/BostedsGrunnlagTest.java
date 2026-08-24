@@ -50,7 +50,8 @@ class BostedsGrunnlagTest {
             null,
             "saksbehandler2",
             LocalDateTime.of(2024, 2, 1, 12, 0),
-            Avklaringtype.AVSLAG
+            Avklaringtype.AVSLAG,
+            1L
         );
     }
 

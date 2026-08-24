@@ -79,6 +79,7 @@ class BostedsAvklaringHolderTest {
             "begrunnelse for hvorfor det ikke varsles",
             "saksbehandler1",
             VURDERT_TIDSPUNKT,
-            Avklaringtype.AVSLAG);
+            Avklaringtype.AVSLAG,
+            1L);
     }
 }

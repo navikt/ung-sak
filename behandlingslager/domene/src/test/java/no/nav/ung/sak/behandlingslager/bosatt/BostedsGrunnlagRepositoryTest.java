@@ -168,11 +168,11 @@ class BostedsGrunnlagRepositoryTest {
             .toList();
     }
 
-    private static BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom) {
+    private BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom) {
         return lagAvklaring(fom, tom, "begrunnelse for hvorfor det ikke varsles");
     }
 
-    private static BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
+    private BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
         return new BostedsPeriodeAvklaring(
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
@@ -182,6 +182,8 @@ class BostedsGrunnlagRepositoryTest {
             "begrunnelse for hvorfor det ikke varsles",
             VURDERT_AV,
             VURDERT_TIDSPUNKT,
-            tom == null ? Avklaringtype.OPPHØR : Avklaringtype.AVSLAG);
+            tom == null ? Avklaringtype.OPPHØR : Avklaringtype.AVSLAG,
+            behandling.getId()
+        );
     }
 }
