@@ -5,6 +5,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
@@ -27,7 +28,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
     }
 
     @Override
-    public Optional<Personinfo> hentBrukerForFnr(PersonIdent fnr) {
+    public Optional<Personinfo> hentBrukerForFnr(PersonIdent fnr, FagsakYtelseType ytelseType) {
         if (fnr.erFdatNummer()) {
             return Optional.empty();
         }
@@ -35,7 +36,7 @@ public class TpsTjenesteImpl implements TpsTjeneste {
         if (aktørId.isEmpty()) {
             return Optional.empty();
         }
-        Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(aktørId.get());
+        Personinfo personinfo = personinfoAdapter.hentKjerneinformasjon(aktørId.get(), ytelseType);
         return Optional.ofNullable(personinfo);
     }
 
@@ -50,31 +51,26 @@ public class TpsTjenesteImpl implements TpsTjeneste {
     }
 
     @Override
-    public Optional<AktørId> hentAktørForFnr(PersonIdent fnr) {
-        return personinfoAdapter.hentAktørIdForPersonIdent(fnr);
-    }
-
-    @Override
     public Optional<PersonIdent> hentFnr(AktørId aktørId) {
         return personinfoAdapter.hentIdentForAktørId(aktørId);
     }
 
     @Override
-    public Optional<Personinfo> hentBrukerForAktør(AktørId aktørId) {
+    public Optional<Personinfo> hentBrukerForAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
         Optional<PersonIdent> funnetFnr = hentFnr(aktørId);
-        return funnetFnr.map(fnr -> personinfoAdapter.hentKjerneinformasjon(aktørId));
+        return funnetFnr.map(fnr -> personinfoAdapter.hentKjerneinformasjon(aktørId, fnr, ytelseType));
     }
 
     @Override
-    public Optional<String> hentDiskresjonskodeForAktør(PersonIdent fnr) {
+    public Optional<String> hentDiskresjonskodeForAktør(PersonIdent fnr, FagsakYtelseType ytelseType) {
         if (fnr.erFdatNummer()) {
             return Optional.empty();
         }
-        return Optional.ofNullable(hentGeografiskTilknytning(fnr).getDiskresjonskode()).map(Diskresjonskode::getKode);
+        return Optional.ofNullable(hentGeografiskTilknytning(fnr, ytelseType).getDiskresjonskode()).map(Diskresjonskode::getKode);
     }
 
     @Override
-    public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent fnr) {
-        return personinfoAdapter.hentGeografiskTilknytning(fnr);
+    public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent fnr, FagsakYtelseType ytelseType) {
+        return personinfoAdapter.hentGeografiskTilknytning(fnr, ytelseType);
     }
 }

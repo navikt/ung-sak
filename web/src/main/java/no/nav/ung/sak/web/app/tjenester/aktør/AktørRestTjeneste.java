@@ -19,6 +19,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
@@ -31,8 +32,11 @@ import no.nav.ung.sak.kontrakt.person.AktørInfoDto;
 import no.nav.ung.sak.kontrakt.person.PersonDto;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -43,6 +47,8 @@ import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
 @Path("")
 @Produces(MediaType.APPLICATION_JSON)
 public class AktørRestTjeneste {
+
+    private static final Logger logger = LoggerFactory.getLogger(AktørRestTjeneste.class);
 
     private FagsakRepository fagsakRepository;
     private TpsTjeneste tpsTjeneste;
@@ -59,7 +65,7 @@ public class AktørRestTjeneste {
 
     @GET
     @Operation(description = "Henter informasjon om en aktøer", tags = "aktoer", responses = {
-            @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i ung-sak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
+        @ApiResponse(responseCode = "200", description = "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i k9-sak.", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktørInfoDto.class)))
     })
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @Path("/aktoer-info")
@@ -70,46 +76,49 @@ public class AktørRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public Response getAktoerInfo(@NotNull @QueryParam("aktoerId") @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) AktørIdDto aktørIdDto) {
         AktørInfoDto aktoerInfoDto = new AktørInfoDto();
-        if (aktørIdDto != null) {
-            var aktørId = aktørIdDto.getAktørId();
-            Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(aktørId);
-            if (personinfo.isPresent()) {
-                Personinfo pi = personinfo.get();
-                PersonDto personDto = new PersonDto(
-                    pi.getNavn(),
-                    pi.getAlderIDag(),
-                    String.valueOf(pi.getPersonIdent().getIdent()),
-                    pi.getDiskresjonskode(),
-                    pi.getDødsdato(),
-                    pi.getAktørId()
-                );
-                aktoerInfoDto.setPerson(personDto);
-                aktoerInfoDto.setAktørId(pi.getAktørId());
-                List<FagsakDto> fagsakDtoer = new ArrayList<>();
-                List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
-                for (var f : fagsaker) {
-                    var periode = new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato());
-                    fagsakDtoer.add(new FagsakDto(
-                        f.getSaksnummer(),
-                        f.getYtelseType(),
-                        f.getStatus(),
-                        periode,
-                        personDto,
-                        null,
-                        f.getOpprettetTidspunkt(),
-                        f.getEndretTidspunkt(),
-                        f.erIkkeDigitalBruker()
-                    ));
-                }
-                aktoerInfoDto.setFagsaker(fagsakDtoer);
-                return Response.ok(aktoerInfoDto).build();
-            } else {
-                FeilDto feilDto = new FeilDto(FeilType.TOMT_RESULTAT_FEIL, "Finner ingen aktør med angitt ident.");
-                return Response.ok(feilDto).status(404).build();
-            }
+
+        var aktørId = aktørIdDto.getAktørId();
+        List<Fagsak> fagsaker = fagsakRepository.hentForBruker(aktørId);
+        FagsakYtelseType ytelsestypeMotPdl;
+        if (fagsaker.isEmpty()) {
+            ytelsestypeMotPdl = FagsakYtelseType.UNGDOMSYTELSE;
+            logger.warn("Oppslag av bruker som ikke har fagsak i ung-sak. Vurder om det går an å svare en 400-feil isdf å gi informasjon om brukeren. Det bør ikke være ung-sak sitt ansvar å gi informasjon om brukere som ikke har sak i systemet.");
         } else {
-            FeilDto feilDto = new FeilDto(FeilType.GENERELL_FEIL, "Query parameteret 'aktoerId' mangler i forespørselen.");
-            return Response.ok(feilDto).status(400).build();
+            ytelsestypeMotPdl = fagsaker.stream().map(Fagsak::getYtelseType).sorted(Comparator.naturalOrder()).findFirst().orElseThrow();
+        }
+        Optional<Personinfo> personinfo = tpsTjeneste.hentBrukerForAktør(aktørId, ytelsestypeMotPdl);
+        if (personinfo.isPresent()) {
+            Personinfo pi = personinfo.get();
+            PersonDto personDto = new PersonDto(
+                pi.getNavn(),
+                pi.getAlderIDag(),
+                String.valueOf(pi.getPersonIdent().getIdent()),
+                pi.getDiskresjonskode(),
+                pi.getDødsdato(),
+                pi.getAktørId()
+            );
+            aktoerInfoDto.setPerson(personDto);
+            aktoerInfoDto.setAktørId(pi.getAktørId());
+            List<FagsakDto> fagsakDtoer = new ArrayList<>();
+            for (var f : fagsaker) {
+                var periode = new Periode(f.getPeriode().getFomDato(), f.getPeriode().getTomDato());
+                fagsakDtoer.add(new FagsakDto(
+                    f.getSaksnummer(),
+                    f.getYtelseType(),
+                    f.getStatus(),
+                    periode,
+                    personDto,
+                    null,
+                    f.getOpprettetTidspunkt(),
+                    f.getEndretTidspunkt(),
+                    f.erIkkeDigitalBruker()
+                ));
+            }
+            aktoerInfoDto.setFagsaker(fagsakDtoer);
+            return Response.ok(aktoerInfoDto).build();
+        } else {
+            FeilDto feilDto = new FeilDto(FeilType.TOMT_RESULTAT_FEIL, "Finner ingen aktør med angitt ident.");
+            return Response.ok(feilDto).status(404).build();
         }
 
     }

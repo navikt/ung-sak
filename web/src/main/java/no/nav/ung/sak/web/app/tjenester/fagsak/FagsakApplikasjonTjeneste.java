@@ -57,8 +57,8 @@ public class FagsakApplikasjonTjeneste {
     }
 
     public Optional<PersoninfoBasis> hentBruker(Saksnummer saksnummer) {
-        Optional<Fagsak> fagsak = fagsakRepository.hentSakGittSaksnummer(saksnummer);
-        return fagsak.map(Fagsak::getAktørId).flatMap(personinfoAdapter::hentBrukerBasisForAktør);
+        return fagsakRepository.hentSakGittSaksnummer(saksnummer)
+            .flatMap(fagsak -> personinfoAdapter.hentBrukerBasisForAktør(fagsak.getAktørId(), fagsak.getYtelseType()));
     }
 
     public Optional<AsyncPollingStatus> sjekkProsessTaskPågår(Saksnummer saksnummer, String gruppe) {
@@ -121,7 +121,7 @@ public class FagsakApplikasjonTjeneste {
         List<Fagsak> fagsaker = Collections.singletonList(fagsak.get());
         AktørId aktørId = fagsak.get().getAktørId();
 
-        Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForAktør(aktørId);
+        Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForAktør(aktørId, fagsak.get().getYtelseType());
         if (funnetNavBruker.isEmpty()) {
             return FagsakSamlingForBruker.emptyView();
         }
@@ -130,7 +130,8 @@ public class FagsakApplikasjonTjeneste {
     }
 
     private FagsakSamlingForBruker hentSakerForFnr( PersonIdent fnr) {
-        Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForFnr(fnr);
+        //her vet vi ikke hvilket ytelsestype som er riktig å sende inn, velger en
+        Optional<Personinfo> funnetNavBruker = tpsTjeneste.hentBrukerForFnr(fnr, FagsakYtelseType.UNGDOMSYTELSE);
         if (funnetNavBruker.isEmpty()) {
             return FagsakSamlingForBruker.emptyView();
         }

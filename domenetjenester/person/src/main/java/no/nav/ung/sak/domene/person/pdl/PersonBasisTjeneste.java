@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
@@ -19,7 +20,7 @@ import java.util.Objects;
 @ApplicationScoped
 public class PersonBasisTjeneste {
 
-    private Pdl pdlKlient;
+    private PdlKlient pdlKlient;
     private boolean isProd = Environment.current().isProd();
 
     PersonBasisTjeneste() {
@@ -27,7 +28,7 @@ public class PersonBasisTjeneste {
     }
 
     @Inject
-    public PersonBasisTjeneste(Pdl pdlKlient) {
+    public PersonBasisTjeneste(PdlKlient pdlKlient) {
         this.pdlKlient = pdlKlient;
     }
 
@@ -35,7 +36,7 @@ public class PersonBasisTjeneste {
         return navn.getEtternavn() + " " + navn.getFornavn() + (navn.getMellomnavn() == null ? "" : " " + navn.getMellomnavn());
     }
 
-    public PersoninfoBasis hentBasisPersoninfo(AktørId aktørId, PersonIdent personIdent) {
+    public PersoninfoBasis hentBasisPersoninfo(AktørId aktørId, PersonIdent personIdent, FagsakYtelseType ytelseType) {
         var query = new HentPersonQueryRequest();
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
@@ -45,7 +46,7 @@ public class PersonBasisTjeneste {
             .kjoenn(new KjoennResponseProjection().kjoenn())
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
 
-        var person = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
+        var person = pdlKlient.hentPerson(query, projection, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         var fødselsdato = person.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)
@@ -85,13 +86,13 @@ public class PersonBasisTjeneste {
         return KjoennType.KVINNE.equals(kode) ? NavBrukerKjønn.KVINNE : NavBrukerKjønn.UDEFINERT;
     }
 
-    public PersoninfoArbeidsgiver hentPersoninfoArbeidsgiver(AktørId aktørId, PersonIdent personIdent) {
+    public PersoninfoArbeidsgiver hentPersoninfoArbeidsgiver(AktørId aktørId, PersonIdent personIdent, FagsakYtelseType ytelseType) {
         var query = new HentPersonQueryRequest();
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
             .navn(new NavnResponseProjection().forkortetNavn().fornavn().mellomnavn().etternavn())
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato());
-        var personFraPDL = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
+        var personFraPDL = pdlKlient.hentPerson(query, projection, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         var fødselsdato = personFraPDL.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)

@@ -13,6 +13,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -45,6 +46,7 @@ public class TpsTjenesteTest {
     private static final Familierelasjon FAMILIERELASJON = new Familierelasjon(FNR_RELASJON, RelasjonsRolleType.BARN, RelasjonsRolleType.FARA);
     private static final Map<PersonIdent, AktørId> AKTØR_ID_VED_FNR = new HashMap<>();
     private PersoninfoAdapter personinfoAdapter;
+    private FagsakYtelseType ytelseType = FagsakYtelseType.UNGDOMSYTELSE;
 
     @BeforeEach
     public void oppsett() {
@@ -61,13 +63,13 @@ public class TpsTjenesteTest {
 
     @Test
     public void skal_ikke_hente_bruker_for_ukjent_aktør() {
-        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForAktør(AktørId.dummy());
+        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForAktør(AktørId.dummy(), ytelseType);
         assertThat(funnetBruker).isNotPresent();
     }
 
     @Test
     public void skal_hente_bruker_for_kjent_fnr() {
-        when(personinfoAdapter.hentKjerneinformasjon(AKTØR_ID)).thenReturn(
+        when(personinfoAdapter.hentKjerneinformasjon(AKTØR_ID, ytelseType)).thenReturn(
             new Personinfo.Builder()
                 .medAktørId(AKTØR_ID)
                 .medPersonIdent(FNR)
@@ -77,21 +79,21 @@ public class TpsTjenesteTest {
                 .build()
         );
 
-        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForFnr(FNR);
+        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForFnr(FNR, ytelseType);
         assertThat(funnetBruker).isPresent();
     }
 
     @Test
     public void skal_ikke_hente_bruker_for_ukjent_fnr() {
-        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForFnr(new PersonIdent("666"));
+        Optional<Personinfo> funnetBruker = testSubject.hentBrukerForFnr(new PersonIdent("666"), ytelseType);
         assertThat(funnetBruker).isNotPresent();
     }
 
     @Test
     public void test_hentGeografiskTilknytning_finnes() {
-        when(personinfoAdapter.hentGeografiskTilknytning(FNR)).thenReturn(new GeografiskTilknytning("0219", Diskresjonskode.UDEFINERT));
+        when(personinfoAdapter.hentGeografiskTilknytning(FNR, ytelseType)).thenReturn(new GeografiskTilknytning("0219", Diskresjonskode.UDEFINERT));
 
-        GeografiskTilknytning geografiskTilknytning = testSubject.hentGeografiskTilknytning(FNR);
+        GeografiskTilknytning geografiskTilknytning = testSubject.hentGeografiskTilknytning(FNR, ytelseType);
         assertThat(geografiskTilknytning).isNotNull();
     }
 

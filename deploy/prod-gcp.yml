@@ -272,6 +272,8 @@ spec:
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
+    - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

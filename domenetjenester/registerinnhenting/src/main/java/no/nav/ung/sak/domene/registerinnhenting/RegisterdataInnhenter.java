@@ -67,14 +67,14 @@ public class RegisterdataInnhenter {
         this.opplysningsperiodeTjeneste = opplysningsperiodeTjeneste;
     }
 
-    public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId) {
-        return personinfoAdapter.hentPersoninfo(søkerAktørId);
+    public Personinfo innhentSaksopplysningerForSøker(AktørId søkerAktørId, FagsakYtelseType ytelseType) {
+        return personinfoAdapter.hentPersoninfo(søkerAktørId, ytelseType);
     }
 
     public Personinfo innhentPersonopplysninger(Behandling behandling) {
         // Innhent data fra TPS for søker
         AktørId søkerAktørId = behandling.getAktørId();
-        Personinfo søkerInfo = innhentSaksopplysningerForSøker(søkerAktørId);
+        Personinfo søkerInfo = innhentSaksopplysningerForSøker(søkerAktørId, behandling.getFagsakYtelseType());
 
         if (søkerInfo == null) {
             throw SaksopplysningerFeil.FACTORY.feilVedOppslagITPS(søkerAktørId.toString())
@@ -197,7 +197,7 @@ public class RegisterdataInnhenter {
             .collect(Collectors.toList());
         for (Familierelasjon familierelasjon : familierelasjoner) {
             var ident = familierelasjon.getPersonIdent();
-            Optional<Personinfo> ektefelleInfo = personinfoAdapter.innhentSaksopplysninger(ident);
+            Optional<Personinfo> ektefelleInfo = personinfoAdapter.innhentSaksopplysninger(ident, behandling.getFagsakYtelseType());
             if (ektefelleInfo.isPresent()) {
                 final Personinfo personinfo = ektefelleInfo.get();
                 if (hentHistorikkForRelatertePersoner(behandling)) {
@@ -215,17 +215,17 @@ public class RegisterdataInnhenter {
     }
 
     private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, no.nav.ung.sak.typer.Periode opplysningsperioden) {
-        List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo);
+        List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo, behandling.getFagsakYtelseType());
         var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
 
         return filter.relasjonsFiltreringBarn(behandling, relaterteBarn, opplysningsperioden);
     }
 
-    private List<Personinfo> hentAlleRelaterteBarn(Personinfo søkerPersonInfo) {
+    private List<Personinfo> hentAlleRelaterteBarn(Personinfo søkerPersonInfo, FagsakYtelseType ytelseType) {
         return søkerPersonInfo.getFamilierelasjoner()
             .stream()
             .filter(r -> r.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
-            .map(r -> personinfoAdapter.innhentSaksopplysningerForBarn(r.getPersonIdent()).orElse(null))
+            .map(r -> personinfoAdapter.innhentSaksopplysningerForBarn(r.getPersonIdent(), ytelseType).orElse(null))
             .filter(Objects::nonNull)
             .toList();
     }
@@ -233,7 +233,7 @@ public class RegisterdataInnhenter {
     private List<Personinfo> hentFosterbarn(Behandling behandling) {
         var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
         return filter.hentFosterbarn(behandling).stream()
-            .map(aktørId -> personinfoAdapter.hentPersoninfo(aktørId))
+            .map(aktørId -> personinfoAdapter.hentPersoninfo(aktørId, behandling.getFagsakYtelseType()))
             .toList();
     }
 

@@ -1,76 +1,49 @@
 package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.personopplysning.debug;
 
-import java.util.List;
-import java.util.Optional;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
-import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
-import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
-import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
-import no.nav.ung.sak.domene.person.pdl.TilknytningTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
+import java.util.List;
+import java.util.Optional;
+
 @ApplicationScoped
 public class DebugPersoninfoAdapter {
-    private PersonBasisTjeneste personBasisTjeneste;
     private DebugPersoninfoTjeneste debugPersoninfoTjeneste;
     private AktørTjeneste aktørTjeneste;
-    private TilknytningTjeneste tilknytningTjeneste;
 
     public DebugPersoninfoAdapter() {
         // for CDI proxy
     }
 
     @Inject
-    public DebugPersoninfoAdapter(PersonBasisTjeneste personBasisTjeneste, DebugPersoninfoTjeneste debugPersoninfoTjeneste, AktørTjeneste aktørTjeneste, TilknytningTjeneste tilknytningTjeneste) {
-        this.personBasisTjeneste = personBasisTjeneste;
+    public DebugPersoninfoAdapter(DebugPersoninfoTjeneste debugPersoninfoTjeneste, AktørTjeneste aktørTjeneste) {
         this.debugPersoninfoTjeneste = debugPersoninfoTjeneste;
         this.aktørTjeneste = aktørTjeneste;
-        this.tilknytningTjeneste = tilknytningTjeneste;
     }
 
-    public Personinfo hentPersoninfo(List<String> dumpinnhold, AktørId aktørId) {
-        return hentKjerneinformasjon(dumpinnhold, aktørId);
+    public Personinfo hentPersoninfo(List<String> dumpinnhold, AktørId aktørId, FagsakYtelseType ytelseType) {
+        return hentKjerneinformasjon(dumpinnhold, aktørId, ytelseType);
     }
 
-    public Optional<Personinfo> innhentSaksopplysninger(PersonIdent personIdent, List<String> dumpinnhold) {
-        Optional<AktørId> aktørId = hentAktørIdForPersonIdent(personIdent);
-
-        if (aktørId.isPresent()) {
-            return hentKjerneinformasjonFor(dumpinnhold, aktørId.get(), personIdent);
-        } else {
-            return Optional.empty();
-        }
-    }
 
     /**
      * Henter PersonInfo for barn, gitt at det ikke er FDAT nummer (sjekkes på format av PersonIdent, evt. ved feilhåndtering fra TPS). Hvis
      * FDAT nummer returneres {@link Optional#empty()}
      */
-    public Optional<Personinfo> innhentSaksopplysningerForBarn(PersonIdent personIdent, List<String> dumpinnhold) {
+    public Optional<Personinfo> innhentSaksopplysningerForBarn(PersonIdent personIdent, List<String> dumpinnhold, FagsakYtelseType ytelseType) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
         Optional<AktørId> optAktørId = hentAktørIdForPersonIdent(personIdent);
         if (optAktørId.isPresent()) {
-            return hentKjerneinformasjonFor(dumpinnhold, optAktørId.get(), personIdent);
+            return hentKjerneinformasjonFor(dumpinnhold, optAktørId.get(), personIdent, ytelseType);
         }
         return Optional.empty();
-    }
-
-    public Optional<PersoninfoArbeidsgiver> hentPersoninfoArbeidsgiver(AktørId aktørId) {
-        var pi = hentFnr(aktørId);
-        return Optional.ofNullable(personBasisTjeneste.hentPersoninfoArbeidsgiver(aktørId, pi));
-    }
-
-    public Optional<PersoninfoBasis> hentBrukerBasisForAktør(AktørId aktørId) {
-        var personIdent = hentFnr(aktørId);
-        return Optional.ofNullable(personBasisTjeneste.hentBasisPersoninfo(aktørId, personIdent));
     }
 
     public Optional<PersonIdent> hentIdentForAktørId(AktørId aktørId) {
@@ -89,29 +62,24 @@ public class DebugPersoninfoAdapter {
         }
     }
 
-    private Optional<Personinfo> hentKjerneinformasjonFor(List<String> dumpinnhold, AktørId aktørId, PersonIdent personIdent) {
+    private Optional<Personinfo> hentKjerneinformasjonFor(List<String> dumpinnhold, AktørId aktørId, PersonIdent personIdent, FagsakYtelseType ytelseType) {
         if (personIdent.erFdatNummer()) {
             return Optional.empty();
         }
-        return Optional.of(hentKjerneinformasjon(dumpinnhold, aktørId, personIdent));
+        return Optional.of(hentKjerneinformasjon(dumpinnhold, aktørId, personIdent, ytelseType));
     }
 
-    public Personinfo hentKjerneinformasjon(List<String> dumpinnhold, AktørId aktørId) {
+    public Personinfo hentKjerneinformasjon(List<String> dumpinnhold, AktørId aktørId, FagsakYtelseType ytelseType) {
         var personIdent = hentFnr(aktørId);
-        return hentKjerneinformasjon(dumpinnhold, aktørId, personIdent);
+        return hentKjerneinformasjon(dumpinnhold, aktørId, personIdent, ytelseType);
     }
 
-    private Personinfo hentKjerneinformasjon(List<String> dumpinnhold, AktørId aktørId, PersonIdent personIdent) {
-        return debugPersoninfoTjeneste.hentKjerneinformasjon(dumpinnhold, aktørId, personIdent);
+    private Personinfo hentKjerneinformasjon(List<String> dumpinnhold, AktørId aktørId, PersonIdent personIdent, FagsakYtelseType ytelseType) {
+        return debugPersoninfoTjeneste.hentKjerneinformasjon(dumpinnhold, aktørId, personIdent, ytelseType);
     }
 
     private PersonIdent hentFnr(AktørId aktørId) {
         return hentIdentForAktørId(aktørId).orElseThrow(() -> new IllegalStateException("Finner ikke FNR for angitt aktørId"));
-    }
-
-    public GeografiskTilknytning hentGeografiskTilknytning(PersonIdent personIdent) {
-        var aktørId = hentAktørIdForPersonIdent(personIdent).orElseThrow(() -> new IllegalStateException("Kan ikke finne geografisk tilknytning for fnr med ukjent aktørId"));
-        return tilknytningTjeneste.hentGeografiskTilknytning(aktørId);
     }
 
 }

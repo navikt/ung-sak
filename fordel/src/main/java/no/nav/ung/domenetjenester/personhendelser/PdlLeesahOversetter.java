@@ -6,6 +6,7 @@ import no.nav.person.pdl.leesah.Endringstype;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon;
 import no.nav.ung.domenetjenester.personhendelser.utils.PersonhendelseUtils;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoBasis;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
 import no.nav.ung.sak.domene.person.pdl.PersonBasisTjeneste;
@@ -117,7 +118,10 @@ public class PdlLeesahOversetter {
 
         AktørId barnAktørId = optionalAktørId.get();
 
-        PersoninfoBasis barn = personTjeneste.hentBasisPersoninfo(barnAktørId, barnPersonIdent);
+        // Vi vet ikke her tidspunktet hvilken ytelse det gjelder (eller om det gjelder flere). Velger bare en av ytelsene.
+        //TODO vi burde antagelig sende alle ytelser det kan være til PDL
+        FagsakYtelseType ytelseTypeForPdl = FagsakYtelseType.UNGDOMSYTELSE;
+        PersoninfoBasis barn = personTjeneste.hentBasisPersoninfo(barnAktørId, barnPersonIdent, ytelseTypeForPdl);
         LocalDate fødselsdato = barn.getFødselsdato();
 
         if (fødselsdato == null) {

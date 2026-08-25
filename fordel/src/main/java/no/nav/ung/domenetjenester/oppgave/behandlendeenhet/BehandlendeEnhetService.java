@@ -3,6 +3,7 @@ package no.nav.ung.domenetjenester.oppgave.behandlendeenhet;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingTema;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.kodeverk.produksjonsstyring.OmrådeTema;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
@@ -25,9 +26,12 @@ public class BehandlendeEnhetService {
     }
 
     public BehandlendeEnhet hentBehandlendeEnhet(OmrådeTema tema, BehandlingTema behandlingTema, AktørId hovedAktør) {
-        GeografiskTilknytning gjeldendeGeografiskTilknytning = hentGjeldendeGeografiskeTilknytning(
-            hovedAktør
-        );
+        FagsakYtelseType ytelseType = switch (behandlingTema) {
+            case UNGDOMSPROGRAMYTELSEN -> FagsakYtelseType.UNGDOMSYTELSE;
+            //TODO legg inn aktivitetspenger her når det er klart.
+            case UDEFINERT -> throw new IllegalArgumentException("Ikke-støttet tema her: " + behandlingTema);
+        };
+        GeografiskTilknytning gjeldendeGeografiskTilknytning = hentGjeldendeGeografiskeTilknytning(hovedAktør, ytelseType);
         return finnBehandledeEnhet(gjeldendeGeografiskTilknytning, tema, behandlingTema);
     }
 
@@ -45,10 +49,10 @@ public class BehandlendeEnhetService {
         return new BehandlendeEnhet(organisasjonsenhet.getEnhetId(), organisasjonsenhet.getEnhetNavn());
     }
 
-    private GeografiskTilknytning hentGjeldendeGeografiskeTilknytning(AktørId hovedAktør) {
+    private GeografiskTilknytning hentGjeldendeGeografiskeTilknytning(AktørId hovedAktør, FagsakYtelseType ytelseType) {
         final GeografiskTilknytning geografiskTilknytningHovedAktør;
         if (hovedAktør != null) {
-            geografiskTilknytningHovedAktør = hentGeografiskTilknytning(hovedAktør);
+            geografiskTilknytningHovedAktør = hentGeografiskTilknytning(hovedAktør, ytelseType);
             if (Diskresjonskode.KODE6.equals(geografiskTilknytningHovedAktør.getDiskresjonskode())) {
                 return geografiskTilknytningHovedAktør;
             }
@@ -61,10 +65,9 @@ public class BehandlendeEnhetService {
     }
 
 
-    private GeografiskTilknytning hentGeografiskTilknytning(AktørId aktørId) {
-        var ident = personinfoAdapter.hentIdentForAktørId(aktørId);
-        return ident
-            .map(personinfoAdapter::hentGeografiskTilknytning)
+    private GeografiskTilknytning hentGeografiskTilknytning(AktørId aktørId, FagsakYtelseType ytelseType) {
+        return personinfoAdapter.hentIdentForAktørId(aktørId)
+            .map(ident -> personinfoAdapter.hentGeografiskTilknytning(ident, ytelseType))
             .orElse(null);
     }
 

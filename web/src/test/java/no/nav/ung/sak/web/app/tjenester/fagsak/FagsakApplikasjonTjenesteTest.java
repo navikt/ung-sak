@@ -32,6 +32,8 @@ public class FagsakApplikasjonTjenesteTest {
     private static final AktørId AKTØR_ID = AktørId.dummy();
     private static final Saksnummer SAKSNUMMER  = new Saksnummer("123");
 
+    private FagsakYtelseType ytelseType = FagsakYtelseType.UNGDOMSYTELSE;
+
     private FagsakApplikasjonTjeneste tjeneste;
     private FagsakRepository fagsakRepository;
     private BehandlingRepository behandlingRepository;
@@ -58,9 +60,9 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_hente_saker_på_fnr() {
         // Arrange
         Personinfo personinfo = new PersoninfoBuilder().medAktørId(AKTØR_ID).build();
-        when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.of(personinfo));
+        when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR), ytelseType)).thenReturn(Optional.of(personinfo));
 
-        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentForBruker(AKTØR_ID)).thenReturn(Collections.singletonList(fagsak));
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
 
@@ -78,11 +80,11 @@ public class FagsakApplikasjonTjenesteTest {
     public void skal_hente_saker_på_saksreferanse() {
         // Arrange
         Personinfo personinfo = new PersoninfoBuilder().medAktørId(AKTØR_ID).build();
-        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
 
         when(behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(anyLong())).thenReturn(Optional.of(Behandling.forFørstegangssøknad(fagsak).build()));
-        when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID)).thenReturn(Optional.of(personinfo));
+        when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID, ytelseType)).thenReturn(Optional.of(personinfo));
 
         // Act
         FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
@@ -97,9 +99,9 @@ public class FagsakApplikasjonTjenesteTest {
     @Test
     public void skal_returnere_tomt_view_når_fagsakens_bruker_er_ukjent_for_tps() {
         // Arrange
-        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.OMSORGSPENGER).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
+        Fagsak fagsak = FagsakBuilder.nyFagsak(FagsakYtelseType.UNGDOMSYTELSE).medBruker(AKTØR_ID).medSaksnummer(SAKSNUMMER).build();
         when(fagsakRepository.hentSakGittSaksnummer(SAKSNUMMER)).thenReturn(Optional.of(fagsak));
-        when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID)).thenReturn(Optional.empty()); // Ingen treff i TPS
+        when(tpsTjeneste.hentBrukerForAktør(AKTØR_ID, ytelseType)).thenReturn(Optional.empty()); // Ingen treff i TPS
 
         // Act
         FagsakSamlingForBruker view = tjeneste.hentSaker(SAKSNUMMER.getVerdi());
@@ -110,7 +112,7 @@ public class FagsakApplikasjonTjenesteTest {
 
     @Test
     public void skal_returnere_tomt_view_ved_ukjent_fnr() {
-        when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR))).thenReturn(Optional.empty());
+        when(tpsTjeneste.hentBrukerForFnr(new PersonIdent(FNR), ytelseType)).thenReturn(Optional.empty());
 
         FagsakSamlingForBruker view = tjeneste.hentSaker(FNR);
 

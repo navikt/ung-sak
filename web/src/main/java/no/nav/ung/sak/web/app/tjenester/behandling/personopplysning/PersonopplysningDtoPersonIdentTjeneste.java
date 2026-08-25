@@ -8,6 +8,7 @@ import java.util.function.Function;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.domene.person.tps.TpsTjeneste;
 import no.nav.ung.sak.kontrakt.person.PersonopplysningDto;
@@ -27,10 +28,10 @@ public class PersonopplysningDtoPersonIdentTjeneste {
     }
 
     // oppdater med foedselsnr
-    public void oppdaterMedPersonIdent(PersonopplysningDto personopplysningDto) {
+    public void oppdaterMedPersonIdent(PersonopplysningDto personopplysningDto, FagsakYtelseType ytelseType) {
         // memoriser oppslagsfunksjoner - unngår repeterende tjeneste kall eksternt
         Function<AktørId, Optional<PersonIdent>> personInfoFinder = memoize((aktørId) -> tpsTjeneste.hentFnr(aktørId));
-        Function<String, Optional<String>> diskresjonskodeFinder = memoize((fnr) -> tpsTjeneste.hentDiskresjonskodeForAktør(new PersonIdent(fnr)));
+        Function<String, Optional<String>> diskresjonskodeFinder = memoize((fnr) -> tpsTjeneste.hentDiskresjonskodeForAktør(new PersonIdent(fnr), ytelseType));
 
         // Sett fødselsnummer og diskresjonskodepå personopplysning for alle
         // behandlinger. Fødselsnummer og diskresjonskode lagres ikke i basen og må derfor hentes fra

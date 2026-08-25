@@ -4,7 +4,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
+import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.integrasjon.pdl.Person;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
@@ -55,7 +55,7 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
     @Inject
     private BehandlingRepository behandlingRepository;
 
-    private Pdl pdlKlient = Mockito.mock(Pdl.class);
+    private PdlKlient pdlKlient = Mockito.mock(PdlKlient.class);
 
     private PdlFødselshendelseFagsakTilVurderingUtleder utleder;
     private PersonopplysningRepository personopplysningRepository;

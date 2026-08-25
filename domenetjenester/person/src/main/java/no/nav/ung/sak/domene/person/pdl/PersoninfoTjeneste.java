@@ -3,6 +3,7 @@ package no.nav.ung.sak.domene.person.pdl;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.pdl.*;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.aktør.Familierelasjon;
@@ -19,11 +20,6 @@ import static java.util.Map.ofEntries;
 
 @ApplicationScoped
 public class PersoninfoTjeneste {
-
-    private static final String HARDKODET_POSTNR = "XXXX";
-
-    private static final Set<Sivilstandstype> JURIDISK_GIFT = Set.of(Sivilstandstype.GIFT, Sivilstandstype.SEPARERT,
-        Sivilstandstype.REGISTRERT_PARTNER, Sivilstandstype.SEPARERT_PARTNER);
 
     private static final Map<ForelderBarnRelasjonRolle, RelasjonsRolleType> ROLLE_FRA_FREG_ROLLE = ofEntries(
         entry(ForelderBarnRelasjonRolle.BARN, RelasjonsRolleType.BARN),
@@ -78,7 +74,7 @@ public class PersoninfoTjeneste {
         return ROLLE_FRA_FREG_ROLLE.getOrDefault(type, RelasjonsRolleType.UDEFINERT);
     }
 
-    public Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent) {
+    public Personinfo hentKjerneinformasjon(AktørId aktørId, PersonIdent personIdent, FagsakYtelseType ytelseType) {
 
         var query = new HentPersonQueryRequest();
         query.setIdent(personIdent.getIdent());
@@ -94,7 +90,7 @@ public class PersoninfoTjeneste {
                     .minRolleForPerson()
             );
 
-        var personFraPdl = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
+        var personFraPdl = pdlKlient.hentPerson(query, projection, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         var fødselsdato = personFraPdl.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)
