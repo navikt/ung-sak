@@ -6425,7 +6425,7 @@
                 }
               }
             },
-            "description" : "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i ung-sak."
+            "description" : "Returnerer basisinformasjon om en aktør og hvilke fagsaker vedkommede har i k9-sak."
           },
           "400" : {
             "content" : {
