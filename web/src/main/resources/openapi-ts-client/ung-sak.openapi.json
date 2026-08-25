@@ -1445,9 +1445,9 @@
         "x-enum-varnames" : [ "INNVILGET", "DELVIS_INNVILGET", "AVSLAG", "OPPHØR", "VEDTAK_I_KLAGEBEHANDLING", "VEDTAK_I_ANKEBEHANDLING", "VEDTAK_I_INNSYNBEHANDLING", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak" : {
-        "enum" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "-" ],
+        "enum" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "AVKORTET", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "UDEFINERT" ]
+        "x-enum-varnames" : [ "HAR_ANNEN_LIVSOPPHOLDSYTELSE", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Avklaringtype" : {
         "enum" : [ "AVSLAG", "OPPHØR" ],
@@ -1455,19 +1455,19 @@
         "x-enum-varnames" : [ "AVSLAG", "OPPHØR" ]
       },
       "ung.kodeverk.vilkår.Avslagsårsak" : {
-        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "3001", "3003", "3004", "3005", "3002", "4001", "-" ],
+        "enum" : [ "1007", "1019", "1089", "1090", "1091", "2001", "2002", "3001", "3003", "3004", "3005", "3002", "4001", "9000", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED", "SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE", "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE", "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED", "IKKE_14A_VEDTAK", "SØKER_ER_IKKE_MEDLEM", "UDEFINERT" ]
+        "x-enum-varnames" : [ "SØKT_FOR_SENT", "MANGLENDE_DOKUMENTASJON", "SØKER_UNDER_MINSTE_ALDER", "SØKER_OVER_HØYESTE_ALDER", "SØKER_HAR_AVGÅTT_MED_DØDEN", "OPPHØRT_UNGDOMSPROGRAM", "ENDRET_STARTDATO_UNGDOMSPROGRAM", "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED", "SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE", "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE", "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED", "IKKE_14A_VEDTAK", "SØKER_ER_IKKE_MEDLEM", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak" : {
-        "enum" : [ "IKKE_14A_VEDTAK", "-" ],
+        "enum" : [ "IKKE_14A_VEDTAK", "AVKORTET", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "UDEFINERT" ]
+        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak" : {
-        "enum" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "ANNET", "-" ],
+        "enum" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "AVKORTET", "ANNET", "-" ],
         "type" : "string",
-        "x-enum-varnames" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "ANNET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "AVKORTET", "ANNET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Utfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],
@@ -5657,6 +5657,47 @@
         "type" : "string",
         "x-enum-varnames" : [ "ARBEIDSGIVER", "BRUKER" ]
       },
+      "ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.AvkortingsperioderResponse" : {
+        "properties" : {
+          "resultat" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.VilkårMedMuligAvkortingPeriode"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "resultat" ],
+        "type" : "object"
+      },
+      "ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.MuligAvkortingPeriode" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.VilkårMedMuligAvkortingPeriode" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.MuligAvkortingPeriode"
+            },
+            "type" : "array"
+          },
+          "vilkårType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          }
+        },
+        "required" : [ "perioder", "vilkårType" ],
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.behandling.personopplysning.ForvaltningPersonRestTjeneste.HentFnr" : {
         "properties" : {
           "aktørIder" : {
@@ -6326,6 +6367,38 @@
               }
             },
             "description" : "default response"
+          }
+        },
+        "tags" : [ "avp" ]
+      }
+    },
+    "/api/aktivitetspenger/perioder-som-kan-avkortes" : {
+      "get" : {
+        "description" : "Henter perioder som kan avkortes av saksbehandler ved nav-kontor",
+        "operationId" : "hentPerioderSomKanAvkortesAvNavKontor",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste.AvkortingsperioderResponse"
+                }
+              }
+            },
+            "description" : "Perioder pr vilkår hvor saksbehandler kan avkorte"
+          },
+          "400" : {
+            "description" : "Input-validering feiler, inkludert at tjenesten er forsøkt brukt for annen ytelse enn aktivitetspenger eller for klage/tilbakekrevingsbehandlinger"
           }
         },
         "tags" : [ "avp" ]
