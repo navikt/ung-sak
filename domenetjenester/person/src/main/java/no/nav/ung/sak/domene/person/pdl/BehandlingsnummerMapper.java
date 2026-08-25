@@ -6,8 +6,8 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 import java.util.List;
 
-public class BehandingsnummerMapper {
-    private BehandingsnummerMapper() {
+public class BehandlingsnummerMapper {
+    private BehandlingsnummerMapper() {
     }
 
     public static List<Behandlingsnummer> ytelsestypeTilBehandlingsnummer(FagsakYtelseType ytelseType){

@@ -12,6 +12,7 @@ import no.nav.ung.sak.domene.person.pdl.PersoninfoAdapter;
 import no.nav.ung.sak.typer.AktørId;
 
 import java.util.List;
+import java.util.Objects;
 
 @Dependent
 public class BehandlendeEnhetService {
@@ -26,6 +27,7 @@ public class BehandlendeEnhetService {
     }
 
     public BehandlendeEnhet hentBehandlendeEnhet(OmrådeTema tema, BehandlingTema behandlingTema, AktørId hovedAktør) {
+        Objects.requireNonNull(behandlingTema, "behandlingTema manglet");
         FagsakYtelseType ytelseType = switch (behandlingTema) {
             case UNGDOMSPROGRAMYTELSEN -> FagsakYtelseType.UNGDOMSYTELSE;
             //TODO legg inn aktivitetspenger her når det er klart.

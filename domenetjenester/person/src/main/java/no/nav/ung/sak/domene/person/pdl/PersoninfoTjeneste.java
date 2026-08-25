@@ -90,7 +90,7 @@ public class PersoninfoTjeneste {
                     .minRolleForPerson()
             );
 
-        var personFraPdl = pdlKlient.hentPerson(query, projection, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
+        var personFraPdl = pdlKlient.hentPerson(query, projection, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         var fødselsdato = personFraPdl.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)

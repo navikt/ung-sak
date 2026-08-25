@@ -7,7 +7,7 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.RelasjonsRolleType;
 import no.nav.ung.sak.behandlingslager.aktør.Familierelasjon;
 import no.nav.ung.sak.behandlingslager.aktør.Personinfo;
-import no.nav.ung.sak.domene.person.pdl.BehandingsnummerMapper;
+import no.nav.ung.sak.domene.person.pdl.BehandlingsnummerMapper;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.PersonIdent;
 
@@ -86,12 +86,12 @@ public class DebugPersoninfoTjeneste {
             );
 
 
-        var personFraPdl = pdlKlient.hentPerson(query, projection, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
+        var personFraPdl = pdlKlient.hentPerson(query, projection, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         dumpinnhold.add("pdl-kjerneinfo-query for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(query));
         dumpinnhold.add("pdl-kjerneinfo-projection for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(projection));
 
-        var person = pdlKlient.hentPerson(query, projection, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
+        var person = pdlKlient.hentPerson(query, projection, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         dumpinnhold.add("pdl-kjerneinfo-svar for " + aktørId.getAktørId() + ": " + PdlKallDump.toJson(person));
 

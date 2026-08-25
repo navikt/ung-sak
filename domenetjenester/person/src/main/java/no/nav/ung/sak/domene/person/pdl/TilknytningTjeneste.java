@@ -67,7 +67,7 @@ public class TilknytningTjeneste {
             .gtType().gtBydel().gtKommune().gtLand();
 
         var diskresjon = hentDiskresjonskode(aktørId, ytelseType);
-        var tilknytning = getTilknytning(pdlKlient.hentGeografiskTilknytning(queryGT, projectionGT, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType)));
+        var tilknytning = getTilknytning(pdlKlient.hentGeografiskTilknytning(queryGT, projectionGT, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType)));
         return new GeografiskTilknytning(tilknytning, diskresjon);
     }
 
@@ -76,7 +76,7 @@ public class TilknytningTjeneste {
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-        var person = pdlKlient.hentPerson(query, projection, BehandingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
+        var person = pdlKlient.hentPerson(query, projection, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         return diskresjonskodeFor(person.getAdressebeskyttelse().stream());
     }
