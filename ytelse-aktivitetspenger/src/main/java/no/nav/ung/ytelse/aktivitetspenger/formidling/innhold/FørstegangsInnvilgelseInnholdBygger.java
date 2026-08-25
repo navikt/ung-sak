@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.ungdomsytelse.sats.UngdomsytelseSatsType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
@@ -59,10 +60,14 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var tilVurdering = tidslinje.tilVurdering();
-        LocalDateTimeline<DetaljertResultat> periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
+        var periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
 
         LocalDate ytelseFom = periode.getMinLocalDate();
-        LocalDate ytelseTom = null;
+
+        var avkortetTidslinje = tilVurdering.filterValue(
+            it -> it.avslåtteVilkår().stream().anyMatch(
+                r -> r.avslagsårsak() == Avslagsårsak.AVKORTET));
+        LocalDate ytelseTom = avkortetTidslinje.isEmpty() ? null : avkortetTidslinje.getMinLocalDate().minusDays(1);
 
         var aktivitetspengerGrunnlag = beregningsgrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow(
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
