@@ -13,6 +13,10 @@ public record VilkårUtfall(Utfall utfall, Avslagsårsak avslagsårsak, String f
         return avslått(avslagsårsak, null);
     }
 
+    public static VilkårUtfall ikkeRelevant() {
+        return new VilkårUtfall(Utfall.IKKE_RELEVANT, null, null);
+    }
+
     public static VilkårUtfall avslått(Avslagsårsak avslagsårsak, String fritekstBrev) {
         return new VilkårUtfall(Utfall.IKKE_OPPFYLT, avslagsårsak, fritekstBrev);
     }

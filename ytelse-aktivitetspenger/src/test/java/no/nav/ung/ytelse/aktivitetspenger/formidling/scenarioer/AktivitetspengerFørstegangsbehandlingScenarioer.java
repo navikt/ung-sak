@@ -19,10 +19,13 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerBrevScenarioerUtils.*;
 
 public class AktivitetspengerFørstegangsbehandlingScenarioer {
+
+    private static final TreeSet<VilkårType> SORTERT_AVKORTBARE_VILKÅR = new TreeSet<>(List.of(VilkårType.BOSTEDSVILKÅR, VilkårType.BISTANDSVILKÅR, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR));
 
     /**
      * 24 år, blir 25 år etter 15 dager i programmet.
@@ -226,6 +229,71 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))))
             .medVilkår(vilkårType, new LocalDateTimeline<>(p, VilkårUtfall.avslått(avslagsårsak, fritekstBrev)))
             .build();
+    }
+
+    /**
+     * Innvilget med tom-dato (avkortet program): bruker er over 25 år og får høy sats (minstesats)
+     * fra fom til og med tom. Vilkårene som kan avkortes er oppfylt i fom-tom, og avslått med
+     * {@link Avslagsårsak#AVKORTET} fra dagen etter tom og ut den maksimale søkte perioden (52 uker).
+     */
+    public static AktivitetspengerTestScenario innvilgetMedAvkortetTomDato(LocalDate fom, LocalDate tom, VilkårType avkortetVilkårType) {
+        LocalDate maksTom = fom.plusWeeks(52).minusDays(1);
+        if (!tom.isAfter(fom) || !tom.isBefore(maksTom)) {
+            throw new IllegalArgumentException("tom må være etter fom og før maksimal sluttdato " + maksTom + ", var " + tom);
+        }
+        LocalDate fødselsdato = fom.minusYears(30);
+        var fagsakPeriode = new LocalDateInterval(fom, maksTom);
+        var innvilgetPeriode = new LocalDateInterval(fom, tom);
+
+        var høySats = høySatsBuilder(fom).build();
+
+        var satsperioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(innvilgetPeriode, new AktivitetspengerSatsPeriode(innvilgetPeriode, høySats))
+        ));
+
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(innvilgetPeriode, høySats);
+
+        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
+        ));
+
+        // Tilkjent ytelse beregnes ut inneværende måned, men aldri lenger enn den avkortede sluttdatoen
+        LocalDate a = fom.with(TemporalAdjusters.lastDayOfMonth());
+        LocalDate tilkjentTom = a.isBefore(tom) ? a : tom;
+        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, tilkjentTom);
+
+        var avkortetTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(innvilgetPeriode, VilkårUtfall.oppfylt()),
+            new LocalDateSegment<>(tom.plusDays(1), maksTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+        ));
+
+        var builder = AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato())))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode))
+            .medAldersvilkår(new LocalDateTimeline<>(innvilgetPeriode, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdato)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(fagsakPeriode))))
+            .medVilkår(avkortetVilkårType, avkortetTidslinje);
+
+
+        //Oppfyll vilkårene før
+        SORTERT_AVKORTBARE_VILKÅR.headSet(avkortetVilkårType, false)
+            .forEach(vilkårType -> builder.medVilkår(vilkårType,
+                new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fagsakPeriode, VilkårUtfall.oppfylt())))));
+
+        //Sett til ikke relevant vilkårene etter
+        SORTERT_AVKORTBARE_VILKÅR.tailSet(avkortetVilkårType, false)
+            .forEach(vilkårType ->
+                builder.medVilkår(vilkårType,
+                    new LocalDateTimeline<>(List.of(
+                        new LocalDateSegment<>(innvilgetPeriode, VilkårUtfall.oppfylt()),
+                        new LocalDateSegment<>(tom.plusDays(1), maksTom, VilkårUtfall.ikkeRelevant()))
+                    )));
+
+        return builder.build();
     }
 
 }
