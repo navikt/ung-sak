@@ -4,12 +4,15 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
@@ -190,119 +193,40 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
      * Avslag pga bostedsvilkåret ikke oppfylt.
      * Bruker er 20 år, har søkt fra fom, men bor utenfor EØS.
      */
-    public static AvslagScenario avslåttBosted(LocalDate fom) {
-        LocalDate fødselsdato = fom.minusYears(20);
-        var tom = fom.plusWeeks(52).minusDays(1);
-        var p = new LocalDateInterval(fom, tom);
-
-        return new AvslagScenario(
-            new AktivitetspengerTestScenario(
-                DEFAULT_NAVN,
-                List.of(new Periode(fom, tom)),
-                null,
-                null,
-                null,
-                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-                fødselsdato,
-                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
-                Collections.emptyList(),
-                null,
-                null),
-            new Periode(fom, tom),
-            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED
-        );
+    public static AktivitetspengerTestScenario avslåttBosted(LocalDate fom) {
+        return fullAvslagScenario(fom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, null);
     }
 
-    /**
-     * Avslag pga bistandsvilkåret ikke oppfylt.
-     * Bruker er 20 år, har søkt fra fom, men mangler 14a-vedtak.
-     */
-    public static AvslagScenario avslåttBistand(LocalDate fom) {
-        LocalDate fødselsdato = fom.minusYears(20);
-        var tom = fom.plusWeeks(52).minusDays(1);
-        var p = new LocalDateInterval(fom, tom);
-
-        return new AvslagScenario(
-            new AktivitetspengerTestScenario(
-                DEFAULT_NAVN,
-                List.of(new Periode(fom, tom)),
-                null,
-                null,
-                null,
-                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-                fødselsdato,
-                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
-                Collections.emptyList(),
-                null,
-                null),
-            new Periode(fom, tom),
-            no.nav.ung.kodeverk.vilkår.VilkårType.BISTANDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.IKKE_14A_VEDTAK
-        );
+    public static AktivitetspengerTestScenario avslåttBistand(LocalDate fom, String fritekstBrev) {
+        return fullAvslagScenario(fom, VilkårType.BISTANDSVILKÅR, Avslagsårsak.IKKE_14A_VEDTAK, fritekstBrev);
     }
 
     /**
      * Avslag pga bostedsvilkåret ikke oppfylt - folkeregistrert eller bostedsadresse.
      * Bruker er 20 år, men har verken bosted eller folkeregistrert adresse i Trondheim.
      */
-    public static AvslagScenario avslåttBostedFolkeregistrertEllerBostedsadresse(LocalDate fom) {
+    public static AktivitetspengerTestScenario avslåttBostedFolkeregistrertEllerBostedsadresse(LocalDate fom) {
+        return fullAvslagScenario(fom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, null);
+    }
+
+    public static AktivitetspengerTestScenario avslåttArbeidsstedStudiested(LocalDate fom, String fritekstBrev) {
+        return fullAvslagScenario(fom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED, fritekstBrev);
+    }
+
+    private static AktivitetspengerTestScenario fullAvslagScenario(LocalDate fom, VilkårType vilkårType, Avslagsårsak avslagsårsak, String fritekstBrev) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
 
-        return new AvslagScenario(
-            new AktivitetspengerTestScenario(
-                DEFAULT_NAVN,
-                List.of(new Periode(fom, tom)),
-                null,
-                null,
-                null,
-                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-                fødselsdato,
-                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
-                Collections.emptyList(),
-                null,
-                null),
-            new Periode(fom, tom),
-            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE
-        );
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, tom)))
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdato)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))))
+            .medVilkår(vilkårType, new LocalDateTimeline<>(p, VilkårUtfall.avslått(avslagsårsak, fritekstBrev)))
+            .build();
     }
 
-    /**
-     * Avslag pga bostedsvilkåret ikke oppfylt - arbeidssted eller studiested.
-     * Bruker er 20 år, men studie- eller arbeidsstedet er utenfor Trondheim.
-     */
-    public static AvslagScenario avslåttArbeidsstedStudiested(LocalDate fom) {
-        LocalDate fødselsdato = fom.minusYears(20);
-        var tom = fom.plusWeeks(52).minusDays(1);
-        var p = new LocalDateInterval(fom, tom);
-
-        return new AvslagScenario(
-            new AktivitetspengerTestScenario(
-                DEFAULT_NAVN,
-                List.of(new Periode(fom, tom)),
-                null,
-                null,
-                null,
-                new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-                fødselsdato,
-                Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))),
-                Collections.emptyList(),
-                null,
-                null),
-            new Periode(fom, tom),
-            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED
-        );
-    }
-
-    public record AvslagScenario(
-        AktivitetspengerTestScenario testScenario,
-        Periode vilkårPeriode,
-        no.nav.ung.kodeverk.vilkår.VilkårType vilkårType,
-        no.nav.ung.kodeverk.vilkår.Avslagsårsak avslagsårsak
-    ) {}
 }
 
