@@ -465,6 +465,9 @@ public class AktivitetspengerTestScenarioBuilder {
         if (aktivitetspengerTestscenario.aldersvilkår() != null) {
             aktivitetspengerTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
         }
+        aktivitetspengerTestscenario.vilkår().forEach((vilkårType, tidslinje) ->
+            tidslinje.forEach(segment -> leggTilVilkår(vilkårType, segment.getValue().utfall(),
+                new Periode(segment.getFom(), segment.getTom()), segment.getValue().avslagsårsak(), segment.getValue().fritekstBrev())));
     }
 
     private void settOppPersoner() {

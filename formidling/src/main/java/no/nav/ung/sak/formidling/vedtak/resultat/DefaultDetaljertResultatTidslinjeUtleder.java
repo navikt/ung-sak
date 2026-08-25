@@ -5,10 +5,10 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -130,6 +130,7 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
                 grunnlag.behandlingÅrsaker(),
                 grunnlag.avslåtteVilkår(),
                 grunnlag.ikkeVurderteVilkår(),
+                grunnlag.avkortedeVilkår(),
                 UtbetalingsgradType.av(rhs != null ? rhs.getValue() : null),
                 grunnlag.tilVurdering());
             return new LocalDateSegment<>(p, resultat);
