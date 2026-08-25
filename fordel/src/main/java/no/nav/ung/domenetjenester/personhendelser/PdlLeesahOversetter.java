@@ -2,6 +2,8 @@ package no.nav.ung.domenetjenester.personhendelser;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.k9.felles.integrasjon.pdl.Behandlingsnummer;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.person.pdl.leesah.Endringstype;
 import no.nav.person.pdl.leesah.Personhendelse;
 import no.nav.person.pdl.leesah.forelderbarnrelasjon.ForelderBarnRelasjon;
@@ -22,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 @Dependent
@@ -118,10 +121,12 @@ public class PdlLeesahOversetter {
 
         AktørId barnAktørId = optionalAktørId.get();
 
-        // Vi vet ikke her tidspunktet hvilken ytelse det gjelder (eller om det gjelder flere). Velger bare en av ytelsene.
-        //TODO vi burde antagelig sende alle ytelser det kan være til PDL
-        FagsakYtelseType ytelseTypeForPdl = FagsakYtelseType.UNGDOMSYTELSE;
-        PersoninfoBasis barn = personTjeneste.hentBasisPersoninfo(barnAktørId, barnPersonIdent, ytelseTypeForPdl);
+        // Vi vet ikke her tidspunktet hvilken ytelse det gjelder (eller om det gjelder flere). Sender med alle aktuelle ytelser
+        Boolean aktivertSpesifikkBehandlingsnummer = Boolean.valueOf(Environment.current().getProperty("BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE", "false"));
+        var behandlingsnumre = aktivertSpesifikkBehandlingsnummer
+            ? List.of(Behandlingsnummer.AKTIVITETSPENGER, Behandlingsnummer.UNGDOMSPROGRAMYTELSEN)
+            : List.of(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
+        PersoninfoBasis barn = personTjeneste.hentBasisPersoninfo(barnAktørId, barnPersonIdent, behandlingsnumre);
         LocalDate fødselsdato = barn.getFødselsdato();
 
         if (fødselsdato == null) {

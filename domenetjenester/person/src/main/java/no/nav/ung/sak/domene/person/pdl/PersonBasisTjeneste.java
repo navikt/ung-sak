@@ -14,6 +14,8 @@ import no.nav.ung.sak.typer.PersonIdent;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.List;
 import java.util.Objects;
 
 @ApplicationScoped
@@ -36,6 +38,11 @@ public class PersonBasisTjeneste {
     }
 
     public PersoninfoBasis hentBasisPersoninfo(AktørId aktørId, PersonIdent personIdent, FagsakYtelseType ytelseType) {
+        List<Behandlingsnummer> behandlingsnumre = BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType);
+        return hentBasisPersoninfo(aktørId, personIdent, behandlingsnumre);
+    }
+
+    public PersoninfoBasis hentBasisPersoninfo(AktørId aktørId, PersonIdent personIdent, List<Behandlingsnummer> behandlingsnumre) {
         var query = new HentPersonQueryRequest();
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
@@ -45,7 +52,7 @@ public class PersonBasisTjeneste {
             .kjoenn(new KjoennResponseProjection().kjoenn())
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
 
-        var person = pdlKlient.hentPerson(query, projection, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
+        var person = pdlKlient.hentPerson(query, projection, behandlingsnumre);
 
         var fødselsdato = person.getFoedselsdato().stream()
             .map(Foedselsdato::getFoedselsdato)
