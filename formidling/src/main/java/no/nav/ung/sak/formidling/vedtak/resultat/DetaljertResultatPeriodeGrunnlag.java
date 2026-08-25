@@ -19,6 +19,13 @@ public record DetaljertResultatPeriodeGrunnlag(List<DetaljertVilkårResultat> vi
             .collect(Collectors.toSet());
     }
 
+    public Set<DetaljertVilkårResultat> avkortedeVilkår() {
+        return vilkårsresultater.stream()
+            .filter(it -> it.utfall() == Utfall.IKKE_OPPFYLT)
+            .filter(it -> it.avslagsårsak() == Avslagsårsak.AVKORTET)
+            .collect(Collectors.toSet());
+    }
+
     public Set<DetaljertVilkårResultat> ikkeVurderteVilkår() {
         return vilkårsresultater.stream()
             .filter(it -> it.utfall() == Utfall.IKKE_VURDERT)

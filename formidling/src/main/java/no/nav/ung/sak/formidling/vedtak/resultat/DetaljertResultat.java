@@ -8,6 +8,7 @@ public record DetaljertResultat(
     Set<BehandlingÅrsakType> behandlingsårsaker,
     Set<DetaljertVilkårResultat> avslåtteVilkår,
     Set<DetaljertVilkårResultat> ikkeVurderteVilkår,
+    Set<DetaljertVilkårResultat> avkortedeVilkår,
     UtbetalingsgradType utbetalingsgrad,
     boolean tilVurdering
 ) {
