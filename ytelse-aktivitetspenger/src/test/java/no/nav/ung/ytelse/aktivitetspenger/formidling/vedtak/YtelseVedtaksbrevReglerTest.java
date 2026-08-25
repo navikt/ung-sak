@@ -43,15 +43,12 @@ class YtelseVedtaksbrevReglerTest {
         repositories = BrevTestUtils.lagAlleTestRepositories(entityManager);
     }
 
-    /**
-     * Avkorting av programperioden gir et AVKORTET-avslag på bostedsvilkåret etter sluttdato.
-     * Det er ikke et reelt avslag, så det skal kun sendes innvilgelsesbrev.
-     */
+
     @Test
     void skal_kun_gi_innvilgelsesbrev_ved_avkortet_bostedsvilkår() {
         var fom = LocalDate.of(2025, 8, 1);
         var tom = LocalDate.of(2025, 11, 30);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetMedAvkortetTomDato(fom, tom, VilkårType.BOSTEDSVILKÅR);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetMedAvkortetVilkår(fom, tom, VilkårType.BOSTEDSVILKÅR);
 
         var behandling = lagBehandling(scenario);
 

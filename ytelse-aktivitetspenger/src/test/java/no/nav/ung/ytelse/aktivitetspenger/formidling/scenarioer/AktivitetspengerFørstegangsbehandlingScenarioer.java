@@ -236,7 +236,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
      * fra fom til og med tom. Vilkårene som kan avkortes er oppfylt i fom-tom, og avslått med
      * {@link Avslagsårsak#AVKORTET} fra dagen etter tom og ut den maksimale søkte perioden (52 uker).
      */
-    public static AktivitetspengerTestScenario innvilgetMedAvkortetTomDato(LocalDate fom, LocalDate tom, VilkårType avkortetVilkårType) {
+    public static AktivitetspengerTestScenario innvilgetMedAvkortetVilkår(LocalDate fom, LocalDate tom, VilkårType avkortetVilkårType) {
         LocalDate maksTom = fom.plusWeeks(52).minusDays(1);
         if (!tom.isAfter(fom) || !tom.isBefore(maksTom)) {
             throw new IllegalArgumentException("tom må være etter fom og før maksimal sluttdato " + maksTom + ", var " + tom);
