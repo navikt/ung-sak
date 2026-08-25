@@ -31,8 +31,6 @@ import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -118,8 +116,6 @@ public class AktivitetspengerTestScenarioBuilder {
     private AktivitetspengerTestScenario aktivitetspengerTestscenario;
     private final List<MottattDokumentTestGrunnlag> mottatteDokumenter = new ArrayList<>();
     private final List<BostedsAvklaringTestData> bostedsAvklaringer = new ArrayList<>();
-    private final List<BostedsvilkårResultatPeriode> bostedsvilkårResultater = new ArrayList<>();
-    private final List<BistandsvilkårResultatPeriode> bistandsvilkårResultater = new ArrayList<>();
 
     private AktivitetspengerTestScenarioBuilder() {
         this.fagsakBuilder = FagsakBuilder
@@ -531,8 +527,9 @@ public class AktivitetspengerTestScenarioBuilder {
         }
 
         if (repositories.inngangsvilkårVurderingRepository() != null) {
-            repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), bostedsvilkårResultater);
-            repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), bistandsvilkårResultater);
+            var inngangsvilkårVurderinger = aktivitetspengerTestscenario.inngangsvilkårVurderinger();
+            repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bostedsvilkårResultater());
+            repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bistandsvilkårResultater());
         }
     }
 
@@ -907,16 +904,6 @@ public class AktivitetspengerTestScenarioBuilder {
 
     public AktivitetspengerTestScenarioBuilder leggTilBostedsAvklaring(BostedsAvklaringTestData bostedsAvklaring) {
         bostedsAvklaringer.add(bostedsAvklaring);
-        return this;
-    }
-
-    public AktivitetspengerTestScenarioBuilder leggTilBostedsvilkårVurderingResultat(BostedsvilkårResultatPeriode vilkårResultatVurdering) {
-        bostedsvilkårResultater.add(vilkårResultatVurdering);
-        return this;
-    }
-
-    public AktivitetspengerTestScenarioBuilder leggTilBistandsvilkårVurderingResultat(BistandsvilkårResultatPeriode vilkårResultatVurdering) {
-        bistandsvilkårResultater.add(vilkårResultatVurdering);
         return this;
     }
 

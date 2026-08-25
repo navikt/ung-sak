@@ -93,8 +93,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medAktivitetspengerTestGrunnlag(scenario.opphørScenario())
             .leggTilVilkår(scenario.vilkårType(), Utfall.IKKE_OPPFYLT, scenario.opphørtVilkårPeriode(), scenario.avslagsårsak(), fritekstBrev)
-            .leggTilBostedsAvklaring(scenario.bostedsAvklaring())
-            .leggTilBostedsvilkårVurderingResultat(scenario.bostedsAvklaring().lagVilkårVurdering());   // Simulerer automatisk vurdert vilkår på bakgrunn av avklaring
+            .leggTilBostedsAvklaring(scenario.bostedsAvklaring());
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);

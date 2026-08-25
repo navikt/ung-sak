@@ -2,8 +2,6 @@ package no.nav.ung.ytelse.aktivitetspenger.testdata;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
 /**
@@ -21,17 +19,5 @@ public record BostedsAvklaringTestData(
 
     public static BostedsAvklaringTestData avslag(Periode periode, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
         return new BostedsAvklaringTestData(periode, Avklaringtype.AVSLAG, ikkeOppfyltÅrsak);
-    }
-
-    public BostedsvilkårResultatPeriode lagVilkårVurdering() {
-        return new BostedsvilkårResultatPeriode(
-            DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()),
-            false,
-            ikkeOppfyltÅrsak,
-            true,
-            "Begrunnelse fra testscenario",
-            null,
-            "VL",
-            periode.getFom().atStartOfDay());
     }
 }

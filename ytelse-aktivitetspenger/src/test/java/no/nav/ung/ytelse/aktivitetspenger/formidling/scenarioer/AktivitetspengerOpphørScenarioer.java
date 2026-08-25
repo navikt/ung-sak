@@ -14,9 +14,9 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestData;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -65,18 +65,21 @@ public class AktivitetspengerOpphørScenarioer {
         LocalDate opphørDato = fom.plusMonths(3);
         var opphørtVilkårPeriode = new Periode(opphørDato, tom);
 
-        var opphørScenario = new AktivitetspengerTestScenario(
-            DEFAULT_NAVN,
-            List.of(new Periode(fom, tom)),
-            satsperioder,
-            beregningsgrunnlag,
-            tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), new LocalDateInterval(fom, opphørDato.minusDays(1))),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdato,
-            Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))),
-            Collections.emptyList(),
-            null,
-            null);
+        var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBostedsvilkårResultat(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, null)
+            .build();
+
+        var opphørScenario = AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, tom)))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), new LocalDateInterval(fom, opphørDato.minusDays(1))))
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdato)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))))
+            .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .build();
 
         return new OpphørScenario(opphørScenario, vilkårType, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, opphørtVilkårPeriode,
             BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak));
