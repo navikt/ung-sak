@@ -92,7 +92,8 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     }
 
     public List<BostedsvilkårResultatPeriode> hentBostedsvilkårResultatPerioder() {
-        return getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(List.of());
+        return getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke BostedsvilkårResultatPerioder"));
     }
 
     public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {

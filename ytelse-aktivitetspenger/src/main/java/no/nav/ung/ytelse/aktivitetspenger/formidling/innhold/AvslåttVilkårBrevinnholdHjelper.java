@@ -19,11 +19,11 @@ import java.util.stream.Collectors;
 
 // Avslagsårsaker og opphørsårsaker er begge implementert vha avslagsårsaker i vilkår.
 // Gjenbruker derfor funksjonalitet på tvers av avslag- og opphørsbrev.
-public class AvslåttVilkårBrevinnholdHelper {
+public class AvslåttVilkårBrevinnholdHjelper {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AvslåttVilkårBrevinnholdHelper.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AvslåttVilkårBrevinnholdHjelper.class);
 
-    private AvslåttVilkårBrevinnholdHelper() {
+    private AvslåttVilkårBrevinnholdHjelper() {
     }
 
     public static AvslåttBosted lagAvslåttBosted(Vilkårene vilkårene,

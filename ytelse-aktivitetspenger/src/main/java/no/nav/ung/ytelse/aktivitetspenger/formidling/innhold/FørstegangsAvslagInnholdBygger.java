@@ -60,11 +60,11 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
             .orElseThrow(() -> new IllegalStateException("Fant ingen eksisterende vilkårvurderinggrunnlag for behandlingId: " + behandling.getId()));
 
         var avslåttBosted = avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR) ?
-            AvslåttVilkårBrevinnholdHelper.lagAvslåttBosted(vilkårene, vilkårVurdering, vurdertPeriode)
+            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vilkårene, vilkårVurdering, vurdertPeriode)
             : null;
 
         var avslåttBistand = avslåtteVilkårTyper.contains(VilkårType.BISTANDSVILKÅR) ?
-            AvslåttVilkårBrevinnholdHelper.lagAvslåttBistand(vilkårene, vilkårVurdering, vurdertPeriode)
+            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vilkårene, vilkårVurdering, vurdertPeriode)
             : null;
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG,

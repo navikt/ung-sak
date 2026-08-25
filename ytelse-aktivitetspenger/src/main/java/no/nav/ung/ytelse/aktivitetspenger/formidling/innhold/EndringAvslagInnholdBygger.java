@@ -5,6 +5,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
@@ -23,6 +24,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringAvslagDto;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -59,28 +61,41 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
         var vilkårVurdering = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
             .orElseThrow(() -> new IllegalStateException("Fant ingen eksisterende vilkårvurderinggrunnlag for behandlingId: " + behandling.getId()));
 
-        var behandlingÅrsakType = vilkårOgBehandlingÅrsak.get(VilkårType.BOSTEDSVILKÅR);
-        var vilkårsAvklaringBosted = behandlingÅrsakMedVilkårsavklaring.get(behandlingÅrsakType);
-        if (vilkårsAvklaringBosted.isPresent()) {
-            var vurdertPeriode = TidslinjeUtil.tilTidslinjeKomprimert(List.of(vilkårsAvklaringBosted.get().periode()));
+        var vilkårsavklaringBosted = behandlingÅrsakMedVilkårsavklaring.get(vilkårOgBehandlingÅrsak.get(VilkårType.BOSTEDSVILKÅR));
+        var vurdertPeriodeBosted = finnVurdertPeriodeForAvslag(tidslinje, VilkårType.BOSTEDSVILKÅR, vilkårsavklaringBosted);
+        if (!vurdertPeriodeBosted.isEmpty()) {
             return lagDto(
-                vilkårsAvklaringBosted.get(),
-                AvslåttVilkårBrevinnholdHelper.lagAvslåttBosted(vilkårene, vilkårVurdering, vurdertPeriode)
+                vilkårsavklaringBosted.get(),
+                AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vilkårene, vilkårVurdering, vurdertPeriodeBosted)
             );
         }
 
-        throw new IllegalStateException("Fant ingen vilkårsavklaring for behandlingÅrsakType: " + behandlingÅrsakType);
+        throw new IllegalStateException("Fant ingen vilkårsavklaring med avslått periode for behandlingId: " + behandling.getId());
     }
 
-        public TemplateInnholdResultat lagDto(VilkårsavklaringUnderArbeid vilkårsavklaring, AvslåttBosted avslåttBosted) {
-            return new TemplateInnholdResultat(
-                vilkårsavklaring.avklaringtype() == Avklaringtype.OPPHØR ? TemplateType.AKTIVITETSPENGER_OPPHØR : TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG,
-                new EndringAvslagDto(
-                    vilkårsavklaring.periode().tilPeriode(),
-                    avslåttBosted
-                )
-            );
+    private static LocalDateTimeline<Boolean> finnVurdertPeriodeForAvslag(DetaljertResultatTidslinje tidslinje,
+                                                                          VilkårType vilkårType,
+                                                                          Optional<VilkårsavklaringUnderArbeid> vilkårsavklaring) {
+        if (vilkårsavklaring.isEmpty()) {
+            return LocalDateTimeline.empty();
         }
+        var avslåttVilkårsPeriode = tidslinje.tilVurdering()
+            .filterValue(r -> r.avslåtteVilkår().stream().anyMatch(v -> v.vilkårType() == vilkårType));
+
+        var vilkårsavklaringPeriode = TidslinjeUtil.tilTidslinjeKomprimert(List.of(vilkårsavklaring.get().periode()));
+        var vurdertPeriode = vilkårsavklaringPeriode.intersection(avslåttVilkårsPeriode);
+        return vurdertPeriode.isEmpty() ? LocalDateTimeline.empty() : vurdertPeriode;
+    }
+
+    public TemplateInnholdResultat lagDto(VilkårsavklaringUnderArbeid vilkårsavklaring, AvslåttBosted avslåttBosted) {
+        return new TemplateInnholdResultat(
+            vilkårsavklaring.avklaringtype() == Avklaringtype.OPPHØR ? TemplateType.AKTIVITETSPENGER_OPPHØR : TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG,
+            new EndringAvslagDto(
+                vilkårsavklaring.periode().tilPeriode(),
+                avslåttBosted
+            )
+        );
+    }
 
 }
 
