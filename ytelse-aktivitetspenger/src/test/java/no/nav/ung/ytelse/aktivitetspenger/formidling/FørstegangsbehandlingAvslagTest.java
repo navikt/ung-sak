@@ -2,14 +2,13 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer.AvslagScenario;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,7 +34,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         var fom = LocalDate.of(2025, 8, 1);
         var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBosted(fom);
 
-        var behandling = lagAvslagScenario(scenario, null);
+        var behandling = lagAvslåttBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
@@ -52,9 +51,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     @Test
     void avslagBistand() {
         var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom, null);
 
-        var behandling = lagAvslagScenario(scenario, null);
+        var behandling = lagAvslåttBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
@@ -70,9 +69,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     @Test
     void avslagBistand_fritekst() {
         var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom, FRITEKST_BISTAND);
 
-        var behandling = lagAvslagScenario(scenario, FRITEKST_BISTAND);
+        var behandling = lagAvslåttBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
@@ -92,7 +91,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         var fom = LocalDate.of(2025, 8, 1);
         var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBostedFolkeregistrertEllerBostedsadresse(fom);
 
-        var behandling = lagAvslagScenario(scenario, null);
+        var behandling = lagAvslåttBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
@@ -108,9 +107,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     @Test
     void avslagArbeidsstedStudiested() {
         var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttArbeidsstedStudiested(fom);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttArbeidsstedStudiested(fom, null);
 
-        var behandling = lagAvslagScenario(scenario, null);
+        var behandling = lagAvslåttBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
@@ -126,9 +125,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     @Test
     void avslagBostedFritekst() {
         var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttArbeidsstedStudiested(fom);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttArbeidsstedStudiested(fom, FRITEKST_BOSTED);
 
-        var behandling = lagAvslagScenario(scenario, FRITEKST_BOSTED);
+        var behandling = lagAvslåttBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
@@ -140,10 +139,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             );
     }
 
-    private Behandling lagAvslagScenario(AvslagScenario avslagScenario, String fritekstBrev) {
+    private Behandling lagAvslåttBehandling(AktivitetspengerTestScenario scenario) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(avslagScenario.testScenario())
-            .leggTilVilkår(avslagScenario.vilkårType(), Utfall.IKKE_OPPFYLT, avslagScenario.vilkårPeriode(), avslagScenario.avslagsårsak(), fritekstBrev)
+            .medAktivitetspengerTestGrunnlag(scenario)
             .leggTilBistandsvilkårVurderingResultat(new BistandsvilkårResultatPeriode(
                 DatoIntervallEntitet.fra(avslagScenario.vilkårPeriode()),
                 avslagScenario.ikkeOppfyltÅrsakBistand() == null,
@@ -175,6 +173,6 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     protected Behandling lagScenarioForFellesTester() {
         var fom = LocalDate.of(2025, 8, 1);
         var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBosted(fom);
-        return lagAvslagScenario(scenario, null);
+        return lagAvslåttBehandling(scenario);
     }
 }
