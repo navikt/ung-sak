@@ -144,7 +144,7 @@ public class JournalføringOgDistribusjonsTjeneste {
             case OPPHOR_VED_MAKSDATO_DOK -> "Opphør ved maksdato";
             case OPPHOR_OPPHEVET_DOK -> "Opphør opphevet";
             case OPPHØR_DOK -> "Opphør";
-            case ENDRING_AVSLAG, AVSLAG__DOK -> "Avslag";
+            case AVSLAG__DOK -> "Avslag";
             case MANUELT_VEDTAK_DOK -> "Fritekstvedtak";
             case GENERELT_FRITEKSTBREV -> "Fritekst generelt brev";
             case KLAGE_AVVIST_DOK -> "Vedtaksbrev for avvist klage";

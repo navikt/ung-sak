@@ -16,11 +16,11 @@ import java.time.LocalDate;
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class OpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
+class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
 
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
 
-    OpphørTest() {
+    EndringAvslagOpphørTest() {
         super(1, "Du får ikke lenger aktivitetspenger");
     }
 
@@ -36,7 +36,7 @@ class OpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
             );
     }
 
@@ -52,7 +52,7 @@ class OpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "bo i eller være folkeregistrert i Trondheim"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
             );
     }
 
@@ -68,7 +68,7 @@ class OpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "studere eller jobbe i Trondheim"
+                "studere eller jobbe i Trondheim kommune"
             );
     }
 
@@ -92,7 +92,9 @@ class OpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
     private Behandling lagOpphørScenario(OpphørScenario scenario, String fritekstBrev) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medAktivitetspengerTestGrunnlag(scenario.opphørScenario())
-            .leggTilVilkår(scenario.vilkårType(), Utfall.IKKE_OPPFYLT, scenario.opphørtVilkårPeriode(), scenario.avslagsårsak(), fritekstBrev);
+            .leggTilVilkår(scenario.vilkårType(), Utfall.IKKE_OPPFYLT, scenario.opphørtVilkårPeriode(), scenario.avslagsårsak(), fritekstBrev)
+            .leggTilBostedsAvklaring(scenario.bostedsAvklaring())
+            .leggTilBostedsvilkårVurderingResultat(scenario.bostedsAvklaring().lagVilkårVurdering());   // Simulerer automatisk vurdert vilkår på bakgrunn av avklaring
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);

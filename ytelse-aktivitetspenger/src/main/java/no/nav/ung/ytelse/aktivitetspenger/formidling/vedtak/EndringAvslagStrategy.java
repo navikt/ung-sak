@@ -61,7 +61,7 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
 
         if (harVilkårSomErAvslåttIBehandling) {
             return List.of(new VedtaksbrevStrategyResultat(
-                harAvklaringMedOpphør ? DokumentMalType.OPPHØR_DOK : DokumentMalType.ENDRING_AVSLAG,
+                harAvklaringMedOpphør ? DokumentMalType.OPPHØR_DOK : DokumentMalType.AVSLAG__DOK,
                 endringAvslagInnholdBygger,
                 VedtaksbrevEgenskaper.builder()
                     .kanHindre(true)

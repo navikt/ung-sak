@@ -72,6 +72,17 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         return Optional.ofNullable(bistandsvilkårResultatHolder);
     }
 
+    public List<BistandsvilkårResultatPeriode> hentBistandsvilkårResultatPerioder() {
+        return getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke BistandsvilkårResultatPerioder"));
+    }
+
+    public LocalDateTimeline<BistandsvilkårResultatPeriode> hentBistandTidslinje() {
+        return new LocalDateTimeline<>(hentBistandsvilkårResultatPerioder().stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+    }
+
     public Optional<AndreLivsoppholdsytelserResultatHolder> getAndreLivsoppholdsytelserResultatHolder() {
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
     }
@@ -85,11 +96,7 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     }
 
     public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {
-        if (bostedsvilkårResultatHolder == null) {
-            return LocalDateTimeline.empty();
-        }
-
-        return new LocalDateTimeline<>(bostedsvilkårResultatHolder.getVurderinger().stream()
+        return new LocalDateTimeline<>(hentBostedsvilkårResultatPerioder().stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }

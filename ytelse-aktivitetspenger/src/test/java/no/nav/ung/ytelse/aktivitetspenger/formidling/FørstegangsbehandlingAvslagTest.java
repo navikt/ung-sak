@@ -2,10 +2,11 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer.AvslagScenario;
@@ -14,6 +15,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -141,7 +143,27 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     private Behandling lagAvslagScenario(AvslagScenario avslagScenario, String fritekstBrev) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medAktivitetspengerTestGrunnlag(avslagScenario.testScenario())
-            .leggTilVilkår(avslagScenario.vilkårType(), Utfall.IKKE_OPPFYLT, avslagScenario.vilkårPeriode(), avslagScenario.avslagsårsak(), fritekstBrev);
+            .leggTilVilkår(avslagScenario.vilkårType(), Utfall.IKKE_OPPFYLT, avslagScenario.vilkårPeriode(), avslagScenario.avslagsårsak(), fritekstBrev)
+            .leggTilBistandsvilkårVurderingResultat(new BistandsvilkårResultatPeriode(
+                DatoIntervallEntitet.fra(avslagScenario.vilkårPeriode()),
+                avslagScenario.ikkeOppfyltÅrsakBistand() == null,
+                avslagScenario.ikkeOppfyltÅrsakBistand(),
+                true,
+                "begrunnelse",
+                "fritekstTilBrev",
+                "A111111",
+                LocalDateTime.now()
+            ))
+            .leggTilBostedsvilkårVurderingResultat(new BostedsvilkårResultatPeriode(
+                DatoIntervallEntitet.fra(avslagScenario.vilkårPeriode()),
+                avslagScenario.ikkeOppfyltÅrsakBosted() == null,
+                avslagScenario.ikkeOppfyltÅrsakBosted(),
+                true,
+                "begrunnelse",
+                "fritekstTilBrev",
+                "A111111",
+                LocalDateTime.now()
+            ));
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);

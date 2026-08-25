@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -20,6 +21,7 @@ import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringAvslagDto;
 
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private final VilkårResultatRepository vilkårResultatRepository;
+    private final InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private final Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
     private static final Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingÅrsak = Map.of(
         VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED
@@ -34,8 +37,10 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
     @Inject
     public EndringAvslagInnholdBygger(VilkårResultatRepository vilkårResultatRepository,
+                                      InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                       @Any Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.vilkårsavklaringTjenester = vilkårsavklaringTjenester;
     }
 
@@ -43,7 +48,7 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
         var behandlingÅrsakMedVilkårsavklaring = TidslinjeUtil.values(tidslinje.tilVurdering()).stream()
-            .flatMap(it -> it.behandlingsårsaker().stream())
+            .flatMap(it -> it.behandlingsårsaker().stream()).distinct()
             .collect(Collectors.toMap(
                 behandlingsårsak -> behandlingsårsak,
                 behandlingsårsak -> VilkårsavklaringTjeneste.finnForÅrsak(vilkårsavklaringTjenester, behandlingsårsak)
@@ -51,13 +56,16 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
             ));
 
         var vilkårene = vilkårResultatRepository.hent(behandling.getId());
+        var vilkårVurdering = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+            .orElseThrow(() -> new IllegalStateException("Fant ingen eksisterende vilkårvurderinggrunnlag for behandlingId: " + behandling.getId()));
 
         var behandlingÅrsakType = vilkårOgBehandlingÅrsak.get(VilkårType.BOSTEDSVILKÅR);
         var vilkårsAvklaringBosted = behandlingÅrsakMedVilkårsavklaring.get(behandlingÅrsakType);
         if (vilkårsAvklaringBosted.isPresent()) {
+            var vurdertPeriode = TidslinjeUtil.tilTidslinjeKomprimert(List.of(vilkårsAvklaringBosted.get().periode()));
             return lagDto(
                 vilkårsAvklaringBosted.get(),
-                AvslåttVilkårBrevinnholdHelper.lagAvslåttBosted(vilkårene, vilkårsAvklaringBosted.get())
+                AvslåttVilkårBrevinnholdHelper.lagAvslåttBosted(vilkårene, vilkårVurdering, vurdertPeriode)
             );
         }
 

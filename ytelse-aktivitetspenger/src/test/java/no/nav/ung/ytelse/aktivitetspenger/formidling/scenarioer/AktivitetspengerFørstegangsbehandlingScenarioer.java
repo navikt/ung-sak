@@ -4,7 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
@@ -209,8 +209,10 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
                 null,
                 null),
             new Periode(fom, tom),
-            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED
+            VilkårType.BOSTEDSVILKÅR,
+            Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
+            BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
+            null
         );
     }
 
@@ -238,7 +240,9 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
                 null),
             new Periode(fom, tom),
             no.nav.ung.kodeverk.vilkår.VilkårType.BISTANDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.IKKE_14A_VEDTAK
+            no.nav.ung.kodeverk.vilkår.Avslagsårsak.IKKE_14A_VEDTAK,
+            null,
+            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK
         );
     }
 
@@ -266,7 +270,9 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
                 null),
             new Periode(fom, tom),
             no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE
+            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE,
+            BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM,
+            null
         );
     }
 
@@ -293,16 +299,20 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
                 null,
                 null),
             new Periode(fom, tom),
-            no.nav.ung.kodeverk.vilkår.VilkårType.BOSTEDSVILKÅR,
-            no.nav.ung.kodeverk.vilkår.Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED
+            VilkårType.BOSTEDSVILKÅR,
+            Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED,
+            BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
+            null
         );
     }
 
     public record AvslagScenario(
         AktivitetspengerTestScenario testScenario,
         Periode vilkårPeriode,
-        no.nav.ung.kodeverk.vilkår.VilkårType vilkårType,
-        no.nav.ung.kodeverk.vilkår.Avslagsårsak avslagsårsak
+        VilkårType vilkårType,
+        Avslagsårsak avslagsårsak,
+        BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsakBosted,
+        BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsakBistand
     ) {}
 }
 

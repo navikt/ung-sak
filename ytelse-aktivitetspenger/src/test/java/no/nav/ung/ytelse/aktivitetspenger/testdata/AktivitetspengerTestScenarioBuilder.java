@@ -29,6 +29,10 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -63,6 +67,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -112,6 +117,9 @@ public class AktivitetspengerTestScenarioBuilder {
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
     private AktivitetspengerTestScenario aktivitetspengerTestscenario;
     private final List<MottattDokumentTestGrunnlag> mottatteDokumenter = new ArrayList<>();
+    private final List<BostedsAvklaringTestData> bostedsAvklaringer = new ArrayList<>();
+    private final List<BostedsvilkårResultatPeriode> bostedsvilkårResultater = new ArrayList<>();
+    private final List<BistandsvilkårResultatPeriode> bistandsvilkårResultater = new ArrayList<>();
 
     private AktivitetspengerTestScenarioBuilder() {
         this.fagsakBuilder = FagsakBuilder
@@ -515,6 +523,40 @@ public class AktivitetspengerTestScenarioBuilder {
             repositories.prosessTriggereRepository().leggTil(behandling1.getId(), aktivitetspengerTestscenario.behandlingTriggere());
         }
 
+        if (!bostedsAvklaringer.isEmpty() && repositories.bostedsGrunnlagRepository() != null) {
+            lagreBostedsAvklaringer(repositories.bostedsGrunnlagRepository(), behandling1);
+        }
+
+        if (repositories.inngangsvilkårVurderingRepository() != null) {
+            repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), bostedsvilkårResultater);
+            repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), bistandsvilkårResultater);
+        }
+    }
+
+    private void lagreBostedsAvklaringer(BostedsGrunnlagRepository bostedsGrunnlagRepository, Behandling behandling1) {
+        var behandlingId = behandling1.getId();
+        var startdato = aktivitetspengerTestscenario.søknadsperioder() != null && !aktivitetspengerTestscenario.søknadsperioder().isEmpty()
+            ? aktivitetspengerTestscenario.søknadsperioder().getFirst().getFom()
+            : bostedsAvklaringer.getFirst().periode().getFom();
+
+        // Grunnlaget må eksistere før avklaringer kan lagres
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, "dummy-journalpostid", startdato, true);
+
+        var avklaringer = bostedsAvklaringer.stream()
+            .map(it -> new BostedsPeriodeAvklaring(
+                DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
+                it.ikkeOppfyltÅrsak(),
+                "Begrunnelse fra testscenario",
+                false,
+                null,
+                "Varsles ikke i testscenario",
+                "VL",
+                it.periode().getFom().atStartOfDay(),
+                it.avklaringtype(),
+                behandlingId))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, avklaringer);
     }
 
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {
@@ -857,6 +899,21 @@ public class AktivitetspengerTestScenarioBuilder {
 
     public AktivitetspengerTestScenarioBuilder leggTilVilkår(VilkårType vilkårType, Utfall utfall, Periode periode, Avslagsårsak avslagsårsak, String fritekstBrev) {
         vilkår.add(new VilkårData(vilkårType, utfall, periode, avslagsårsak, fritekstBrev));
+        return this;
+    }
+
+    public AktivitetspengerTestScenarioBuilder leggTilBostedsAvklaring(BostedsAvklaringTestData bostedsAvklaring) {
+        bostedsAvklaringer.add(bostedsAvklaring);
+        return this;
+    }
+
+    public AktivitetspengerTestScenarioBuilder leggTilBostedsvilkårVurderingResultat(BostedsvilkårResultatPeriode vilkårResultatVurdering) {
+        bostedsvilkårResultater.add(vilkårResultatVurdering);
+        return this;
+    }
+
+    public AktivitetspengerTestScenarioBuilder leggTilBistandsvilkårVurderingResultat(BistandsvilkårResultatPeriode vilkårResultatVurdering) {
+        bistandsvilkårResultater.add(vilkårResultatVurdering);
         return this;
     }
 

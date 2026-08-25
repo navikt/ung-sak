@@ -24,11 +24,17 @@ public class InngangsvilkårVurderingRepository {
     }
 
     public Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> hentGrunnlag(Long behandlingId) {
-        return hentEksisterendeGrunnlag(behandlingId);
+        var query = entityManager.createQuery(
+            "SELECT g FROM AktivitetspengerInngangsvilkårResultatGrunnlag g " +
+                "WHERE g.behandlingId = :behandlingId " +
+                "AND g.aktiv = true",
+            AktivitetspengerInngangsvilkårResultatGrunnlag.class);
+        query.setParameter("behandlingId", behandlingId);
+        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     public void lagreBistandsVurderinger(Long behandlingId, List<BistandsvilkårResultatPeriode> nyeVurderinger) {
-        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterende = hentGrunnlag(behandlingId);
         var eksisterendeVurderinger = eksisterende
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
             .map(BistandsvilkårResultatHolder::getVurderinger)
@@ -42,7 +48,7 @@ public class InngangsvilkårVurderingRepository {
     }
 
     public void lagreYtelseVurderinger(Long behandlingId, List<AndreLivsoppholdsytelserResultatPeriode> nyeVurderinger) {
-        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterende = hentGrunnlag(behandlingId);
         var eksisterendeVurderinger = eksisterende
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder)
             .map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
@@ -56,7 +62,7 @@ public class InngangsvilkårVurderingRepository {
     }
 
     public void lagreBostedVurderinger(Long behandlingId, List<BostedsvilkårResultatPeriode> nyeVurderinger) {
-        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterende = hentGrunnlag(behandlingId);
         var eksisterendeVurderinger = eksisterende
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder)
             .map(BostedsvilkårResultatHolder::getVurderinger)
@@ -70,7 +76,7 @@ public class InngangsvilkårVurderingRepository {
     }
 
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
-        hentEksisterendeGrunnlag(eksisterendeBehandlingId).ifPresent(eksisterende -> {
+        hentGrunnlag(eksisterendeBehandlingId).ifPresent(eksisterende -> {
             var nyttGrunnlag = new AktivitetspengerInngangsvilkårResultatGrunnlag(
                 nyBehandlingId,
                 eksisterende.getBistandsvilkårResultatHolder().orElse(null),
@@ -154,19 +160,9 @@ public class InngangsvilkårVurderingRepository {
         entityManager.flush();
     }
 
-    private Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
-        var query = entityManager.createQuery(
-            "SELECT g FROM AktivitetspengerInngangsvilkårResultatGrunnlag g " +
-                "WHERE g.behandlingId = :behandlingId " +
-                "AND g.aktiv = true",
-            AktivitetspengerInngangsvilkårResultatGrunnlag.class);
-        query.setParameter("behandlingId", behandlingId);
-        return HibernateVerktøy.hentUniktResultat(query);
-    }
-
     public void fjernResultatFor(long behandlingId, VilkårType vilkårType, Collection<Periode> perioder) {
         var perioderSomSkalFjernes = new LocalDateTimeline<>(perioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE)).toList());
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlag = hentGrunnlag(behandlingId);
 
         BostedsvilkårResultatHolder bostedVilkårHolder;
         if (VilkårType.BOSTEDSVILKÅR.equals(vilkårType)) {
