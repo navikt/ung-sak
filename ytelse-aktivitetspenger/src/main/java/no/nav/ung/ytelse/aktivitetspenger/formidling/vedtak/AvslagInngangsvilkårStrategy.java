@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -34,11 +33,11 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        boolean avslåttInngangsvilkår = resultatTidslinje.filtrerPåÅrsak(BehandlingÅrsakType.ENDRET_BOSTED, BehandlingÅrsakType.NY_SØKT_PERIODE)
-            .stream()
-            .anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+        var tilVurdering = resultatTidslinje.tilVurdering();
+        boolean fullAvslag = !tilVurdering.isEmpty()
+            && tilVurdering.stream().noneMatch(it -> it.getValue().avslåtteVilkår().isEmpty());
 
-        if (avslåttInngangsvilkår) {
+        if (fullAvslag) {
             return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.AVSLAG__DOK,
                 førstegangsAvslagInnholdBygger,

@@ -232,11 +232,17 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
     }
 
     /**
-     * Innvilget med tom-dato (avkortet program): bruker er over 25 år og får høy sats (minstesats)
-     * fra fom til og med tom. Vilkårene som kan avkortes er oppfylt i fom-tom, og avslått med
-     * {@link Avslagsårsak#AVKORTET} fra dagen etter tom og ut den maksimale søkte perioden (52 uker).
+     * Innvilget med tom-dato: bruker er over 25 år og får høy sats
      */
     public static AktivitetspengerTestScenario innvilgetMedAvkortetVilkår(LocalDate fom, LocalDate tom, VilkårType avkortetVilkårType) {
+        return innvilgetMedAvslåttVilkår(fom, tom, avkortetVilkårType, Avslagsårsak.AVKORTET);
+    }
+
+    /**
+     * Som {@link #innvilgetMedAvkortetVilkår}, men med valgfri avslagsårsak slik at delvis avslag
+     * kan skilles fra avkorting.
+     */
+    public static AktivitetspengerTestScenario innvilgetMedAvslåttVilkår(LocalDate fom, LocalDate tom, VilkårType avslåttVilkår, Avslagsårsak avslagsårsak) {
         LocalDate maksTom = fom.plusWeeks(52).minusDays(1);
         if (!tom.isAfter(fom) || !tom.isBefore(maksTom)) {
             throw new IllegalArgumentException("tom må være etter fom og før maksimal sluttdato " + maksTom + ", var " + tom);
@@ -264,7 +270,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
 
         var avkortetTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(innvilgetPeriode, VilkårUtfall.oppfylt()),
-            new LocalDateSegment<>(tom.plusDays(1), maksTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+            new LocalDateSegment<>(tom.plusDays(1), maksTom, VilkårUtfall.avslått(avslagsårsak))
         ));
 
         var builder = AktivitetspengerTestScenario.builder()
@@ -276,16 +282,16 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             .medAldersvilkår(new LocalDateTimeline<>(innvilgetPeriode, Utfall.OPPFYLT))
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(fagsakPeriode))))
-            .medVilkår(avkortetVilkårType, avkortetTidslinje);
+            .medVilkår(avslåttVilkår, avkortetTidslinje);
 
 
         //Oppfyll vilkårene før
-        SORTERT_AVKORTBARE_VILKÅR.headSet(avkortetVilkårType, false)
+        SORTERT_AVKORTBARE_VILKÅR.headSet(avslåttVilkår, false)
             .forEach(vilkårType -> builder.medVilkår(vilkårType,
                 new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fagsakPeriode, VilkårUtfall.oppfylt())))));
 
         //Sett til ikke relevant vilkårene etter
-        SORTERT_AVKORTBARE_VILKÅR.tailSet(avkortetVilkårType, false)
+        SORTERT_AVKORTBARE_VILKÅR.tailSet(avslåttVilkår, false)
             .forEach(vilkårType ->
                 builder.medVilkår(vilkårType,
                     new LocalDateTimeline<>(List.of(

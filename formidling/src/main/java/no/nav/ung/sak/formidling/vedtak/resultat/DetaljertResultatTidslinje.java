@@ -66,7 +66,6 @@ public final class DetaljertResultatTidslinje {
                     + (v.tilVurdering() ? "tilVurdering" : "ikkeTilVurdering")
                     + ", behandlingÅrsaker: " + v.behandlingsårsaker()
                     + ", avslåtteVilkår: " + v.avslåtteVilkår()
-                    + ", avkortedeVilkår: " + v.avkortedeVilkår()
                     + ", ikkeVurderteVilkår: " + v.ikkeVurderteVilkår()
                     + ", utbetalingsgrad: " + v.utbetalingsgrad();
             })
