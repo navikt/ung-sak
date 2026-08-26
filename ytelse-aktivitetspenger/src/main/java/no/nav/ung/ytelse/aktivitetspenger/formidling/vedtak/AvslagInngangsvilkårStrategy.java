@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -33,9 +34,9 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        var tilVurdering = resultatTidslinje.tilVurdering();
-        boolean fullAvslag = !tilVurdering.isEmpty()
-            && tilVurdering.stream().noneMatch(it -> it.getValue().avslåtteVilkår().isEmpty());
+        var periodeTilVurdering = resultatTidslinje.filtrerPåÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE);
+        boolean fullAvslag = !periodeTilVurdering.isEmpty()
+            && periodeTilVurdering.stream().noneMatch(it -> it.getValue().avslåtteVilkår().isEmpty());
 
         if (fullAvslag) {
             return List.of(new VedtaksbrevStrategyResultat(
