@@ -7,12 +7,13 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverTjeneste;
-import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
+import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.kontroll.InntekterForKilde;
 import no.nav.ung.sak.kontroll.RapportertInntektMapper;
 import no.nav.ung.sak.kontroll.RelevanteKontrollperioderUtleder;
@@ -43,24 +44,23 @@ public class InntektkontrollOppgaveOppretter {
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var relevantKontrolltidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(behandling.getId());
-        OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
         etterlysninger.stream()
-            .map(mapTilDto(behandling.getId(), aktørId, relevantKontrolltidslinje, ytelsetype))
+            .map(mapTilDto(behandling.getId(), aktørId, relevantKontrolltidslinje, behandling.getFagsakYtelseType()))
             .forEach(oppgaveKlient::opprettOppgave);
     }
 
-    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId,
-                                                                LocalDateTimeline<RelevanteKontrollperioderUtleder.InfoOmRådata> relevantKontrollTidslinje, OppgaveYtelsetype ytelsetype) {
+    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<RelevanteKontrollperioderUtleder.InfoOmRådata> relevantKontrollTidslinje, FagsakYtelseType ytelsetype) {
+        OppgaveYtelsetype oppgaveYtelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(ytelsetype);
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
             List<ArbeidsgiverOpplysninger> arbeidsgiverOpplysninger = registerinntekter.stream().map(InntekterForKilde::arbeidsgiver)
                 .distinct()
-                .map(arbeidsgiverTjeneste::hent)
+                .map(arbeidsgiver -> arbeidsgiverTjeneste.hent(arbeidsgiver, ytelsetype))
                 .collect(Collectors.toList());
             LocalDateInterval etterlysningPeriode = etterlysning.getPeriode().toLocalDateInterval();
             return new OpprettOppgaveDto(
                 new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
-                ytelsetype,
+                oppgaveYtelsetype,
                 etterlysning.getEksternReferanse(),
                 new KontrollerRegisterinntektOppgavetypeDataDto(
                     etterlysning.getPeriode().getFomDato(),

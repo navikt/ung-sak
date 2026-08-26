@@ -34,7 +34,6 @@ import no.nav.k9.felles.integrasjon.pdl.IdentGruppe;
 import no.nav.k9.felles.integrasjon.pdl.IdentInformasjon;
 import no.nav.k9.felles.integrasjon.pdl.IdentInformasjonResponseProjection;
 import no.nav.k9.felles.integrasjon.pdl.IdentlisteResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
 import no.nav.k9.felles.integrasjon.pdl.PdlKlient;
 import no.nav.k9.felles.util.LRUCache;
 import no.nav.k9.felles.util.Tuple;
@@ -50,14 +49,14 @@ public class AktørTjeneste {
     private LRUCache<AktørId, PersonIdent> cacheAktørIdTilIdent;
     private LRUCache<PersonIdent, AktørId> cacheIdentTilAktørId;
 
-    private Pdl pdlKlient;
+    private PdlKlient pdlKlient;
 
     AktørTjeneste() {
         //
     }
 
     @Inject
-    public AktørTjeneste(Pdl pdlKlient) {
+    public AktørTjeneste(PdlKlient pdlKlient) {
         this.pdlKlient = pdlKlient;
         this.cacheAktørIdTilIdent = new LRUCache<>(DEFAULT_CACHE_SIZE, DEFAULT_CACHE_TIMEOUT);
         this.cacheIdentTilAktørId = new LRUCache<>(DEFAULT_CACHE_SIZE, DEFAULT_CACHE_TIMEOUT);

@@ -37,7 +37,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
     private UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
     private PersonopplysningRepository personopplysningRepository;
-    private Pdl pdlKlient;
+    private PdlKlient pdlKlient;
 
     public PdlFødselshendelseFagsakTilVurderingUtleder() {
         // For CDI
@@ -48,7 +48,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
                                                        UngdomsprogramPeriodeRepository ungdomsprogramPeriodeRepository,
                                                        FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
                                                        PersonopplysningRepository personopplysningRepository,
-                                                       Pdl pdlKlient) {
+                                                       PdlKlient pdlKlient) {
         this.behandlingRepository = behandlingRepository;
         this.ungdomsprogramPeriodeRepository = ungdomsprogramPeriodeRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
@@ -141,7 +141,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
                     .relatertPersonsIdent()
                     .minRolleForPerson()
             );
-        return pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
+        return pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN));
     }
 
     private boolean deltarIProgramPåHendelsedato(Fagsak fagsak, LocalDate relevantDato, String hendelseId) {
