@@ -25,6 +25,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
@@ -112,6 +113,7 @@ public class AktivitetspengerTestScenarioBuilder {
     private BehandlingStatus behandlingStatus = BehandlingStatus.UTREDES; // vanligste for tester
     private AktivitetspengerTestScenario aktivitetspengerTestscenario;
     private final List<MottattDokumentTestGrunnlag> mottatteDokumenter = new ArrayList<>();
+    private final List<SøktStartdato> søktStartdatoer = new ArrayList<>();
 
     private AktivitetspengerTestScenarioBuilder() {
         this.fagsakBuilder = FagsakBuilder
@@ -419,6 +421,9 @@ public class AktivitetspengerTestScenarioBuilder {
         build(repositoryProvider);
         if (!mottatteDokumenter.isEmpty()) {
             lagreMottatteDokumenter(entityManager);
+        }
+        if (!søktStartdatoer.isEmpty()) {
+            lagreSøktStartdatoer(entityManager);
         }
         return behandling;
     }
@@ -829,6 +834,17 @@ public class AktivitetspengerTestScenarioBuilder {
     public AktivitetspengerTestScenarioBuilder medMottattDokument(MottattDokumentTestGrunnlag grunnlag) {
         this.mottatteDokumenter.add(grunnlag);
         return this;
+    }
+
+    public AktivitetspengerTestScenarioBuilder medSøktStartdato(LocalDate startdato) {
+        this.søktStartdatoer.add(new SøktStartdato(startdato, new JournalpostId("dummy-journalpostid")));
+        return this;
+    }
+
+    private void lagreSøktStartdatoer(EntityManager entityManager) {
+        var repo = new StartdatoRepository(entityManager);
+        repo.lagre(behandling.getId(), søktStartdatoer);
+        repo.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(søktStartdatoer));
     }
 
     private void lagreMottatteDokumenter(EntityManager entityManager) {
