@@ -297,11 +297,13 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
 
         //Oppfyll vilkårene før
         SORTERTE_VILKÅR.headSet(avslåttVilkår, false)
+            .stream().filter(it -> it != VilkårType.ALDERSVILKÅR)
             .forEach(vilkårType -> builder.medVilkår(vilkårType,
                 new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fagsakPeriode, VilkårUtfall.oppfylt())))));
 
         //Sett til ikke relevant vilkårene etter
         SORTERTE_VILKÅR.tailSet(avslåttVilkår, false)
+            .stream().filter(it -> it != VilkårType.ALDERSVILKÅR)
             .forEach(vilkårType ->
                 builder.medVilkår(vilkårType,
                     new LocalDateTimeline<>(List.of(
