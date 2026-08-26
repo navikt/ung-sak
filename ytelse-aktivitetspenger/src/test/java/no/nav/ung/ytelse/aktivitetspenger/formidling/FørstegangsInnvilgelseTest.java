@@ -232,8 +232,8 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
-                Du får aktivitetspenger så lenge du oppfyller vilkårene, men ikke lenger enn til 31. oktober 2025. \
+                Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+                Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 31. oktober 2025. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -276,8 +276,8 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
-                Du får aktivitetspenger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025. \
+                Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+                Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025. \
                 Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
@@ -302,8 +302,8 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
     static String hvorforFårDuPengerAvsnitt() {
         return """
             Hvorfor får du aktivitetspenger? \
-            Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
-            Du får aktivitetspenger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år. \
+            Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+            Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år. \
             """;
     }
 
