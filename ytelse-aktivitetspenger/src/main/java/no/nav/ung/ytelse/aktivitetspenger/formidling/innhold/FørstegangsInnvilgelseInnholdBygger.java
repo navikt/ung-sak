@@ -17,6 +17,7 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringHendelseDto;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtleder;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
@@ -62,12 +63,12 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var tilVurdering = tidslinje.tilVurdering();
         var periode = tilVurdering.filterValue(r -> r.utbetalingsgrad().erSatt());
 
-        LocalDate ytelseFom = periode.getMinLocalDate();
+        var ytelseFom = periode.getMinLocalDate();
 
-        var avkortetTidslinje = tilVurdering.filterValue(
-            it -> it.avslåtteVilkår().stream().anyMatch(
-                r -> r.avslagsårsak() == Avslagsårsak.AVKORTET));
-        LocalDate ytelseTom = avkortetTidslinje.isEmpty() ? null : avkortetTidslinje.getMinLocalDate().minusDays(1);
+        var avslåttTidslinje = tilVurdering.filterValue(
+            it -> !it.avslåtteVilkår().isEmpty());
+        var ytelseTom = avslåttTidslinje.isEmpty() ? null : avslåttTidslinje.getMinLocalDate().minusDays(1);
+        var avkortingsårsak = bestemAvkortingsårsak(avslåttTidslinje);
 
         var aktivitetspengerGrunnlag = beregningsgrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow(
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
@@ -89,8 +90,19 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 dagsatsFom,
                 utbetalingDto,
                 satsendringer,
-                byggSatsOgBeregning(satsTidslinje.toSegments())
-            ));
+                byggSatsOgBeregning(satsTidslinje.toSegments()),
+                Avslagsårsak.SØKER_OVER_HØYESTE_ALDER == avkortingsårsak));
+    }
+
+    private Avslagsårsak bestemAvkortingsårsak(LocalDateTimeline<DetaljertResultat> avslåttTidslinje) {
+        if (avslåttTidslinje.isEmpty()) {
+            return null;
+        }
+        return avslåttTidslinje.segmenter()
+            .getFirst().getValue()
+            .avslåtteVilkår().stream()
+            .map(DetaljertVilkårResultat::avslagsårsak).findFirst()
+            .orElse(null);
     }
 
     private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {

@@ -463,7 +463,7 @@ public class AktivitetspengerTestScenarioBuilder {
 
         //Vilkår
         if (aktivitetspengerTestscenario.aldersvilkår() != null) {
-            aktivitetspengerTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom())));
+            aktivitetspengerTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom()), Avslagsårsak.SØKER_OVER_HØYESTE_ALDER, null));
         }
         aktivitetspengerTestscenario.vilkår().forEach((vilkårType, tidslinje) ->
             tidslinje.forEach(segment -> leggTilVilkår(vilkårType, segment.getValue().utfall(),

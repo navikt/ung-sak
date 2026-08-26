@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
@@ -233,6 +234,51 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Hvorfor får du aktivitetspenger? \
                 Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
                 Du får aktivitetspenger så lenge du oppfyller vilkårene, men ikke lenger enn til 31. oktober 2025. \
+                Hvordan har vi regnet ut hvor mye penger du får? \
+                Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
+                Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
+                Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. \
+                Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
+                Det vil si at du har rett på 1 022 kroner per dag. \
+                """ + meldFraOmArbeidsinntektAvsnitt()
+        );
+
+        assertThatHtml(brevtekst)
+            .asPlainTextIsEqualTo(forventet)
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får aktivitetspenger</h1>",
+                "<h2>Hvorfor får du aktivitetspenger?</h2>",
+                "<h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>",
+                "<h2>Meld fra til oss hvis du har arbeidsinntekt i tillegg til aktivitetspengene</h2>"
+            );
+    }
+
+    @DisplayName("Førstegangsinnvilgelse delvis pga alder")
+    @Test
+    void avslåttAlder() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var trettiårsdag = LocalDate.of(2025, 9, 5);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer
+            .innvilgetMedAvslåttVilkår(fom, trettiårsdag, VilkårType.ALDERSVILKÅR, Avslagsårsak.SØKER_OVER_HØYESTE_ALDER);
+
+        var behandling = lagScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_INNVILGELSE);
+
+        var brevtekst = generertBrev.dokument().html();
+
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+            """
+                Du får aktivitetspenger \
+                Fra 1. august 2025 får du aktivitetspenger på 1 022 kroner utenom lørdag og søndag. \
+                Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
+                Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
+                Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
+                Hvorfor får du aktivitetspenger? \
+                Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+                Du får aktivitetspenger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025. \
+                Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \

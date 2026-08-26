@@ -16,16 +16,19 @@ import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerBrevScenarioerUtils.*;
 
 public class AktivitetspengerFørstegangsbehandlingScenarioer {
 
-    private static final TreeSet<VilkårType> SORTERT_AVKORTBARE_VILKÅR = new TreeSet<>(List.of(VilkårType.BOSTEDSVILKÅR, VilkårType.BISTANDSVILKÅR, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR));
+    private static final TreeSet<VilkårType> SORTERTE_VILKÅR = new TreeSet<>(
+        List.of(
+            VilkårType.ALDERSVILKÅR,
+            VilkårType.BOSTEDSVILKÅR,
+            VilkårType.BISTANDSVILKÅR,
+            VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
+    );
 
     /**
      * 24 år, blir 25 år etter 15 dager i programmet.
@@ -279,19 +282,26 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             .medSatsperioder(satsperioder)
             .medBeregningsgrunnlag(beregningsgrunnlag)
             .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode))
-            .medAldersvilkår(new LocalDateTimeline<>(innvilgetPeriode, Utfall.OPPFYLT))
             .medFødselsdato(fødselsdato)
-            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(fagsakPeriode))))
-            .medVilkår(avslåttVilkår, avkortetTidslinje);
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(fagsakPeriode))));
+
+        // TODO: Flytt aldersvilkår til medVilkår
+        if (avslåttVilkår == VilkårType.ALDERSVILKÅR) {
+            builder.medAldersvilkår(avkortetTidslinje.mapValue(v -> Objects.equals(v, VilkårUtfall.oppfylt()) ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT));
+        } else {
+            builder.medVilkår(avslåttVilkår, avkortetTidslinje);
+        }
+
+
 
 
         //Oppfyll vilkårene før
-        SORTERT_AVKORTBARE_VILKÅR.headSet(avslåttVilkår, false)
+        SORTERTE_VILKÅR.headSet(avslåttVilkår, false)
             .forEach(vilkårType -> builder.medVilkår(vilkårType,
                 new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fagsakPeriode, VilkårUtfall.oppfylt())))));
 
         //Sett til ikke relevant vilkårene etter
-        SORTERT_AVKORTBARE_VILKÅR.tailSet(avslåttVilkår, false)
+        SORTERTE_VILKÅR.tailSet(avslåttVilkår, false)
             .forEach(vilkårType ->
                 builder.medVilkår(vilkårType,
                     new LocalDateTimeline<>(List.of(
