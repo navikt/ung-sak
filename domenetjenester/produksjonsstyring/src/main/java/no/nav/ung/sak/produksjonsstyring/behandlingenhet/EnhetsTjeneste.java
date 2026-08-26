@@ -139,7 +139,7 @@ public class EnhetsTjeneste {
     private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType) {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(ytelseType.getOppgavetema())
+            .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema()) //FIXME aktivitetspenger
             .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK.getKode()) // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)
