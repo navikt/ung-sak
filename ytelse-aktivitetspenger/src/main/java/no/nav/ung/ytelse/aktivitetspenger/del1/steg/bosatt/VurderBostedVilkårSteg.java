@@ -117,7 +117,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
 
-        var tidligereVilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandlingId)
+        var tidligereVilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(new LocalDateTimeline<>(List.of()));
 

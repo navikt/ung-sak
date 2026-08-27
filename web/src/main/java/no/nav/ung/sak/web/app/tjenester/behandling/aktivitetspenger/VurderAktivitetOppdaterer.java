@@ -7,7 +7,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -21,19 +21,18 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.VurderAktivitetDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
 
 import java.time.LocalDateTime;
 
 @ApplicationScoped
-@DtoTilServiceAdapter(dto = VurderAndreLivsoppholdsytelserDto.class, adapter = AksjonspunktOppdaterer.class)
-public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOppdaterer<VurderAndreLivsoppholdsytelserDto> {
+@DtoTilServiceAdapter(dto = VurderAktivitetDto.class, adapter = AksjonspunktOppdaterer.class)
+public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderAktivitetDto> {
 
     private BehandlingRepository behandlingRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
@@ -42,17 +41,17 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private AvkortTjeneste avkortTjeneste;
 
-    VurderAndreLivsoppholdsytelserOppdaterer() {
+    VurderAktivitetOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderAndreLivsoppholdsytelserOppdaterer(BehandlingRepository behandlingRepository,
-                                                    HistorikkinnslagRepository historikkinnslagRepository,
-                                                    VilkårResultatRepository vilkårResultatRepository,
-                                                    InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
-                                                    AvkortTjeneste avkortTjeneste) {
+    public VurderAktivitetOppdaterer(BehandlingRepository behandlingRepository,
+                                     HistorikkinnslagRepository historikkinnslagRepository,
+                                     VilkårResultatRepository vilkårResultatRepository,
+                                     InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
+                                     InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
+                                     AvkortTjeneste avkortTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -62,9 +61,9 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
     }
 
     @Override
-    public OppdateringResultat oppdater(VurderAndreLivsoppholdsytelserDto dto, AksjonspunktOppdaterParameter param) {
+    public OppdateringResultat oppdater(VurderAktivitetDto dto, AksjonspunktOppdaterParameter param) {
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
+        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.AKTIVITETSVILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
         LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
@@ -78,7 +77,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
         var periodeVurderinger = dto.getVurdertePerioder().stream()
-            .map(it -> new AndreLivsoppholdsytelserResultatPeriode(
+            .map(it -> new AktivitetsvilkårResultatPeriode(
                 DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
                 it.erVilkårOppfylt(),
                 it.avslagsårsak(),
@@ -88,41 +87,28 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 vurdertAv,
                 vurdertTidspunkt))
             .toList();
-        inngangsvilkårVurderingRepository.lagreYtelseVurderinger(param.getBehandlingId(), periodeVurderinger);
-
-        LocalDateTimeline<Boolean> vurdertEtterOppdatering = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(param.getBehandlingId())
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder)
-            .map(h -> new LocalDateTimeline<>(h.getVurderinger().stream()
-                .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), true))
-                .toList()))
-            .orElse(LocalDateTimeline.empty());
-        LocalDateTimeline<?> manglendePerioder = perioderTilVurdering.disjoint(vurdertEtterOppdatering);
-        if (!manglendePerioder.isEmpty()) {
-            throw new IllegalArgumentException("Forventer at alle perioder til vurdering er vurdert. Mangler : " + manglendePerioder);
-        }
-
-        inngangsvilkårVurderingTjeneste.settAndreLivsoppholdsytelserResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
+        inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(param.getBehandlingId(), periodeVurderinger);
+        inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandling.getId())
-            .medTittel(SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
-            .addLinje("Det ble vurdert om søker har andre livsoppholdsytelser som ikke er forenelig med denne ytelsen")
+            .medTittel(SkjermlenkeType.AKTIVITETSVILKÅR)
+            .addLinje("Aktivitetsvilkår ble vurdert")
             .build();
         historikkinnslagRepository.lagre(historikkinnslag);
 
         return OppdateringResultat.nyttResultat();
     }
 
-    private void validerAvkortingBruktRiktig(VurderAndreLivsoppholdsytelserDto dto, Long behandlingId) {
+    private void validerAvkortingBruktRiktig(VurderAktivitetDto dto, Long behandlingId) {
         LocalDateTimeline<Boolean> perioderSattTilAvkortet = new LocalDateTimeline<>(dto.getVurdertePerioder().stream()
-            .filter(f -> f.avslagsårsak() == AndreLivsoppholdsytelserIkkeOppfyltÅrsak.AVKORTET)
+            .filter(f -> f.avslagsårsak() == AktivitetsvilkåretIkkeOppfyltÅrsak.AVKORTET)
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
             .toList());
-        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
+        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, VilkårType.AKTIVITETSVILKÅR);
     }
 
 }

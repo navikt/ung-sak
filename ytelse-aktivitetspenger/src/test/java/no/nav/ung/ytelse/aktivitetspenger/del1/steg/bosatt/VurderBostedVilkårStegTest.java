@@ -104,7 +104,7 @@ class VurderBostedVilkårStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
-        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId());
         var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
         assertThat(inngangsvilkårVurderinger.get()).isEmpty();
 
@@ -133,7 +133,7 @@ class VurderBostedVilkårStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
-        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId());
         var bostedsvurdering = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder).map(Collection::stream).orElseThrow().findFirst().orElseThrow();
         assertThat(bostedsvurdering.getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(bostedsvurdering.getPeriode().getTomDato()).isEqualTo(TOM);
@@ -161,7 +161,7 @@ class VurderBostedVilkårStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
-        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId());
         var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
         assertThat(inngangsvilkårVurderinger.get()).isEmpty();
 
@@ -190,7 +190,7 @@ class VurderBostedVilkårStegTest {
         var resultat = utførSteg(behandling);
 
         assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
-        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId());
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId());
         var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
         assertThat(inngangsvilkårVurderinger.get()).isEmpty();
     }

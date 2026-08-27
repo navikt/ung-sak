@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -43,7 +44,7 @@ public class InngangsvilkårVurderingTjeneste {
     }
 
     public void settBistandsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
-        var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
+        var grunnlag = vilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
         var holder = grunnlag.getBistandsvilkårResultatHolder()
             .orElseThrow(() -> new IllegalStateException("Bistandsvilkår-holder mangler i grunnlag for behandling " + behandlingId));
@@ -71,8 +72,48 @@ public class InngangsvilkårVurderingTjeneste {
         };
     }
 
+    public void settAktivitetsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
+        var grunnlag = vilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
+        var vurderinger = grunnlag.hentAktivitetsvilkårResultatPerioder();
+        byggAktivitetVilkårIBuilder(resultatBuilder, vurderinger, VilkårType.AKTIVITETSVILKÅR);
+    }
+
+    private void byggAktivitetVilkårIBuilder(VilkårResultatBuilder resultatBuilder, List<AktivitetsvilkårResultatPeriode> vurderinger, VilkårType vilkårType) {
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
+        for (var vurdering : vurderinger) {
+            var periode = vurdering.getPeriode();
+            var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT
+                ? mapAktivitetsvilkårAvslagsårsak(vurdering.getIkkeOppfyltÅrsak())
+                : null;
+
+            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+                .medBegrunnelse(vurdering.getBegrunnelse())
+                .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
+                .medAvslagsårsak(avslagsårsak);
+
+            if (vurdering.erManuellVurdering()) {
+                vilkårPeriodeBuilder.medUtfallManuell(utfall);
+            } else {
+                vilkårPeriodeBuilder.tilbakestillManuellVurdering().medUtfall(utfall);
+            }
+            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+        }
+        resultatBuilder.leggTil(vilkårBuilder);
+    }
+
+    private Avslagsårsak mapAktivitetsvilkårAvslagsårsak(AktivitetsvilkåretIkkeOppfyltÅrsak årsak) {
+        Objects.requireNonNull(årsak, "avslagsårsak må være satt ved avslag");
+        return switch (årsak) {
+            case ANNET -> Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK;
+            case AVKORTET -> Avslagsårsak.AVKORTET;
+            case UDEFINERT -> throw new IllegalStateException("UDEFINERT avslagsårsak ikke tillatt ved avslag");
+        };
+    }
+
     public void settAndreLivsoppholdsytelserResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
-        var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
+        var grunnlag = vilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
         var holder = grunnlag.getAndreLivsoppholdsytelserResultatHolder()
             .orElseThrow(() -> new IllegalStateException("Andre livsoppholdsytelser-holder mangler i grunnlag for behandling " + behandlingId));
@@ -137,7 +178,7 @@ public class InngangsvilkårVurderingTjeneste {
             return;
         }
 
-        var tidligereVurderTidslinje = vilkårVurderingRepository.hentGrunnlag(originalBehandlingId)
+        var tidligereVurderTidslinje = vilkårVurderingRepository.hentEksisterendeGrunnlag(originalBehandlingId)
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElseThrow(() -> new IllegalStateException("Fant ikke vilkårvurdering på originalbehandling ved gjenoppretting" + originalBehandlingId));
 
@@ -160,7 +201,7 @@ public class InngangsvilkårVurderingTjeneste {
     }
 
     public void settBostedsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
-        var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
+        var grunnlag = vilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
         var vurderinger = grunnlag.hentBostedsvilkårResultatPerioder();
         byggVilkårIBuilder(resultatBuilder, vurderinger, VilkårType.BOSTEDSVILKÅR);

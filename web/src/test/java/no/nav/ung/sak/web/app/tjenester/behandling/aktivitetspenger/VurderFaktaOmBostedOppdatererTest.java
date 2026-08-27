@@ -294,7 +294,7 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     private List<BostedsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
-        return inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+        return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
             .orElseThrow();
     }
