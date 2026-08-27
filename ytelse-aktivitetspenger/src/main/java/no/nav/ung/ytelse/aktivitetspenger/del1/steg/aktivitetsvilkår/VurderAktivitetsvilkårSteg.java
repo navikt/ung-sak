@@ -104,7 +104,7 @@ public class VurderAktivitetsvilkårSteg extends VilkårVurderingSteg {
                 false,
                 null,
                 null,
-                null,
+                "ung-sak",
                 LocalDateTime.now()
             ))
             .toList();
