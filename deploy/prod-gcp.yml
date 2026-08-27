@@ -121,6 +121,8 @@ spec:
             value: "all"
           - name: "pgaudit.log_parameter"
             value: "on"
+          - name: "pgaudit.log_relation"
+            value: "on"
         pointInTimeRecovery: true
         retainedBackups : 30
     bigQueryDatasets:
