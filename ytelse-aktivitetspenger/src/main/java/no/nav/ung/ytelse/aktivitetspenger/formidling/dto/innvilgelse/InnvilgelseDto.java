@@ -12,6 +12,6 @@ public record InnvilgelseDto(
     long dagsats,
     UtbetalingDto utbetaling,
     List<SatsEndringHendelseDto> satsEndringer,
-    SatsOgBeregningDto satsOgBeregning
-) implements TemplateInnholdDto {
+    SatsOgBeregningDto satsOgBeregning,
+    boolean søkerBlirOverHøyesteAlder) implements TemplateInnholdDto {
 }

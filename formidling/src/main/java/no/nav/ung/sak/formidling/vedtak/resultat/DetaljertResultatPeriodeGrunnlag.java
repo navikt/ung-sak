@@ -1,7 +1,6 @@
 package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 
 import java.util.List;
@@ -15,14 +14,6 @@ public record DetaljertResultatPeriodeGrunnlag(List<DetaljertVilkårResultat> vi
     public Set<DetaljertVilkårResultat> avslåtteVilkår() {
         return vilkårsresultater.stream()
             .filter(it -> it.utfall() == Utfall.IKKE_OPPFYLT)
-            .filter(it -> it.avslagsårsak() != Avslagsårsak.AVKORTET)
-            .collect(Collectors.toSet());
-    }
-
-    public Set<DetaljertVilkårResultat> avkortedeVilkår() {
-        return vilkårsresultater.stream()
-            .filter(it -> it.utfall() == Utfall.IKKE_OPPFYLT)
-            .filter(it -> it.avslagsårsak() == Avslagsårsak.AVKORTET)
             .collect(Collectors.toSet());
     }
 

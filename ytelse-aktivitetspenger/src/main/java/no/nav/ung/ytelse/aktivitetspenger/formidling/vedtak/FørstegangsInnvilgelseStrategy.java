@@ -31,7 +31,9 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
         var detaljertResultat = resultatTidslinje.tilVurdering();
         boolean manueltOpprettet = behandling.erManueltOpprettet();
-        if (detaljertResultat.stream().allMatch(it -> erInnvilgelse(it.getValue(), manueltOpprettet))) {
+        boolean minstEnPeriodeInnvilget = detaljertResultat.stream()
+            .anyMatch(it -> erInnvilgelse(it.getValue(), manueltOpprettet));
+        if (minstEnPeriodeInnvilget) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(DokumentMalType.INNVILGELSE_DOK, førstegangsInnvilgelseInnholdBygger, "Automatisk brev ved ny innvilgelse. "));
         }
         return List.of();
