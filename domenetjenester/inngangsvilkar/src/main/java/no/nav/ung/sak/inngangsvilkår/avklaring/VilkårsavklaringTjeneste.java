@@ -20,6 +20,7 @@ public interface VilkårsavklaringTjeneste {
 
     void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId);
 
+    // Henter seneste vilkårsavklaring for behandling. Hvis det er flere vilkårsavklaringer lagret samtidig velges den med senest fom.
     Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId);
 
     static List<VilkårsavklaringTjeneste> sortert(Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
