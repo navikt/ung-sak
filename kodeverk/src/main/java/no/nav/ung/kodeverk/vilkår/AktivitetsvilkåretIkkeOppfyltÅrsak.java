@@ -9,7 +9,9 @@ import java.util.Map;
 
 public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi {
 
-    ÅRSAK_1("ÅRSAK_1", "TODO beskrivelse for årsak 1"),
+    //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
+    ANNET("ANNET", "Annet/fritekst"),
+
     AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge."),
     UDEFINERT("-", "Ikke definert"),
     ;

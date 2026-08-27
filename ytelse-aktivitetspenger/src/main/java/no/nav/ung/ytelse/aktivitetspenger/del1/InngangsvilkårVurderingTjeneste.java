@@ -94,7 +94,7 @@ public class InngangsvilkårVurderingTjeneste {
     private Avslagsårsak mapAktivitetsvilkårAvslagsårsk(AktivitetsvilkåretIkkeOppfyltÅrsak årsak) {
         Objects.requireNonNull(årsak, "avslagsårsak må være satt ved avslag");
         return switch (årsak) {
-            case ÅRSAK_1 -> Avslagsårsak.AKTIVITETSVILKÅR_AVSLAGSÅRSAK_1;
+            case ANNET -> Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK;
             case AVKORTET -> Avslagsårsak.AVKORTET;
             case UDEFINERT -> throw new IllegalStateException("UDEFINERT avslagsårsak ikke tillatt ved avslag");
         };
