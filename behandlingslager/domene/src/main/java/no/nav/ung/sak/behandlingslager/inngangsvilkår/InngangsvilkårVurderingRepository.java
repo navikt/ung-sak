@@ -38,7 +38,7 @@ public class InngangsvilkårVurderingRepository {
      * Tidslinje over vurderte inngangsvilkår for behandlingen, koblet til {@link VilkårType}.
      * Tom tidslinje dersom det ikke finnes grunnlag.
      */
-    public LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultatPeriode>> hentVurderingTidslinje(Long behandlingId) {
+    public LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> hentVurderingTidslinje(Long behandlingId) {
         return hentGrunnlag(behandlingId)
             .map(grunnlag -> tilVilkårTidslinje(grunnlag.hentBistandTidslinje())
                 .crossJoin(tilVilkårTidslinje(grunnlag.hentLivsoppholdTidslinje()), InngangsvilkårVurderingRepository::slåSammen)
@@ -46,16 +46,16 @@ public class InngangsvilkårVurderingRepository {
             .orElseGet(LocalDateTimeline::empty);
     }
 
-    private static <T extends VilkårsvurderingResultatPeriode> LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultatPeriode>> tilVilkårTidslinje(
+    private static <T extends VilkårsvurderingResultat> LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> tilVilkårTidslinje(
             LocalDateTimeline<T> tidslinje) {
         return tidslinje.mapValue(v -> Map.of(v.getVilkårType(), v));
     }
 
-    private static LocalDateSegment<Map<VilkårType, VilkårsvurderingResultatPeriode>> slåSammen(
+    private static LocalDateSegment<Map<VilkårType, VilkårsvurderingResultat>> slåSammen(
             LocalDateInterval interval,
-            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultatPeriode>> lhs,
-            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultatPeriode>> rhs) {
-        var kombinert = new LinkedHashMap<VilkårType, VilkårsvurderingResultatPeriode>();
+            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultat>> lhs,
+            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultat>> rhs) {
+        var kombinert = new LinkedHashMap<VilkårType, VilkårsvurderingResultat>();
         if (lhs != null) { kombinert.putAll(lhs.getValue()); }
         if (rhs != null) { kombinert.putAll(rhs.getValue()); }
         return new LocalDateSegment<>(interval, Map.copyOf(kombinert));

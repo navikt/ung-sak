@@ -2,7 +2,7 @@ package no.nav.ung.sak.inngangsvilkår.avklaring;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 
 /**
  * Kobler sammen vilkårsavklaringen (som styres av {@link BehandlingÅrsakType}) med vilkårsvurderingen
@@ -14,7 +14,7 @@ public record VilkårsavklaringMedVurdering(
     VilkårType vilkårType,
     BehandlingÅrsakType behandlingÅrsakType,
     Vilkårsavklaring vilkårsavklaring,
-    VilkårsvurderingResultatPeriode vilkårsvurdering
+    VilkårsvurderingResultat vilkårsvurdering
 ) {
 
     public boolean harVilkårsAvklaring() {

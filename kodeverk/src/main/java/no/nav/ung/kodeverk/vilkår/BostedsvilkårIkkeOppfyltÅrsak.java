@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public enum BostedsvilkårIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltÅrsak {
+public enum BostedsvilkårIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltDetaljertÅrsak {
 
     IKKE_BOSATTADRESSE_I_TRONDHEIM("IKKE_BOSATTADRESSE_I_TRONDHEIM", "Ikke bosattadresse i Trondheim"),
     IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM("IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "Ikke bostedsadresse i Trondheim og ikke folkeregistrert i Trondheim"),

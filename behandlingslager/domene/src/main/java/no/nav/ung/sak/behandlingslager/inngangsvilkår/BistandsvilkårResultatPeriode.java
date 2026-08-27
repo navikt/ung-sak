@@ -17,7 +17,7 @@ import java.util.Objects;
 @Immutable
 @Entity(name = "BistandsvilkårResultatPeriode")
 @Table(name = "bistand_resultat_periode")
-public class BistandsvilkårResultatPeriode extends BaseEntitet implements VilkårsvurderingResultatPeriode {
+public class BistandsvilkårResultatPeriode extends BaseEntitet implements VilkårsvurderingResultat {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BISTAND_RESULTAT_PERIODE")

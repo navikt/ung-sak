@@ -5,10 +5,10 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
-import no.nav.ung.kodeverk.vilkår.IkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
 import org.junit.jupiter.api.Test;
@@ -78,16 +78,11 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
         assertThat(resultat.isEmpty()).isTrue();
     }
 
-    private VilkårsvurderingResultatPeriode enkelVurdering(DatoIntervallEntitet periode) {
-        return new VilkårsvurderingResultatPeriode() {
+    private VilkårsvurderingResultat enkelVurdering(DatoIntervallEntitet periode) {
+        return new VilkårsvurderingResultat() {
             @Override
             public VilkårType getVilkårType() {
                 return VilkårType.BOSTEDSVILKÅR;
-            }
-
-            @Override
-            public DatoIntervallEntitet getPeriode() {
-                return periode;
             }
 
             @Override
@@ -96,7 +91,7 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
             }
 
             @Override
-            public IkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {
+            public IkkeOppfyltDetaljertÅrsak getIkkeOppfyltÅrsak() {
                 return null;
             }
 

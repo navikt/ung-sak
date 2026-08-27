@@ -7,19 +7,18 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
+import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOgVurderingTidslinjeUtleder;
-import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.UendretDto;
 
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 
 @Dependent
 public class UendretInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -53,7 +52,7 @@ public class UendretInnholdBygger implements VedtaksbrevInnholdBygger {
 
         var fritekst = vilkårsavklaringOgVurdering.stream()
             .map(VilkårsavklaringMedVurdering::vilkårsvurdering)
-            .map(VilkårsvurderingResultatPeriode::getFritekstVurderingBrev)
+            .map(VilkårsvurderingResultat::getFritekstVurderingBrev)
             .findFirst()
             .orElse(null);
 

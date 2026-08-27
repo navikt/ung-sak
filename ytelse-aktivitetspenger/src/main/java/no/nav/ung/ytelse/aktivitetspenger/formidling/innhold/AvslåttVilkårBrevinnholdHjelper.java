@@ -2,7 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted;
 
@@ -13,7 +13,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
     private AvslåttVilkårBrevinnholdHjelper() {
     }
 
-    public static AvslåttBosted lagAvslåttBosted(VilkårsvurderingResultatPeriode vurdering) {
+    public static AvslåttBosted lagAvslåttBosted(VilkårsvurderingResultat vurdering) {
         if (vurdering.getFritekstVurderingBrev() != null) {
             return AvslåttBosted.medKunFritekst(
                 vurdering.getFritekstVurderingBrev()
@@ -27,7 +27,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
             vurdering.getFritekstVurderingBrev());
     }
 
-    public static AvslåttBistand lagAvslåttBistand(VilkårsvurderingResultatPeriode vurdering) {
+    public static AvslåttBistand lagAvslåttBistand(VilkårsvurderingResultat vurdering) {
         if (vurdering.getFritekstVurderingBrev() != null) {
             return AvslåttBistand.medKunFritekst(
                 vurdering.getFritekstVurderingBrev()

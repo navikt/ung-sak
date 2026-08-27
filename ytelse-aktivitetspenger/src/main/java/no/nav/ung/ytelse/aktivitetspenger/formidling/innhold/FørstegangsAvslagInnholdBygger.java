@@ -9,8 +9,7 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -74,7 +73,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
             new AvslagInngangsvilkårDto(fom, avslåttBosted, avslåttBistand));
     }
 
-    private static VilkårsvurderingResultatPeriode hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultatPeriode>> vilkårVurdering, LocalDateTimeline<Boolean> vurdertPeriode, VilkårType vilkårType) {
+    private static VilkårsvurderingResultat hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vilkårVurdering, LocalDateTimeline<Boolean> vurdertPeriode, VilkårType vilkårType) {
         var vilkårResultatPeriode = vilkårVurdering.intersection(vurdertPeriode)
             .mapValue(it -> it.get(vilkårType))
             .segmenter().stream().map(LocalDateSegment::getValue)

@@ -10,7 +10,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 
 import java.util.List;
@@ -54,7 +54,7 @@ public class VilkårsavklaringOgVurderingTidslinjeUtleder {
     }
 
     private LocalDateTimeline<VilkårsavklaringMedVurdering> lagTidslinjeForVilkår(long behandlingId,
-                                                                                  LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultatPeriode>> vurderingTidslinje,
+                                                                                  LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vurderingTidslinje,
                                                                                   VilkårType vilkårType,
                                                                                   BehandlingÅrsakType behandlingÅrsakType) {
         var vilkårsavklaring = VilkårsavklaringTjeneste.finnForÅrsak(vilkårsavklaringTjenester, behandlingÅrsakType)
