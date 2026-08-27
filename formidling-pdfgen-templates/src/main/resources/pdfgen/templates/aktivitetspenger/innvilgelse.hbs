@@ -4,7 +4,7 @@
         <h1>Du får aktivitetspenger</h1>
 
         <p>
-            Fra {{ytelseFom}}{{#if ytelseTom}} til {{ytelseTom}}{{/if}} får du aktivitetspenger på {{> felles/beløp dagsats}} utenom lørdag og søndag.
+            Fra {{ytelseFom}} får du aktivitetspenger på {{> felles/beløp dagsats}} utenom lørdag og søndag.
         </p>
 
         {{#each satsEndringer}}
@@ -42,9 +42,15 @@
             side på nav.no</a>.
         </p>
 
-        <h2>Hvorfor får du penger?</h2>
-        <p>Du får penger fordi du har behov for hjelp til å komme i jobb eller utdanning.</p>
-        <p>Pengene får du så lenge du får oppfølging fra Nav, og i inntil ett år.</p>
+        <h2>Hvorfor får du aktivitetspenger?</h2>
+        <p>Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning.</p>
+        {{#if ytelseTom}}
+            <p>Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til {{ytelseTom}}.
+            {{#if søkerBlirOverHøyesteAlder}}Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år.{{/if}}
+            </p>
+        {{else}}
+            <p>Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år.</p>
+        {{/if}}
 
         {{#with satsOgBeregning}}
             <h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>

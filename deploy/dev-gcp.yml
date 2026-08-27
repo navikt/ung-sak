@@ -278,6 +278,8 @@ spec:
       value: "true"
     - name: AKTIVITETSPENGER_ENABLED
       value: "true"
+    - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
+      value: "true"
 
       # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL

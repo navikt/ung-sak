@@ -33,7 +33,7 @@ import no.nav.k9.felles.integrasjon.arbeidsfordeling.rest.ArbeidsfordelingRestKl
 
 public class EnhetsTjenesteTest {
 
-    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.OMSORGSPENGER;
+    private static final FagsakYtelseType YTELSE_TYPE = FagsakYtelseType.UNGDOMSYTELSE;
 
     private static AktørId MOR_AKTØR_ID = AktørId.dummy();
     private static PersonIdent MOR_IDENT = new PersonIdent(new FiktiveFnr().nesteKvinneFnr());
@@ -64,6 +64,7 @@ public class EnhetsTjenesteTest {
     private TpsTjeneste tpsTjeneste;
     private ArbeidsfordelingRestKlient arbeidsfordelingTjeneste;
     private EnhetsTjeneste enhetsTjeneste;
+    private FagsakYtelseType ytelseType = FagsakYtelseType.UNGDOMSYTELSE;
 
 
     @BeforeEach
@@ -189,13 +190,13 @@ public class EnhetsTjenesteTest {
         when(tpsTjeneste.hentFnrForAktør(FAR_AKTØR_ID)).thenReturn(FAR_IDENT);
         when(tpsTjeneste.hentFnrForAktør(BARN_AKTØR_ID)).thenReturn(BARN_IDENT);
 
-        when(tpsTjeneste.hentBrukerForAktør(MOR_AKTØR_ID)).thenReturn(Optional.of(MOR_PINFO));
-        when(tpsTjeneste.hentBrukerForAktør(FAR_AKTØR_ID)).thenReturn(Optional.of(FAR_PINFO));
-        when(tpsTjeneste.hentBrukerForAktør(BARN_AKTØR_ID)).thenReturn(Optional.of(BARN_PINFO));
+        when(tpsTjeneste.hentBrukerForAktør(MOR_AKTØR_ID, ytelseType)).thenReturn(Optional.of(MOR_PINFO));
+        when(tpsTjeneste.hentBrukerForAktør(FAR_AKTØR_ID, ytelseType)).thenReturn(Optional.of(FAR_PINFO));
+        when(tpsTjeneste.hentBrukerForAktør(BARN_AKTØR_ID, ytelseType)).thenReturn(Optional.of(BARN_PINFO));
 
-        when(tpsTjeneste.hentGeografiskTilknytning(MOR_IDENT)).thenReturn(morKode6 ? tilknytningKode6 : tilknytningNormal);
-        when(tpsTjeneste.hentGeografiskTilknytning(FAR_IDENT)).thenReturn(annenPartKode6 ? tilknytningKode6 : tilknytningNormal);
-        when(tpsTjeneste.hentGeografiskTilknytning(BARN_IDENT)).thenReturn(barnKode6 ? tilknytningKode6 : tilknytningNormal);
+        when(tpsTjeneste.hentGeografiskTilknytning(MOR_IDENT, ytelseType)).thenReturn(morKode6 ? tilknytningKode6 : tilknytningNormal);
+        when(tpsTjeneste.hentGeografiskTilknytning(FAR_IDENT, ytelseType)).thenReturn(annenPartKode6 ? tilknytningKode6 : tilknytningNormal);
+        when(tpsTjeneste.hentGeografiskTilknytning(BARN_IDENT, ytelseType)).thenReturn(barnKode6 ? tilknytningKode6 : tilknytningNormal);
 
         Mockito.doAnswer((Answer<List<ArbeidsfordelingResponse>>) invocation -> {
             ArbeidsfordelingRequest data = (ArbeidsfordelingRequest) invocation.getArguments()[0];

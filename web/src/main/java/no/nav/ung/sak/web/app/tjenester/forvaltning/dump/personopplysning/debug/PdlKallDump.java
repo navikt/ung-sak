@@ -86,7 +86,7 @@ public class PdlKallDump implements DebugDumpBehandling {
     private int doDump(DumpMottaker dumpMottaker, Behandling behandling, String basePath) {
         List<String> dumpinnhold = new ArrayList<>();
         AktørId søkerAktørId = behandling.getAktørId();
-        Personinfo søkerInfo = personinfoAdapter.hentPersoninfo(dumpinnhold, søkerAktørId);
+        Personinfo søkerInfo = personinfoAdapter.hentPersoninfo(dumpinnhold, søkerAktørId, behandling.getFagsakYtelseType());
 
         byggPersonopplysningMedRelasjoner(dumpinnhold, søkerInfo, behandling);
         dumpMottaker.newFile(basePath + "/" + path);
@@ -118,7 +118,7 @@ public class PdlKallDump implements DebugDumpBehandling {
 
 
     private void leggTilSøkersBarn(Personinfo søkerPersonInfo, Behandling behandling, PersonInformasjonBuilder informasjonBuilder, Periode opplysningsperioden, List<String> dumpinnhold) {
-        List<Personinfo> barna = hentBarnRelatertTil(søkerPersonInfo, behandling, opplysningsperioden, dumpinnhold);
+        List<Personinfo> barna = hentBarnRelatertTil(søkerPersonInfo, behandling, opplysningsperioden, dumpinnhold, behandling.getFagsakYtelseType());
         barna.forEach(barn -> {
             if (hentHistorikkForRelatertePersoner(behandling)) {
                 mapInfoMedHistorikkTilEntitet(dumpinnhold, barn, informasjonBuilder, behandling);
@@ -128,18 +128,18 @@ public class PdlKallDump implements DebugDumpBehandling {
         });
     }
 
-    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, Periode opplysningsperioden, List<String> dumpinnhold) {
-        List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo, dumpinnhold);
+    private List<Personinfo> hentBarnRelatertTil(Personinfo personinfo, Behandling behandling, Periode opplysningsperioden, List<String> dumpinnhold, FagsakYtelseType ytelseType) {
+        List<Personinfo> relaterteBarn = hentAlleRelaterteBarn(personinfo, dumpinnhold, ytelseType);
         var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
 
         return filter.relasjonsFiltreringBarn(behandling, relaterteBarn, opplysningsperioden);
     }
 
-    private List<Personinfo> hentAlleRelaterteBarn(Personinfo søkerPersonInfo, List<String> dumpinnhold) {
+    private List<Personinfo> hentAlleRelaterteBarn(Personinfo søkerPersonInfo, List<String> dumpinnhold, FagsakYtelseType ytelseType) {
         return søkerPersonInfo.getFamilierelasjoner()
             .stream()
             .filter(r -> r.getRelasjonsrolle().equals(RelasjonsRolleType.BARN))
-            .map(r -> personinfoAdapter.innhentSaksopplysningerForBarn(r.getPersonIdent(), dumpinnhold).orElse(null))
+            .map(r -> personinfoAdapter.innhentSaksopplysningerForBarn(r.getPersonIdent(), dumpinnhold, ytelseType).orElse(null))
             .filter(Objects::nonNull)
             .toList();
     }
@@ -158,7 +158,7 @@ public class PdlKallDump implements DebugDumpBehandling {
     private List<Personinfo> hentFosterbarn(Behandling behandling, List<String> dumpinnhold) {
         var filter = YtelsesspesifikkRelasjonsFilter.finnTjeneste(relasjonsFiltre, behandling.getFagsakYtelseType());
         return filter.hentFosterbarn(behandling).stream()
-            .map(aktørId -> personinfoAdapter.hentPersoninfo(dumpinnhold, aktørId))
+            .map(aktørId -> personinfoAdapter.hentPersoninfo(dumpinnhold, aktørId, behandling.getFagsakYtelseType()))
             .toList();
     }
 

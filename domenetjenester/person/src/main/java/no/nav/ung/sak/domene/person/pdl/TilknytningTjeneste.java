@@ -1,21 +1,20 @@
 package no.nav.ung.sak.domene.person.pdl;
 
 
-import static java.util.function.Predicate.not;
-import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE6;
-import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE7;
-import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.UGRADERT;
-
-import java.util.List;
-import java.util.stream.Stream;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
 import no.nav.k9.felles.integrasjon.pdl.*;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.Diskresjonskode;
 import no.nav.ung.sak.behandlingslager.aktør.GeografiskTilknytning;
 import no.nav.ung.sak.typer.AktørId;
+
+import java.util.stream.Stream;
+
+import static java.util.function.Predicate.not;
+import static no.nav.k9.felles.integrasjon.pdl.AdressebeskyttelseGradering.UGRADERT;
+import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE6;
+import static no.nav.ung.kodeverk.person.Diskresjonskode.KODE7;
 
 @ApplicationScoped
 public class TilknytningTjeneste {
@@ -61,23 +60,23 @@ public class TilknytningTjeneste {
         return null;
     }
 
-    public GeografiskTilknytning hentGeografiskTilknytning(AktørId aktørId) {
+    public GeografiskTilknytning hentGeografiskTilknytning(AktørId aktørId, FagsakYtelseType ytelseType) {
         var queryGT = new HentGeografiskTilknytningQueryRequest();
         queryGT.setIdent(aktørId.getId());
         var projectionGT = new GeografiskTilknytningResponseProjection()
             .gtType().gtBydel().gtKommune().gtLand();
 
-        var diskresjon = hentDiskresjonskode(aktørId);
-        var tilknytning = getTilknytning(pdlKlient.hentGT(queryGT, projectionGT, List.of(Behandlingsnummer.UNGDOMSYTELSEN)));
+        var diskresjon = hentDiskresjonskode(aktørId, ytelseType);
+        var tilknytning = getTilknytning(pdlKlient.hentGeografiskTilknytning(queryGT, projectionGT, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType)));
         return new GeografiskTilknytning(tilknytning, diskresjon);
     }
 
-    private Diskresjonskode hentDiskresjonskode(AktørId aktørId) {
+    private Diskresjonskode hentDiskresjonskode(AktørId aktørId, FagsakYtelseType ytelseType) {
         var query = new HentPersonQueryRequest();
         query.setIdent(aktørId.getId());
         var projection = new PersonResponseProjection()
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-        var person = pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
+        var person = pdlKlient.hentPerson(query, projection, BehandlingsnummerMapper.ytelsestypeTilBehandlingsnummer(ytelseType));
 
         return diskresjonskodeFor(person.getAdressebeskyttelse().stream());
     }

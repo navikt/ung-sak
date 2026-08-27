@@ -68,7 +68,7 @@ public class PersonRestTjeneste {
         Optional<PersonopplysningDto> personopplysningDto = personopplysningDtoTjeneste.lagPersonopplysningDto(behandlingId);
         if (personopplysningDto.isPresent()) {
             PersonopplysningDto pers = personopplysningDto.get();
-            personopplysningFnrFinder.oppdaterMedPersonIdent(pers);
+            personopplysningFnrFinder.oppdaterMedPersonIdent(pers, behandling.getFagsakYtelseType());
             return pers;
         } else {
             return null;

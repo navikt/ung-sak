@@ -9,12 +9,12 @@ import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -72,7 +72,7 @@ public class AktivitetspengerSøknadPersisterer {
     }
 
     public void oppdaterFagsakperiode(Periode søknadsperiode, Behandling behandling) {
-        var nyPeriodeForFagsak = fagsakperiodeUtleder.utledNyPeriodeForFagsak(behandling, søknadsperiode);
+        var nyPeriodeForFagsak = fagsakperiodeUtleder.utledFagsakPeriodeUtvidelse(behandling, søknadsperiode.getFom());
         fagsakRepository.utvidPeriode(behandling.getFagsakId(), nyPeriodeForFagsak.getFomDato(), nyPeriodeForFagsak.getTomDato());
     }
 

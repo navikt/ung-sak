@@ -116,7 +116,7 @@ public class PapirsøknadHåndteringTjeneste {
     }
 
     public OpprettJournalpostResponse opprettJournalpostForInnsendtPapirsøknad(PersonIdent deltakerIdent, JournalpostId journalpostId) {
-        Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent).orElseThrow();
+        Personinfo personinfo = tpsTjeneste.hentBrukerForFnr(deltakerIdent, FagsakYtelseType.UNGDOMSYTELSE).orElseThrow();
         String deltakerNavn = personinfo.getNavn();
         AktørId aktørId = personinfo.getAktørId();
 

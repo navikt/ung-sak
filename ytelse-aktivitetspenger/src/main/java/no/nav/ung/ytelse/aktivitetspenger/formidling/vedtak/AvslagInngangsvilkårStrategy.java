@@ -34,11 +34,11 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        boolean avslåttInngangsvilkår = resultatTidslinje.filtrerPåÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
-            .stream()
-            .anyMatch(it -> !it.getValue().avslåtteVilkår().isEmpty());
+        var periodeTilVurdering = resultatTidslinje.filtrerPåÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE);
+        boolean fullAvslag = !periodeTilVurdering.isEmpty()
+            && periodeTilVurdering.stream().noneMatch(it -> it.getValue().avslåtteVilkår().isEmpty());
 
-        if (avslåttInngangsvilkår) {
+        if (fullAvslag) {
             return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.AVSLAG__DOK,
                 førstegangsAvslagInnholdBygger,

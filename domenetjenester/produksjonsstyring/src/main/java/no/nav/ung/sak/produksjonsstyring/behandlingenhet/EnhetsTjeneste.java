@@ -64,7 +64,7 @@ public class EnhetsTjeneste {
             return Optional.empty();
         }
 
-        if (harNoenDiskresjonskode6(alleAktører)) {
+        if (harNoenDiskresjonskode6(alleAktører, ytelseType)) {
             return Optional.of(cacheEntry.enhetKode6);
         }
         if (finnOrganisasjonsEnhet(ytelseType, enhetId).isEmpty()) {
@@ -91,7 +91,7 @@ public class EnhetsTjeneste {
 
     OrganisasjonsEnhet hentEnhetSjekkKunAktør(AktørId aktørId, FagsakYtelseType ytelseType) {
         PersonIdent fnr = tpsTjeneste.hentFnrForAktør(aktørId);
-        GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr);
+        GeografiskTilknytning geografiskTilknytning = tpsTjeneste.hentGeografiskTilknytning(fnr, ytelseType);
         return hentEnheterFor(geografiskTilknytning.getTilknytning(), ofNullable(geografiskTilknytning.getDiskresjonskode()).map(Diskresjonskode::getKode).orElse(null), ytelseType).get(0);
     }
 
@@ -103,10 +103,10 @@ public class EnhetsTjeneste {
         return enhetSak1;
     }
 
-    private boolean harNoenDiskresjonskode6(Collection<AktørId> aktører) {
+    private boolean harNoenDiskresjonskode6(Collection<AktørId> aktører, FagsakYtelseType ytelseType) {
         return aktører.stream()
             .map(tpsTjeneste::hentFnrForAktør)
-            .map(tpsTjeneste::hentGeografiskTilknytning)
+            .map(fnr -> tpsTjeneste.hentGeografiskTilknytning(fnr, ytelseType))
             .map(GeografiskTilknytning::getDiskresjonskode)
             .filter(Objects::nonNull)
             .anyMatch(Diskresjonskode.KODE6::equals);
@@ -139,7 +139,7 @@ public class EnhetsTjeneste {
     private List<OrganisasjonsEnhet> hentEnheterFor(String geografi, String diskresjon, FagsakYtelseType ytelseType) {
         List<ArbeidsfordelingResponse> restenhet;
         var request = ArbeidsfordelingRequest.ny()
-            .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema())
+            .medTema(FagsakYtelseType.UNGDOMSYTELSE.getOppgavetema()) //FIXME aktivitetspenger
             .medOppgavetype(OppgaveÅrsak.BEHANDLE_SAK.getKode()) // fra Oppgavetype offisielt kodeverk)
             .medBehandlingstype(BehandlingType.FØRSTEGANGSSØKNAD.getOffisiellKode()) // fra BehandlingType offisielt kodeverk
             .medDiskresjonskode(diskresjon)

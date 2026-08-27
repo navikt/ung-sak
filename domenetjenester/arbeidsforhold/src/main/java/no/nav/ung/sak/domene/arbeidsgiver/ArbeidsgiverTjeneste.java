@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 
 import no.nav.k9.felles.exception.VLException;
 import no.nav.k9.felles.util.LRUCache;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.organisasjon.Organisasjonstype;
 import no.nav.ung.sak.behandlingslager.aktør.PersoninfoArbeidsgiver;
 import no.nav.ung.sak.behandlingslager.virksomhet.Virksomhet;
@@ -36,7 +37,7 @@ public class ArbeidsgiverTjeneste {
         this.virksomhetTjeneste = virksomhetTjeneste;
     }
 
-    public ArbeidsgiverOpplysninger hent(Arbeidsgiver arbeidsgiver) {
+    public ArbeidsgiverOpplysninger hent(Arbeidsgiver arbeidsgiver, FagsakYtelseType ytelseType) {
         if (arbeidsgiver == null) {
             return null;
         }
@@ -57,7 +58,7 @@ public class ArbeidsgiverTjeneste {
         } else if (arbeidsgiver.getErVirksomhet() && Organisasjonstype.erKunstig(arbeidsgiver.getOrgnr())) {
             return new ArbeidsgiverOpplysninger(OrgNummer.KUNSTIG_ORG, "Kunstig(Lagt til av saksbehandling)");
         } else if (arbeidsgiver.erAktørId()) {
-            Optional<PersoninfoArbeidsgiver> personinfo = hentInformasjonFraTps(arbeidsgiver);
+            Optional<PersoninfoArbeidsgiver> personinfo = hentInformasjonFraTps(arbeidsgiver, ytelseType);
             if (personinfo.isPresent()) {
                 PersoninfoArbeidsgiver personinfoArbeidsgiver = personinfo.get();
                 String fødselsdato = personinfoArbeidsgiver.getFødselsdato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
@@ -74,17 +75,13 @@ public class ArbeidsgiverTjeneste {
         return null;
     }
 
-    public Virksomhet hentVirksomhet(String orgNummer) {
-        return virksomhetTjeneste.finnOrganisasjon(orgNummer).orElseThrow(() -> new IllegalArgumentException("Kunne ikke hente virksomhet for orgNummer: " + orgNummer));
-    }
-
     public static Arbeidsgiver fra(Virksomhet virksomhet) {
         return Arbeidsgiver.virksomhet(virksomhet.getOrgnr());
     }
 
-    private Optional<PersoninfoArbeidsgiver> hentInformasjonFraTps(Arbeidsgiver arbeidsgiver) {
+    private Optional<PersoninfoArbeidsgiver> hentInformasjonFraTps(Arbeidsgiver arbeidsgiver, FagsakYtelseType ytelseType) {
         try {
-            return tpsTjeneste.hentPersoninfoArbeidsgiver(arbeidsgiver.getAktørId());
+            return tpsTjeneste.hentPersoninfoArbeidsgiver(arbeidsgiver.getAktørId(), ytelseType);
         } catch (VLException feil) {
             // Ønsker ikke å gi GUI problemer ved å eksponere exceptions
             return Optional.empty();

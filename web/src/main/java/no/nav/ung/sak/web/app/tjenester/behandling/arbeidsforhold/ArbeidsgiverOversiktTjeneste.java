@@ -2,6 +2,7 @@ package no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.arbeidsgiver.ArbeidsgiverOpplysninger;
@@ -55,16 +56,16 @@ public class ArbeidsgiverOversiktTjeneste {
 
 
         arbeidsgivere.stream()
-            .map(this::mapFra)
+            .map(arbeidsgiver -> mapFra(arbeidsgiver, behandling.getFagsakYtelseType()))
             .collect(Collectors.groupingBy(ArbeidsgiverOpplysningerDto::getIdentifikator))
             .forEach((key, value) -> oversikt.putIfAbsent(key, value.stream().findFirst().orElseGet(() -> new ArbeidsgiverOpplysningerDto(key, "Ukjent"))));
         return new ArbeidsgiverOversiktDto(oversikt);
     }
 
-    private ArbeidsgiverOpplysningerDto mapFra(Arbeidsgiver arbeidsgiver) {
+    private ArbeidsgiverOpplysningerDto mapFra(Arbeidsgiver arbeidsgiver, FagsakYtelseType ytelseType) {
         var identifikator = arbeidsgiver.getIdentifikator();
         try {
-            ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(arbeidsgiver);
+            ArbeidsgiverOpplysninger opplysninger = arbeidsgiverTjeneste.hent(arbeidsgiver, ytelseType);
             if (arbeidsgiver.getErVirksomhet()) {
                 return new ArbeidsgiverOpplysningerDto(identifikator, opplysninger.getNavn());
             } else {

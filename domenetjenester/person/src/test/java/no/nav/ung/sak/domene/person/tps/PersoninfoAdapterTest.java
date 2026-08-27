@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.person.NavBrukerKjønn;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,8 @@ public class PersoninfoAdapterTest {
     private static final PersonIdent PERSONIDENT_FNR_SØKER = new PersonIdent("14430175875");
     private static final PersonIdent PERSONIDENT_FNR_BARN = new PersonIdent("26470392885");
 
+    private FagsakYtelseType ytelseType = FagsakYtelseType.UNGDOMSYTELSE;
+
     private Personinfo mockPersoninfo;
 
     @BeforeEach
@@ -48,8 +51,8 @@ public class PersoninfoAdapterTest {
 
         PersonBasisTjeneste personBasisTjeneste = mock(PersonBasisTjeneste.class);
         PersoninfoTjeneste personinfoTjeneste = mock(PersoninfoTjeneste.class);
-        when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_BARN, PERSONIDENT_FNR_BARN)).thenReturn(kjerneinfobarn);
-        when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_SØKER, PERSONIDENT_FNR_SØKER)).thenReturn(kjerneinfoSøker);
+        when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_BARN, PERSONIDENT_FNR_BARN, ytelseType)).thenReturn(kjerneinfobarn);
+        when(personinfoTjeneste.hentKjerneinformasjon(AKTØR_ID_SØKER, PERSONIDENT_FNR_SØKER, ytelseType)).thenReturn(kjerneinfoSøker);
 
         testSubject = new PersoninfoAdapter(personBasisTjeneste, personinfoTjeneste, aktørTjeneste, mock(TilknytningTjeneste.class), null);
     }
@@ -60,7 +63,7 @@ public class PersoninfoAdapterTest {
         when(mockPersoninfo.getAktørId()).thenReturn(AKTØR_ID_SØKER);
 
         // Act and assert
-        assertThat(testSubject.hentPersoninfo(AKTØR_ID_SØKER))
+        assertThat(testSubject.hentPersoninfo(AKTØR_ID_SØKER, ytelseType))
             .isNotNull()
             .extracting(Personinfo::getAktørId)
             .isEqualTo(AKTØR_ID_SØKER);
@@ -72,7 +75,7 @@ public class PersoninfoAdapterTest {
         when(mockPersoninfo.getAktørId()).thenReturn(AKTØR_ID_BARN);
 
         // Act and assert
-        assertThat(testSubject.innhentSaksopplysningerForBarn(PERSONIDENT_FNR_BARN))
+        assertThat(testSubject.innhentSaksopplysningerForBarn(PERSONIDENT_FNR_BARN, ytelseType))
             .hasValueSatisfying(barn -> {
                     assertThat(barn.getAktørId()).isEqualTo(AKTØR_ID_BARN);
                     assertThat(barn.getFødselsdato()).isNotNull();

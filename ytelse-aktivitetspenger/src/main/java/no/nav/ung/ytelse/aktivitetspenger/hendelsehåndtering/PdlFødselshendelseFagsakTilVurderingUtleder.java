@@ -2,14 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.hendelsehåndtering;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.k9.felles.integrasjon.pdl.Behandlingsnummer;
-import no.nav.k9.felles.integrasjon.pdl.Foedselsdato;
-import no.nav.k9.felles.integrasjon.pdl.FoedselsdatoResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.ForelderBarnRelasjonResponseProjection;
-import no.nav.k9.felles.integrasjon.pdl.HentPersonQueryRequest;
-import no.nav.k9.felles.integrasjon.pdl.Pdl;
-import no.nav.k9.felles.integrasjon.pdl.Person;
-import no.nav.k9.felles.integrasjon.pdl.PersonResponseProjection;
+import no.nav.k9.felles.integrasjon.pdl.*;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandling.revurdering.ÅrsakOgPerioder;
@@ -47,7 +40,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
     private BehandlingRepository behandlingRepository;
     private FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste;
     private PersonopplysningRepository personopplysningRepository;
-    private Pdl pdlKlient;
+    private PdlKlient pdlKlient;
 
     public PdlFødselshendelseFagsakTilVurderingUtleder() {
         // For CDI
@@ -57,7 +50,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
     public PdlFødselshendelseFagsakTilVurderingUtleder(BehandlingRepository behandlingRepository,
                                                        FinnFagsakerForAktørTjeneste finnFagsakerForAktørTjeneste,
                                                        PersonopplysningRepository personopplysningRepository,
-                                                       Pdl pdlKlient) {
+                                                       PdlKlient pdlKlient) {
         this.behandlingRepository = behandlingRepository;
         this.finnFagsakerForAktørTjeneste = finnFagsakerForAktørTjeneste;
         this.personopplysningRepository = personopplysningRepository;
@@ -148,7 +141,7 @@ public class PdlFødselshendelseFagsakTilVurderingUtleder implements FagsakerTil
                     .relatertPersonsIdent()
                     .minRolleForPerson()
             );
-        return pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.UNGDOMSYTELSEN));
+        return pdlKlient.hentPerson(query, projection, List.of(Behandlingsnummer.AKTIVITETSPENGER));
     }
 
     private LocalDate finnAktuellDato(Person personFraPdl) {

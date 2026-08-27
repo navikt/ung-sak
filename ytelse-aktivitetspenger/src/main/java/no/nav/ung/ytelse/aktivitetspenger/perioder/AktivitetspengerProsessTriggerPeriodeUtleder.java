@@ -13,7 +13,9 @@ import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.Set;
 
 @ApplicationScoped
@@ -21,10 +23,12 @@ import java.util.Set;
 public class AktivitetspengerProsessTriggerPeriodeUtleder implements ProsessTriggerPeriodeUtleder {
 
     private final ProsessTriggereRepository prosessTriggereRepository;
+    private final AktivitetspengerSøknadsperiodeTjeneste aktivitetspengerSøknadsperiodeTjeneste;
 
     @Inject
-    public AktivitetspengerProsessTriggerPeriodeUtleder(ProsessTriggereRepository prosessTriggereRepository) {
+    public AktivitetspengerProsessTriggerPeriodeUtleder(ProsessTriggereRepository prosessTriggereRepository, AktivitetspengerSøknadsperiodeTjeneste aktivitetspengerSøknadsperiodeTjeneste) {
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.aktivitetspengerSøknadsperiodeTjeneste = aktivitetspengerSøknadsperiodeTjeneste;
     }
 
     /**
@@ -41,12 +45,27 @@ public class AktivitetspengerProsessTriggerPeriodeUtleder implements ProsessTrig
             .toList();
         return triggere
             .stream()
-            .map(p -> new LocalDateTimeline<>(finnPeriodeForBehandlingsårsak(p), Set.of(p.getÅrsak())))
+            .map(p -> new LocalDateTimeline<>(finnPeriodeForBehandlingsårsak(behandligId, p), Set.of(p.getÅrsak())))
             .reduce((t1, t2) -> t1.crossJoin(t2, StandardCombinators::union))
             .orElse(LocalDateTimeline.empty());
     }
 
-    private LocalDateInterval finnPeriodeForBehandlingsårsak(Trigger p) {
+    private LocalDateInterval finnPeriodeForBehandlingsårsak(Long behandligId, Trigger p) {
+        // For nye søknader så vil triggerperioden være uendelig fordi vi ikke vet sluttdato ved oppretting av trigger,
+        // så vi begresenser det her til søknadsperioden
+        if (p.getÅrsak() == BehandlingÅrsakType.NY_SØKT_PERIODE) {
+            var søknadsperioder = aktivitetspengerSøknadsperiodeTjeneste.utledPeriode(behandligId);
+            String triggerperiodeFomDato = p.getPeriode().getFomDato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            return søknadsperioder.stream()
+                .filter(it -> it.getTomDato().isAfter(p.getPeriode().getFomDato()))
+                .min(Comparator.naturalOrder())
+                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode. behandlingId=" + behandligId
+                    + ", trigger-startdato=" + triggerperiodeFomDato
+                    + ", kjente søknadsperioder=" + søknadsperioder))
+                .toLocalDateInterval();
+
+        }
+
         return p.getPeriode().toLocalDateInterval();
     }
 

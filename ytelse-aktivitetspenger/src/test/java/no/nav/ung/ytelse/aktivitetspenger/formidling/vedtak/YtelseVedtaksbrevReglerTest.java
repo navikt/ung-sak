@@ -6,6 +6,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -49,6 +50,25 @@ class YtelseVedtaksbrevReglerTest {
         var fom = LocalDate.of(2025, 8, 1);
         var tom = LocalDate.of(2025, 11, 30);
         var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetMedAvkortetVilkår(fom, tom, VilkårType.BOSTEDSVILKÅR);
+
+        var behandling = lagBehandling(scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater()).hasSize(1);
+
+        var vedtaksbrev = totalresultater.vedtaksbrevResultater().getFirst();
+        assertThat(vedtaksbrev.dokumentMalType()).isEqualTo(DokumentMalType.INNVILGELSE_DOK);
+        assertThat(vedtaksbrev.vedtaksbrevBygger()).isInstanceOf(FørstegangsInnvilgelseInnholdBygger.class);
+    }
+
+    @Test
+    void skal_kun_gi_innvilgelsesbrev_ved_delvis_avslag() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var tom = LocalDate.of(2025, 11, 30);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetMedAvslåttVilkår(
+            fom, tom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
 
         var behandling = lagBehandling(scenario);
 
