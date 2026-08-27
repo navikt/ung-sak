@@ -8,7 +8,6 @@ import no.nav.k9.sikkerhet.context.SubjectHandler;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
@@ -23,11 +22,9 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.VurderAktivitetDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
 
