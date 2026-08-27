@@ -71,6 +71,35 @@ public class InngangsvilkårVurderingTjeneste {
         };
     }
 
+    public void settAktivitetsvilkårResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
+        var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));
+        var holder = grunnlag.getAktivitetsvilkårResultatHolder()
+            .orElseThrow(() -> new IllegalStateException("Aktivitetsvilkår-holder mangler i grunnlag for behandling " + behandlingId));
+
+        var vilkårBuilder = resultatBuilder.hentBuilderFor(VilkårType.AKTIVITETSVILKÅR);
+        for (var vurdering : holder.getVurderinger()) {
+            var periode = vurdering.getPeriode();
+            var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAktivitetsvilkårAvslagsårsk(vurdering.getIkkeOppfyltÅrsak()) : null;
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+                .medBegrunnelse(vurdering.getBegrunnelse())
+                .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
+                .medUtfallManuell(utfall)
+                .medAvslagsårsak(avslagsårsak));
+        }
+        resultatBuilder.leggTil(vilkårBuilder);
+    }
+
+    private Avslagsårsak mapAktivitetsvilkårAvslagsårsk(AktivitetsvilkåretIkkeOppfyltÅrsak årsak) {
+        Objects.requireNonNull(årsak, "avslagsårsak må være satt ved avslag");
+        return switch (årsak) {
+            case ÅRSAK_1 -> Avslagsårsak.AKTIVITETSVILKÅR_AVSLAGSÅRSAK_1;
+            case AVKORTET -> Avslagsårsak.AVKORTET;
+            case UDEFINERT -> throw new IllegalStateException("UDEFINERT avslagsårsak ikke tillatt ved avslag");
+        };
+    }
+
     public void settAndreLivsoppholdsytelserResultat(Long behandlingId, VilkårResultatBuilder resultatBuilder) {
         var grunnlag = vilkårVurderingRepository.hentGrunnlag(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Fant ikke inngangsvilkår-vurderingsgrunnlag for behandling " + behandlingId));

@@ -36,9 +36,25 @@ public class InngangsvilkårVurderingRepository {
 
         var kombinerte = kombinerBistand(eksisterendeVurderinger, nyeVurderinger);
         var nyHolder = new BistandsvilkårResultatHolder(kombinerte);
+        var aktivitetHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder).orElse(null);
         var livsoppholdHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
         var bostedHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder).orElse(null);
-        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, nyHolder, livsoppholdHolder, bostedHolder));
+        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, nyHolder, aktivitetHolder, livsoppholdHolder, bostedHolder));
+    }
+
+    public void lagreAktivitetVurderinger(Long behandlingId, List<AktivitetsvilkårResultatPeriode> nyeVurderinger) {
+        var eksisterende = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeVurderinger = eksisterende
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder)
+            .map(AktivitetsvilkårResultatHolder::getVurderinger)
+            .orElse(List.of());
+
+        var kombinerte = kombinerAktivitet(eksisterendeVurderinger, nyeVurderinger);
+        var bistandHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
+        var nyHolder = new AktivitetsvilkårResultatHolder(kombinerte);
+        var livsoppholdHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
+        var bostedHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder).orElse(null);
+        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandHolder, nyHolder, livsoppholdHolder, bostedHolder));
     }
 
     public void lagreYtelseVurderinger(Long behandlingId, List<AndreLivsoppholdsytelserResultatPeriode> nyeVurderinger) {
@@ -50,9 +66,10 @@ public class InngangsvilkårVurderingRepository {
 
         var kombinerte = kombinerYtelser(eksisterendeVurderinger, nyeVurderinger);
         var bistandHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
+        var aktivitetHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder).orElse(null);
         var nyHolder = new AndreLivsoppholdsytelserResultatHolder(kombinerte);
         var bostedHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder).orElse(null);
-        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandHolder, nyHolder, bostedHolder));
+        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandHolder, aktivitetHolder, nyHolder, bostedHolder));
     }
 
     public void lagreBostedVurderinger(Long behandlingId, List<BostedsvilkårResultatPeriode> nyeVurderinger) {
@@ -64,9 +81,10 @@ public class InngangsvilkårVurderingRepository {
 
         var kombinerte = kombinerBosted(eksisterendeVurderinger, nyeVurderinger);
         var bistandHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
+        var aktivitetHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder).orElse(null);
         var livsoppholdHolder = eksisterende.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
         var nyHolder = new BostedsvilkårResultatHolder(kombinerte);
-        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandHolder, livsoppholdHolder, nyHolder));
+        persister(eksisterende, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandHolder, aktivitetHolder, livsoppholdHolder, nyHolder));
     }
 
     public void kopier(Long eksisterendeBehandlingId, Long nyBehandlingId) {
@@ -74,6 +92,7 @@ public class InngangsvilkårVurderingRepository {
             var nyttGrunnlag = new AktivitetspengerInngangsvilkårResultatGrunnlag(
                 nyBehandlingId,
                 eksisterende.getBistandsvilkårResultatHolder().orElse(null),
+                eksisterende.getAktivitetsvilkårResultatHolder().orElse(null),
                 eksisterende.getAndreLivsoppholdsytelserResultatHolder().orElse(null),
                 eksisterende.getBostedsvilkårResultatHolder().orElse(null)
             );
@@ -96,6 +115,21 @@ public class InngangsvilkårVurderingRepository {
             .toList();
     }
 
+    private List<AktivitetsvilkårResultatPeriode> kombinerAktivitet(
+        List<AktivitetsvilkårResultatPeriode> eksisterende,
+        List<AktivitetsvilkårResultatPeriode> nye) {
+        var eksisterendeTidslinje = tilAktivitetTidslinje(eksisterende);
+        var nyTidslinje = tilAktivitetTidslinje(nye);
+        // Behold eksisterende der nye ikke overlapper, nye tar alltid presedens
+        return eksisterendeTidslinje.disjoint(nyTidslinje).crossJoin(nyTidslinje).stream()
+            .map(seg -> {
+                var periode = DatoIntervallEntitet.fraOgMedTilOgMed(seg.getFom(), seg.getTom());
+                var v = seg.getValue();
+                return v.getPeriode().equals(periode) ? v : new AktivitetsvilkårResultatPeriode(periode, v);
+            })
+            .toList();
+    }
+
     private List<AndreLivsoppholdsytelserResultatPeriode> kombinerYtelser(
             List<AndreLivsoppholdsytelserResultatPeriode> eksisterende,
             List<AndreLivsoppholdsytelserResultatPeriode> nye) {
@@ -111,6 +145,12 @@ public class InngangsvilkårVurderingRepository {
     }
 
     private static LocalDateTimeline<BistandsvilkårResultatPeriode> tilBistandTidslinje(List<BistandsvilkårResultatPeriode> vurderinger) {
+        return new LocalDateTimeline<>(vurderinger.stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+    }
+
+    private static LocalDateTimeline<AktivitetsvilkårResultatPeriode> tilAktivitetTidslinje(List<AktivitetsvilkårResultatPeriode> vurderinger) {
         return new LocalDateTimeline<>(vurderinger.stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
@@ -182,6 +222,13 @@ public class InngangsvilkårVurderingRepository {
             bistandsvilkårResultatHolder = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
         }
 
+        AktivitetsvilkårResultatHolder aktivitetsvilkårResultatHolder;
+        if (VilkårType.AKTIVITETSVILKÅR.equals(vilkårType)) {
+            aktivitetsvilkårResultatHolder = oppdaterAktivitetsVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
+        } else {
+            aktivitetsvilkårResultatHolder = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder).orElse(null);
+        }
+
         AndreLivsoppholdsytelserResultatHolder livsoppholdYtelser;
         if (VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR.equals(vilkårType)) {
             livsoppholdYtelser = oppdaterLivsoppholdYtelserVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
@@ -189,7 +236,7 @@ public class InngangsvilkårVurderingRepository {
             livsoppholdYtelser = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
         }
 
-        persister(eksisterendeGrunnlag, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandsvilkårResultatHolder, livsoppholdYtelser, bostedVilkårHolder));
+        persister(eksisterendeGrunnlag, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandsvilkårResultatHolder, aktivitetsvilkårResultatHolder, livsoppholdYtelser, bostedVilkårHolder));
     }
 
     private static BostedsvilkårResultatHolder oppdaterBostedVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
@@ -220,6 +267,21 @@ public class InngangsvilkårVurderingRepository {
         }).toList();
 
         return new BistandsvilkårResultatHolder(oppdaterte);
+    }
+
+    private static AktivitetsvilkårResultatHolder oppdaterAktivitetsVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
+        var eksisterendeVurderingerTidslinje = tilAktivitetTidslinje(eksisterende
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder)
+            .map(AktivitetsvilkårResultatHolder::getVurderinger)
+            .orElse(List.of()));
+
+        var oppdaterte = eksisterendeVurderingerTidslinje.disjoint(perioderSomSkalFjernes).segmenter().stream().map(seg -> {
+            var periode = DatoIntervallEntitet.fraOgMedTilOgMed(seg.getFom(), seg.getTom());
+            var v = seg.getValue();
+            return v.getPeriode().equals(periode) ? v : new AktivitetsvilkårResultatPeriode(periode, v);
+        }).toList();
+
+        return new AktivitetsvilkårResultatHolder(oppdaterte);
     }
 
     private static AndreLivsoppholdsytelserResultatHolder oppdaterLivsoppholdYtelserVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {

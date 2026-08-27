@@ -26,6 +26,10 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     private BistandsvilkårResultatHolder bistandsvilkårResultatHolder;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "aktivitet_resultat_holder_id", updatable = false)
+    private AktivitetsvilkårResultatHolder aktivitetsvilkårResultatHolder;
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "livsopphold_resultat_holder_id", updatable = false)
     private AndreLivsoppholdsytelserResultatHolder andreLivsoppholdsytelserResultatHolder;
 
@@ -45,17 +49,13 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
 
     AktivitetspengerInngangsvilkårResultatGrunnlag(Long behandlingId,
                                                    BistandsvilkårResultatHolder bistandHolder,
-                                                   AndreLivsoppholdsytelserResultatHolder livsoppholdHolder) {
-        this(behandlingId, bistandHolder, livsoppholdHolder, null);
-    }
-
-    AktivitetspengerInngangsvilkårResultatGrunnlag(Long behandlingId,
-                                                   BistandsvilkårResultatHolder bistandHolder,
+                                                   AktivitetsvilkårResultatHolder aktivitetHolder,
                                                    AndreLivsoppholdsytelserResultatHolder livsoppholdHolder,
                                                    BostedsvilkårResultatHolder bostedHolder) {
         Objects.requireNonNull(behandlingId, "behandlingId");
         this.behandlingId = behandlingId;
         this.bistandsvilkårResultatHolder = bistandHolder;
+        this.aktivitetsvilkårResultatHolder = aktivitetHolder;
         this.andreLivsoppholdsytelserResultatHolder = livsoppholdHolder;
         this.bostedsvilkårResultatHolder = bostedHolder;
     }
@@ -70,6 +70,10 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
 
     public Optional<BistandsvilkårResultatHolder> getBistandsvilkårResultatHolder() {
         return Optional.ofNullable(bistandsvilkårResultatHolder);
+    }
+
+    public Optional<AktivitetsvilkårResultatHolder> getAktivitetsvilkårResultatHolder() {
+        return Optional.ofNullable(aktivitetsvilkårResultatHolder);
     }
 
     public Optional<AndreLivsoppholdsytelserResultatHolder> getAndreLivsoppholdsytelserResultatHolder() {
@@ -104,16 +108,19 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
 
     @Override
     public boolean equals(Object o) {
+        //FIXME denne kaller videre på holderne, som IKKE har implementert egne equals-metoder. Enten implementer i holderne også, eller gjør noe annet her
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AktivitetspengerInngangsvilkårResultatGrunnlag that = (AktivitetspengerInngangsvilkårResultatGrunnlag) o;
         return Objects.equals(bistandsvilkårResultatHolder, that.bistandsvilkårResultatHolder)
+            && Objects.equals(aktivitetsvilkårResultatHolder, that.aktivitetsvilkårResultatHolder)
             && Objects.equals(andreLivsoppholdsytelserResultatHolder, that.andreLivsoppholdsytelserResultatHolder)
             && Objects.equals(bostedsvilkårResultatHolder, that.bostedsvilkårResultatHolder);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(bistandsvilkårResultatHolder, andreLivsoppholdsytelserResultatHolder, bostedsvilkårResultatHolder);
+        //FIXME denne kaller videre på holderne, som IKKE har implementert egne hashCode-metoder. Enten implementer i holderne også, eller gjør noe annet her
+        return Objects.hash(bistandsvilkårResultatHolder, aktivitetsvilkårResultatHolder, andreLivsoppholdsytelserResultatHolder, bostedsvilkårResultatHolder);
     }
 }
