@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.aktivitetspenger.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -21,6 +22,7 @@ public class ProsessModell {
     public ProsessModell() {
     }
 
+    @Inject
     public ProsessModell(@KonfigVerdi(value = "AKTIVITETSVILKAAR_ENABLED", required = false, defaultVerdi = "true") boolean aktivitetsvilkårEnabled) {
         this.aktivitetsvilkårEnabled = aktivitetsvilkårEnabled;
     }
