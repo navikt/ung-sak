@@ -50,7 +50,7 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
-    AktivitetsvilkårResultatPeriode() {
+    protected AktivitetsvilkårResultatPeriode() {
         // Hibernate
     }
 
@@ -92,7 +92,7 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
         return ikkeOppfyltÅrsak;
     }
 
-    public boolean isManuellVurdering() {
+    public boolean erManuellVurdering() {
         return manuellVurdering;
     }
 

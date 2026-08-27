@@ -10,7 +10,7 @@ import java.util.List;
 
 @Entity(name = "AktivitetsvilkårResultatHolder")
 @Table(name = "aktivitet_resultat_holder")
-public class AktivitetsvilkårResultatHolder extends BaseEntitet {
+class AktivitetsvilkårResultatHolder extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_AKTIVITET_RESULTAT_HOLDER")
