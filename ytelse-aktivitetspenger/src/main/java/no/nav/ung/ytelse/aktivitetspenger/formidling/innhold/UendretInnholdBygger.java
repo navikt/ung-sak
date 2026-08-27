@@ -17,6 +17,8 @@ import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOgVurderingTids
 import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.UendretDto;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
 
 @Dependent
@@ -39,24 +41,23 @@ public class UendretInnholdBygger implements VedtaksbrevInnholdBygger {
             throw new IllegalStateException("Fant ingen vilkårsavklaring uten avslått periode for behandlingId: " + behandling.getId());
         }
 
-        var vilkårsavklaringer = TidslinjeUtil.values(periodeFremdelesInnvilget).stream()
-            .map(VilkårsavklaringMedVurdering::vilkårsavklaring)
+        var vilkårsavklaringOgVurdering = TidslinjeUtil.values(periodeFremdelesInnvilget.mapValue(Map::values)).stream()
+            .flatMap(Collection::stream)
+            .filter(VilkårsavklaringMedVurdering::harVilkårsAvklaring)
             .distinct()
             .toList();
 
-        if (vilkårsavklaringer.size() != 1) {
-            throw new IllegalStateException("Vedtaksbrev ved uendret vedtak forventer kun én vilkårsavklaring for behandlingId: " + behandling.getId());
+        if (vilkårsavklaringOgVurdering.size() != 1) {
+            throw new IllegalStateException("Vedtaksbrev ved uendret vedtak forventer kun én (fant " + vilkårsavklaringOgVurdering.size() + ") vilkårsavklaring for behandlingId: " + behandling.getId());
         }
 
-        var fritekst = TidslinjeUtil.values(periodeFremdelesInnvilget).stream()
+        var fritekst = vilkårsavklaringOgVurdering.stream()
             .map(VilkårsavklaringMedVurdering::vilkårsvurdering)
-            .filter(Objects::nonNull)
             .map(VilkårsvurderingResultatPeriode::getFritekstVurderingBrev)
-            .filter(Objects::nonNull)
             .findFirst()
             .orElse(null);
 
-        return lagDto(vilkårsavklaringer.getFirst(), fritekst);
+        return lagDto(vilkårsavklaringOgVurdering.getFirst().vilkårsavklaring(), fritekst);
     }
 
     private static LocalDateTimeline<Boolean> avslåttVilkårsPeriode(DetaljertResultatTidslinje tidslinje) {

@@ -47,8 +47,8 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
         if (avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR)) {
             var avslåttPeriode = avklartOgVurdertTidslinje
-                .filterValue(it -> it.vilkårType() == VilkårType.BOSTEDSVILKÅR)
-                .filterValue(VilkårsavklaringMedVurdering::harVilkårsAvklaring)
+                .mapValue(it -> it.get(VilkårType.BOSTEDSVILKÅR))
+                .filterValue(it -> it != null && it.harVilkårsAvklaring())
                 .intersection(avslåttVilkårsPeriode(tidslinje, VilkårType.BOSTEDSVILKÅR));
 
             if (avslåttPeriode.isEmpty()) {

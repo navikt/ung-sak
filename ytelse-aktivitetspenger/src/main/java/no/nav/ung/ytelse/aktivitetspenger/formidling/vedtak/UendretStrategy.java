@@ -19,7 +19,10 @@ import java.util.List;
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class UendretStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final UendretInnholdBygger uendretInnholdBygger;
+    private UendretInnholdBygger uendretInnholdBygger;
+
+    public UendretStrategy() {
+    }
 
     @Inject
     public UendretStrategy(UendretInnholdBygger uendretInnholdBygger) {

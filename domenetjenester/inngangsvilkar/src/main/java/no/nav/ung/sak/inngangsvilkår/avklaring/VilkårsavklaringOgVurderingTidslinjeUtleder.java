@@ -4,16 +4,20 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * Fletter vilkårsavklaringene på behandlingen (som styres av {@link BehandlingÅrsakType}) sammen med
@@ -38,12 +42,15 @@ public class VilkårsavklaringOgVurderingTidslinjeUtleder {
         this.vilkårsavklaringTjenester = vilkårsavklaringTjenester;
     }
 
-    public LocalDateTimeline<VilkårsavklaringMedVurdering> utled(long behandlingId) {
+    public LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> utled(long behandlingId) {
         var vurderingTidslinje = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId);
 
         return VILKÅR_OG_BEHANDLINGSÅRSAK.entrySet().stream()
-            .map(entry -> lagTidslinjeForVilkår(behandlingId, vurderingTidslinje, entry.getKey(), entry.getValue()))
-            .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin);
+            .map(entry -> lagTidslinjeForVilkår(behandlingId, vurderingTidslinje, entry.getKey(), entry.getValue()).mapValue(Set::of))
+            .reduce(LocalDateTimeline.empty(), (akkumulert, neste) ->
+                akkumulert.combine(neste, StandardCombinators::union, LocalDateTimeline.JoinStyle.CROSS_JOIN)
+            )
+            .mapValue(it -> it.stream().collect(Collectors.toMap(VilkårsavklaringMedVurdering::vilkårType, Function.identity())));
     }
 
     private LocalDateTimeline<VilkårsavklaringMedVurdering> lagTidslinjeForVilkår(long behandlingId,
@@ -56,13 +63,14 @@ public class VilkårsavklaringOgVurderingTidslinjeUtleder {
             return LocalDateTimeline.empty();
         }
 
-        var avklartTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(List.of(vilkårsavklaring.get().periode()));
+        var avklartTidslinje = new LocalDateTimeline<>(vilkårsavklaring.get().periode().toLocalDateInterval(), vilkårsavklaring.get());
+
         return avklartTidslinje.combine(vurderingTidslinje,
-            (interval, _, vurdering) -> new LocalDateSegment<>(interval,
+            (interval, avklaring, vurdering) -> new LocalDateSegment<>(interval,
                 new VilkårsavklaringMedVurdering(
                     vilkårType,
                     behandlingÅrsakType,
-                    vilkårsavklaring.get(),
+                    avklaring.getValue(),
                     vurdering == null ? null : vurdering.getValue().get(vilkårType))),
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
     }

@@ -1,10 +1,10 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -15,7 +15,6 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
-import no.nav.ung.sak.formidling.vedtak.regler.strategy.Presedens;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
@@ -27,18 +26,20 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringAvslagInnhol
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Stream;
 
-@Dependent
+@ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
-    private final EndringAvslagInnholdBygger endringAvslagInnholdBygger;
-    private final Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
+    private EndringAvslagInnholdBygger endringAvslagInnholdBygger;
+    private Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
 
     private static final Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingÅrsak = Map.of(
         VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED
     );
+
+    public EndringAvslagStrategy() {
+    }
 
     @Inject
     public EndringAvslagStrategy(EndringAvslagInnholdBygger endringAvslagInnholdBygger,
@@ -88,18 +89,16 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
 
         return vilkårsAvklaring.flatMap(avklaring -> {
             var avklaringsperiode = avklaring.periode().toLocalDateInterval();
-            boolean harAvslåtteVilkår = perioderMedAvslåttVilkår(tilVurdering, vilkårType).anyMatch(avklaringsperiode::overlaps);
-            if (!harAvslåtteVilkår) {
+            boolean avklaringsperiodeHarIkkeAvslåtteVilkår = tilVurdering
+                .filterValue(it -> it.avslåtteVilkår().stream().anyMatch(vilkår -> vilkår.vilkårType() == vilkårType))
+                .intersection(avklaringsperiode)
+                .isEmpty();
+            if (avklaringsperiodeHarIkkeAvslåtteVilkår) {
                 return Optional.empty();
             }
             return Optional.of(avklaring);
         });
     }
 
-    private static Stream<LocalDateInterval> perioderMedAvslåttVilkår(LocalDateTimeline<DetaljertResultat> tilVurdering, VilkårType vilkårType) {
-        return tilVurdering.stream()
-            .filter(it -> it.getValue().avslåtteVilkår().stream().anyMatch(vilkår -> vilkår.vilkårType() == vilkårType))
-            .map(LocalDateSegment::getLocalDateInterval);
-    }
 }
 
