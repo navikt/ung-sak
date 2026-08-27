@@ -62,7 +62,7 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
                  AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vilkårsavklaringOgVurdering.getValue().vilkårsvurdering())
             );
         }
-        throw new IllegalStateException("Avslag for vilkårType ikke implementert: " + behandling.getId());
+        throw new IllegalStateException("Avslag for vilkårtyper ikke implementert: " + avslåtteVilkårTyper + ", behandlingId: " + behandling.getId());
     }
 
     private static LocalDateTimeline<Boolean> avslåttVilkårsPeriode(DetaljertResultatTidslinje tidslinje, VilkårType vilkårType) {

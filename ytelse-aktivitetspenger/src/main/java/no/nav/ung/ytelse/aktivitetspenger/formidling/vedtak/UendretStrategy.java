@@ -28,13 +28,17 @@ public final class UendretStrategy implements VedtaksbrevInnholdbyggerStrategy {
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
+        // Fordi brevets formål er å informere om at det ikke er endringer på vedtaket, sjekkes det i tillegg at det ikke finnes andre årsaker.
+        var harIkkeAndreBehandlingÅrsaker = resultatTidslinje.tilVurdering().stream()
+            .allMatch(it -> it.getValue().harÅrsak(BehandlingÅrsakType.ENDRET_BOSTED));
+
         var perioderMedBehandlingÅrsakSomKanHaUendretBrev = resultatTidslinje.filtrerPåÅrsak(BehandlingÅrsakType.ENDRET_BOSTED);
 
         var uendretVurderingAvInngangsvilkår = !perioderMedBehandlingÅrsakSomKanHaUendretBrev.isEmpty() &&
             perioderMedBehandlingÅrsakSomKanHaUendretBrev.stream()
             .allMatch(it -> it.getValue().avslåtteVilkår().isEmpty());
 
-        if (uendretVurderingAvInngangsvilkår) {
+        if (harIkkeAndreBehandlingÅrsaker && uendretVurderingAvInngangsvilkår) {
             return List.of(new VedtaksbrevStrategyResultat(
                 DokumentMalType.INGEN_ENDRING,
                 uendretInnholdBygger,

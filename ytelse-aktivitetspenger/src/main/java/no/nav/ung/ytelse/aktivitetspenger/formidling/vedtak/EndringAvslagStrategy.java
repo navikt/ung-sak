@@ -101,10 +101,5 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
             .filter(it -> it.getValue().avslåtteVilkår().stream().anyMatch(vilkår -> vilkår.vilkårType() == vilkårType))
             .map(LocalDateSegment::getLocalDateInterval);
     }
-
-    @Override
-    public Presedens presedens() {
-        return Presedens.OVERSTYRENDE_ENKELTBREV;
-    }
 }
 

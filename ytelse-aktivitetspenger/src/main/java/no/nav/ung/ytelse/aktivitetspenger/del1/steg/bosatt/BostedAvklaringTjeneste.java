@@ -167,7 +167,8 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .map(BostedsGrunnlag::getForeslåtteAvklaringerForBehandlingen)
             .orElse(Collections.emptyList())
             .stream()
-            .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt))
+            .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt)
+                .thenComparing(avklaring -> avklaring.getPeriode().getFomDato()))
             .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode()));
     }
 }
