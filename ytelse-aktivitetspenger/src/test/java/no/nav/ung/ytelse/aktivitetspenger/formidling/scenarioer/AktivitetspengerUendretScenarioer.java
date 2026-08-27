@@ -4,8 +4,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -22,36 +20,24 @@ import java.util.Set;
 
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerBrevScenarioerUtils.*;
 
-public class AktivitetspengerOpphørScenarioer {
+/**
+ * Scenarioer der bostedsvilkåret er avklart av saksbehandler (varslet opphør/avslag), men vurderingen konkluderer
+ * med at vilkåret fortsatt er oppfylt. Gir grunnlag for et "uendret vedtak"-brev.
+ */
+public class AktivitetspengerUendretScenarioer {
 
-    public record OpphørScenario(
-        AktivitetspengerTestScenario opphørScenario,
+    public record UendretScenario(
+        AktivitetspengerTestScenario uendretScenario,
         VilkårType vilkårType,
-        Avslagsårsak avslagsårsak,
-        Periode opphørtVilkårPeriode,
+        Periode vurdertPeriode,
         BostedsAvklaringTestData bostedsAvklaring
     ) {}
 
-    public static OpphørScenario opphørPgaBosted(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null);
-    }
-
-    public static OpphørScenario opphørPgaBostedAnnet(LocalDate fom, String fritekstTilBrev) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.ANNET, fritekstTilBrev);
-    }
-
-    public static OpphørScenario opphørPgaBostedFolkeregistrert(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null);
-    }
-
-    public static OpphørScenario opphørPgaArbeidsstedStudiested(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null);
-    }
-
-    private static OpphørScenario opphørMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+    public static UendretScenario uendretScenario(LocalDate fom, BostedsAvklaringTestData bostedsAvklaring, String fritekstTilBrev) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
+        var vurdertPeriode = bostedsAvklaring.periode();
 
         var lavSats = lavSatsBuilder(fom).build();
         var satsperioder = new LocalDateTimeline<>(List.of(
@@ -66,27 +52,22 @@ public class AktivitetspengerOpphørScenarioer {
             new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
         ));
 
-        LocalDate opphørDato = fom.plusMonths(3);
-        var opphørtVilkårPeriode = new Periode(opphørDato, tom);
-
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
-            .medBostedsvilkårResultat(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
+            .medBostedsvilkårResultat(vurdertPeriode, true, null, fritekstTilBrev)
             .build();
 
-        var opphørScenario = AktivitetspengerTestScenario.builder()
+        var uendretScenario = AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
             .medSøknadsperioder(List.of(new Periode(fom, tom)))
             .medSatsperioder(satsperioder)
             .medBeregningsgrunnlag(beregningsgrunnlag)
-            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), new LocalDateInterval(fom, opphørDato.minusDays(1))))
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), p))
             .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
             .build();
 
-        return new OpphørScenario(opphørScenario, vilkårType, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, opphørtVilkårPeriode,
-            BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak));
+        return new UendretScenario(uendretScenario, VilkårType.BOSTEDSVILKÅR, vurdertPeriode, bostedsAvklaring);
     }
 }
-

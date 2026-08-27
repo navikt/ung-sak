@@ -76,7 +76,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void opphørBostedFritekst() {
         var fritekst = "Du har flyttet til et sted utenfor Trondheim og har derfor ikke lenger rett.";
-        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBosted(FOM);
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedAnnet(FOM, fritekst);
         var behandling = lagOpphørScenario(scenario, fritekst);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());

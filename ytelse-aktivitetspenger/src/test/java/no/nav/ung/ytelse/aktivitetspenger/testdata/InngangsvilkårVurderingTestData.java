@@ -1,7 +1,9 @@
 package no.nav.ung.ytelse.aktivitetspenger.testdata;
 
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -12,18 +14,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Testdatastruktur som samler vilkårsvurderinger (resultatperioder fra faktaavklaring) for de ulike
- * inngangsvilkårene i aktivitetspenger. Brukes av {@link AktivitetspengerTestScenarioBuilder} for å lagre
- * vurderingsresultatene ved bygging av behandlingen.
- * <p>
- * Bruk {@link Builder} for å legge til kun resultatperioder for de vilkårene som er relevante for testen,
- * uten å måtte ta stilling til de andre. Builderen setter selv rimelige testverdier (begrunnelse, vurdertAv,
- * vurdertTidspunkt, manuell vurdering) - kall-stedet trenger kun oppgi periode, om vilkåret er oppfylt,
- * ikke-oppfylt-årsak og evt. fritekst til brev.
+ * Testdatastruktur som samler vilkårsvurderinger for de ulike inngangsvilkårene i aktivitetspenger.
+ * Brukes av {@link AktivitetspengerTestScenarioBuilder} for å lagre vurderingsresultatene ved bygging av behandlingen.
  */
 public record InngangsvilkårVurderingTestData(
     List<BostedsvilkårResultatPeriode> bostedsvilkårResultater,
-    List<BistandsvilkårResultatPeriode> bistandsvilkårResultater) {
+    List<BistandsvilkårResultatPeriode> bistandsvilkårResultater,
+    List<AndreLivsoppholdsytelserResultatPeriode> andreYtelserResultater) {
 
     private static final String DEFAULT_BEGRUNNELSE = "Begrunnelse fra testscenario";
     private static final String DEFAULT_VURDERT_AV = "A111111";
@@ -31,6 +28,7 @@ public record InngangsvilkårVurderingTestData(
     public InngangsvilkårVurderingTestData {
         bostedsvilkårResultater = List.copyOf(bostedsvilkårResultater);
         bistandsvilkårResultater = List.copyOf(bistandsvilkårResultater);
+        andreYtelserResultater = List.copyOf(andreYtelserResultater);
     }
 
     public static InngangsvilkårVurderingTestData tom() {
@@ -41,26 +39,21 @@ public record InngangsvilkårVurderingTestData(
         return new Builder();
     }
 
-    /**
-     * Midlertidig internt holdeobjekt for en vurdering før perioden er endelig avklart.
-     * Perioden kan enten oppgis direkte på vurderingen, eller settes felles for alle vurderinger
-     * via {@link Builder#medPeriode(Periode)} - se {@link #resolverPeriode(Periode, Periode)}.
-     */
     private record BostedVurderingInput(Periode periode, boolean oppfylt, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
     }
 
     private record BistandVurderingInput(Periode periode, boolean oppfylt, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
     }
 
+    private record AndreYtelserVurderingInput(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+    }
+
     public static class Builder {
         private final List<BostedVurderingInput> bostedsvilkårInput = new ArrayList<>();
         private final List<BistandVurderingInput> bistandsvilkårInput = new ArrayList<>();
+        private final List<AndreYtelserVurderingInput> andreYtelserInput = new ArrayList<>();
         private Periode periode;
 
-        /**
-         * Setter en felles periode som brukes for alle vurderinger som ikke har fått oppgitt egen periode.
-         * Kan ikke kombineres med å oppgi periode direkte på en enkelt vurdering.
-         */
         public Builder medPeriode(Periode periode) {
             this.periode = periode;
             return this;
@@ -81,6 +74,15 @@ public record InngangsvilkårVurderingTestData(
 
         public Builder medBistandsvilkårResultat(Periode periode, boolean oppfylt, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
             bistandsvilkårInput.add(new BistandVurderingInput(periode, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev));
+            return this;
+        }
+
+        public Builder medAndreYtelser(boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+            return medAndreYtelser(null, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev);
+        }
+
+        public Builder medAndreYtelser(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+            andreYtelserInput.add(new AndreYtelserVurderingInput(periode, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev));
             return this;
         }
 
@@ -109,7 +111,19 @@ public record InngangsvilkårVurderingTestData(
                     LocalDateTime.now()))
                 .toList();
 
-            return new InngangsvilkårVurderingTestData(bostedsvilkårResultater, bistandsvilkårResultater);
+            List<AndreLivsoppholdsytelserResultatPeriode> andreYtelserResultater = andreYtelserInput.stream()
+                .map(input -> new AndreLivsoppholdsytelserResultatPeriode(
+                    tilDatoIntervall(resolverPeriode(input.periode(), periode)),
+                    input.oppfylt(),
+                    input.ikkeOppfyltÅrsak(),
+                    true,
+                    DEFAULT_BEGRUNNELSE,
+                    input.fritekstTilBrev(),
+                    DEFAULT_VURDERT_AV,
+                    LocalDateTime.now()))
+                .toList();
+
+            return new InngangsvilkårVurderingTestData(bostedsvilkårResultater, bistandsvilkårResultater, andreYtelserResultater);
         }
 
         private static Periode resolverPeriode(Periode periodePåVurdering, Periode fellesPeriode) {

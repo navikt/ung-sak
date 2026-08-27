@@ -7,7 +7,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements Kodeverdi {
+public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltÅrsak {
 
     HAR_ANNEN_LIVSOPPHOLDSYTELSE("HAR_ANNEN_LIVSOPPHOLDSYTELSE", "Søker har livsoppholdsytelse som ikke er forenelig med ytelsen."),
     AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge."),

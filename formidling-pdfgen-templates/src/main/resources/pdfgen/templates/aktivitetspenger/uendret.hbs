@@ -1,0 +1,19 @@
+{{#> felles/base}}
+
+    {{#> felles/seksjon/hoved }}
+        <h1>Nav har ikke endret aktivitetspengene dine</h1>
+
+        {{#if erVarsletSomOpphør}}
+            <p>Du vil fortsatt få aktivitetspenger fra {{periode.fom}}.</p>
+        {{else}}
+            <p>Du får likevel aktivitetspenger i perioden fra og med {{periode.fom}} til og med {{periode.tom}}.</p>
+        {{/if}}
+
+        <h2>Hvorfor får du aktivitetspenger?</h2>
+        <p>{{fritekstBrev}}</p>
+
+    {{/felles/seksjon/hoved}}
+
+    {{> aktivitetspenger/footer/footer-vedtak }}
+
+{{/felles/base}}

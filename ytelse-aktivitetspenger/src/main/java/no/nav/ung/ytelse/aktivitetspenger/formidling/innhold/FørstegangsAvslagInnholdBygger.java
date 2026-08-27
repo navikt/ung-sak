@@ -3,12 +3,14 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
@@ -19,6 +21,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslagInngangsvilkårDt
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -53,21 +56,35 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
             .map(DetaljertVilkårResultat::vilkårType)
             .collect(Collectors.toSet());
 
-        Vilkårene vilkårene = vilkårResultatRepository.hent(behandling.getId());
         var vurdertPeriode = avslagPeriode.mapValue(_ -> true);
 
-        var vilkårVurdering = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
-            .orElseThrow(() -> new IllegalStateException("Fant ingen eksisterende vilkårvurderinggrunnlag for behandlingId: " + behandling.getId()));
+        var vilkårVurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandling.getId());
 
         var avslåttBosted = avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR) ?
-            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vilkårene, vilkårVurdering, vurdertPeriode)
-            : null;
+            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(
+                hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, vurdertPeriode, VilkårType.BOSTEDSVILKÅR)
+            ) : null;
 
         var avslåttBistand = avslåtteVilkårTyper.contains(VilkårType.BISTANDSVILKÅR) ?
-            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vilkårene, vilkårVurdering, vurdertPeriode)
-            : null;
+            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(
+                hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, vurdertPeriode, VilkårType.BISTANDSVILKÅR)
+            ) : null;
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG,
             new AvslagInngangsvilkårDto(fom, avslåttBosted, avslåttBistand));
+    }
+
+    private static VilkårsvurderingResultatPeriode hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultatPeriode>> vilkårVurdering, LocalDateTimeline<Boolean> vurdertPeriode, VilkårType vilkårType) {
+        var vilkårResultatPeriode = vilkårVurdering.intersection(vurdertPeriode)
+            .mapValue(it -> it.get(vilkårType))
+            .segmenter().stream().map(LocalDateSegment::getValue)
+            .distinct()
+            .toList();
+
+        if (vilkårResultatPeriode.size() > 1) {
+            throw new IllegalStateException("Forventer kun en periode for vilkårstype " + vilkårType + ", men fant " + vilkårResultatPeriode.size());
+        }
+
+        return vilkårResultatPeriode.getFirst();
     }
 }

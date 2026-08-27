@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
@@ -31,6 +32,33 @@ public class InngangsvilkårVurderingRepository {
             AktivitetspengerInngangsvilkårResultatGrunnlag.class);
         query.setParameter("behandlingId", behandlingId);
         return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    /**
+     * Tidslinje over vurderte inngangsvilkår for behandlingen, koblet til {@link VilkårType}.
+     * Tom tidslinje dersom det ikke finnes grunnlag.
+     */
+    public LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultatPeriode>> hentVurderingTidslinje(Long behandlingId) {
+        return hentGrunnlag(behandlingId)
+            .map(grunnlag -> tilVilkårTidslinje(grunnlag.hentBistandTidslinje())
+                .crossJoin(tilVilkårTidslinje(grunnlag.hentLivsoppholdTidslinje()), InngangsvilkårVurderingRepository::slåSammen)
+                .crossJoin(tilVilkårTidslinje(grunnlag.hentBostedTidslinje()), InngangsvilkårVurderingRepository::slåSammen))
+            .orElseGet(LocalDateTimeline::empty);
+    }
+
+    private static <T extends VilkårsvurderingResultatPeriode> LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultatPeriode>> tilVilkårTidslinje(
+            LocalDateTimeline<T> tidslinje) {
+        return tidslinje.mapValue(v -> Map.of(v.getVilkårType(), v));
+    }
+
+    private static LocalDateSegment<Map<VilkårType, VilkårsvurderingResultatPeriode>> slåSammen(
+            LocalDateInterval interval,
+            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultatPeriode>> lhs,
+            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultatPeriode>> rhs) {
+        var kombinert = new LinkedHashMap<VilkårType, VilkårsvurderingResultatPeriode>();
+        if (lhs != null) { kombinert.putAll(lhs.getValue()); }
+        if (rhs != null) { kombinert.putAll(rhs.getValue()); }
+        return new LocalDateSegment<>(interval, Map.copyOf(kombinert));
     }
 
     public void lagreBistandsVurderinger(Long behandlingId, List<BistandsvilkårResultatPeriode> nyeVurderinger) {

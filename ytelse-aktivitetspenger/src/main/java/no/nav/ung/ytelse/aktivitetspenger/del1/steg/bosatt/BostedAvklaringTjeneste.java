@@ -22,7 +22,7 @@ import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
+import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,12 +162,12 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     @Override
-    public Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringForBehandling(long behandlingId) {
+    public Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(BostedsGrunnlag::getForeslåtteAvklaringerForBehandlingen)
             .orElse(Collections.emptyList())
             .stream()
             .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt))
-            .map(avklaring -> new VilkårsavklaringUnderArbeid(avklaring.getAvklaringtype(), avklaring.getPeriode()));
+            .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode()));
     }
 }

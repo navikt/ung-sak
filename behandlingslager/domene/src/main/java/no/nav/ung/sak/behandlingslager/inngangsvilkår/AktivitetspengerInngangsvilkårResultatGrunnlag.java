@@ -78,13 +78,24 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     }
 
     public LocalDateTimeline<BistandsvilkårResultatPeriode> hentBistandTidslinje() {
-        return new LocalDateTimeline<>(hentBistandsvilkårResultatPerioder().stream()
+        return new LocalDateTimeline<>(getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger).orElse(List.of()).stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }
 
     public Optional<AndreLivsoppholdsytelserResultatHolder> getAndreLivsoppholdsytelserResultatHolder() {
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
+    }
+
+    public List<AndreLivsoppholdsytelserResultatPeriode> hentAndreLivsoppholdsytelserResultatPerioder() {
+        return getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke AndreLivsoppholdsytelserResultatPerioder"));
+    }
+
+    public LocalDateTimeline<AndreLivsoppholdsytelserResultatPeriode> hentLivsoppholdTidslinje() {
+        return new LocalDateTimeline<>(getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger).orElse(List.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
     }
 
     Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
@@ -97,7 +108,7 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     }
 
     public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {
-        return new LocalDateTimeline<>(hentBostedsvilkårResultatPerioder().stream()
+        return new LocalDateTimeline<>(getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(List.of()).stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }

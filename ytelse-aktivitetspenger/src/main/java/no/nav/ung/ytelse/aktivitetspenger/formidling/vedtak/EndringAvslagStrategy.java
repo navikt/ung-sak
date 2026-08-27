@@ -21,7 +21,7 @@ import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevStrategyResul
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
+import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringAvslagInnholdBygger;
 
 import java.util.List;
@@ -49,7 +49,7 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        List<VilkårsavklaringUnderArbeid> vilkårsavklaringerForAvslåtteVilkår = vilkårOgBehandlingÅrsak.entrySet().stream()
+        List<Vilkårsavklaring> vilkårsavklaringerForAvslåtteVilkår = vilkårOgBehandlingÅrsak.entrySet().stream()
             .map(entry -> harVilkårsavklaringForAvslåttVilkår(behandling, resultatTidslinje.tilVurdering(), entry.getKey(), entry.getValue()))
             .filter(Optional::isPresent)
             .map(Optional::get)
@@ -79,10 +79,10 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
     /**
      * Avslåtte vilkårsperioder sjekkes mot vilkårsavklaringen for det samme vilkåret
      */
-    private Optional<VilkårsavklaringUnderArbeid> harVilkårsavklaringForAvslåttVilkår(Behandling behandling,
-                                                                                      LocalDateTimeline<DetaljertResultat> tilVurdering,
-                                                                                      VilkårType vilkårType,
-                                                                                      BehandlingÅrsakType behandlingÅrsakType) {
+    private Optional<Vilkårsavklaring> harVilkårsavklaringForAvslåttVilkår(Behandling behandling,
+                                                                           LocalDateTimeline<DetaljertResultat> tilVurdering,
+                                                                           VilkårType vilkårType,
+                                                                           BehandlingÅrsakType behandlingÅrsakType) {
         var vilkårsAvklaring = VilkårsavklaringTjeneste.finnForÅrsak(vilkårsavklaringTjenester, behandlingÅrsakType)
             .flatMap(it -> it.hentSenesteAvklaringForBehandling(behandling.getId()));
 

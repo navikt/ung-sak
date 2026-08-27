@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
@@ -16,7 +17,7 @@ import java.util.Objects;
 @Immutable
 @Entity(name = "BostedsvilkårResultatPeriode")
 @Table(name = "bosted_resultat_periode")
-public class BostedsvilkårResultatPeriode extends BaseEntitet {
+public class BostedsvilkårResultatPeriode extends BaseEntitet implements VilkårsvurderingResultatPeriode {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSTED_RESULTAT_PERIODE")
@@ -81,14 +82,22 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         return id;
     }
 
+    @Override
+    public VilkårType getVilkårType() {
+        return VilkårType.BOSTEDSVILKÅR;
+    }
+
+    @Override
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }
 
+    @Override
     public boolean isGodkjent() {
         return godkjent;
     }
 
+    @Override
     public BostedsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {
         return ikkeOppfyltÅrsak;
     }
@@ -97,10 +106,12 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         return erManuellVurdering;
     }
 
+    @Override
     public String getBegrunnelse() {
         return begrunnelse;
     }
 
+    @Override
     public String getFritekstVurderingBrev() {
         return fritekstVurderingBrev;
     }

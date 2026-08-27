@@ -20,7 +20,7 @@ public interface VilkårsavklaringTjeneste {
 
     void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId);
 
-    Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringForBehandling(long behandlingId);
+    Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId);
 
     static List<VilkårsavklaringTjeneste> sortert(Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
         return vilkårsavklaringTjenester.stream().sorted(Comparator.comparing(it -> it.getClass().getName())).toList();
