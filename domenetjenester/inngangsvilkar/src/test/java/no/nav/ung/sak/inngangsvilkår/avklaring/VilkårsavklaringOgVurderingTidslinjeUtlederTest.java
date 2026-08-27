@@ -5,7 +5,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
-import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
@@ -79,31 +78,6 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
     }
 
     private VilkårsvurderingResultat enkelVurdering(DatoIntervallEntitet periode) {
-        return new VilkårsvurderingResultat() {
-            @Override
-            public VilkårType getVilkårType() {
-                return VilkårType.BOSTEDSVILKÅR;
-            }
-
-            @Override
-            public boolean isGodkjent() {
-                return true;
-            }
-
-            @Override
-            public IkkeOppfyltDetaljertÅrsak getIkkeOppfyltÅrsak() {
-                return null;
-            }
-
-            @Override
-            public String getBegrunnelse() {
-                return null;
-            }
-
-            @Override
-            public String getFritekstVurderingBrev() {
-                return null;
-            }
-        };
+        return new VilkårsvurderingResultat(VilkårType.BOSTEDSVILKÅR, true, null, null, null);
     }
 }

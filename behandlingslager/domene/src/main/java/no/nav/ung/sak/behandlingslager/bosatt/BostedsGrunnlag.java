@@ -115,7 +115,7 @@ public class BostedsGrunnlag extends BaseEntitet {
 
     public List<BostedsPeriodeAvklaring> getForeslåtteAvklaringerForBehandlingen() {
         return getForeslåtteAvklaringerEllerTomListe().stream()
-            .filter(a -> a.getBehandlingId().equals(behandlingId))
+            .filter(a -> a.getOpprettetIBehandlingId().equals(behandlingId))
             .toList();
     }
 

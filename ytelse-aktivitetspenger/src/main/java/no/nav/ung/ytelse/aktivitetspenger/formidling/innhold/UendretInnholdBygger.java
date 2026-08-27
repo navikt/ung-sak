@@ -19,6 +19,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.UendretDto;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 @Dependent
 public class UendretInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -52,7 +53,8 @@ public class UendretInnholdBygger implements VedtaksbrevInnholdBygger {
 
         var fritekst = vilkårsavklaringOgVurdering.stream()
             .map(VilkårsavklaringMedVurdering::vilkårsvurdering)
-            .map(VilkårsvurderingResultat::getFritekstVurderingBrev)
+            .map(VilkårsvurderingResultat::fritekstVurderingBrev)
+            .filter(Objects::nonNull)
             .findFirst()
             .orElse(null);
 

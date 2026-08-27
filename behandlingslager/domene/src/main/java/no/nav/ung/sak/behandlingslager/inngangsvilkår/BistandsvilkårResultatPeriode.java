@@ -17,7 +17,7 @@ import java.util.Objects;
 @Immutable
 @Entity(name = "BistandsvilkårResultatPeriode")
 @Table(name = "bistand_resultat_periode")
-public class BistandsvilkårResultatPeriode extends BaseEntitet implements VilkårsvurderingResultat {
+public class BistandsvilkårResultatPeriode extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BISTAND_RESULTAT_PERIODE")
@@ -80,22 +80,18 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet implements Vilk�
         return id;
     }
 
-    @Override
     public VilkårType getVilkårType() {
         return VilkårType.BISTANDSVILKÅR;
     }
 
-    @Override
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }
 
-    @Override
     public boolean isGodkjent() {
         return godkjent;
     }
 
-    @Override
     public BistandsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {
         return ikkeOppfyltÅrsak;
     }
@@ -104,14 +100,16 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet implements Vilk�
         return manuellVurdering;
     }
 
-    @Override
     public String getBegrunnelse() {
         return begrunnelse;
     }
 
-    @Override
     public String getFritekstVurderingBrev() {
         return fritekstVurderingBrev;
+    }
+
+    public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
+        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, begrunnelse, fritekstVurderingBrev);
     }
 
     public String getVurdertAv() {

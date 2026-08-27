@@ -14,30 +14,30 @@ public class AvslåttVilkårBrevinnholdHjelper {
     }
 
     public static AvslåttBosted lagAvslåttBosted(VilkårsvurderingResultat vurdering) {
-        if (vurdering.getFritekstVurderingBrev() != null) {
+        if (vurdering.fritekstVurderingBrev() != null) {
             return AvslåttBosted.medKunFritekst(
-                vurdering.getFritekstVurderingBrev()
+                vurdering.fritekstVurderingBrev()
             );
         }
 
         return new AvslåttBosted(
-            vurdering.getIkkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
-            vurdering.getIkkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM,
-            vurdering.getIkkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
-            vurdering.getFritekstVurderingBrev());
+            vurdering.ikkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
+            vurdering.ikkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM,
+            vurdering.ikkeOppfyltÅrsak() == BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
+            vurdering.fritekstVurderingBrev());
     }
 
     public static AvslåttBistand lagAvslåttBistand(VilkårsvurderingResultat vurdering) {
-        if (vurdering.getFritekstVurderingBrev() != null) {
+        if (vurdering.fritekstVurderingBrev() != null) {
             return AvslåttBistand.medKunFritekst(
-                vurdering.getFritekstVurderingBrev()
+                vurdering.fritekstVurderingBrev()
             );
         }
 
-        var vilkårsvurderingBistand = vurdering.getIkkeOppfyltÅrsak();
+        var vilkårsvurderingBistand = vurdering.ikkeOppfyltÅrsak();
         return new AvslåttBistand(
             vilkårsvurderingBistand == BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK,
-            vurdering.getFritekstVurderingBrev()
+            vurdering.fritekstVurderingBrev()
         );
     }
 }

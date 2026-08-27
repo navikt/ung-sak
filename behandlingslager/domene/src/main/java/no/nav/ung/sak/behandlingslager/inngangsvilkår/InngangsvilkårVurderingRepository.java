@@ -42,13 +42,12 @@ public class InngangsvilkårVurderingRepository {
         return hentGrunnlag(behandlingId)
             .map(grunnlag -> tilVilkårTidslinje(grunnlag.hentBistandTidslinje())
                 .crossJoin(tilVilkårTidslinje(grunnlag.hentLivsoppholdTidslinje()), InngangsvilkårVurderingRepository::slåSammen)
-                .crossJoin(tilVilkårTidslinje(grunnlag.hentBostedTidslinje()), InngangsvilkårVurderingRepository::slåSammen))
+                .crossJoin(tilVilkårTidslinje(grunnlag.hentBostedTidslinje().mapValue(BostedsvilkårResultatPeriode::tilVilkårsvurderingResultat)), InngangsvilkårVurderingRepository::slåSammen))
             .orElseGet(LocalDateTimeline::empty);
     }
 
-    private static <T extends VilkårsvurderingResultat> LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> tilVilkårTidslinje(
-            LocalDateTimeline<T> tidslinje) {
-        return tidslinje.mapValue(v -> Map.of(v.getVilkårType(), v));
+    private static LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> tilVilkårTidslinje(LocalDateTimeline<VilkårsvurderingResultat> tidslinje) {
+        return tidslinje.mapValue(v -> Map.of(v.vilkårType(), v));
     }
 
     private static LocalDateSegment<Map<VilkårType, VilkårsvurderingResultat>> slåSammen(
