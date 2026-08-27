@@ -26,7 +26,7 @@ import java.util.Set;
  */
 public abstract class VilkårVurderingSteg implements BehandlingSteg {
 
-    private VilkårTjeneste vilkårTjeneste;
+    protected VilkårTjeneste vilkårTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     protected BehandlingRepository behandlingRepository;
     protected Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
