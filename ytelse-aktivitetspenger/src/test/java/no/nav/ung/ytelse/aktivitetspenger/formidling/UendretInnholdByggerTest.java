@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 
+import static no.nav.ung.ytelse.aktivitetspenger.formidling.BrevTestUtils.brevDatoString;
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,7 +44,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du vil fortsatt få aktivitetspenger fra " + scenario.vurdertPeriode().getFom()
+                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(scenario.vurdertPeriode().getFom())
             );
     }
 
@@ -63,7 +64,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du får likevel aktivitetspenger i perioden fra og med " + scenario.vurdertPeriode().getFom()
+                "Du får likevel aktivitetspenger i perioden fra og med " + brevDatoString(scenario.vurdertPeriode().getFom())
             );
     }
 
