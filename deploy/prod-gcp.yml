@@ -274,6 +274,8 @@ spec:
       value: "false"
     - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
       value: "false"
+    - name: AKTIVITETSVILKAAR_ENABLED
+      value: "false"
 
     # Konfigurasjoner
     - name: FLYWAY_REPAIR_ON_FAIL
