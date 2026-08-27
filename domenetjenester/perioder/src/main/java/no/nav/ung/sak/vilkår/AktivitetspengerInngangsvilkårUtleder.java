@@ -1,6 +1,7 @@
 package no.nav.ung.sak.vilkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -43,6 +44,7 @@ public class AktivitetspengerInngangsvilkårUtleder implements VilkårUtleder {
         //for CDI proxy
     }
 
+    @Inject
     public AktivitetspengerInngangsvilkårUtleder(@KonfigVerdi(value = "AKTIVITETSVILKAAR_ENABLED", required = false, defaultVerdi = "true") boolean aktivitetsvilkårEnabled) {
         this.aktivitetsvilkårEnabled = aktivitetsvilkårEnabled;
     }
