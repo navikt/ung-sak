@@ -59,7 +59,14 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
     }
 
-    public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public AktivitetsvilkårResultatPeriode(DatoIntervallEntitet periode,
+                                           boolean godkjent,
+                                           AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
+                                           boolean manuellVurdering,
+                                           String begrunnelse,
+                                           String fritekstVurderingBrev,
+                                           String vurdertAv,
+                                           LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
