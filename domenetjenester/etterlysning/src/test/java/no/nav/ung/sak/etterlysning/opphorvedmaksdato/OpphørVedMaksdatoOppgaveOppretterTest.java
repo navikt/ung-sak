@@ -1,5 +1,6 @@
 package no.nav.ung.sak.etterlysning.opphorvedmaksdato;
 
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -14,6 +15,7 @@ import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +58,9 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
 
         oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123"));
 
-        verify(oppgaveKlient).opprettOppgave(any());
+        var dto = capturerOppgave();
+        assertThat(dto.journalføring()).isNotNull();
+        assertThat(dto.journalføring().saksnummer().getVerdi()).isEqualTo("123");
     }
 
     @Test
@@ -67,7 +72,16 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
 
         oppretter.opprettOppgave(behandling, List.of(etterlysning1, etterlysning2), new AktørId("1234567890123"));
 
-        verify(oppgaveKlient, times(2)).opprettOppgave(any());
+        var captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
+        verify(oppgaveKlient, times(2)).opprettOppgave(captor.capture());
+        assertThat(captor.getAllValues())
+            .allSatisfy(dto -> assertThat(dto.journalføring().saksnummer().getVerdi()).isEqualTo("123"));
+    }
+
+    private OpprettOppgaveDto capturerOppgave() {
+        var captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
+        verify(oppgaveKlient).opprettOppgave(captor.capture());
+        return captor.getValue();
     }
 
     private void stubGrunnlag(Etterlysning etterlysning, LocalDate maksdato) {

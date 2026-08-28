@@ -290,7 +290,10 @@ class EndretPeriodeOppgaveOppretterTest {
     private OpprettOppgaveDto capturerOppgave() {
         var captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
         verify(oppgaveKlient).opprettOppgave(captor.capture());
-        return captor.getValue();
+        var dto = captor.getValue();
+        assertThat(dto.journalføring()).isNotNull();
+        assertThat(dto.journalføring().saksnummer().getVerdi()).isEqualTo("123");
+        return dto;
     }
 
     private static Object hentOppgaveData(OpprettOppgaveDto dto) {
