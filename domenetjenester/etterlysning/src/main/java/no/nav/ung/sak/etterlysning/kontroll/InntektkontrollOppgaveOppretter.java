@@ -6,6 +6,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.kontrollerregisterinntekt.KontrollerRegisterinntektOppgavetypeDataDto;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -45,11 +46,11 @@ public class InntektkontrollOppgaveOppretter {
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var relevantKontrolltidslinje = relevanteKontrollperioderUtleder.utledPerioderRelevantForKontrollAvInntekt(behandling.getId());
         etterlysninger.stream()
-            .map(mapTilDto(behandling.getId(), aktørId, relevantKontrolltidslinje, behandling.getFagsakYtelseType()))
+            .map(mapTilDto(behandling.getId(), aktørId, relevantKontrolltidslinje, behandling.getFagsakYtelseType(), behandling.getFagsak().getSaksnummer()))
             .forEach(oppgaveKlient::opprettOppgave);
     }
 
-    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<RelevanteKontrollperioderUtleder.InfoOmRådata> relevantKontrollTidslinje, FagsakYtelseType ytelsetype) {
+    private Function<Etterlysning, OpprettOppgaveDto> mapTilDto(long behandlingId, AktørId aktørId, LocalDateTimeline<RelevanteKontrollperioderUtleder.InfoOmRådata> relevantKontrollTidslinje, FagsakYtelseType ytelsetype, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         OppgaveYtelsetype oppgaveYtelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(ytelsetype);
         return etterlysning -> {
             var registerinntekter = rapportertInntektMapper.finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, etterlysning.getGrunnlagsreferanse(), etterlysning.getPeriode().toLocalDateInterval());
@@ -68,7 +69,8 @@ public class InntektkontrollOppgaveOppretter {
                     InntektKontrollOppgaveMapper.mapTilRegisterInntekter(registerinntekter, arbeidsgiverOpplysninger),
                     overlapperPeriodeDelvisMedProgramtidslinje(etterlysningPeriode, relevantKontrollTidslinje)
                 ),
-                etterlysning.getFrist()
+                etterlysning.getFrist(),
+                new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
             );
         };
     }

@@ -10,6 +10,7 @@ import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ class OpphørVedMaksdatoOppgaveOppretterTest {
         oppretter = new OpphørVedMaksdatoOppgaveOppretter(oppgaveKlient, ungdomsprogramPeriodeRepository);
         when(behandling.getFagsak()).thenReturn(fagsak);
         when(fagsak.getYtelseType()).thenReturn(FagsakYtelseType.UNGDOMSYTELSE);
+        when(fagsak.getSaksnummer()).thenReturn(new Saksnummer("123"));
     }
 
     @Test
