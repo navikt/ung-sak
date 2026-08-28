@@ -7,7 +7,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
@@ -60,13 +59,13 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     public List<BostedsPeriodeAvklaring> hentBostedPeriodeAvklaringUnderArbeid(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID))
+            .map(g -> List.copyOf(g.getForeslåtteAvklaringer()))
             .orElse(List.of());
     }
 
     public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
-            .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, behandlingId, vurdertAv, vurdertTidspunkt))
+            .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
             .collect(Collectors.toSet());
         return bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
     }
@@ -164,8 +163,8 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     @Override
     public Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(BostedsGrunnlag::getForeslåtteAvklaringerForBehandlingen)
-            .orElse(Collections.emptyList())
+            .map(BostedsGrunnlag::getForeslåtteAvklaringer)
+            .orElse(Set.of())
             .stream()
             .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt)
                 .thenComparing(avklaring -> avklaring.getPeriode().getFomDato()))

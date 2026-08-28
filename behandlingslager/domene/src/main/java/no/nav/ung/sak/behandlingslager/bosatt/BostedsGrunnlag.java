@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
 import java.time.LocalDate;
@@ -75,9 +74,9 @@ public class BostedsGrunnlag extends BaseEntitet {
      * Bygger ny holder fra avklaringene og setter foreslått — kun hvis innholdet faktisk er endret.
      * Beholder gammel holder-referanse ved ingen endring (tilsvarende {@link #leggTilInformasjonFraSøknad}).
      */
-    void setForeslåttAvklaring(Set<BostedsPeriodeAvklaring> avklaringer) {
+    void setForeslåttAvklaring(Set<BostedsPeriodeAvklaringForeslått> avklaringer) {
         var nyHolder = BostedsAvklaringHolder.lagSkrivbarKopi(this.foreslått);
-        nyHolder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(avklaringer);
+        nyHolder.leggTilEllerErstattForeslåttePeriodeAvklaringer(avklaringer);
 
         if (nyHolder.equals(this.foreslått)) {
             return;
@@ -103,30 +102,30 @@ public class BostedsGrunnlag extends BaseEntitet {
         return behandlingId;
     }
 
-    public BostedsAvklaringHolderSkrivebeskyttet getForeslått() {
+    BostedsAvklaringHolder getForeslått() {
         return foreslått;
     }
 
-    public Set<BostedsPeriodeAvklaring> getForeslåtteAvklaringerEllerTomListe() {
-        return Optional.ofNullable(getForeslått())
-            .map(BostedsAvklaringHolderSkrivebeskyttet::hentPeriodeAvklaringer)
+    /**
+     * Avklaringene som er foreslått og behandlet i denne behandlingen — uavhengig av om de er ferdigstilt.
+     */
+    public Set<BostedsPeriodeAvklaring> getForeslåtteAvklaringer() {
+        return Optional.ofNullable(foreslått)
+            .map(BostedsAvklaringHolder::hentForeslåtteAvklaringer)
             .orElse(Set.of());
     }
 
-    public List<BostedsPeriodeAvklaring> getForeslåtteAvklaringerForBehandlingen() {
-        return getForeslåtteAvklaringerEllerTomListe().stream()
-            .filter(a -> a.getOpprettetIBehandlingId().equals(behandlingId))
-            .toList();
+    /**
+     * Alle ferdigstilte avklaringer på saken, akkumulert på tvers av behandlinger.
+     */
+    public Set<BostedsPeriodeAvklaring> getFerdigstilteAvklaringer() {
+        return Optional.ofNullable(foreslått)
+            .map(BostedsAvklaringHolder::hentFerdigstilteAvklaringer)
+            .orElse(Set.of());
     }
 
-    public List<BostedsPeriodeAvklaring> getForeslåtteAvklaringerMedStatus(AvklaringStatus... status) {
-        return Optional.ofNullable(getForeslått())
-            .map(f -> f.hentPeriodeAvklaringerMedStatus(status))
-            .orElse(List.of());
-    }
-
-    public LocalDateTimeline<BostedsPeriodeAvklaring> getForeslåtteAvklaringerMedStatusSomTidslinje(AvklaringStatus... status) {
-        return BostedsAvklaringHolder.byggAvklaringTidslinje(getForeslåtteAvklaringerMedStatus(status));
+    public LocalDateTimeline<BostedsPeriodeAvklaring> getForeslåtteAvklaringerSomTidslinje() {
+        return BostedsAvklaringHolder.byggAvklaringTidslinje(getForeslåtteAvklaringer());
     }
 
     BostedsinformasjonFraSøknadHolder getOppgittFraSøknad() {
@@ -163,20 +162,36 @@ public class BostedsGrunnlag extends BaseEntitet {
     }
 
     /**
-     * Bygger en tidslinje for vurdert periode der oppgitt fakta fra søknad flettes sammen med eventuell foreslått
-     * avklaring fra saksbehandler. Foreslått avklaring er kilde til sannhet der de overlapper.
+     * Bygger en tidslinje for vurdert periode der oppgitt fakta fra søknad flettes sammen med avklaringene som er
+     * foreslått i denne behandlingen. Foreslått avklaring er kilde til sannhet der de overlapper.
      * Baserer seg på {@link #hentSøknadsfaktaSomTidslinje()} og mapper til {@link BostedsfaktaOgAvklaring}.
      */
-    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus... status) {
-        var søknadsTidslinje = hentSøknadsfaktaSomTidslinje();
-        var foreslåttTidslinje = getForeslåtteAvklaringerMedStatusSomTidslinje(status);
+    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaSomTidslinje() {
+        return flettMedSøknadsfakta(getForeslåtteAvklaringerSomTidslinje());
+    }
 
-        return søknadsTidslinje.combine(foreslåttTidslinje,
+    /**
+     * Som {@link #hentOppgittOgForeslåttFaktaSomTidslinje()}, men inkluderer også tidligere ferdigstilte avklaringer.
+     * Avklaringer foreslått i denne behandlingen overstyrer de ferdigstilte der de overlapper.
+     */
+    public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgAlleAvklaringerSomTidslinje() {
+        var alleAvklaringer = getForeslåtteAvklaringerSomTidslinje()
+            .crossJoin(BostedsAvklaringHolder.byggAvklaringTidslinje(getFerdigstilteAvklaringer()));
+        return flettMedSøknadsfakta(alleAvklaringer);
+    }
+
+    private LocalDateTimeline<BostedsfaktaOgAvklaring> flettMedSøknadsfakta(LocalDateTimeline<BostedsPeriodeAvklaring> avklaringTidslinje) {
+        return hentSøknadsfaktaSomTidslinje().combine(avklaringTidslinje,
             (di, søknad, avklaring) -> new LocalDateSegment<>(di, new BostedsfaktaOgAvklaring(
                 søknad == null ? null : søknad.getValue(),
-                avklaring == null ? null : avklaring.getValue()
+                avklaring == null ? null : avklaring.getValue(),
+                avklaring != null && kanRedigeres(avklaring.getValue())
             )),
             LocalDateTimeline.JoinStyle.CROSS_JOIN);
+    }
+
+    private boolean kanRedigeres(BostedsPeriodeAvklaring avklaring) {
+        return foreslått != null && foreslått.erForeslåttOgIkkeFerdigstilt(avklaring);
     }
 
     public UUID getGrunnlagsreferanse() {
@@ -214,15 +229,23 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             grunnlag.getBehandlingId(),
             grunnlag.getOppgittFraSøknad(),
-            (BostedsAvklaringHolder) grunnlag.getForeslått()
+            grunnlag.foreslått
         );
     }
 
+    /**
+     * Kopierer grunnlaget til en ny behandling. Avklaringer som ble foreslått i den forrige behandlingen gjelder ikke
+     * for den nye behandlingen, og kopieres derfor ikke med — kun de ferdigstilte avklaringene følger med videre.
+     */
     public static BostedsGrunnlag nyttGrunnlagForBehandlingMedReferanserFra(Long behandlingId, BostedsGrunnlag grunnlag) {
+        var forrigeHolder = grunnlag.foreslått;
+        var nyHolder = forrigeHolder != null && forrigeHolder.harForeslåtteAvklaringer()
+            ? BostedsAvklaringHolder.lagKopiUtenForeslåtte(forrigeHolder)
+            : forrigeHolder;
         return new BostedsGrunnlag(
             behandlingId,
             grunnlag.getOppgittFraSøknad(),
-            (BostedsAvklaringHolder) grunnlag.getForeslått()
+            nyHolder
         );
     }
 }

@@ -33,15 +33,15 @@ class BostedsGrunnlagTest {
 
         // Assert - ny holder er en annen instans enn den forrige, og den forrige er urørt
         assertThat(andreHolder).isNotSameAs(førsteHolder);
-        assertThat(førsteHolder.hentPeriodeAvklaringer()).hasSize(1);
-        assertThat(førsteHolder.hentPeriodeAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Første begrunnelse");
+        assertThat(førsteHolder.hentForeslåtteAvklaringer()).hasSize(1);
+        assertThat(førsteHolder.hentForeslåtteAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Første begrunnelse");
 
-        assertThat(andreHolder.hentPeriodeAvklaringer()).hasSize(1);
-        assertThat(andreHolder.hentPeriodeAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Andre begrunnelse");
+        assertThat(andreHolder.hentForeslåtteAvklaringer()).hasSize(1);
+        assertThat(andreHolder.hentForeslåtteAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Andre begrunnelse");
     }
 
-    private static BostedsPeriodeAvklaring lagBostedAvklaring(DatoIntervallEntitet periode, String begrunnelse) {
-        return new BostedsPeriodeAvklaring(
+    private static BostedsPeriodeAvklaringForeslått lagBostedAvklaring(DatoIntervallEntitet periode, String begrunnelse) {
+        return new BostedsPeriodeAvklaringForeslått(
             periode,
             BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
             begrunnelse,
@@ -50,8 +50,7 @@ class BostedsGrunnlagTest {
             null,
             "saksbehandler2",
             LocalDateTime.of(2024, 2, 1, 12, 0),
-            Avklaringtype.AVSLAG,
-            1L
+            Avklaringtype.AVSLAG
         );
     }
 

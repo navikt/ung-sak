@@ -1,7 +1,6 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
@@ -20,44 +19,47 @@ class BostedsAvklaringHolderTest {
     private static final LocalDateTime VURDERT_TIDSPUNKT = LocalDateTime.of(2026, 1, 15, 10, 0);
 
     @Test
-    void skal_erstatte_avklaring_under_arbeid_uten_a_splitte_den() {
+    void skal_erstatte_foreslatt_avklaring_uten_a_splitte_den() {
         var holder = new BostedsAvklaringHolder();
-        holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(lagAvklaring(FOM, TOM)));
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(lagAvklaring(FOM, TOM)));
 
         var ny = lagAvklaring(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20));
-        holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(ny));
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(ny));
 
-        assertThat(holder.hentPeriodeAvklaringer()).hasSize(1);
-        assertThat(holder.hentPeriodeAvklaringer().iterator().next().getReferanse()).isEqualTo(ny.getReferanse());
+        assertThat(holder.hentForeslåtteAvklaringer()).hasSize(1);
+        assertThat(holder.hentForeslåtteAvklaringer().iterator().next().getReferanse()).isEqualTo(ny.getReferanse());
     }
 
     @Test
-    void skal_beholde_ferdigstilte_avklaringer_nar_nye_avklaringer_under_arbeid_lagres() {
+    void skal_beholde_ferdigstilte_avklaringer_nar_nye_foreslatte_avklaringer_lagres() {
         var holder = new BostedsAvklaringHolder();
         var ferdigstilt = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
-        holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(ferdigstilt));
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(ferdigstilt));
         holder.settAlleAvklaringerTilFerdig();
 
-        holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(lagAvklaring(LocalDate.of(2026, 1, 16), TOM)));
+        var nyForeslått = lagAvklaring(LocalDate.of(2026, 1, 16), TOM);
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(nyForeslått));
 
-        assertThat(holder.hentPeriodeAvklaringerMedStatus(AvklaringStatus.FERDIG))
+        assertThat(holder.hentFerdigstilteAvklaringer())
             .extracting(BostedsPeriodeAvklaring::getReferanse)
             .containsExactly(ferdigstilt.getReferanse());
-        assertThat(holder.hentPeriodeAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID)).hasSize(1);
+        assertThat(holder.hentForeslåtteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getReferanse)
+            .containsExactly(nyForeslått.getReferanse());
     }
 
     @Test
     void skal_beholde_referansen_pa_begge_segmenter_nar_ferdigstilt_avklaring_splittes() {
         var holder = new BostedsAvklaringHolder();
         var opprinnelig = lagAvklaring(FOM, TOM);
-        holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(opprinnelig));
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(opprinnelig));
         holder.settAlleAvklaringerTilFerdig();
 
         var overlappende = lagAvklaring(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20));
-        holder.leggTilEllerErstattPeriodeAvklaringerUnderArbeid(List.of(overlappende));
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(overlappende));
         holder.settAlleAvklaringerTilFerdig();
 
-        var ferdigstilte = holder.hentPeriodeAvklaringerMedStatus(AvklaringStatus.FERDIG).stream()
+        var ferdigstilte = holder.hentFerdigstilteAvklaringer().stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
             .toList();
 
@@ -69,8 +71,39 @@ class BostedsAvklaringHolderTest {
         assertThat(ferdigstilte.get(2).getReferanse()).isEqualTo(opprinnelig.getReferanse());
     }
 
-    private static BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom) {
-        return new BostedsPeriodeAvklaring(
+    @Test
+    void avklaring_er_under_arbeid_frem_til_den_er_ferdigstilt() {
+        var holder = new BostedsAvklaringHolder();
+        var avklaring = lagAvklaring(FOM, TOM);
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(avklaring));
+
+        assertThat(holder.erForeslåttOgIkkeFerdigstilt(avklaring)).isTrue();
+
+        holder.settAlleAvklaringerTilFerdig();
+
+        assertThat(holder.erForeslåttOgIkkeFerdigstilt(avklaring)).isFalse();
+        // De foreslåtte beholdes etter ferdigstilling, slik at vi fortsatt vet hva som ble behandlet i behandlingen
+        assertThat(holder.harForeslåtteAvklaringer()).isTrue();
+    }
+
+    @Test
+    void kopi_uten_foreslatte_skal_kun_beholde_de_ferdigstilte() {
+        var holder = new BostedsAvklaringHolder();
+        var ferdigstilt = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(ferdigstilt));
+        holder.settAlleAvklaringerTilFerdig();
+        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(lagAvklaring(LocalDate.of(2026, 1, 16), TOM)));
+
+        var kopi = BostedsAvklaringHolder.lagKopiUtenForeslåtte(holder);
+
+        assertThat(kopi.hentForeslåtteAvklaringer()).isEmpty();
+        assertThat(kopi.hentFerdigstilteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getReferanse)
+            .containsExactly(ferdigstilt.getReferanse());
+    }
+
+    private static BostedsPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom) {
+        return new BostedsPeriodeAvklaringForeslått(
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
             "begrunnelse",
@@ -79,7 +112,6 @@ class BostedsAvklaringHolderTest {
             "begrunnelse for hvorfor det ikke varsles",
             "saksbehandler1",
             VURDERT_TIDSPUNKT,
-            Avklaringtype.AVSLAG,
-            1L);
+            Avklaringtype.AVSLAG);
     }
 }

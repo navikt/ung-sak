@@ -3,7 +3,6 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import jakarta.persistence.*;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.hibernate.annotations.BatchSize;
@@ -14,11 +13,21 @@ import java.util.stream.Collectors;
 /**
  * Aggregat/holder for bostedsavklaringer. Holderen kan deles i sin helhet mellom behandlinger ved revurdering uten endringer i grunnlaget.
  * Enhver endring fører til en ny instans av holderen med kopier. Dette er ivaretatt av setter på grunnlag!
- * Inneholder ett {@link BostedsPeriodeAvklaring} per vilkårsperiode.
+ * <p>
+ * Holderen har to samlinger:
+ * <ul>
+ *     <li>{@code periodeAvklaringerForeslått} — avklaringer som er foreslått og behandlet i gjeldende behandling.
+ *     Disse kopieres aldri videre til en ny behandling.</li>
+ *     <li>{@code periodeAvklaringer} — alle ferdigstilte (vedtatte) avklaringer. Disse akkumuleres og følger saken videre.</li>
+ * </ul>
+ * Hvilken samling en avklaring ligger i erstatter behovet for status og opprettende behandling på selve avklaringen.
+ * <p>
+ * Klassen er pakkeprivat med vilje: mutasjon skal kun skje gjennom setterne på {@link BostedsGrunnlag}, som sørger for
+ * at det lages en ny holder-instans ved endring slik at data fra tidligere behandlinger aldri muteres.
  */
 @Entity(name = "BostedsAvklaringHolder")
 @Table(name = "BOSATT_AVKLARING_HOLDER")
-class BostedsAvklaringHolder extends BaseEntitet implements BostedsAvklaringHolderSkrivebeskyttet {
+class BostedsAvklaringHolder extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BOSATT_AVKLARING_HOLDER")
@@ -27,84 +36,110 @@ class BostedsAvklaringHolder extends BaseEntitet implements BostedsAvklaringHold
     @BatchSize(size = 20)
     @JoinColumn(name = "bosatt_avklaring_holder_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BostedsPeriodeAvklaring> periodeAvklaringer = new LinkedHashSet<>();
+    private Set<BostedsPeriodeAvklaringFerdigstilt> periodeAvklaringer = new LinkedHashSet<>();
+
+    @BatchSize(size = 20)
+    @JoinColumn(name = "bosatt_avklaring_holder_id", nullable = false)
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<BostedsPeriodeAvklaringForeslått> periodeAvklaringerForeslått = new LinkedHashSet<>();
 
     public BostedsAvklaringHolder() {
     }
 
-    private BostedsAvklaringHolder(BostedsAvklaringHolder other) {
-        if (other != null && other.periodeAvklaringer != null) {
-            this.periodeAvklaringer = other.periodeAvklaringer.stream()
-                .map(BostedsPeriodeAvklaring::new)
+    private BostedsAvklaringHolder(BostedsAvklaringHolder other, boolean inkluderForeslåtte) {
+        if (other == null) {
+            return;
+        }
+        this.periodeAvklaringer = other.periodeAvklaringer.stream()
+            .map(BostedsPeriodeAvklaringFerdigstilt::new)
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (inkluderForeslåtte) {
+            this.periodeAvklaringerForeslått = other.periodeAvklaringerForeslått.stream()
+                .map(BostedsPeriodeAvklaringForeslått::new)
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         }
     }
 
     static BostedsAvklaringHolder lagSkrivbarKopi(BostedsAvklaringHolder other) {
-        return new BostedsAvklaringHolder(other);
+        return new BostedsAvklaringHolder(other, true);
     }
 
     /**
-     * Erstatter avklaringer under arbeid istedenfor å legge til eller splitte eksisterende — slik at referansen til én periodeavklaring under arbeid alltid dekker
-     * ett segment og kan varsles entydig. Avklaringer som allerede er ferdigstilte beholdes urørt.
+     * Lager en kopi uten de foreslåtte avklaringene. Brukes når grunnlaget kopieres til en ny behandling —
+     * forslag som ble gjort i en tidligere behandling skal ikke gjelde for den nye behandlingen.
+     */
+    static BostedsAvklaringHolder lagKopiUtenForeslåtte(BostedsAvklaringHolder other) {
+        return new BostedsAvklaringHolder(other, false);
+    }
+
+    /**
+     * Erstatter de foreslåtte avklaringene istedenfor å legge til eller splitte eksisterende — slik at referansen til én
+     * foreslått periodeavklaring alltid dekker ett segment og kan varsles entydig. Ferdigstilte avklaringer beholdes urørt.
      * Obs: Denne muterer og må kun kalles gjennom setter på grunnlag, slik at deduplisering gjøres korrekt.
      */
-    void leggTilEllerErstattPeriodeAvklaringerUnderArbeid(Collection<BostedsPeriodeAvklaring> nyePeriodeAvklaring) {
-        var beholdte = periodeAvklaringer.stream()
-            .filter(eksisterende -> eksisterende.getStatus() == AvklaringStatus.FERDIG)
+    void leggTilEllerErstattForeslåttePeriodeAvklaringer(Collection<BostedsPeriodeAvklaringForeslått> nyePeriodeAvklaringer) {
+        periodeAvklaringerForeslått = nyePeriodeAvklaringer.stream()
+            .map(BostedsPeriodeAvklaringForeslått::new)
             .collect(Collectors.toCollection(LinkedHashSet::new));
-
-        beholdte.addAll(nyePeriodeAvklaring);
-        periodeAvklaringer = beholdte;
     }
 
     /**
-     * Ferdigstiller alle avklaringer under arbeid. Ferdigstilte avklaringer kan splittes av senere
-     * ferdigstillinger og kan derfor dele referanse på tvers av segmenter — det etterlyses aldri
-     * uttalelse på en ferdigstilt avklaring.
+     * Ferdigstiller de foreslåtte avklaringene ved å kopiere dem over blant de ferdigstilte, der de overstyrer
+     * tidligere ferdigstilte avklaringer i overlappende perioder. Tidligere ferdigstilte avklaringer kan dermed
+     * splittes og dele referanse på tvers av segmenter — det etterlyses aldri uttalelse på en ferdigstilt avklaring.
+     * <p>
+     * De foreslåtte avklaringene beholdes, siden de forteller hva som ble foreslått og behandlet i denne behandlingen.
+     * Operasjonen er derfor idempotent.
      * Obs: Denne muterer og må kun kalles gjennom setter på grunnlag, slik at deduplisering gjøres korrekt.
      */
     void settAlleAvklaringerTilFerdig() {
-        var avklaringerEndretTilFerdig = hentPeriodeAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID).stream()
-            .map(BostedsPeriodeAvklaring::medStatusFerdig)
-            .toList();
-
-        var alleFerdige = byggAvklaringTidslinje(avklaringerEndretTilFerdig)
-            .crossJoin(hentAvklaringMedStatusSomTidslinje(AvklaringStatus.FERDIG))
+        var alleFerdige = byggAvklaringTidslinje(periodeAvklaringerForeslått)
+            .crossJoin(byggAvklaringTidslinje(periodeAvklaringer))
             .segmenter().stream()
-            .map(s -> s.getValue().medNyPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
+            .map(s -> new BostedsPeriodeAvklaringFerdigstilt(s.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom())))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         periodeAvklaringer.clear();
         periodeAvklaringer.addAll(alleFerdige);
     }
 
-    private LocalDateTimeline<BostedsPeriodeAvklaring> hentAvklaringMedStatusSomTidslinje(AvklaringStatus... status) {
-        return byggAvklaringTidslinje(
-            hentPeriodeAvklaringerMedStatus(status)
-        );
-    }
-
-    @Override
-    public List<BostedsPeriodeAvklaring> hentPeriodeAvklaringerMedStatus(AvklaringStatus... status) {
-        var statusSet = Set.of(status);
-        return hentPeriodeAvklaringer().stream().filter(it -> statusSet.contains(it.getStatus())).toList();
-    }
-
-    @Override
-    public Long getId() {
+    Long getId() {
         return id;
     }
 
-    @Override
-    public Set<BostedsPeriodeAvklaring> hentPeriodeAvklaringer() {
-        return Collections.unmodifiableSet(periodeAvklaringer);
+    /**
+     * Alle ferdigstilte (vedtatte) avklaringer, akkumulert på tvers av behandlinger.
+     */
+    Set<BostedsPeriodeAvklaring> hentFerdigstilteAvklaringer() {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(periodeAvklaringer));
     }
 
-    static LocalDateTimeline<BostedsPeriodeAvklaring> byggAvklaringTidslinje(Collection<BostedsPeriodeAvklaring> avklaringer) {
+    /**
+     * Avklaringer som er foreslått og behandlet i den behandlingen grunnlaget tilhører.
+     */
+    Set<BostedsPeriodeAvklaring> hentForeslåtteAvklaringer() {
+        return Collections.unmodifiableSet(new LinkedHashSet<>(periodeAvklaringerForeslått));
+    }
+
+    /**
+     * Om avklaringen fortsatt er under arbeid, dvs. foreslått i gjeldende behandling og ennå ikke ferdigstilt.
+     */
+    boolean erForeslåttOgIkkeFerdigstilt(BostedsPeriodeAvklaring avklaring) {
+        return harReferanse(periodeAvklaringerForeslått, avklaring) && !harReferanse(periodeAvklaringer, avklaring);
+    }
+
+    boolean harForeslåtteAvklaringer() {
+        return !periodeAvklaringerForeslått.isEmpty();
+    }
+
+    private static boolean harReferanse(Collection<? extends BostedsPeriodeAvklaring> avklaringer, BostedsPeriodeAvklaring avklaring) {
+        return avklaringer.stream().anyMatch(it -> it.getReferanse().equals(avklaring.getReferanse()));
+    }
+
+    static LocalDateTimeline<BostedsPeriodeAvklaring> byggAvklaringTidslinje(Collection<? extends BostedsPeriodeAvklaring> avklaringer) {
         return new LocalDateTimeline<>(
             avklaringer.stream().map(avklaring ->
-                new LocalDateSegment<>(
+                new LocalDateSegment<BostedsPeriodeAvklaring>(
                     avklaring.getPeriode().getFomDato(),
                     avklaring.getPeriode().getTomDato(),
                     avklaring)
@@ -115,11 +150,12 @@ class BostedsAvklaringHolder extends BaseEntitet implements BostedsAvklaringHold
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof BostedsAvklaringHolder that)) return false;
-        return Objects.equals(periodeAvklaringer, that.periodeAvklaringer);
+        return Objects.equals(periodeAvklaringer, that.periodeAvklaringer)
+            && Objects.equals(periodeAvklaringerForeslått, that.periodeAvklaringerForeslått);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(periodeAvklaringer);
+        return Objects.hash(periodeAvklaringer, periodeAvklaringerForeslått);
     }
 }

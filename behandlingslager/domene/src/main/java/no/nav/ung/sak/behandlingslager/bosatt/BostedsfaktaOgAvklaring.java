@@ -15,10 +15,12 @@ public class BostedsfaktaOgAvklaring {
 
     private final BostedsinformasjonFraSøknad søknadsinformasjon;
     private final BostedsPeriodeAvklaring foreslåttAvslagsavklaring;
+    private final boolean kanRedigeres;
 
-    public BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, BostedsPeriodeAvklaring foreslåttAvslagsavklaring) {
+    public BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, BostedsPeriodeAvklaring foreslåttAvslagsavklaring, boolean kanRedigeres) {
         this.søknadsinformasjon = søknadsinformasjon;
         this.foreslåttAvslagsavklaring = foreslåttAvslagsavklaring;
+        this.kanRedigeres = kanRedigeres;
     }
 
     public BostedsinformasjonFraSøknad getSøknadsinformasjon() {
@@ -31,6 +33,13 @@ public class BostedsfaktaOgAvklaring {
 
     public boolean harForeslåttAvslagsavklaring() {
         return foreslåttAvslagsavklaring != null;
+    }
+
+    /**
+     * Om avklaringen fortsatt er under arbeid i gjeldende behandling og dermed kan endres av saksbehandler.
+     */
+    public boolean kanRedigeres() {
+        return kanRedigeres;
     }
 
     public Kilde getKilde() {
@@ -52,4 +61,3 @@ public class BostedsfaktaOgAvklaring {
             + ", erBosattITrondheim=" + isErBosattITrondheim() + '}';
     }
 }
-
