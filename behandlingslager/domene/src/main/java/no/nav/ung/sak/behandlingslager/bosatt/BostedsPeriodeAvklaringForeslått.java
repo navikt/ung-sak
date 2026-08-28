@@ -93,7 +93,7 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
         this.avklaringtype = avklaringtype;
     }
 
-    public BostedsPeriodeAvklaringForeslått(BostedsPeriodeAvklaring annenAvklaring) {
+    public BostedsPeriodeAvklaringForeslått(BostedsPeriodeAvklaringForeslått annenAvklaring) {
         this.periode = annenAvklaring.getPeriode().toRange();
         this.referanse = annenAvklaring.getReferanse();
         this.ikkeOppfyltÅrsak = annenAvklaring.getIkkeOppfyltÅrsak();
