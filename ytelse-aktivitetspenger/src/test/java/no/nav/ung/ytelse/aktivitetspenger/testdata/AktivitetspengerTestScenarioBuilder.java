@@ -522,21 +522,19 @@ public class AktivitetspengerTestScenarioBuilder {
         if (aktivitetspengerTestscenario.kontrollerInntektPerioder() != null) {
             repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), aktivitetspengerTestscenario.kontrollerInntektPerioder().stream().map(LocalDateSegment::getValue).toList());
         }
-        if (aktivitetspengerTestscenario.behandlingTriggere() != null && repositories.prosessTriggereRepository() != null) {
+        if (aktivitetspengerTestscenario.behandlingTriggere() != null) {
             repositories.prosessTriggereRepository().leggTil(behandling1.getId(), aktivitetspengerTestscenario.behandlingTriggere());
         }
 
-        if (!aktivitetspengerTestscenario.bostedsAvklaringer().isEmpty() && repositories.bostedsGrunnlagRepository() != null) {
+        if (!aktivitetspengerTestscenario.bostedsAvklaringer().isEmpty()) {
             lagreBostedsAvklaringer(repositories.bostedsGrunnlagRepository(), behandling1);
         }
 
-        if (repositories.inngangsvilkårVurderingRepository() != null) {
-            var inngangsvilkårVurderinger = aktivitetspengerTestscenario.inngangsvilkårVurderinger();
-            repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bostedsvilkårResultater());
-            repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bistandsvilkårResultater());
-            repositories.inngangsvilkårVurderingRepository().lagreYtelseVurderinger(behandling1.getId(), inngangsvilkårVurderinger.andreYtelserResultater());
-            repositories.inngangsvilkårVurderingRepository().lagreAktivitetVurderinger(behandling1.getId(), inngangsvilkårVurderinger.aktivitetsvilkårResultater());
-        }
+        var inngangsvilkårVurderinger = aktivitetspengerTestscenario.inngangsvilkårVurderinger();
+        repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bostedsvilkårResultater());
+        repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bistandsvilkårResultater());
+        repositories.inngangsvilkårVurderingRepository().lagreYtelseVurderinger(behandling1.getId(), inngangsvilkårVurderinger.andreYtelserResultater());
+        repositories.inngangsvilkårVurderingRepository().lagreAktivitetVurderinger(behandling1.getId(), inngangsvilkårVurderinger.aktivitetsvilkårResultater());
     }
 
     private void lagreBostedsAvklaringer(BostedsGrunnlagRepository bostedsGrunnlagRepository, Behandling behandling1) {
