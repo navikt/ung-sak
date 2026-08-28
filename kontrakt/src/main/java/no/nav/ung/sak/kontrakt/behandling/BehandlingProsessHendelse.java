@@ -132,6 +132,23 @@ public class BehandlingProsessHendelse {
     private String ansvarligSaksbehandlerForTotrinn;
 
     /**
+     * Ident for ansvarlig saksbehandler ved nav-kontor (brukes for aktivitetspenger)
+     */
+    @Valid
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String navKontorAnsvarligSaksbehandler;
+
+    /**
+     * Ident for beslutter ved nav-kontor (brukes for aktivitetspenger)
+     */
+    @Valid
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String navKontorBeslutter;
+
+
+    /**
      * @see BehandlingResultatType
      */
     @Valid
@@ -174,14 +191,6 @@ public class BehandlingProsessHendelse {
     private LocalDateTime opprettetBehandling;
 
     /**
-     * Map av aksjonspunktkode og statuskode.
-     */
-    @JsonInclude(value = Include.ALWAYS)
-    @Valid
-    @JsonProperty(value = "aksjonspunktKoderMedStatusListe", required = true)
-    private Map<String, String> aksjonspunktKoderMedStatusListe;
-
-    /**
      * @NotNull produseres alltid, men er nullable for kompatiblitet med eldre versjoner
      */
     @Valid
@@ -200,20 +209,12 @@ public class BehandlingProsessHendelse {
     private Boolean nyeKrav;
 
     @Valid
-    @JsonProperty(value = "fraEndringsdialog", required = false)
-    private Boolean fraEndringsdialog;
-
-    @Valid
     @JsonProperty(value = "vedtaksdato", required = false)
     private LocalDate vedtaksdato;
 
     @Valid
     @JsonProperty(value = "behandlingsårsaker")
     private List<String> behandlingsårsaker;
-
-    @Valid
-    @JsonProperty(value = "søknadsårsaker")
-    private List<String> søknadsårsaker;
 
     public BehandlingProsessHendelse() {
     }
@@ -234,16 +235,15 @@ public class BehandlingProsessHendelse {
         this.behandlingTypeKode = kopierFra.behandlingTypeKode;
         this.opprettetBehandling = kopierFra.opprettetBehandling;
         this.eldsteDatoMedEndringFraSøker = kopierFra.eldsteDatoMedEndringFraSøker;
-        this.aksjonspunktKoderMedStatusListe = kopierFra.aksjonspunktKoderMedStatusListe;
-        this.ansvarligSaksbehandlerForTotrinn = kopierFra.ansvarligSaksbehandlerForTotrinn;
         this.fagsakPeriode = kopierFra.fagsakPeriode;
+        this.ansvarligSaksbehandlerForTotrinn = kopierFra.ansvarligSaksbehandlerForTotrinn;
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
+        this.navKontorAnsvarligSaksbehandler = kopierFra.navKontorAnsvarligSaksbehandler;
+        this.navKontorBeslutter = kopierFra.navKontorBeslutter;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
         this.nyeKrav = kopierFra.nyeKrav;
         this.vedtaksdato = kopierFra.vedtaksdato;
-        this.fraEndringsdialog = kopierFra.fraEndringsdialog;
         this.behandlingsårsaker = kopierFra.behandlingsårsaker;
-        this.søknadsårsaker = kopierFra.søknadsårsaker;
     }
 
     public static Builder builder() {
@@ -298,16 +298,20 @@ public class BehandlingProsessHendelse {
         return opprettetBehandling;
     }
 
-    public Map<String, String> getAksjonspunktKoderMedStatusListe() {
-        return aksjonspunktKoderMedStatusListe;
-    }
-
     public String getAnsvarligBeslutterForTotrinn() {
         return ansvarligBeslutterForTotrinn;
     }
 
     public String getAnsvarligSaksbehandlerForTotrinn() {
         return ansvarligSaksbehandlerForTotrinn;
+    }
+
+    public String getNavKontorAnsvarligSaksbehandler() {
+        return navKontorAnsvarligSaksbehandler;
+    }
+
+    public String getNavKontorBeslutter() {
+        return navKontorBeslutter;
     }
 
     public LocalDate getBehandlingstidFrist() {
@@ -326,16 +330,8 @@ public class BehandlingProsessHendelse {
         return nyeKrav != null && nyeKrav;
     }
 
-    public boolean isFraEndringsdialog() {
-        return fraEndringsdialog != null && fraEndringsdialog;
-    }
-
     public List<String> getBehandlingsårsaker() {
         return behandlingsårsaker;
-    }
-
-    public List<String> getSøknadsårsaker() {
-        return søknadsårsaker;
     }
 
     public LocalDate getVedtaksdato() {
@@ -403,6 +399,16 @@ public class BehandlingProsessHendelse {
             return this;
         }
 
+        public Builder medNavKontorAnsvarligSaksbehandler(String navKontorAnsvarligSaksbehandler){
+            kladd.navKontorAnsvarligSaksbehandler= navKontorAnsvarligSaksbehandler;
+            return this;
+        }
+
+        public Builder medNavKontorBeslutter(String navKontorBeslutter){
+            kladd.navKontorBeslutter= navKontorBeslutter;
+            return this;
+        }
+
         public Builder medYtelseTypeKode(String ytelseTypeKode) {
             kladd.ytelseTypeKode = ytelseTypeKode;
             return this;
@@ -426,11 +432,6 @@ public class BehandlingProsessHendelse {
         public Builder medBehandlingResultat(BehandlingResultatType resultatType) {
             Objects.requireNonNull(resultatType);
             kladd.resultatType = Objects.requireNonNull(resultatType).getKode();
-            return this;
-        }
-
-        public Builder medAksjonspunktKoderMedStatusListe(Map<String, String> aksjonspunktKoderMedStatusListe) {
-            kladd.aksjonspunktKoderMedStatusListe = aksjonspunktKoderMedStatusListe;
             return this;
         }
 
@@ -459,17 +460,8 @@ public class BehandlingProsessHendelse {
             return this;
         }
 
-        public Builder medFraEndringsdialog(Boolean fraEndringsdialog) {
-            kladd.fraEndringsdialog = fraEndringsdialog;
-            return this;
-        }
-
         public Builder medBehandlingsårsaker(List<String> behandlingsårsaker) {
             kladd.behandlingsårsaker = behandlingsårsaker;
-            return this;
-        }
-        public Builder medSøknadårsaker(List<String> søknadsårsaker) {
-            kladd.søknadsårsaker = søknadsårsaker;
             return this;
         }
 
