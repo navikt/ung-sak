@@ -236,19 +236,21 @@ public class BostedsGrunnlag extends BaseEntitet {
         );
     }
 
-    /**
-     * Kopierer grunnlaget til en ny behandling. Avklaringer som ble foreslått i den forrige behandlingen gjelder ikke
-     * for den nye behandlingen, og kopieres derfor ikke med — kun de ferdigstilte avklaringene følger med videre.
-     */
     public static BostedsGrunnlag nyttGrunnlagForBehandlingMedReferanserFra(Long behandlingId, BostedsGrunnlag grunnlag) {
-        var forrigeHolder = grunnlag.avklaringer;
-        var nyHolder = forrigeHolder != null && forrigeHolder.harForeslåtteAvklaringer()
-            ? BostedsAvklaringHolder.lagKopiUtenForeslåtte(forrigeHolder)
-            : forrigeHolder;
         return new BostedsGrunnlag(
             behandlingId,
             grunnlag.getOppgittFraSøknad(),
-            nyHolder
+            utenForeslåtteAvklaringer(grunnlag.avklaringer)
         );
+    }
+
+    // Beholder holderen hvis det ikke var foreslåtte avklaringer på den forrige behandlingen
+    private static BostedsAvklaringHolder utenForeslåtteAvklaringer(BostedsAvklaringHolder forrigeHolder) {
+        var nyHolder = BostedsAvklaringHolder.lagKopiUtenForeslåtte(forrigeHolder);
+
+        if (nyHolder.equals(forrigeHolder)) {
+            return forrigeHolder;
+        }
+        return nyHolder;
     }
 }
