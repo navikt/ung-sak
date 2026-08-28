@@ -55,7 +55,7 @@ class BostedAvklaringOgUttalelseOgResultat {
     }
 
     BostedsPeriodeAvklaring getForeslåttAvklaring() {
-        return faktaOgAvklaring.harForeslåttAvslagsavklaring() ? faktaOgAvklaring.getForeslåttAvslagsavklaring() : null;
+        return faktaOgAvklaring.getForeslåttAvklaring();
     }
 
     EtterlysningData getEtterlysning() {
@@ -67,7 +67,8 @@ class BostedAvklaringOgUttalelseOgResultat {
     }
 
     private boolean erValgtÅIkkeVarsleNårIkkeOppfylt() {
-        return faktaOgAvklaring.harForeslåttAvslagsavklaring() && !faktaOgAvklaring.getForeslåttAvslagsavklaring().skalSendeVarsel();
+        var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvklaring();
+        return foreslåttAvklaring != null && !foreslåttAvklaring.skalSendeVarsel();
     }
 
     private boolean erÅrsakAnnet() {

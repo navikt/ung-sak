@@ -7,8 +7,6 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
-
 import java.time.LocalDate;
 import java.util.*;
 import java.util.function.Consumer;
@@ -62,31 +60,31 @@ public class BostedsGrunnlagRepository {
      * Lagrer saksbehandlers bostedsavklaringer for en behandling.
      * Beholder referanser til {@code oppgittFraSøknad} og {@code resultat} på grunnlaget.
      *
-     * @return Map fra periodestart til periodeAvklaring.referanse
+     * @return avklaringene som nå er foreslått på behandlingen
      */
-    public Set<BostedsPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, Set<BostedsPeriodeAvklaring> nyeAvklaringer) {
+    public Set<BostedsPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, Set<BostedsPeriodeAvklaringForeslått> nyeAvklaringer) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer at grunnlag allerede eksisterer ved lagring av avklaring"));
 
         var nyttGrunnlag = BostedsGrunnlag.nyttGrunnlagMedReferanserFra(eksisterendeGrunnlag);
-        nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
+        nyttGrunnlag.setForeslåtteAvklaringer(nyeAvklaringer);
 
         if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
             LOG.info("lagreForeslåtteAvklaringer ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
-            return new HashSet<>(eksisterendeGrunnlag.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
+            return new HashSet<>(eksisterendeGrunnlag.getForeslåtteAvklaringer());
         }
         deaktiverEksisterende(eksisterendeGrunnlag);
 
         entityManager.persist(nyttGrunnlag);
         entityManager.flush();
 
-        return new HashSet<>(nyttGrunnlag.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID));
+        return new HashSet<>(nyttGrunnlag.getForeslåtteAvklaringer());
     }
 
-    public void settAlleAvklaringerFerdig(long behandlingId) {
-        var bleEndret = lagre(behandlingId, BostedsGrunnlag::settAlleAvklaringerTilFerdig);
+    public void ferdigstillForeslåtteAvklaringer(long behandlingId) {
+        var bleEndret = lagre(behandlingId, BostedsGrunnlag::ferdigstillForeslåtteAvklaringer);
         if (!bleEndret) {
-            LOG.info("settAlleAvklaringerFerdig ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
+            LOG.info("ferdigstillForeslåtteAvklaringer ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
         }
     }
 
@@ -111,7 +109,8 @@ public class BostedsGrunnlagRepository {
 
     /**
      * Kopierer grunnlag fra en eksisterende behandling til en ny behandling.
-     * Holder refereres — ingen kopiering av data.
+     * Holder refereres — ingen kopiering av data, med mindre den forrige behandlingen har foreslåtte avklaringer
+     * som ikke skal gjelde for den nye behandlingen.
      */
     public void kopierGrunnlagFraEksisterendeBehandling(Long gammelBehandlingId, Long nyBehandlingId) {
         hentGrunnlagHvisEksisterer(gammelBehandlingId).ifPresent(eksisterende -> {

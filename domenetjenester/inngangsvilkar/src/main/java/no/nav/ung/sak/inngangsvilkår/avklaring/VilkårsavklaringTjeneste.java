@@ -16,9 +16,12 @@ import java.util.Optional;
  */
 public interface VilkårsavklaringTjeneste {
 
-    void settAlleAvklaringerTilFerdig(long behandlingId);
+    /**
+     * Ferdigstiller vilkårsavklaringene som er foreslått i behandlingen. Kalles ved iverksettelse av vedtaket.
+     */
+    void ferdigstillForeslåtteAvklaringer(long behandlingId);
 
-    void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId);
+    void settVilkårsperioderTilIkkeVurdertForForeslåtteAvklaringer(long behandlingId);
 
     // Henter seneste vilkårsavklaring for behandling. Hvis det er flere vilkårsavklaringer lagret samtidig velges den med senest fom.
     Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId);

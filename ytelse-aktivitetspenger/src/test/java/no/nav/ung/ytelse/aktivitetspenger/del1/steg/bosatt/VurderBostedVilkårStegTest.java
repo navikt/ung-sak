@@ -25,6 +25,7 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporin
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -325,13 +326,13 @@ class VurderBostedVilkårStegTest {
         return steg.utførSteg(kontekst);
     }
 
-    private BostedsPeriodeAvklaring lagBostedsPeriodeAvklaring(
+    private BostedsPeriodeAvklaringForeslått lagBostedsPeriodeAvklaring(
             long behandlingId,
             LocalDate fom, LocalDate tom,
             BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
             boolean skalSendeVarsel) {
 
-        return new BostedsPeriodeAvklaring(
+        return new BostedsPeriodeAvklaringForeslått(
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
                 ikkeOppfyltÅrsak,
                 "Begrunnelse for relevante fakta lagt til grunn i avklaring",
@@ -340,8 +341,7 @@ class VurderBostedVilkårStegTest {
                 skalSendeVarsel ? null : "Fritekst for ikke varsling",
                 "A12345",
                 LocalDateTime.now(),
-                Avklaringtype.AVSLAG,
-                behandlingId
+                Avklaringtype.AVSLAG
         );
     }
 }

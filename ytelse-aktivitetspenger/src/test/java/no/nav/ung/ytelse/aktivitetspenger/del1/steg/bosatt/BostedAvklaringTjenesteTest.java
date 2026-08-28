@@ -12,6 +12,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -72,7 +73,7 @@ class BostedAvklaringTjenesteTest {
     }
 
     private BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom, BostedsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse, boolean skalSendeVarsel) {
-        return new BostedsPeriodeAvklaring(
+        return new BostedsPeriodeAvklaringForeslått(
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             årsak,
             begrunnelse,
@@ -81,8 +82,7 @@ class BostedAvklaringTjenesteTest {
             skalSendeVarsel ? null : "begrunnelse for at det ikke varsles",
             UUID.randomUUID().toString(),
             LocalDateTime.now(),
-            Avklaringtype.AVSLAG,
-            behandling.getId()
+            Avklaringtype.AVSLAG
         );
     }
 

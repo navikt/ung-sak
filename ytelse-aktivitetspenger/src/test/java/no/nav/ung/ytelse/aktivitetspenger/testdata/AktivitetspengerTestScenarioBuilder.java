@@ -31,7 +31,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -549,7 +549,7 @@ public class AktivitetspengerTestScenarioBuilder {
         bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, "dummy-journalpostid", startdato, true);
 
         var avklaringer = bostedsAvklaringer.stream()
-            .map(it -> new BostedsPeriodeAvklaring(
+            .map(it -> new BostedsPeriodeAvklaringForeslått(
                 DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
                 it.ikkeOppfyltÅrsak(),
                 "Begrunnelse fra testscenario",
@@ -558,8 +558,7 @@ public class AktivitetspengerTestScenarioBuilder {
                 "Varsles ikke i testscenario",
                 "VL",
                 it.periode().getFom().atStartOfDay(),
-                it.avklaringtype(),
-                behandlingId))
+                it.avklaringtype()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, avklaringer);
