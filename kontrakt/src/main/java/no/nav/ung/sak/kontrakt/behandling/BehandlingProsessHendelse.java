@@ -69,7 +69,7 @@ public class BehandlingProsessHendelse {
      */
     @NotNull
     @Valid
-    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "Verdien matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "aktørId", required = true)
     private String aktørId;
 
