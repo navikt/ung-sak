@@ -36,12 +36,12 @@ class BostedsAvklaringHolder extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "bosatt_avklaring_holder_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BostedsPeriodeAvklaringFerdigstilt> periodeAvklaringerFerdigstilt = new LinkedHashSet<>();
+    private Set<BostedsPeriodeAvklaringForeslått> periodeAvklaringerForeslått = new LinkedHashSet<>();
 
     @BatchSize(size = 20)
     @JoinColumn(name = "bosatt_avklaring_holder_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<BostedsPeriodeAvklaringForeslått> periodeAvklaringerForeslått = new LinkedHashSet<>();
+    private Set<BostedsPeriodeAvklaringFerdigstilt> periodeAvklaringerFerdigstilt = new LinkedHashSet<>();
 
     public BostedsAvklaringHolder() {
     }
@@ -94,26 +94,26 @@ class BostedsAvklaringHolder extends BaseEntitet {
      * <p>
      * De foreslåtte avklaringene beholdes, siden de forteller hva som ble foreslått og behandlet i denne behandlingen.
      * Operasjonen er derfor idempotent.
-     * Obs: Denne muterer og må kun kalles gjennom setter på grunnlag, slik at deduplisering gjøres korrekt.
+     * Obs: Denne muterer periodeAvklaringerFerdigstilt og må kun kalles gjennom setter på grunnlag, slik at deduplisering gjøres korrekt.
      */
     void ferdigstillForeslåtteAvklaringer() {
-        var foreslåtteTidslinje = byggAvklaringTidslinje(periodeAvklaringerForeslått);
+        // Konverterer de foreslåtte til ferdigstilte før tidslinjeoperasjonene, slik at begge tidslinjene har samme
+        // type og eksisterende ferdigstilte instanser kun berøres når perioden deres faktisk splittes.
+        var foreslåtteTidslinje = byggAvklaringTidslinje(periodeAvklaringerForeslått.stream()
+            .map(BostedsPeriodeAvklaringFerdigstilt::new)
+            .toList());
 
         periodeAvklaringerFerdigstilt = byggAvklaringTidslinje(periodeAvklaringerFerdigstilt)
             .disjoint(foreslåtteTidslinje)
             .crossJoin(foreslåtteTidslinje)
             .stream()
-            .map(segment -> tilFerdigstilt(segment.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom())))
+            .map(segment -> medPeriode(segment.getValue(), DatoIntervallEntitet.fraOgMedTilOgMed(segment.getFom(), segment.getTom())))
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
-    // Beholder avklaringen som den er hvis den allerede er ferdigstilt med uendret periode, slik at kun de faktisk
-    // endrede avklaringene erstattes av nye instanser.
-    private static BostedsPeriodeAvklaringFerdigstilt tilFerdigstilt(BostedsPeriodeAvklaring avklaring, DatoIntervallEntitet periode) {
-        if (avklaring instanceof BostedsPeriodeAvklaringFerdigstilt ferdigstilt && ferdigstilt.getPeriode().equals(periode)) {
-            return ferdigstilt;
-        }
-        return new BostedsPeriodeAvklaringFerdigstilt(avklaring, periode);
+    // Beholder instansen som den er hvis perioden er uendret, slik at kun de faktisk splittede avklaringene erstattes av nye instanser.
+    private static BostedsPeriodeAvklaringFerdigstilt medPeriode(BostedsPeriodeAvklaringFerdigstilt avklaring, DatoIntervallEntitet periode) {
+        return avklaring.getPeriode().equals(periode) ? avklaring : new BostedsPeriodeAvklaringFerdigstilt(avklaring, periode);
     }
 
     Long getId() {
@@ -134,25 +134,10 @@ class BostedsAvklaringHolder extends BaseEntitet {
         return Collections.unmodifiableSet(new LinkedHashSet<>(periodeAvklaringerForeslått));
     }
 
-    /**
-     * Om avklaringen fortsatt er under arbeid, dvs. foreslått i gjeldende behandling og ennå ikke ferdigstilt.
-     */
-    boolean erForeslåttOgIkkeFerdigstilt(BostedsPeriodeAvklaring avklaring) {
-        return harReferanse(periodeAvklaringerForeslått, avklaring) && !harReferanse(periodeAvklaringerFerdigstilt, avklaring);
-    }
-
-    boolean harForeslåtteAvklaringer() {
-        return !periodeAvklaringerForeslått.isEmpty();
-    }
-
-    private static boolean harReferanse(Collection<? extends BostedsPeriodeAvklaring> avklaringer, BostedsPeriodeAvklaring avklaring) {
-        return avklaringer.stream().anyMatch(it -> it.getReferanse().equals(avklaring.getReferanse()));
-    }
-
-    static LocalDateTimeline<BostedsPeriodeAvklaring> byggAvklaringTidslinje(Collection<? extends BostedsPeriodeAvklaring> avklaringer) {
+    static <V extends BostedsPeriodeAvklaring> LocalDateTimeline<V> byggAvklaringTidslinje(Collection<? extends V> avklaringer) {
         return new LocalDateTimeline<>(
             avklaringer.stream().map(avklaring ->
-                new LocalDateSegment<BostedsPeriodeAvklaring>(
+                new LocalDateSegment<V>(
                     avklaring.getPeriode().getFomDato(),
                     avklaring.getPeriode().getTomDato(),
                     avklaring)

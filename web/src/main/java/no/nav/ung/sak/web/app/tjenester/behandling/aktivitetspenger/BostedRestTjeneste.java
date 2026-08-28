@@ -115,7 +115,7 @@ public class BostedRestTjeneste {
 
                 var verdi = segment.getValue();
                 var faktaOgAvklaring = verdi.getFaktaOgAvklaring();
-                var uttalelse = faktaOgAvklaring.harForeslåttAvslagsavklaring() ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvslagsavklaring().getReferanse()) : null;
+                var uttalelse = faktaOgAvklaring.getForeslåttAvklaring() != null ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvklaring().getReferanse()) : null;
                 boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
                 String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
@@ -202,21 +202,21 @@ public class BostedRestTjeneste {
         }
 
         public BostedAvklaringDto byggAvklaringDtoHvisFinnes() {
-            if (faktaOgAvklaring == null || !faktaOgAvklaring.harForeslåttAvslagsavklaring()) {
+            if (faktaOgAvklaring == null || !faktaOgAvklaring.harAvklaring()) {
                 return null;
             }
 
-            var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvslagsavklaring();
+            var gjeldendeAvklaring = faktaOgAvklaring.getGjeldendeAvklaring();
 
             return new BostedAvklaringDto(
-                foreslåttAvklaring.getPeriode().tilPeriode(),
+                gjeldendeAvklaring.getPeriode().tilPeriode(),
                 faktaOgAvklaring.isErBosattITrondheim(),
                 faktaOgAvklaring.getIkkeOppfyltÅrsak(),
-                foreslåttAvklaring.getBegrunnelse(),
-                foreslåttAvklaring.skalSendeVarsel(),
-                foreslåttAvklaring.getFritekstTilVarsel(),
-                foreslåttAvklaring.getBegrunnelseIkkeVarsel(),
-                foreslåttAvklaring.getAvklaringtype(),
+                gjeldendeAvklaring.getBegrunnelse(),
+                gjeldendeAvklaring.skalSendeVarsel(),
+                gjeldendeAvklaring.getFritekstTilVarsel(),
+                gjeldendeAvklaring.getBegrunnelseIkkeVarsel(),
+                gjeldendeAvklaring.getAvklaringtype(),
                 faktaOgAvklaring.kanRedigeres()
             );
         }

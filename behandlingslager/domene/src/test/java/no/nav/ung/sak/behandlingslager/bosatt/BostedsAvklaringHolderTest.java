@@ -72,21 +72,6 @@ class BostedsAvklaringHolderTest {
     }
 
     @Test
-    void avklaring_er_under_arbeid_frem_til_den_er_ferdigstilt() {
-        var holder = new BostedsAvklaringHolder();
-        var avklaring = lagAvklaring(FOM, TOM);
-        holder.erstattForeslåttePeriodeAvklaringer(List.of(avklaring));
-
-        assertThat(holder.erForeslåttOgIkkeFerdigstilt(avklaring)).isTrue();
-
-        holder.ferdigstillForeslåtteAvklaringer();
-
-        assertThat(holder.erForeslåttOgIkkeFerdigstilt(avklaring)).isFalse();
-        // De foreslåtte beholdes etter ferdigstilling, slik at vi fortsatt vet hva som ble behandlet i behandlingen
-        assertThat(holder.harForeslåtteAvklaringer()).isTrue();
-    }
-
-    @Test
     void kopi_uten_foreslatte_skal_kun_beholde_de_ferdigstilte() {
         var holder = new BostedsAvklaringHolder();
         var ferdigstilt = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));

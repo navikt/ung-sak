@@ -211,7 +211,8 @@ class BostedsGrunnlagRepositoryTest {
             .containsExactly(foreslått.getReferanse());
     }
 
-    private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {        return repository.hentGrunnlagHvisEksisterer(behandling.getId())
+    private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
+        return repository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
             .getAvklaringer()
             .hentForeslåtteAvklaringer()

@@ -170,7 +170,16 @@ public class BostedsGrunnlag extends BaseEntitet {
      * Baserer seg på {@link #hentSøknadsfaktaSomTidslinje()} og mapper til {@link BostedsfaktaOgAvklaring}.
      */
     public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgForeslåttFaktaSomTidslinje() {
-        return flettMedSøknadsfakta(getForeslåtteAvklaringerSomTidslinje());
+        LocalDateTimeline<BostedsPeriodeAvklaring> foreslåtteTidslinje = getForeslåtteAvklaringerSomTidslinje();
+        var faktaMedForeslåttTidslinje = hentSøknadsfaktaSomTidslinje().mapValue(BostedsfaktaOgAvklaring::fraSøknad).combine(foreslåtteTidslinje,
+            (di, søknad, foreslått) -> new LocalDateSegment<>(di,
+                søknad.getValue().medForeslåttAvklaring(foreslått == null ? null : foreslått.getValue())),
+            LocalDateTimeline.JoinStyle.CROSS_JOIN);
+
+        return faktaMedForeslåttTidslinje.combine(LocalDateTimeline.<BostedsPeriodeAvklaring>empty(),
+            (di, fakta, ferdigstilt) -> new LocalDateSegment<>(di,
+                fakta.getValue().medFerdigstiltAvklaring(ferdigstilt == null ? null : ferdigstilt.getValue())),
+            LocalDateTimeline.JoinStyle.CROSS_JOIN);
     }
 
     /**
@@ -178,23 +187,13 @@ public class BostedsGrunnlag extends BaseEntitet {
      * Avklaringer foreslått i denne behandlingen overstyrer de ferdigstilte der de overlapper.
      */
     public LocalDateTimeline<BostedsfaktaOgAvklaring> hentOppgittOgAlleAvklaringerSomTidslinje() {
-        var alleAvklaringer = getForeslåtteAvklaringerSomTidslinje()
-            .crossJoin(BostedsAvklaringHolder.byggAvklaringTidslinje(getFerdigstilteAvklaringer()));
-        return flettMedSøknadsfakta(alleAvklaringer);
-    }
+        var faktaMedForeslåttTidslinje = hentOppgittOgForeslåttFaktaSomTidslinje();
 
-    private LocalDateTimeline<BostedsfaktaOgAvklaring> flettMedSøknadsfakta(LocalDateTimeline<BostedsPeriodeAvklaring> avklaringTidslinje) {
-        return hentSøknadsfaktaSomTidslinje().combine(avklaringTidslinje,
-            (di, søknad, avklaring) -> new LocalDateSegment<>(di, new BostedsfaktaOgAvklaring(
-                søknad == null ? null : søknad.getValue(),
-                avklaring == null ? null : avklaring.getValue(),
-                avklaring != null && kanRedigeres(avklaring.getValue())
-            )),
+        var ferdigstilteTidslinje = BostedsAvklaringHolder.byggAvklaringTidslinje(getFerdigstilteAvklaringer());
+        return faktaMedForeslåttTidslinje.combine(ferdigstilteTidslinje,
+            (di, fakta, ferdigstilt) -> new LocalDateSegment<>(di,
+                fakta.getValue().medFerdigstiltAvklaring(ferdigstilt == null ? null : ferdigstilt.getValue())),
             LocalDateTimeline.JoinStyle.CROSS_JOIN);
-    }
-
-    private boolean kanRedigeres(BostedsPeriodeAvklaring avklaring) {
-        return avklaringer != null && avklaringer.erForeslåttOgIkkeFerdigstilt(avklaring);
     }
 
     public UUID getGrunnlagsreferanse() {
