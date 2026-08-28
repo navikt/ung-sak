@@ -24,6 +24,7 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
+import no.nav.ung.sak.typer.Saksnummer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -80,6 +81,7 @@ class EndretPeriodeOppgaveOppretterTest {
         when(behandling.getId()).thenReturn(100L);
         when(behandling.getFagsak()).thenReturn(fagsak);
         when(fagsak.getYtelseType()).thenReturn(FagsakYtelseType.UNGDOMSYTELSE);
+        when(fagsak.getSaksnummer()).thenReturn(new Saksnummer("123"));
 
     }
 
@@ -288,7 +290,10 @@ class EndretPeriodeOppgaveOppretterTest {
     private OpprettOppgaveDto capturerOppgave() {
         var captor = ArgumentCaptor.forClass(OpprettOppgaveDto.class);
         verify(oppgaveKlient).opprettOppgave(captor.capture());
-        return captor.getValue();
+        var dto = captor.getValue();
+        assertThat(dto.journalføring()).isNotNull();
+        assertThat(dto.journalføring().saksnummer().getVerdi()).isEqualTo("123");
+        return dto;
     }
 
     private static Object hentOppgaveData(OpprettOppgaveDto dto) {

@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.EndretPeriodeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeDTO;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretperiode.PeriodeEndringType;
@@ -57,6 +58,7 @@ public class EndretPeriodeOppgaveOppretter {
             return;
         }
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
         UngdomsprogramPeriodeGrunnlag initieltPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentInitiell(behandling.getId()).orElseThrow(() ->
             new IllegalStateException("Klarte ikke å innhentete originalt ungdomsprogram periodegrunnlag for behandling " + behandling.getId())
         );
@@ -70,7 +72,7 @@ public class EndretPeriodeOppgaveOppretter {
         if (erPeriodeFjernet(gjeldendeGrunnlag)) {
             // FJERNET PERIODE
             PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
-            var oppgaveDto = mapTilFjernetPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, forrigePeriode);
+            var oppgaveDto = mapTilFjernetPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, forrigePeriode, saksnummer);
             oppgaveKlient.opprettOppgave(oppgaveDto);
         } else {
             Optional<StartdatoGrunnlag> startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId());
@@ -100,7 +102,7 @@ public class EndretPeriodeOppgaveOppretter {
                     etterlysning.getEksternReferanse(),
                     endretStartDato.get().nyDatoOgBeskrivelse(),
                     endretStartDato.get().forrigeDatoOgBeskrivelse());
-                var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretStartDato.get().nyDatoOgBeskrivelse().dato(), endretStartDato.get().forrigeDatoOgBeskrivelse().dato());
+                var oppgaveDto = mapTilStartdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretStartDato.get().nyDatoOgBeskrivelse().dato(), endretStartDato.get().forrigeDatoOgBeskrivelse().dato(), saksnummer);
                 oppgaveKlient.opprettOppgave(oppgaveDto);
             } else if (endretStartDato.isEmpty() && endretSluttDato.isPresent()) {
                 // ENDRING AV SLUTTDATO
@@ -108,7 +110,7 @@ public class EndretPeriodeOppgaveOppretter {
                     etterlysning.getEksternReferanse(),
                     endretSluttDato.get().nyDatoOgBeskrivelse(),
                     endretSluttDato.get().forrigeDatoOgBeskrivelse());
-                var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretSluttDato.get().nyDatoOgBeskrivelse().dato(), endretSluttDato.get().forrigeDatoOgBeskrivelse().dato());
+                var oppgaveDto = mapTilSluttdatoOppgaveDto(etterlysning, aktørId, ytelsetype, endretSluttDato.get().nyDatoOgBeskrivelse().dato(), endretSluttDato.get().forrigeDatoOgBeskrivelse().dato(), saksnummer);
                 oppgaveKlient.opprettOppgave(oppgaveDto);
             }  else if (endretStartDato.isPresent() && endretSluttDato.isPresent()) {
                 log.info("Fant endring i både start og slutt for etterlysning {}. Ny sluttdato og grunnlag: {}, forrige sluttdato og grunnlag: {}. Ny startdato og grunnlag: {}, forrige startdato og grunnlag: {}.",
@@ -120,7 +122,7 @@ public class EndretPeriodeOppgaveOppretter {
                 PeriodeDTO nyPeriode = hentPeriodeFraGrunnlag(gjeldendeGrunnlag);
                 PeriodeDTO forrigePeriode = hentPeriodeFraGrunnlag(initieltPeriodeGrunnlag);
                 var endringer = Set.of(PeriodeEndringType.ENDRET_STARTDATO, PeriodeEndringType.ENDRET_SLUTTDATO);
-                var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, nyPeriode, forrigePeriode, endringer);
+                var oppgaveDto = mapTilEndretPeriodeOppgaveDto(etterlysning, aktørId, ytelsetype, nyPeriode, forrigePeriode, endringer, saksnummer);
                 oppgaveKlient.opprettOppgave(oppgaveDto);
             } else {
                 throw new IllegalStateException("Fant ingen endringer som kunne mappes til oppgave for etterlysning " + etterlysning.getEksternReferanse());
@@ -167,23 +169,25 @@ public class EndretPeriodeOppgaveOppretter {
         return snapshotsSortert;
     }
 
-    private OpprettOppgaveDto mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer) {
+    private OpprettOppgaveDto mapTilEndretPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, PeriodeDTO nyPeriode, PeriodeDTO forrigePeriode, Set<PeriodeEndringType> endringer, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
             new EndretPeriodeDataDto(nyPeriode, forrigePeriode, endringer),
-            etterlysning.getFrist()
+            etterlysning.getFrist(),
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
     }
 
-    private OpprettOppgaveDto mapTilFjernetPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, PeriodeDTO forrigePeriode) {
+    private OpprettOppgaveDto mapTilFjernetPeriodeOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, PeriodeDTO forrigePeriode, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
             new EndretPeriodeDataDto(null, forrigePeriode, Set.of(PeriodeEndringType.FJERNET_PERIODE)),
-            etterlysning.getFrist()
+            etterlysning.getFrist(),
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
     }
 
@@ -193,23 +197,25 @@ public class EndretPeriodeOppgaveOppretter {
         return new PeriodeDTO(fomDato, tomDato);
     }
 
-    private OpprettOppgaveDto mapTilStartdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, LocalDate nyStartDato, LocalDate forrigeStartDato) {
+    private OpprettOppgaveDto mapTilStartdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, LocalDate nyStartDato, LocalDate forrigeStartDato, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
             new EndretStartdatoDataDto(nyStartDato, forrigeStartDato),
-            etterlysning.getFrist()
+            etterlysning.getFrist(),
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
     }
 
-    private OpprettOppgaveDto mapTilSluttdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, LocalDate nySluttDato, LocalDate forrigeSluttDato) {
+    private OpprettOppgaveDto mapTilSluttdatoOppgaveDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, LocalDate nySluttDato, LocalDate forrigeSluttDato, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
             new EndretSluttdatoDataDto(nySluttDato, TIDENES_ENDE.equals(forrigeSluttDato) ? null : forrigeSluttDato),
-            etterlysning.getFrist()
+            etterlysning.getFrist(),
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
     }
 

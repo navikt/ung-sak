@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretsluttdato.EndretSluttdatoDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -38,12 +39,13 @@ public class EndretSluttdatoOppgaveOppretter {
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var originalPeriode = behandling.getOriginalBehandlingId().flatMap(ungdomsprogramPeriodeRepository::hentGrunnlag).map(UngdomsprogramPeriodeGrunnlag::hentForEksaktEnPeriode);
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
         etterlysninger.stream()
-            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode))
+            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode, saksnummer))
             .forEach(oppgaveKlient::opprettOppgave);
     }
 
-    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, Optional<DatoIntervallEntitet> originalPeriode) {
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, Optional<DatoIntervallEntitet> originalPeriode, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
@@ -52,7 +54,8 @@ public class EndretSluttdatoOppgaveOppretter {
                 hentSluttdato(etterlysning.getGrunnlagsreferanse()),
                 originalPeriode.map(DatoIntervallEntitet::getTomDato).filter(d -> !d.equals(TIDENES_ENDE)).orElse(null)
             ),
-            etterlysning.getFrist()
+            etterlysning.getFrist(),
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
     }
 

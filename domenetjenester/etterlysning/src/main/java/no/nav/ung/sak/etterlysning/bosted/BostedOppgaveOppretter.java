@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgavetypeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOppgavetypeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOpphørOppgavetypeDataDto;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
@@ -80,7 +81,8 @@ public class BostedOppgaveOppretter {
                 ytelsetype,
                 etterlysning.getEksternReferanse(),
                 oppgavetypeData,
-                etterlysning.getFrist()
+                etterlysning.getFrist(),
+                new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(behandling.getFagsak().getSaksnummer().getVerdi()))
             );
             oppgaveKlient.opprettOppgave(oppgaveDto);
         }
