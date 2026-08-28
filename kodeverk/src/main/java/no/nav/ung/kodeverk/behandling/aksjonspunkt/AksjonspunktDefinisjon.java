@@ -58,10 +58,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.LOKALKONTOR_MANUELL, "Lokalkontor foreslår vilkår", BehandlingStatus.UTREDES, BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR,
         UTEN_VILKÅR, SkjermlenkeType.LOKALKONTOR_FORESLÅR_VILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
-    SØKERS_OPPLYSNINGSPLIKT_MANU(
-        AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU_KODE, AksjonspunktType.MANUELL,
-        "Vurder søkers opplysningsplikt ved ufullstendig/ikke-komplett søknad", BehandlingStatus.UTREDES,
-        BehandlingStegType.KONTROLLERER_SØKERS_OPPLYSNINGSPLIKT, VilkårType.SØKERSOPPLYSNINGSPLIKT, SkjermlenkeType.OPPLYSNINGSPLIKT, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VEDTAK_UTEN_TOTRINNSKONTROLL(
         AksjonspunktKodeDefinisjon.VEDTAK_UTEN_TOTRINNSKONTROLL_KODE, AksjonspunktType.MANUELL, "Foreslå vedtak uten totrinnskontroll",
         BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
@@ -85,9 +81,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         AksjonspunktType.MANUELL, "Vurder feilutbetaling", BehandlingStatus.UTREDES, BehandlingStegType.SIMULER_OPPDRAG, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
     SJEKK_TILBAKEKREVING(AksjonspunktKodeDefinisjon.SJEKK_TILBAKEKREVING_KODE,
         AksjonspunktType.MANUELL, "Sjekk om ytelsesbehandlingen skal utføres før eller etter tilbakekrevingsbehandlingen", BehandlingStatus.UTREDES, BehandlingStegType.FORESLÅ_VEDTAK, UTEN_VILKÅR, UTEN_SKJERMLENKE, ENTRINN, AVVENTER_SAKSBEHANDLER),
-    VURDER_TILBAKETREKK(AksjonspunktKodeDefinisjon.VURDER_TILBAKETREKK_KODE,
-        AksjonspunktType.MANUELL, "Vurder tilbaketrekk", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_TILBAKETREKK,
-        UTEN_VILKÅR, SkjermlenkeType.TILKJENT_YTELSE, TOTRINN, AVVENTER_SAKSBEHANDLER),
     KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST(AksjonspunktKodeDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST_KODE,
         AksjonspunktType.MANUELL, "Vurder søknadsfrist", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_SØKNADSFRIST,
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),

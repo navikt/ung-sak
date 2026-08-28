@@ -31,9 +31,6 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String OVERSTYRING_AV_INNTEKT_KODE = "6100";
 
-
-    public static final String SØKERS_OPPLYSNINGSPLIKT_MANU_KODE = "5017";
-
     public static final String VARSEL_REVURDERING_ETTERKONTROLL_KODE = "5025";
     public static final String KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST_KODE = "5055";
     public static final String KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING_KODE = "5056";
@@ -58,8 +55,6 @@ public class AksjonspunktKodeDefinisjon {
 
     public static final String VURDER_FEILUTBETALING_KODE = "5084";
     public static final String SJEKK_TILBAKEKREVING_KODE = "5085";
-
-    public static final String VURDER_TILBAKETREKK_KODE = "5090";
 
     // Auto
     public static final String AUTO_OVERFØRT_NK_KODE = "7100";

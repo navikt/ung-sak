@@ -20,7 +20,6 @@ public class VilkårKodeverkRepositoryImplTest {
     @Test
     public void skal_hente_alle_avslagsårsaker_gruppert_på_vilkårstype() {
         Map<VilkårType, Set<Avslagsårsak>> map = VilkårType.finnAvslagårsakerGruppertPåVilkårType();
-        assertThat(map.get(VilkårType.SØKERSOPPLYSNINGSPLIKT)).containsOnly(Avslagsårsak.MANGLENDE_DOKUMENTASJON);
         assertThat(map.get(VilkårType.UNGDOMSPROGRAMVILKÅRET)).isNotEmpty();
     }
 }
