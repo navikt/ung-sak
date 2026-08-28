@@ -11,12 +11,12 @@ import no.nav.k9.søknad.JsonUtils;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.ung.kodeverk.Fagsystem;
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.Brevkode;
 import no.nav.ung.kodeverk.hendelse.EventHendelse;
 import no.nav.ung.kodeverk.produksjonsstyring.UtvidetSøknadÅrsak;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
-import no.nav.ung.sak.behandling.hendelse.produksjonsstyring.søknadsårsak.SøknadsårsakUtleder;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
@@ -51,33 +51,22 @@ public class BehandlingProsessHendelseMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(BehandlingProsessHendelseMapper.class);
     private final Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester;
-    private final Instance<SøknadsårsakUtleder> søknadsårsakUtledere;
-    private final MottatteDokumentRepository mottatteDokumentRepository;
     private final BehandlingAnsvarligRepository behandlingAnsvarligRepository;
 
     @Inject
     public BehandlingProsessHendelseMapper(@Any Instance<VurderSøknadsfristTjeneste<?>> søknadsfristTjenester,
-                                           @Any Instance<SøknadsårsakUtleder> søknadsårsakUtledere,
-                                           MottatteDokumentRepository mottatteDokumentRepository,
                                            BehandlingAnsvarligRepository behandlingAnsvarligRepository) {
         this.søknadsfristTjenester = søknadsfristTjenester;
-        this.søknadsårsakUtledere = søknadsårsakUtledere;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
     public BehandlingProsessHendelse getProduksjonstyringEventDto(LocalDateTime eventTid, EventHendelse eventHendelse, Behandling behandling, LocalDate vedtaksdato) {
-        Map<String, String> aksjonspunktKoderMedStatusListe = new HashMap<>();
         var fagsak = behandling.getFagsak();
-        behandling.getAksjonspunkter().forEach(aksjonspunkt -> aksjonspunktKoderMedStatusListe.put(aksjonspunkt.getAksjonspunktDefinisjon().getKode(), aksjonspunkt.getStatus().getKode()));
 
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
-        final boolean fraEndringsdialog = sjekkOmDetFinnesEndringFraEndringsdialog(behandling);
 
-        List<UtvidetSøknadÅrsak> søknadsårsaker = utledSøknadÅrsaker(behandling);
-
-        //TODO dersom vi skal bruke LOS for aktivitetspenger, må denne hente begge behandlingsansvarlige
-        Optional<BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId());
+        Optional<BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.SENTRAL);
+        Optional<BehandlingAnsvarlig> behandlingAnsvarligNavKontor = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.LOKAL);
 
         return BehandlingProsessHendelse.builder()
             .medEksternId(behandling.getUuid())
@@ -95,24 +84,16 @@ public class BehandlingProsessHendelseMapper {
             .medOpprettetBehandling(behandling.getOpprettetDato())
             .medEldsteDatoMedEndringFraSøker(finnEldsteMottattdato(behandling))
             .medBehandlingResultat(behandling.getBehandlingResultatType())
-            .medAksjonspunktKoderMedStatusListe(aksjonspunktKoderMedStatusListe)
-            .medAnsvarligSaksbehandlerForTotrinn( behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medBehandlendeEnhet(behandlingAnsvarlig.map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null))
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
+            .medAnsvarligSaksbehandlerForTotrinn( behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medAnsvarligBeslutterForTotrinn(behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
+            .medNavKontorAnsvarligSaksbehandler(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
+            .medNavKontorBeslutter(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)
             .medBehandlingsårsaker(behandling.getBehandlingÅrsaker().stream().map(årsak -> årsak.getBehandlingÅrsakType().getKode()).distinct().toList())
-            .medSøknadårsaker(søknadsårsaker.stream().map(UtvidetSøknadÅrsak::getKode).distinct().toList())
-            .medFraEndringsdialog(fraEndringsdialog)
             .build();
-    }
-
-    private List<UtvidetSøknadÅrsak> utledSøknadÅrsaker(Behandling behandling) {
-        SøknadsårsakUtleder tjeneste = SøknadsårsakUtleder.finnTjeneste(søknadsårsakUtledere, behandling.getFagsakYtelseType());
-        return tjeneste != null
-            ? tjeneste.utledSøknadÅrsaker(behandling)
-            : List.of();
     }
 
     public LocalDateTime finnEldsteMottattdato(Behandling behandling) {
@@ -146,27 +127,6 @@ public class BehandlingProsessHendelseMapper {
         return getProduksjonstyringEventDto(LocalDateTime.now(), eventHendelse, behandling, null);
     }
 
-
-    private boolean sjekkOmDetFinnesEndringFraEndringsdialog(Behandling behandling) {
-        if (behandling.getFagsakYtelseType() != FagsakYtelseType.PLEIEPENGER_SYKT_BARN) {
-            return false;
-        }
-
-        final List<MottattDokument> dokumenter = mottatteDokumentRepository.hentMottatteDokumentForBehandling(behandling.getFagsakId(),
-            behandling.getId(),
-            List.of(Brevkode.UNGDOMSYTELSE_SOKNAD),
-            false);
-
-        return dokumenter.stream().anyMatch(md -> {
-            try {
-                final Søknad søknad = JsonUtils.fromString(md.getPayload(), Søknad.class);
-                return søknad.getKildesystem().map(ks -> ks == Kildesystem.ENDRINGSDIALOG).orElse(false);
-            } catch (RuntimeException e) {
-                logger.warn("Uventet feil ved parsing av søknad for oversendelse til k9-los. Setter endringsflagget til false på oppgaven.", e);
-                return false;
-            }
-        });
-    }
 
     public List<AksjonspunktTilstandDto> lagAksjonspunkttilstander(Collection<Aksjonspunkt> aksjonspunkter) {
         return aksjonspunkter.stream().map(it ->
