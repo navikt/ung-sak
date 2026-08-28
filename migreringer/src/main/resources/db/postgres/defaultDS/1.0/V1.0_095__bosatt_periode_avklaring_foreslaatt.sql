@@ -40,7 +40,7 @@ insert into bosatt_periode_avklaring_foreslaatt (id, bosatt_avklaring_holder_id,
                                                  begrunnelse, skal_sende_varsel, fritekst_til_varsel,
                                                  begrunnelse_ikke_varsel, avklaringtype, vurdert_av, vurdert_tidspunkt,
                                                  opprettet_av, opprettet_tid, endret_av, endret_tid)
-select bpa.id,
+select nextval('seq_bosatt_periode_avklaring_foreslaatt'),
        bpa.bosatt_avklaring_holder_id,
        bpa.referanse,
        bpa.periode,
