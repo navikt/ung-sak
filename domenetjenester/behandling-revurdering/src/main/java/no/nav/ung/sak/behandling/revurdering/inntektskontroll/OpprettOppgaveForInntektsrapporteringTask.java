@@ -15,6 +15,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.inntektsrapportering.InntektsrapporteringOppgavetypeDataDto;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.typer.AktørId;
@@ -91,7 +92,8 @@ public class OpprettOppgaveForInntektsrapporteringTask implements ProsessTaskHan
             OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(fagsak.getYtelseType()),
             UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_REF)),
             new InntektsrapporteringOppgavetypeDataDto(fom, tom, harIkkeYtelseIHelePerioden),
-            frist
+            frist,
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(fagsak.getSaksnummer().getVerdi()))
         ));
     }
 

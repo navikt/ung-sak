@@ -4,6 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.opphorvedmaksdato.BekreftOpphorVedMaksdatoOppgavetypeDataDto;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
@@ -37,13 +38,14 @@ public class OpphørVedMaksdatoOppgaveOppretter {
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
         etterlysninger.stream()
-            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype))
+            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, saksnummer))
             .forEach(oppgaveKlient::opprettOppgave);
     }
 
 
-    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype) {
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         UngdomsprogramPeriodeGrunnlag ungdomsprogramPeriodeGrunnlag = ungdomsprogramPeriodeRepository.hentGrunnlagFraGrunnlagsReferanse(etterlysning.getGrunnlagsreferanse());
         LocalDate sluttdato = ungdomsprogramPeriodeGrunnlag.hentForEksaktEnPeriode().getTomDato();
         LocalDate maksdato = ungdomsprogramPeriodeGrunnlag.getPeriodeMaksDato().orElseThrow(() -> new IllegalStateException("Forventer å finne maksdato"));
@@ -52,7 +54,8 @@ public class OpphørVedMaksdatoOppgaveOppretter {
             ytelsetype,
             etterlysning.getEksternReferanse(),
             new BekreftOpphorVedMaksdatoOppgavetypeDataDto(sluttdato, maksdato),
-            etterlysning.getFrist()
+            etterlysning.getFrist(),
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
     }
 }

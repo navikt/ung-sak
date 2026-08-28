@@ -9,6 +9,7 @@ import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OppgaveYtelsetype;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.OpprettOppgaveDto;
+import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.endretstartdato.EndretStartdatoDataDto;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.AktørId;
@@ -32,18 +33,20 @@ public class EndretStartdatoOppgaveOppretter {
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         var originalPeriode = finnOriginalPeriode(behandling);
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
+        var saksnummer = behandling.getFagsak().getSaksnummer();
         etterlysninger.stream()
-            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode))
+            .map(etterlysning -> mapTilDto(etterlysning, aktørId, ytelsetype, originalPeriode, saksnummer))
             .forEach(oppgaveKlient::opprettOppgave);
     }
 
-    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, DatoIntervallEntitet originalPeriode) {
+    private OpprettOppgaveDto mapTilDto(Etterlysning etterlysning, AktørId aktørId, OppgaveYtelsetype ytelsetype, DatoIntervallEntitet originalPeriode, no.nav.ung.sak.typer.Saksnummer saksnummer) {
         return new OpprettOppgaveDto(
             new no.nav.ung.brukerdialog.typer.AktørId(aktørId.getAktørId()),
             ytelsetype,
             etterlysning.getEksternReferanse(),
             new EndretStartdatoDataDto(hentStartdato(etterlysning), originalPeriode.getFomDato()),
-            etterlysning.getFrist()
+            etterlysning.getFrist(),
+            new JournalføringDto(new no.nav.ung.brukerdialog.typer.Saksnummer(saksnummer.getVerdi()))
         );
     }
 
