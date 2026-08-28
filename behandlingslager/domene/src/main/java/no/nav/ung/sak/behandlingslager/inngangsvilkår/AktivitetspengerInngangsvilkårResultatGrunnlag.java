@@ -80,8 +80,30 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         return getAktivitetsvilkårResultatHolder().map(AktivitetsvilkårResultatHolder::getVurderinger).orElse(List.of());
     }
 
+    public List<BistandsvilkårResultatPeriode> hentBistandsvilkårResultatPerioder() {
+        return getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke BistandsvilkårResultatPerioder"));
+    }
+
+    public LocalDateTimeline<VilkårsvurderingResultat> hentBistandTidslinje() {
+        return new LocalDateTimeline<>(getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger).orElse(List.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.tilVilkårsvurderingResultat()))
+            .toList());
+    }
+
     public Optional<AndreLivsoppholdsytelserResultatHolder> getAndreLivsoppholdsytelserResultatHolder() {
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
+    }
+
+    public List<AndreLivsoppholdsytelserResultatPeriode> hentAndreLivsoppholdsytelserResultatPerioder() {
+        return getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke AndreLivsoppholdsytelserResultatPerioder"));
+    }
+
+    public LocalDateTimeline<VilkårsvurderingResultat> hentLivsoppholdTidslinje() {
+        return new LocalDateTimeline<>(getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger).orElse(List.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.tilVilkårsvurderingResultat()))
+            .toList());
     }
 
     Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
@@ -89,15 +111,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     }
 
     public List<BostedsvilkårResultatPeriode> hentBostedsvilkårResultatPerioder() {
-        return getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(List.of());
+        return getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke BostedsvilkårResultatPerioder"));
     }
 
     public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {
-        if (bostedsvilkårResultatHolder == null) {
-            return LocalDateTimeline.empty();
-        }
-
-        return new LocalDateTimeline<>(bostedsvilkårResultatHolder.getVurderinger().stream()
+        return new LocalDateTimeline<>(getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(List.of()).stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }

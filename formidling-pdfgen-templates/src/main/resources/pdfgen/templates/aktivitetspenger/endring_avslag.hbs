@@ -1,0 +1,40 @@
+{{#> felles/base}}
+
+    {{#> felles/seksjon/hoved }}
+        <h1>Nav har endret aktivitetspengene dine</h1>
+
+        <p>Du får ikke aktivitetspenger i perioden fra {{periode.fom}} til {{periode.tom}}.</p>
+
+        <h2>Hvorfor får du ikke aktivitetspenger i perioden?</h2>
+        {{#with avslåttBosted}}
+            {{#if ytelseIkkeTilgjengeligPåBosted}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
+                    Fordi du ikke har bostedsadresse i Trondheim kommune i denne perioden, får du ikke aktivitetspenger.
+                </p>
+            {{/if}}
+            {{#if ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
+                    Fordi du ikke har bostedsadresse i Trondheim kommune i denne perioden, får du ikke aktivitetspenger.
+                </p>
+            {{/if}}
+            {{#if ytelseIkkePåArbeidsstedStudiested}}
+                <p>
+                    For å ha rett til aktivitetspenger må du studere eller jobbe i Trondheim kommune.
+                    Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune i denne perioden, får du ikke aktivitetspenger.
+                </p>
+            {{/if}}
+            {{#if fritekstBrev}}
+                For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+        {{/with}}
+
+    {{/felles/seksjon/hoved}}
+
+    {{> aktivitetspenger/footer/footer-vedtak }}
+
+{{/felles/base}}

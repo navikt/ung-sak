@@ -1,13 +1,12 @@
 package no.nav.ung.sak.inngangsvilkår.avklaring;
 
 import jakarta.enterprise.inject.Instance;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 
 /**
  * Vilkårsavklaringer styres av behandlingstriggere representert som {@link BehandlingÅrsakType}.
@@ -17,11 +16,15 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
  */
 public interface VilkårsavklaringTjeneste {
 
-    void settAlleAvklaringerTilFerdig(long behandlingId);
+    /**
+     * Ferdigstiller vilkårsavklaringene som er foreslått i behandlingen. Kalles ved iverksettelse av vedtaket.
+     */
+    void ferdigstillForeslåtteAvklaringer(long behandlingId);
 
-    void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId);
+    void settVilkårsperioderTilIkkeVurdertForForeslåtteAvklaringer(long behandlingId);
 
-    Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringUnderArbeid(long behandlingId);
+    // Henter seneste vilkårsavklaring for behandling. Hvis det er flere vilkårsavklaringer lagret samtidig velges den med senest fom.
+    Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId);
 
     static List<VilkårsavklaringTjeneste> sortert(Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
         return vilkårsavklaringTjenester.stream().sorted(Comparator.comparing(it -> it.getClass().getName())).toList();

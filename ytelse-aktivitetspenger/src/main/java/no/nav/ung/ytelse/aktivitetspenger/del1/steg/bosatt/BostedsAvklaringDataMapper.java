@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.typer.Periode;
 
@@ -22,8 +23,8 @@ public final class BostedsAvklaringDataMapper {
         );
     }
 
-    public static BostedsPeriodeAvklaring mapTilBostedsPeriodeAvklaring(BostedAvklaringInnhold bostedAvklaringInnhold, String vurdertAv, LocalDateTime vurdertTidspunkt) {
-        return new BostedsPeriodeAvklaring(
+    public static BostedsPeriodeAvklaringForeslått mapTilBostedsPeriodeAvklaring(BostedAvklaringInnhold bostedAvklaringInnhold, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+        return new BostedsPeriodeAvklaringForeslått(
             bostedAvklaringInnhold.hentPeriodeSomDatoIntervallEntitet(),
             bostedAvklaringInnhold.ikkeOppfyltÅrsak(),
             bostedAvklaringInnhold.begrunnelse(),

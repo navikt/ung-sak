@@ -8,7 +8,6 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.bosatt.Kilde;
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -105,7 +104,7 @@ class VurderFaktaBostedStegTest {
         utførSteg(behandling);
 
         var lagretGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
-        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.UNDER_ARBEID).stream().findFirst().orElseThrow();
+        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().stream().findFirst().orElseThrow();
         assertThat(periodeAvklaring.getValue().isErBosattITrondheim()).isTrue();
         assertThat(periodeAvklaring.getValue().getKilde()).isEqualTo(Kilde.SØKNAD);
     }

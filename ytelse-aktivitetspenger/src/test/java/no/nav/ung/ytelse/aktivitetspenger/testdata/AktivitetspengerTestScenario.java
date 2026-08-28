@@ -32,7 +32,9 @@ public record AktivitetspengerTestScenario(
     List<PersonInformasjon> barn,
     LocalDate dødsdato,
     LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder,
-    Map<VilkårType, LocalDateTimeline<VilkårUtfall>> vilkår) {
+    Map<VilkårType, LocalDateTimeline<VilkårUtfall>> vilkår,
+    InngangsvilkårVurderingTestData inngangsvilkårVurderinger,
+    List<BostedsAvklaringTestData> bostedsAvklaringer) {
 
     public AktivitetspengerTestScenario(
         String navn,
@@ -47,7 +49,7 @@ public record AktivitetspengerTestScenario(
         LocalDate dødsdato,
         LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder) {
         this(navn, søknadsperioder, satsperioder, beregningsgrunnlag, tilkjentYtelsePerioder, aldersvilkår, fødselsdato,
-            behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.of());
+            behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.of(), InngangsvilkårVurderingTestData.tom(), List.of());
     }
 
     public static Builder builder() {
@@ -67,6 +69,8 @@ public record AktivitetspengerTestScenario(
         private LocalDate dødsdato;
         private LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder;
         private final Map<VilkårType, LocalDateTimeline<VilkårUtfall>> vilkår = new LinkedHashMap<>();
+        private InngangsvilkårVurderingTestData inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.tom();
+        private List<BostedsAvklaringTestData> bostedsAvklaringer = List.of();
 
         public Builder medNavn(String navn) {
             this.navn = navn;
@@ -133,9 +137,20 @@ public record AktivitetspengerTestScenario(
             return this;
         }
 
+        public Builder medInngangsvilkårVurderinger(InngangsvilkårVurderingTestData inngangsvilkårVurderinger) {
+            this.inngangsvilkårVurderinger = inngangsvilkårVurderinger;
+            return this;
+        }
+
+        public Builder medBostedsAvklaringer(List<BostedsAvklaringTestData> bostedsAvklaringer) {
+            this.bostedsAvklaringer = bostedsAvklaringer;
+            return this;
+        }
+
         public AktivitetspengerTestScenario build() {
             return new AktivitetspengerTestScenario(navn, søknadsperioder, satsperioder, beregningsgrunnlag, tilkjentYtelsePerioder,
-                aldersvilkår, fødselsdato, behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.copyOf(vilkår));
+                aldersvilkår, fødselsdato, behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.copyOf(vilkår), inngangsvilkårVurderinger,
+                List.copyOf(bostedsAvklaringer));
         }
     }
 }

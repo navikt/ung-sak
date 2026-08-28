@@ -5,13 +5,14 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestData;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
@@ -200,11 +201,11 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
      * Bruker er 20 år, har søkt fra fom, men bor utenfor EØS.
      */
     public static AktivitetspengerTestScenario avslåttBosted(LocalDate fom) {
-        return fullAvslagScenario(fom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, null);
+        return avslåttBostedScenario(fom, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null);
     }
 
     public static AktivitetspengerTestScenario avslåttBistand(LocalDate fom, String fritekstBrev) {
-        return fullAvslagScenario(fom, VilkårType.BISTANDSVILKÅR, Avslagsårsak.IKKE_14A_VEDTAK, fritekstBrev);
+        return avslåttBistandScenario(fom, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstBrev);
     }
 
     /**
@@ -212,25 +213,39 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
      * Bruker er 20 år, men har verken bosted eller folkeregistrert adresse i Trondheim.
      */
     public static AktivitetspengerTestScenario avslåttBostedFolkeregistrertEllerBostedsadresse(LocalDate fom) {
-        return fullAvslagScenario(fom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, null);
+        return avslåttBostedScenario(fom, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null);
     }
 
     public static AktivitetspengerTestScenario avslåttArbeidsstedStudiested(LocalDate fom, String fritekstBrev) {
-        return fullAvslagScenario(fom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED, fritekstBrev);
+        return avslåttBostedScenario(fom, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, fritekstBrev);
     }
 
-    private static AktivitetspengerTestScenario fullAvslagScenario(LocalDate fom, VilkårType vilkårType, Avslagsårsak avslagsårsak, String fritekstBrev) {
+    private static AktivitetspengerTestScenario avslåttBostedScenario(LocalDate fom, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstBrev) {
+        var vurderinger = InngangsvilkårVurderingTestData.builder().medBostedsvilkårResultat(false, ikkeOppfyltÅrsak, fritekstBrev);
+        return fullAvslagScenario(fom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, fritekstBrev, vurderinger);
+    }
+
+    private static AktivitetspengerTestScenario avslåttBistandScenario(LocalDate fom, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstBrev) {
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBistandsvilkårResultat(false, ikkeOppfyltÅrsak, fritekstBrev);
+        return fullAvslagScenario(fom, VilkårType.BISTANDSVILKÅR, Avslagsårsak.IKKE_14A_VEDTAK, fritekstBrev, vurderinger);
+    }
+
+    private static AktivitetspengerTestScenario fullAvslagScenario(LocalDate fom, VilkårType vilkårType, Avslagsårsak avslagsårsak, String fritekstBrev,
+                                                                     InngangsvilkårVurderingTestData.Builder vurderinger) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
+        var periode = new Periode(fom, tom);
 
         return AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
-            .medSøknadsperioder(List.of(new Periode(fom, tom)))
+            .medSøknadsperioder(List.of(periode))
             .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))))
             .medVilkår(vilkårType, new LocalDateTimeline<>(p, VilkårUtfall.avslått(avslagsårsak, fritekstBrev)))
+            .medInngangsvilkårVurderinger(vurderinger.medPeriode(periode).build())
             .build();
     }
 

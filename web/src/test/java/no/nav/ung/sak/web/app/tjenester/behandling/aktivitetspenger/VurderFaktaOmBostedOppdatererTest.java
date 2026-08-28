@@ -31,6 +31,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
@@ -132,7 +133,7 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
-        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto);
+        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto, behandling);
 
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(bostedAvklaringPeriode));
 
@@ -142,7 +143,7 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
-    private static BostedsPeriodeAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto) {
+    private static BostedsPeriodeAvklaringForeslått konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
         return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
             BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(dto.getAvklaringer().getFirst(), TOM),
             UUID.randomUUID().toString(),
@@ -293,7 +294,7 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     private List<BostedsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
-        return inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+        return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
             .orElseThrow();
     }
@@ -401,7 +402,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
-            .getForeslåtteAvklaringerEllerTomListe()
+            .getForeslåtteAvklaringer()
             .stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
             .toList();

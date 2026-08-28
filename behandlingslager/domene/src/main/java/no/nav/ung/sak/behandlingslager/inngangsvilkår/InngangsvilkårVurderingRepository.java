@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
@@ -23,8 +24,40 @@ public class InngangsvilkårVurderingRepository {
         this.entityManager = entityManager;
     }
 
-    public Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> hentGrunnlag(Long behandlingId) {
-        return hentEksisterendeGrunnlag(behandlingId);
+    public Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
+        var query = entityManager.createQuery(
+            "SELECT g FROM AktivitetspengerInngangsvilkårResultatGrunnlag g " +
+                "WHERE g.behandlingId = :behandlingId " +
+                "AND g.aktiv = true",
+            AktivitetspengerInngangsvilkårResultatGrunnlag.class);
+        query.setParameter("behandlingId", behandlingId);
+        return HibernateVerktøy.hentUniktResultat(query);
+    }
+
+    /**
+     * Tidslinje over vurderte inngangsvilkår for behandlingen, koblet til {@link VilkårType}.
+     * Tom tidslinje dersom det ikke finnes grunnlag.
+     */
+    public LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> hentVurderingTidslinje(Long behandlingId) {
+        return hentEksisterendeGrunnlag(behandlingId)
+            .map(grunnlag -> tilVilkårTidslinje(grunnlag.hentBistandTidslinje())
+                .crossJoin(tilVilkårTidslinje(grunnlag.hentLivsoppholdTidslinje()), InngangsvilkårVurderingRepository::slåSammen)
+                .crossJoin(tilVilkårTidslinje(grunnlag.hentBostedTidslinje().mapValue(BostedsvilkårResultatPeriode::tilVilkårsvurderingResultat)), InngangsvilkårVurderingRepository::slåSammen))
+            .orElseGet(LocalDateTimeline::empty);
+    }
+
+    private static LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> tilVilkårTidslinje(LocalDateTimeline<VilkårsvurderingResultat> tidslinje) {
+        return tidslinje.mapValue(v -> Map.of(v.vilkårType(), v));
+    }
+
+    private static LocalDateSegment<Map<VilkårType, VilkårsvurderingResultat>> slåSammen(
+            LocalDateInterval interval,
+            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultat>> lhs,
+            LocalDateSegment<Map<VilkårType, VilkårsvurderingResultat>> rhs) {
+        var kombinert = new LinkedHashMap<VilkårType, VilkårsvurderingResultat>();
+        if (lhs != null) { kombinert.putAll(lhs.getValue()); }
+        if (rhs != null) { kombinert.putAll(rhs.getValue()); }
+        return new LocalDateSegment<>(interval, Map.copyOf(kombinert));
     }
 
     public void lagreBistandsVurderinger(Long behandlingId, List<BistandsvilkårResultatPeriode> nyeVurderinger) {
@@ -192,16 +225,6 @@ public class InngangsvilkårVurderingRepository {
         grunnlag.deaktiver();
         entityManager.persist(grunnlag);
         entityManager.flush();
-    }
-
-    private Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> hentEksisterendeGrunnlag(Long behandlingId) {
-        var query = entityManager.createQuery(
-            "SELECT g FROM AktivitetspengerInngangsvilkårResultatGrunnlag g " +
-                "WHERE g.behandlingId = :behandlingId " +
-                "AND g.aktiv = true",
-            AktivitetspengerInngangsvilkårResultatGrunnlag.class);
-        query.setParameter("behandlingId", behandlingId);
-        return HibernateVerktøy.hentUniktResultat(query);
     }
 
     public void fjernResultatFor(long behandlingId, VilkårType vilkårType, Collection<Periode> perioder) {

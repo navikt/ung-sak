@@ -19,7 +19,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EndringType;
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.*;
@@ -116,7 +115,7 @@ public class BostedRestTjeneste {
 
                 var verdi = segment.getValue();
                 var faktaOgAvklaring = verdi.getFaktaOgAvklaring();
-                var uttalelse = faktaOgAvklaring.harForeslåttAvslagsavklaring() ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvslagsavklaring().getReferanse()) : null;
+                var uttalelse = faktaOgAvklaring.getForeslåttAvklaring() != null ? uttalelseByReferanse.get(faktaOgAvklaring.getForeslåttAvklaring().getReferanse()) : null;
                 boolean harUttalelse = uttalelse != null && uttalelse.harUttalelse();
                 String uttalelseTekst = uttalelse != null ? uttalelse.getUttalelseBegrunnelse() : null;
 
@@ -145,9 +144,9 @@ public class BostedRestTjeneste {
     }
 
     private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedsGrunnlag grunnlag, Behandling behandling) {
-        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaMedStatusSomTidslinje(AvklaringStatus.UNDER_ARBEID, AvklaringStatus.FERDIG);
+        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgAlleAvklaringerSomTidslinje();
 
-        LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+        LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(LocalDateTimeline.empty());
 
@@ -203,22 +202,22 @@ public class BostedRestTjeneste {
         }
 
         public BostedAvklaringDto byggAvklaringDtoHvisFinnes() {
-            if (faktaOgAvklaring == null || !faktaOgAvklaring.harForeslåttAvslagsavklaring()) {
+            if (faktaOgAvklaring == null || !faktaOgAvklaring.harAvklaring()) {
                 return null;
             }
 
-            var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvslagsavklaring();
+            var gjeldendeAvklaring = faktaOgAvklaring.getGjeldendeAvklaring();
 
             return new BostedAvklaringDto(
-                foreslåttAvklaring.getPeriode().tilPeriode(),
+                gjeldendeAvklaring.getPeriode().tilPeriode(),
                 faktaOgAvklaring.isErBosattITrondheim(),
                 faktaOgAvklaring.getIkkeOppfyltÅrsak(),
-                foreslåttAvklaring.getBegrunnelse(),
-                foreslåttAvklaring.skalSendeVarsel(),
-                foreslåttAvklaring.getFritekstTilVarsel(),
-                foreslåttAvklaring.getBegrunnelseIkkeVarsel(),
-                foreslåttAvklaring.getAvklaringtype(),
-                foreslåttAvklaring.kanRedigeres()
+                gjeldendeAvklaring.getBegrunnelse(),
+                gjeldendeAvklaring.skalSendeVarsel(),
+                gjeldendeAvklaring.getFritekstTilVarsel(),
+                gjeldendeAvklaring.getBegrunnelseIkkeVarsel(),
+                gjeldendeAvklaring.getAvklaringtype(),
+                faktaOgAvklaring.kanRedigeres()
             );
         }
     }

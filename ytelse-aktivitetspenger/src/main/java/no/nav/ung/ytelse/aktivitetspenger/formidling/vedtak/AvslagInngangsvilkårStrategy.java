@@ -52,6 +52,7 @@ public final class AvslagInngangsvilkårStrategy implements VedtaksbrevInnholdby
                 "Avslagsbrev ved avslag på inngangsvilkår"
             ));
         }
+
         return List.of();
     }
 

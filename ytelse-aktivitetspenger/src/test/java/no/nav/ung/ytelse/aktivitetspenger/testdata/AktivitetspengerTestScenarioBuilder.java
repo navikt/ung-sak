@@ -30,6 +30,8 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtak;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
@@ -64,6 +66,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -519,10 +522,45 @@ public class AktivitetspengerTestScenarioBuilder {
         if (aktivitetspengerTestscenario.kontrollerInntektPerioder() != null) {
             repositories.tilkjentYtelseRepository().lagre(behandling1.getId(), aktivitetspengerTestscenario.kontrollerInntektPerioder().stream().map(LocalDateSegment::getValue).toList());
         }
-        if (aktivitetspengerTestscenario.behandlingTriggere() != null && repositories.prosessTriggereRepository() != null) {
+        if (aktivitetspengerTestscenario.behandlingTriggere() != null) {
             repositories.prosessTriggereRepository().leggTil(behandling1.getId(), aktivitetspengerTestscenario.behandlingTriggere());
         }
 
+        if (!aktivitetspengerTestscenario.bostedsAvklaringer().isEmpty()) {
+            lagreBostedsAvklaringer(repositories.bostedsGrunnlagRepository(), behandling1);
+        }
+
+        var inngangsvilkårVurderinger = aktivitetspengerTestscenario.inngangsvilkårVurderinger();
+        repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bostedsvilkårResultater());
+        repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bistandsvilkårResultater());
+        repositories.inngangsvilkårVurderingRepository().lagreYtelseVurderinger(behandling1.getId(), inngangsvilkårVurderinger.andreYtelserResultater());
+        repositories.inngangsvilkårVurderingRepository().lagreAktivitetVurderinger(behandling1.getId(), inngangsvilkårVurderinger.aktivitetsvilkårResultater());
+    }
+
+    private void lagreBostedsAvklaringer(BostedsGrunnlagRepository bostedsGrunnlagRepository, Behandling behandling1) {
+        var bostedsAvklaringer = aktivitetspengerTestscenario.bostedsAvklaringer();
+        var behandlingId = behandling1.getId();
+        var startdato = aktivitetspengerTestscenario.søknadsperioder() != null && !aktivitetspengerTestscenario.søknadsperioder().isEmpty()
+            ? aktivitetspengerTestscenario.søknadsperioder().getFirst().getFom()
+            : bostedsAvklaringer.getFirst().periode().getFom();
+
+        // Grunnlaget må eksistere før avklaringer kan lagres
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, "dummy-journalpostid", startdato, true);
+
+        var avklaringer = bostedsAvklaringer.stream()
+            .map(it -> new BostedsPeriodeAvklaringForeslått(
+                DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
+                it.ikkeOppfyltÅrsak(),
+                "Begrunnelse fra testscenario",
+                false,
+                null,
+                "Varsles ikke i testscenario",
+                "VL",
+                it.periode().getFom().atStartOfDay(),
+                it.avklaringtype()))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, avklaringer);
     }
 
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {

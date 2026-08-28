@@ -42,7 +42,7 @@ public class BostedOppgaveOppretter {
         for (Etterlysning etterlysning : etterlysninger) {
             var periodeAvklaring = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
                 .stream()
-                .flatMap(g -> g.getForeslåtteAvklaringerEllerTomListe().stream())
+                .flatMap(g -> g.getForeslåtteAvklaringer().stream())
                 .filter(avklaring -> avklaring.getReferanse().equals(etterlysning.getGrunnlagsreferanse()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
