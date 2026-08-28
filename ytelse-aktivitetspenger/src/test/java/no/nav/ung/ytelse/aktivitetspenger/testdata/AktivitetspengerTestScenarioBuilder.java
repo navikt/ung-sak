@@ -117,7 +117,6 @@ public class AktivitetspengerTestScenarioBuilder {
     private AktivitetspengerTestScenario aktivitetspengerTestscenario;
     private final List<MottattDokumentTestGrunnlag> mottatteDokumenter = new ArrayList<>();
     private final List<SøktStartdato> søktStartdatoer = new ArrayList<>();
-    private final List<BostedsAvklaringTestData> bostedsAvklaringer = new ArrayList<>();
 
     private AktivitetspengerTestScenarioBuilder() {
         this.fagsakBuilder = FagsakBuilder
@@ -527,7 +526,7 @@ public class AktivitetspengerTestScenarioBuilder {
             repositories.prosessTriggereRepository().leggTil(behandling1.getId(), aktivitetspengerTestscenario.behandlingTriggere());
         }
 
-        if (!bostedsAvklaringer.isEmpty() && repositories.bostedsGrunnlagRepository() != null) {
+        if (!aktivitetspengerTestscenario.bostedsAvklaringer().isEmpty() && repositories.bostedsGrunnlagRepository() != null) {
             lagreBostedsAvklaringer(repositories.bostedsGrunnlagRepository(), behandling1);
         }
 
@@ -540,6 +539,7 @@ public class AktivitetspengerTestScenarioBuilder {
     }
 
     private void lagreBostedsAvklaringer(BostedsGrunnlagRepository bostedsGrunnlagRepository, Behandling behandling1) {
+        var bostedsAvklaringer = aktivitetspengerTestscenario.bostedsAvklaringer();
         var behandlingId = behandling1.getId();
         var startdato = aktivitetspengerTestscenario.søknadsperioder() != null && !aktivitetspengerTestscenario.søknadsperioder().isEmpty()
             ? aktivitetspengerTestscenario.søknadsperioder().getFirst().getFom()
@@ -915,11 +915,6 @@ public class AktivitetspengerTestScenarioBuilder {
 
     public AktivitetspengerTestScenarioBuilder leggTilVilkår(VilkårType vilkårType, Utfall utfall, Periode periode, Avslagsårsak avslagsårsak, String fritekstBrev) {
         vilkår.add(new VilkårData(vilkårType, utfall, periode, avslagsårsak, fritekstBrev));
-        return this;
-    }
-
-    public AktivitetspengerTestScenarioBuilder leggTilBostedsAvklaring(BostedsAvklaringTestData bostedsAvklaring) {
-        bostedsAvklaringer.add(bostedsAvklaring);
         return this;
     }
 

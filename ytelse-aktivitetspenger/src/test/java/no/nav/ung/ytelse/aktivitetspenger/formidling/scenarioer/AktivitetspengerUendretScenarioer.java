@@ -13,6 +13,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerS
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -26,14 +27,7 @@ import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.Aktivitet
  */
 public class AktivitetspengerUendretScenarioer {
 
-    public record UendretScenario(
-        AktivitetspengerTestScenario uendretScenario,
-        VilkårType vilkårType,
-        Periode vurdertPeriode,
-        BostedsAvklaringTestData bostedsAvklaring
-    ) {}
-
-    public static UendretScenario uendretScenario(LocalDate fom, BostedsAvklaringTestData bostedsAvklaring, String fritekstTilBrev) {
+    public static AktivitetspengerTestScenario uendretScenario(LocalDate fom, BostedsAvklaringTestData bostedsAvklaring, String fritekstTilBrev) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
@@ -56,7 +50,11 @@ public class AktivitetspengerUendretScenarioer {
             .medBostedsvilkårResultat(vurdertPeriode, true, null, fritekstTilBrev)
             .build();
 
-        var uendretScenario = AktivitetspengerTestScenario.builder()
+        var bostedVilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt())
+        ));
+
+        return AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
             .medSøknadsperioder(List.of(new Periode(fom, tom)))
             .medSatsperioder(satsperioder)
@@ -66,8 +64,8 @@ public class AktivitetspengerUendretScenarioer {
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .medVilkår(VilkårType.BOSTEDSVILKÅR, bostedVilkårTidslinje)
+            .medBostedsAvklaringer(List.of(bostedsAvklaring))
             .build();
-
-        return new UendretScenario(uendretScenario, VilkårType.BOSTEDSVILKÅR, vurdertPeriode, bostedsAvklaring);
     }
 }

@@ -15,6 +15,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerS
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -24,31 +25,23 @@ import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.Aktivitet
 
 public class AktivitetspengerOpphørScenarioer {
 
-    public record OpphørScenario(
-        AktivitetspengerTestScenario opphørScenario,
-        VilkårType vilkårType,
-        Avslagsårsak avslagsårsak,
-        Periode opphørtVilkårPeriode,
-        BostedsAvklaringTestData bostedsAvklaring
-    ) {}
-
-    public static OpphørScenario opphørPgaBosted(LocalDate fom) {
+    public static AktivitetspengerTestScenario opphørPgaBosted(LocalDate fom) {
         return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null);
     }
 
-    public static OpphørScenario opphørPgaBostedAnnet(LocalDate fom, String fritekstTilBrev) {
+    public static AktivitetspengerTestScenario opphørPgaBostedAnnet(LocalDate fom, String fritekstTilBrev) {
         return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.ANNET, fritekstTilBrev);
     }
 
-    public static OpphørScenario opphørPgaBostedFolkeregistrert(LocalDate fom) {
+    public static AktivitetspengerTestScenario opphørPgaBostedFolkeregistrert(LocalDate fom) {
         return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null);
     }
 
-    public static OpphørScenario opphørPgaArbeidsstedStudiested(LocalDate fom) {
+    public static AktivitetspengerTestScenario opphørPgaArbeidsstedStudiested(LocalDate fom) {
         return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null);
     }
 
-    private static OpphørScenario opphørMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+    private static AktivitetspengerTestScenario opphørMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
@@ -73,7 +66,12 @@ public class AktivitetspengerOpphørScenarioer {
             .medBostedsvilkårResultat(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
             .build();
 
-        var opphørScenario = AktivitetspengerTestScenario.builder()
+        var bostedVilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(opphørtVilkårPeriode.getFom(), opphørtVilkårPeriode.getTom(),
+                VilkårUtfall.avslått(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, fritekstTilBrev))
+        ));
+
+        return AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
             .medSøknadsperioder(List.of(new Periode(fom, tom)))
             .medSatsperioder(satsperioder)
@@ -83,10 +81,9 @@ public class AktivitetspengerOpphørScenarioer {
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .medVilkår(vilkårType, bostedVilkårTidslinje)
+            .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak)))
             .build();
-
-        return new OpphørScenario(opphørScenario, vilkårType, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, opphørtVilkårPeriode,
-            BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak));
     }
 }
 

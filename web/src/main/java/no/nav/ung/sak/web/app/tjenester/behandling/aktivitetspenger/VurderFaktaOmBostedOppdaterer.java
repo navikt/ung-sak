@@ -74,6 +74,10 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         List<BostedAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
             .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(a, maxTomDato)).toList();
 
+        if (nyeAvklaringer.size() > 1) {
+            throw new IllegalArgumentException("Støtter kun lagring av én avklaring for bostedsvilkåret samtidig");
+        }
+
         Set<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
 
         bostedAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereForeslåtteAvklaringer, nyeAvklaringer);

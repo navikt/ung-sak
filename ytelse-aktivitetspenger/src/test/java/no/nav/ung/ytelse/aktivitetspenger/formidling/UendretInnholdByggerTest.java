@@ -3,12 +3,11 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerUendretScenarioer;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerUendretScenarioer.UendretScenario;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
 import org.junit.jupiter.api.DisplayName;
@@ -44,7 +43,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(scenario.vurdertPeriode().getFom())
+                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom())
             );
     }
 
@@ -64,7 +63,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du får likevel aktivitetspenger i perioden fra og med " + brevDatoString(scenario.vurdertPeriode().getFom())
+                "Du får likevel aktivitetspenger i perioden fra og med " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom())
             );
     }
 
@@ -89,11 +88,9 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    private Behandling lagUendretScenario(UendretScenario scenario) {
+    private Behandling lagUendretScenario(AktivitetspengerTestScenario scenario) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(scenario.uendretScenario())
-            .leggTilVilkår(scenario.vilkårType(), Utfall.OPPFYLT, scenario.vurdertPeriode())
-            .leggTilBostedsAvklaring(scenario.bostedsAvklaring());
+            .medAktivitetspengerTestGrunnlag(scenario);
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);

@@ -15,6 +15,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerS
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,31 +29,23 @@ import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.Aktivitet
  */
 public class AktivitetspengerEndringAvslagScenarioer {
 
-    public record EndringAvslagScenario(
-        AktivitetspengerTestScenario endringAvslagScenario,
-        VilkårType vilkårType,
-        Avslagsårsak avslagsårsak,
-        Periode avslåttVilkårPeriode,
-        BostedsAvklaringTestData bostedsAvklaring
-    ) {}
-
-    public static EndringAvslagScenario avslagPgaBosted(LocalDate fom) {
+    public static AktivitetspengerTestScenario avslagPgaBosted(LocalDate fom) {
         return avslagMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null);
     }
 
-    public static EndringAvslagScenario avslagPgaBostedAnnet(LocalDate fom, String fritekstTilBrev) {
+    public static AktivitetspengerTestScenario avslagPgaBostedAnnet(LocalDate fom, String fritekstTilBrev) {
         return avslagMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.ANNET, fritekstTilBrev);
     }
 
-    public static EndringAvslagScenario avslagPgaBostedFolkeregistrert(LocalDate fom) {
+    public static AktivitetspengerTestScenario avslagPgaBostedFolkeregistrert(LocalDate fom) {
         return avslagMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null);
     }
 
-    public static EndringAvslagScenario avslagPgaArbeidsstedStudiested(LocalDate fom) {
+    public static AktivitetspengerTestScenario avslagPgaArbeidsstedStudiested(LocalDate fom) {
         return avslagMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null);
     }
 
-    private static EndringAvslagScenario avslagMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+    private static AktivitetspengerTestScenario avslagMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
@@ -82,7 +75,12 @@ public class AktivitetspengerEndringAvslagScenarioer {
             .medBostedsvilkårResultat(avslåttVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
             .build();
 
-        var endringAvslagScenario = AktivitetspengerTestScenario.builder()
+        var bostedVilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(avslåttVilkårPeriode.getFom(), avslåttVilkårPeriode.getTom(),
+                VilkårUtfall.avslått(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, fritekstTilBrev))
+        ));
+
+        return AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
             .medSøknadsperioder(List.of(new Periode(fom, tom)))
             .medSatsperioder(satsperioder)
@@ -92,9 +90,8 @@ public class AktivitetspengerEndringAvslagScenarioer {
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .medVilkår(vilkårType, bostedVilkårTidslinje)
+            .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.avslag(avslåttVilkårPeriode, ikkeOppfyltÅrsak)))
             .build();
-
-        return new EndringAvslagScenario(endringAvslagScenario, vilkårType, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, avslåttVilkårPeriode,
-            BostedsAvklaringTestData.avslag(avslåttVilkårPeriode, ikkeOppfyltÅrsak));
     }
 }
