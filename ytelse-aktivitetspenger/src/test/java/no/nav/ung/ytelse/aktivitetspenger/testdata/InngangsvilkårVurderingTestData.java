@@ -1,8 +1,10 @@
 package no.nav.ung.ytelse.aktivitetspenger.testdata;
 
+import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
@@ -20,7 +22,8 @@ import java.util.List;
 public record InngangsvilkårVurderingTestData(
     List<BostedsvilkårResultatPeriode> bostedsvilkårResultater,
     List<BistandsvilkårResultatPeriode> bistandsvilkårResultater,
-    List<AndreLivsoppholdsytelserResultatPeriode> andreYtelserResultater) {
+    List<AndreLivsoppholdsytelserResultatPeriode> andreYtelserResultater,
+    List<AktivitetsvilkårResultatPeriode> aktivitetsvilkårResultater) {
 
     private static final String DEFAULT_BEGRUNNELSE = "Begrunnelse fra testscenario";
     private static final String DEFAULT_VURDERT_AV = "A111111";
@@ -29,6 +32,7 @@ public record InngangsvilkårVurderingTestData(
         bostedsvilkårResultater = List.copyOf(bostedsvilkårResultater);
         bistandsvilkårResultater = List.copyOf(bistandsvilkårResultater);
         andreYtelserResultater = List.copyOf(andreYtelserResultater);
+        aktivitetsvilkårResultater = List.copyOf(aktivitetsvilkårResultater);
     }
 
     public static InngangsvilkårVurderingTestData tom() {
@@ -48,10 +52,14 @@ public record InngangsvilkårVurderingTestData(
     private record AndreYtelserVurderingInput(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
     }
 
+    private record AktivitetVurderingInput(Periode periode, boolean oppfylt, AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+    }
+
     public static class Builder {
         private final List<BostedVurderingInput> bostedsvilkårInput = new ArrayList<>();
         private final List<BistandVurderingInput> bistandsvilkårInput = new ArrayList<>();
         private final List<AndreYtelserVurderingInput> andreYtelserInput = new ArrayList<>();
+        private final List<AktivitetVurderingInput> aktivitetsvilkårInput = new ArrayList<>();
         private Periode periode;
 
         public Builder medPeriode(Periode periode) {
@@ -83,6 +91,15 @@ public record InngangsvilkårVurderingTestData(
 
         public Builder medAndreYtelser(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
             andreYtelserInput.add(new AndreYtelserVurderingInput(periode, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev));
+            return this;
+        }
+
+        public Builder medAktivitetsvilkårResultat(boolean oppfylt, AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+            return medAktivitetsvilkårResultat(null, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev);
+        }
+
+        public Builder medAktivitetsvilkårResultat(Periode periode, boolean oppfylt, AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+            aktivitetsvilkårInput.add(new AktivitetVurderingInput(periode, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev));
             return this;
         }
 
@@ -123,7 +140,19 @@ public record InngangsvilkårVurderingTestData(
                     LocalDateTime.now()))
                 .toList();
 
-            return new InngangsvilkårVurderingTestData(bostedsvilkårResultater, bistandsvilkårResultater, andreYtelserResultater);
+            List<AktivitetsvilkårResultatPeriode> aktivitetsvilkårResultater = aktivitetsvilkårInput.stream()
+                .map(input -> new AktivitetsvilkårResultatPeriode(
+                    tilDatoIntervall(resolverPeriode(input.periode(), periode)),
+                    input.oppfylt(),
+                    input.ikkeOppfyltÅrsak(),
+                    true,
+                    DEFAULT_BEGRUNNELSE,
+                    input.fritekstTilBrev(),
+                    DEFAULT_VURDERT_AV,
+                    LocalDateTime.now()))
+                .toList();
+
+            return new InngangsvilkårVurderingTestData(bostedsvilkårResultater, bistandsvilkårResultater, andreYtelserResultater, aktivitetsvilkårResultater);
         }
 
         private static Periode resolverPeriode(Periode periodePåVurdering, Periode fellesPeriode) {

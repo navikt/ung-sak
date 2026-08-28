@@ -535,6 +535,7 @@ public class AktivitetspengerTestScenarioBuilder {
             repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bostedsvilkårResultater());
             repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bistandsvilkårResultater());
             repositories.inngangsvilkårVurderingRepository().lagreYtelseVurderinger(behandling1.getId(), inngangsvilkårVurderinger.andreYtelserResultater());
+            repositories.inngangsvilkårVurderingRepository().lagreAktivitetVurderinger(behandling1.getId(), inngangsvilkårVurderinger.aktivitetsvilkårResultater());
         }
     }
 
