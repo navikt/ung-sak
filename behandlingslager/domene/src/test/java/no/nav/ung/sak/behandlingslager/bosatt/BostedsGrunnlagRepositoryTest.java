@@ -142,7 +142,7 @@ class BostedsGrunnlagRepositoryTest {
 
         var avklaringerPåNyBehandling = repository.hentGrunnlagHvisEksisterer(nyBehandling.getId())
             .orElseThrow()
-            .getForeslått()
+            .getAvklaringer()
             .hentForeslåtteAvklaringer();
 
         assertThat(avklaringerPåNyBehandling)
@@ -151,7 +151,7 @@ class BostedsGrunnlagRepositoryTest {
 
         var avklaringerPåGammelBehandling = repository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
-            .getForeslått()
+            .getAvklaringer()
             .hentForeslåtteAvklaringer();
 
         assertThat(avklaringerPåGammelBehandling).hasSize(1);
@@ -181,7 +181,7 @@ class BostedsGrunnlagRepositoryTest {
     void skal_kopiere_ferdigstilte_avklaringer_til_ny_behandling() {
         var foreslått = lagAvklaring(FOM, TOM);
         repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(foreslått));
-        repository.settAlleAvklaringerFerdig(behandling.getId());
+        repository.ferdigstillForeslåtteAvklaringer(behandling.getId());
 
         Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
@@ -199,8 +199,8 @@ class BostedsGrunnlagRepositoryTest {
         var foreslått = lagAvklaring(FOM, TOM);
         repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(foreslått));
 
-        repository.settAlleAvklaringerFerdig(behandling.getId());
-        repository.settAlleAvklaringerFerdig(behandling.getId());
+        repository.ferdigstillForeslåtteAvklaringer(behandling.getId());
+        repository.ferdigstillForeslåtteAvklaringer(behandling.getId());
 
         var grunnlag = repository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
         assertThat(grunnlag.getForeslåtteAvklaringer())
@@ -213,7 +213,7 @@ class BostedsGrunnlagRepositoryTest {
 
     private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {        return repository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
-            .getForeslått()
+            .getAvklaringer()
             .hentForeslåtteAvklaringer()
             .stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))

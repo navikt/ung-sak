@@ -67,7 +67,7 @@ public class BostedsGrunnlagRepository {
             .orElseThrow(() -> new IllegalStateException("Forventer at grunnlag allerede eksisterer ved lagring av avklaring"));
 
         var nyttGrunnlag = BostedsGrunnlag.nyttGrunnlagMedReferanserFra(eksisterendeGrunnlag);
-        nyttGrunnlag.setForeslåttAvklaring(nyeAvklaringer);
+        nyttGrunnlag.setForeslåtteAvklaringer(nyeAvklaringer);
 
         if (eksisterendeGrunnlag.equals(nyttGrunnlag)) {
             LOG.info("lagreForeslåtteAvklaringer ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
@@ -81,10 +81,10 @@ public class BostedsGrunnlagRepository {
         return new HashSet<>(nyttGrunnlag.getForeslåtteAvklaringer());
     }
 
-    public void settAlleAvklaringerFerdig(long behandlingId) {
-        var bleEndret = lagre(behandlingId, BostedsGrunnlag::settAlleAvklaringerTilFerdig);
+    public void ferdigstillForeslåtteAvklaringer(long behandlingId) {
+        var bleEndret = lagre(behandlingId, BostedsGrunnlag::ferdigstillForeslåtteAvklaringer);
         if (!bleEndret) {
-            LOG.info("settAlleAvklaringerFerdig ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
+            LOG.info("ferdigstillForeslåtteAvklaringer ga ingen endring i bostedsgrunnlag for behandlingId={}", behandlingId);
         }
     }
 

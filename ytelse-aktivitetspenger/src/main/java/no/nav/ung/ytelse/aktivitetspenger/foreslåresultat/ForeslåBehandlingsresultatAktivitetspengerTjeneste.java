@@ -68,7 +68,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
     /**
      * Behandlingen skal opphøres dersom det finnes en {@link VilkårsavklaringTjeneste} som gjelder for en av
-     * behandlingens årsaker, hvis seneste avklaring under arbeid er av typen {@link Avklaringtype#OPPHØR},
+     * behandlingens årsaker, hvis seneste avklaring foreslått i behandlingen er av typen {@link Avklaringtype#OPPHØR},
      * og det finnes en avslått vilkårsperiode som overlapper avklaringens periode.
      */
     @Override

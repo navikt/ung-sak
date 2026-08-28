@@ -57,7 +57,7 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public List<BostedsPeriodeAvklaring> hentBostedPeriodeAvklaringUnderArbeid(long behandlingId) {
+    public List<BostedsPeriodeAvklaring> hentForeslåtteAvklaringer(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(g -> List.copyOf(g.getForeslåtteAvklaringer()))
             .orElse(List.of());
@@ -71,8 +71,8 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     public void oppdaterEtterlysninger(Behandling behandling,
-                                       Collection<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid,
-                                       Collection<BostedsPeriodeAvklaring> alleAvklaringerUnderArbeid) {
+                                       Collection<BostedsPeriodeAvklaring> tidligereForeslåtteAvklaringer,
+                                       Collection<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer) {
 
         long behandlingId = behandling.getId();
 
@@ -81,13 +81,13 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
             .toList();
 
-        Map<BostedAvklaringInnhold, UUID> tidligereAvklaringer = tidligereAvklaringerUnderArbeid.stream()
+        Map<BostedAvklaringInnhold, UUID> tidligereAvklaringer = tidligereForeslåtteAvklaringer.stream()
             .collect(Collectors.toMap(
                 BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold,
                 BostedsPeriodeAvklaring::getReferanse
             ));
 
-        Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles = alleAvklaringerUnderArbeid.stream()
+        Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtteAvklaringer.stream()
             .filter(BostedsPeriodeAvklaring::skalSendeVarsel)
             .collect(Collectors.toMap(
                 BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold,
@@ -137,8 +137,8 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     // Hvis saksbehandler endrer perioden det avklares for etter at vilkårsvurdering er utført, gjelder ikke lenger vurderingen og den delen som ikke overlapper med ny avklaring må gjenopprettes fra forrige behandling.
     // Vilkårsperioden som avklaringen gjelder for settes til ikke vurdert, slik at den kan vurderes på nytt (automatisk eller i aksjonspunkt)
-    public void gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid, List<BostedAvklaringInnhold> nyeAvklaringer) {
-        var tidligereTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(tidligereAvklaringerUnderArbeid.stream().map(BostedsPeriodeAvklaring::getPeriode).toList());
+    public void gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedsPeriodeAvklaring> tidligereForeslåtteAvklaringer, List<BostedAvklaringInnhold> nyeAvklaringer) {
+        var tidligereTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(tidligereForeslåtteAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList());
         var nyTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nyeAvklaringer.stream().map(BostedAvklaringInnhold::periode).toList());
         var tidslinjeSomIkkeHåndteresAvNyAvklaring = tidligereTidslinje.disjoint(nyTidslinje);
 
@@ -150,13 +150,13 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     @Override
-    public void settAlleAvklaringerTilFerdig(long behandlingId) {
-        bostedsGrunnlagRepository.settAlleAvklaringerFerdig(behandlingId);
+    public void ferdigstillForeslåtteAvklaringer(long behandlingId) {
+        bostedsGrunnlagRepository.ferdigstillForeslåtteAvklaringer(behandlingId);
     }
 
     @Override
-    public void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId) {
-        var perioderTidligereVurdertEtterAvklaring = hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
+    public void settVilkårsperioderTilIkkeVurdertForForeslåtteAvklaringer(long behandlingId) {
+        var perioderTidligereVurdertEtterAvklaring = hentForeslåtteAvklaringer(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
         inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(behandlingId, VilkårType.BOSTEDSVILKÅR, perioderTidligereVurdertEtterAvklaring);
     }
 

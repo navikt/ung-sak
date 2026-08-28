@@ -29,8 +29,8 @@ public class BostedsGrunnlag extends BaseEntitet {
     private BostedsinformasjonFraSøknadHolder oppgittFraSøknad;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
-    @JoinColumn(name = "foreslatt_holder_id", updatable = false)
-    private BostedsAvklaringHolder foreslått;
+    @JoinColumn(name = "avklaring_holder_id", updatable = false)
+    private BostedsAvklaringHolder avklaringer;
 
     @Column(name = "grunnlag_ref", nullable = false, updatable = false)
     private UUID grunnlagsreferanse;
@@ -51,10 +51,10 @@ public class BostedsGrunnlag extends BaseEntitet {
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
-    BostedsGrunnlag(Long behandlingId, BostedsinformasjonFraSøknadHolder oppgittFraSøknad, BostedsAvklaringHolder foreslått) {
+    BostedsGrunnlag(Long behandlingId, BostedsinformasjonFraSøknadHolder oppgittFraSøknad, BostedsAvklaringHolder avklaringer) {
         this.behandlingId = behandlingId;
         this.oppgittFraSøknad = oppgittFraSøknad;
-        this.foreslått = foreslått;
+        this.avklaringer = avklaringer;
         this.grunnlagsreferanse = UUID.randomUUID();
     }
 
@@ -71,27 +71,27 @@ public class BostedsGrunnlag extends BaseEntitet {
     }
 
     /**
-     * Bygger ny holder fra avklaringene og setter foreslått — kun hvis innholdet faktisk er endret.
+     * Bygger ny holder med de foreslåtte avklaringene — kun hvis innholdet faktisk er endret.
      * Beholder gammel holder-referanse ved ingen endring (tilsvarende {@link #leggTilInformasjonFraSøknad}).
      */
-    void setForeslåttAvklaring(Set<BostedsPeriodeAvklaringForeslått> avklaringer) {
-        var nyHolder = BostedsAvklaringHolder.lagSkrivbarKopi(this.foreslått);
-        nyHolder.leggTilEllerErstattForeslåttePeriodeAvklaringer(avklaringer);
+    void setForeslåtteAvklaringer(Set<BostedsPeriodeAvklaringForeslått> avklaringer) {
+        var nyHolder = BostedsAvklaringHolder.lagKopi(this.avklaringer);
+        nyHolder.erstattForeslåttePeriodeAvklaringer(avklaringer);
 
-        if (nyHolder.equals(this.foreslått)) {
+        if (nyHolder.equals(this.avklaringer)) {
             return;
         }
-        this.foreslått = nyHolder;
+        this.avklaringer = nyHolder;
     }
 
-    void settAlleAvklaringerTilFerdig() {
-        var nyHolder = BostedsAvklaringHolder.lagSkrivbarKopi(this.foreslått);
-        nyHolder.settAlleAvklaringerTilFerdig();
+    void ferdigstillForeslåtteAvklaringer() {
+        var nyHolder = BostedsAvklaringHolder.lagKopi(this.avklaringer);
+        nyHolder.ferdigstillForeslåtteAvklaringer();
 
-        if (nyHolder.equals(this.foreslått)) {
+        if (nyHolder.equals(this.avklaringer)) {
             return;
         }
-        this.foreslått = nyHolder;
+        this.avklaringer = nyHolder;
     }
 
     public Long getId() {
@@ -102,15 +102,18 @@ public class BostedsGrunnlag extends BaseEntitet {
         return behandlingId;
     }
 
-    BostedsAvklaringHolder getForeslått() {
-        return foreslått;
+    /**
+     * Holderen med alle bostedsavklaringer på saken — både de foreslåtte i denne behandlingen og de ferdigstilte.
+     */
+    BostedsAvklaringHolder getAvklaringer() {
+        return avklaringer;
     }
 
     /**
      * Avklaringene som er foreslått og behandlet i denne behandlingen — uavhengig av om de er ferdigstilt.
      */
     public Set<BostedsPeriodeAvklaring> getForeslåtteAvklaringer() {
-        return Optional.ofNullable(foreslått)
+        return Optional.ofNullable(avklaringer)
             .map(BostedsAvklaringHolder::hentForeslåtteAvklaringer)
             .orElse(Set.of());
     }
@@ -119,7 +122,7 @@ public class BostedsGrunnlag extends BaseEntitet {
      * Alle ferdigstilte avklaringer på saken, akkumulert på tvers av behandlinger.
      */
     public Set<BostedsPeriodeAvklaring> getFerdigstilteAvklaringer() {
-        return Optional.ofNullable(foreslått)
+        return Optional.ofNullable(avklaringer)
             .map(BostedsAvklaringHolder::hentFerdigstilteAvklaringer)
             .orElse(Set.of());
     }
@@ -191,7 +194,7 @@ public class BostedsGrunnlag extends BaseEntitet {
     }
 
     private boolean kanRedigeres(BostedsPeriodeAvklaring avklaring) {
-        return foreslått != null && foreslått.erForeslåttOgIkkeFerdigstilt(avklaring);
+        return avklaringer != null && avklaringer.erForeslåttOgIkkeFerdigstilt(avklaring);
     }
 
     public UUID getGrunnlagsreferanse() {
@@ -210,12 +213,12 @@ public class BostedsGrunnlag extends BaseEntitet {
     public boolean equals(Object o) {
         if (!(o instanceof BostedsGrunnlag that)) return false;
         return Objects.equals(oppgittFraSøknad, that.oppgittFraSøknad) &&
-            Objects.equals(foreslått, that.foreslått);
+            Objects.equals(avklaringer, that.avklaringer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(oppgittFraSøknad, foreslått);
+        return Objects.hash(oppgittFraSøknad, avklaringer);
     }
 
     @Override
@@ -229,7 +232,7 @@ public class BostedsGrunnlag extends BaseEntitet {
         return new BostedsGrunnlag(
             grunnlag.getBehandlingId(),
             grunnlag.getOppgittFraSøknad(),
-            grunnlag.foreslått
+            grunnlag.avklaringer
         );
     }
 
@@ -238,7 +241,7 @@ public class BostedsGrunnlag extends BaseEntitet {
      * for den nye behandlingen, og kopieres derfor ikke med — kun de ferdigstilte avklaringene følger med videre.
      */
     public static BostedsGrunnlag nyttGrunnlagForBehandlingMedReferanserFra(Long behandlingId, BostedsGrunnlag grunnlag) {
-        var forrigeHolder = grunnlag.foreslått;
+        var forrigeHolder = grunnlag.avklaringer;
         var nyHolder = forrigeHolder != null && forrigeHolder.harForeslåtteAvklaringer()
             ? BostedsAvklaringHolder.lagKopiUtenForeslåtte(forrigeHolder)
             : forrigeHolder;

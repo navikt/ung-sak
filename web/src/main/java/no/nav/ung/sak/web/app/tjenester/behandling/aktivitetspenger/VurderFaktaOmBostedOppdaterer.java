@@ -66,7 +66,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             .max(Comparator.naturalOrder())
             .orElseThrow(() -> new IllegalStateException("Må ha perioder til vurdering"));
 
-        List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid = bostedAvklaringTjeneste.hentBostedPeriodeAvklaringUnderArbeid(behandlingId);
+        List<BostedsPeriodeAvklaring> tidligereForeslåtteAvklaringer = bostedAvklaringTjeneste.hentForeslåtteAvklaringer(behandlingId);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -74,11 +74,11 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         List<BostedAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
             .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(a, maxTomDato)).toList();
 
-        Set<BostedsPeriodeAvklaring> alleGrunnlagsreferanserUnderArbeid = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
+        Set<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
 
-        bostedAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereAvklaringerUnderArbeid, nyeAvklaringer);
+        bostedAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereForeslåtteAvklaringer, nyeAvklaringer);
 
-        bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereAvklaringerUnderArbeid, alleGrunnlagsreferanserUnderArbeid);
+        bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereForeslåtteAvklaringer, nyeForeslåtteAvklaringer);
 
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)

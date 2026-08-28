@@ -37,7 +37,7 @@ public class VilkårsavklaringFerdigstillerTask extends BehandlingProsessTask {
     protected void prosesser(ProsessTaskData prosessTaskData) {
         long behandlingId = Long.parseLong(prosessTaskData.getBehandlingId());
         alleVilkårsavklaringTjenester.forEach(oppdaterer ->
-            oppdaterer.settAlleAvklaringerTilFerdig(behandlingId)
+            oppdaterer.ferdigstillForeslåtteAvklaringer(behandlingId)
         );
     }
 }

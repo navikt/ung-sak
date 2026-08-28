@@ -17,19 +17,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 class BostedsGrunnlagTest {
 
     @Test
-    void setForeslåttAvklaring_delerIkkeReferanserFraTidligereForeslåttHolderVedNyAvklaring() {
+    void setForeslåtteAvklaringer_delerIkkeReferanserFraTidligereForeslåttHolderVedNyAvklaring() {
         // Arrange
         var grunnlag = new BostedsGrunnlag(1L);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31));
 
         var førsteAvklaring = lagBostedAvklaring(periode, "Første begrunnelse");
 
-        grunnlag.setForeslåttAvklaring(Set.of(førsteAvklaring));
-        var førsteHolder = grunnlag.getForeslått();
+        grunnlag.setForeslåtteAvklaringer(Set.of(førsteAvklaring));
+        var førsteHolder = grunnlag.getAvklaringer();
 
         var andreAvklaring = lagBostedAvklaring(periode, "Andre begrunnelse");
-        grunnlag.setForeslåttAvklaring(Set.of(andreAvklaring));
-        var andreHolder = grunnlag.getForeslått();
+        grunnlag.setForeslåtteAvklaringer(Set.of(andreAvklaring));
+        var andreHolder = grunnlag.getAvklaringer();
 
         // Assert - ny holder er en annen instans enn den forrige, og den forrige er urørt
         assertThat(andreHolder).isNotSameAs(førsteHolder);

@@ -21,10 +21,10 @@ class BostedsAvklaringHolderTest {
     @Test
     void skal_erstatte_foreslatt_avklaring_uten_a_splitte_den() {
         var holder = new BostedsAvklaringHolder();
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(lagAvklaring(FOM, TOM)));
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(lagAvklaring(FOM, TOM)));
 
         var ny = lagAvklaring(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20));
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(ny));
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(ny));
 
         assertThat(holder.hentForeslåtteAvklaringer()).hasSize(1);
         assertThat(holder.hentForeslåtteAvklaringer().iterator().next().getReferanse()).isEqualTo(ny.getReferanse());
@@ -34,11 +34,11 @@ class BostedsAvklaringHolderTest {
     void skal_beholde_ferdigstilte_avklaringer_nar_nye_foreslatte_avklaringer_lagres() {
         var holder = new BostedsAvklaringHolder();
         var ferdigstilt = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(ferdigstilt));
-        holder.settAlleAvklaringerTilFerdig();
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(ferdigstilt));
+        holder.ferdigstillForeslåtteAvklaringer();
 
         var nyForeslått = lagAvklaring(LocalDate.of(2026, 1, 16), TOM);
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(nyForeslått));
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(nyForeslått));
 
         assertThat(holder.hentFerdigstilteAvklaringer())
             .extracting(BostedsPeriodeAvklaring::getReferanse)
@@ -52,12 +52,12 @@ class BostedsAvklaringHolderTest {
     void skal_beholde_referansen_pa_begge_segmenter_nar_ferdigstilt_avklaring_splittes() {
         var holder = new BostedsAvklaringHolder();
         var opprinnelig = lagAvklaring(FOM, TOM);
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(opprinnelig));
-        holder.settAlleAvklaringerTilFerdig();
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(opprinnelig));
+        holder.ferdigstillForeslåtteAvklaringer();
 
         var overlappende = lagAvklaring(LocalDate.of(2026, 1, 10), LocalDate.of(2026, 1, 20));
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(overlappende));
-        holder.settAlleAvklaringerTilFerdig();
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(overlappende));
+        holder.ferdigstillForeslåtteAvklaringer();
 
         var ferdigstilte = holder.hentFerdigstilteAvklaringer().stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
@@ -75,11 +75,11 @@ class BostedsAvklaringHolderTest {
     void avklaring_er_under_arbeid_frem_til_den_er_ferdigstilt() {
         var holder = new BostedsAvklaringHolder();
         var avklaring = lagAvklaring(FOM, TOM);
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(avklaring));
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(avklaring));
 
         assertThat(holder.erForeslåttOgIkkeFerdigstilt(avklaring)).isTrue();
 
-        holder.settAlleAvklaringerTilFerdig();
+        holder.ferdigstillForeslåtteAvklaringer();
 
         assertThat(holder.erForeslåttOgIkkeFerdigstilt(avklaring)).isFalse();
         // De foreslåtte beholdes etter ferdigstilling, slik at vi fortsatt vet hva som ble behandlet i behandlingen
@@ -90,9 +90,9 @@ class BostedsAvklaringHolderTest {
     void kopi_uten_foreslatte_skal_kun_beholde_de_ferdigstilte() {
         var holder = new BostedsAvklaringHolder();
         var ferdigstilt = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(ferdigstilt));
-        holder.settAlleAvklaringerTilFerdig();
-        holder.leggTilEllerErstattForeslåttePeriodeAvklaringer(List.of(lagAvklaring(LocalDate.of(2026, 1, 16), TOM)));
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(ferdigstilt));
+        holder.ferdigstillForeslåtteAvklaringer();
+        holder.erstattForeslåttePeriodeAvklaringer(List.of(lagAvklaring(LocalDate.of(2026, 1, 16), TOM)));
 
         var kopi = BostedsAvklaringHolder.lagKopiUtenForeslåtte(holder);
 
