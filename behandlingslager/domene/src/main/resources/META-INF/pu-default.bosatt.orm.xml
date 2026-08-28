@@ -6,11 +6,10 @@
 
     <sequence-generator name="SEQ_BOSATT_AVKLARING_HOLDER" allocation-size="50" sequence-name="SEQ_BOSATT_AVKLARING_HOLDER"/>
     <sequence-generator name="SEQ_BOSATT_PERIODE_AVKLARING" allocation-size="50" sequence-name="SEQ_BOSATT_PERIODE_AVKLARING"/>
+    <sequence-generator name="SEQ_BOSATT_PERIODE_AVKLARING_FORESLAATT" allocation-size="50" sequence-name="SEQ_BOSATT_PERIODE_AVKLARING_FORESLAATT"/>
     <sequence-generator name="SEQ_GR_BOSATT_AVKLARING" allocation-size="50" sequence-name="SEQ_GR_BOSATT_AVKLARING"/>
     <sequence-generator name="SEQ_BOSTEDSINFORMASJON_SOEKNAD_HOLDER" allocation-size="50" sequence-name="SEQ_BOSTEDSINFORMASJON_SOEKNAD_HOLDER"/>
     <sequence-generator name="SEQ_BOSATT_INFORMASJON_FRA_SOEKNAD" allocation-size="50" sequence-name="SEQ_BOSATT_INFORMASJON_FRA_SOEKNAD"/>
-
-    <mapped-superclass class="no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringFerdigstilt"/>
