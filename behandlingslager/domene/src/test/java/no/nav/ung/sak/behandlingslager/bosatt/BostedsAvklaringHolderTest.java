@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
@@ -95,6 +96,8 @@ class BostedsAvklaringHolderTest {
             false,
             null,
             "begrunnelse for hvorfor det ikke varsles",
+            BostedsavklaringKildeType.BRUKER,
+            null,
             "saksbehandler1",
             VURDERT_TIDSPUNKT,
             Avklaringtype.AVSLAG);

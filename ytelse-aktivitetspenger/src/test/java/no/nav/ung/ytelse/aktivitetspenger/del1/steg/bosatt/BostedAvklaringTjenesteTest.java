@@ -8,6 +8,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
@@ -80,6 +81,8 @@ class BostedAvklaringTjenesteTest {
             skalSendeVarsel,
             null,
             skalSendeVarsel ? null : "begrunnelse for at det ikke varsles",
+            BostedsavklaringKildeType.BRUKER,
+            null,
             UUID.randomUUID().toString(),
             LocalDateTime.now(),
             Avklaringtype.AVSLAG

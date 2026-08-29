@@ -19,6 +19,8 @@ public final class BostedsAvklaringDataMapper {
             bostedsPeriodeAvklaring.skalSendeVarsel(),
             bostedsPeriodeAvklaring.getFritekstTilVarsel(),
             bostedsPeriodeAvklaring.getBegrunnelseIkkeVarsel(),
+            bostedsPeriodeAvklaring.getKilde(),
+            bostedsPeriodeAvklaring.getKildeFritekst(),
             bostedsPeriodeAvklaring.getAvklaringtype()
         );
     }
@@ -31,6 +33,8 @@ public final class BostedsAvklaringDataMapper {
             bostedAvklaringInnhold.skalSendeVarsel(),
             bostedAvklaringInnhold.fritekstTilVarsel(),
             bostedAvklaringInnhold.begrunnelseIkkeVarsel(),
+            bostedAvklaringInnhold.kilde(),
+            bostedAvklaringInnhold.kildeFritekst(),
             vurdertAv,
             vurdertTidspunkt,
             bostedAvklaringInnhold.avklaringtype()
@@ -50,6 +54,8 @@ public final class BostedsAvklaringDataMapper {
             dto.skalSendeVarsel(),
             dto.vurdering().fritekstTilVarsel(),
             dto.vurdering().begrunnelseIkkeVarsel(),
+            dto.vurdering().kilde(),
+            dto.vurdering().kildeFritekst(),
             avklaringtype
         );
     }

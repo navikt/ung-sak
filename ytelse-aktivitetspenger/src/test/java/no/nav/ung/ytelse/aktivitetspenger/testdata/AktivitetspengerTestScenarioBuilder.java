@@ -5,6 +5,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.behandling.*;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.dokument.Brevkode;
@@ -555,6 +556,8 @@ public class AktivitetspengerTestScenarioBuilder {
                 false,
                 null,
                 "Varsles ikke i testscenario",
+                BostedsavklaringKildeType.BRUKER,
+                null,
                 "VL",
                 it.periode().getFom().atStartOfDay(),
                 it.avklaringtype()))
