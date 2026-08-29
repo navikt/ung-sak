@@ -556,8 +556,8 @@ public class AktivitetspengerTestScenarioBuilder {
                 false,
                 null,
                 "Varsles ikke i testscenario",
-                BostedsavklaringKildeType.BRUKER,
-                null,
+                it.kilde(),
+                it.kildeFritekst(),
                 "VL",
                 it.periode().getFom().atStartOfDay(),
                 it.avklaringtype()))
