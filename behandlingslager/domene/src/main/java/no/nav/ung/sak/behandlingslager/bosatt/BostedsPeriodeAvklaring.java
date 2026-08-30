@@ -31,10 +31,8 @@ public interface BostedsPeriodeAvklaring {
 
     Avklaringtype getAvklaringtype();
 
-    /** Hvor saksbehandler har fått opplysningene fra. */
     BostedsavklaringKildeType getKilde();
 
-    /** Påkrevd når kilde er ANNET. */
     String getKildeFritekst();
 
     String getVurdertAv();

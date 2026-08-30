@@ -17,7 +17,7 @@ alter table bosatt_periode_avklaring
 alter table bosatt_periode_avklaring_foreslaatt
     alter column kilde set not null;
 
-comment on column bosatt_periode_avklaring.kilde is 'Hvor saksbehandler har fått opplysningene fra, jf. BostedsavklaringKildeType.';
+comment on column bosatt_periode_avklaring.kilde is 'Hvor Nav har fått opplysningene fra, jf. BostedsavklaringKildeType.';
 comment on column bosatt_periode_avklaring.kilde_fritekst is 'Fritekstbeskrivelse av kilde. Settes kun når kilde = ANNET.';
-comment on column bosatt_periode_avklaring_foreslaatt.kilde is 'Hvor saksbehandler har fått opplysningene fra, jf. BostedsavklaringKildeType.';
+comment on column bosatt_periode_avklaring_foreslaatt.kilde is 'Hvor Nav har fått opplysningene fra, jf. BostedsavklaringKildeType.';
 comment on column bosatt_periode_avklaring_foreslaatt.kilde_fritekst is 'Fritekstbeskrivelse av kilde. Settes kun når kilde = ANNET.';

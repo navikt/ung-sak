@@ -18,7 +18,7 @@ public record BostedVurderingIkkeOppfyltDto(
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
-    /** Hvor saksbehandler har fått opplysningene fra. */
+    /** Hvor Nav har fått opplysningene fra. */
     @NotNull BostedsavklaringKildeType kilde,
     /** Påkrevd når kilde er ANNET. Skal ikke settes for andre kilder. */
     @Size(max = 1000) @Pattern(regexp = InputValideringRegex.FRITEKST) String kildeFritekst

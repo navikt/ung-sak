@@ -2,10 +2,6 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.dto;
 
 import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 
-/**
- * Hvor saksbehandler fikk opplysningene fra. Feltene er gjensidig utelukkende og styrer
- * hvilken variant av «Vi har fått opplysninger om dette fra …» brevmalen viser.
- */
 public record KildeTilOpplysninger(
     boolean fraBruker,
     boolean fraFolkeregisteret,

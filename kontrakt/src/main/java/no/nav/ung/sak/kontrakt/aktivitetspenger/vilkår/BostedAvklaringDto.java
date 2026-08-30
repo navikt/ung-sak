@@ -23,7 +23,7 @@ public record BostedAvklaringDto(
     String fritekstTilVarsel,
     /** Begrunnelse for hvorfor det ikke skal sendes varsel til bruker. */
     String begrunnelseIkkeVarsel,
-    /** Hvor saksbehandler har fått opplysningene fra. */
+    /** Hvor Nav har fått opplysningene fra. */
     BostedsavklaringKildeType kilde,
     /** Fritekstbeskrivelse av kilde. Kun satt når kilde er ANNET. */
     String kildeFritekst,
