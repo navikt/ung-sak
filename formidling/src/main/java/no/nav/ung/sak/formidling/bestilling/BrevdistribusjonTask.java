@@ -6,6 +6,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.prosesstask.api.ProsessTask;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
+import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingEntitet;
@@ -36,6 +37,7 @@ public class BrevdistribusjonTask implements ProsessTaskHandler {
     private BrevbestillingRepository brevbestillingRepository;
     private DokDistRestKlient dokDistRestKlient;
     private BrevHistorikkinnslagTjeneste brevHistorikkinnslagTjeneste;
+    private ProsessTaskTjeneste taskTjeneste;
 
     @Inject
     public BrevdistribusjonTask(BrevbestillingRepository brevbestillingRepository, DokDistRestKlient dokDistRestKlient, BrevHistorikkinnslagTjeneste brevHistorikkinnslagTjeneste) {
