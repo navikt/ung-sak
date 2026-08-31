@@ -1469,6 +1469,11 @@
         "type" : "string",
         "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "AVKORTET", "UDEFINERT" ]
       },
+      "ung.kodeverk.vilkår.BostedsavklaringKildeType" : {
+        "enum" : [ "BRUKER", "FOLKEREGISTER", "ANNET" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "BRUKER", "FOLKEREGISTER", "ANNET" ]
+      },
       "ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak" : {
         "enum" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "AVKORTET", "ANNET", "-" ],
         "type" : "string",
@@ -2268,6 +2273,12 @@
           "kanRedigeres" : {
             "type" : "boolean"
           },
+          "kilde" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsavklaringKildeType"
+          },
+          "kildeFritekst" : {
+            "type" : "string"
+          },
           "skalSendeVarsel" : {
             "type" : "boolean"
           }
@@ -2386,8 +2397,18 @@
             "minLength" : 0,
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
+          },
+          "kilde" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.BostedsavklaringKildeType"
+          },
+          "kildeFritekst" : {
+            "maxLength" : 1000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
+            "type" : "string"
           }
         },
+        "required" : [ "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto" : {

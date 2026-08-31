@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.bosatt;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
@@ -29,6 +30,10 @@ public interface BostedsPeriodeAvklaring {
     String getBegrunnelseIkkeVarsel();
 
     Avklaringtype getAvklaringtype();
+
+    BostedsavklaringKildeType getKilde();
+
+    String getKildeFritekst();
 
     String getVurdertAv();
 

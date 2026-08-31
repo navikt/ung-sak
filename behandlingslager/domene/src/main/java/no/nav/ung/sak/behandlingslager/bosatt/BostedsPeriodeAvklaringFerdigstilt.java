@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -52,6 +53,13 @@ public class BostedsPeriodeAvklaringFerdigstilt extends BaseEntitet implements B
     private String begrunnelseIkkeVarsel;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "kilde", updatable = false, nullable = false)
+    private BostedsavklaringKildeType kilde;
+
+    @Column(name = "kilde_fritekst", updatable = false)
+    private String kildeFritekst;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "avklaringtype", updatable = false, nullable = false)
     private Avklaringtype avklaringtype;
 
@@ -77,6 +85,8 @@ public class BostedsPeriodeAvklaringFerdigstilt extends BaseEntitet implements B
         this.skalSendeVarsel = annenAvklaring.skalSendeVarsel();
         this.fritekstTilVarsel = annenAvklaring.getFritekstTilVarsel();
         this.begrunnelseIkkeVarsel = annenAvklaring.getBegrunnelseIkkeVarsel();
+        this.kilde = annenAvklaring.getKilde();
+        this.kildeFritekst = annenAvklaring.getKildeFritekst();
         this.vurdertAv = annenAvklaring.getVurdertAv();
         this.vurdertTidspunkt = annenAvklaring.getVurdertTidspunkt();
         this.avklaringtype = annenAvklaring.getAvklaringtype();
@@ -132,6 +142,16 @@ public class BostedsPeriodeAvklaringFerdigstilt extends BaseEntitet implements B
     }
 
     @Override
+    public BostedsavklaringKildeType getKilde() {
+        return kilde;
+    }
+
+    @Override
+    public String getKildeFritekst() {
+        return kildeFritekst;
+    }
+
+    @Override
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }
@@ -147,6 +167,8 @@ public class BostedsPeriodeAvklaringFerdigstilt extends BaseEntitet implements B
             && skalSendeVarsel == that.skalSendeVarsel
             && Objects.equals(fritekstTilVarsel, that.fritekstTilVarsel)
             && Objects.equals(begrunnelseIkkeVarsel, that.begrunnelseIkkeVarsel)
+            && kilde == that.kilde
+            && Objects.equals(kildeFritekst, that.kildeFritekst)
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt)
             && avklaringtype == that.avklaringtype;
@@ -154,7 +176,7 @@ public class BostedsPeriodeAvklaringFerdigstilt extends BaseEntitet implements B
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype);
+        return Objects.hash(getPeriode(), ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, kilde, kildeFritekst, vurdertAv, vurdertTidspunkt, avklaringtype);
     }
 
     @Override

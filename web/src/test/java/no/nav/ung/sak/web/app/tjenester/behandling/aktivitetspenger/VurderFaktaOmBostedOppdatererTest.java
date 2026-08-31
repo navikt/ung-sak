@@ -15,6 +15,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -413,7 +414,9 @@ class VurderFaktaOmBostedOppdatererTest {
             årsak,
             "begrunnelse",
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
-            BEGRUNNELSE_IKKE_VARSEL
+            BEGRUNNELSE_IKKE_VARSEL,
+            BostedsavklaringKildeType.BRUKER,
+            null
         );
         var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), vurdering, true);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
@@ -424,7 +427,9 @@ class VurderFaktaOmBostedOppdatererTest {
             årsak,
             "begrunnelse",
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
-            skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL
+            skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL,
+            BostedsavklaringKildeType.BRUKER,
+            null
         );
         var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering, !skalSendeVarsel);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");

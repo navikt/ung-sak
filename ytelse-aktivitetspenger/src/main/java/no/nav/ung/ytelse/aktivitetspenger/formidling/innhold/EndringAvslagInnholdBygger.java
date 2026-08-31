@@ -19,6 +19,7 @@ import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOgVurderingTids
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringAvslagDto;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.KildeTilOpplysninger;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -76,7 +77,8 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
             vilkårsavklaring.avklaringtype() == Avklaringtype.OPPHØR ? TemplateType.AKTIVITETSPENGER_OPPHØR : TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG,
             new EndringAvslagDto(
                 new Periode(localDateInterval.getFomDato(), localDateInterval.getTomDato()),
-                avslåttBosted
+                avslåttBosted,
+                KildeTilOpplysninger.av(vilkårsavklaring.kilde(), vilkårsavklaring.kildeFritekst())
             )
         );
     }

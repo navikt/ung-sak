@@ -5,6 +5,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -26,22 +27,22 @@ import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.Aktivitet
 public class AktivitetspengerOpphørScenarioer {
 
     public static AktivitetspengerTestScenario opphørPgaBosted(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null);
+        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null, BostedsavklaringKildeType.BRUKER, null);
     }
 
     public static AktivitetspengerTestScenario opphørPgaBostedAnnet(LocalDate fom, String fritekstTilBrev) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.ANNET, fritekstTilBrev);
+        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.ANNET, fritekstTilBrev, BostedsavklaringKildeType.ANNET, "veileder ved Nav Trondheim");
     }
 
     public static AktivitetspengerTestScenario opphørPgaBostedFolkeregistrert(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null);
+        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null, BostedsavklaringKildeType.FOLKEREGISTER, null);
     }
 
     public static AktivitetspengerTestScenario opphørPgaArbeidsstedStudiested(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null);
+        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null, BostedsavklaringKildeType.BRUKER, null);
     }
 
-    private static AktivitetspengerTestScenario opphørMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+    private static AktivitetspengerTestScenario opphørMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev, BostedsavklaringKildeType kilde, String kildeFritekst) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
@@ -82,7 +83,7 @@ public class AktivitetspengerOpphørScenarioer {
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(p))))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
             .medVilkår(vilkårType, bostedVilkårTidslinje)
-            .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak)))
+            .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak).medKilde(kilde, kildeFritekst)))
             .build();
     }
 }

@@ -216,6 +216,8 @@ public class BostedRestTjeneste {
                 gjeldendeAvklaring.skalSendeVarsel(),
                 gjeldendeAvklaring.getFritekstTilVarsel(),
                 gjeldendeAvklaring.getBegrunnelseIkkeVarsel(),
+                gjeldendeAvklaring.getKilde(),
+                gjeldendeAvklaring.getKildeFritekst(),
                 gjeldendeAvklaring.getAvklaringtype(),
                 faktaOgAvklaring.kanRedigeres()
             );

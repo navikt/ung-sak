@@ -33,6 +33,18 @@
             {{/if}}
         {{/with}}
 
+        {{#with kilde}}
+            {{#if fraBruker}}
+                <p>Vi har fått opplysninger om dette fra deg.</p>
+            {{/if}}
+            {{#if fraFolkeregisteret}}
+                <p>Vi har fått opplysninger om dette fra Folkeregisteret.</p>
+            {{/if}}
+            {{#if annet}}
+                <p>Vi har fått opplysninger om dette fra {{annet}}.</p>
+            {{/if}}
+        {{/with}}
+
     {{/felles/seksjon/hoved}}
 
     {{> aktivitetspenger/footer/footer-vedtak }}
