@@ -43,16 +43,10 @@ public class BostedsfaktaOgAvklaring {
         return søknadsinformasjon;
     }
 
-    /**
-     * Avklaringen foreslått og behandlet i gjeldende behandling, om den finnes. Kan redigeres av saksbehandler.
-     */
     public BostedsPeriodeAvklaring getForeslåttAvklaring() {
         return foreslåttAvklaring;
     }
 
-    /**
-     * Tidligere ferdigstilt (vedtatt) avklaring for perioden, om den finnes. Kan ikke redigeres.
-     */
     public BostedsPeriodeAvklaring getFerdigstiltAvklaring() {
         return ferdigstiltAvklaring;
     }
@@ -68,24 +62,23 @@ public class BostedsfaktaOgAvklaring {
         return getGjeldendeAvklaring() != null;
     }
 
-    /**
-     * Om avklaringen fortsatt er under arbeid i gjeldende behandling og dermed kan endres av saksbehandler.
-     */
+    public boolean harForeslåttAvklaring() {
+        return foreslåttAvklaring != null;
+    }
+
     public boolean kanRedigeres() {
         return foreslåttAvklaring != null;
     }
 
+    // getKilde kan kun brukes for gjeldende behandling (Avklaringer foreslått i denne behandlingen)
     public Kilde getKilde() {
-        return harAvklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
+        return harForeslåttAvklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
     }
 
     public boolean isErBosattITrondheim() {
         return !harAvklaring() && søknadsinformasjon.isErBosattITrondheim();
     }
 
-    public BostedsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {
-        return harAvklaring() ? getGjeldendeAvklaring().getIkkeOppfyltÅrsak() : null;
-    }
 
     @Override
     public String toString() {
