@@ -43,6 +43,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BOSTED)
             .medSteg(BehandlingStegType.VURDER_BOSTEDVILKÅR)
             .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
+            .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BISTAND)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR);
         if (aktivitetsvilkårEnabled) {
             modellBuilder.medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR);
@@ -78,6 +79,7 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BOSTED)
             .medSteg(BehandlingStegType.VURDER_BOSTEDVILKÅR)
             .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
+            .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BISTAND)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR);
         if (aktivitetsvilkårEnabled) {
             modellBuilder.medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR);

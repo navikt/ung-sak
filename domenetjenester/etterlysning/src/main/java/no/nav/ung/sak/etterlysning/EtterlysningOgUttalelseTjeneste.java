@@ -79,6 +79,7 @@ public class EtterlysningOgUttalelseTjeneste {
             case UTTALELSE_ENDRET_PERIODE -> EndringType.ENDRET_PERIODE;
             case UTTALELSE_OPPHOR_VED_MAKSDATO -> EndringType.OPPHOR_VED_MAKSDATO;
             case UTTALELSE_BOSTED -> EndringType.AVKLAR_BOSTED;
+            case UTTALELSE_BISTAND -> EndringType.AVKLAR_BISTAND;
         };
     }
 }

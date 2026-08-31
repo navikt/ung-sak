@@ -16,6 +16,7 @@ public enum EndringType implements Kodeverdi {
     ENDRET_PERIODE("ENDRET_PERIODE", "Endret programperiode"),
     OPPHOR_VED_MAKSDATO("OPPHOR_VED_MAKSDATO", "Opphør ved maksdato"),
     AVKLAR_BOSTED("AVKLAR_BOSTED", "Avklaring bosted"),
+    AVKLAR_BISTAND("AVKLAR_BISTAND", "Avklaring bistand"),
 
     ;
 

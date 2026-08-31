@@ -78,6 +78,9 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
         if (vilkårType == VilkårType.BOSTEDSVILKÅR) {
             årsaker.add(BehandlingÅrsakType.ENDRET_BOSTED);
         }
+        if (vilkårType == VilkårType.BISTANDSVILKÅR) {
+            årsaker.add(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
+        }
         return årsaker;
     }
 

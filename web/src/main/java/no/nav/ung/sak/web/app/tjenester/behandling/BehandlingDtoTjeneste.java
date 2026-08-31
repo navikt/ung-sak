@@ -32,6 +32,7 @@ import no.nav.ung.sak.web.app.aktivitetspenger.AktivitetspengerRestTjeneste;
 import no.nav.ung.sak.web.app.proxy.oppdrag.OppdragProxyRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.BostedRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.BistandRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
@@ -312,6 +313,7 @@ public class BehandlingDtoTjeneste {
         dto.leggTil(getFraMap(AktivitetspengerRestTjeneste.SATS_OG_UTBETALING_PATH, "månedsvis-sats-og-utbetaling", uuidQueryParams));
         dto.leggTil(getFraMap(BostedRestTjeneste.BOSATT_PATH, "bosatt", uuidQueryParams));
         dto.leggTil(getFraMap(BostedRestTjeneste.BOSATT_FAKTA_PATH, "bosatt-fakta", uuidQueryParams));
+        dto.leggTil(getFraMap(BistandRestTjeneste.BISTAND_PATH, "bistand", uuidQueryParams));
     }
 
     private void leggTilBeregnetYtelseBaserteLinks(Behandling behandling, BehandlingDto dto, Map<String, String> uuidQueryParams) {

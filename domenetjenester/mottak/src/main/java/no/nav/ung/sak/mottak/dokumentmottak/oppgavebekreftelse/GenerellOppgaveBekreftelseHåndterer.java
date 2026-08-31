@@ -98,6 +98,10 @@ public class GenerellOppgaveBekreftelseHåndterer implements BekreftelseHåndter
             case UTTALELSE_ENDRET_PERIODE -> EndringType.ENDRET_PERIODE;
             case UTTALELSE_OPPHOR_VED_MAKSDATO -> EndringType.OPPHOR_VED_MAKSDATO;
             case UTTALELSE_BOSTED -> EndringType.AVKLAR_BOSTED;
+            // TODO(fase 1 plassholder): k9-format mangler Bekreftelse.Type for bistandsavklaring, så det finnes
+            // ingen @OppgaveTypeRef som treffer denne håndtereren for bistand ennå. Mappingen er lagt inn slik at
+            // switchen er uttømmende, og er klar til bruk når kontrakten foreligger.
+            case UTTALELSE_BISTAND -> EndringType.AVKLAR_BISTAND;
         };
     }
 

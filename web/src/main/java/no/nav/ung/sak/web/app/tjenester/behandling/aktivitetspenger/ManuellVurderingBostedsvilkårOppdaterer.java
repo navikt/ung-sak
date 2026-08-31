@@ -137,11 +137,11 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
 
-        LocalDateTimeline<?> manglendePerioder = eksisterendeVilkårperiode.disjoint(vurderteLukkedePerioder);
-        if (!manglendePerioder.isEmpty() && !erEndretBosted) {
-            // Brukers uttalelse kan føre til at ikke hele perioden opprinnelig satt til IKKE_VURDERT skal revurderes likevel.
-            throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);
-        }
+//        LocalDateTimeline<?> manglendePerioder = eksisterendeVilkårperiode.disjoint(vurderteLukkedePerioder);
+//        if (!manglendePerioder.isEmpty() && !erEndretBosted) {
+//            // Brukers uttalelse kan føre til at ikke hele perioden opprinnelig satt til IKKE_VURDERT skal revurderes likevel.
+//            throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);
+//        }
     }
 
     static LocalDate hentMaksDatoVedÅpenPeriode(Periode periode, LocalDate senesteTomVilkårsperiode) {

@@ -11,6 +11,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatHolder;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -189,6 +191,51 @@ public class InngangsvilkårVurderingTjeneste {
             ).toList();
 
         vilkårVurderingRepository.lagreBostedVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
+    }
+
+    /**
+     * Bistand-variant av {@link #gjenopprettForrigeVurderingForPerioderIkkeVurdert}. Egen metode framfor å gjøre
+     * den eksisterende generisk: bosted henter tidslinjen som hele {@code BostedsvilkårResultatPeriode}-entiteter,
+     * mens {@code hentBistandTidslinje()} kun gir {@link no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat}
+     * (uten vurdertAv/vurdertTidspunkt/manuellVurdering). Vi går derfor rett på holderen og bygger tidslinjen selv,
+     * slik at hele vurderingen kan gjenopprettes uten tap av felter.
+     */
+    public void gjenopprettForrigeVurderingForPerioderIkkeVurdertBistand(Long behandlingId, VilkårResultatBuilder vilkårResultatBuilder, LocalDateTimeline<Boolean> avgrensningstidslinje) {
+        var originalBehandlingId = behandlingRepository.hentBehandling(behandlingId).getOriginalBehandlingId().orElse(null);
+        if (originalBehandlingId == null) {
+            return;
+        }
+        var perioderSomSkalGjenopprettes = hentPerioderSomSkalGjenopprettes(vilkårResultatBuilder, VilkårType.BISTANDSVILKÅR, avgrensningstidslinje);
+        if (perioderSomSkalGjenopprettes.isEmpty()) {
+            return;
+        }
+
+        var tidligereVurderinger = vilkårVurderingRepository.hentEksisterendeGrunnlag(originalBehandlingId)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke vilkårvurdering på originalbehandling ved gjenoppretting" + originalBehandlingId))
+            .getBistandsvilkårResultatHolder()
+            .map(BistandsvilkårResultatHolder::getVurderinger)
+            .orElse(List.of());
+
+        var tidligereVurderTidslinje = new LocalDateTimeline<>(tidligereVurderinger.stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+
+        var tidligereVurderingerSomSkalGjenopprettes = tidligereVurderTidslinje.intersection(perioderSomSkalGjenopprettes)
+            .segmenter().stream()
+            .map(it -> {
+                var kilde = it.getValue();
+                return new BistandsvilkårResultatPeriode(
+                    DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()),
+                    kilde.isGodkjent(),
+                    kilde.getIkkeOppfyltÅrsak(),
+                    kilde.isManuellVurdering(),
+                    kilde.getBegrunnelse(),
+                    kilde.getFritekstVurderingBrev(),
+                    kilde.getVurdertAv(),
+                    kilde.getVurdertTidspunkt());
+            }).toList();
+
+        vilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
     }
 
     private static LocalDateTimeline<Boolean> hentPerioderSomSkalGjenopprettes(VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, LocalDateTimeline<Boolean> avgrensningstidslinje) {

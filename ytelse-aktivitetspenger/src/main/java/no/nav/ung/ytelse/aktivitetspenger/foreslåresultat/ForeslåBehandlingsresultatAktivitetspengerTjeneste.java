@@ -75,7 +75,8 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
     protected boolean skalBehandlingResultatSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
         // Avgrenser hvilke behandlingsårsaker vi leter etter opphør for
         var behandlingårsakerSomSkalKunneEndreBehandlingResultat = Set.of(
-            BehandlingÅrsakType.ENDRET_BOSTED
+            BehandlingÅrsakType.ENDRET_BOSTED,
+            BehandlingÅrsakType.ENDRET_BISTANDSBEHOV
         );
 
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
