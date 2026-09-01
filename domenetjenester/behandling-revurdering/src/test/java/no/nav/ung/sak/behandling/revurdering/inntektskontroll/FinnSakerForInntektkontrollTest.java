@@ -49,7 +49,6 @@ import static no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval.TIDENES_
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -59,14 +58,14 @@ import static org.mockito.Mockito.when;
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
 class FinnSakerForInntektkontrollTest {
-
-    public static final LocalDate FØRSTE_SEPTEMBER = LocalDate.of(2025, 9, 1);
-    public static final LocalDate MIDT_I_SEPTEMBER = LocalDate.of(2025, 9, 15);
-    public static final LocalDate LANGT_FRAM = LocalDate.of(2026, 7, 1);
-    public static final LocalDate LANGT_BAK = LocalDate.of(2025, 1, 1);
-    public static final LocalDate FØRSTE_AUGUST = LocalDate.of(2025, 8, 1);
-    public static final LocalDate SISTE_DAG_I_SEPTEMBER = LocalDate.of(2025, 9, 30);
-    public static final LocalDate MIDT_I_OKTOBER = LocalDate.of(2025, 10, 15);
+    public static final int ÅR = LocalDate.now().getYear();
+    public static final LocalDate FØRSTE_SEPTEMBER = LocalDate.of(ÅR, 9, 1);
+    public static final LocalDate MIDT_I_SEPTEMBER = LocalDate.of(ÅR, 9, 15);
+    public static final LocalDate LANGT_FRAM = LocalDate.of(ÅR+1, 7, 1);
+    public static final LocalDate LANGT_BAK = LocalDate.of(ÅR, 1, 1);
+    public static final LocalDate FØRSTE_AUGUST = LocalDate.of(ÅR, 8, 1);
+    public static final LocalDate SISTE_DAG_I_SEPTEMBER = LocalDate.of(ÅR, 9, 30);
+    public static final LocalDate MIDT_I_OKTOBER = LocalDate.of(ÅR, 10, 15);
 
     @Inject
     private BehandlingRepository behandlingRepository;
@@ -399,7 +398,7 @@ class FinnSakerForInntektkontrollTest {
         b.avsluttBehandling();
         behandlingRepository.lagreOgClear(b, behandlingRepository.taSkriveLås(b));
         var vedtak = BehandlingVedtak.builder(b.getId())
-            .medVedtakstidspunkt(LocalDateTime.of(2025, 9, 1, 0, 0))
+            .medVedtakstidspunkt(LocalDateTime.of(ÅR, 9, 1, 0, 0))
             .medAnsvarligSaksbehandler("system")
             .build();
         behandlingVedtakRepository.lagre(vedtak, behandlingRepository.taSkriveLås(b));

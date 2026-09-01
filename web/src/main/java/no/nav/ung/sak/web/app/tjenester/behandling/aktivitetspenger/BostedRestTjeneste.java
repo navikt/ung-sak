@@ -211,7 +211,7 @@ public class BostedRestTjeneste {
             return new BostedAvklaringDto(
                 gjeldendeAvklaring.getPeriode().tilPeriode(),
                 faktaOgAvklaring.isErBosattITrondheim(),
-                faktaOgAvklaring.getIkkeOppfyltÅrsak(),
+                gjeldendeAvklaring.getIkkeOppfyltÅrsak(),
                 gjeldendeAvklaring.getBegrunnelse(),
                 gjeldendeAvklaring.skalSendeVarsel(),
                 gjeldendeAvklaring.getFritekstTilVarsel(),
