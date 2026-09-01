@@ -3,18 +3,6 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 
-/**
- * Fletter sammen oppgitt fakta fra søknad ({@link BostedsinformasjonFraSøknad}) med en eventuell foreslått
- * avklaring fra saksbehandler i gjeldende behandling og/eller en tidligere ferdigstilt (vedtatt) avklaring,
- * for én periode.
- * <p>
- * Foreslått og ferdigstilt avklaring holdes som to atskilte felter — istedenfor å flettes til én felles
- * avklaring med et supplerende flagg — slik at det alltid er eksplisitt hvilken av de to en gitt avklaring er.
- * Bygges opp trinnvis via {@link #medForeslåttAvklaring(BostedsPeriodeAvklaring)} og {@link #medFerdigstiltAvklaring(BostedsPeriodeAvklaring)}
- * ettersom {@link BostedsGrunnlag} fletter søknadsfakta med de to avklaringstidslinjene i separate steg.
- * Foreslått avklaring er kilde til sannhet der begge finnes ({@link Kilde#SAKSBEHANDLER}); ellers benyttes
- * ferdigstilt avklaring om den finnes, eller fakta fra søknaden ({@link Kilde#SØKNAD}).
- */
 public class BostedsfaktaOgAvklaring {
 
     private final BostedsinformasjonFraSøknad søknadsinformasjon;
@@ -70,9 +58,8 @@ public class BostedsfaktaOgAvklaring {
         return foreslåttAvklaring != null;
     }
 
-    // getKilde kan kun brukes for gjeldende behandling (Avklaringer foreslått i denne behandlingen)
     public Kilde getKilde() {
-        return harForeslåttAvklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
+        return harAvklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
     }
 
     public boolean isErBosattITrondheim() {
