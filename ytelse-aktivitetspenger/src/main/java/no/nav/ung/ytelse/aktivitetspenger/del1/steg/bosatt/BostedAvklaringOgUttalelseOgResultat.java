@@ -61,7 +61,7 @@ class BostedAvklaringOgUttalelseOgResultat {
     }
 
     private boolean erKildeSøknad() {
-        return Kilde.SØKNAD.equals(faktaOgAvklaring.getKilde());
+        return faktaOgAvklaring.getKilde() == Kilde.SØKNAD;
     }
 
     private boolean erValgtÅIkkeVarsleNårIkkeOppfylt() {

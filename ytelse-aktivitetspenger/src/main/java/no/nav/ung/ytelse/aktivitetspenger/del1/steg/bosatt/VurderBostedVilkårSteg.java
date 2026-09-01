@@ -106,8 +106,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        behandlingRepository.hentBehandling(behandlingId).harBehandlingÅrsak(BehandlingÅrsakType.ENDRET_BOSTED);
-
         List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
             behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_BOSTED);
 
