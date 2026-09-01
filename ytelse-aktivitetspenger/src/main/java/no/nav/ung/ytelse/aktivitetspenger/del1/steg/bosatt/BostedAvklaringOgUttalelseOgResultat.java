@@ -11,9 +11,7 @@ import no.nav.ung.sak.etterlysning.EtterlysningData;
 import java.time.LocalDateTime;
 
 /**
- * Per-segment hjelpeobjekt som kombinerer avklaring og etterlysning,
- * og reduserer til et {@link StegUtfall}.
- * Bygges opp via tidslinje-combinators, inspirert av PgiØvreGrenseVurderer.
+ * Per-segment hjelpeobjekt som kombinerer avklaring og etterlysning, og reduserer til et {@link StegUtfall}.
  */
 class BostedAvklaringOgUttalelseOgResultat {
 
@@ -42,7 +40,7 @@ class BostedAvklaringOgUttalelseOgResultat {
     StegUtfall utledUtfall() {
         if (erVentende()) {
             return StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
-        } else if (erKildeSøknadOgIkkeTidligereVurdert() || harMottattSvarMedUttalelse() || erÅrsakAnnet() || erValgtÅIkkeVarsleNårIkkeOppfylt()) {
+        } else if (erKildeSøknad() || harMottattSvarMedUttalelse() || erÅrsakAnnet() || erValgtÅIkkeVarsleNårIkkeOppfylt()) {
             return StegUtfall.VILKÅR_VURDERES_MANUELT;
         } else if (!faktaOgAvklaring.isErBosattITrondheim()) {
             return StegUtfall.OPPHØR_AUTOMATISK;
@@ -62,8 +60,8 @@ class BostedAvklaringOgUttalelseOgResultat {
         return etterlysning;
     }
 
-    private boolean erKildeSøknadOgIkkeTidligereVurdert() {
-        return Kilde.SØKNAD.equals(faktaOgAvklaring.getKilde()) && resultat == null;
+    private boolean erKildeSøknad() {
+        return faktaOgAvklaring.getKilde() == Kilde.SØKNAD;
     }
 
     private boolean erValgtÅIkkeVarsleNårIkkeOppfylt() {
@@ -72,7 +70,8 @@ class BostedAvklaringOgUttalelseOgResultat {
     }
 
     private boolean erÅrsakAnnet() {
-        return BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(faktaOgAvklaring.getIkkeOppfyltÅrsak());
+        var ikkeOppfyltÅrsak = faktaOgAvklaring.harForeslåttAvklaring() ? faktaOgAvklaring.getForeslåttAvklaring().getIkkeOppfyltÅrsak() : null;
+        return BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak);
     }
 
     private boolean erVentende() {

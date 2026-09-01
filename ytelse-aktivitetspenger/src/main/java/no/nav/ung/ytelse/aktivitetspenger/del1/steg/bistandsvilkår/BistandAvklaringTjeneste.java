@@ -121,6 +121,6 @@ public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .stream()
             .max(Comparator.comparing(VilkårPeriodeAvklaring::getVurdertTidspunkt)
                 .thenComparing(avklaring -> avklaring.getPeriode().getFomDato()))
-            .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode()));
+            .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode(), null, null));
     }
 }

@@ -8,6 +8,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -18,6 +19,7 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporin
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
@@ -120,9 +122,11 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(new LocalDateTimeline<>(List.of()));
 
-            var avklaringTidslinje = grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering);
+        var avklaringTidslinje = avgrensTilForeslåtteAvklaringerHvisFinnes(
+            grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering)
+        );
+
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
-            .intersection(tidslinjeTilVurdering)
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new)
             .combine(
                 etterlysningTidslinje,
@@ -171,6 +175,16 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
         inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    /**
+     * Avgrenser avklaringstidslinjen til kun periodene med foreslått avklaring, dersom minst én slik periode
+     * finnes til vurdering. Perioder som kun har oppgitt fakta fra søknad ikke vurderes i dette steget.
+     */
+    private static LocalDateTimeline<BostedsfaktaOgAvklaring> avgrensTilForeslåtteAvklaringerHvisFinnes(
+        LocalDateTimeline<BostedsfaktaOgAvklaring> avklaringTidslinje) {
+        var medForeslåttAvklaring = avklaringTidslinje.filterValue(BostedsfaktaOgAvklaring::harForeslåttAvklaring);
+        return medForeslåttAvklaring.isEmpty() ? avklaringTidslinje : medForeslåttAvklaring;
     }
 
     private void lagreBehandlingprosessSporing(long behandlingId, LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje, LocalDateTimeline<StegUtfall> stegutfallTidslinje) {

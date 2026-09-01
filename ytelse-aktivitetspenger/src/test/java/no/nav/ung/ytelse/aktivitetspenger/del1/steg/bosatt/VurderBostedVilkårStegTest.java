@@ -257,6 +257,52 @@ class VurderBostedVilkårStegTest {
             .doesNotContain(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
     }
 
+    @Test
+    void skal_ignorere_periode_uten_foreslått_avklaring_når_annen_periode_har_foreslått_avklaring() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+
+        // Kun første periode har en foreslått avklaring fra saksbehandler. Andre periode har bare søknadsfakta.
+        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
+
+        var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
+        var ventendeEtterlysning = new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            frist,
+            avklaring.getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(false, null, new JournalpostId("jp-uttalelse-1"))
+        );
+        steg = lagSteg(List.of(ventendeEtterlysning));
+        var resultat = utførSteg(behandling);
+
+        // Andre periode (uten foreslått avklaring) skal ikke trigge manuell vurdering, selv om kilde er søknad der.
+        assertThat(resultat.getAksjonspunktListe()).isEmpty();
+
+        // Verifiserer at opphøret automatisk er konvertert til vurdering og vilkårsresultat
+        var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId());
+        var inngangsvilkårVurderinger = vilkårVurderingResultat
+            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
+            .orElseThrow();
+        assertThat(inngangsvilkårVurderinger).hasSize(1);
+        var vurdertPeriode = inngangsvilkårVurderinger.iterator().next();
+        assertThat(vurdertPeriode.getPeriode().getFomDato()).isEqualTo(FOM);
+        assertThat(vurdertPeriode.getPeriode().getTomDato()).isEqualTo(TOM);
+        assertThat(vurdertPeriode.getIkkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
+
+        var vilkårPerioder = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BOSTEDSVILKÅR).get().getPerioder();
+        var periodeMedAvklaring = vilkårPerioder.stream().filter(p -> p.getPeriode().getFomDato().equals(FOM)).findFirst().orElseThrow();
+        var periodeUtenAvklaring = vilkårPerioder.stream().filter(p -> p.getPeriode().getFomDato().equals(fom2)).findFirst().orElseThrow();
+
+        assertThat(periodeMedAvklaring.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
+        // Perioden uten foreslått avklaring skal ikke ha blitt rørt, siden den avgrenses bort fra vurderingen.
+        assertThat(periodeUtenAvklaring.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+    }
+
     private Behandling opprettBehandlingMedVilkårOgPeriode() {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.BOSTEDSVILKÅR, Utfall.IKKE_VURDERT, new Periode(FOM, TOM))
