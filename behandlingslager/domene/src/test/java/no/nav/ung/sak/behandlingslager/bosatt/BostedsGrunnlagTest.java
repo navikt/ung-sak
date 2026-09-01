@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
@@ -47,6 +48,8 @@ class BostedsGrunnlagTest {
             begrunnelse,
             true,
             null,
+            null,
+            BostedsavklaringKildeType.FOLKEREGISTER,
             null,
             "saksbehandler2",
             LocalDateTime.of(2024, 2, 1, 12, 0),

@@ -5,6 +5,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
@@ -38,7 +39,7 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
         var behandlingId = 1L;
         var avklaringsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
         when(vilkårsavklaringTjeneste.hentSenesteAvklaringForBehandling(behandlingId))
-            .thenReturn(Optional.of(new Vilkårsavklaring(Avklaringtype.AVSLAG, avklaringsperiode)));
+            .thenReturn(Optional.of(new Vilkårsavklaring(Avklaringtype.AVSLAG, avklaringsperiode, BostedsavklaringKildeType.BRUKER, null)));
 
         // Vurdering finnes kun for første halvdel av perioden
         var vurdertTom = LocalDate.of(2024, 1, 15);

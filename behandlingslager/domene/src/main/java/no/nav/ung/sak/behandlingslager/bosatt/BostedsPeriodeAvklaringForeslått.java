@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -48,6 +49,13 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
     private String begrunnelseIkkeVarsel;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "kilde", updatable = false, nullable = false)
+    private BostedsavklaringKildeType kilde;
+
+    @Column(name = "kilde_fritekst", updatable = false)
+    private String kildeFritekst;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "avklaringtype", updatable = false, nullable = false)
     private Avklaringtype avklaringtype;
 
@@ -67,6 +75,8 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
                                             boolean skalSendeVarsel,
                                             String fritekstTilVarsel,
                                             String begrunnelseIkkeVarsel,
+                                            BostedsavklaringKildeType kilde,
+                                            String kildeFritekst,
                                             String vurdertAv,
                                             LocalDateTime vurdertTidspunkt,
                                             Avklaringtype avklaringtype) {
@@ -81,6 +91,10 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
         Objects.requireNonNull(begrunnelse, "begrunnelse");
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
+        Objects.requireNonNull(kilde, "kilde");
+        if (kilde == BostedsavklaringKildeType.ANNET) {
+            Objects.requireNonNull(kildeFritekst, "kildeFritekst må være satt når kilde=ANNET");
+        }
 
         this.periode = periode.toRange();
         this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
@@ -88,6 +102,8 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
         this.skalSendeVarsel = skalSendeVarsel;
         this.fritekstTilVarsel = fritekstTilVarsel;
         this.begrunnelseIkkeVarsel = begrunnelseIkkeVarsel;
+        this.kilde = kilde;
+        this.kildeFritekst = kildeFritekst;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
         this.avklaringtype = avklaringtype;
@@ -101,6 +117,8 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
         this.skalSendeVarsel = annenAvklaring.skalSendeVarsel();
         this.fritekstTilVarsel = annenAvklaring.getFritekstTilVarsel();
         this.begrunnelseIkkeVarsel = annenAvklaring.getBegrunnelseIkkeVarsel();
+        this.kilde = annenAvklaring.getKilde();
+        this.kildeFritekst = annenAvklaring.getKildeFritekst();
         this.vurdertAv = annenAvklaring.getVurdertAv();
         this.vurdertTidspunkt = annenAvklaring.getVurdertTidspunkt();
         this.avklaringtype = annenAvklaring.getAvklaringtype();
@@ -156,6 +174,16 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
     }
 
     @Override
+    public BostedsavklaringKildeType getKilde() {
+        return kilde;
+    }
+
+    @Override
+    public String getKildeFritekst() {
+        return kildeFritekst;
+    }
+
+    @Override
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }
@@ -171,6 +199,8 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
             && skalSendeVarsel == that.skalSendeVarsel
             && Objects.equals(fritekstTilVarsel, that.fritekstTilVarsel)
             && Objects.equals(begrunnelseIkkeVarsel, that.begrunnelseIkkeVarsel)
+            && kilde == that.kilde
+            && Objects.equals(kildeFritekst, that.kildeFritekst)
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt)
             && avklaringtype == that.avklaringtype;
@@ -178,7 +208,7 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype);
+        return Objects.hash(getPeriode(), ikkeOppfyltÅrsak, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, kilde, kildeFritekst, vurdertAv, vurdertTidspunkt, avklaringtype);
     }
 
     @Override

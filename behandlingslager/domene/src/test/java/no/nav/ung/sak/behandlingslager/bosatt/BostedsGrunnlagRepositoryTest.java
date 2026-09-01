@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -233,6 +234,8 @@ class BostedsGrunnlagRepositoryTest {
             false,
             null,
             "begrunnelse for hvorfor det ikke varsles",
+            BostedsavklaringKildeType.BRUKER,
+            null,
             VURDERT_AV,
             VURDERT_TIDSPUNKT,
             tom == null ? Avklaringtype.OPPHØR : Avklaringtype.AVSLAG

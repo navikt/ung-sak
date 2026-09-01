@@ -38,7 +38,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
+                "Vi har fått opplysninger om dette fra deg."
             );
     }
 
@@ -55,7 +56,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
+                "Vi har fått opplysninger om dette fra Folkeregisteret."
             );
     }
 
@@ -72,7 +74,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "studere eller jobbe i Trondheim kommune"
+                "studere eller jobbe i Trondheim kommune",
+                "Vi har fått opplysninger om dette fra deg."
             );
     }
 
@@ -90,7 +93,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                fritekst
+                fritekst,
+                "Vi har fått opplysninger om dette fra veileder ved Nav Trondheim."
             );
     }
 
@@ -109,7 +113,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
+                "Vi har fått opplysninger om dette fra deg."
             );
     }
 
@@ -128,7 +133,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
+                "Vi har fått opplysninger om dette fra Folkeregisteret."
             );
     }
 
@@ -147,7 +153,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "studere eller jobbe i Trondheim kommune"
+                "studere eller jobbe i Trondheim kommune",
+                "Vi har fått opplysninger om dette fra deg."
             );
     }
 
@@ -167,7 +174,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                fritekst
+                fritekst,
+                "Vi har fått opplysninger om dette fra veileder ved Nav Trondheim."
             );
     }
 
@@ -196,5 +204,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBosted(FOM);
         return lagOpphørScenario(scenario);
     }
-}
 
+
+
+
+}

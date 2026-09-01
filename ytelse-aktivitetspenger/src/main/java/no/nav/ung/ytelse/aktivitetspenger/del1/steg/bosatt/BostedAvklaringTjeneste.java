@@ -168,6 +168,6 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .stream()
             .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt)
                 .thenComparing(avklaring -> avklaring.getPeriode().getFomDato()))
-            .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode()));
+            .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode(), avklaring.getKilde(), avklaring.getKildeFritekst()));
     }
 }

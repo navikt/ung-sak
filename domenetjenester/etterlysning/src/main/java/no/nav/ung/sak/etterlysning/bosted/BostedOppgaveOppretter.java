@@ -9,6 +9,7 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.journalforing.JournalføringDto
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOppgavetypeDataDto;
 import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOpphørOppgavetypeDataDto;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
@@ -56,6 +57,7 @@ public class BostedOppgaveOppretter {
             }
 
             var mappetÅrsak = mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak);
+            var mappetKilde = mapKilde(periodeAvklaring.getKilde());
             var avklaringtype = periodeAvklaring.getAvklaringtype();
 
             OppgavetypeDataDto oppgavetypeData;
@@ -64,7 +66,9 @@ public class BostedOppgaveOppretter {
                     etterlysning.getPeriode().getFomDato(),
                     false,
                     periodeAvklaring.getFritekstTilVarsel(),
-                    mappetÅrsak
+                    mappetÅrsak,
+                    mappetKilde,
+                    periodeAvklaring.getKildeFritekst()
                 );
             } else {
                 oppgavetypeData = new BekreftBostedOppgavetypeDataDto(
@@ -72,7 +76,9 @@ public class BostedOppgaveOppretter {
                     etterlysning.getPeriode().getTomDato(),
                     false,
                     periodeAvklaring.getFritekstTilVarsel(),
-                    mappetÅrsak
+                    mappetÅrsak,
+                    mappetKilde,
+                    periodeAvklaring.getKildeFritekst()
                 );
             }
 
@@ -96,6 +102,14 @@ public class BostedOppgaveOppretter {
             case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.ANNET;
             case UDEFINERT -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT;
             case AVKORTET -> throw new IllegalArgumentException("Ikke-støttet årsak for varsling: " + ikkeOppfyltÅrsak);
+        };
+    }
+
+    static no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType mapKilde(BostedsavklaringKildeType kilde) {
+        return switch (kilde) {
+            case BRUKER -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType.BRUKER;
+            case FOLKEREGISTER -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType.FOLKEREGISTER;
+            case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType.ANNET;
         };
     }
 }
