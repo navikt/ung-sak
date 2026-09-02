@@ -253,7 +253,7 @@ class BistandsvilkårStegTest {
     }
 
     @Test
-    void skal_utfores_uten_aksjonspunkt_nar_perioden_allerede_er_vurdert_som_oppfylt() {
+    void skal_ikke_utlede_utfall_fra_tidligere_vilkårsvurdering_uten_avklaring() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of(
             new BistandsvilkårResultatPeriode(
@@ -269,9 +269,54 @@ class BistandsvilkårStegTest {
 
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe()).isEmpty();
+        assertThat(resultat.getAksjonspunktListe())
+            .as("uten foreslått avklaring eller etterlysning skal perioden vurderes manuelt, ikke arve utfall fra tidligere vurdering (jf. #1566)")
+            .containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
         var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BISTANDSVILKÅR).orElseThrow().getPerioder();
-        assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.OPPFYLT);
+        assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
+    }
+
+    @Test
+    void skal_avgrense_hele_tidslinjen_nar_kun_en_av_to_perioder_har_foreslatt_avklaring() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
+        lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+
+        var etterlysningUtenUttalelse = new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            LocalDateTime.of(2026, 2, 15, 12, 0),
+            hentEnesteAvklaring(behandling.getId()).getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(false, null, new JournalpostId("jp-uttalelse-1"))
+        );
+        steg = lagSteg(List.of(etterlysningUtenUttalelse));
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe())
+            .as("perioden uten foreslått avklaring faller stille ut av vurderingen (grovkornet 1.1-semantikk, rettes i fase 1.2)")
+            .isEmpty();
+
+        var vurderinger = hentVurderinger(behandling);
+        assertThat(vurderinger).hasSize(1);
+        assertThat(vurderinger.iterator().next().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
+
+        var vilkårPerioder = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BISTANDSVILKÅR).orElseThrow().getPerioder();
+        var vilkårForAvklartPeriode = vilkårPerioder.stream().filter(p -> p.getPeriode().equals(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))).findFirst().orElseThrow();
+        var vilkårForUavklartPeriode = vilkårPerioder.stream().filter(p -> p.getPeriode().equals(DatoIntervallEntitet.fraOgMedTilOgMed(fom2, tom2))).findFirst().orElseThrow();
+        assertThat(vilkårForAvklartPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
+        assertThat(vilkårForUavklartPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+    }
+
+    private VilkårPeriodeAvklaring hentEnesteAvklaring(long behandlingId) {
+        return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId, VilkårType.BISTANDSVILKÅR)
+            .orElseThrow()
+            .getForeslåtteAvklaringer()
+            .stream()
+            .findFirst()
+            .orElseThrow();
     }
 
     @Test

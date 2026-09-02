@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Oppretter oppgave til deltaker for etterlysning av uttalelse om bistandsavklaring.
@@ -42,7 +41,6 @@ public class BistandOppgaveOppretter {
         for (Etterlysning etterlysning : etterlysninger) {
             var periodeAvklaring = finnAvklaring(behandling, etterlysning);
             var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.fraKode(periodeAvklaring.getIkkeOppfyltÅrsakKode());
-            validerÅrsak(ikkeOppfyltÅrsak, periodeAvklaring);
 
             sendOppgaveTilBruker(behandling, etterlysning, aktørId, ikkeOppfyltÅrsak);
         }
@@ -55,15 +53,6 @@ public class BistandOppgaveOppretter {
             .filter(avklaring -> avklaring.getReferanse().equals(etterlysning.getGrunnlagsreferanse()))
             .findFirst()
             .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
-    }
-
-    private static void validerÅrsak(BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, VilkårPeriodeAvklaring periodeAvklaring) {
-        if (ikkeOppfyltÅrsak == BistandsvilkårIkkeOppfyltÅrsak.AVKORTET) {
-            throw new IllegalStateException("Det er ikke forventet at AVKORTET skal brukes på periode det skal varsles om. Det er antagelig feil i løsningen som gjør at saksbehandler kan sette denne årsaken her.");
-        }
-        if (ikkeOppfyltÅrsak == BistandsvilkårIkkeOppfyltÅrsak.UDEFINERT) {
-            Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "FritekstTilVarsel må være satt når årsak er " + ikkeOppfyltÅrsak);
-        }
     }
 
     // TODO(fase 1 plassholder): Erstatt med reelt kall til UngBrukerdialogOppgaveKlient.opprettOppgave(...) når

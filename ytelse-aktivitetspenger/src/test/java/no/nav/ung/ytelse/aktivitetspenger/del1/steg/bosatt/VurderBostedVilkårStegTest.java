@@ -22,6 +22,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.AvklaringSporing;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
@@ -79,7 +80,7 @@ class VurderBostedVilkårStegTest {
     private VurderBostedVilkårSteg steg;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
-    private BehandingprosessSporingRepository behandlingprosessSporingRepository;
+    private AvklaringSporing avklaringSporing;
 
     @BeforeEach
     void setUp() {
@@ -91,7 +92,7 @@ class VurderBostedVilkårStegTest {
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        behandlingprosessSporingRepository = new BehandingprosessSporingRepository(entityManager);
+        avklaringSporing = new AvklaringSporing(new BehandingprosessSporingRepository(entityManager));
 
         steg = lagSteg(List.of());
     }
@@ -360,7 +361,7 @@ class VurderBostedVilkårStegTest {
             etterlysningTjeneste,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
-            behandlingprosessSporingRepository
+            avklaringSporing
         );
     }
 

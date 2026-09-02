@@ -62,7 +62,6 @@ class BistandAvklaringTjenesteTest {
         tjeneste = new BistandAvklaringTjeneste(
             vilkårsavklaringGrunnlagRepository,
             new VilkårsavklaringEtterlysningTjeneste(etterlysningRepository, prosessTaskTjeneste),
-            null,
             null
         );
 
@@ -71,16 +70,18 @@ class BistandAvklaringTjenesteTest {
 
     @Test
     void skal_lagre_foreslatt_avklaring_pa_bistandsvilkaret() {
-        var innhold = new BistandAvklaringInnhold(
-            new no.nav.ung.sak.typer.Periode(FOM, TOM),
-            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK,
+        var innhold = new VilkårPeriodeAvklaringForeslått(
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode(),
             "begrunnelse",
             true,
             "fritekst til varsel",
             null,
+            "A12345",
+            LocalDateTime.now(),
             Avklaringtype.AVSLAG);
 
-        var lagret = tjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List.of(innhold), "A12345", LocalDateTime.now(), behandling.getId());
+        var lagret = tjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List.of(innhold), behandling.getId());
 
         assertThat(lagret).hasSize(1);
         assertThat(tjeneste.hentForeslåtteAvklaringer(behandling.getId()))

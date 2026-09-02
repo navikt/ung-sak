@@ -8,34 +8,28 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.AvklaringSporing;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
+import no.nav.ung.sak.etterlysning.VilkårsavklaringUtfall;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringOgUttalelseOgResultat.StegUtfall;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -50,14 +44,13 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTEDVIL
 public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
     private static final Duration DEFAULT_VENTEFRIST = Duration.ofDays(14);
-    private static final Logger logger = LoggerFactory.getLogger(VurderBostedVilkårSteg.class);
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private EtterlysningTjeneste etterlysningTjeneste;
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
-    private BehandingprosessSporingRepository behandingprosessSporingRepository;
+    private AvklaringSporing avklaringSporing;
 
 
     VurderBostedVilkårSteg() {
@@ -73,14 +66,14 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                   EtterlysningTjeneste etterlysningTjeneste,
                                   InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
-                                  InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste, BehandingprosessSporingRepository behandingprosessSporingRepository) {
+                                  InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste, AvklaringSporing avklaringSporing) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
-        this.behandingprosessSporingRepository = behandingprosessSporingRepository;
+        this.avklaringSporing = avklaringSporing;
     }
 
     @Override
@@ -128,14 +121,14 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 leggTilEtterlysning(),
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        LocalDateTimeline<StegUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
-        lagreBehandlingprosessSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje);
+        LocalDateTimeline<VilkårsavklaringUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
+        avklaringSporing.lagreSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje, VURDER_BOSTEDVILKÅR.getKode());
 
-        if (!stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
+        if (!stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
             return settPåVent(vurderingTidslinje);
         }
 
-        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.OPPHØR_AUTOMATISK::equals))
+        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK::equals))
             .segmenter()
             .stream().map(s -> {
                 if (s.getValue().getEtterlysning() != null) {
@@ -159,7 +152,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, vurderingResultat);
 
-        if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
+        if (!stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT || v == VilkårsavklaringUtfall.INGEN_AVKLARING).isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
         }
 
@@ -178,19 +171,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         return medForeslåttAvklaring.isEmpty() ? avklaringTidslinje : medForeslåttAvklaring;
     }
 
-    private void lagreBehandlingprosessSporing(long behandlingId, LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje, LocalDateTimeline<StegUtfall> stegutfallTidslinje) {
-        try {
-            behandingprosessSporingRepository.lagreSporing(new BehandlingprosessSporing(
-                behandlingId,
-                JsonObjectMapper.getJson(vurderingTidslinje),
-                JsonObjectMapper.getJson(stegutfallTidslinje),
-                VURDER_BOSTEDVILKÅR.getKode())
-            );
-        } catch (IOException e) {
-            logger.warn("Feil ved lagring av sporing for utledning av StegUtfall i VurderBostedVilkårSteg", e);
-        }
-    }
-
     private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, EtterlysningData, BostedAvklaringOgUttalelseOgResultat> leggTilEtterlysning() {
         return (di, lhs, rhs) -> {
             var vurdering = rhs != null ? lhs.getValue().medEtterlysning(rhs.getValue()) : lhs.getValue();
@@ -200,7 +180,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
     private static BehandleStegResultat settPåVent(LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje) {
         LocalDateTime frist = vurderingTidslinje
-            .filterValue(v -> v.utledUtfall() == StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
+            .filterValue(v -> v.utledUtfall() == VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
             .segmenter().stream()
             .map(seg -> seg.getValue().getFrist())
             .filter(Objects::nonNull)

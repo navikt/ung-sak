@@ -1,6 +1,8 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -14,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
@@ -34,6 +37,7 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     private VilkårResultatRepository vilkårResultatRepository;
     private VilkårUtleder inngangsvilkårUtleder;
     private ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder;
+    private Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingÅrsak;
 
     AktivitetspengerVilkårsPerioderTilVurderingTjeneste() {
         // for CDI proxy
@@ -44,11 +48,14 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
         AktivitetspengerSøknadsperiodeTjeneste aktivitetspengerSøknadsperiodeTjeneste,
         VilkårResultatRepository vilkårResultatRepository,
         @FagsakYtelseTypeRef(AKTIVITETSPENGER) @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD) VilkårUtleder inngangsvilkårUtleder,
-        @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder) {
+        @FagsakYtelseTypeRef(AKTIVITETSPENGER) ProsessTriggerPeriodeUtleder prosessTriggerPeriodeUtleder,
+        @Any Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
         this.aktivitetspengerSøknadsperiodeTjeneste = aktivitetspengerSøknadsperiodeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårUtleder = inngangsvilkårUtleder;
         this.prosessTriggerPeriodeUtleder = prosessTriggerPeriodeUtleder;
+        this.vilkårOgBehandlingÅrsak = VilkårsavklaringTjeneste.sortert(vilkårsavklaringTjenester).stream()
+            .collect(Collectors.toMap(VilkårsavklaringTjeneste::vilkårType, VilkårsavklaringTjeneste::behandlingÅrsakType));
     }
 
     @Override
@@ -75,12 +82,7 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
 
     private Set<BehandlingÅrsakType> hentRelevanteÅrsaker(VilkårType vilkårType) {
         EnumSet<BehandlingÅrsakType> årsaker = EnumSet.of(BehandlingÅrsakType.NY_SØKT_PERIODE);
-        if (vilkårType == VilkårType.BOSTEDSVILKÅR) {
-            årsaker.add(BehandlingÅrsakType.ENDRET_BOSTED);
-        }
-        if (vilkårType == VilkårType.BISTANDSVILKÅR) {
-            årsaker.add(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
-        }
+        Optional.ofNullable(vilkårOgBehandlingÅrsak.get(vilkårType)).ifPresent(årsaker::add);
         return årsaker;
     }
 

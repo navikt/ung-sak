@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.time.LocalDateTime;
@@ -13,13 +14,18 @@ import java.util.UUID;
  * {@link BostedsPeriodeAvklaringForeslått} (foreslått og behandlet i gjeldende behandling) og
  * {@link BostedsPeriodeAvklaringFerdigstilt} (ferdig avklart/vedtatt). Selve dataene er identiske,
  */
-public interface BostedsPeriodeAvklaring {
+public interface BostedsPeriodeAvklaring extends VilkårPeriodeAvklaring {
 
     UUID getReferanse();
 
     DatoIntervallEntitet getPeriode();
 
     BostedsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak();
+
+    @Override
+    default String getIkkeOppfyltÅrsakKode() {
+        return getIkkeOppfyltÅrsak() == null ? null : getIkkeOppfyltÅrsak().getKode();
+    }
 
     String getBegrunnelse();
 
@@ -38,4 +44,12 @@ public interface BostedsPeriodeAvklaring {
     String getVurdertAv();
 
     LocalDateTime getVurdertTidspunkt();
+
+    /**
+     * Om avklaringen krever at saksbehandler tar stilling til vilkåret manuelt, uavhengig av årsak —
+     * dvs. at bruker er valgt å ikke varsles ved eventuelt negativt utfall.
+     */
+    default boolean krevesManuellVurdering() {
+        return !skalSendeVarsel();
+    }
 }

@@ -36,4 +36,12 @@ public interface VilkårPeriodeAvklaring {
     String getVurdertAv();
 
     LocalDateTime getVurdertTidspunkt();
+
+    /**
+     * Om avklaringen krever at saksbehandler tar stilling til vilkåret manuelt, uavhengig av årsak —
+     * dvs. at bruker er valgt å ikke varsles ved eventuelt negativt utfall.
+     */
+    default boolean krevesManuellVurdering() {
+        return !skalSendeVarsel();
+    }
 }

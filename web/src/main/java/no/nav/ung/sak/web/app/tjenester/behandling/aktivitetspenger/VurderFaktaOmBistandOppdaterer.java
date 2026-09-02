@@ -19,11 +19,11 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringDataMapper;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringInnhold;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringDtoMapper;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringTjeneste;
 
 import java.time.LocalDateTime;
@@ -72,14 +72,14 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        List<BistandAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
-            .map(a -> BistandAvklaringDataMapper.mapTilBistandAvklaringInnhold(a, maxTomDato)).toList();
+        List<VilkårPeriodeAvklaringForeslått> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
+            .map(a -> BistandAvklaringDtoMapper.mapTilVilkårPeriodeAvklaring(a, maxTomDato, vurdertAv, vurdertTidspunkt)).toList();
 
         if (nyeAvklaringer.size() > 1) {
             throw new IllegalArgumentException("Støtter kun lagring av én avklaring for bistandsvilkåret samtidig");
         }
 
-        Set<VilkårPeriodeAvklaring> nyeForeslåtteAvklaringer = bistandAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
+        Set<VilkårPeriodeAvklaring> nyeForeslåtteAvklaringer = bistandAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, behandlingId);
 
         bistandAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereForeslåtteAvklaringer, nyeAvklaringer);
 

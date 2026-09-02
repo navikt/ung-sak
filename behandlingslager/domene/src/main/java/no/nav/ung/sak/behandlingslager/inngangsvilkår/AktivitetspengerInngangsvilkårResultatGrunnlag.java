@@ -91,6 +91,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
             .toList());
     }
 
+    public LocalDateTimeline<BistandsvilkårResultatPeriode> hentBistandsvilkårResultatTidslinje() {
+        return new LocalDateTimeline<>(getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger).orElse(List.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+    }
+
     public Optional<AndreLivsoppholdsytelserResultatHolder> getAndreLivsoppholdsytelserResultatHolder() {
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
     }
@@ -106,7 +112,7 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
             .toList());
     }
 
-    Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
+    public Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
         return Optional.ofNullable(bostedsvilkårResultatHolder);
     }
 
