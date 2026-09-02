@@ -18,7 +18,6 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.ytelse.aktivitetspenger.AktivitetspengerFagsakperiodeUtleder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,21 +30,19 @@ public class AktivitetspengerSøknadPersisterer {
 
     private final SøknadRepository søknadRepository;
     private final FagsakRepository fagsakRepository;
-    private final AktivitetspengerFagsakperiodeUtleder fagsakperiodeUtleder;
     private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private final StartdatoRepository startdatoRepository;
     private final BostedsGrunnlagRepository bostedsGrunnlagRepository;
 
 
     @Inject
-    public AktivitetspengerSøknadPersisterer(BehandlingRepositoryProvider repositoryProvider, FagsakRepository fagsakRepository,
-                                             AktivitetspengerFagsakperiodeUtleder fagsakperiodeUtleder,
+    public AktivitetspengerSøknadPersisterer(BehandlingRepositoryProvider repositoryProvider,
+                                             FagsakRepository fagsakRepository,
                                              OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
                                              BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                              StartdatoRepository startdatoRepository) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = fagsakRepository;
-        this.fagsakperiodeUtleder = fagsakperiodeUtleder;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.startdatoRepository = startdatoRepository;
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
@@ -71,9 +68,8 @@ public class AktivitetspengerSøknadPersisterer {
         }
     }
 
-    public void oppdaterFagsakperiode(Periode søknadsperiode, Behandling behandling) {
-        var nyPeriodeForFagsak = fagsakperiodeUtleder.utledFagsakPeriodeUtvidelse(behandling, søknadsperiode.getFom());
-        fagsakRepository.utvidPeriode(behandling.getFagsakId(), nyPeriodeForFagsak.getFomDato(), nyPeriodeForFagsak.getTomDato());
+    public void oppdaterFagsakperiode(Periode utvidelsesperiode, Behandling behandling) {
+        fagsakRepository.utvidPeriode(behandling.getFagsakId(), utvidelsesperiode.getFom(), utvidelsesperiode.getTom());
     }
 
     private Språkkode getSpraakValg(Språk spraak) {

@@ -46,7 +46,6 @@ public class AktivitetspengerSøknadsperiodeTjeneste {
         return finnTidslinje(behandlingId, StartdatoGrunnlag::getRelevanteStartdatoer);
     }
 
-
     private LocalDateTimeline<Boolean> finnTidslinje(Long behandlingId,
                                                      Function<StartdatoGrunnlag, Startdatoer> finnPeriodeHolder) {
         var startdatoer = startdatoRepository.hentGrunnlag(behandlingId).map(finnPeriodeHolder);
@@ -58,15 +57,14 @@ public class AktivitetspengerSøknadsperiodeTjeneste {
                 .orElse(Collections.emptySet())
                 .stream()
                 .map(SøktStartdato::getStartdato)
-                .map(AktivitetspengerSøknadsperiodeTjeneste::tidslinjeFraSøktDato)
+                .map(AktivitetspengerSøknadsperiodeTjeneste::tidslinjeFraVirkningstidspunkt)
                 .reduce(LocalDateTimeline::crossJoin)
                 .orElse(LocalDateTimeline.empty());
         }
     }
 
-    public static LocalDateTimeline<Boolean> tidslinjeFraSøktDato(LocalDate søktDato){
-        return new LocalDateTimeline<>(søktDato, søktDato.plusWeeks(52).minusDays(1), true);
+    public static LocalDateTimeline<Boolean> tidslinjeFraVirkningstidspunkt(LocalDate virkningstidspunkt){
+        return new LocalDateTimeline<>(virkningstidspunkt, virkningstidspunkt.plusWeeks(52).minusDays(1), true);
     }
-
 
 }
