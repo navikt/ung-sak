@@ -30,6 +30,11 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
     private final InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository = mock(InngangsvilkårVurderingRepository.class);
     private final VilkårsavklaringTjeneste vilkårsavklaringTjeneste = mock(VilkårsavklaringTjeneste.class);
 
+    {
+        when(vilkårsavklaringTjeneste.vilkårType()).thenReturn(VilkårType.BOSTEDSVILKÅR);
+        when(vilkårsavklaringTjeneste.behandlingÅrsakType()).thenReturn(BehandlingÅrsakType.ENDRET_BOSTED);
+    }
+
     private final VilkårsavklaringOgVurderingTidslinjeUtleder utleder = new VilkårsavklaringOgVurderingTidslinjeUtleder(
         inngangsvilkårVurderingRepository,
         new UnitTestLookupInstanceImpl<>(vilkårsavklaringTjeneste));

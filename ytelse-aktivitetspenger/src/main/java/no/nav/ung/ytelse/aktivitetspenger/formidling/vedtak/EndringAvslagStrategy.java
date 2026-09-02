@@ -26,6 +26,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringAvslagInnhol
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
@@ -33,10 +34,7 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
 
     private EndringAvslagInnholdBygger endringAvslagInnholdBygger;
     private Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
-
-    private static final Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingÅrsak = Map.of(
-        VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED
-    );
+    private Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingÅrsak;
 
     public EndringAvslagStrategy() {
     }
@@ -46,6 +44,8 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
                                  @Any Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
         this.endringAvslagInnholdBygger = endringAvslagInnholdBygger;
         this.vilkårsavklaringTjenester = vilkårsavklaringTjenester;
+        this.vilkårOgBehandlingÅrsak = VilkårsavklaringTjeneste.sortert(vilkårsavklaringTjenester).stream()
+            .collect(Collectors.toMap(VilkårsavklaringTjeneste::vilkårType, VilkårsavklaringTjeneste::behandlingÅrsakType));
     }
 
     @Override

@@ -150,6 +150,16 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     @Override
+    public VilkårType vilkårType() {
+        return VilkårType.BOSTEDSVILKÅR;
+    }
+
+    @Override
+    public BehandlingÅrsakType behandlingÅrsakType() {
+        return BehandlingÅrsakType.ENDRET_BOSTED;
+    }
+
+    @Override
     public void ferdigstillForeslåtteAvklaringer(long behandlingId) {
         bostedsGrunnlagRepository.ferdigstillForeslåtteAvklaringer(behandlingId);
     }

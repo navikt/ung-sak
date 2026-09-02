@@ -28,24 +28,23 @@ import java.util.stream.Collectors;
 @Dependent
 public class VilkårsavklaringOgVurderingTidslinjeUtleder {
 
-    private static final Map<VilkårType, BehandlingÅrsakType> VILKÅR_OG_BEHANDLINGSÅRSAK = Map.of(
-        VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED
-    );
-
     private final InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private final Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
+    private final Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingsårsak;
 
     @Inject
     public VilkårsavklaringOgVurderingTidslinjeUtleder(InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                                        @Any Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.vilkårsavklaringTjenester = vilkårsavklaringTjenester;
+        this.vilkårOgBehandlingsårsak = VilkårsavklaringTjeneste.sortert(vilkårsavklaringTjenester).stream()
+            .collect(Collectors.toMap(VilkårsavklaringTjeneste::vilkårType, VilkårsavklaringTjeneste::behandlingÅrsakType));
     }
 
     public LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> utled(long behandlingId) {
         var vurderingTidslinje = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId);
 
-        return VILKÅR_OG_BEHANDLINGSÅRSAK.entrySet().stream()
+        return vilkårOgBehandlingsårsak.entrySet().stream()
             .map(entry -> lagTidslinjeForVilkår(behandlingId, vurderingTidslinje, entry.getKey(), entry.getValue()).mapValue(Set::of))
             .reduce(LocalDateTimeline.empty(), (akkumulert, neste) ->
                 akkumulert.combine(neste, StandardCombinators::union, LocalDateTimeline.JoinStyle.CROSS_JOIN)

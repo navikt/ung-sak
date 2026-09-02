@@ -5,6 +5,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 
 import java.util.*;
+import java.util.function.Function;
 
 public enum VilkårType implements Kodeverdi {
     ALDERSVILKÅR("UNG_VK_1",
@@ -36,6 +37,7 @@ public enum VilkårType implements Kodeverdi {
         "AKT_VK_1",
         "Bostedsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        BostedsvilkårIkkeOppfyltÅrsak::fraKode,
         Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
         Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE,
         Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED
@@ -44,18 +46,21 @@ public enum VilkårType implements Kodeverdi {
         "AKT_VK_4",
         "Andre livsoppholdsytelser-vilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        AndreLivsoppholdsytelserIkkeOppfyltÅrsak::fraKode,
         Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE
     ),
     BISTANDSVILKÅR(
         "AKT_VK_2",
         "Bistandsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        BistandsvilkårIkkeOppfyltÅrsak::fraKode,
         Avslagsårsak.IKKE_14A_VEDTAK
     ),
     AKTIVITETSVILKÅR(
         "AKT_VK_5",
         "Aktivitetsvilkår",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        AktivitetsvilkåretIkkeOppfyltÅrsak::fraKode,
         Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK
     ),
 
@@ -96,6 +101,7 @@ public enum VilkårType implements Kodeverdi {
     private String navn;
     private Set<Avslagsårsak> avslagsårsaker;
     private String kode;
+    private Function<String, IkkeOppfyltDetaljertÅrsak> ikkeOppfyltÅrsakResolver;
 
     private VilkårType(String kode) {
         this.kode = kode;
@@ -110,6 +116,22 @@ public enum VilkårType implements Kodeverdi {
         this.lovReferanser = lovReferanser;
         this.avslagsårsaker = Set.of(avslagsårsaker);
 
+    }
+
+    private VilkårType(String kode,
+                       String navn,
+                       Map<FagsakYtelseType, String> lovReferanser,
+                       Function<String, IkkeOppfyltDetaljertÅrsak> ikkeOppfyltÅrsakResolver,
+                       Avslagsårsak... avslagsårsaker) {
+        this(kode, navn, lovReferanser, avslagsårsaker);
+        this.ikkeOppfyltÅrsakResolver = ikkeOppfyltÅrsakResolver;
+    }
+
+    public IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak(String kode) {
+        if (ikkeOppfyltÅrsakResolver == null) {
+            throw new IllegalStateException("Vilkår " + this + " har ingen registrert IkkeOppfyltDetaljertÅrsak");
+        }
+        return ikkeOppfyltÅrsakResolver.apply(kode);
     }
 
     public static VilkårType fraKode(final String kode) {

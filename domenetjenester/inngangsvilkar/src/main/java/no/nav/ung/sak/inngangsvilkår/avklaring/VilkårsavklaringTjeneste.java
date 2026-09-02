@@ -3,6 +3,7 @@ package no.nav.ung.sak.inngangsvilkår.avklaring;
 import jakarta.enterprise.inject.Instance;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,6 +16,10 @@ import java.util.Optional;
  * {@link BehandlingÅrsakType} de gjelder for.
  */
 public interface VilkårsavklaringTjeneste {
+
+    VilkårType vilkårType();
+
+    BehandlingÅrsakType behandlingÅrsakType();
 
     /**
      * Ferdigstiller vilkårsavklaringene som er foreslått i behandlingen. Kalles ved iverksettelse av vedtaket.
