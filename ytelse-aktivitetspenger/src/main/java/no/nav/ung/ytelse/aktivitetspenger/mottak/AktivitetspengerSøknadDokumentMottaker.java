@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.typer.Periode;
@@ -63,7 +64,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
             LocalDate virkningstidspunkt = virkingstidspunktUtleder.utledVirkingstidspunkt(ytelse.getSøknadsperiodeFom(), behandling.getId());
             LocalDateTimeline<Boolean> tidslinjeFraVirkningstidspunkt = AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(virkningstidspunkt);
-            søknadPersisterer.lagreStartdato(ytelse.getSøknadsperiodeFom(), dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId, ytelse.getErBosattITrondheim());
+            søknadPersisterer.lagreVirkningsdato(virkningstidspunkt, dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId, ytelse.getErBosattITrondheim());
             søknadPersisterer.oppdaterFagsakperiode(new Periode(tidslinjeFraVirkningstidspunkt.getMinLocalDate(), tidslinjeFraVirkningstidspunkt.getMaxLocalDate()), behandling);
             søknadPersisterer.lagreForutgåendeMedlemskapGrunnlag(ytelse.getForutgåendeBosteder(), ytelse.getSøknadsperiode(), dokument.getJournalpostId(), behandlingId);
 

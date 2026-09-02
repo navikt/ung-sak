@@ -61,10 +61,10 @@ public class AktivitetspengerSøknadPersisterer {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    public void lagreStartdato(LocalDate startdato, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId, Boolean erBosattITrondheim) {
-        startdatoRepository.lagre(behandlingId, List.of(new SøktStartdato(startdato, journalpostId)));
+    public void lagreVirkningsdato(LocalDate virkningsdato, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId, Boolean erBosattITrondheim) {
+        startdatoRepository.lagre(behandlingId, List.of(new SøktStartdato(virkningsdato, journalpostId)));
         if (erBosattITrondheim != null) {
-            bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), startdato, erBosattITrondheim);
+            bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), virkningsdato, erBosattITrondheim);
         }
     }
 
