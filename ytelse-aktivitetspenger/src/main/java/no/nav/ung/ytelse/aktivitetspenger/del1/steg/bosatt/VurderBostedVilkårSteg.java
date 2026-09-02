@@ -20,7 +20,6 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSpori
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -118,10 +117,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
 
-        var tidligereVilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
-            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
-            .orElse(new LocalDateTimeline<>(List.of()));
-
         var avklaringTidslinje = avgrensTilForeslåtteAvklaringerHvisFinnes(
             grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering)
         );
@@ -131,10 +126,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
             .combine(
                 etterlysningTidslinje,
                 leggTilEtterlysning(),
-                LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .combine(
-                tidligereVilkårVurderingResultat,
-                leggTilResultat(),
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         LocalDateTimeline<StegUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::utledUtfall);
@@ -203,13 +194,6 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
     private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, EtterlysningData, BostedAvklaringOgUttalelseOgResultat> leggTilEtterlysning() {
         return (di, lhs, rhs) -> {
             var vurdering = rhs != null ? lhs.getValue().medEtterlysning(rhs.getValue()) : lhs.getValue();
-            return new LocalDateSegment<>(di, vurdering);
-        };
-    }
-
-    private static LocalDateSegmentCombinator<BostedAvklaringOgUttalelseOgResultat, BostedsvilkårResultatPeriode, BostedAvklaringOgUttalelseOgResultat> leggTilResultat() {
-        return (di, lhs, rhs) -> {
-            var vurdering = rhs != null ? lhs.getValue().medResultat(rhs.getValue()) : lhs.getValue();
             return new LocalDateSegment<>(di, vurdering);
         };
     }

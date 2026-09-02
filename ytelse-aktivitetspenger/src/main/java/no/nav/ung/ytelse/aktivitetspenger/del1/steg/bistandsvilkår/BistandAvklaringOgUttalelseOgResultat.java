@@ -43,19 +43,13 @@ class BistandAvklaringOgUttalelseOgResultat {
         if (erVentende()) {
             return StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
         }
-        if (harMottattSvarMedUttalelse()) {
-            return StegUtfall.VILKÅR_VURDERES_MANUELT;
+        if (foreslåttAvklaring != null) {
+            if (harMottattSvarMedUttalelse() || erValgtÅIkkeVarsleNårIkkeOppfylt() || !girAutomatiskAvslag()) {
+                return StegUtfall.VILKÅR_VURDERES_MANUELT;
+            }
+            return StegUtfall.AVSLAG_AUTOMATISK;
         }
-        if (foreslåttAvklaring == null) {
-            // Ingen avklaring foreslått for perioden. Er vilkåret allerede vurdert og oppfylt (typisk gjenopprettet
-            // fra forrige behandling), er det ingenting mer å ta stilling til. Ellers må saksbehandler vurdere
-            // bistandsvilkåret manuelt slik som før fase 1.
-            return erTidligereVurdertSomOppfylt() ? StegUtfall.OPPFYLT : StegUtfall.VILKÅR_VURDERES_MANUELT;
-        }
-        if (erValgtÅIkkeVarsleNårIkkeOppfylt() || !girAutomatiskAvslag()) {
-            return StegUtfall.VILKÅR_VURDERES_MANUELT;
-        }
-        return StegUtfall.AVSLAG_AUTOMATISK;
+        return erTidligereVurdertSomOppfylt() ? StegUtfall.OPPFYLT : StegUtfall.VILKÅR_VURDERES_MANUELT;
     }
 
     LocalDateTime getFrist() {
