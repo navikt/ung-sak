@@ -14,26 +14,26 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @Dependent
-public class VirkingstidspunktUtleder {
+public class VirkningstidspunktUtleder {
 
     private BehandlingRepository behandlingRepository;
     private VilkårTjeneste vilkårTjeneste;
 
     @Inject
-    public VirkingstidspunktUtleder(BehandlingRepository behandlingRepository, VilkårTjeneste vilkårTjeneste) {
+    public VirkningstidspunktUtleder(BehandlingRepository behandlingRepository, VilkårTjeneste vilkårTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårTjeneste = vilkårTjeneste;
     }
 
-    public LocalDate utledVirkingstidspunkt(LocalDate søknadFomDato, long behandlingId) {
+    public LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         Optional<Behandling> sisteAvsluttedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId());
         LocalDateTimeline<VilkårUtfallSamlet> tidslinjeInnvilgetVedtak = sisteAvsluttedeBehandling.map(avsluttetBehandling -> vilkårTjeneste.samletVilkårsresultat(avsluttetBehandling.getId()).filterValue(utfall -> utfall.getSamletUtfall() == Utfall.OPPFYLT)).orElse(LocalDateTimeline.empty());
         LocalDate sisteInnvilgedeDato = tidslinjeInnvilgetVedtak.isEmpty() ? null : tidslinjeInnvilgetVedtak.getMaxLocalDate();
-        return utledVirkingstidspunkt(søknadFomDato, sisteInnvilgedeDato);
+        return utledVirkningstidspunkt(søknadFomDato, sisteInnvilgedeDato);
     }
 
-    static LocalDate utledVirkingstidspunkt(LocalDate søknadFomDato, LocalDate sisteInnvilgedeDato) {
+    static LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, LocalDate sisteInnvilgedeDato) {
         LocalDate justertVirkningstidspunkt;
         if (sisteInnvilgedeDato == null || sisteInnvilgedeDato.isBefore(søknadFomDato)){
             justertVirkningstidspunkt = søknadFomDato;

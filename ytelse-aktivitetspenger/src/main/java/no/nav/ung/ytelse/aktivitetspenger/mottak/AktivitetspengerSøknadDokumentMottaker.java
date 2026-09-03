@@ -11,7 +11,6 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.typer.Periode;
@@ -33,19 +32,19 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
     private MottatteDokumentRepository mottatteDokumentRepository;
     private AktivitetspengerSøknadPersisterer søknadPersisterer;
     private HistorikkinnslagTjeneste historikkinnslagTjeneste;
-    private VirkingstidspunktUtleder virkingstidspunktUtleder;
+    private VirkningstidspunktUtleder virkningstidspunktUtleder;
 
     public AktivitetspengerSøknadDokumentMottaker() {
         //for CDI proxy
     }
 
     @Inject
-    public AktivitetspengerSøknadDokumentMottaker(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, AktivitetspengerSøknadPersisterer søknadPersisterer, HistorikkinnslagTjeneste historikkinnslagTjeneste, VirkingstidspunktUtleder virkingstidspunktUtleder) {
+    public AktivitetspengerSøknadDokumentMottaker(SøknadParser søknadParser, MottatteDokumentRepository mottatteDokumentRepository, AktivitetspengerSøknadPersisterer søknadPersisterer, HistorikkinnslagTjeneste historikkinnslagTjeneste, VirkningstidspunktUtleder virkningstidspunktUtleder) {
         this.søknadParser = søknadParser;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.søknadPersisterer = søknadPersisterer;
         this.historikkinnslagTjeneste = historikkinnslagTjeneste;
-        this.virkingstidspunktUtleder = virkingstidspunktUtleder;
+        this.virkningstidspunktUtleder = virkningstidspunktUtleder;
     }
 
     @Override
@@ -62,7 +61,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             LocalDate startdato = ytelse.getSøknadsperiode().getFraOgMed();
 
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
-            LocalDate virkningstidspunkt = virkingstidspunktUtleder.utledVirkingstidspunkt(ytelse.getSøknadsperiodeFom(), behandling.getId());
+            LocalDate virkningstidspunkt = virkningstidspunktUtleder.utledVirkningstidspunkt(ytelse.getSøknadsperiodeFom(), behandling.getId());
             LocalDateTimeline<Boolean> tidslinjeFraVirkningstidspunkt = AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(virkningstidspunkt);
             søknadPersisterer.lagreVirkningsdato(virkningstidspunkt, dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId, ytelse.getErBosattITrondheim());
             søknadPersisterer.oppdaterFagsakperiode(new Periode(tidslinjeFraVirkningstidspunkt.getMinLocalDate(), tidslinjeFraVirkningstidspunkt.getMaxLocalDate()), behandling);
