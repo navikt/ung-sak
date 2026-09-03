@@ -1,0 +1,51 @@
+package no.nav.ung.ytelse.aktivitetspenger.mottak;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.kontrakt.vilkår.VilkårUtfallSamlet;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.util.Optional;
+
+@Dependent
+public class VirkningstidspunktUtleder {
+
+    private BehandlingRepository behandlingRepository;
+    private VilkårTjeneste vilkårTjeneste;
+
+    @Inject
+    public VirkningstidspunktUtleder(BehandlingRepository behandlingRepository, VilkårTjeneste vilkårTjeneste) {
+        this.behandlingRepository = behandlingRepository;
+        this.vilkårTjeneste = vilkårTjeneste;
+    }
+
+    public LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, Behandling behandling) {
+        return utledVirkningstidspunkt(søknadFomDato, behandling.getFagsakId());
+    }
+
+    public LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, Long fagsakId) {
+        Optional<Behandling> sisteAvsluttedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
+        LocalDateTimeline<VilkårUtfallSamlet> tidslinjeInnvilgetVedtak = sisteAvsluttedeBehandling.map(avsluttetBehandling -> vilkårTjeneste.samletVilkårsresultat(avsluttetBehandling.getId()).filterValue(utfall -> utfall.getSamletUtfall() == Utfall.OPPFYLT)).orElse(LocalDateTimeline.empty());
+        LocalDate sisteInnvilgedeDato = tidslinjeInnvilgetVedtak.isEmpty() ? null : tidslinjeInnvilgetVedtak.getMaxLocalDate();
+        return utledVirkningstidspunkt(søknadFomDato, sisteInnvilgedeDato);
+    }
+
+    static LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, LocalDate sisteInnvilgedeDato) {
+        LocalDate justertVirkningstidspunkt;
+        if (sisteInnvilgedeDato == null || sisteInnvilgedeDato.isBefore(søknadFomDato)){
+            justertVirkningstidspunkt = søknadFomDato;
+        } else {
+            justertVirkningstidspunkt = sisteInnvilgedeDato.plusDays(1);
+        }
+        while (justertVirkningstidspunkt.getDayOfWeek() == DayOfWeek.SATURDAY || justertVirkningstidspunkt.getDayOfWeek() == DayOfWeek.SUNDAY) {
+            justertVirkningstidspunkt = justertVirkningstidspunkt.plusDays(1);
+        }
+        return justertVirkningstidspunkt;
+    }
+}

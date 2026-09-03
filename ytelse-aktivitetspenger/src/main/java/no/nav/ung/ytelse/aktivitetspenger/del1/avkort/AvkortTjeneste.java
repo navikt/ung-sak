@@ -98,7 +98,7 @@ public class AvkortTjeneste {
         if (sistSøkteStartdatoIBehandlingen == null) {
             return LocalDateTimeline.empty();
         }
-        return AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraSøktDato(sistSøkteStartdatoIBehandlingen)
+        return AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(sistSøkteStartdatoIBehandlingen)
             .disjoint(new LocalDateTimeline<>(sistSøkteStartdatoIBehandlingen, sistSøkteStartdatoIBehandlingen, true)); //fjerner startdatoen siden saksbehandler må ta stilling til vilkår på denne datoen
     }
 }
