@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.typer.Periode;
@@ -62,7 +63,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             LocalDate startdato = ytelse.getSøknadsperiode().getFraOgMed();
 
             søknadPersisterer.lagreSøknadEntitet(søknad, dokument.getJournalpostId(), behandlingId, startdato, dokument.getMottattDato());
-            LocalDate virkningstidspunkt = virkningstidspunktUtleder.utledVirkningstidspunkt(ytelse.getSøknadsperiodeFom(), behandling.getId());
+            LocalDate virkningstidspunkt = virkningstidspunktUtleder.utledVirkningstidspunkt(ytelse.getSøknadsperiodeFom(), behandling);
             LocalDateTimeline<Boolean> tidslinjeFraVirkningstidspunkt = AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(virkningstidspunkt);
             søknadPersisterer.lagreVirkningsdato(virkningstidspunkt, dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId, ytelse.getErBosattITrondheim());
             søknadPersisterer.oppdaterFagsakperiode(new Periode(tidslinjeFraVirkningstidspunkt.getMinLocalDate(), tidslinjeFraVirkningstidspunkt.getMaxLocalDate()), behandling);
@@ -78,14 +79,14 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
         return mottattDokument.stream()
             .map(dokument -> {
                 Søknad søknad = søknadParser.parseSøknad(dokument);
-                DatoIntervallEntitet periode = utledVurderingsperiode(dokument.getBehandlingId(), søknad.getYtelse().getSøknadsperiode().getFraOgMed());
+                DatoIntervallEntitet periode = utledVurderingsperiode(søknad.getYtelse().getSøknadsperiode().getFraOgMed(), dokument.getFagsakId());
                 return new Trigger(periode, BehandlingÅrsakType.NY_SØKT_PERIODE);
             })
             .toList();
     }
 
-    public DatoIntervallEntitet utledVurderingsperiode(Long behandlingId, LocalDate søknadsdato) {
-        LocalDate virkningstidspunkt = virkningstidspunktUtleder.utledVirkningstidspunkt(søknadsdato, behandlingId);
+    public DatoIntervallEntitet utledVurderingsperiode(LocalDate søknadsdato, Long fagsakId) {
+        LocalDate virkningstidspunkt = virkningstidspunktUtleder.utledVirkningstidspunkt(søknadsdato, fagsakId);
         LocalDateTimeline<Boolean> tidslinjeFraVirkningstidspunkt = AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(virkningstidspunkt);
         return DatoIntervallEntitet.fraOgMedTilOgMed(tidslinjeFraVirkningstidspunkt.getMinLocalDate(), tidslinjeFraVirkningstidspunkt.getMaxLocalDate());
     }

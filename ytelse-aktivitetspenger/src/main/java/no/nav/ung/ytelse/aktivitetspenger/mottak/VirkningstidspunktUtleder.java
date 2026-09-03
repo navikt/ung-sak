@@ -25,9 +25,12 @@ public class VirkningstidspunktUtleder {
         this.vilkårTjeneste = vilkårTjeneste;
     }
 
-    public LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, long behandlingId) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
-        Optional<Behandling> sisteAvsluttedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId());
+    public LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, Behandling behandling) {
+        return utledVirkningstidspunkt(søknadFomDato, behandling.getFagsakId());
+    }
+
+    public LocalDate utledVirkningstidspunkt(LocalDate søknadFomDato, Long fagsakId) {
+        Optional<Behandling> sisteAvsluttedeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
         LocalDateTimeline<VilkårUtfallSamlet> tidslinjeInnvilgetVedtak = sisteAvsluttedeBehandling.map(avsluttetBehandling -> vilkårTjeneste.samletVilkårsresultat(avsluttetBehandling.getId()).filterValue(utfall -> utfall.getSamletUtfall() == Utfall.OPPFYLT)).orElse(LocalDateTimeline.empty());
         LocalDate sisteInnvilgedeDato = tidslinjeInnvilgetVedtak.isEmpty() ? null : tidslinjeInnvilgetVedtak.getMaxLocalDate();
         return utledVirkningstidspunkt(søknadFomDato, sisteInnvilgedeDato);
