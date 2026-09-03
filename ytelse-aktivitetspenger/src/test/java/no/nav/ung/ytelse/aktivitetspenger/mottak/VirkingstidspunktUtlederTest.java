@@ -41,7 +41,7 @@ class VirkingstidspunktUtlederTest {
 
     @Test
     void skal_bruke_søknad_fom_når_ingen_tidligere_innvilget_dato() {
-        var resultat = VirkningstidspunktUtleder.utledVirkningstidspunkt(UKE2_MANDAG, null);
+        var resultat = VirkningstidspunktUtleder.utledVirkningstidspunkt(UKE2_MANDAG, (LocalDate) null);
 
         assertThat(resultat).isEqualTo(UKE2_MANDAG);
     }
@@ -69,14 +69,14 @@ class VirkingstidspunktUtlederTest {
 
     @Test
     void skal_flytte_søknad_fom_fra_lørdag_til_mandag() {
-        var resultat = VirkningstidspunktUtleder.utledVirkningstidspunkt(UKE1_LØRDAG, null);
+        var resultat = VirkningstidspunktUtleder.utledVirkningstidspunkt(UKE1_LØRDAG, (LocalDate) null);
 
         assertThat(resultat).isEqualTo(UKE2_MANDAG);
     }
 
     @Test
     void skal_flytte_søknad_fom_fra_søndag_til_mandag() {
-        var resultat = VirkningstidspunktUtleder.utledVirkningstidspunkt(UKE1_SØNDAG, null);
+        var resultat = VirkningstidspunktUtleder.utledVirkningstidspunkt(UKE1_SØNDAG, (LocalDate) null);
 
         assertThat(resultat).isEqualTo(UKE2_MANDAG);
     }
@@ -93,7 +93,7 @@ class VirkingstidspunktUtlederTest {
     void skal_bruke_søknad_fom_når_det_ikke_finnes_avsluttet_behandling() {
         var behandling = opprettFørstegangsbehandling();
 
-        var resultat = utleder.utledVirkningstidspunkt(UKE2_MANDAG, behandling.getId());
+        var resultat = utleder.utledVirkningstidspunkt(UKE2_MANDAG, behandling);
 
         assertThat(resultat).isEqualTo(UKE2_MANDAG);
     }
@@ -105,7 +105,7 @@ class VirkingstidspunktUtlederTest {
         var avsluttet = opprettAvsluttetInnvilgetBehandling(new Periode(LocalDate.of(2026, 3, 2), sisteInnvilgedeDato));
         var revurdering = opprettRevurdering(avsluttet);
 
-        var resultat = utleder.utledVirkningstidspunkt(UKE2_MANDAG, revurdering.getId());
+        var resultat = utleder.utledVirkningstidspunkt(UKE2_MANDAG, revurdering);
 
         assertThat(resultat).isEqualTo(forventetVirkningstidspunkt);
     }
@@ -116,7 +116,7 @@ class VirkingstidspunktUtlederTest {
         var avsluttet = opprettAvsluttetInnvilgetBehandling(new Periode(UKE1_TORSDAG, UKE2_MANDAG));
         var revurdering = opprettRevurdering(avsluttet);
 
-        var resultat = utleder.utledVirkningstidspunkt(søknadFom, revurdering.getId());
+        var resultat = utleder.utledVirkningstidspunkt(søknadFom, revurdering);
 
         assertThat(resultat).isEqualTo(søknadFom);
     }
