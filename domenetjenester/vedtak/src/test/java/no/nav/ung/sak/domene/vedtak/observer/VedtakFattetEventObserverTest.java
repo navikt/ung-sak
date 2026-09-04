@@ -4,6 +4,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vedtak.IverksettingStatus;
 import no.nav.ung.kodeverk.vedtak.VedtakResultatType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -13,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakEvent;
 import no.nav.ung.sak.behandlingslager.behandling.vedtak.BehandlingVedtakRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.domene.vedtak.brukerdialog.PubliserSakTilBrukerdialogTask;
 import no.nav.ung.sak.formidling.bestilling.VedtaksbrevbestillingTjeneste;
 import no.nav.ung.sak.formidling.bestilling.VurderVedtaksbrevTask;
 import no.nav.ung.sak.typer.AktørId;
@@ -92,12 +94,58 @@ public class VedtakFattetEventObserverTest {
             .containsExactlyInAnyOrder(VurderVedtaksbrevTask.TASKTYPE, PubliserVedtattYtelseHendelseTask.TASKTYPE);
     }
 
+    @Test
+    public void sendervedtaksstatusTilBrukerdialogForAktivitetspenger() {
+        var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET, FagsakYtelseType.AKTIVITETSPENGER);
+        observerBehandlingVedtak(behandlingVedtakEvent);
+
+        verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
+        assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
+            .map(ProsessTaskData::getTaskType))
+            .contains(PubliserSakTilBrukerdialogTask.TASKTYPE);
+    }
+
+    @Test
+    public void senderVedtaksstatusOgsaaVedFulltAvslagSlikAtDeltakerenKanSoekePaaNytt() {
+        var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.AVSLAG, FagsakYtelseType.AKTIVITETSPENGER);
+        observerBehandlingVedtak(behandlingVedtakEvent);
+
+        verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
+        assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
+            .map(ProsessTaskData::getTaskType))
+            .contains(PubliserSakTilBrukerdialogTask.TASKTYPE);
+    }
+
+    @Test
+    public void senderIkkeVedtaksstatusForAndreYtelser() {
+        var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IVERKSATT, VedtakResultatType.INNVILGET, FagsakYtelseType.UNGDOMSYTELSE);
+        observerBehandlingVedtak(behandlingVedtakEvent);
+
+        verify(prosessTaskRepository, times(2)).lagre(prosessTaskDataCaptorCaptor.capture());
+        assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
+            .map(ProsessTaskData::getTaskType))
+            .doesNotContain(PubliserSakTilBrukerdialogTask.TASKTYPE);
+    }
+
+    @Test
+    public void senderIkkeVedtaksstatusFoerVedtaketErIverksatt() {
+        var behandlingVedtakEvent = lagVedtakEvent(IverksettingStatus.IKKE_IVERKSATT, VedtakResultatType.INNVILGET, FagsakYtelseType.AKTIVITETSPENGER);
+        observerBehandlingVedtak(behandlingVedtakEvent);
+
+        verify(prosessTaskRepository, never()).lagre(any(ProsessTaskData.class));
+    }
+
     private Behandling lagBehandling() {
+        return lagBehandling(FagsakYtelseType.UNGDOMSYTELSE);
+    }
+
+    private Behandling lagBehandling(FagsakYtelseType ytelseType) {
         Behandling behandling = mock(Behandling.class);
         when(behandling.getId()).thenReturn(123L);
         when(behandling.getFagsakId()).thenReturn(123L);
         when(behandling.getAktørId()).thenReturn(AktørId.dummy());
         when(behandling.erYtelseBehandling()).thenReturn(true);
+        when(behandling.getFagsakYtelseType()).thenReturn(ytelseType);
         Fagsak fagsakMock = mock(Fagsak.class);
         when(fagsakMock.getSaksnummer()).thenReturn(new Saksnummer("123"));
         when(behandling.getFagsak()).thenReturn(fagsakMock);
@@ -108,6 +156,10 @@ public class VedtakFattetEventObserverTest {
     }
 
     private BehandlingVedtakEvent lagVedtakEvent(IverksettingStatus status, VedtakResultatType vedtakResultatType) {
+        return lagVedtakEvent(status, vedtakResultatType, FagsakYtelseType.UNGDOMSYTELSE);
+    }
+
+    private BehandlingVedtakEvent lagVedtakEvent(IverksettingStatus status, VedtakResultatType vedtakResultatType, FagsakYtelseType ytelseType) {
         var vedtak = BehandlingVedtak.builder(123L)
             .medVedtakstidspunkt(LocalDateTime.now())
             .medAnsvarligSaksbehandler("")
@@ -117,7 +169,7 @@ public class VedtakFattetEventObserverTest {
 
         when(vedtakRepository.hentBehandlingVedtakForBehandlingId(any())).thenReturn(Optional.of(vedtak));
 
-        return new BehandlingVedtakEvent(vedtak, lagBehandling());
+        return new BehandlingVedtakEvent(vedtak, lagBehandling(ytelseType));
     }
 
     private void observerBehandlingVedtak(BehandlingVedtakEvent behandlingVedtakEvent) {
