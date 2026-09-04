@@ -19,12 +19,6 @@ public enum VilkårType implements Kodeverdi {
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "", // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
             FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
         Avslagsårsak.SØKT_FOR_SENT),
-    SØKERSOPPLYSNINGSPLIKT("UNG_VK_4",
-        "Søkers opplysningsplikt",
-        Map.of(
-            FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 4",
-            FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
-        Avslagsårsak.MANGLENDE_DOKUMENTASJON),
     UNGDOMSPROGRAMVILKÅRET(
         "UNG_VK_2",
         "Deltar i ungdomsprogrammet",

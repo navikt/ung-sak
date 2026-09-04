@@ -236,7 +236,7 @@ class YtelseVedtaksbrevReglerTest {
 
         var behandling = BrevScenarioerUtils.lagAvsluttetBehandlingMedAP(
           EndringHøySatsScenarioer.endring25År(fom.minusYears(25)), ungTestRepositories,
-            AksjonspunktDefinisjon.VURDER_TILBAKETREKK
+            AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST
         );
 
         behandling.avsluttBehandling();
