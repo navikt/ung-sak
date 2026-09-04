@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -10,10 +9,12 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.IngenVurdering;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.KantIKantVurderer;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.UtledeteVilkår;
@@ -92,6 +93,13 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
     @Override
     public int maksMellomliggendePeriodeAvstand() {
         return 0;
+    }
+
+
+    @Override
+    public KantIKantVurderer getKantIKantVurderer() {
+        //for at ny søknad skal vurderes uten å gjenåpne perioder fra tidligere behandlinger
+        return new IngenVurdering();
     }
 
 
