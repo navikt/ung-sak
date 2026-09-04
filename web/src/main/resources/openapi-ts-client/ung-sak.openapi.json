@@ -70,12 +70,6 @@
           "continuous" : {
             "type" : "boolean"
           },
-          "datoIntervaller" : {
-            "items" : {
-              "$ref" : "#/components/schemas/fpsak.tidsserie.LocalDateInterval"
-            },
-            "type" : "array"
-          },
           "empty" : {
             "type" : "boolean"
           },
