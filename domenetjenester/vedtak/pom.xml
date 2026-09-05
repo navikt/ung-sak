@@ -43,12 +43,20 @@
 			<groupId>no.nav.ung.sak</groupId>
 			<artifactId>behandlingslager-domene</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>no.nav.ung.sak</groupId>
+            <artifactId>perioder</artifactId>
+        </dependency>
 
 		<!-- Kontrakter -->
         <dependency>
 			<groupId>no.nav.k9.abakus</groupId>
 			<artifactId>abakus-kontrakt</artifactId>
 		</dependency>
+        <dependency>
+            <groupId>no.nav.ung.brukerdialog</groupId>
+            <artifactId>kontrakt</artifactId>
+        </dependency>
 
 		<dependency>
             <groupId>no.nav.k9.felles.sikkerhet</groupId>

@@ -33,7 +33,7 @@ public class UngBrukerdialogOppgaveKlient {
     @Inject
     public UngBrukerdialogOppgaveKlient(
         OidcRestClient restClient,
-        @KonfigVerdi(value = "ung.brukerdialog.api.url", defaultVerdi = "http://ung-brukerdialog-api.k9saksbehandling") String url) {
+        @KonfigVerdi(value = "ung.brukerdialog.api.url", defaultVerdi = "http://ung-brukerdialog-api/ung/brukerdialog/intern/api") String url) {
         this.restClient = restClient;
         this.opprettURI = tilUri(url, "oppgavebehandling/opprett");
         this.avbrytURI = tilUri(url, "oppgavebehandling/sett-avbrutt");
