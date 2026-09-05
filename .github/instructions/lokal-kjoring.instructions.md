@@ -25,10 +25,10 @@ Main class:        no.nav.ung.sak.web.server.jetty.JettyDevServer
 Working directory: <repo>/web
 ```
 
-`--vtp`-argumentet i `.run/Ung-sak JettyDevServer.run.xml` og README **gjør ingenting** —
-`main` ignorerer argumentene. Konfigurasjonen kommer fra `web/app-vtp.properties`, som
-`PropertiesUtils` laster fra **working directory**. Er working dir feil, starter serveren med
-tomme properties og feiler på en måte som ikke peker mot årsaken.
+Working directory er det som avgjør konfigurasjonen: `PropertiesUtils` laster
+`app-local.properties` og `app-vtp.properties` fra **working directory**, ikke fra classpath.
+Er den feil, starter serveren med tomme properties og feiler på en måte som ikke peker mot
+årsaken. `JettyDevServer.main` tar ingen argumenter.
 
 ### Forutsetninger
 
