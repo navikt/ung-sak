@@ -100,10 +100,11 @@ public class VedtakFattetEventObserverTest {
         observerBehandlingVedtak(behandlingVedtakEvent);
 
         verify(prosessTaskRepository, times(3)).lagre(prosessTaskDataCaptorCaptor.capture());
-        assertThat(prosessTaskDataCaptorCaptor.getAllValues().stream()
-            .map(ProsessTaskData::getTaskType))
-            .contains(PubliserSakTilBrukerdialogTask.TASKTYPE);
-    }
+        var brukerdialogTask = prosessTaskDataCaptorCaptor.getAllValues().stream()
+            .filter(it -> PubliserSakTilBrukerdialogTask.TASKTYPE.equals(it.getTaskType()))
+            .findFirst()
+            .orElseThrow();
+        assertThat(brukerdialogTask.getAktørId()).containsOnlyDigits();    }
 
     @Test
     public void senderVedtaksstatusOgsaaVedFulltAvslagSlikAtDeltakerenKanSoekePaaNytt() {

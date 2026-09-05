@@ -36,7 +36,7 @@ public class VedtakFattetEventObserver {
 
     private ProsessTaskData opprettTaskForVedtaksstatusTilBrukerdialog(BehandlingVedtakEvent event) {
         final ProsessTaskData taskData = ProsessTaskData.forProsessTask(PubliserSakTilBrukerdialogTask.class);
-        taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().toString());
+        taskData.setBehandling(event.getFagsakId(), event.getBehandlingId(), event.getAktørId().getId());
         taskData.setCallIdFraEksisterende();
         return taskData;
     }
