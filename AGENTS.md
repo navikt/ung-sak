@@ -77,7 +77,8 @@ dev/generate-openapi-ts-client.sh
 - Lokal app bruker typisk schema `ung_sak`.
 - Start DB via `k9-verdikjede/saksbehandling` (se `README.md`).
 - Kjor `no.nav.ung.sak.db.util.Databaseskjemainitialisering` eller `mvn test-compile` ved behov for skjemaendringer.
-- Lokal server startes via `JettyDevServer --vtp`.
+- Lokal server startes via `JettyDevServer` med working directory `web` (`--vtp` er en no-op —
+  properties lastes fra working directory). Se `.github/instructions/lokal-kjoring.instructions.md`.
 
 ## Conventions
 - Hold dependency-versjoner sentralt i root `pom.xml` med mindre modulspesifikk grunn finnes.
