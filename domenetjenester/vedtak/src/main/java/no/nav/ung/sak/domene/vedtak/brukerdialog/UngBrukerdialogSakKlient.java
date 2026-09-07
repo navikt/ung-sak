@@ -5,7 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
-import no.nav.ung.brukerdialog.kontrakt.vedtak.FagsakRequest;
+import no.nav.ung.brukerdialog.kontrakt.vedtak.MottaFagsakRequest;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -25,7 +25,7 @@ public class UngBrukerdialogSakKlient {
         this.fagsakUri = tilUri(url, "aktivitetspenger/fagsak");
     }
 
-    public void sendVedtaksstatus(FagsakRequest request) {
+    public void sendVedtaksstatus(MottaFagsakRequest request) {
         restClient.post(fagsakUri, request);
     }
 

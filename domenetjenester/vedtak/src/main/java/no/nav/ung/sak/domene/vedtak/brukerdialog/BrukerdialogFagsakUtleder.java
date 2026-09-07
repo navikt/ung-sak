@@ -3,7 +3,7 @@ package no.nav.ung.sak.domene.vedtak.brukerdialog;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.brukerdialog.kontrakt.vedtak.FagsakRequest;
+import no.nav.ung.brukerdialog.kontrakt.vedtak.MottaFagsakRequest;
 import no.nav.ung.brukerdialog.kontrakt.vedtak.MottattSøknadDto;
 import no.nav.ung.brukerdialog.kontrakt.vedtak.VedtakPeriodeDto;
 import no.nav.ung.brukerdialog.kontrakt.vedtak.VedtakResultatType;
@@ -42,11 +42,11 @@ public class BrukerdialogFagsakUtleder {
         this.vilkårTjeneste = vilkårTjeneste;
     }
 
-    public FagsakRequest utled(Long behandlingId) {
+    public MottaFagsakRequest utled(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         var fagsak = behandling.getFagsak();
 
-        return new FagsakRequest(
+        return new MottaFagsakRequest(
             new AktørId(fagsak.getAktørId().getId()),
             new Saksnummer(fagsak.getSaksnummer().getVerdi()),
             vedtaksperioder(behandling),
