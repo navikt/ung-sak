@@ -6,14 +6,14 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
-public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi {
+public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltDetaljertÅrsak {
 
     //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
-    ANNET("ANNET", "Annet/fritekst"),
-
-    AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge."),
-    UDEFINERT("-", "Ikke definert"),
+    ANNET("ANNET", "Annet/fritekst", Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK, true),
+    AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.", Avslagsårsak.AVKORTET, false),
+    UDEFINERT("-", "Ikke definert", null, true),
     ;
 
     public static final String KODEVERK = "AKTIVITETSVILKAAR_IKKE_OPPFYLT_AARSAK";
@@ -29,10 +29,25 @@ public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi {
 
     private final String kode;
     private final String navn;
+    private final Avslagsårsak avslagsårsak;
+    private final boolean krevesFritekst;
 
-    AktivitetsvilkåretIkkeOppfyltÅrsak(String kode, String navn) {
+    AktivitetsvilkåretIkkeOppfyltÅrsak(String kode, String navn, Avslagsårsak avslagsårsak,
+                                       boolean krevesFritekst) {
         this.kode = kode;
         this.navn = navn;
+        this.avslagsårsak = avslagsårsak;
+        this.krevesFritekst = krevesFritekst;
+    }
+
+    @Override
+    public Optional<Avslagsårsak> avslagsårsak() {
+        return Optional.ofNullable(avslagsårsak);
+    }
+
+    @Override
+    public boolean krevesFritekst() {
+        return krevesFritekst;
     }
 
     public static AktivitetsvilkåretIkkeOppfyltÅrsak fraKode(String kode) {

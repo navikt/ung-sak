@@ -16,6 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringInnhold;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsAvklaringDataMapper;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -38,6 +39,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
     private BostedAvklaringTjeneste bostedAvklaringTjeneste;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
 
     VurderFaktaOmBostedOppdaterer() {
@@ -48,11 +50,13 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     public VurderFaktaOmBostedOppdaterer(BehandlingRepository behandlingRepository,
                                          HistorikkinnslagRepository historikkinnslagRepository,
                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                         @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste) {
+                                         @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste,
+                                         InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.bostedAvklaringTjeneste = bostedAvklaringTjeneste;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     @Override
@@ -80,7 +84,11 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
         Set<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
 
-        bostedAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereForeslåtteAvklaringer, nyeAvklaringer);
+        inngangsvilkårVurderingTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param,
+            VilkårType.BOSTEDSVILKÅR,
+            InngangsvilkårVurderingTjeneste::settBostedsvilkårResultat,
+            tidligereForeslåtteAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList(),
+            nyeAvklaringer.stream().map(BostedAvklaringInnhold::hentPeriodeSomDatoIntervallEntitet).toList());
 
         bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereForeslåtteAvklaringer, nyeForeslåtteAvklaringer);
 

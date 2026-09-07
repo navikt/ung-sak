@@ -50,13 +50,24 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
-    BistandsvilkårResultatPeriode() {
+    protected BistandsvilkårResultatPeriode() {
         // Hibernate
     }
 
     /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
     BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, BistandsvilkårResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+    }
+
+    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
+        this(periode,
+            vilkårsvurderingResultat.godkjent(),
+            (BistandsvilkårIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
+            vilkårsvurderingResultat.manuellVurdering(),
+            vilkårsvurderingResultat.begrunnelse(),
+            vilkårsvurderingResultat.fritekstVurderingBrev(),
+            vilkårsvurderingResultat.vurdertAv(),
+            vilkårsvurderingResultat.vurdertTidspunkt());
     }
 
     public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
@@ -96,7 +107,7 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
         return ikkeOppfyltÅrsak;
     }
 
-    public boolean isManuellVurdering() {
+    public boolean erManuellVurdering() {
         return manuellVurdering;
     }
 
@@ -109,7 +120,7 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
     }
 
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, begrunnelse, fritekstVurderingBrev);
+        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {

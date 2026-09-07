@@ -6,16 +6,13 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
-import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,10 +41,15 @@ public class VilkårsavklaringEtterlysningTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
+    /**
+     * Avklaringsinnholdet er mappet til en vilkårsspesifikk {@link VilkårsavklaringInnhold}-implementasjon
+     * (skjuler den konkrete entitetsrepresentasjonen for denne tjenesten), sammen med referansen den ble/skal
+     * lagres med.
+     */
     public void oppdaterEtterlysninger(Behandling behandling,
                                         EtterlysningType etterlysningType,
-                                        Collection<VilkårPeriodeAvklaring> tidligereForeslåtte,
-                                        Collection<VilkårPeriodeAvklaring> nyeForeslåtte) {
+                                        Map<? extends VilkårsavklaringInnhold, UUID> tidligereForeslåtte,
+                                        Map<? extends VilkårsavklaringInnhold, UUID> nyeForeslåtte) {
 
         long behandlingId = behandling.getId();
 
@@ -56,18 +58,11 @@ public class VilkårsavklaringEtterlysningTjeneste {
             .filter(e -> e.getType() == etterlysningType)
             .toList();
 
-        Map<VilkårsavklaringInnhold, UUID> tidligereAvklaringer = tidligereForeslåtte.stream()
-            .collect(Collectors.toMap(
-                VilkårsavklaringInnhold::fra,
-                VilkårPeriodeAvklaring::getReferanse
-            ));
+        Map<VilkårsavklaringInnhold, UUID> tidligereAvklaringer = new HashMap<>(tidligereForeslåtte);
 
-        Map<VilkårsavklaringInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtte.stream()
-            .filter(VilkårPeriodeAvklaring::skalSendeVarsel)
-            .collect(Collectors.toMap(
-                VilkårsavklaringInnhold::fra,
-                VilkårPeriodeAvklaring::getReferanse)
-            );
+        Map<VilkårsavklaringInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtte.entrySet().stream()
+            .filter(entry -> entry.getKey().skalSendeVarsel())
+            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
         var referanserForUendretInnhold = tidligereAvklaringer.entrySet().stream()
             .filter(entry -> avklaringerSomSkalVarsles.containsKey(entry.getKey()))
@@ -87,7 +82,7 @@ public class VilkårsavklaringEtterlysningTjeneste {
                 behandlingId,
                 avklaring.getValue(),
                 UUID.randomUUID(),
-                avklaring.getKey().periode(),
+                avklaring.getKey().hentPeriodeSomDatoIntervallEntitet(),
                 etterlysningType
             )).toList();
         etterlysningRepository.lagre(nyeEtterlysninger);
@@ -106,31 +101,6 @@ public class VilkårsavklaringEtterlysningTjeneste {
             task.setBehandling(behandling.getFagsakId(), behandlingId);
             task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, etterlysningType.getKode());
             prosessTaskTjeneste.lagre(task);
-        }
-    }
-
-    /**
-     * Innholdssammenligning uten {@code referanse}, {@code vurdertAv} og {@code vurdertTidspunkt} — to
-     * avklaringer med samme innhold skal ikke trigge en ny etterlysning, selv om de er separate instanser.
-     */
-    private record VilkårsavklaringInnhold(DatoIntervallEntitet periode,
-                                            String ikkeOppfyltÅrsakKode,
-                                            String begrunnelse,
-                                            boolean skalSendeVarsel,
-                                            String fritekstTilVarsel,
-                                            String begrunnelseIkkeVarsel,
-                                            Avklaringtype avklaringtype) {
-
-        static VilkårsavklaringInnhold fra(VilkårPeriodeAvklaring avklaring) {
-            return new VilkårsavklaringInnhold(
-                avklaring.getPeriode(),
-                avklaring.getIkkeOppfyltÅrsakKode(),
-                avklaring.getBegrunnelse(),
-                avklaring.skalSendeVarsel(),
-                avklaring.getFritekstTilVarsel(),
-                avklaring.getBegrunnelseIkkeVarsel(),
-                avklaring.getAvklaringtype()
-            );
         }
     }
 }

@@ -109,7 +109,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
     }
 
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, begrunnelse, fritekstVurderingBrev);
+        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {

@@ -11,27 +11,27 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.AvklaringSporing;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 import no.nav.ung.sak.etterlysning.EtterlysningTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringOgUttalelseOgResultat.StegUtfall;
+import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfallUtleder;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -113,15 +113,9 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         ).intersection(tidslinjeTilVurdering);
 
         var avklaringTidslinje = hentForeslåttAvklaringTidslinje(behandlingId).intersection(tidslinjeTilVurdering);
+        var perioderTilVurderingAvgrenset = avgrensTilForeslåtteAvklaringerHvisFinnes(tidslinjeTilVurdering, avklaringTidslinje);
 
-        var tidligereVilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
-            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBistandTidslinje)
-            .orElse(new LocalDateTimeline<>(List.of()));
-
-        // I motsetning til bosted finnes det ingen faktatidslinje som dekker hele vilkårsperioden. Vi bygger derfor
-        // tidslinjen fra periodene til vurdering (LEFT_JOIN), slik at perioder uten foreslått avklaring fortsatt
-        // ender i manuell vurdering — som er dagens oppførsel for bistandsvilkåret.
-        LocalDateTimeline<BistandAvklaringOgUttalelseOgResultat> vurderingTidslinje = tidslinjeTilVurdering
+        LocalDateTimeline<VilkårsavklaringUtfallUtleder> vurderingTidslinje = perioderTilVurderingAvgrenset
             .combine(
                 avklaringTidslinje,
                 leggTilAvklaring(),
@@ -129,23 +123,23 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
             .combine(
                 etterlysningTidslinje,
                 leggTilEtterlysning(),
-                LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .combine(
-                tidligereVilkårVurderingResultat,
-                leggTilResultat(),
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        LocalDateTimeline<StegUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(BistandAvklaringOgUttalelseOgResultat::utledUtfall);
+        LocalDateTimeline<VilkårsavklaringUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(VilkårsavklaringUtfallUtleder::utledUtfall);
         avklaringSporing.lagreSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje, VURDER_BISTANDSVILKÅR.getKode());
 
-        if (!stegutfallTidslinje.filterValue(StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
+        if (!stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
             return settPåVent(vurderingTidslinje);
         }
 
-        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(StegUtfall.AVSLAG_AUTOMATISK::equals))
+        var vurderingResultat = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK::equals))
             .segmenter()
             .stream().map(s -> {
                 var foreslåttAvklaring = s.getValue().getForeslåttAvklaring();
+                if (foreslåttAvklaring == null) {
+                    throw new IllegalStateException("Foreslått avklaring mangler for periode " + s.getLocalDateInterval());
+                }
+
                 if (s.getValue().getEtterlysning() != null) {
                     if (!s.getValue().getEtterlysning().grunnlagsreferanse().equals(foreslåttAvklaring.getReferanse())) {
                         throw new IllegalStateException("Avklaring og etterlysning har ulik grunnlagsreferanse "
@@ -153,10 +147,11 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                     }
                 }
 
+                var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.fraKode(foreslåttAvklaring.getIkkeOppfyltÅrsakKode());
                 return new BistandsvilkårResultatPeriode(
                     DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
                     false,
-                    s.getValue().getIkkeOppfyltÅrsak(),
+                    ikkeOppfyltÅrsak,
                     false,
                     foreslåttAvklaring.getBegrunnelse(),
                     null,
@@ -167,13 +162,18 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         // Kalles også med tom liste, slik at grunnlaget alltid finnes når settBistandsvilkårResultat kjører under.
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, vurderingResultat);
 
-        if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
+        if (!stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT).isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR));
         }
 
         // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
         oppdaterBistandsvilkårResultatFraVurdering(behandlingId);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+     private static LocalDateTimeline<Boolean> avgrensTilForeslåtteAvklaringerHvisFinnes(
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<VilkårPeriodeAvklaring> avklaringTidslinje) {
+        return avklaringTidslinje.isEmpty() ? tidslinjeTilVurdering : tidslinjeTilVurdering.intersection(avklaringTidslinje);
     }
 
     private void oppdaterBistandsvilkårResultatFraVurdering(long behandlingId) {
@@ -192,27 +192,21 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
             .toList());
     }
 
-    private static LocalDateSegmentCombinator<Boolean, VilkårPeriodeAvklaring, BistandAvklaringOgUttalelseOgResultat> leggTilAvklaring() {
-        return (di, lhs, rhs) -> new LocalDateSegment<>(di, new BistandAvklaringOgUttalelseOgResultat(rhs != null ? rhs.getValue() : null));
+    private static LocalDateSegmentCombinator<Boolean, VilkårPeriodeAvklaring, VilkårsavklaringUtfallUtleder> leggTilAvklaring() {
+        return (di, lhs, rhs) ->
+            new LocalDateSegment<>(di, new VilkårsavklaringUtfallUtleder(VilkårType.BISTANDSVILKÅR, rhs != null ? rhs.getValue() : null));
     }
 
-    private static LocalDateSegmentCombinator<BistandAvklaringOgUttalelseOgResultat, EtterlysningData, BistandAvklaringOgUttalelseOgResultat> leggTilEtterlysning() {
+    private static LocalDateSegmentCombinator<VilkårsavklaringUtfallUtleder, EtterlysningData, VilkårsavklaringUtfallUtleder> leggTilEtterlysning() {
         return (di, lhs, rhs) -> {
             var vurdering = rhs != null ? lhs.getValue().medEtterlysning(rhs.getValue()) : lhs.getValue();
             return new LocalDateSegment<>(di, vurdering);
         };
     }
 
-    private static LocalDateSegmentCombinator<BistandAvklaringOgUttalelseOgResultat, VilkårsvurderingResultat, BistandAvklaringOgUttalelseOgResultat> leggTilResultat() {
-        return (di, lhs, rhs) -> {
-            var vurdering = rhs != null ? lhs.getValue().medResultat(rhs.getValue()) : lhs.getValue();
-            return new LocalDateSegment<>(di, vurdering);
-        };
-    }
-
-    private static BehandleStegResultat settPåVent(LocalDateTimeline<BistandAvklaringOgUttalelseOgResultat> vurderingTidslinje) {
+    private static BehandleStegResultat settPåVent(LocalDateTimeline<VilkårsavklaringUtfallUtleder> vurderingTidslinje) {
         LocalDateTime frist = vurderingTidslinje
-            .filterValue(v -> v.utledUtfall() == StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
+            .filterValue(v -> v.utledUtfall() == VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER)
             .segmenter().stream()
             .map(seg -> seg.getValue().getFrist())
             .filter(Objects::nonNull)

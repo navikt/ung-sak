@@ -49,6 +49,12 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
     @Column(name = "begrunnelse_ikke_varsel", updatable = false)
     private String begrunnelseIkkeVarsel;
 
+    @Column(name = "kilde", updatable = false, nullable = false)
+    private String kildeKode;
+
+    @Column(name = "kilde_fritekst", updatable = false)
+    private String kildeFritekst;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "avklaringtype", updatable = false, nullable = false)
     private Avklaringtype avklaringtype;
@@ -75,6 +81,8 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
         this.skalSendeVarsel = annenAvklaring.skalSendeVarsel();
         this.fritekstTilVarsel = annenAvklaring.getFritekstTilVarsel();
         this.begrunnelseIkkeVarsel = annenAvklaring.getBegrunnelseIkkeVarsel();
+        this.kildeKode = annenAvklaring.getKildeKode();
+        this.kildeFritekst = annenAvklaring.getKildeFritekst();
         this.vurdertAv = annenAvklaring.getVurdertAv();
         this.vurdertTidspunkt = annenAvklaring.getVurdertTidspunkt();
         this.avklaringtype = annenAvklaring.getAvklaringtype();
@@ -125,6 +133,16 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
     }
 
     @Override
+    public String getKildeKode() {
+        return kildeKode;
+    }
+
+    @Override
+    public String getKildeFritekst() {
+        return kildeFritekst;
+    }
+
+    @Override
     public Avklaringtype getAvklaringtype() {
         return avklaringtype;
     }
@@ -145,6 +163,8 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
             && skalSendeVarsel == that.skalSendeVarsel
             && Objects.equals(fritekstTilVarsel, that.fritekstTilVarsel)
             && Objects.equals(begrunnelseIkkeVarsel, that.begrunnelseIkkeVarsel)
+            && Objects.equals(kildeKode, that.kildeKode)
+            && Objects.equals(kildeFritekst, that.kildeFritekst)
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt)
             && avklaringtype == that.avklaringtype;
@@ -152,7 +172,7 @@ public class VilkårPeriodeAvklaringFerdigstilt extends BaseEntitet implements V
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), ikkeOppfyltÅrsakKode, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype);
+        return Objects.hash(getPeriode(), ikkeOppfyltÅrsakKode, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, kildeKode, kildeFritekst, vurdertAv, vurdertTidspunkt, avklaringtype);
     }
 
     @Override

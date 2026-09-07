@@ -10,10 +10,6 @@ import java.util.UUID;
  * Avklaringen lagres i to varianter som skiller seg fra hverandre kun ved hvilken tabell de ligger i:
  * {@link VilkårPeriodeAvklaringForeslått} (foreslått og behandlet i gjeldende behandling) og
  * {@link VilkårPeriodeAvklaringFerdigstilt} (ferdig avklart/vedtatt). Selve dataene er identiske.
- * <p>
- * I motsetning til vilkårsspesifikke avklaringer (f.eks. {@code BostedsPeriodeAvklaring}) eksponeres årsaken
- * til at vilkåret ikke er oppfylt som en rå kode, siden fire ulike {@code *IkkeOppfyltÅrsak}-enums ikke kan deles
- * i én kolonne. Typingen gjenopprettes i hvert vilkårs egen mapper via {@code fraKode}.
  */
 public interface VilkårPeriodeAvklaring {
 
@@ -22,6 +18,10 @@ public interface VilkårPeriodeAvklaring {
     DatoIntervallEntitet getPeriode();
 
     String getIkkeOppfyltÅrsakKode();
+
+    String getKildeKode();
+
+    String getKildeFritekst();
 
     String getBegrunnelse();
 

@@ -15,17 +15,6 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Objects;
 
-/**
- * Oppretter oppgave til deltaker for etterlysning av uttalelse om bistandsavklaring.
- * <p>
- * TODO(fase 1 plassholder): Faktisk oppgave-sending til ung-brukerdialog-api er IKKE koblet opp. Kontrakten
- * {@code no.nav.ung.brukerdialog:kontrakt} mangler både en {@code OppgaveType}-verdi for bistand og en
- * {@code OppgavetypeDataDto}-subtype for bekreftelse av bistandsavklaring, og kan ikke endres herfra.
- * All utledning og validering nedenfor speiler {@code BostedOppgaveOppretter} og kjøres som normalt, slik at
- * feil i saksbehandlers avklaring fanges opp allerede nå. Selve REST-kallet er erstattet med en advarsel i
- * loggen. Det kastes bevisst ikke exception, slik at behandlingsflyten ikke stopper.
- * Se {@code dokumentasjon/felles-vilkaarsavklaring-fase-1-plassholdere.md}.
- */
 @Dependent
 public class BistandOppgaveOppretter {
 

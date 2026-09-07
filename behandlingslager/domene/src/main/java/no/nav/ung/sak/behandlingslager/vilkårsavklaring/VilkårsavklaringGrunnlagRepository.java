@@ -34,13 +34,6 @@ public class VilkårsavklaringGrunnlagRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    /**
-     * Lagrer saksbehandlers foreslåtte vilkårsavklaringer for en behandling og et vilkår. Oppretter grunnlaget
-     * dersom det ikke finnes fra før (i motsetning til bosted, der grunnlaget alltid er opprettet av
-     * søknadsmottaket på forhånd).
-     *
-     * @return avklaringene som nå er foreslått på behandlingen for dette vilkåret
-     */
     public Set<VilkårPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, VilkårType vilkårType, Set<VilkårPeriodeAvklaringForeslått> nyeAvklaringer) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId, vilkårType);
         var nyttGrunnlag = eksisterendeGrunnlag

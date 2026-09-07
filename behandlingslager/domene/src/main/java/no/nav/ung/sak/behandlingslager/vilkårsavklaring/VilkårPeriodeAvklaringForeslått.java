@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.vilkårsavklaring;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.vilkår.AvklaringKilde;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -49,6 +50,12 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
     @Column(name = "begrunnelse_ikke_varsel", updatable = false)
     private String begrunnelseIkkeVarsel;
 
+    @Column(name = "kilde", updatable = false, nullable = false)
+    private String kildeKode;
+
+    @Column(name = "kilde_fritekst", updatable = false)
+    private String kildeFritekst;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "avklaringtype", updatable = false, nullable = false)
     private Avklaringtype avklaringtype;
@@ -69,6 +76,8 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
                                             boolean skalSendeVarsel,
                                             String fritekstTilVarsel,
                                             String begrunnelseIkkeVarsel,
+                                            AvklaringKilde kilde,
+                                            String kildeFritekst,
                                             String vurdertAv,
                                             LocalDateTime vurdertTidspunkt,
                                             Avklaringtype avklaringtype) {
@@ -81,6 +90,10 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
         Objects.requireNonNull(avklaringtype, "avklaringtype");
+        Objects.requireNonNull(kilde, "kilde");
+        if (kilde.krevesFritekst()) {
+            Objects.requireNonNull(kildeFritekst, "kildeFritekst må være satt når kilde=" + kilde.getKode());
+        }
 
         this.periode = periode.toRange();
         this.ikkeOppfyltÅrsakKode = ikkeOppfyltÅrsakKode;
@@ -88,6 +101,8 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
         this.skalSendeVarsel = skalSendeVarsel;
         this.fritekstTilVarsel = fritekstTilVarsel;
         this.begrunnelseIkkeVarsel = begrunnelseIkkeVarsel;
+        this.kildeKode = kilde.getKode();
+        this.kildeFritekst = kildeFritekst;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
         this.avklaringtype = avklaringtype;
@@ -101,6 +116,8 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
         this.skalSendeVarsel = annenAvklaring.skalSendeVarsel();
         this.fritekstTilVarsel = annenAvklaring.getFritekstTilVarsel();
         this.begrunnelseIkkeVarsel = annenAvklaring.getBegrunnelseIkkeVarsel();
+        this.kildeKode = annenAvklaring.getKildeKode();
+        this.kildeFritekst = annenAvklaring.getKildeFritekst();
         this.vurdertAv = annenAvklaring.getVurdertAv();
         this.vurdertTidspunkt = annenAvklaring.getVurdertTidspunkt();
         this.avklaringtype = annenAvklaring.getAvklaringtype();
@@ -151,6 +168,16 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
     }
 
     @Override
+    public String getKildeKode() {
+        return kildeKode;
+    }
+
+    @Override
+    public String getKildeFritekst() {
+        return kildeFritekst;
+    }
+
+    @Override
     public Avklaringtype getAvklaringtype() {
         return avklaringtype;
     }
@@ -171,6 +198,8 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
             && skalSendeVarsel == that.skalSendeVarsel
             && Objects.equals(fritekstTilVarsel, that.fritekstTilVarsel)
             && Objects.equals(begrunnelseIkkeVarsel, that.begrunnelseIkkeVarsel)
+            && Objects.equals(kildeKode, that.kildeKode)
+            && Objects.equals(kildeFritekst, that.kildeFritekst)
             && Objects.equals(vurdertAv, that.vurdertAv)
             && Objects.equals(vurdertTidspunkt, that.vurdertTidspunkt)
             && avklaringtype == that.avklaringtype;
@@ -178,7 +207,7 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), ikkeOppfyltÅrsakKode, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, vurdertAv, vurdertTidspunkt, avklaringtype);
+        return Objects.hash(getPeriode(), ikkeOppfyltÅrsakKode, begrunnelse, skalSendeVarsel, fritekstTilVarsel, begrunnelseIkkeVarsel, kildeKode, kildeFritekst, vurdertAv, vurdertTidspunkt, avklaringtype);
     }
 
     @Override

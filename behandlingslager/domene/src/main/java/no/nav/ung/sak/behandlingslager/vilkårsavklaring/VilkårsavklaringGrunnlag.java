@@ -3,14 +3,12 @@ package no.nav.ung.sak.behandlingslager.vilkårsavklaring;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import org.hibernate.annotations.BatchSize;
 
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * Grunnlag som kobler en behandling og ett vilkår til vilkårsavklarings-aggregatet.
@@ -31,10 +29,9 @@ public class VilkårsavklaringGrunnlag extends BaseEntitet {
     @Column(name = "vilkaar_type", nullable = false, updatable = false)
     private VilkårType vilkårType;
 
-    @BatchSize(size = 20)
-    @JoinColumn(name = "gr_vilkaar_avklaring_id", nullable = false)
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<VilkårPeriodeAvklaringForeslått> foreslåtteAvklaringer = new LinkedHashSet<>();
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "foreslaatt_holder_id", updatable = false)
+    private VilkårAvklaringForeslåttHolder foreslåtteAvklaringer;
 
     @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "avklaring_holder_id", updatable = false)
@@ -59,28 +56,24 @@ public class VilkårsavklaringGrunnlag extends BaseEntitet {
 
     private VilkårsavklaringGrunnlag(Long behandlingId,
                                       VilkårType vilkårType,
-                                      Set<VilkårPeriodeAvklaringForeslått> foreslåtteAvklaringer,
+                                      VilkårAvklaringForeslåttHolder foreslåtteAvklaringer,
                                       VilkårAvklaringHolder ferdigstilteAvklaringer) {
         this(behandlingId, vilkårType);
-        this.foreslåtteAvklaringer = foreslåtteAvklaringer.stream()
-            .map(VilkårPeriodeAvklaringForeslått::new)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        this.foreslåtteAvklaringer = foreslåtteAvklaringer;
         this.ferdigstilteAvklaringer = ferdigstilteAvklaringer;
     }
 
     /**
-     * Bygger nytt sett med foreslåtte avklaringer — kun hvis innholdet faktisk er endret. Rører ikke holderen,
-     * slik at ferdigstilte avklaringer ikke dupliseres ved lagring av forslag.
+     * Bygger ny holder for foreslåtte avklaringer — kun hvis innholdet faktisk er endret. Rører ikke holderen for
+     * ferdigstilte, slik at ferdigstilte avklaringer ikke dupliseres ved lagring av forslag.
      */
     void setForeslåtteAvklaringer(Set<VilkårPeriodeAvklaringForeslått> nyeAvklaringer) {
-        var kopi = nyeAvklaringer.stream()
-            .map(VilkårPeriodeAvklaringForeslått::new)
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+        var nyHolder = VilkårAvklaringForeslåttHolder.lagHolder(nyeAvklaringer);
 
-        if (kopi.equals(this.foreslåtteAvklaringer)) {
+        if (nyHolder.harSammeInnholdSom(this.foreslåtteAvklaringer)) {
             return;
         }
-        this.foreslåtteAvklaringer = kopi;
+        this.foreslåtteAvklaringer = nyHolder;
     }
 
     /**
@@ -90,12 +83,18 @@ public class VilkårsavklaringGrunnlag extends BaseEntitet {
      */
     void ferdigstillForeslåtteAvklaringer() {
         var nyHolder = VilkårAvklaringHolder.lagKopi(this.ferdigstilteAvklaringer);
-        nyHolder.ferdigstillAvklaringer(foreslåtteAvklaringer);
+        nyHolder.ferdigstillAvklaringer(hentForeslåtte());
 
-        if (nyHolder.equals(this.ferdigstilteAvklaringer)) {
+        if (nyHolder.harSammeInnholdSom(this.ferdigstilteAvklaringer)) {
             return;
         }
         this.ferdigstilteAvklaringer = nyHolder;
+    }
+
+    private Set<VilkårPeriodeAvklaringForeslått> hentForeslåtte() {
+        return Optional.ofNullable(foreslåtteAvklaringer)
+            .map(VilkårAvklaringForeslåttHolder::hentForeslåtteAvklaringer)
+            .orElse(Set.of());
     }
 
     public Long getId() {
@@ -114,7 +113,7 @@ public class VilkårsavklaringGrunnlag extends BaseEntitet {
      * Avklaringene som er foreslått og behandlet i denne behandlingen — uavhengig av om de er ferdigstilt.
      */
     public Set<VilkårPeriodeAvklaring> getForeslåtteAvklaringer() {
-        return Collections.unmodifiableSet(new LinkedHashSet<>(foreslåtteAvklaringer));
+        return Collections.unmodifiableSet(new LinkedHashSet<>(hentForeslåtte()));
     }
 
     /**
@@ -155,8 +154,8 @@ public class VilkårsavklaringGrunnlag extends BaseEntitet {
     }
 
     /**
-     * Nytt grunnlag for samme behandling, med kopi av de foreslåtte avklaringene og referanse til samme holder.
-     * Brukes ved lagring av nye/endrede avklaringer på en behandling som allerede har et grunnlag.
+     * Nytt grunnlag for samme behandling, med referanse til de samme holderne. Brukes ved lagring av nye/endrede
+     * avklaringer på en behandling som allerede har et grunnlag.
      */
     public static VilkårsavklaringGrunnlag nyttGrunnlagMedReferanserFra(VilkårsavklaringGrunnlag grunnlag) {
         return new VilkårsavklaringGrunnlag(
@@ -176,7 +175,7 @@ public class VilkårsavklaringGrunnlag extends BaseEntitet {
         return new VilkårsavklaringGrunnlag(
             behandlingId,
             grunnlag.getVilkårType(),
-            Set.of(),
+            null,
             grunnlag.ferdigstilteAvklaringer
         );
     }

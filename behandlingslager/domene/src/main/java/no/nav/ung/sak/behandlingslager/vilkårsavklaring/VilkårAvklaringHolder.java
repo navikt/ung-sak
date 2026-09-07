@@ -14,11 +14,6 @@ import java.util.stream.Collectors;
  * Aggregat/holder for ferdigstilte vilkårsavklaringer for ett vilkår. Holderen kan deles i sin helhet mellom
  * behandlinger ved revurdering uten endringer. Enhver endring fører til en ny instans av holderen med kopier.
  * Dette er ivaretatt av setterne på {@link VilkårsavklaringGrunnlag}.
- * <p>
- * I motsetning til bosted-modellen inneholder holderen kun ferdigstilte avklaringer. Foreslåtte avklaringer
- * gjelder per definisjon kun for én behandling og deles aldri, og hører derfor hjemme på grunnlaget —
- * se {@link VilkårsavklaringGrunnlag}.
- * <p>
  * Klassen er pakkeprivat med vilje: mutasjon skal kun skje gjennom setterne på {@link VilkårsavklaringGrunnlag},
  * som sørger for at det lages en ny holder-instans ved endring slik at data fra tidligere behandlinger aldri
  * muteres.
@@ -103,6 +98,14 @@ class VilkårAvklaringHolder extends BaseEntitet {
                     avklaring)
             ).collect(Collectors.toList())
         );
+    }
+
+    /**
+     * En holder som ikke er satt er innholdsmessig det samme som en tom holder — brukes for å unngå at det lages
+     * en ny (tom) holder når det ikke finnes noe å ferdigstille.
+     */
+    boolean harSammeInnholdSom(VilkårAvklaringHolder other) {
+        return other == null ? periodeAvklaringerFerdigstilt.isEmpty() : equals(other);
     }
 
     @Override

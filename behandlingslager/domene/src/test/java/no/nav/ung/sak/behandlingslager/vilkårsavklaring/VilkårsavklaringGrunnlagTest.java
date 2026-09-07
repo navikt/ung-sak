@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.vilkårsavklaring;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
@@ -82,7 +83,7 @@ class VilkårsavklaringGrunnlagTest {
     }
 
     @Test
-    void nyttGrunnlagMedReferanserFra_skalGiKopiAvForeslåtteOgSammeHolderreferanse() {
+    void nyttGrunnlagMedReferanserFra_skalDeleHolderreferanserForBådeForeslåtteOgFerdigstilte() {
         var grunnlag = new VilkårsavklaringGrunnlag(1L, VilkårType.BOSTEDSVILKÅR);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
         grunnlag.setForeslåtteAvklaringer(Set.of(lagAvklaring(periode, "begrunnelse")));
@@ -93,6 +94,11 @@ class VilkårsavklaringGrunnlagTest {
         assertThat(nyttGrunnlag).isEqualTo(grunnlag);
         assertThat(nyttGrunnlag.getForeslåtteAvklaringer()).hasSize(1);
         assertThat(nyttGrunnlag.getFerdigstilteAvklaringer()).hasSize(1);
+
+        assertThat(nyttGrunnlag.getForeslåtteAvklaringer().iterator().next())
+            .isSameAs(grunnlag.getForeslåtteAvklaringer().iterator().next());
+        assertThat(nyttGrunnlag.getFerdigstilteAvklaringer().iterator().next())
+            .isSameAs(grunnlag.getFerdigstilteAvklaringer().iterator().next());
     }
 
     @Test
@@ -131,6 +137,8 @@ class VilkårsavklaringGrunnlagTest {
             begrunnelse,
             true,
             null,
+            null,
+            BostedsavklaringKildeType.BRUKER,
             null,
             "saksbehandler2",
             VURDERT_TIDSPUNKT,

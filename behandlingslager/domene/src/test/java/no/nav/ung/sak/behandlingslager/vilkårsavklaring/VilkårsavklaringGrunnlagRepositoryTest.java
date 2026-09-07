@@ -1,9 +1,11 @@
 package no.nav.ung.sak.behandlingslager.vilkårsavklaring;
 
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -260,6 +262,8 @@ class VilkårsavklaringGrunnlagRepositoryTest {
             false,
             null,
             "begrunnelse for hvorfor det ikke varsles",
+            BostedsavklaringKildeType.BRUKER,
+            null,
             VURDERT_AV,
             VURDERT_TIDSPUNKT,
             Avklaringtype.AVSLAG

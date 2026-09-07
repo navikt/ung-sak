@@ -16,6 +16,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -67,6 +68,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -123,15 +125,15 @@ class VurderFaktaOmBistandOppdatererTest {
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
         var bistandAvklaringTjeneste = new BistandAvklaringTjeneste(
             vilkårsavklaringGrunnlagRepository,
-            new VilkårsavklaringEtterlysningTjeneste(etterlysningRepository, prosessTaskTjeneste),
-            inngangsvilkårVurderingTjeneste,
-            inngangsvilkårVurderingRepository);
+            inngangsvilkårVurderingTjeneste);
 
         oppdaterer = new VurderFaktaOmBistandOppdaterer(
             behandlingRepository,
             historikkinnslagRepository,
+            new VilkårsavklaringEtterlysningTjeneste(etterlysningRepository, prosessTaskTjeneste),
             vilkårsPerioderTilVurderingTjenester,
-            bistandAvklaringTjeneste
+            bistandAvklaringTjeneste,
+            inngangsvilkårVurderingTjeneste
         );
 
         behandling = opprettBehandlingMedVilkårOgPeriode();
@@ -171,7 +173,7 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void skal_lagre_avklaring_uten_varsel_uten_a_opprette_etterlysning() {
-        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.AVKORTET));
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
 
         var avklaringer = hentSorterteAvklaringer();
         assertThat(avklaringer).hasSize(1);
@@ -180,6 +182,21 @@ class VurderFaktaOmBistandOppdatererTest {
 
         assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
+    }
+
+    @Test
+    void avkortet_skal_avvises_ved_lagring() {
+        var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.AVKORTET);
+
+        assertThatThrownBy(() -> oppdater(dto)).isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void annet_uten_fritekst_skal_avvises_ved_lagring() {
+        var vurdering = new BistandVurderingIkkeOppfyltDto(BistandsvilkårIkkeOppfyltÅrsak.ANNET, "begrunnelse", null, null, BistandsavklaringKildeType.BRUKER,null);
+        var dto = new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering, false)), "begrunnelse");
+
+        assertThatThrownBy(() -> oppdater(dto)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -193,7 +210,7 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void skal_sette_vilkarsperiode_for_avklaringen_til_ikke_vurdert() {
-        var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.AVKORTET);
+        var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
         var param = new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto);
 
         oppdaterer.oppdater(dto, param);
@@ -245,7 +262,7 @@ class VurderFaktaOmBistandOppdatererTest {
 
         var revurdering = opprettRevurderingMedGrunnlagKopiert(originalBehandling, vilkårsperiode(heleperioden, Utfall.IKKE_VURDERT));
 
-        oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.AVKORTET));
+        oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.ANNET));
         var vilkårResultat = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
 
         assertThat(hentVilkårsperiode(vilkårResultat, heleperioden).getGjeldendeUtfall())
@@ -378,6 +395,10 @@ class VurderFaktaOmBistandOppdatererTest {
 
         new ProsessTriggereRepository(entityManager).leggTil(behandling.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
+
+        // Aksjonspunktet forutsetter at inngangsvilkår-vurderingsgrunnlaget allerede er opprettet (jf. faktaavklaringssteget)
+        inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of());
+
         return behandling;
     }
 

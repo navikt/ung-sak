@@ -1,6 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
@@ -11,10 +12,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * Mapper mellom den generiske {@link VilkårPeriodeAvklaring} (fase 0) og den bistandsspesifikke
- * {@link BistandAvklaringInnhold}. Årsaken lagres som rå kode i fellesmodellen og types tilbake her.
- */
 public final class BistandAvklaringDataMapper {
 
     private BistandAvklaringDataMapper() {
@@ -28,6 +25,8 @@ public final class BistandAvklaringDataMapper {
             avklaring.skalSendeVarsel(),
             avklaring.getFritekstTilVarsel(),
             avklaring.getBegrunnelseIkkeVarsel(),
+            BistandsavklaringKildeType.fraKode(avklaring.getKildeKode()),
+            avklaring.getKildeFritekst(),
             avklaring.getAvklaringtype()
         );
     }
@@ -41,6 +40,8 @@ public final class BistandAvklaringDataMapper {
             innhold.skalSendeVarsel(),
             innhold.fritekstTilVarsel(),
             innhold.begrunnelseIkkeVarsel(),
+            innhold.kilde(),
+            innhold.kildeFritekst(),
             vurdertAv,
             vurdertTidspunkt,
             innhold.avklaringtype()
@@ -60,6 +61,8 @@ public final class BistandAvklaringDataMapper {
             dto.skalSendeVarsel(),
             dto.vurdering().fritekstTilVarsel(),
             dto.vurdering().begrunnelseIkkeVarsel(),
+            dto.vurdering().kilde(),
+            dto.vurdering().kildeFritekst(),
             avklaringtype
         );
     }

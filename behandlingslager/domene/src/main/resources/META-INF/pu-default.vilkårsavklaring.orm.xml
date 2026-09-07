@@ -5,11 +5,13 @@
                  version="3.2">
 
     <sequence-generator name="SEQ_VILKAAR_AVKLARING_HOLDER" allocation-size="50" sequence-name="SEQ_VILKAAR_AVKLARING_HOLDER"/>
+    <sequence-generator name="SEQ_VILKAAR_AVKLARING_FORES_HOLDER" allocation-size="50" sequence-name="SEQ_VILKAAR_AVKLARING_FORES_HOLDER"/>
     <sequence-generator name="SEQ_VILKAAR_PERIODE_AVKLARING" allocation-size="50" sequence-name="SEQ_VILKAAR_PERIODE_AVKLARING"/>
     <sequence-generator name="SEQ_VILKAAR_PERIODE_AVKLARING_FORES" allocation-size="50" sequence-name="SEQ_VILKAAR_PERIODE_AVKLARING_FORES"/>
     <sequence-generator name="SEQ_GR_VILKAAR_AVKLARING" allocation-size="50" sequence-name="SEQ_GR_VILKAAR_AVKLARING"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårAvklaringHolder"/>
+    <entity class="no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårAvklaringForeslåttHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringFerdigstilt"/>
     <entity class="no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått"/>
     <entity class="no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag"/>

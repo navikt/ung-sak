@@ -6,12 +6,14 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum BistandsvilkårIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltDetaljertÅrsak {
 
-    IKKE_14A_VEDTAK("IKKE_14A_VEDTAK", "Søker har ikke oppfølgingsvedtak etter Navloven §14a."),
-    AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge."),
-    UDEFINERT("-", "Ikke definert"),
+    IKKE_14A_VEDTAK("IKKE_14A_VEDTAK", "Søker har ikke oppfølgingsvedtak etter Navloven §14a.", Avslagsårsak.IKKE_14A_VEDTAK, false),
+    ANNET("ANNET", "Annet", Avslagsårsak.IKKE_14A_VEDTAK, true),
+    AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.", Avslagsårsak.AVKORTET, false),
+    UDEFINERT("-", "Ikke definert", null,  false),
     ;
 
     public static final String KODEVERK = "BISTANDSVILKAAR_IKKE_OPPFYLT_AARSAK";
@@ -27,10 +29,24 @@ public enum BistandsvilkårIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltDe
 
     private final String kode;
     private final String navn;
+    private final Avslagsårsak avslagsårsak;
+    private final boolean krevesFritekst;
 
-    BistandsvilkårIkkeOppfyltÅrsak(String kode, String navn) {
+    BistandsvilkårIkkeOppfyltÅrsak(String kode, String navn, Avslagsårsak avslagsårsak, boolean krevesFritekst) {
         this.kode = kode;
         this.navn = navn;
+        this.avslagsårsak = avslagsårsak;
+        this.krevesFritekst = krevesFritekst;
+    }
+
+    @Override
+    public Optional<Avslagsårsak> avslagsårsak() {
+        return Optional.ofNullable(avslagsårsak);
+    }
+
+    @Override
+    public boolean krevesFritekst() {
+        return krevesFritekst;
     }
 
     public static BistandsvilkårIkkeOppfyltÅrsak fraKode(String kode) {

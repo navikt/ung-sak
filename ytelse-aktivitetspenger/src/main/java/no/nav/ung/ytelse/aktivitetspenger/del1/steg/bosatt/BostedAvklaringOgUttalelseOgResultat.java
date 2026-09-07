@@ -7,6 +7,7 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
+import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall;
 
 import java.time.LocalDateTime;
 
@@ -37,15 +38,14 @@ class BostedAvklaringOgUttalelseOgResultat {
         return new BostedAvklaringOgUttalelseOgResultat(this.faktaOgAvklaring, this.etterlysning, resultat);
     }
 
-    StegUtfall utledUtfall() {
+    VilkårsavklaringUtfall utledUtfall() {
         if (erVentende()) {
-            return StegUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
+            return VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER;
         } else if (erKildeSøknad() || harMottattSvarMedUttalelse() || erÅrsakAnnet() || erValgtÅIkkeVarsleNårIkkeOppfylt()) {
-            return StegUtfall.VILKÅR_VURDERES_MANUELT;
+            return VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT;
         } else if (!faktaOgAvklaring.isErBosattITrondheim()) {
-            return StegUtfall.OPPHØR_AUTOMATISK;
-        }
-        return StegUtfall.BOSATT_HELE_PERIODEN;
+            return VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK;
+        } else throw new IllegalStateException("Ukjent utfall for bostedsavklaring");
     }
 
     LocalDateTime getFrist() {
