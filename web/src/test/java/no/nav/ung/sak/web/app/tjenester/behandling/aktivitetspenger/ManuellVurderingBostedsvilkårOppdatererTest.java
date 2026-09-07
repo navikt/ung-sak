@@ -14,6 +14,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -31,9 +32,10 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPer
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -72,6 +74,9 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     private ManuellVurderingBostedsvilkårOppdaterer oppdaterer;
     @Inject
     private AvkortTjeneste avkortTjeneste;
+    @Inject
+    @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     private Fagsak fagsak;
 
@@ -101,7 +106,8 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
             new HistorikkinnslagRepository(entityManager),
-            avkortTjeneste);
+            avkortTjeneste,
+            vilkårsPerioderTilVurderingTjeneste);
 
         fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, new AktørId("1122334455667"), new Saksnummer("BOSTED1"),
             LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));

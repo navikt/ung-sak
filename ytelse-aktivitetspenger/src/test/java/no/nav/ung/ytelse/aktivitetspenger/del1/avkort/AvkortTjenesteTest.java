@@ -8,6 +8,7 @@ import no.nav.ung.sak.typer.JournalpostId;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -39,15 +40,19 @@ class AvkortTjenesteTest {
     }
 
     @Test
-    void skal_bruke_siste_soekte_startdato_når_flere_finnes() {
+    void skal_bruke_siste_søkte_startdato_når_flere_finnes_og_tom_dato_blir_fredag_isdf_i_helg() {
         LocalDate tidligste = LocalDate.of(2026, 1, 1);
         LocalDate seneste = LocalDate.of(2026, 3, 1);
         StartdatoGrunnlag grunnlag = grunnlagMedStartdatoer(tidligste, seneste);
 
         LocalDateTimeline<Boolean> tidslinje = AvkortTjeneste.utledTidslinjeForMuligAvkortingFraStartdatoer(grunnlag);
 
+        LocalDate fomVedEksakt52Uker = seneste.plusWeeks(52).minusDays(1);
+        assertThat(fomVedEksakt52Uker.getDayOfWeek()).isEqualTo(DayOfWeek.SATURDAY);
+        LocalDate forventetTomDato = fomVedEksakt52Uker.minusDays(1);
+        assertThat(forventetTomDato.getDayOfWeek()).isEqualTo(DayOfWeek.FRIDAY);
         assertThat(tidslinje.getMinLocalDate()).isEqualTo(seneste.plusDays(1));
-        assertThat(tidslinje.getMaxLocalDate()).isEqualTo(seneste.plusWeeks(52).minusDays(1));
+        assertThat(tidslinje.getMaxLocalDate()).isEqualTo(forventetTomDato);
     }
 
     private static StartdatoGrunnlag grunnlagMedStartdatoer(LocalDate... startdatoer) {
