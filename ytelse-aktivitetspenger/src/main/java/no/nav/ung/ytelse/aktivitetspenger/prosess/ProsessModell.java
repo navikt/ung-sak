@@ -3,8 +3,6 @@ package no.nav.ung.ytelse.aktivitetspenger.prosess;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
-import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -16,16 +14,6 @@ import no.nav.ung.sak.behandlingslager.hendelser.StartpunktType;
 
 @ApplicationScoped
 public class ProsessModell {
-
-    private Boolean aktivitetsvilkårEnabled;
-
-    public ProsessModell() {
-    }
-
-    @Inject
-    public ProsessModell(@KonfigVerdi(value = "AKTIVITETSVILKAAR_ENABLED", required = false, defaultVerdi = "true") boolean aktivitetsvilkårEnabled) {
-        this.aktivitetsvilkårEnabled = aktivitetsvilkårEnabled;
-    }
 
     @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
@@ -43,12 +31,9 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BOSTED)
             .medSteg(BehandlingStegType.VURDER_BOSTEDVILKÅR)
             .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
-            .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BISTAND)
-            .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR);
-        if (aktivitetsvilkårEnabled) {
-            modellBuilder.medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR);
-        }
-        modellBuilder.medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
+            .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
+            .medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR)
+            .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
             .medSteg(BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
@@ -80,11 +65,8 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_BOSTEDVILKÅR)
             .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
             .medSteg(BehandlingStegType.VURDER_FAKTA_OM_BISTAND)
-            .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR);
-        if (aktivitetsvilkårEnabled) {
-            modellBuilder.medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR);
-        }
-        modellBuilder
+            .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
+            .medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
             .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
             .medSteg(BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
