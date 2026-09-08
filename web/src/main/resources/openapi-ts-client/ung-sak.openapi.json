@@ -74,7 +74,8 @@
             "items" : {
               "$ref" : "#/components/schemas/fpsak.tidsserie.LocalDateInterval"
             },
-            "type" : "array"
+            "type" : "array",
+            "uniqueItems" : true
           },
           "empty" : {
             "type" : "boolean"
@@ -83,7 +84,8 @@
             "items" : {
               "$ref" : "#/components/schemas/fpsak.tidsserie.LocalDateInterval"
             },
-            "type" : "array"
+            "type" : "array",
+            "uniqueItems" : true
           },
           "maxLocalDate" : {
             "format" : "date",
@@ -4606,7 +4608,8 @@
             },
             "maxItems" : 2147483647,
             "minItems" : 0,
-            "type" : "array"
+            "type" : "array",
+            "uniqueItems" : true
           },
           "årsak" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.krav.ÅrsakTilVurdering"
