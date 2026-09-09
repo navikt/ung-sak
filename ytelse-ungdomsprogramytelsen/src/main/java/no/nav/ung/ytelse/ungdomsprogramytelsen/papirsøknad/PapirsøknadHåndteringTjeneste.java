@@ -133,8 +133,6 @@ public class PapirsøknadHåndteringTjeneste {
 
         //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
         oppgaveKlient.løsSøkYtelseOppgave(new AktørIdDto(aktørId.getAktørId()));
-        // Digital søknad markerer deltakelsen som søkt automatisk ved innsending. Papirsøknad må gjøre det samme
-        // eksplisitt her, siden veilederappen leser deltakelsens søkt-status direkte og ikke lenger oppgavestatus.
         ungdomsprogramRegisterKlient.markerSomSøkt(aktørId.getAktørId(), deltakelseId);
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
