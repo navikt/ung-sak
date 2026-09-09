@@ -1326,6 +1326,11 @@
         "type" : "string",
         "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
       },
+      "ung.kodeverk.bosatt.Avklaringtype" : {
+        "enum" : [ "AVSLAG", "OPPHØR" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "AVSLAG", "OPPHØR" ]
+      },
       "ung.kodeverk.bosatt.Kilde" : {
         "enum" : [ "SØKNAD", "SAKSBEHANDLER" ],
         "type" : "string",
@@ -2279,6 +2284,9 @@
           "kildeFritekst" : {
             "type" : "string"
           },
+          "kanRedigeres" : {
+            "type" : "boolean"
+          },
           "skalSendeVarsel" : {
             "type" : "boolean"
           }
@@ -2353,6 +2361,9 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto" : {
         "properties" : {
+          "avklaringtype" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.bosatt.Avklaringtype"
+          },
           "begrunnelse" : {
             "type" : "string"
           },
