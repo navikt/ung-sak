@@ -5918,6 +5918,18 @@
         },
         "type" : "object"
       },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningUngdomsprogramRegisterRestTjeneste.MarkerDeltakelseSøktRequest" : {
+        "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "begrunnelse", "saksnummer" ],
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.forvaltning.MånedForRapportering" : {
         "enum" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
         "type" : "string",
@@ -8841,6 +8853,32 @@
             "description" : "default response"
           }
         }
+      }
+    },
+    "/api/forvaltning/ungdomsprogram/marker-deltakelse-sokt" : {
+      "post" : {
+        "description" : "Marker deltakelsen tilhørende saken som søkt i ung-deltakelse-opplyser. Brukes til å rette opp saker der papirsøknad er journalført uten at deltakelsen ble markert søkt, f.eks. pga. driftsavbrudd eller saker journalført før dette ble håndtert automatisk. NB: Ikke idempotent på tidspunkt - hvert kall setter søkt-tidspunktet til nå, selv om deltakelsen allerede er markert søkt.",
+        "operationId" : "markerDeltakelseSomSøkt",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningUngdomsprogramRegisterRestTjeneste.MarkerDeltakelseSøktRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Marker deltakelse som søkt",
+        "tags" : [ "forvaltning" ]
       }
     },
     "/api/health/isAlive" : {

@@ -133,6 +133,7 @@ public class PapirsøknadHåndteringTjeneste {
 
         //Dette kallet er idempotenet. Hvis oppgaven er løst tidligere så vil ikke det feile ved et nytt kall her.
         oppgaveKlient.løsSøkYtelseOppgave(new AktørIdDto(aktørId.getAktørId()));
+        ungdomsprogramRegisterKlient.markerSomSøkt(aktørId.getAktørId(), deltakelseId);
         return opprettJournalpost(deltakerIdent, deltakerNavn, deltakelseId, pdfDokument, jsonDokument, behandlendeEnhet);
     }
 
