@@ -82,7 +82,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @DisplayName("Opphør med fritekst på bostedsvilkåret")
     @Test
     void opphørBostedFritekst() {
-        var fritekst = "Du har flyttet til et sted utenfor Trondheim og har derfor ikke lenger rett.";
+        var fritekst = "Du har flyttet til et sted utenfor Trondheim kommune og har derfor ikke lenger rett.";
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedAnnet(FOM, fritekst);
         var behandling = lagOpphørScenario(scenario);
 
@@ -161,7 +161,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @DisplayName("Endring/avslag med fritekst på bostedsvilkåret")
     @Test
     void endringAvslagBostedFritekst() {
-        var fritekst = "Du har midlertidig ikke bostedsadresse i Trondheim og har derfor ikke rett i perioden.";
+        var fritekst = "Du har midlertidig ikke bostedsadresse i Trondheim kommune og har derfor ikke rett i perioden.";
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBostedAnnet(FOM, fritekst);
         var behandling = lagEndringAvslagScenario(scenario);
 
