@@ -1312,9 +1312,9 @@
         "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "LOKALKONTOR_AUTOPUNKT", "LOKALKONTOR_MANUELL", "LOKALKONTOR_OVERSTYRING", "LOKALKONTOR_SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
-        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "-", "FAKTA_OM_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
+        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "-", "FAKTA_OM_MEDLEMSKAP", "FORUTGÅENDE_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
         "type" : "string",
-        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "UDEFINERT", "FAKTA_OM_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
+        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "UDEFINERT", "FAKTA_OM_MEDLEMSKAP", "FORUTGÅENDE_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.Venteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "VENTER_ETTERLYS_BOSTEDUTTALELSE", "OVERSENDT_KABAL" ],
@@ -5918,6 +5918,18 @@
         },
         "type" : "object"
       },
+      "ung.sak.web.app.tjenester.forvaltning.ForvaltningUngdomsprogramRegisterRestTjeneste.MarkerDeltakelseSøktRequest" : {
+        "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "saksnummer" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "begrunnelse", "saksnummer" ],
+        "type" : "object"
+      },
       "ung.sak.web.app.tjenester.forvaltning.MånedForRapportering" : {
         "enum" : [ "JANUAR", "FEBRUAR", "MARS", "APRIL", "MAI", "JUNI", "JULI", "AUGUST", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER" ],
         "type" : "string",
@@ -8841,6 +8853,32 @@
             "description" : "default response"
           }
         }
+      }
+    },
+    "/api/forvaltning/ungdomsprogram/marker-deltakelse-sokt" : {
+      "post" : {
+        "description" : "Marker deltakelsen tilhørende saken som søkt i ung-deltakelse-opplyser. Brukes til å rette opp saker der papirsøknad er journalført uten at deltakelsen ble markert søkt, f.eks. pga. driftsavbrudd eller saker journalført før dette ble håndtert automatisk. NB: Ikke idempotent på tidspunkt - hvert kall setter søkt-tidspunktet til nå, selv om deltakelsen allerede er markert søkt.",
+        "operationId" : "markerDeltakelseSomSøkt",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.web.app.tjenester.forvaltning.ForvaltningUngdomsprogramRegisterRestTjeneste.MarkerDeltakelseSøktRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json; charset=UTF-8" : { }
+            },
+            "description" : "default response"
+          }
+        },
+        "summary" : "Marker deltakelse som søkt",
+        "tags" : [ "forvaltning" ]
       }
     },
     "/api/health/isAlive" : {
