@@ -17,7 +17,7 @@ create table vilkaar_avklaring_holder
 (
     id            bigint primary key,
     opprettet_av  varchar(20)  not null default 'VL',
-    opprettet_tid timestamp(3) not null default now(),
+    opprettet_tid timestamp(3) not null default current_timestamp,
     endret_av     varchar(20),
     endret_tid    timestamp(3)
 );
@@ -29,7 +29,7 @@ create table vilkaar_avklaring_foreslaatt_holder
 (
     id            bigint primary key,
     opprettet_av  varchar(20)  not null default 'VL',
-    opprettet_tid timestamp(3) not null default now(),
+    opprettet_tid timestamp(3) not null default current_timestamp,
     endret_av     varchar(20),
     endret_tid    timestamp(3)
 );
@@ -55,7 +55,7 @@ create table vilkaar_periode_avklaring
     vurdert_av                  varchar(100),
     vurdert_tidspunkt           timestamp(3) not null,
     opprettet_av                varchar(20)  not null default 'VL',
-    opprettet_tid               timestamp(3) not null default now(),
+    opprettet_tid               timestamp(3) not null default current_timestamp,
     endret_av                   varchar(20),
     endret_tid                  timestamp(3)
 );
@@ -88,7 +88,7 @@ create table vilkaar_periode_avklaring_foreslaatt
     vurdert_av                        varchar(100),
     vurdert_tidspunkt                 timestamp(3) not null,
     opprettet_av                      varchar(20)  not null default 'VL',
-    opprettet_tid                     timestamp(3) not null default now(),
+    opprettet_tid                     timestamp(3) not null default current_timestamp,
     endret_av                         varchar(20),
     endret_tid                        timestamp(3)
 );
@@ -117,7 +117,7 @@ create table gr_vilkaar_avklaring
     aktiv                boolean      not null default true,
     versjon              bigint       not null default 0,
     opprettet_av         varchar(20)  not null default 'VL',
-    opprettet_tid        timestamp(3) not null default now(),
+    opprettet_tid        timestamp(3) not null default current_timestamp,
     endret_av            varchar(20),
     endret_tid           timestamp(3)
 );
