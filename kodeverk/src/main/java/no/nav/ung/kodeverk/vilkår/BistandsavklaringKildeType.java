@@ -6,15 +6,14 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public enum BostedsavklaringKildeType implements AvklaringKilde {
+public enum BistandsavklaringKildeType implements AvklaringKilde {
 
     BRUKER("BRUKER", "Bruker", false),
-    FOLKEREGISTER("FOLKEREGISTER", "Folkeregisteret", false),
     ANNET("ANNET", "Annet", true),
     ;
 
-    public static final String KODEVERK = "BOSTEDSAVKLARING_KILDE_TYPE";
-    private static final Map<String, BostedsavklaringKildeType> KODER = new LinkedHashMap<>();
+    public static final String KODEVERK = "BISTANDSAVKLARING_KILDE_TYPE";
+    private static final Map<String, BistandsavklaringKildeType> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
@@ -28,7 +27,7 @@ public enum BostedsavklaringKildeType implements AvklaringKilde {
     private final String navn;
     private final boolean krevesFritekst;
 
-    BostedsavklaringKildeType(String kode, String navn, boolean krevesFritekst) {
+    BistandsavklaringKildeType(String kode, String navn, boolean krevesFritekst) {
         this.kode = kode;
         this.navn = navn;
         this.krevesFritekst = krevesFritekst;
@@ -39,18 +38,18 @@ public enum BostedsavklaringKildeType implements AvklaringKilde {
         return krevesFritekst;
     }
 
-    public static BostedsavklaringKildeType fraKode(String kode) {
+    public static BistandsavklaringKildeType fraKode(String kode) {
         if (kode == null) {
             return null;
         }
         var v = KODER.get(kode);
         if (v == null) {
-            throw new IllegalArgumentException("Ukjent BostedsavklaringKildeType: " + kode);
+            throw new IllegalArgumentException("Ukjent BistandsavklaringKildeType: " + kode);
         }
         return v;
     }
 
-    public static Map<String, BostedsavklaringKildeType> kodeMap() {
+    public static Map<String, BistandsavklaringKildeType> kodeMap() {
         return Collections.unmodifiableMap(KODER);
     }
 
