@@ -1312,9 +1312,9 @@
         "x-enum-varnames" : [ "AUTOPUNKT", "MANUELL", "OVERSTYRING", "SAKSBEHANDLEROVERSTYRING", "LOKALKONTOR_AUTOPUNKT", "LOKALKONTOR_MANUELL", "LOKALKONTOR_OVERSTYRING", "LOKALKONTOR_SAKSBEHANDLEROVERSTYRING", "UDEFINERT" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType" : {
-        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "-", "FAKTA_OM_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
+        "enum" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "-", "FORUTGÅENDE_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ],
         "type" : "string",
-        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "UDEFINERT", "FAKTA_OM_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
+        "x-enum-varnames" : [ "KONTROLL_AV_INNTEKT", "FAKTA_OM_SIMULERING", "SOEKNADSFRIST", "BOSTEDSVILKÅR", "BISTANDSVILKÅR", "AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "UDEFINERT", "FORUTGÅENDE_MEDLEMSKAP", "OPPLYSNINGSPLIKT", "TILKJENT_YTELSE", "VEDTAK", "LOKALKONTOR_FORESLÅR_VILKÅR", "LOKALKONTOR_BESLUTTER_VILKÅR", "FORMKRAV_KLAGE_VEDTAKSINSTANS", "KLAGE_BEH_VEDTAKSINSTANS" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.Venteårsak" : {
         "enum" : [ "-", "AVV_DOK", "FOR_TIDLIG_SOKNAD", "VENT_INNTEKT_RAPPORTERINGSFRIST", "VENT_TIDLIGERE_BEHANDLING", "VENTER_SVAR_TEAMS", "ANNET", "VENT_ØKONOMI", "VENT_TILBAKEKREVING", "VENTER_ETTERLYS_INNTEKT_UTTALELSE", "VENTER_BEKREFT_ENDRET_UNGDOMSPROGRAMPERIODE", "VENTER_ETTERLYS_BOSTEDUTTALELSE", "OVERSENDT_KABAL" ],
@@ -1325,11 +1325,6 @@
         "enum" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "-" ],
         "type" : "string",
         "x-enum-varnames" : [ "FEIL_FAKTA", "FEIL_LOV", "FEIL_REGEL", "ANNET", "UDEFINERT" ]
-      },
-      "ung.kodeverk.bosatt.Avklaringtype" : {
-        "enum" : [ "AVSLAG", "OPPHØR" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "AVSLAG", "OPPHØR" ]
       },
       "ung.kodeverk.bosatt.Kilde" : {
         "enum" : [ "SØKNAD", "SAKSBEHANDLER" ],
@@ -2284,9 +2279,6 @@
           "kildeFritekst" : {
             "type" : "string"
           },
-          "kanRedigeres" : {
-            "type" : "boolean"
-          },
           "skalSendeVarsel" : {
             "type" : "boolean"
           }
@@ -2361,9 +2353,6 @@
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto" : {
         "properties" : {
-          "avklaringtype" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.bosatt.Avklaringtype"
-          },
           "begrunnelse" : {
             "type" : "string"
           },
