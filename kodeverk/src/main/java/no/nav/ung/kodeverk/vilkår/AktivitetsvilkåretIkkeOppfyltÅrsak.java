@@ -6,8 +6,9 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
-public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi {
+public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltDetaljertÅrsak {
 
     //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
     ANNET("ANNET", "Annet/fritekst"),
@@ -54,6 +55,16 @@ public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi {
     @Override
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public Optional<Avslagsårsak> avslagsårsak() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean kreverFritekst() {
+        return false;
     }
 
     @Override

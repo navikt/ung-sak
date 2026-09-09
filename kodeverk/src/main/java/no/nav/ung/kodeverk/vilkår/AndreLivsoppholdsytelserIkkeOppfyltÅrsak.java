@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltDetaljertÅrsak {
 
@@ -52,6 +53,16 @@ public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements Kodeverdi, Ikke
     @Override
     public String getKode() {
         return kode;
+    }
+
+    @Override
+    public Optional<Avslagsårsak> avslagsårsak() {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean kreverFritekst() {
+        return false;
     }
 
     @Override
