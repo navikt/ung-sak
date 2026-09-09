@@ -2,9 +2,6 @@ package no.nav.ung.kodeverk.vilkår;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public enum BostedsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
@@ -21,14 +18,6 @@ public enum BostedsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsa
     ANNET(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, true),
     UDEFINERT(null, true),
     ;
-
-    private static final Map<String, BostedsvilkårIkkeOppfyltÅrsak> KODER = new LinkedHashMap<>();
-
-    static {
-        for (var v : values()) {
-            KODER.put(v.name(), v);
-        }
-    }
 
     private final Avslagsårsak avslagsårsak;
     private final boolean kreverFritekst;
@@ -53,15 +42,11 @@ public enum BostedsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsa
         if (kode == null) {
             return null;
         }
-        var v = KODER.get(kode);
-        if (v == null) {
-            throw new IllegalArgumentException("Ukjent BostedsvilkårIkkeOppfyltÅrsak: " + kode);
+        try {
+            return valueOf(kode);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ukjent BostedsvilkårIkkeOppfyltÅrsak: " + kode, e);
         }
-        return v;
-    }
-
-    public static Map<String, BostedsvilkårIkkeOppfyltÅrsak> kodeMap() {
-        return Collections.unmodifiableMap(KODER);
     }
 
     @JsonValue

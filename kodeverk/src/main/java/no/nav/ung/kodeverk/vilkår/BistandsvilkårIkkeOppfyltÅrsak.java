@@ -2,9 +2,6 @@ package no.nav.ung.kodeverk.vilkår;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public enum BistandsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
@@ -15,14 +12,6 @@ public enum BistandsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrs
     AVKORTET(Avslagsårsak.AVKORTET, false),
     UDEFINERT(null, false),
     ;
-
-    private static final Map<String, BistandsvilkårIkkeOppfyltÅrsak> KODER = new LinkedHashMap<>();
-
-    static {
-        for (var v : values()) {
-            KODER.put(v.name(), v);
-        }
-    }
 
     private final Avslagsårsak avslagsårsak;
     private final boolean kreverFritekst;
@@ -46,15 +35,11 @@ public enum BistandsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrs
         if (kode == null) {
             return null;
         }
-        var v = KODER.get(kode);
-        if (v == null) {
-            throw new IllegalArgumentException("Ukjent BistandsvilkårIkkeOppfyltÅrsak: " + kode);
+        try {
+            return valueOf(kode);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ukjent BistandsvilkårIkkeOppfyltÅrsak: " + kode, e);
         }
-        return v;
-    }
-
-    public static Map<String, BistandsvilkårIkkeOppfyltÅrsak> kodeMap() {
-        return Collections.unmodifiableMap(KODER);
     }
 
     @JsonValue

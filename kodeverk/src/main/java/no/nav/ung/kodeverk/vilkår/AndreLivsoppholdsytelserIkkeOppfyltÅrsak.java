@@ -2,42 +2,34 @@ package no.nav.ung.kodeverk.vilkår;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
     // Søker har livsoppholdsytelse som ikke er forenelig med ytelsen.
-    HAR_ANNEN_LIVSOPPHOLDSYTELSE,
+    HAR_ANNEN_LIVSOPPHOLDSYTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
-    AVKORTET,
-    UDEFINERT,
+    AVKORTET(Avslagsårsak.AVKORTET, false),
+    UDEFINERT(null, false),
     ;
 
-    private static final Map<String, AndreLivsoppholdsytelserIkkeOppfyltÅrsak> KODER = new LinkedHashMap<>();
+    private final Avslagsårsak avslagsårsak;
+    private final boolean kreverFritekst;
 
-    static {
-        for (var v : values()) {
-            KODER.put(v.name(), v);
-        }
+    AndreLivsoppholdsytelserIkkeOppfyltÅrsak(Avslagsårsak avslagsårsak, boolean kreverFritekst) {
+        this.avslagsårsak = avslagsårsak;
+        this.kreverFritekst = kreverFritekst;
     }
-
 
     public static AndreLivsoppholdsytelserIkkeOppfyltÅrsak fraKode(String kode) {
         if (kode == null) {
             return null;
         }
-        var v = KODER.get(kode);
-        if (v == null) {
-            throw new IllegalArgumentException("Ukjent AndreLivsoppholdsytelserIkkeOppfyltÅrsak: " + kode);
+        try {
+            return valueOf(kode);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ukjent AndreLivsoppholdsytelserIkkeOppfyltÅrsak: " + kode, e);
         }
-        return v;
-    }
-
-    public static Map<String, AndreLivsoppholdsytelserIkkeOppfyltÅrsak> kodeMap() {
-        return Collections.unmodifiableMap(KODER);
     }
 
     @JsonValue
@@ -48,11 +40,11 @@ public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements IkkeOppfyltDeta
 
     @Override
     public Optional<Avslagsårsak> avslagsårsak() {
-        return Optional.empty();
+        return Optional.ofNullable(avslagsårsak);
     }
 
     @Override
     public boolean kreverFritekst() {
-        return false;
+        return kreverFritekst;
     }
 }
