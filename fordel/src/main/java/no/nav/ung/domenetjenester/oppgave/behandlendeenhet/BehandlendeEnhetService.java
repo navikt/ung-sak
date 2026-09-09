@@ -31,7 +31,9 @@ public class BehandlendeEnhetService {
         FagsakYtelseType ytelseType = switch (behandlingTema) {
             case UNGDOMSPROGRAMYTELSEN -> FagsakYtelseType.UNGDOMSYTELSE;
             //TODO legg inn aktivitetspenger her når det er klart.
-            case UDEFINERT -> throw new IllegalArgumentException("Ikke-støttet tema her: " + behandlingTema);
+            // Behandlingstema er ikke utledet ennå (f.eks. klager). Vi vet da ikke hvilken ytelse det gjelder,
+            // og må sende med behandlingsnummer for alle aktuelle ytelser i PDL-oppslagene, jf. BehandlingsnummerMapper.
+            case UDEFINERT -> FagsakYtelseType.UDEFINERT;
         };
         GeografiskTilknytning gjeldendeGeografiskTilknytning = hentGjeldendeGeografiskeTilknytning(hovedAktør, ytelseType);
         return finnBehandledeEnhet(gjeldendeGeografiskTilknytning, tema, behandlingTema);
