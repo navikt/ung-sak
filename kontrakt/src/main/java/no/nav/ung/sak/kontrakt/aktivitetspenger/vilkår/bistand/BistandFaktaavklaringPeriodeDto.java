@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
+package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
@@ -7,11 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 
 /**
- * Saksbehandlers fakta-avklaring for hvorfor bruker ikke bor i Trondheim i en periode
+ * Saksbehandlers fakta-avklaring for hvorfor bruker ikke oppfyller bistandsvilkåret i en periode.
+ * Åpen tom betyr opphør fra og med fom.
  */
-public record BostedFaktaavklaringPeriodeDto(
+public record BistandFaktaavklaringPeriodeDto(
     @NotNull @Valid ÅpenPeriode periode,
-    @NotNull @Valid BostedVurderingIkkeOppfyltDto vurdering,
+    @NotNull @Valid BistandVurderingIkkeOppfyltDto vurdering,
     boolean skalIkkeSendeVarsel
 ) {
 

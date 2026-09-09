@@ -14,7 +14,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
  * Brukes som felles undertype i {@link BostedFaktaavklaringPeriodeDto}
  */
 public record BostedVurderingIkkeOppfyltDto(
-    BostedsvilkårIkkeOppfyltÅrsak fraflyttingsÅrsak,
+    @NotNull BostedsvilkårIkkeOppfyltÅrsak fraflyttingsÅrsak,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
@@ -24,11 +24,14 @@ public record BostedVurderingIkkeOppfyltDto(
     @Size(max = 1000) @Pattern(regexp = InputValideringRegex.FRITEKST) String kildeFritekst
 ) {
     @JsonIgnore
-    @AssertTrue(message = "kildeFritekst er påkrevd når kilde er ANNET")
+    @AssertTrue(message = "fritekstTilVarsel er påkrevd når fraflyttingsÅrsak krever fritekst")
+    public boolean isFritekstTilVarselGyldig() {
+        return !fraflyttingsÅrsak.kreverFritekst() || (fritekstTilVarsel != null && !fritekstTilVarsel.isBlank());
+    }
+
+    @JsonIgnore
+    @AssertTrue(message = "kildeFritekst er påkrevd når kilde krever fritekst")
     public boolean isKildeFritekstGyldig() {
-        if (kilde == BostedsavklaringKildeType.ANNET) {
-            return kildeFritekst != null && !kildeFritekst.isBlank();
-        }
-        return true;
+        return !kilde.kreverFritekst() || (kildeFritekst != null && !kildeFritekst.isBlank());
     }
 }
