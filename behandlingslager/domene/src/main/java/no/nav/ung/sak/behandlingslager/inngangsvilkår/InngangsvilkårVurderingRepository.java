@@ -9,9 +9,10 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Dependent
 public class InngangsvilkårVurderingRepository {
@@ -227,37 +228,18 @@ public class InngangsvilkårVurderingRepository {
         entityManager.flush();
     }
 
-    public void fjernResultatFor(long behandlingId, VilkårType vilkårType, Collection<Periode> perioder) {
-        var perioderSomSkalFjernes = new LocalDateTimeline<>(perioder.stream().map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE)).toList());
+    public void fjernResultatForPerioder(long behandlingId, Map<VilkårType, NavigableSet<DatoIntervallEntitet>> perioderSomFjernes) {
+        Map<VilkårType, LocalDateTimeline<Boolean>> tidslinjer = perioderSomFjernes.entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, e -> TidslinjeUtil.tilTidslinje(e.getValue())));
+        fjernResultatForTidslinjer(behandlingId, tidslinjer);
+    }
+
+    public void fjernResultatForTidslinjer(long behandlingId, Map<VilkårType, LocalDateTimeline<Boolean>> perioderSomFjernes) {
         var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
-
-        BostedsvilkårResultatHolder bostedVilkårHolder;
-        if (VilkårType.BOSTEDSVILKÅR.equals(vilkårType)) {
-            bostedVilkårHolder = oppdaterBostedVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
-        } else {
-            bostedVilkårHolder = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder).orElse(null);
-        }
-
-        BistandsvilkårResultatHolder bistandsvilkårResultatHolder;
-        if (VilkårType.BISTANDSVILKÅR.equals(vilkårType)) {
-            bistandsvilkårResultatHolder = oppdaterBistandsVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
-        } else {
-            bistandsvilkårResultatHolder = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder).orElse(null);
-        }
-
-        AktivitetsvilkårResultatHolder aktivitetsvilkårResultatHolder;
-        if (VilkårType.AKTIVITETSVILKÅR.equals(vilkårType)) {
-            aktivitetsvilkårResultatHolder = oppdaterAktivitetsVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
-        } else {
-            aktivitetsvilkårResultatHolder = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder).orElse(null);
-        }
-
-        AndreLivsoppholdsytelserResultatHolder livsoppholdYtelser;
-        if (VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR.equals(vilkårType)) {
-            livsoppholdYtelser = oppdaterLivsoppholdYtelserVilkår(eksisterendeGrunnlag, perioderSomSkalFjernes);
-        } else {
-            livsoppholdYtelser = eksisterendeGrunnlag.flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder).orElse(null);
-        }
+        BostedsvilkårResultatHolder bostedVilkårHolder = oppdaterBostedVilkår(eksisterendeGrunnlag,  perioderSomFjernes.getOrDefault(VilkårType.BOSTEDSVILKÅR, LocalDateTimeline.empty()));
+        BistandsvilkårResultatHolder bistandsvilkårResultatHolder = oppdaterBistandsVilkår(eksisterendeGrunnlag,  perioderSomFjernes.getOrDefault(VilkårType.BISTANDSVILKÅR, LocalDateTimeline.empty()));;
+        AktivitetsvilkårResultatHolder aktivitetsvilkårResultatHolder = oppdaterAktivitetsVilkår(eksisterendeGrunnlag,  perioderSomFjernes.getOrDefault(VilkårType.AKTIVITETSVILKÅR, LocalDateTimeline.empty()));
+        AndreLivsoppholdsytelserResultatHolder livsoppholdYtelser = oppdaterLivsoppholdYtelserVilkår(eksisterendeGrunnlag,  perioderSomFjernes.getOrDefault(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, LocalDateTimeline.empty()));;
 
         persister(eksisterendeGrunnlag, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandsvilkårResultatHolder, aktivitetsvilkårResultatHolder, livsoppholdYtelser, bostedVilkårHolder));
     }

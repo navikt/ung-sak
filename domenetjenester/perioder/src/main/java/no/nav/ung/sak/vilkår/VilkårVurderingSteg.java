@@ -68,7 +68,7 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
             //vilkår 2, for så å senere endre til en senere sluttdato i vilkår 1. Nå må perioden mellom ny og gammel sluttdato
             //også vurderes i vilkårene etter vilkår 1. Vi har ikke funksjonalitet for å vurdere bare denne nye perioden,
             //så vi tar hele den orginale perioden opp igjen til vurdering.
-            vilkårBuilder.tilbakestill(TidslinjeUtil.tilDatoIntervallEntiteter(perioder)); //nødvendig for å få en sammenhengende periode
+            vilkårBuilder.tilbakestill(TidslinjeUtil.tilDatoIntervallEntiteter(perioder), false); //nødvendig for å få en sammenhengende periode
             for (LocalDateSegment<Boolean> segment : perioder.segmenter()) {
                 vilkårBuilder.leggTil(new VilkårPeriodeBuilder()
                     .medPeriode(segment.getFom(), segment.getTom())
