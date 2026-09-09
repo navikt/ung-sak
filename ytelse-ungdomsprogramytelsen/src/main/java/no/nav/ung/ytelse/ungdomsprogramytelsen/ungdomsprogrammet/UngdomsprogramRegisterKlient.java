@@ -42,7 +42,7 @@ public class UngdomsprogramRegisterKlient {
     public void markerSomSøkt(String aktørId, UUID deltakelseId) {
         try {
             URI markerSomSøktUri = tilUri(url, "register/" + deltakelseId + "/marker-sokt");
-            restClient.post(markerSomSøktUri, new AktørIdDto(aktørId));
+            restClient.patch(markerSomSøktUri, new AktørIdDto(aktørId));
         } catch (Exception e) {
             throw UngdomsprogramRegisterFeil.FACTORY.feilVedKallTilUngRegister(e).toException();
         }

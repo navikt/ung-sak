@@ -55,7 +55,7 @@ class UngdomsprogramRegisterKlientTest {
         // Assert
         ArgumentCaptor<URI> uriCaptor = ArgumentCaptor.forClass(URI.class);
         ArgumentCaptor<Object> bodyCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(restClient).post(uriCaptor.capture(), bodyCaptor.capture());
+        verify(restClient).patch(uriCaptor.capture(), bodyCaptor.capture());
 
         assertThat(uriCaptor.getValue()).hasToString("http://localhost:8080/register/" + deltakelseId + "/marker-sokt");
         assertThat(bodyCaptor.getValue()).isInstanceOf(AktørIdDto.class);
