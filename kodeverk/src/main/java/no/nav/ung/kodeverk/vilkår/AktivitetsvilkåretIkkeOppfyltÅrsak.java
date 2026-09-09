@@ -1,40 +1,31 @@
 package no.nav.ung.kodeverk.vilkår;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import no.nav.ung.kodeverk.api.Kodeverdi;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfyltDetaljertÅrsak {
+public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
     //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
-    ANNET("ANNET", "Annet/fritekst"),
+    // Annet/fritekst
+    ANNET,
 
-    AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge."),
-    UDEFINERT("-", "Ikke definert"),
+    // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
+    AVKORTET,
+    UDEFINERT,
     ;
 
-    public static final String KODEVERK = "AKTIVITETSVILKAAR_IKKE_OPPFYLT_AARSAK";
     private static final Map<String, AktivitetsvilkåretIkkeOppfyltÅrsak> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
-            if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
-            }
+            KODER.put(v.name(), v);
         }
     }
 
-    private final String kode;
-    private final String navn;
-
-    AktivitetsvilkåretIkkeOppfyltÅrsak(String kode, String navn) {
-        this.kode = kode;
-        this.navn = navn;
-    }
 
     public static AktivitetsvilkåretIkkeOppfyltÅrsak fraKode(String kode) {
         if (kode == null) {
@@ -54,7 +45,7 @@ public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfy
     @JsonValue
     @Override
     public String getKode() {
-        return kode;
+        return name();
     }
 
     @Override
@@ -65,15 +56,5 @@ public enum AktivitetsvilkåretIkkeOppfyltÅrsak implements Kodeverdi, IkkeOppfy
     @Override
     public boolean kreverFritekst() {
         return false;
-    }
-
-    @Override
-    public String getKodeverk() {
-        return KODEVERK;
-    }
-
-    @Override
-    public String getNavn() {
-        return navn;
     }
 }
