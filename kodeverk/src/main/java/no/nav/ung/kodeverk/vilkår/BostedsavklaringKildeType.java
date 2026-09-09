@@ -8,35 +8,28 @@ import java.util.Map;
 
 public enum BostedsavklaringKildeType implements AvklaringKilde {
 
-    BRUKER("BRUKER", "Bruker", false),
-    FOLKEREGISTER("FOLKEREGISTER", "Folkeregisteret", false),
-    ANNET("ANNET", "Annet", true),
+    BRUKER(false),
+    FOLKEREGISTER(false),
+    ANNET(true),
     ;
 
-    public static final String KODEVERK = "BOSTEDSAVKLARING_KILDE_TYPE";
     private static final Map<String, BostedsavklaringKildeType> KODER = new LinkedHashMap<>();
 
     static {
         for (var v : values()) {
-            if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
-            }
+            KODER.put(v.name(), v);
         }
     }
 
-    private final String kode;
-    private final String navn;
-    private final boolean krevesFritekst;
+    private final boolean kreverFritekst;
 
-    BostedsavklaringKildeType(String kode, String navn, boolean krevesFritekst) {
-        this.kode = kode;
-        this.navn = navn;
-        this.krevesFritekst = krevesFritekst;
+    BostedsavklaringKildeType(boolean kreverFritekst) {
+        this.kreverFritekst = kreverFritekst;
     }
 
     @Override
     public boolean kreverFritekst() {
-        return krevesFritekst;
+        return kreverFritekst;
     }
 
     public static BostedsavklaringKildeType fraKode(String kode) {
@@ -57,16 +50,6 @@ public enum BostedsavklaringKildeType implements AvklaringKilde {
     @JsonValue
     @Override
     public String getKode() {
-        return kode;
-    }
-
-    @Override
-    public String getKodeverk() {
-        return KODEVERK;
-    }
-
-    @Override
-    public String getNavn() {
-        return navn;
+        return name();
     }
 }
