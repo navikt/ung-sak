@@ -28,13 +28,11 @@ public class BehandlendeEnhetService {
 
     public BehandlendeEnhet hentBehandlendeEnhet(OmrådeTema tema, BehandlingTema behandlingTema, AktørId hovedAktør) {
         Objects.requireNonNull(behandlingTema, "behandlingTema manglet");
-        FagsakYtelseType ytelseType = switch (behandlingTema) {
-            case UNGDOMSPROGRAMYTELSEN -> FagsakYtelseType.UNGDOMSYTELSE;
-            //TODO legg inn aktivitetspenger her når det er klart.
-            // Behandlingstema er ikke utledet ennå (f.eks. klager). Vi vet da ikke hvilken ytelse det gjelder,
-            // og må sende med behandlingsnummer for alle aktuelle ytelser i PDL-oppslagene, jf. BehandlingsnummerMapper.
-            case UDEFINERT -> FagsakYtelseType.UDEFINERT;
-        };
+        // For UDEFINERT (f.eks. klager uten utledet fagsak/ytelse) gir dette FagsakYtelseType.UDEFINERT,
+        // som brukes av BehandlingsnummerMapper til å velge behandlingsnummer for PDL-oppslagene.
+        // Når BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE er aktivert sendes da behandlingsnummer for alle
+        // aktuelle ytelser; med flagget av (dagens produksjonsverdi) brukes uansett kun ett behandlingsnummer.
+        FagsakYtelseType ytelseType = behandlingTema.getFagsakYtelseType();
         GeografiskTilknytning gjeldendeGeografiskTilknytning = hentGjeldendeGeografiskeTilknytning(hovedAktør, ytelseType);
         return finnBehandledeEnhet(gjeldendeGeografiskTilknytning, tema, behandlingTema);
     }
