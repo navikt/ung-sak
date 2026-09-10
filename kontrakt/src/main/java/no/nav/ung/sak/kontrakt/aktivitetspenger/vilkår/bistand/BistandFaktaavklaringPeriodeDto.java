@@ -12,7 +12,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
  */
 public record BistandFaktaavklaringPeriodeDto(
     @NotNull @Valid ÅpenPeriode periode,
-    @NotNull @Valid BistandVurderingIkkeOppfyltDto vurdering,
+    @NotNull @Valid BistandAvklaringIkkeOppfyltDto avklaring,
     boolean skalIkkeSendeVarsel
 ) {
 
@@ -23,10 +23,10 @@ public record BistandFaktaavklaringPeriodeDto(
     @JsonIgnore
     @AssertTrue(message = "begrunnelseIkkeVarsel skal kun settes når skalIkkeSendeVarsel er true")
     public boolean isBegrunnelseIkkeVarselGyldig() {
-        if (skalIkkeSendeVarsel || vurdering == null) {
+        if (skalIkkeSendeVarsel || avklaring == null) {
             return true;
         }
-        return vurdering.begrunnelseIkkeVarsel() == null || vurdering.begrunnelseIkkeVarsel().isBlank();
+        return avklaring.begrunnelseIkkeVarsel() == null || avklaring.begrunnelseIkkeVarsel().isBlank();
     }
 
 }

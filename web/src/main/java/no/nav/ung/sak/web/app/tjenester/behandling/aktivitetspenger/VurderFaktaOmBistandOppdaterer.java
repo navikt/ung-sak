@@ -9,7 +9,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
@@ -23,8 +22,6 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
 import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandVurderingIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
@@ -73,10 +70,6 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
 
     @Override
     public OppdateringResultat oppdater(VurderFaktaOmBistandDto dto, AksjonspunktOppdaterParameter param) {
-        dto.getAvklaringer().stream()
-            .map(BistandFaktaavklaringPeriodeDto::vurdering)
-            .forEach(VurderFaktaOmBistandOppdaterer::validerVurdering);
-
         Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
         long behandlingId = behandling.getId();
 
@@ -93,7 +86,7 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        Set<BistandAvklaring> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
+        Set<BistandAvklaring> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.avklaring() != null)
             .map(a -> BistandAvklaringDataMapper.mapTilBistandAvklaring(a, maxTomDato, vurdertAv, vurdertTidspunkt))
             .collect(Collectors.toSet());
 
@@ -120,14 +113,5 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
         historikkinnslagRepository.lagre(historikkinnslag);
 
         return OppdateringResultat.nyttResultat();
-    }
-
-    private static void validerVurdering(BistandVurderingIkkeOppfyltDto vurdering) {
-        if (vurdering == null) {
-            return;
-        }
-        if (vurdering.ikkeOppfyltÅrsak() == BistandsvilkårIkkeOppfyltÅrsak.AVKORTET) {
-            throw new IllegalArgumentException("Ikke-støttet årsak for bistandsavklaring: " + vurdering.ikkeOppfyltÅrsak());
-        }
     }
 }

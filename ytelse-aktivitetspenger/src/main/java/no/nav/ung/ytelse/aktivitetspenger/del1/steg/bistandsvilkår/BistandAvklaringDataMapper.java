@@ -57,15 +57,15 @@ public final class BistandAvklaringDataMapper {
 
         var innhold = new BistandVarselInnhold(
             new Periode(fom, tom),
-            dto.vurdering().ikkeOppfyltÅrsak(),
+            dto.avklaring().ikkeOppfyltÅrsak(),
             dto.skalSendeVarsel(),
-            dto.vurdering().fritekstTilVarsel(),
-            dto.vurdering().kilde(),
-            dto.vurdering().kildeFritekst(),
+            dto.avklaring().fritekstTilVarsel(),
+            dto.avklaring().kilde(),
+            dto.avklaring().kildeFritekst(),
             avklaringtype
         );
 
-        return new BistandAvklaring(innhold, dto.vurdering().begrunnelse(), dto.vurdering().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
+        return new BistandAvklaring(innhold, dto.avklaring().begrunnelse(), dto.avklaring().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
 
 }

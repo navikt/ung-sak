@@ -41,8 +41,8 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaringIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandVurderingIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -434,7 +434,7 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     private static VurderFaktaOmBistandDto dtoUtenVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak) {
-        var vurdering = new BistandVurderingIkkeOppfyltDto(årsak, "begrunnelse", null, BEGRUNNELSE_IKKE_VARSEL);
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, "begrunnelse", null, BEGRUNNELSE_IKKE_VARSEL);
         return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering, true)), "begrunnelse");
     }
 
@@ -443,7 +443,7 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     private static VurderFaktaOmBistandDto dtoMedVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var vurdering = new BistandVurderingIkkeOppfyltDto(årsak, begrunnelse, "Fritekst til varsel", null);
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, begrunnelse, "Fritekst til varsel", null);
         return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering, false)), "begrunnelse");
     }
 }

@@ -10,10 +10,10 @@ import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 
 /**
- * Saksbehandlers vurdering av hvorfor bistandsvilkåret ikke er oppfylt for én periode.
+ * Saksbehandlers avklaring av hvorfor bistandsvilkåret ikke er oppfylt for én periode.
  * Brukes som felles undertype i {@link BistandFaktaavklaringPeriodeDto}
  */
-public record BistandVurderingIkkeOppfyltDto(
+public record BistandAvklaringIkkeOppfyltDto(
     @NotNull BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
@@ -23,7 +23,7 @@ public record BistandVurderingIkkeOppfyltDto(
     /** Påkrevd når kilde er ANNET. Skal ikke settes for andre kilder. */
     @Size(max = 1000) @Pattern(regexp = InputValideringRegex.FRITEKST) String kildeFritekst
 ) {
-    public BistandVurderingIkkeOppfyltDto(
+    public BistandAvklaringIkkeOppfyltDto(
         BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
         String begrunnelse,
         String fritekstTilVarsel,
@@ -48,5 +48,11 @@ public record BistandVurderingIkkeOppfyltDto(
             return true; // dekkes av @NotNull på kilde
         }
         return !kilde.kreverFritekst() || (kildeFritekst != null && !kildeFritekst.isBlank());
+    }
+
+    @JsonIgnore
+    @AssertTrue(message = "Ikke-støttet årsak for bistandsavklaring: AVKORTET")
+    public boolean isIkkeOppfyltÅrsakStøttet() {
+        return ikkeOppfyltÅrsak != BistandsvilkårIkkeOppfyltÅrsak.AVKORTET;
     }
 }

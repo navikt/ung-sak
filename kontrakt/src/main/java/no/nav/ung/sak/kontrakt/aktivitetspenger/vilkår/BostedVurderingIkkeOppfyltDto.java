@@ -10,7 +10,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 
 /**
- * Saksbehandlers vurdering av brukers bosted for én periode.
+ * Saksbehandlers avklaring av brukers bosted for én periode.
  * Brukes som felles undertype i {@link BostedFaktaavklaringPeriodeDto}
  */
 public record BostedVurderingIkkeOppfyltDto(
@@ -26,12 +26,18 @@ public record BostedVurderingIkkeOppfyltDto(
     @JsonIgnore
     @AssertTrue(message = "fritekstTilVarsel er påkrevd når fraflyttingsÅrsak krever fritekst")
     public boolean isFritekstTilVarselGyldig() {
+        if (fraflyttingsÅrsak == null) {
+            return true; // dekkes av @NotNull på fraflyttingsÅrsak
+        }
         return !fraflyttingsÅrsak.kreverFritekst() || (fritekstTilVarsel != null && !fritekstTilVarsel.isBlank());
     }
 
     @JsonIgnore
     @AssertTrue(message = "kildeFritekst er påkrevd når kilde krever fritekst")
     public boolean isKildeFritekstGyldig() {
+        if (kilde == null) {
+            return true; // dekkes av @NotNull på kilde
+        }
         return !kilde.kreverFritekst() || (kildeFritekst != null && !kildeFritekst.isBlank());
     }
 }
