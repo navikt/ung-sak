@@ -173,7 +173,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         }
 
         // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
-        inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(behandlingId);
+        inngangsvilkårVurderingTjeneste.oppdaterVilkårResultatFraVurdering(behandlingId, VilkårType.BOSTEDSVILKÅR);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

@@ -79,6 +79,6 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
     }
 
     private VilkårsvurderingResultat enkelVurdering(DatoIntervallEntitet periode) {
-        return new VilkårsvurderingResultat(VilkårType.BOSTEDSVILKÅR, true, null, null, null);
+        return new VilkårsvurderingResultat(VilkårType.BOSTEDSVILKÅR, true, null, false, null, null, null, null);
     }
 }

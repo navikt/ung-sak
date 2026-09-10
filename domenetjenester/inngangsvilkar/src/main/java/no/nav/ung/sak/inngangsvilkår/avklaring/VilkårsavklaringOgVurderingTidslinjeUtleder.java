@@ -4,16 +4,14 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;

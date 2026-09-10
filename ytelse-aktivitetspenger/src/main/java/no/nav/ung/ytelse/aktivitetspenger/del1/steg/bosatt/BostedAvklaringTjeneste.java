@@ -8,7 +8,6 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
@@ -17,7 +16,6 @@ import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
@@ -133,20 +131,6 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
             task.setProperty(OpprettEtterlysningTask.ETTERLYSNING_TYPE, EtterlysningType.UTTALELSE_BOSTED.getKode());
             prosessTaskTjeneste.lagre(task);
         }
-    }
-
-    // Hvis saksbehandler endrer perioden det avklares for etter at vilkårsvurdering er utført, gjelder ikke lenger vurderingen og den delen som ikke overlapper med ny avklaring må gjenopprettes fra forrige behandling.
-    // Vilkårsperioden som avklaringen gjelder for settes til ikke vurdert, slik at den kan vurderes på nytt (automatisk eller i aksjonspunkt)
-    public void gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedsPeriodeAvklaring> tidligereForeslåtteAvklaringer, List<BostedAvklaringInnhold> nyeAvklaringer) {
-        var tidligereTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(tidligereForeslåtteAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList());
-        var nyTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nyeAvklaringer.stream().map(BostedAvklaringInnhold::periode).toList());
-        var tidslinjeSomIkkeHåndteresAvNyAvklaring = tidligereTidslinje.disjoint(nyTidslinje);
-
-        inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, tidslinjeSomIkkeHåndteresAvNyAvklaring);
-        inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(param.getBehandlingId(), param.getVilkårResultatBuilder());
-
-        var perioderSomSkalVurderesPåNytt = TidslinjeUtil.tilDatoIntervallEntiteter(nyTidslinje);
-        inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
     }
 
     @Override

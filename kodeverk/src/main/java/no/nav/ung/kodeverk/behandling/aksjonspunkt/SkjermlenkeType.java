@@ -17,6 +17,7 @@ public enum SkjermlenkeType implements Kodeverdi {
     VURDER_ANDRE_LIVSOPPHOLDSYTELSER("VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "Vurder andre livsoppholdsytelser"),
     UDEFINERT("-", "Ikke definert"),
     FAKTA_OM_MEDLEMSKAP("FAKTA_OM_MEDLEMSKAP", "Medlemskap"),
+    FORUTGÅENDE_MEDLEMSKAP("FORUTGÅENDE_MEDLEMSKAP", "Medlemskap"),
     OPPLYSNINGSPLIKT("OPPLYSNINGSPLIKT", "Opplysningsplikt"),
     TILKJENT_YTELSE("TILKJENT_YTELSE", "Tilkjent ytelse"),
     VEDTAK("VEDTAK", "Vedtak"),

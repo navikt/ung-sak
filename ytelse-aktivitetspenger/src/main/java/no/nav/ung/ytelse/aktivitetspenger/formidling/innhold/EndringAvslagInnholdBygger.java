@@ -14,7 +14,6 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOgVurderingTidslinjeUtleder;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted;

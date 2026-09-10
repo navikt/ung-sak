@@ -123,7 +123,8 @@ class VurderFaktaOmBostedOppdatererTest {
             behandlingRepository,
             historikkinnslagRepository,
             vilkårsPerioderTilVurderingTjenester,
-            bostedAvklaringTjeneste
+            bostedAvklaringTjeneste,
+            inngangsvilkårVurderingTjeneste
         );
 
         behandling = opprettBehandlingMedVilkårOgPeriode();
