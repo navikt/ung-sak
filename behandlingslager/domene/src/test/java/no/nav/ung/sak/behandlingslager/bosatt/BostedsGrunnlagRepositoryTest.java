@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -228,6 +229,7 @@ class BostedsGrunnlagRepositoryTest {
 
     private BostedsPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
         return new BostedsPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
             begrunnelse,

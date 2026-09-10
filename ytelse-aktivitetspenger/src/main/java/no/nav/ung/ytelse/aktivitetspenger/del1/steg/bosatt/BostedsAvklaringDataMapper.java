@@ -8,6 +8,7 @@ import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public final class BostedsAvklaringDataMapper {
 
@@ -23,9 +24,10 @@ public final class BostedsAvklaringDataMapper {
         );
     }
 
-    public static BostedsPeriodeAvklaringForeslått mapTilBostedsPeriodeAvklaring(BostedAvklaring bostedAvklaring) {
+    public static BostedsPeriodeAvklaringForeslått mapTilBostedsPeriodeAvklaring(BostedAvklaring bostedAvklaring, UUID referanse) {
         var innhold = bostedAvklaring.innhold();
         return new BostedsPeriodeAvklaringForeslått(
+            referanse,
             innhold.hentPeriodeSomDatoIntervallEntitet(),
             innhold.ikkeOppfyltÅrsak(),
             bostedAvklaring.begrunnelse(),

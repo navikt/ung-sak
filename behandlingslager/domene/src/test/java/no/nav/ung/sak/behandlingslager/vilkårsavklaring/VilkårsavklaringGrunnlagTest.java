@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -131,6 +132,7 @@ class VilkårsavklaringGrunnlagTest {
 
     private static VilkårPeriodeAvklaringForeslått lagAvklaring(DatoIntervallEntitet periode, String begrunnelse) {
         return new VilkårPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             periode,
             "IKKE_OPPFYLT_KODE",
             begrunnelse,

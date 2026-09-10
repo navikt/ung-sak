@@ -41,11 +41,21 @@ public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     public Map<VilkårsvarselInnhold, UUID> lagreForeslåtteAvklaringer(long behandlingId, Set<BistandAvklaring> nyeAvklaringer) {
+        var referanserPerVarselinnhold = hentForeslåtteAvklaringerSomInnhold(behandlingId);
         var nyeEntiteter = nyeAvklaringer.stream()
-            .map(BistandAvklaringDataMapper::mapTilVilkårPeriodeAvklaring)
+            .map(avklaring -> BistandAvklaringDataMapper.mapTilVilkårPeriodeAvklaring(avklaring, referanseFor(avklaring, referanserPerVarselinnhold)))
             .collect(Collectors.toSet());
         var lagret = vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, VilkårType.BISTANDSVILKÅR, nyeEntiteter);
         return tilInnholdMap(lagret);
+    }
+
+    /**
+     * Etterlysningen brukeren allerede har fått peker på referansen til avklaringen. Endres noe som ikke vises for
+     * bruker (typisk begrunnelsen), lagres avklaringen på nytt i et nytt grunnlag — da må referansen følge med,
+     * ellers ville etterlysningen som beholdes pekt på en avklaring i et deaktivert grunnlag.
+     */
+    private static UUID referanseFor(BistandAvklaring avklaring, Map<VilkårsvarselInnhold, UUID> referanserPerVarselinnholdForEksisterendeAvklaringer) {
+        return referanserPerVarselinnholdForEksisterendeAvklaringer.getOrDefault(avklaring.innhold(), UUID.randomUUID());
     }
 
     private static Map<VilkårsvarselInnhold, UUID> tilInnholdMap(Collection<VilkårPeriodeAvklaring> avklaringer) {

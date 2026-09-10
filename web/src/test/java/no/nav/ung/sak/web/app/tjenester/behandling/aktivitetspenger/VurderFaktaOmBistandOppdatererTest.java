@@ -15,6 +15,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -160,6 +161,7 @@ class VurderFaktaOmBistandOppdatererTest {
             .extracting(Etterlysning::getGrunnlagsreferanse)
             .containsExactly(referanseFørstegang);
         verify(prosessTaskTjeneste, org.mockito.Mockito.times(1)).lagre(any(ProsessTaskData.class));
+        assertEtterlysningerPekerPåAvklaringIAktivtGrunnlag();
     }
 
     @Test
@@ -181,6 +183,7 @@ class VurderFaktaOmBistandOppdatererTest {
             .as("begrunnelsen vises ikke for bruker, så varselet skal ikke sendes på nytt")
             .containsExactly(referanseFørstegang);
         verify(prosessTaskTjeneste, org.mockito.Mockito.times(1)).lagre(any(ProsessTaskData.class));
+        assertEtterlysningerPekerPåAvklaringIAktivtGrunnlag();
     }
 
     @Test
@@ -406,8 +409,23 @@ class VurderFaktaOmBistandOppdatererTest {
         return behandling;
     }
 
-    private List<VilkårPeriodeAvklaring> hentSorterteAvklaringer() {
-        return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BISTANDSVILKÅR)
+    /**
+     * En etterlysning som beholdes må peke på en avklaring i det aktive grunnlaget — ellers finner
+     * oppgaveoppretteren ikke igjen avklaringen når varselet skal sendes.
+     */
+    private void assertEtterlysningerPekerPåAvklaringIAktivtGrunnlag() {
+        var referanserIAktivtGrunnlag = hentSorterteAvklaringer().stream()
+            .map(VilkårPeriodeAvklaring::getReferanse)
+            .toList();
+
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId()))
+            .filteredOn(e -> e.getStatus() != EtterlysningStatus.AVBRUTT && e.getStatus() != EtterlysningStatus.SKAL_AVBRYTES)
+            .extracting(Etterlysning::getGrunnlagsreferanse)
+            .as("etterlysningen skal peke på en avklaring i det aktive grunnlaget")
+            .allMatch(referanserIAktivtGrunnlag::contains);
+    }
+
+    private List<VilkårPeriodeAvklaring> hentSorterteAvklaringer() {        return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BISTANDSVILKÅR)
             .orElseThrow()
             .getForeslåtteAvklaringer()
             .stream()

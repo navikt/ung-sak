@@ -135,6 +135,7 @@ class VilkårsavklaringEtterlysningTjenesteTest {
 
     private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, boolean skalSendeVarsel) {
         return new VilkårPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode(),
             "begrunnelse",

@@ -34,7 +34,9 @@ public class VilkårsavklaringGrunnlagRepository {
         return HibernateVerktøy.hentUniktResultat(query);
     }
 
-    public Set<VilkårPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId, VilkårType vilkårType, Set<VilkårPeriodeAvklaringForeslått> nyeAvklaringer) {
+    public Set<VilkårPeriodeAvklaring> lagreForeslåtteAvklaringer(Long behandlingId,
+                                                                  VilkårType vilkårType,
+                                                                  Set<VilkårPeriodeAvklaringForeslått> nyeAvklaringer) {
         var eksisterendeGrunnlag = hentGrunnlagHvisEksisterer(behandlingId, vilkårType);
         var nyttGrunnlag = eksisterendeGrunnlag
             .map(VilkårsavklaringGrunnlag::nyttGrunnlagMedReferanserFra)

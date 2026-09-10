@@ -378,6 +378,7 @@ class VurderBostedVilkårStegTest {
             boolean skalSendeVarsel) {
 
         return new BostedsPeriodeAvklaringForeslått(
+                UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
                 ikkeOppfyltÅrsak,
                 "Begrunnelse for relevante fakta lagt til grunn i avklaring",

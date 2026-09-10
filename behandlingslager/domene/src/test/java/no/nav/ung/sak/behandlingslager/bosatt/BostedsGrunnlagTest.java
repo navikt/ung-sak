@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,6 +44,7 @@ class BostedsGrunnlagTest {
 
     private static BostedsPeriodeAvklaringForeslått lagBostedAvklaring(DatoIntervallEntitet periode, String begrunnelse) {
         return new BostedsPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             periode,
             BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
             begrunnelse,

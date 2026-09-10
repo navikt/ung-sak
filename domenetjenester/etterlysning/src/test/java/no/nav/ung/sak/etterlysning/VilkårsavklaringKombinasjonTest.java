@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -148,6 +149,7 @@ class VilkårsavklaringKombinasjonTest {
 
     private VilkårPeriodeAvklaring lagreAvklaring(VilkårType vilkårType, IkkeOppfyltDetaljertÅrsak årsak, AvklaringKilde kilde) {
         var avklaring = new VilkårPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             PERIODE,
             årsak.getKode(),
             "begrunnelse",

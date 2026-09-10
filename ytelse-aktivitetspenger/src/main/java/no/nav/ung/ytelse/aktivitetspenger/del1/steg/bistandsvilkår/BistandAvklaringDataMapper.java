@@ -11,6 +11,7 @@ import no.nav.ung.sak.typer.Periode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public final class BistandAvklaringDataMapper {
 
@@ -29,10 +30,11 @@ public final class BistandAvklaringDataMapper {
         );
     }
 
-    public static VilkårPeriodeAvklaringForeslått mapTilVilkårPeriodeAvklaring(BistandAvklaring avklaring) {
+    public static VilkårPeriodeAvklaringForeslått mapTilVilkårPeriodeAvklaring(BistandAvklaring avklaring, UUID referanse) {
         var innhold = avklaring.innhold();
         Objects.requireNonNull(innhold.ikkeOppfyltÅrsak(), "Mangler årsak for hvorfor bistandsvilkåret ikke er oppfylt");
         return new VilkårPeriodeAvklaringForeslått(
+            referanse,
             innhold.hentPeriodeSomDatoIntervallEntitet(),
             innhold.ikkeOppfyltÅrsak().getKode(),
             avklaring.begrunnelse(),

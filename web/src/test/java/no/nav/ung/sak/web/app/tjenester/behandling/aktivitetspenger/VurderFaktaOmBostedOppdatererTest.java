@@ -165,7 +165,8 @@ class VurderFaktaOmBostedOppdatererTest {
 
     private static BostedsPeriodeAvklaringForeslått konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
         return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
-            BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now())
+            BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now()),
+            UUID.randomUUID()
         );
     }
 

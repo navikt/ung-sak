@@ -75,6 +75,7 @@ class BostedAvklaringTjenesteTest {
 
     private BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom, BostedsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse, boolean skalSendeVarsel) {
         return new BostedsPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             årsak,
             begrunnelse,

@@ -69,7 +69,13 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
         // Hibernate
     }
 
-    public BostedsPeriodeAvklaringForeslått(DatoIntervallEntitet periode,
+    /**
+     * Referansen er brukerens koblingspunkt mot etterlysning og uttalelse. Kallstedet kan derfor gjenbruke referansen
+     * fra en tidligere avklaring når varselet er uendret, slik at etterlysningen fortsatt peker på en avklaring i
+     * det aktive grunnlaget.
+     */
+    public BostedsPeriodeAvklaringForeslått(UUID referanse,
+                                            DatoIntervallEntitet periode,
                                             BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
                                             String begrunnelse,
                                             boolean skalSendeVarsel,
@@ -80,6 +86,7 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
                                             String vurdertAv,
                                             LocalDateTime vurdertTidspunkt,
                                             Avklaringtype avklaringtype) {
+        Objects.requireNonNull(referanse, "referanse");
         if (!skalSendeVarsel) {
             Objects.requireNonNull(begrunnelseIkkeVarsel, "Mangler begrunnelse for hvorfor det ikke varsles");
         } else if (BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak)) {
@@ -97,6 +104,7 @@ public class BostedsPeriodeAvklaringForeslått extends BaseEntitet implements Bo
         }
 
         this.periode = periode.toRange();
+        this.referanse = referanse;
         this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
         this.begrunnelse = begrunnelse;
         this.skalSendeVarsel = skalSendeVarsel;

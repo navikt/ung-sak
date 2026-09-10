@@ -5,8 +5,10 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
 /**
- * Innhold for en vilkårsavklaring. Brukes i {@link VilkårsavklaringEtterlysningTjeneste},
- * men vilkåret som implementerer interfacet eier likhetssjekken!
+ * Varselinnholdet i en vilkårsavklaring — det brukeren faktisk får se. Likheten avgjør både om en etterlysning
+ * kan beholdes og om avklaringens referanse gjenbrukes ved lagring, slik at de to alltid er enige.
+ * Vilkåret som implementerer interfacet eier likhetssjekken, og må utelate felter som ikke vises for bruker
+ * (begrunnelse, vurdert av/tidspunkt) — ellers varsles brukeren på nytt uten at varselet er endret.
  */
 public interface VilkårsvarselInnhold {
 

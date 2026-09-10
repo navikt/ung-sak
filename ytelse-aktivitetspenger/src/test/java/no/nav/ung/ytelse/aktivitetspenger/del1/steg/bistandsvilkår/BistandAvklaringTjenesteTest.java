@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -90,6 +92,49 @@ class BistandAvklaringTjenesteTest {
             .containsExactly(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
     }
 
+    @Test
+    void skal_gjenbruke_referanse_naar_kun_begrunnelsen_er_endret() {
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(lagBistandAvklaring("begrunnelse")));
+        var opprinneligReferanse = hentReferanser().getFirst();
+
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(lagBistandAvklaring("ny begrunnelse")));
+
+        assertThat(hentReferanser())
+            .as("begrunnelsen vises ikke for bruker, så referansen etterlysningen peker på skal overleve")
+            .containsExactly(opprinneligReferanse);
+    }
+
+    @Test
+    void skal_gi_ny_referanse_naar_varselet_er_endret() {
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(lagBistandAvklaring("begrunnelse")));
+        var opprinneligReferanse = hentReferanser().getFirst();
+
+        var medEndretPeriode = new BistandAvklaring(
+            new BistandVarselInnhold(new Periode(FOM, TOM.minusDays(1)), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null,
+                BistandsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG),
+            "begrunnelse", null, "A12345", LocalDateTime.now());
+        tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(medEndretPeriode));
+
+        assertThat(hentReferanser())
+            .as("endret periode endrer varselet, og brukeren må varsles på nytt")
+            .doesNotContain(opprinneligReferanse);
+    }
+
+    private List<UUID> hentReferanser() {
+        return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BISTANDSVILKÅR)
+            .orElseThrow()
+            .getForeslåtteAvklaringer()
+            .stream()
+            .map(VilkårPeriodeAvklaring::getReferanse)
+            .toList();
+    }
+
+    private BistandAvklaring lagBistandAvklaring(String begrunnelse) {
+        var innhold = new BistandVarselInnhold(new Periode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null,
+            BistandsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG);
+        return new BistandAvklaring(innhold, begrunnelse, null, "A12345", LocalDateTime.now());
+    }
+
     private VilkårPeriodeAvklaring lagreAvklaring(VilkårPeriodeAvklaringForeslått avklaring) {
         var lagret = vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BISTANDSVILKÅR, Set.of(avklaring));
         return lagret.stream()
@@ -100,6 +145,7 @@ class BistandAvklaringTjenesteTest {
 
     private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, boolean skalSendeVarsel) {
         return new VilkårPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode(),
             "begrunnelse",

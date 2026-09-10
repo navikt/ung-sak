@@ -98,6 +98,7 @@ class VilkårsavklaringUtfallUtlederTest {
 
     private static VilkårPeriodeAvklaring avklaring(VilkårType vilkårType, IkkeOppfyltDetaljertÅrsak årsak, String kildeKode, boolean skalSendeVarsel) {
         return new VilkårPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             PERIODE,
             årsak.getKode(),
             "begrunnelse",

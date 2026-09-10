@@ -61,8 +61,13 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaring> nyeAvklaringer, long behandlingId) {
+        // Gjenbruker referansen når varselet er uendret, slik at etterlysningen som beholdes fortsatt peker på en
+        // avklaring i det aktive grunnlaget
+        var referanserPerVarselinnhold = hentForeslåtteAvklaringer(behandlingId).stream()
+            .collect(Collectors.toMap(BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold, BostedsPeriodeAvklaring::getReferanse));
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
-            .map(BostedsAvklaringDataMapper::mapTilBostedsPeriodeAvklaring)
+            .map(avklaring -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(avklaring,
+                referanserPerVarselinnhold.getOrDefault(avklaring.innhold(), UUID.randomUUID())))
             .collect(Collectors.toSet());
         return bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
     }
