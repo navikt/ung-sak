@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.Tid;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
@@ -15,6 +16,9 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
@@ -22,8 +26,14 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.repository.*;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.*;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
+import no.nav.ung.sak.domene.typer.tid.AbstractLocalDateInterval;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
 import no.nav.ung.sak.mottak.dokumentmottak.*;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
@@ -49,6 +59,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
     private final ProsessTaskTjeneste prosessTaskTjeneste;
     private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private final ProsessTriggereRepository prosessTriggereRepository;
+    private final VilkårResultatRepository vilkårResultatRepository;
 
 
     @Inject
@@ -58,7 +69,8 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
                                                    BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                                    ProsessTaskTjeneste prosessTaskTjeneste,
                                                    FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                                   ProsessTriggereRepository prosessTriggereRepository) {
+                                                   ProsessTriggereRepository prosessTriggereRepository,
+                                                   VilkårResultatRepository vilkårResultatRepository) {
         this.mottakere = mottakere;
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -68,6 +80,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
     public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
@@ -93,12 +106,57 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
         }
         lagreDokumenter(brevkodeMap, resultat.behandling);
 
+        fjernBegrunnelsePåIkkevurdertVilkårsperiodeHvorOverlapperMedNySøknad(triggere, resultat.behandling);
+
         if (taskGruppe == null) {
             throw new IllegalStateException("Det er planlagt kjøringer som ikke har garantert rekkefølge. Sjekk oversikt over ventende tasker for eventuelt avbryte disse.");
         }
 
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
         prosessTaskTjeneste.lagre(taskGruppe);
+    }
+
+    /**
+     * Når saksbehandler innvilger korter enn 260 dager, ligger det i bakgrunnen en opprinnelig utledet periode som er inntil
+     * ett år lang. Den delen som ikke blir innvilget, er funksjonelt sett ikke avslått heller, men vi har valgt å løse det
+     * teknisk ved å lagre som avslag med en avslagsårsak som kan brukes for å se at dette er bare teknisk avslag. Den perioden
+     * får også begrunnelse for hvorfor det ikke ble innvilget lenger.
+     * <p>
+     * Når det så kommer ny søknad som overlapper med den perioden som ikke ble innvilget, vil opprinnelig begrunnelse automatisk
+     * bli kopiert over fra forrige behandling. Begrunnelsen er ikke relevant for vurdering av søknaden, så den fjernes her
+     */
+    private void fjernBegrunnelsePåIkkevurdertVilkårsperiodeHvorOverlapperMedNySøknad(List<Trigger> triggere, Behandling behandling) {
+        DatoIntervallEntitet alltid = DatoIntervallEntitet.fraOgMedTilOgMed(AbstractLocalDateInterval.TIDENES_BEGYNNELSE, AbstractLocalDateInterval.TIDENES_ENDE);
+        Optional<Behandling> forrigeBehandling = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId());
+        if (forrigeBehandling.isEmpty()){
+            return;
+        }
+        Vilkårene forrigeVilkårsresultat = vilkårResultatRepository.hent(forrigeBehandling.get().getId());
+        Map<VilkårType, LocalDateTimeline<Boolean>> tekniskAvslagTidslinjer = forrigeVilkårsresultat.getVilkårTidslinjer(alltid).entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey,
+                e->e.getValue().filterValue(vp -> vp.getAvslagsårsak() == Avslagsårsak.AVKORTET).mapValue(_->true)));
+
+        LocalDateTimeline<Boolean> nySøknadTidslinje = TidslinjeUtil.tilTidslinje(triggere.stream()
+            .filter(t -> t.behandlingÅrsak() == BehandlingÅrsakType.NY_SØKT_PERIODE)
+            .map(Trigger::periode)
+            .toList());
+        Vilkårene vilkårene = vilkårResultatRepository.hent(behandling.getId());
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(vilkårene);
+        vilkårene.getVilkårTidslinjer(alltid)
+            .forEach((vilkårType, vilkårTidslinje) -> {
+                var tekniskAvslagTidslinje = tekniskAvslagTidslinjer.getOrDefault(vilkårType, LocalDateTimeline.empty());
+                VilkårBuilder vilkårBuilder = builder.hentBuilderFor(vilkårType);
+                vilkårTidslinje.intersection(nySøknadTidslinje).intersection(tekniskAvslagTidslinje).segmenter()
+                    .forEach(segment -> {
+                        if (segment.getValue().getUtfall() == Utfall.IKKE_VURDERT && segment.getValue().getBegrunnelse() != null) {
+                            VilkårPeriodeBuilder vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(segment.getFom(), segment.getTom());
+                            vilkårPeriodeBuilder.medBegrunnelse(null);
+                            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
+                            log.info("Fjerner begrunnelse fra {} for periode {} til {} pga overlapp mot ny søknad", vilkårType, segment.getFom(), segment.getTom());
+                        }
+                    });
+                builder.leggTil(vilkårBuilder);
+            });
     }
 
     private boolean prosessenStårStillePåAksjonspunktForSøknadsfrist(Behandling behandling) {
@@ -233,7 +291,7 @@ public class AktivitetspengerInnhentDokumentTjeneste implements InnhentDokumentT
             .orElseThrow(() -> new IllegalStateException("Har ikke Dokumentmottaker for ytelseType=" + fagsakYtelseTypeKode + ", dokumentgruppe=" + brevkode));
     }
 
-    record BehandlingMedOpprettelseResultat ( Behandling behandling, boolean nyopprettet) {
+    record BehandlingMedOpprettelseResultat(Behandling behandling, boolean nyopprettet) {
 
         static BehandlingMedOpprettelseResultat nyBehandling(Behandling behandling) {
             return new BehandlingMedOpprettelseResultat(behandling, true);
