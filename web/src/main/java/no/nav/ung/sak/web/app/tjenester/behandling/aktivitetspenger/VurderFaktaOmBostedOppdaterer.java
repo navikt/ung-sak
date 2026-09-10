@@ -17,7 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringInnhold;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsAvklaringDataMapper;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -75,19 +75,19 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        List<BostedAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
-            .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(a, maxTomDato)).toList();
+        List<BostedAvklaring> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
+            .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaring(a, maxTomDato, vurdertAv, vurdertTidspunkt)).toList();
 
         if (nyeAvklaringer.size() > 1) {
             throw new IllegalArgumentException("Støtter kun lagring av én avklaring for bostedsvilkåret samtidig");
         }
 
-        Set<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
+        Set<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, behandlingId);
 
         inngangsvilkårVurderingTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param,
             VilkårType.BOSTEDSVILKÅR,
             tidligereForeslåtteAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList(),
-            nyeAvklaringer.stream().map(BostedAvklaringInnhold::hentPeriodeSomDatoIntervallEntitet).toList());
+            nyeAvklaringer.stream().map(a -> a.innhold().hentPeriodeSomDatoIntervallEntitet()).toList());
 
         bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereForeslåtteAvklaringer, nyeForeslåtteAvklaringer);
 

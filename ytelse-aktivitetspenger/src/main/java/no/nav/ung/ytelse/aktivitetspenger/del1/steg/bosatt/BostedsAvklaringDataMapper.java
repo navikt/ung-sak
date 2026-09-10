@@ -11,53 +11,52 @@ import java.time.LocalDateTime;
 
 public final class BostedsAvklaringDataMapper {
 
-    public static BostedAvklaringInnhold mapTilBostedAvklaringInnhold(BostedsPeriodeAvklaring bostedsPeriodeAvklaring) {
-        return new BostedAvklaringInnhold(
+    public static BostedVarselInnhold mapTilBostedAvklaringInnhold(BostedsPeriodeAvklaring bostedsPeriodeAvklaring) {
+        return new BostedVarselInnhold(
             bostedsPeriodeAvklaring.getPeriode().tilPeriode(),
             bostedsPeriodeAvklaring.getIkkeOppfyltÅrsak(),
-            bostedsPeriodeAvklaring.getBegrunnelse(),
             bostedsPeriodeAvklaring.skalSendeVarsel(),
             bostedsPeriodeAvklaring.getFritekstTilVarsel(),
-            bostedsPeriodeAvklaring.getBegrunnelseIkkeVarsel(),
             bostedsPeriodeAvklaring.getKilde(),
             bostedsPeriodeAvklaring.getKildeFritekst(),
             bostedsPeriodeAvklaring.getAvklaringtype()
         );
     }
 
-    public static BostedsPeriodeAvklaringForeslått mapTilBostedsPeriodeAvklaring(BostedAvklaringInnhold bostedAvklaringInnhold, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public static BostedsPeriodeAvklaringForeslått mapTilBostedsPeriodeAvklaring(BostedAvklaring bostedAvklaring) {
+        var innhold = bostedAvklaring.innhold();
         return new BostedsPeriodeAvklaringForeslått(
-            bostedAvklaringInnhold.hentPeriodeSomDatoIntervallEntitet(),
-            bostedAvklaringInnhold.ikkeOppfyltÅrsak(),
-            bostedAvklaringInnhold.begrunnelse(),
-            bostedAvklaringInnhold.skalSendeVarsel(),
-            bostedAvklaringInnhold.fritekstTilVarsel(),
-            bostedAvklaringInnhold.begrunnelseIkkeVarsel(),
-            bostedAvklaringInnhold.kilde(),
-            bostedAvklaringInnhold.kildeFritekst(),
-            vurdertAv,
-            vurdertTidspunkt,
-            bostedAvklaringInnhold.avklaringtype()
+            innhold.hentPeriodeSomDatoIntervallEntitet(),
+            innhold.ikkeOppfyltÅrsak(),
+            bostedAvklaring.begrunnelse(),
+            innhold.skalSendeVarsel(),
+            innhold.fritekstTilVarsel(),
+            bostedAvklaring.begrunnelseIkkeVarsel(),
+            innhold.kilde(),
+            innhold.kildeFritekst(),
+            bostedAvklaring.vurdertAv(),
+            bostedAvklaring.vurdertTidspunkt(),
+            innhold.avklaringtype()
         );
     }
 
-    public static BostedAvklaringInnhold mapTilBostedAvklaringInnhold(BostedFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode) {
+    public static BostedAvklaring mapTilBostedAvklaring(BostedFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         var avklaringtype = dto.periode().getTom() != null ? Avklaringtype.AVSLAG : Avklaringtype.OPPHØR;
         var fom = dto.periode().getFom();
         // Konverterer opphør til en lukket periode, slik at det i ettertid er tydelig hvilken periode opphøret er utført på.
         var tom = dto.periode().getTom() != null ? dto.periode().getTom() : maksDatoFraVilkårsperiode;
 
-        return new BostedAvklaringInnhold(
+        var innhold = new BostedVarselInnhold(
             new Periode(fom, tom),
             dto.vurdering().fraflyttingsÅrsak(),
-            dto.vurdering().begrunnelse(),
             dto.skalSendeVarsel(),
             dto.vurdering().fritekstTilVarsel(),
-            dto.vurdering().begrunnelseIkkeVarsel(),
             dto.vurdering().kilde(),
             dto.vurdering().kildeFritekst(),
             avklaringtype
         );
+
+        return new BostedAvklaring(innhold, dto.vurdering().begrunnelse(), dto.vurdering().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
 
 }

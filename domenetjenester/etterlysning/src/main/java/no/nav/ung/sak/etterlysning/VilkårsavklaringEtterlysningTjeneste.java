@@ -42,14 +42,14 @@ public class VilkårsavklaringEtterlysningTjeneste {
     }
 
     /**
-     * Avklaringsinnholdet er mappet til en vilkårsspesifikk {@link VilkårsavklaringInnhold}-implementasjon
+     * Avklaringsinnholdet er mappet til en vilkårsspesifikk {@link VilkårsvarselInnhold}-implementasjon
      * (skjuler den konkrete entitetsrepresentasjonen for denne tjenesten), sammen med referansen den ble/skal
      * lagres med.
      */
     public void oppdaterEtterlysninger(Behandling behandling,
                                         EtterlysningType etterlysningType,
-                                        Map<? extends VilkårsavklaringInnhold, UUID> tidligereForeslåtte,
-                                        Map<? extends VilkårsavklaringInnhold, UUID> nyeForeslåtte) {
+                                        Map<? extends VilkårsvarselInnhold, UUID> tidligereForeslåtte,
+                                        Map<? extends VilkårsvarselInnhold, UUID> nyeForeslåtte) {
 
         long behandlingId = behandling.getId();
 
@@ -58,9 +58,9 @@ public class VilkårsavklaringEtterlysningTjeneste {
             .filter(e -> e.getType() == etterlysningType)
             .toList();
 
-        Map<VilkårsavklaringInnhold, UUID> tidligereAvklaringer = new HashMap<>(tidligereForeslåtte);
+        Map<VilkårsvarselInnhold, UUID> tidligereAvklaringer = new HashMap<>(tidligereForeslåtte);
 
-        Map<VilkårsavklaringInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtte.entrySet().stream()
+        Map<VilkårsvarselInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtte.entrySet().stream()
             .filter(entry -> entry.getKey().skalSendeVarsel())
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 

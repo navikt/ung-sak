@@ -8,12 +8,11 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
-import no.nav.ung.sak.etterlysning.VilkårsavklaringInnhold;
+import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
 import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -35,21 +34,21 @@ public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
-    public Map<VilkårsavklaringInnhold, UUID> hentForeslåtteAvklaringerSomInnhold(long behandlingId) {
+    public Map<VilkårsvarselInnhold, UUID> hentForeslåtteAvklaringerSomInnhold(long behandlingId) {
         return tilInnholdMap(vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId, VilkårType.BISTANDSVILKÅR)
             .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
             .orElse(Set.of()));
     }
 
-    public Map<VilkårsavklaringInnhold, UUID> lagreForeslåtteAvklaringer(long behandlingId, Set<BistandAvklaringInnhold> nyttInnhold, String vurdertAv, LocalDateTime vurdertTidspunkt) {
-        var nyeEntiteter = nyttInnhold.stream()
-            .map(innhold -> BistandAvklaringDataMapper.mapTilVilkårPeriodeAvklaring(innhold, vurdertAv, vurdertTidspunkt))
+    public Map<VilkårsvarselInnhold, UUID> lagreForeslåtteAvklaringer(long behandlingId, Set<BistandAvklaring> nyeAvklaringer) {
+        var nyeEntiteter = nyeAvklaringer.stream()
+            .map(BistandAvklaringDataMapper::mapTilVilkårPeriodeAvklaring)
             .collect(Collectors.toSet());
         var lagret = vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, VilkårType.BISTANDSVILKÅR, nyeEntiteter);
         return tilInnholdMap(lagret);
     }
 
-    private static Map<VilkårsavklaringInnhold, UUID> tilInnholdMap(Collection<VilkårPeriodeAvklaring> avklaringer) {
+    private static Map<VilkårsvarselInnhold, UUID> tilInnholdMap(Collection<VilkårPeriodeAvklaring> avklaringer) {
         return avklaringer.stream()
             .collect(Collectors.toMap(BistandAvklaringDataMapper::mapTilBistandAvklaringInnhold, VilkårPeriodeAvklaring::getReferanse));
     }

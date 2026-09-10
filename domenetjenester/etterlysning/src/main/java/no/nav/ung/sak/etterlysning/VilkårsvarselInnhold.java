@@ -5,9 +5,10 @@ import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.Periode;
 
 /**
- * Innhold for en vilkårsavklaring, sett fra {@link VilkårsavklaringEtterlysningTjeneste} sitt ståsted.
+ * Innhold for en vilkårsavklaring. Brukes i {@link VilkårsavklaringEtterlysningTjeneste},
+ * men vilkåret som implementerer interfacet eier likhetssjekken!
  */
-public interface VilkårsavklaringInnhold {
+public interface VilkårsvarselInnhold {
 
     Periode periode();
     IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak();

@@ -69,7 +69,7 @@ class VilkårsavklaringEtterlysningTjenesteTest {
 
         var nyAvklaringMedSammeInnhold = lagAvklaring(FOM, TOM, true);
 
-        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, tidligereAvklaring), TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaringMedSammeInnhold));
+        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, tidligereAvklaring), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaringMedSammeInnhold));
 
         assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId())).isEmpty();
         assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BISTAND))
@@ -87,7 +87,7 @@ class VilkårsavklaringEtterlysningTjenesteTest {
 
         var nyAvklaring = lagAvklaring(FOM, LocalDate.of(2024, 2, 15), true);
 
-        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, tidligereAvklaring), TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaring));
+        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, tidligereAvklaring), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaring));
 
         assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId()))
             .extracting(Etterlysning::getId).containsExactly(etterlysningSomVenter.getId());
@@ -107,7 +107,7 @@ class VilkårsavklaringEtterlysningTjenesteTest {
     void ny_avklaring_uten_tidligere_avklaring_skal_opprette_etterlysning_og_task() {
         var nyAvklaring = lagAvklaring(FOM, TOM, true);
 
-        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaring));
+        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaring));
 
         assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId())).isEmpty();
 
@@ -127,7 +127,7 @@ class VilkårsavklaringEtterlysningTjenesteTest {
     void ny_avklaring_uten_varsel_skal_ikke_opprette_etterlysninger() {
         var nyAvklaringUtenVarsel = lagAvklaring(FOM, TOM, false);
 
-        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaringUtenVarsel));
+        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaringUtenVarsel));
 
         assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId())).isEmpty();
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));

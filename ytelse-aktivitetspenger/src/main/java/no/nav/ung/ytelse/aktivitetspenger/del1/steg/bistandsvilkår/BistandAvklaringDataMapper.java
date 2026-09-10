@@ -17,54 +17,53 @@ public final class BistandAvklaringDataMapper {
     private BistandAvklaringDataMapper() {
     }
 
-    public static BistandAvklaringInnhold mapTilBistandAvklaringInnhold(VilkårPeriodeAvklaring avklaring) {
-        return new BistandAvklaringInnhold(
+    public static BistandVarselInnhold mapTilBistandAvklaringInnhold(VilkårPeriodeAvklaring avklaring) {
+        return new BistandVarselInnhold(
             avklaring.getPeriode().tilPeriode(),
             BistandsvilkårIkkeOppfyltÅrsak.fraKode(avklaring.getIkkeOppfyltÅrsakKode()),
-            avklaring.getBegrunnelse(),
             avklaring.skalSendeVarsel(),
             avklaring.getFritekstTilVarsel(),
-            avklaring.getBegrunnelseIkkeVarsel(),
             BistandsavklaringKildeType.fraKode(avklaring.getKildeKode()),
             avklaring.getKildeFritekst(),
             avklaring.getAvklaringtype()
         );
     }
 
-    public static VilkårPeriodeAvklaringForeslått mapTilVilkårPeriodeAvklaring(BistandAvklaringInnhold innhold, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public static VilkårPeriodeAvklaringForeslått mapTilVilkårPeriodeAvklaring(BistandAvklaring avklaring) {
+        var innhold = avklaring.innhold();
         Objects.requireNonNull(innhold.ikkeOppfyltÅrsak(), "Mangler årsak for hvorfor bistandsvilkåret ikke er oppfylt");
         return new VilkårPeriodeAvklaringForeslått(
             innhold.hentPeriodeSomDatoIntervallEntitet(),
             innhold.ikkeOppfyltÅrsak().getKode(),
-            innhold.begrunnelse(),
+            avklaring.begrunnelse(),
             innhold.skalSendeVarsel(),
             innhold.fritekstTilVarsel(),
-            innhold.begrunnelseIkkeVarsel(),
+            avklaring.begrunnelseIkkeVarsel(),
             innhold.kilde(),
             innhold.kildeFritekst(),
-            vurdertAv,
-            vurdertTidspunkt,
+            avklaring.vurdertAv(),
+            avklaring.vurdertTidspunkt(),
             innhold.avklaringtype()
         );
     }
 
-    public static BistandAvklaringInnhold mapTilBistandAvklaringInnhold(BistandFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode) {
+    public static BistandAvklaring mapTilBistandAvklaring(BistandFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         var avklaringtype = dto.periode().getTom() != null ? Avklaringtype.AVSLAG : Avklaringtype.OPPHØR;
         var fom = dto.periode().getFom();
         // Konverterer opphør til en lukket periode, slik at det i ettertid er tydelig hvilken periode opphøret er utført på.
         var tom = dto.periode().getTom() != null ? dto.periode().getTom() : maksDatoFraVilkårsperiode;
 
-        return new BistandAvklaringInnhold(
+        var innhold = new BistandVarselInnhold(
             new Periode(fom, tom),
             dto.vurdering().ikkeOppfyltÅrsak(),
-            dto.vurdering().begrunnelse(),
             dto.skalSendeVarsel(),
             dto.vurdering().fritekstTilVarsel(),
-            dto.vurdering().begrunnelseIkkeVarsel(),
             dto.vurdering().kilde(),
             dto.vurdering().kildeFritekst(),
             avklaringtype
         );
+
+        return new BistandAvklaring(innhold, dto.vurdering().begrunnelse(), dto.vurdering().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
 
 }

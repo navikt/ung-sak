@@ -145,11 +145,27 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
+    @Test
+    void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
+        var opprinnelig = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "opprinnelig begrunnelse");
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(konverterTilBostedAvklaringPeriode(opprinnelig, behandling)));
+
+        oppdater(dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "rettet begrunnelse"));
+
+        assertThat(hentSorterteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getBegrunnelse)
+            .as("den rettede begrunnelsen skal lagres")
+            .containsExactly("rettet begrunnelse");
+
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId()))
+            .as("begrunnelsen vises ikke for bruker, så varselet skal ikke sendes på nytt")
+            .isEmpty();
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
+    }
+
     private static BostedsPeriodeAvklaringForeslått konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
         return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
-            BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(dto.getAvklaringer().getFirst(), TOM),
-            UUID.randomUUID().toString(),
-            LocalDateTime.now()
+            BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now())
         );
     }
 
@@ -424,9 +440,13 @@ class VurderFaktaOmBostedOppdatererTest {
     }
 
     private static VurderFaktaOmBostedDto dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel) {
+        return dtoMedEnAvklaring(årsak, skalSendeVarsel, "begrunnelse");
+    }
+
+    private static VurderFaktaOmBostedDto dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel, String begrunnelse) {
         var vurdering = new BostedVurderingIkkeOppfyltDto(
             årsak,
-            "begrunnelse",
+            begrunnelse,
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
             skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL,
             BostedsavklaringKildeType.BRUKER,

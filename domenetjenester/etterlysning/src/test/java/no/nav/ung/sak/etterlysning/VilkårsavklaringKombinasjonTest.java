@@ -104,8 +104,8 @@ class VilkårsavklaringKombinasjonTest {
         var bosted = lagreAvklaring(VilkårType.BOSTEDSVILKÅR, BOSTED_ÅRSAK, BostedsavklaringKildeType.FOLKEREGISTER);
         var bistand = lagreAvklaring(VilkårType.BISTANDSVILKÅR, BISTAND_ÅRSAK, BistandsavklaringKildeType.BRUKER);
 
-        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BOSTED, Map.of(), TestVilkårsavklaringInnhold.tilMap(VilkårType.BOSTEDSVILKÅR, bosted));
-        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand));
+        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BOSTED, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BOSTEDSVILKÅR, bosted));
+        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand));
 
         assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BOSTED))
             .extracting(Etterlysning::getGrunnlagsreferanse)
@@ -120,11 +120,11 @@ class VilkårsavklaringKombinasjonTest {
         var bosted = lagreAvklaring(VilkårType.BOSTEDSVILKÅR, BOSTED_ÅRSAK, BostedsavklaringKildeType.FOLKEREGISTER);
         var bistand = lagreAvklaring(VilkårType.BISTANDSVILKÅR, BISTAND_ÅRSAK, BistandsavklaringKildeType.BRUKER);
 
-        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BOSTED, Map.of(), TestVilkårsavklaringInnhold.tilMap(VilkårType.BOSTEDSVILKÅR, bosted));
-        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand));
+        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BOSTED, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BOSTEDSVILKÅR, bosted));
+        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand));
 
         var endretBistand = lagreAvklaring(VilkårType.BISTANDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.AVKORTET, BistandsavklaringKildeType.BRUKER);
-        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand), TestVilkårsavklaringInnhold.tilMap(VilkårType.BISTANDSVILKÅR, endretBistand));
+        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, endretBistand));
 
         assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId()))
             .extracting(Etterlysning::getType)

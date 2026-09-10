@@ -10,7 +10,7 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.etterlysning.VilkårsavklaringInnhold;
+import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,7 +59,7 @@ class BistandAvklaringTjenesteTest {
 
         assertThat(lagret).hasSize(1);
         assertThat(tjeneste.hentForeslåtteAvklaringerSomInnhold(behandling.getId()).keySet())
-            .extracting(VilkårsavklaringInnhold::ikkeOppfyltÅrsak).map(IkkeOppfyltDetaljertÅrsak::getKode)
+            .extracting(VilkårsvarselInnhold::ikkeOppfyltÅrsak).map(IkkeOppfyltDetaljertÅrsak::getKode)
             .containsExactly(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode());
 
         // Skal ikke berøre andre vilkårstyper

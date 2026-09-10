@@ -22,14 +22,14 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
-import no.nav.ung.sak.etterlysning.VilkårsavklaringInnhold;
+import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandVurderingIkkeOppfyltDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringDataMapper;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringInnhold;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringTjeneste;
 
 import java.time.LocalDateTime;
@@ -67,8 +67,8 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
-    private static List<DatoIntervallEntitet> tilPerioder(Collection<VilkårsavklaringInnhold> avklaringer) {
-        return avklaringer.stream().map(VilkårsavklaringInnhold::hentPeriodeSomDatoIntervallEntitet).toList();
+    private static List<DatoIntervallEntitet> tilPerioder(Collection<VilkårsvarselInnhold> avklaringer) {
+        return avklaringer.stream().map(VilkårsvarselInnhold::hentPeriodeSomDatoIntervallEntitet).toList();
     }
 
     @Override
@@ -88,20 +88,20 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
             .max(Comparator.naturalOrder())
             .orElseThrow(() -> new IllegalStateException("Må ha perioder til vurdering"));
 
-        Map<VilkårsavklaringInnhold, UUID> tidligereForeslåtteAvklaringer = bistandAvklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId);
+        Map<VilkårsvarselInnhold, UUID> tidligereForeslåtteAvklaringer = bistandAvklaringTjeneste.hentForeslåtteAvklaringerSomInnhold(behandlingId);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        Set<BistandAvklaringInnhold> nyttInnhold = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
-            .map(a -> BistandAvklaringDataMapper.mapTilBistandAvklaringInnhold(a, maxTomDato))
+        Set<BistandAvklaring> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
+            .map(a -> BistandAvklaringDataMapper.mapTilBistandAvklaring(a, maxTomDato, vurdertAv, vurdertTidspunkt))
             .collect(Collectors.toSet());
 
-        if (nyttInnhold.size() > 1) {
+        if (nyeAvklaringer.size() > 1) {
             throw new IllegalArgumentException("Støtter kun lagring av én avklaring for bistandsvilkåret samtidig");
         }
 
-        Map<VilkårsavklaringInnhold, UUID> nyeForeslåtteAvklaringer = bistandAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyttInnhold, vurdertAv, vurdertTidspunkt);
+        Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = bistandAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyeAvklaringer);
 
         inngangsvilkårVurderingTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param,
             VilkårType.BISTANDSVILKÅR,

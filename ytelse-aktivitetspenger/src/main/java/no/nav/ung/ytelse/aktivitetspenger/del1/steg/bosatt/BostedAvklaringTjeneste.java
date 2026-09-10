@@ -24,7 +24,6 @@ import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,9 +60,9 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .orElse(List.of());
     }
 
-    public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
+    public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaring> nyeAvklaringer, long behandlingId) {
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
-            .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
+            .map(BostedsAvklaringDataMapper::mapTilBostedsPeriodeAvklaring)
             .collect(Collectors.toSet());
         return bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
     }
@@ -79,13 +78,13 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
             .toList();
 
-        Map<BostedAvklaringInnhold, UUID> tidligereAvklaringer = tidligereForeslåtteAvklaringer.stream()
+        Map<BostedVarselInnhold, UUID> tidligereAvklaringer = tidligereForeslåtteAvklaringer.stream()
             .collect(Collectors.toMap(
                 BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold,
                 BostedsPeriodeAvklaring::getReferanse
             ));
 
-        Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtteAvklaringer.stream()
+        Map<BostedVarselInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtteAvklaringer.stream()
             .filter(BostedsPeriodeAvklaring::skalSendeVarsel)
             .collect(Collectors.toMap(
                 BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold,
