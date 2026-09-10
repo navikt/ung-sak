@@ -18,6 +18,9 @@ public class BehandlingsnummerMapper {
         return switch (ytelseType){
             case AKTIVITETSPENGER -> List.of(Behandlingsnummer.AKTIVITETSPENGER);
             case UNGDOMSYTELSE -> List.of(Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
+            // Ytelsen er ikke utledet ennå (f.eks. klager uten kjent fagsak). Sender med behandlingsnummer for alle aktuelle ytelser,
+            // samme mønster som brukes i PdlLeesahOversetter for fødselshendelser.
+            case UDEFINERT -> List.of(Behandlingsnummer.AKTIVITETSPENGER, Behandlingsnummer.UNGDOMSPROGRAMYTELSEN);
             default -> throw new IllegalArgumentException("Ikke-støttet ytelsestype: " + ytelseType);
         };
     }
