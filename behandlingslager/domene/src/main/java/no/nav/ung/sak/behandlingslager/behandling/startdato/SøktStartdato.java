@@ -1,25 +1,15 @@
 package no.nav.ung.sak.behandlingslager.behandling.startdato;
 
-import static no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.*;
+import jakarta.persistence.*;
+import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.diff.ChangeTracked;
+import no.nav.ung.sak.typer.JournalpostId;
+import org.hibernate.annotations.Immutable;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
-import org.hibernate.annotations.Immutable;
-
-import jakarta.persistence.AttributeOverride;
-import jakarta.persistence.AttributeOverrides;
-import jakarta.persistence.Column;
-import jakarta.persistence.Embedded;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Version;
-import no.nav.ung.sak.behandlingslager.BaseEntitet;
-import no.nav.ung.sak.diff.ChangeTracked;
-import no.nav.ung.sak.typer.JournalpostId;
+import static no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
 
 @Entity(name = "SøktStartdato")
 @Table(name = "SOEKT_STARTDATO")
@@ -74,15 +64,15 @@ public class SøktStartdato extends BaseEntitet implements SøktPeriodeData {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SøktStartdato that = (SøktStartdato) o;
-        return Objects.equals(startdato, that.startdato);
+        return Objects.equals(startdato, that.startdato)
+            && Objects.equals(journalpostId, that.journalpostId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startdato);
+        return Objects.hash(startdato, journalpostId);
     }
 
     @Override
