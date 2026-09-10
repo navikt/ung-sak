@@ -3,7 +3,6 @@ package no.nav.ung.sak.behandlingslager.vilkårsavklaring;
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.AvklaringKilde;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
-import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
