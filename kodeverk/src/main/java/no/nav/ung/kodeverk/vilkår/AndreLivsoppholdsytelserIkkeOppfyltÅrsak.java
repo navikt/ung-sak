@@ -6,7 +6,6 @@ import java.util.Optional;
 
 public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
-    // Søker har livsoppholdsytelse som ikke er forenelig med ytelsen.
     HAR_ANNEN_LIVSOPPHOLDSYTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
     AVKORTET(Avslagsårsak.AVKORTET, false),
