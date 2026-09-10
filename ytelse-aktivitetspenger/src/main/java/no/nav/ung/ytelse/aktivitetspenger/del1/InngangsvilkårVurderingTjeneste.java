@@ -15,9 +15,7 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPer
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.SequencedCollection;
+import java.util.*;
 
 /**
  * Leser saksbehandlers lagrede vurderinger fra {@link AktivitetspengerInngangsvilkårResultatGrunnlag}
@@ -79,7 +77,7 @@ public class InngangsvilkårVurderingTjeneste {
         byggAktivitetVilkårIBuilder(resultatBuilder, vurderinger, VilkårType.AKTIVITETSVILKÅR);
     }
 
-    private void byggAktivitetVilkårIBuilder(VilkårResultatBuilder resultatBuilder, List<AktivitetsvilkårResultatPeriode> vurderinger, VilkårType vilkårType) {
+    private void byggAktivitetVilkårIBuilder(VilkårResultatBuilder resultatBuilder, Set<AktivitetsvilkårResultatPeriode> vurderinger, VilkårType vilkårType) {
         var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
         for (var vurdering : vurderinger) {
             var periode = vurdering.getPeriode();
@@ -207,7 +205,7 @@ public class InngangsvilkårVurderingTjeneste {
         byggVilkårIBuilder(resultatBuilder, vurderinger, VilkårType.BOSTEDSVILKÅR);
     }
 
-    private void byggVilkårIBuilder(VilkårResultatBuilder resultatBuilder, List<BostedsvilkårResultatPeriode> vurderinger, VilkårType vilkårType) {
+    private void byggVilkårIBuilder(VilkårResultatBuilder resultatBuilder, Collection<BostedsvilkårResultatPeriode> vurderinger, VilkårType vilkårType) {
         var vilkårBuilder = resultatBuilder.hentBuilderFor(vilkårType);
         for (var vurdering : vurderinger) {
             var periode = vurdering.getPeriode();

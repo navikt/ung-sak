@@ -59,6 +59,11 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
     }
 
+    AndreLivsoppholdsytelserResultatPeriode(AndreLivsoppholdsytelserResultatPeriode kilde) {
+        this(kilde.getPeriode(), kilde);
+    }
+
+
     public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
@@ -118,5 +123,23 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof AndreLivsoppholdsytelserResultatPeriode annen
+            && DatoIntervallEntitet.fra(periode).equals(DatoIntervallEntitet.fra(annen.periode))
+            && godkjent == annen.godkjent
+            && ikkeOppfyltÅrsak == annen.ikkeOppfyltÅrsak
+            && manuellVurdering == annen.manuellVurdering
+            && Objects.equals(begrunnelse, annen.begrunnelse)
+            && Objects.equals(fritekstVurderingBrev, annen.fritekstVurderingBrev)
+            && Objects.equals(vurdertAv, annen.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(DatoIntervallEntitet.fra(periode), vurdertTidspunkt);
     }
 }

@@ -54,9 +54,15 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
         // Hibernate
     }
 
-    /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
+    /**
+     * Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer.
+     */
     BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, BistandsvilkårResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+    }
+
+    BistandsvilkårResultatPeriode(BistandsvilkårResultatPeriode kilde) {
+        this(kilde.getPeriode(), kilde);
     }
 
     public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
@@ -118,5 +124,23 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BistandsvilkårResultatPeriode annen
+            && DatoIntervallEntitet.fra(periode).equals(DatoIntervallEntitet.fra(annen.periode))
+            && godkjent == annen.godkjent
+            && ikkeOppfyltÅrsak == annen.ikkeOppfyltÅrsak
+            && manuellVurdering == annen.manuellVurdering
+            && Objects.equals(begrunnelse, annen.begrunnelse)
+            && Objects.equals(fritekstVurderingBrev, annen.fritekstVurderingBrev)
+            && Objects.equals(vurdertAv, annen.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(DatoIntervallEntitet.fra(periode), vurdertTidspunkt);
     }
 }
