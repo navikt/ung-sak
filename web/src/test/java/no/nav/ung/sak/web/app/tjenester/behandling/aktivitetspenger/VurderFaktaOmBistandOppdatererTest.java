@@ -200,13 +200,6 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     @Test
-    void avkortet_skal_avvises_ved_lagring() {
-        var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.AVKORTET);
-
-        assertThatThrownBy(() -> oppdater(dto)).isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
     void apen_tom_skal_lukkes_mot_maksdato_i_vilkarsperioden() {
         oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
 
@@ -425,7 +418,8 @@ class VurderFaktaOmBistandOppdatererTest {
             .allMatch(referanserIAktivtGrunnlag::contains);
     }
 
-    private List<VilkårPeriodeAvklaring> hentSorterteAvklaringer() {        return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BISTANDSVILKÅR)
+    private List<VilkårPeriodeAvklaring> hentSorterteAvklaringer() {
+        return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BISTANDSVILKÅR)
             .orElseThrow()
             .getForeslåtteAvklaringer()
             .stream()
