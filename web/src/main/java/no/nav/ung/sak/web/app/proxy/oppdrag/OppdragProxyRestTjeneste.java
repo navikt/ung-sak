@@ -14,6 +14,9 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.k9.oppdrag.kontrakt.oppsummering.OppsummeringDto;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringDto;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
@@ -31,14 +34,16 @@ public class OppdragProxyRestTjeneste {
     public static final String OPPSUMMERING_URL = "/proxy/oppdrag/oppsummering/v2/oppsummering";
 
     private K9OppdragRestKlient restKlient;
+    private BehandlingRepository behandlingRepository;
 
     public OppdragProxyRestTjeneste() {
         // For Rest-CDI
     }
 
     @Inject
-    public OppdragProxyRestTjeneste(K9OppdragRestKlient restKlient) {
+    public OppdragProxyRestTjeneste(K9OppdragRestKlient restKlient, BehandlingRepository behandlingRepository) {
         this.restKlient = restKlient;
+        this.behandlingRepository = behandlingRepository;
     }
 
     @GET
@@ -46,6 +51,11 @@ public class OppdragProxyRestTjeneste {
     @Operation(description = "Hent detaljert resultat av simulering mot økonomi med og uten inntrekk", summary = ("Returnerer simuleringsresultat."), tags = "simulering")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     public Optional<SimuleringDto> hentSimuleringResultat(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingIdDto) {
+        //FIXME aktivitetspenger. Midlertidig lar være å kalle til k9-oppdrag for aktivitetspenger for å komme forbi feil der i testing
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingIdDto.getBehandlingUuid());
+        if (behandling.getFagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER){
+            return Optional.empty();
+        }
         return restKlient.hentDetaljertSimuleringResultat(behandlingIdDto.getBehandlingUuid());
     }
 
