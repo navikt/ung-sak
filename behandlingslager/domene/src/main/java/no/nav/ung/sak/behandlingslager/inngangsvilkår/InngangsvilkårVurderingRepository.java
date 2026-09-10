@@ -10,6 +10,8 @@ import no.nav.k9.felles.jpa.HibernateVerktøy;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -17,6 +19,7 @@ import java.util.stream.Collectors;
 @Dependent
 public class InngangsvilkårVurderingRepository {
 
+    private static final Logger log = LoggerFactory.getLogger(InngangsvilkårVurderingRepository.class);
     private final EntityManager entityManager;
 
     @Inject
@@ -233,20 +236,34 @@ public class InngangsvilkårVurderingRepository {
     }
 
     public void fjernResultatForTidslinjer(long behandlingId, Map<VilkårType, LocalDateTimeline<Boolean>> perioderSomFjernes) {
-        var eksisterendeGrunnlag = hentEksisterendeGrunnlag(behandlingId);
+        var eksisterendeGrunnlagOpt = hentEksisterendeGrunnlag(behandlingId);
+        if (eksisterendeGrunnlagOpt.isEmpty()){
+            log.info("Har ikke eksisterende grunnlag, så ingenting kan fjernes.");
+            return;
+        }
+        if (perioderSomFjernes.values().stream().allMatch(LocalDateTimeline::isEmpty)) {
+            log.info("Ingen perioder som skal fjernes, så ingenting å gjøre.");
+            return;
+        }
+        AktivitetspengerInngangsvilkårResultatGrunnlag eksisterendeGrunnlag = eksisterendeGrunnlagOpt.get();
         BostedsvilkårResultatHolder bostedVilkårHolder = oppdaterBostedVilkår(eksisterendeGrunnlag, perioderSomFjernes.getOrDefault(VilkårType.BOSTEDSVILKÅR, LocalDateTimeline.empty()));
         BistandsvilkårResultatHolder bistandsvilkårResultatHolder = oppdaterBistandsVilkår(eksisterendeGrunnlag, perioderSomFjernes.getOrDefault(VilkårType.BISTANDSVILKÅR, LocalDateTimeline.empty()));
-        ;
         AktivitetsvilkårResultatHolder aktivitetsvilkårResultatHolder = oppdaterAktivitetsVilkår(eksisterendeGrunnlag, perioderSomFjernes.getOrDefault(VilkårType.AKTIVITETSVILKÅR, LocalDateTimeline.empty()));
         AndreLivsoppholdsytelserResultatHolder livsoppholdYtelser = oppdaterLivsoppholdYtelserVilkår(eksisterendeGrunnlag, perioderSomFjernes.getOrDefault(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, LocalDateTimeline.empty()));
-        ;
 
-        persister(eksisterendeGrunnlag, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandsvilkårResultatHolder, aktivitetsvilkårResultatHolder, livsoppholdYtelser, bostedVilkårHolder));
+        if (bostedVilkårHolder.equals(eksisterendeGrunnlag.getBostedsvilkårResultatHolder().orElse(new BostedsvilkårResultatHolder()))
+            && bistandsvilkårResultatHolder.equals(eksisterendeGrunnlag.getBistandsvilkårResultatHolder().orElse(new BistandsvilkårResultatHolder()))
+            && aktivitetsvilkårResultatHolder.equals(eksisterendeGrunnlag.getAktivitetsvilkårResultatHolder().orElse(new AktivitetsvilkårResultatHolder()))
+            && livsoppholdYtelser.equals(eksisterendeGrunnlag.getAndreLivsoppholdsytelserResultatHolder().orElse(new AndreLivsoppholdsytelserResultatHolder()))) {
+            log.info("Ingen endringer i grunnlag etter fjerning av perioder, så ingenting å lagre.");
+            return;
+        }
+
+        persister(eksisterendeGrunnlagOpt, new AktivitetspengerInngangsvilkårResultatGrunnlag(behandlingId, bistandsvilkårResultatHolder, aktivitetsvilkårResultatHolder, livsoppholdYtelser, bostedVilkårHolder));
     }
 
-    private static BostedsvilkårResultatHolder oppdaterBostedVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
-        var eksisterendeVurderingerTidslinje = tilBostedTidslinje(eksisterende
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBostedsvilkårResultatHolder)
+    private static BostedsvilkårResultatHolder oppdaterBostedVilkår(AktivitetspengerInngangsvilkårResultatGrunnlag eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
+        var eksisterendeVurderingerTidslinje = tilBostedTidslinje(eksisterende.getBostedsvilkårResultatHolder()
             .map(BostedsvilkårResultatHolder::getVurderinger)
             .orElse(Set.of()));
 
@@ -259,9 +276,8 @@ public class InngangsvilkårVurderingRepository {
         return new BostedsvilkårResultatHolder(oppdaterte);
     }
 
-    private static BistandsvilkårResultatHolder oppdaterBistandsVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
-        var eksisterendeVurderingerTidslinje = tilBistandTidslinje(eksisterende
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
+    private static BistandsvilkårResultatHolder oppdaterBistandsVilkår(AktivitetspengerInngangsvilkårResultatGrunnlag eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
+        var eksisterendeVurderingerTidslinje = tilBistandTidslinje(eksisterende.getBistandsvilkårResultatHolder()
             .map(BistandsvilkårResultatHolder::getVurderinger)
             .orElse(Set.of()));
 
@@ -274,9 +290,8 @@ public class InngangsvilkårVurderingRepository {
         return new BistandsvilkårResultatHolder(oppdaterte);
     }
 
-    private static AktivitetsvilkårResultatHolder oppdaterAktivitetsVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
-        var eksisterendeVurderingerTidslinje = tilAktivitetTidslinje(eksisterende
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAktivitetsvilkårResultatHolder)
+    private static AktivitetsvilkårResultatHolder oppdaterAktivitetsVilkår(AktivitetspengerInngangsvilkårResultatGrunnlag eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
+        var eksisterendeVurderingerTidslinje = tilAktivitetTidslinje(eksisterende.getAktivitetsvilkårResultatHolder()
             .map(AktivitetsvilkårResultatHolder::getVurderinger)
             .orElse(Set.of()));
 
@@ -289,9 +304,8 @@ public class InngangsvilkårVurderingRepository {
         return new AktivitetsvilkårResultatHolder(oppdaterte);
     }
 
-    private static AndreLivsoppholdsytelserResultatHolder oppdaterLivsoppholdYtelserVilkår(Optional<AktivitetspengerInngangsvilkårResultatGrunnlag> eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
-        var eksisterendeVurderingerTidslinje = tilLivsoppholdTidslinje(eksisterende
-            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getAndreLivsoppholdsytelserResultatHolder)
+    private static AndreLivsoppholdsytelserResultatHolder oppdaterLivsoppholdYtelserVilkår(AktivitetspengerInngangsvilkårResultatGrunnlag eksisterende, LocalDateTimeline<Boolean> perioderSomSkalFjernes) {
+        var eksisterendeVurderingerTidslinje = tilLivsoppholdTidslinje(eksisterende.getAndreLivsoppholdsytelserResultatHolder()
             .map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
             .orElse(Set.of()));
 

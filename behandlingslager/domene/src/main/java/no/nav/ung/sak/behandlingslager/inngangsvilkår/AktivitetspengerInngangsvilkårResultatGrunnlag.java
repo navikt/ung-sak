@@ -72,7 +72,7 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         return Optional.ofNullable(bistandsvilkårResultatHolder);
     }
 
-    public Optional<AktivitetsvilkårResultatHolder> getAktivitetsvilkårResultatHolder() {
+    Optional<AktivitetsvilkårResultatHolder> getAktivitetsvilkårResultatHolder() {
         return Optional.ofNullable(aktivitetsvilkårResultatHolder);
     }
 
