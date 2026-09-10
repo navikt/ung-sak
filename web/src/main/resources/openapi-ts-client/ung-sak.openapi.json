@@ -2553,6 +2553,9 @@
             "minLength" : 0,
             "pattern" : "^[\\p{L}\\p{M}\\p{N}\\p{P}\\p{S}\\p{Space}]*$",
             "type" : "string"
+          },
+          "skalIkkeSendeVarsel" : {
+            "type" : "boolean"
           }
         },
         "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
@@ -2565,9 +2568,6 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
-          },
-          "skalIkkeSendeVarsel" : {
-            "type" : "boolean"
           }
         },
         "required" : [ "avklaring", "periode" ],
