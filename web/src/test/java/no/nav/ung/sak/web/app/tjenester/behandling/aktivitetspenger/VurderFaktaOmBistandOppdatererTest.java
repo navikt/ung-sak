@@ -17,6 +17,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -428,8 +429,8 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     private static VurderFaktaOmBistandDto dtoUtenVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak) {
-        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, "begrunnelse", null, BEGRUNNELSE_IKKE_VARSEL);
-        return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering, true)), "begrunnelse");
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, "begrunnelse", true, null, BEGRUNNELSE_IKKE_VARSEL, BistandsavklaringKildeType.BRUKER, null);
+        return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 
     private static VurderFaktaOmBistandDto dtoMedVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak) {
@@ -437,7 +438,7 @@ class VurderFaktaOmBistandOppdatererTest {
     }
 
     private static VurderFaktaOmBistandDto dtoMedVarsel(ÅpenPeriode periode, BistandsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse) {
-        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, begrunnelse, "Fritekst til varsel", null);
-        return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering, false)), "begrunnelse");
+        var vurdering = new BistandAvklaringIkkeOppfyltDto(årsak, begrunnelse, false, "Fritekst til varsel", null, BistandsavklaringKildeType.BRUKER, null);
+        return new VurderFaktaOmBistandDto(List.of(new BistandFaktaavklaringPeriodeDto(periode, vurdering)), "begrunnelse");
     }
 }

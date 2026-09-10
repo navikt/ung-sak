@@ -1,8 +1,6 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 
@@ -12,21 +10,11 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
  */
 public record BistandFaktaavklaringPeriodeDto(
     @NotNull @Valid ÅpenPeriode periode,
-    @NotNull @Valid BistandAvklaringIkkeOppfyltDto avklaring,
-    boolean skalIkkeSendeVarsel
+    @NotNull @Valid BistandAvklaringIkkeOppfyltDto avklaring
 ) {
 
     public boolean skalSendeVarsel() {
-        return !skalIkkeSendeVarsel;
-    }
-
-    @JsonIgnore
-    @AssertTrue(message = "begrunnelseIkkeVarsel skal kun settes når skalIkkeSendeVarsel er true")
-    public boolean isBegrunnelseIkkeVarselGyldig() {
-        if (skalIkkeSendeVarsel || avklaring == null) {
-            return true;
-        }
-        return avklaring.begrunnelseIkkeVarsel() == null || avklaring.begrunnelseIkkeVarsel().isBlank();
+        return avklaring != null && avklaring.skalSendeVarsel();
     }
 
 }

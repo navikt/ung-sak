@@ -58,7 +58,7 @@ public final class BistandAvklaringDataMapper {
         var innhold = new BistandVarselInnhold(
             new Periode(fom, tom),
             dto.avklaring().ikkeOppfyltÅrsak(),
-            dto.skalSendeVarsel(),
+            dto.avklaring().skalSendeVarsel(),
             dto.avklaring().fritekstTilVarsel(),
             dto.avklaring().kilde(),
             dto.avklaring().kildeFritekst(),
