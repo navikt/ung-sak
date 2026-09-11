@@ -41,6 +41,7 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -79,6 +80,9 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
     @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
+    @Inject
+    private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
+
     private Fagsak fagsak;
 
     @BeforeAll
@@ -106,8 +110,8 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
             vilkårResultatRepository,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
-            new HistorikkinnslagRepository(entityManager),
             avkortTjeneste,
+            vilkårsvurderingHistorikkinnslagTjeneste,
             vilkårsPerioderTilVurderingTjeneste);
 
         fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, new AktørId("1122334455667"), new Saksnummer("BOSTED1"),

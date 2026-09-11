@@ -46,8 +46,24 @@ public class InngangsvilkårVurderingRepository {
         return hentEksisterendeGrunnlag(behandlingId)
             .map(grunnlag -> tilVilkårTidslinje(grunnlag.hentBistandTidslinje())
                 .crossJoin(tilVilkårTidslinje(grunnlag.hentLivsoppholdTidslinje()), InngangsvilkårVurderingRepository::slåSammen)
-                .crossJoin(tilVilkårTidslinje(grunnlag.hentBostedTidslinje().mapValue(BostedsvilkårResultatPeriode::tilVilkårsvurderingResultat)), InngangsvilkårVurderingRepository::slåSammen))
+                .crossJoin(tilVilkårTidslinje(grunnlag.hentBostedTidslinjeVilkårResultat()), InngangsvilkårVurderingRepository::slåSammen)
+                .crossJoin(tilVilkårTidslinje(grunnlag.hentAktivitetsvilkårTidslinje()), InngangsvilkårVurderingRepository::slåSammen))
             .orElseGet(LocalDateTimeline::empty);
+    }
+
+
+    public LocalDateTimeline<VilkårsvurderingResultat> hentVurderingTidslinje(Long behandlingId, VilkårType vilkårType) {
+        AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag = hentEksisterendeGrunnlag(behandlingId).orElse(null);
+        if (grunnlag == null) {
+            return LocalDateTimeline.empty();
+        }
+        return switch (vilkårType) {
+            case BOSTEDSVILKÅR -> grunnlag.hentBostedTidslinjeVilkårResultat();
+            case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> grunnlag.hentLivsoppholdTidslinje();
+            case BISTANDSVILKÅR -> grunnlag.hentBistandTidslinje();
+            case AKTIVITETSVILKÅR -> grunnlag.hentAktivitetsvilkårTidslinje();
+            default -> throw new IllegalArgumentException("Ikke-støttet vilkårtype: " + vilkårType);
+        };
     }
 
     private static LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> tilVilkårTidslinje(LocalDateTimeline<VilkårsvurderingResultat> tidslinje) {

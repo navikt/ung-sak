@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.behandling.historikk;
 
 import jakarta.persistence.*;
+import no.nav.k9.felles.konfigurasjon.env.Environment;
 import no.nav.ung.kodeverk.api.IndexKey;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.diff.IndexKeyComposer;
@@ -107,7 +108,11 @@ public class HistorikkinnslagLinje extends BaseEntitet implements IndexKey {
 
     @Override
     public String toString() {
-        //tekst kan være fritekst fra saksbehandler
+        //tekst kan være fritekst fra saksbehandler, så unngår å ha det i toString for miljøer for å redusere muligheten for at fritekst havner i loggene
+        if (Environment.current().isLocal()){
+            //har med tekst lokalt for enklere feilsøking i enhetstester
+            return "HistorikkinnslagLinje{" + "tekst='" + tekst + '\'' + ", sekvensNr=" + sekvensNr + ", type=" + type + '}';
+        }
         return "HistorikkinnslagLinje{" + "tekst='***" + '\'' + ", sekvensNr=" + sekvensNr + ", type=" + type + '}';
     }
 }
