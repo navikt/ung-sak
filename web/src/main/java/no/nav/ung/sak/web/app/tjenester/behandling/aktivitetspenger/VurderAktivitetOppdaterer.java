@@ -14,19 +14,18 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.VurderAktivitetDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 
 import java.time.LocalDateTime;
 
@@ -34,36 +33,36 @@ import java.time.LocalDateTime;
 @DtoTilServiceAdapter(dto = VurderAktivitetDto.class, adapter = AksjonspunktOppdaterer.class)
 public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderAktivitetDto> {
 
-    private BehandlingRepository behandlingRepository;
-    private HistorikkinnslagRepository historikkinnslagRepository;
+    private static final VilkårType AKTUELT_VILKÅR = VilkårType.AKTIVITETSVILKÅR;
+
     private VilkårResultatRepository vilkårResultatRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private AvkortTjeneste avkortTjeneste;
+    private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
 
     VurderAktivitetOppdaterer() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderAktivitetOppdaterer(BehandlingRepository behandlingRepository,
-                                     HistorikkinnslagRepository historikkinnslagRepository,
-                                     VilkårResultatRepository vilkårResultatRepository,
+    public VurderAktivitetOppdaterer(VilkårResultatRepository vilkårResultatRepository,
                                      InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                      InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
-                                     AvkortTjeneste avkortTjeneste) {
-        this.behandlingRepository = behandlingRepository;
-        this.historikkinnslagRepository = historikkinnslagRepository;
+                                     AvkortTjeneste avkortTjeneste,
+                                     VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste) {
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.avkortTjeneste = avkortTjeneste;
+        this.vilkårsvurderingHistorikkinnslagTjeneste = vilkårsvurderingHistorikkinnslagTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(VurderAktivitetDto dto, AksjonspunktOppdaterParameter param) {
+        LocalDateTimeline<VilkårsvurderingResultat> opprinneligVilkårsvurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR);
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(VilkårType.AKTIVITETSVILKÅR)
+        LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(AKTUELT_VILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
         LocalDateTimeline<Boolean> inputOppdateres = new LocalDateTimeline<>(dto.getVurdertePerioder().stream().map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true)).toList());
@@ -90,15 +89,15 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
         inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(param.getBehandlingId(), periodeVurderinger);
         inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
-        Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        var historikkinnslag = new Historikkinnslag.Builder()
-            .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .medFagsakId(behandling.getFagsakId())
-            .medBehandlingId(behandling.getId())
-            .medTittel(SkjermlenkeType.AKTIVITETSVILKÅR)
-            .addLinje("Aktivitetsvilkår ble vurdert")
-            .build();
-        historikkinnslagRepository.lagre(historikkinnslag);
+        HistorikkinnslagInput historikkinnslagInput = new HistorikkinnslagInput()
+            .setSkjermlenkeType(SkjermlenkeType.AKTIVITETSVILKÅR)
+            .setBehandlingId(param.getBehandlingId())
+            .setEksisterendeVilkårVurderinger(opprinneligVilkårsvurdering)
+            .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR))
+            .setGjelderOpphør(false) //opphør ikke implementert enda for vilkåret
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
+            .setSaksbehandlerIdent(vurdertAv);
+        vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return OppdateringResultat.nyttResultat();
     }
@@ -108,7 +107,7 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
             .filter(f -> f.avslagsårsak() == AktivitetsvilkåretIkkeOppfyltÅrsak.AVKORTET)
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
             .toList());
-        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, VilkårType.AKTIVITETSVILKÅR);
+        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, AKTUELT_VILKÅR);
     }
 
 }

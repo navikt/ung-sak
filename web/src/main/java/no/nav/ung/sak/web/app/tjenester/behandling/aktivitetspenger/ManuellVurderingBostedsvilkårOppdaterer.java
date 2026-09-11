@@ -16,15 +16,13 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
-import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
-import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
@@ -33,6 +31,8 @@ import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -48,12 +48,14 @@ import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.ENDRET_BOSTED;
 @DtoTilServiceAdapter(dto = ManuellVurderingBostedsvilkårDto.class, adapter = AksjonspunktOppdaterer.class)
 public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOppdaterer<ManuellVurderingBostedsvilkårDto> {
 
+    private static final VilkårType AKTUELT_VILKÅR = VilkårType.BOSTEDSVILKÅR;
+
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
-    private HistorikkinnslagRepository historikkinnslagRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private AvkortTjeneste avkortTjeneste;
+    private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
     private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     ManuellVurderingBostedsvilkårOppdaterer() {
@@ -65,31 +67,32 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
                                                    VilkårResultatRepository vilkårResultatRepository,
                                                    InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
-                                                   HistorikkinnslagRepository historikkinnslagRepository,
                                                    AvkortTjeneste avkortTjeneste,
+                                                   VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste,
                                                    @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
-        this.historikkinnslagRepository = historikkinnslagRepository;
         this.avkortTjeneste = avkortTjeneste;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
+        this.vilkårsvurderingHistorikkinnslagTjeneste = vilkårsvurderingHistorikkinnslagTjeneste;
     }
 
     @Override
     public OppdateringResultat oppdater(ManuellVurderingBostedsvilkårDto dto, AksjonspunktOppdaterParameter param) {
+
+        LocalDateTimeline<VilkårsvurderingResultat> opprinneligVilkårsvurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR);
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(VilkårType.BOSTEDSVILKÅR)
+        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(AKTUELT_VILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
 
-        var erEndretBosted =
-            behandlingRepository.hentBehandling(param.getBehandlingId()).harBehandlingÅrsak(ENDRET_BOSTED);
-
+        var erEndretBosted = behandlingRepository.hentBehandling(param.getBehandlingId()).harBehandlingÅrsak(ENDRET_BOSTED);
 
         var senesteDatoFraVilkårsperiode = eksisterendeVilkårperioder.getMaxLocalDate();
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
+
 
         var vurderteÅpnePerioder = new LocalDateTimeline<>(dto.getVurdertePerioder().stream()
             .filter(it -> it.periode().getTom() == null)
@@ -102,7 +105,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), it))
             .toList());
 
-        LocalDateTimeline<Boolean> tilVurderingTidlinje = TidslinjeUtil.tilTidslinje(vilkårsPerioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BOSTEDSVILKÅR));
+        LocalDateTimeline<Boolean> tilVurderingTidlinje = TidslinjeUtil.tilTidslinje(vilkårsPerioderTilVurderingTjeneste.utled(param.getBehandlingId(), AKTUELT_VILKÅR));
         validerLukkedePerioder(vurderteLukkedePerioder, eksisterendeVilkårperioder, tilVurderingTidlinje, erEndretBosted);
         validerAvkortingBruktRiktig(dto, param.getBehandlingId());
 
@@ -123,18 +126,17 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
             .toList();
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(param.getBehandlingId(), periodeVurderinger);
-
         inngangsvilkårVurderingTjeneste.settBostedsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
-        Behandling behandling = behandlingRepository.hentBehandling(param.getBehandlingId());
-        var historikkinnslag = new Historikkinnslag.Builder()
-            .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .medFagsakId(behandling.getFagsakId())
-            .medBehandlingId(behandling.getId())
-            .medTittel(SkjermlenkeType.BOSTEDSVILKÅR)
-            .addLinje("Manuell vurdering av bostedsvilkåret lagret")
-            .build();
-        historikkinnslagRepository.lagre(historikkinnslag);
+        HistorikkinnslagInput historikkinnslagInput = new HistorikkinnslagInput()
+            .setSkjermlenkeType(SkjermlenkeType.BOSTEDSVILKÅR)
+            .setBehandlingId(param.getBehandlingId())
+            .setEksisterendeVilkårVurderinger(opprinneligVilkårsvurdering)
+            .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR))
+            .setGjelderOpphør(erEndretBosted)
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
+            .setSaksbehandlerIdent(vurdertAv);
+        vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return OppdateringResultat.nyttResultat();
     }
@@ -162,6 +164,6 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
             .filter(f -> f.avslagsårsak() == BostedsvilkårIkkeOppfyltÅrsak.AVKORTET)
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
             .toList());
-        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, VilkårType.BOSTEDSVILKÅR);
+        avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, AKTUELT_VILKÅR);
     }
 }
