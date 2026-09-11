@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
@@ -25,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @CdiDbAwareTest
 class InngangsvilkårVurderingRepositoryTest {
+
+    @Inject
+    private EntityManager entityManager;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -61,7 +65,7 @@ class InngangsvilkårVurderingRepositoryTest {
         var holder = grunnlag.get().getBistandsvilkårResultatHolder();
         assertThat(holder).isPresent();
         assertThat(holder.get().getVurderinger()).hasSize(1);
-        var lagretVurdering = holder.get().getVurderinger().get(0);
+        var lagretVurdering = holder.get().getVurderinger().iterator().next();
         assertThat(lagretVurdering.getPeriode()).isEqualTo(PERIODE_1);
         assertThat(lagretVurdering.isGodkjent()).isTrue();
         assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isNull();
@@ -79,7 +83,7 @@ class InngangsvilkårVurderingRepositoryTest {
             .orElseThrow();
 
         assertThat(holder.getVurderinger()).hasSize(1);
-        var lagretVurdering = holder.getVurderinger().get(0);
+        var lagretVurdering = holder.getVurderinger().iterator().next();
         assertThat(lagretVurdering.isGodkjent()).isFalse();
         assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
     }
@@ -96,7 +100,7 @@ class InngangsvilkårVurderingRepositoryTest {
         var holder = grunnlag.get().getAndreLivsoppholdsytelserResultatHolder();
         assertThat(holder).isPresent();
         assertThat(holder.get().getVurderinger()).hasSize(1);
-        var lagretVurdering = holder.get().getVurderinger().get(0);
+        var lagretVurdering = holder.get().getVurderinger().iterator().next();
         assertThat(lagretVurdering.isGodkjent()).isFalse();
         assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE);
     }
@@ -156,14 +160,21 @@ class InngangsvilkårVurderingRepositoryTest {
                 new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT),
                 new BistandsvilkårResultatPeriode(PERIODE_2, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)
             ));
+        var opprinneligHolder = repository.hentEksisterendeGrunnlag(behandling.getId())
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
+            .orElseThrow();
+        entityManager.flush();
+        entityManager.clear();
+
 
         // Kun PERIODE_2 oppdateres — PERIODE_1 skal beholdes fra eksisterende
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(new BistandsvilkårResultatPeriode(PERIODE_2, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
 
-        var vurderinger = repository.hentEksisterendeGrunnlag(behandling.getId())
+        BistandsvilkårResultatHolder nyHolder = repository.hentEksisterendeGrunnlag(behandling.getId())
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
-            .orElseThrow()
+            .orElseThrow();
+        var vurderinger = nyHolder
             .getVurderinger();
 
         assertThat(vurderinger).hasSize(2);
@@ -174,6 +185,16 @@ class InngangsvilkårVurderingRepositoryTest {
         var periode1Vurdering = vurderinger.stream().filter(v -> v.getPeriode().equals(PERIODE_1)).findFirst().orElseThrow();
         assertThat(periode1Vurdering.isGodkjent()).isTrue();
         assertThat(periode1Vurdering.getVurdertAv()).isEqualTo(VURDERT_AV);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //sikrer at det ikke er endret på opprinnelig holder. Endring på opprinnelig holder kan i verste fall endre på
+        //grunnlag for tidligere behandling, siden holdere
+        opprinneligHolder = entityManager.find(BistandsvilkårResultatHolder.class, opprinneligHolder.getId());
+        assertThat(opprinneligHolder.getVurderinger()).hasSize(2);
+
+
     }
 
     @Test

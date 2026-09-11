@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import org.hibernate.annotations.BatchSize;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity(name = "AndreLivsoppholdsytelserResultatHolder")
 @Table(name = "livsopphold_resultat_holder")
@@ -20,20 +19,31 @@ public class AndreLivsoppholdsytelserResultatHolder extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "livsopphold_resultat_holder_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<AndreLivsoppholdsytelserResultatPeriode> vurderinger = new ArrayList<>();
+    private Set<AndreLivsoppholdsytelserResultatPeriode> vurderinger = new HashSet<>();
 
     public AndreLivsoppholdsytelserResultatHolder() {
     }
 
-    public AndreLivsoppholdsytelserResultatHolder(List<AndreLivsoppholdsytelserResultatPeriode> vurderinger) {
-        this.vurderinger = new ArrayList<>(vurderinger);
+    public AndreLivsoppholdsytelserResultatHolder(Collection<AndreLivsoppholdsytelserResultatPeriode> vurderinger) {
+        this.vurderinger = vurderinger.stream().map(AndreLivsoppholdsytelserResultatPeriode::new).collect(Collectors.toSet());
     }
 
     public Long getId() {
         return id;
     }
 
-    public List<AndreLivsoppholdsytelserResultatPeriode> getVurderinger() {
-        return Collections.unmodifiableList(vurderinger);
+    public Set<AndreLivsoppholdsytelserResultatPeriode> getVurderinger() {
+        return Collections.unmodifiableSet(vurderinger);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof AndreLivsoppholdsytelserResultatHolder annen
+            && Objects.equals(vurderinger, annen.vurderinger);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(vurderinger);
     }
 }

@@ -50,6 +50,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -227,7 +228,7 @@ class ManuellVurderingBostedsvilkårOppdatererTest {
         return new AksjonspunktOppdaterParameter(behandling, Optional.empty(), vilkårResultatBuilder, dto);
     }
 
-    private List<BostedsvilkårResultatPeriode> hentBostedvurderinger(Behandling behandling) {
+    private Set<BostedsvilkårResultatPeriode> hentBostedvurderinger(Behandling behandling) {
         return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
             .orElseThrow();

@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 
@@ -30,6 +31,7 @@ public class InitierVilkårSteg implements BehandlingSteg {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
+    private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
 
     InitierVilkårSteg() {
         // for CDI proxy
@@ -38,25 +40,18 @@ public class InitierVilkårSteg implements BehandlingSteg {
     @Inject
     public InitierVilkårSteg(BehandlingRepository behandlingRepository,
                              VilkårResultatRepository vilkårResultatRepository,
+                             InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                              @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
     }
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
         var behandling = behandlingRepository.hentBehandling(kontekst.getBehandlingId());
-        // Utleder vilkår med en gang
-        utledVilkår(behandling);
-        return BehandleStegResultat.utførtUtenAksjonspunkter();
-    }
 
-    private void utledVilkår(Behandling behandling) {
-        opprettVilkår(behandling);
-    }
-
-    private void opprettVilkår(Behandling behandling) {
         // Opprett Vilkårsresultat med vilkårne som som skal vurderes, og sett dem som ikke vurdert
         var eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(behandling.getId());
         VilkårResultatBuilder vilkårBuilder = Vilkårene.builderFraEksisterende(eksisterendeVilkår.orElse(null)).medBoundry(behandling.getFagsak().getPeriode(), true);
@@ -77,6 +72,10 @@ public class InitierVilkårSteg implements BehandlingSteg {
         validerResultat(vilkårResultat, vilkårPeriodeMap);
 
         vilkårResultatRepository.lagre(behandling.getId(), vilkårResultat, behandling.getFagsak().getPeriode());
+
+        inngangsvilkårVurderingRepository.fjernResultatForPerioder(behandling.getId(), vilkårPeriodeMap);
+
+        return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
     private void validerResultat(Vilkårene vilkårResultat, Map<VilkårType, NavigableSet<DatoIntervallEntitet>> vilkårPeriodeMap) {

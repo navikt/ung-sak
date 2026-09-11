@@ -2,6 +2,7 @@ package no.nav.ung.sak.vilkår;
 
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -12,10 +13,16 @@ import no.nav.ung.sak.behandlingskontroll.BehandlingSteg;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -26,6 +33,7 @@ import java.util.Set;
  */
 public abstract class VilkårVurderingSteg implements BehandlingSteg {
 
+    private static final Logger log = LoggerFactory.getLogger(VilkårVurderingSteg.class);
     protected VilkårTjeneste vilkårTjeneste;
     private VilkårResultatRepository vilkårResultatRepository;
     protected BehandlingRepository behandlingRepository;
@@ -46,11 +54,40 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
 
     @Override
     public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
-        // Henter avslåtte perioder
         var perioder = finnPerioderForVurderingAvVilkår(kontekst);
-        var ikkeRelevantPerioder = finnIkkeRelevantePerioder(kontekst, perioder);
+        var eksisterendeIkkeRelevantePerioder = finnEksisterendeIkkeRelevantePerioder(kontekst);
+        var nyeIkkeRelevantPerioder = finnIkkeRelevantePerioder(kontekst, perioder);
+
+        Vilkårene eksisterendeVilkår = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId()).orElseThrow();
+        VilkårResultatBuilder builder = Vilkårene.builderFraEksisterende(eksisterendeVilkår);
+        VilkårBuilder vilkårBuilder = builder.hentBuilderFor(getAktuellVilkårType());
+
+        boolean noeEksisterendeIkkeRelevantErNåRelevant = !eksisterendeIkkeRelevantePerioder.disjoint(nyeIkkeRelevantPerioder).isEmpty();
+        if (noeEksisterendeIkkeRelevantErNåRelevant) {
+            //dette er for å håndtere tilfelle hvor saksbehandler først har satt en sluttdato for vilkår 1, så behandler
+            //vilkår 2, for så å senere endre til en senere sluttdato i vilkår 1. Nå må perioden mellom ny og gammel sluttdato
+            //også vurderes i vilkårene etter vilkår 1. Vi har ikke funksjonalitet for å vurdere bare denne nye perioden,
+            //så vi tar hele den orginale perioden opp igjen til vurdering.
+            vilkårBuilder.tilbakestill(TidslinjeUtil.tilDatoIntervallEntiteter(perioder), false); //nødvendig for å få en sammenhengende periode
+            for (LocalDateSegment<Boolean> segment : perioder.segmenter()) {
+                vilkårBuilder.leggTil(new VilkårPeriodeBuilder()
+                    .medPeriode(segment.getFom(), segment.getTom())
+                    .medUtfall(Utfall.IKKE_VURDERT));
+            }
+            log.info("Tilbakestiller perioder til {} for {} siden noe som før var ikke-relevant nå må vurderes.", perioder, getAktuellVilkårType());
+        }
+        for (LocalDateSegment<?> segment : nyeIkkeRelevantPerioder.segmenter()) {
+            vilkårBuilder.leggTil(new VilkårPeriodeBuilder()
+                .medPeriode(segment.getFom(), segment.getTom())
+                .medUtfall(Utfall.IKKE_RELEVANT));
+            log.info("Setter {} til ikke-relevant for {} ", segment.getLocalDateInterval(), getAktuellVilkårType());
+        }
+
+        builder.leggTil(vilkårBuilder);
+        vilkårResultatRepository.lagre(kontekst.getBehandlingId(), builder.build());
+
         vilkårTjeneste.nullstillBehandlingsresultat(kontekst);
-        vilkårResultatRepository.settUtfallForPeriode(kontekst.getBehandlingId(), getAktuellVilkårType(), ikkeRelevantPerioder, Utfall.IKKE_RELEVANT);
+
         return utførResten(kontekst);
     }
 
@@ -58,6 +95,12 @@ public abstract class VilkårVurderingSteg implements BehandlingSteg {
         var perioder = finnPerioderForVurderingAvVilkår(kontekst);
         var ikkeRelevantPerioder = finnIkkeRelevantePerioder(kontekst, perioder);
         return perioder.disjoint(ikkeRelevantPerioder);
+    }
+
+    private LocalDateTimeline<?> finnEksisterendeIkkeRelevantePerioder(BehandlingskontrollKontekst kontekst) {
+        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårtidslinje = vilkårResultatRepository.hentHvisEksisterer(kontekst.getBehandlingId()).orElseThrow()
+            .getVilkårTimeline(getAktuellVilkårType());
+        return eksisterendeVilkårtidslinje.filterValue(v -> v.getUtfall() == Utfall.IKKE_RELEVANT);
     }
 
     private LocalDateTimeline<?> finnIkkeRelevantePerioder(BehandlingskontrollKontekst kontekst, LocalDateTimeline<?> perioder) {
