@@ -304,7 +304,7 @@ class VurderFaktaOmBistandOppdatererTest {
             .toList();
     }
 
-    private List<BistandsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
+    private Set<BistandsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
         return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBistandsvilkårResultatPerioder)
             .orElseThrow();
