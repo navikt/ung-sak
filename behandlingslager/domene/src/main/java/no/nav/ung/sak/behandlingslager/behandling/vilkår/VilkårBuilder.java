@@ -139,13 +139,17 @@ public class VilkårBuilder {
     }
 
     public VilkårBuilder tilbakestill(DatoIntervallEntitet periode) {
+        return tilbakestill(periode, true);
+    }
+
+    public VilkårBuilder tilbakestill(DatoIntervallEntitet periode, boolean justerUtfallForForInntilliggendePerioder ) {
         validerBuilder();
 
-        tilbakestill(new TreeSet<>(Set.of(periode)));
+        tilbakestill(new TreeSet<>(Set.of(periode)), justerUtfallForForInntilliggendePerioder);
         return this;
     }
 
-    public VilkårBuilder tilbakestill(NavigableSet<DatoIntervallEntitet> perioder) {
+    public VilkårBuilder tilbakestill(NavigableSet<DatoIntervallEntitet> perioder, boolean justerUtfallForForInntilliggendePerioder) {
         validerBuilder();
         for (DatoIntervallEntitet periode : perioder) {
             var segment = new LocalDateSegment<WrappedVilkårPeriode>(periode.getFomDato(), periode.getTomDato(), null);
@@ -153,7 +157,9 @@ public class VilkårBuilder {
 
             this.vilkårTidslinje = vilkårTidslinje.disjoint(periodeTidslinje);
         }
-        justereUtfallVedTilbakestilling(perioder);
+        if (justerUtfallForForInntilliggendePerioder) {
+            justereUtfallVedTilbakestilling(perioder);
+        }
         return this;
     }
 

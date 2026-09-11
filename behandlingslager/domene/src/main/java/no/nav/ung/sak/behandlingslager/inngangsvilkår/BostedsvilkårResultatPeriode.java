@@ -47,7 +47,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_av", updatable = false)
     private String vurdertAv;
 
-    @Column(name = "vurdert_tidspunkt",  updatable = false)
+    @Column(name = "vurdert_tidspunkt", updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
     protected BostedsvilkårResultatPeriode() {
@@ -56,6 +56,10 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, BostedsvilkårResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.erManuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+    }
+
+    public BostedsvilkårResultatPeriode(BostedsvilkårResultatPeriode kilde) {
+        this(kilde.getPeriode(), kilde);
     }
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
