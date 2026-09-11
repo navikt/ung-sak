@@ -75,6 +75,7 @@ class BostedAvklaringTjenesteTest {
 
     private BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom, BostedsvilkårIkkeOppfyltÅrsak årsak, String begrunnelse, boolean skalSendeVarsel) {
         return new BostedsPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             årsak,
             begrunnelse,
@@ -249,12 +250,11 @@ class BostedAvklaringTjenesteTest {
         verify(prosessTaskTjeneste, times(2)).lagre(any(ProsessTaskData.class));
     }
 
-    @Test
-    void endret_begrunnelse_med_uendret_periode_skal_avbryte_og_opprette_ny_etterlysning() {
+    @Test // begrunnelse er en intern forklaring - i motsetning til fritekstTilVarsel.
+    void endret_begrunnelse_med_uendret_periode_skal_beholde_etterlysningen() {
         var tidligereAvklaring = lagAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "begrunnelse", true);
         var etterlysningSomVenter = lagOgLagreEtterlysningSomVenterPåSvar(tidligereAvklaring);
 
-        // Samme periode og årsak, men annen begrunnelse -> innholdet regnes som endret
         var nyAvklaringMedEndretBegrunnelse = lagAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, "en annen begrunnelse", true);
 
         tjeneste.oppdaterEtterlysninger(
@@ -263,14 +263,13 @@ class BostedAvklaringTjenesteTest {
             List.of(nyAvklaringMedEndretBegrunnelse)
         );
 
-        var avbrutteEtterlysninger = etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId());
-        assertThat(avbrutteEtterlysninger).extracting(Etterlysning::getId).containsExactly(etterlysningSomVenter.getId());
+        assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId())).isEmpty();
 
-        var nyeEtterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BOSTED);
-        assertThat(nyeEtterlysninger).hasSize(1);
-        assertThat(nyeEtterlysninger.getFirst().getGrunnlagsreferanse()).isEqualTo(nyAvklaringMedEndretBegrunnelse.getReferanse());
+        assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BOSTED))
+            .extracting(Etterlysning::getId)
+            .containsExactly(etterlysningSomVenter.getId());
 
-        verify(prosessTaskTjeneste, times(2)).lagre(any(ProsessTaskData.class));
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
     @Test

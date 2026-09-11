@@ -68,6 +68,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.UUID;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -550,6 +551,7 @@ public class AktivitetspengerTestScenarioBuilder {
 
         var avklaringer = bostedsAvklaringer.stream()
             .map(it -> new BostedsPeriodeAvklaringForeslått(
+                UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
                 it.ikkeOppfyltÅrsak(),
                 "Begrunnelse fra testscenario",

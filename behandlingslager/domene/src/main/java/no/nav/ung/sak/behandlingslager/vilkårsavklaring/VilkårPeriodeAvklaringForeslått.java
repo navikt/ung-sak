@@ -29,7 +29,7 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
     private Long id;
 
     @Column(name = "referanse", nullable = false, updatable = false)
-    private UUID referanse = UUID.randomUUID();
+    private UUID referanse;
 
     @Type(PostgreSQLRangeType.class)
     @Column(name = "periode", columnDefinition = "daterange")
@@ -70,7 +70,13 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
         // Hibernate
     }
 
-    public VilkårPeriodeAvklaringForeslått(DatoIntervallEntitet periode,
+    /**
+     * Referansen er brukerens koblingspunkt mot etterlysning og uttalelse. Kallstedet kan derfor gjenbruke referansen
+     * fra en tidligere avklaring når varselet er uendret, slik at etterlysningen fortsatt peker på en avklaring i
+     * det aktive grunnlaget.
+     */
+    public VilkårPeriodeAvklaringForeslått(UUID referanse,
+                                            DatoIntervallEntitet periode,
                                             String ikkeOppfyltÅrsakKode,
                                             String begrunnelse,
                                             boolean skalSendeVarsel,
@@ -81,6 +87,7 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
                                             String vurdertAv,
                                             LocalDateTime vurdertTidspunkt,
                                             Avklaringtype avklaringtype) {
+        Objects.requireNonNull(referanse, "referanse");
         if (!skalSendeVarsel) {
             Objects.requireNonNull(begrunnelseIkkeVarsel, "Mangler begrunnelse for hvorfor det ikke varsles");
         }
@@ -96,6 +103,7 @@ public class VilkårPeriodeAvklaringForeslått extends BaseEntitet implements Vi
         }
 
         this.periode = periode.toRange();
+        this.referanse = referanse;
         this.ikkeOppfyltÅrsakKode = ikkeOppfyltÅrsakKode;
         this.begrunnelse = begrunnelse;
         this.skalSendeVarsel = skalSendeVarsel;

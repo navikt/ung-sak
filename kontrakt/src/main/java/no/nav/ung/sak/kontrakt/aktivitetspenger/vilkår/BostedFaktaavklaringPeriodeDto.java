@@ -1,6 +1,8 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 
@@ -15,6 +17,15 @@ public record BostedFaktaavklaringPeriodeDto(
 
     public boolean skalSendeVarsel() {
         return !skalIkkeSendeVarsel;
+    }
+
+    @JsonIgnore
+    @AssertTrue(message = "begrunnelseIkkeVarsel skal kun settes når skalIkkeSendeVarsel er true")
+    public boolean isBegrunnelseIkkeVarselGyldig() {
+        if (skalIkkeSendeVarsel || vurdering == null) {
+            return true;
+        }
+        return vurdering.begrunnelseIkkeVarsel() == null || vurdering.begrunnelseIkkeVarsel().isBlank();
     }
 
 }

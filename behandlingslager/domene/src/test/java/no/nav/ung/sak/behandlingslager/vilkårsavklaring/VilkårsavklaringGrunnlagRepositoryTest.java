@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -245,6 +246,7 @@ class VilkårsavklaringGrunnlagRepositoryTest {
 
     private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
         return new VilkårPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             "IKKE_OPPFYLT_KODE",
             begrunnelse,
