@@ -4,7 +4,7 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Språk;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
+import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
@@ -79,16 +79,16 @@ public class AktivitetspengerSøknadPersisterer {
         return Språkkode.UDEFINERT;
     }
 
-    public void lagreForutgåendeMedlemskapGrunnlag(Bosteder forutgåendeBosteder, no.nav.k9.søknad.felles.type.Periode søknadsperiode, JournalpostId journalpostId, Long behandlingId) {
+    public void lagreMedlemskapGrunnlag(Utenlandsopphold utenlandsopphold, no.nav.k9.søknad.felles.type.Periode søknadsperiode, JournalpostId journalpostId, Long behandlingId) {
         LocalDate søknadsperiodeFom = søknadsperiode.getFraOgMed();
         LocalDate forutgåendeFom = søknadsperiodeFom.minusYears(5);
         LocalDate forutgåendeTom = søknadsperiodeFom.minusDays(1);
 
-        Set<OppgittBosted> bosteder = forutgåendeBosteder.getPerioder().entrySet().stream()
+        Set<OppgittBosted> bosteder = utenlandsopphold.perioder().entrySet().stream()
             .map(entry -> new OppgittBosted(
                 entry.getKey().getFraOgMed(),
                 entry.getKey().getTilOgMed(),
-                entry.getValue().getLand().getLandkode()))
+                entry.getValue().land().getLandkode()))
             .collect(Collectors.toSet());
 
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandlingId, journalpostId, forutgåendeFom, forutgåendeTom, bosteder);

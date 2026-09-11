@@ -4,8 +4,8 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.søknad.felles.type.Landkode;
 import no.nav.k9.søknad.felles.type.Periode;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.Bosteder.BostedPeriodeInfo;
+import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold;
+import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold.UtenlandsoppholdPeriodeInfo;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
@@ -44,14 +44,15 @@ class AktivitetspengerSøknadPersistererTest {
     @Test
     void skal_lagre_forutgående_periode_5_år_før_søknadsperiode_fom() {
         var søknadsperiode = new Periode(LocalDate.of(2026, 5, 1), LocalDate.of(2027, 4, 30));
-        var bosteder = new Bosteder().medPerioder(Map.of(
+        String utenlandskNasjonalId = "010185-1234";
+        var utenlandsopphold = new Utenlandsopphold(Map.of(
             new Periode(LocalDate.of(2021, 5, 1), LocalDate.of(2024, 4, 30)),
-            new BostedPeriodeInfo().medLand(Landkode.of("DEU")),
+            new UtenlandsoppholdPeriodeInfo(Landkode.of("DEU"), false, null),
             new Periode(LocalDate.of(2024, 5, 1), LocalDate.of(2026, 4, 30)),
-            new BostedPeriodeInfo().medLand(Landkode.of("FIN"))
+            new UtenlandsoppholdPeriodeInfo(Landkode.of("FIN"), true, utenlandskNasjonalId)
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, behandling.getId());
+        persister.lagreMedlemskapGrunnlag(utenlandsopphold, søknadsperiode, JP, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
@@ -67,9 +68,9 @@ class AktivitetspengerSøknadPersistererTest {
     @Test
     void skal_lagre_tom_bostedliste_når_ingen_bosteder_oppgitt() {
         var søknadsperiode = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
-        var bosteder = new Bosteder();
+        var utenlandsopphold = Utenlandsopphold.tomt();
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(bosteder, søknadsperiode, JP, behandling.getId());
+        persister.lagreMedlemskapGrunnlag(utenlandsopphold, søknadsperiode, JP, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
@@ -85,20 +86,20 @@ class AktivitetspengerSøknadPersistererTest {
         var jp1 = new JournalpostId("JP-FIRST");
         var jp2 = new JournalpostId("JP-SECOND");
 
-        var førsteBosteder = new Bosteder().medPerioder(Map.of(
+        var førsteOpphold = new Utenlandsopphold(Map.of(
             new Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2026, 6, 30)),
-            new BostedPeriodeInfo().medLand(Landkode.SVERIGE)
+            new UtenlandsoppholdPeriodeInfo(Landkode.SVERIGE, false, null)
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(førsteBosteder, søknadsperiode, jp1, behandling.getId());
+        persister.lagreMedlemskapGrunnlag(førsteOpphold, søknadsperiode, jp1, behandling.getId());
 
 
-        var andreBosteder = new Bosteder().medPerioder(Map.of(
+        var andreOpphold = new Utenlandsopphold(Map.of(
             new Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2026, 6, 30)),
-            new BostedPeriodeInfo().medLand(Landkode.of("DEU"))
+            new UtenlandsoppholdPeriodeInfo(Landkode.of("DEU"), false, null)
         ));
 
-        persister.lagreForutgåendeMedlemskapGrunnlag(andreBosteder, søknadsperiode, jp2, behandling.getId());
+        persister.lagreMedlemskapGrunnlag(andreOpphold, søknadsperiode, jp2, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
