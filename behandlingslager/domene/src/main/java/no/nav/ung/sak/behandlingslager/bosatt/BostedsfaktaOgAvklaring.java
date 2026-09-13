@@ -3,47 +3,69 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 
-/**
- * Fletter sammen oppgitt fakta fra søknad ({@link BostedsinformasjonFraSøknad}) og eventuell foreslått
- * avklaring fra saksbehandler ({@link BostedsPeriodeAvklaring}) for én periode.
- * <p>
- * Klassen leverer de samme feltene som {@link BostedsPeriodeAvklaring} og supplerer med opplysningene
- * fra søknad samt {@link Kilde}. Dersom det finnes en foreslått avklaring er den kilde til sannhet
- * ({@link Kilde#SAKSBEHANDLER}); ellers benyttes fakta fra søknaden ({@link Kilde#SØKNAD}).
- */
 public class BostedsfaktaOgAvklaring {
 
     private final BostedsinformasjonFraSøknad søknadsinformasjon;
-    private final BostedsPeriodeAvklaring foreslåttAvslagsavklaring;
+    private final BostedsPeriodeAvklaring foreslåttAvklaring;
+    private final BostedsPeriodeAvklaring ferdigstiltAvklaring;
 
-    public BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, BostedsPeriodeAvklaring foreslåttAvslagsavklaring) {
+    private BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, BostedsPeriodeAvklaring foreslåttAvklaring, BostedsPeriodeAvklaring ferdigstiltAvklaring) {
         this.søknadsinformasjon = søknadsinformasjon;
-        this.foreslåttAvslagsavklaring = foreslåttAvslagsavklaring;
+        this.foreslåttAvklaring = foreslåttAvklaring;
+        this.ferdigstiltAvklaring = ferdigstiltAvklaring;
+    }
+
+    static BostedsfaktaOgAvklaring fraSøknad(BostedsinformasjonFraSøknad søknadsinformasjon) {
+        return new BostedsfaktaOgAvklaring(søknadsinformasjon, null, null);
+    }
+
+    BostedsfaktaOgAvklaring medForeslåttAvklaring(BostedsPeriodeAvklaring foreslåttAvklaring) {
+        return foreslåttAvklaring == null ? this : new BostedsfaktaOgAvklaring(søknadsinformasjon, foreslåttAvklaring, ferdigstiltAvklaring);
+    }
+
+    BostedsfaktaOgAvklaring medFerdigstiltAvklaring(BostedsPeriodeAvklaring ferdigstiltAvklaring) {
+        return ferdigstiltAvklaring == null ? this : new BostedsfaktaOgAvklaring(søknadsinformasjon, foreslåttAvklaring, ferdigstiltAvklaring);
     }
 
     public BostedsinformasjonFraSøknad getSøknadsinformasjon() {
         return søknadsinformasjon;
     }
 
-    public BostedsPeriodeAvklaring getForeslåttAvslagsavklaring() {
-        return foreslåttAvslagsavklaring;
+    public BostedsPeriodeAvklaring getForeslåttAvklaring() {
+        return foreslåttAvklaring;
     }
 
-    public boolean harForeslåttAvslagsavklaring() {
-        return foreslåttAvslagsavklaring != null;
+    public BostedsPeriodeAvklaring getFerdigstiltAvklaring() {
+        return ferdigstiltAvklaring;
+    }
+
+    /**
+     * Den avklaringen som er gjeldende for perioden — foreslått avklaring har forrang over ferdigstilt.
+     */
+    public BostedsPeriodeAvklaring getGjeldendeAvklaring() {
+        return foreslåttAvklaring != null ? foreslåttAvklaring : ferdigstiltAvklaring;
+    }
+
+    public boolean harAvklaring() {
+        return getGjeldendeAvklaring() != null;
+    }
+
+    public boolean harForeslåttAvklaring() {
+        return foreslåttAvklaring != null;
+    }
+
+    public boolean kanRedigeres() {
+        return foreslåttAvklaring != null;
     }
 
     public Kilde getKilde() {
-        return harForeslåttAvslagsavklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
+        return harAvklaring() ? Kilde.SAKSBEHANDLER : Kilde.SØKNAD;
     }
 
     public boolean isErBosattITrondheim() {
-        return !harForeslåttAvslagsavklaring() && søknadsinformasjon.isErBosattITrondheim();
+        return !harAvklaring() && søknadsinformasjon.isErBosattITrondheim();
     }
 
-    public BostedsvilkårIkkeOppfyltÅrsak getIkkeOppfyltÅrsak() {
-        return harForeslåttAvslagsavklaring() ? foreslåttAvslagsavklaring.getIkkeOppfyltÅrsak() : null;
-    }
 
     @Override
     public String toString() {
@@ -52,4 +74,3 @@ public class BostedsfaktaOgAvklaring {
             + ", erBosattITrondheim=" + isErBosattITrondheim() + '}';
     }
 }
-

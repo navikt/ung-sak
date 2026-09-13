@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
@@ -49,13 +50,30 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
-    BistandsvilkårResultatPeriode() {
+    protected BistandsvilkårResultatPeriode() {
         // Hibernate
     }
 
-    /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
+    /**
+     * Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer.
+     */
     BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, BistandsvilkårResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+    }
+
+    BistandsvilkårResultatPeriode(BistandsvilkårResultatPeriode kilde) {
+        this(kilde.getPeriode(), kilde);
+    }
+  
+    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
+        this(periode,
+            vilkårsvurderingResultat.godkjent(),
+            (BistandsvilkårIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
+            vilkårsvurderingResultat.erManuellVurdering(),
+            vilkårsvurderingResultat.begrunnelse(),
+            vilkårsvurderingResultat.fritekstVurderingBrev(),
+            vilkårsvurderingResultat.vurdertAv(),
+            vilkårsvurderingResultat.vurdertTidspunkt());
     }
 
     public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
@@ -79,6 +97,10 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
         return id;
     }
 
+    public VilkårType getVilkårType() {
+        return VilkårType.BISTANDSVILKÅR;
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }
@@ -91,7 +113,7 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
         return ikkeOppfyltÅrsak;
     }
 
-    public boolean isManuellVurdering() {
+    public boolean erManuellVurdering() {
         return manuellVurdering;
     }
 
@@ -103,11 +125,33 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
         return fritekstVurderingBrev;
     }
 
+    public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
+        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+    }
+
     public String getVurdertAv() {
         return vurdertAv;
     }
 
     public LocalDateTime getVurdertTidspunkt() {
         return vurdertTidspunkt;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BistandsvilkårResultatPeriode annen
+            && DatoIntervallEntitet.fra(periode).equals(DatoIntervallEntitet.fra(annen.periode))
+            && godkjent == annen.godkjent
+            && ikkeOppfyltÅrsak == annen.ikkeOppfyltÅrsak
+            && manuellVurdering == annen.manuellVurdering
+            && Objects.equals(begrunnelse, annen.begrunnelse)
+            && Objects.equals(fritekstVurderingBrev, annen.fritekstVurderingBrev)
+            && Objects.equals(vurdertAv, annen.vurdertAv)
+            && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(DatoIntervallEntitet.fra(periode), vurdertTidspunkt);
     }
 }

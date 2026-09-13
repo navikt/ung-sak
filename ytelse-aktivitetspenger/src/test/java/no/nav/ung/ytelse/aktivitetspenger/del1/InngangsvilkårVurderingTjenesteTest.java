@@ -2,7 +2,6 @@ package no.nav.ung.ytelse.aktivitetspenger.del1;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -68,7 +67,7 @@ class InngangsvilkårVurderingTjenesteTest {
             new BostedsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
                 false, "Automatisk avslag", null, "A111111", LocalDateTime.now())));
 
-        tjeneste.oppdaterBostedsvilkårResultatFraVurdering(behandling.getId());
+        tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
 
         var vilkårPeriode = hentVilkårPeriode(hentBostedsvilkårTidslinje(behandling.getId()), PERIODE_1);
         assertThat(vilkårPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
@@ -98,7 +97,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(revurdering.getId()));
         tjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(revurdering.getId(), vilkårResultatBuilder, VilkårType.BOSTEDSVILKÅR, UBEGRENSET_AVGRENSNING);
-        tjeneste.oppdaterBostedsvilkårResultatFraVurdering(revurdering.getId());
+        tjeneste.oppdaterVilkårResultatFraVurdering(revurdering.getId(), VilkårType.BOSTEDSVILKÅR);
         var resultat = vilkårResultatRepository.hent(revurdering.getId()).getVilkårTimeline(VilkårType.BOSTEDSVILKÅR);
 
         var vurdertPeriode = hentVilkårPeriode(resultat, PERIODE_1_AVKORTET);
@@ -138,7 +137,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(revurdering.getId()));
         tjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(revurdering.getId(), vilkårResultatBuilder, VilkårType.BOSTEDSVILKÅR, UBEGRENSET_AVGRENSNING);
-        tjeneste.oppdaterBostedsvilkårResultatFraVurdering(revurdering.getId());
+        tjeneste.oppdaterVilkårResultatFraVurdering(revurdering.getId(), VilkårType.BOSTEDSVILKÅR);
         var resultat = vilkårResultatRepository.hent(revurdering.getId()).getVilkårTimeline(VilkårType.BOSTEDSVILKÅR);
 
         assertThat(hentVilkårPeriode(resultat, PERIODE_1).getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);

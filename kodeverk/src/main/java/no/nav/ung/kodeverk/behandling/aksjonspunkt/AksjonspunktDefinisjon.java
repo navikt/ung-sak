@@ -91,6 +91,9 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     VURDER_BOSTEDVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE,
         AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret (årsak: Annet)", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTEDVILKÅR,
         VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
+    VURDER_FAKTA_OM_BISTAND(AksjonspunktKodeDefinisjon.VURDER_FAKTA_OM_BISTAND_KODE,
+        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder fakta om bistandsbehov", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BISTAND,
+        UTEN_VILKÅR, SkjermlenkeType.BISTANDSVILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
         AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
         VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
@@ -111,7 +114,7 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     AVKLAR_GYLDIG_MEDLEMSKAP(
         AksjonspunktKodeDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP_KODE, AksjonspunktType.MANUELL, "Avklar om bruker har gyldig medlemskap.",
         BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET,
-        SkjermlenkeType.FAKTA_OM_MEDLEMSKAP, TOTRINN, AVVENTER_SAKSBEHANDLER),
+        SkjermlenkeType.FORUTGÅENDE_MEDLEMSKAP, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
     OVERSTYRING_AV_INNTEKT(AksjonspunktKodeDefinisjon.OVERSTYRING_AV_INNTEKT_KODE,
         AksjonspunktType.OVERSTYRING, "Overstyring av intekt", BehandlingStatus.UTREDES, BehandlingStegType.KONTROLLER_REGISTER_INNTEKT,
@@ -140,6 +143,10 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
 
     AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTED_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
         "Satt på vent i påvente av brukers svar på bostedavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTEDVILKÅR, UTEN_VILKÅR,
+        UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
+
+    AUTO_SATT_PÅ_VENT_ETTERLYST_BISTANDUTTALELSE(AksjonspunktKodeDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BISTAND_UTTALELSE_KODE, AksjonspunktType.AUTOPUNKT,
+        "Satt på vent i påvente av brukers svar på bistandsavklaring", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR, UTEN_VILKÅR,
         UTEN_SKJERMLENKE, ENTRINN, TILBAKE, "P2W", AVVENTER_SØKER),
 
     // Gruppe: 80xx

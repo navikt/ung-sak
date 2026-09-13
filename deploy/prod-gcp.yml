@@ -118,8 +118,10 @@ spec:
           - name: "cloudsql.enable_pgaudit"
             value: "on"
           - name: "pgaudit.log"
-            value: "all"
+            value: "read,write,ddl,role,function"
           - name: "pgaudit.log_parameter"
+            value: "on"
+          - name: "pgaudit.log_relation"
             value: "on"
         pointInTimeRecovery: true
         retainedBackups : 30
@@ -273,8 +275,6 @@ spec:
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
     - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
-      value: "false"
-    - name: AKTIVITETSVILKAAR_ENABLED
       value: "false"
 
     # Konfigurasjoner

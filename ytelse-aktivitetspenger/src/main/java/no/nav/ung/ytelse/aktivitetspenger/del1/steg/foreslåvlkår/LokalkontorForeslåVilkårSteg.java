@@ -71,7 +71,7 @@ public class LokalkontorForeslåVilkårSteg implements BehandlingSteg {
             // Når behandlingen hopper tilbake fra foreslå vedtak, er det vilkårsperioden for tilsvarende den avklarte periode som settes til vurdering.
             // Vilkårsvurdering beholdes intakt, slik at saksbehandler kan redigere den foreslåtte vurderingen.
             alleVilkårsavklaringTjenester.forEach(vilkårsavklaringTjeneste ->
-                vilkårsavklaringTjeneste.settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(kontekst.getBehandlingId())
+                vilkårsavklaringTjeneste.settVilkårsperioderTilIkkeVurdertForForeslåtteAvklaringer(kontekst.getBehandlingId())
             );
         }
     }

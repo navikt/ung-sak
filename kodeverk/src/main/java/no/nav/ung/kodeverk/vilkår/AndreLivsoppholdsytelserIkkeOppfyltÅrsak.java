@@ -1,66 +1,49 @@
 package no.nav.ung.kodeverk.vilkår;
 
 import com.fasterxml.jackson.annotation.JsonValue;
-import no.nav.ung.kodeverk.api.Kodeverdi;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.Optional;
 
-public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements Kodeverdi {
+public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
-    HAR_ANNEN_LIVSOPPHOLDSYTELSE("HAR_ANNEN_LIVSOPPHOLDSYTELSE", "Søker har livsoppholdsytelse som ikke er forenelig med ytelsen."),
-    AVKORTET("AVKORTET", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge."),
-    UDEFINERT("-", "Ikke definert"),
+    HAR_ANNEN_LIVSOPPHOLDSYTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
+    AVKORTET(Avslagsårsak.AVKORTET, false),
+    UDEFINERT(null, false),
     ;
 
-    public static final String KODEVERK = "ANDRE_LIVSOPPHOLDSYTELSER_IKKE_OPPFYLT_AARSAK";
-    private static final Map<String, AndreLivsoppholdsytelserIkkeOppfyltÅrsak> KODER = new LinkedHashMap<>();
+    private final Avslagsårsak avslagsårsak;
+    private final boolean kreverFritekst;
 
-    static {
-        for (var v : values()) {
-            if (KODER.putIfAbsent(v.kode, v) != null) {
-                throw new IllegalArgumentException("Duplikat : " + v.kode);
-            }
-        }
-    }
-
-    private final String kode;
-    private final String navn;
-
-    AndreLivsoppholdsytelserIkkeOppfyltÅrsak(String kode, String navn) {
-        this.kode = kode;
-        this.navn = navn;
+    AndreLivsoppholdsytelserIkkeOppfyltÅrsak(Avslagsårsak avslagsårsak, boolean kreverFritekst) {
+        this.avslagsårsak = avslagsårsak;
+        this.kreverFritekst = kreverFritekst;
     }
 
     public static AndreLivsoppholdsytelserIkkeOppfyltÅrsak fraKode(String kode) {
         if (kode == null) {
             return null;
         }
-        var v = KODER.get(kode);
-        if (v == null) {
-            throw new IllegalArgumentException("Ukjent AndreLivsoppholdsytelserIkkeOppfyltÅrsak: " + kode);
+        try {
+            return valueOf(kode);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Ukjent AndreLivsoppholdsytelserIkkeOppfyltÅrsak: " + kode, e);
         }
-        return v;
-    }
-
-    public static Map<String, AndreLivsoppholdsytelserIkkeOppfyltÅrsak> kodeMap() {
-        return Collections.unmodifiableMap(KODER);
     }
 
     @JsonValue
     @Override
     public String getKode() {
-        return kode;
+        return name();
     }
 
     @Override
-    public String getKodeverk() {
-        return KODEVERK;
+    public Optional<Avslagsårsak> avslagsårsak() {
+        return Optional.ofNullable(avslagsårsak);
     }
 
     @Override
-    public String getNavn() {
-        return navn;
+    public boolean kreverFritekst() {
+        return kreverFritekst;
     }
 }

@@ -2,55 +2,63 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public final class BostedsAvklaringDataMapper {
 
-    public static BostedAvklaringInnhold mapTilBostedAvklaringInnhold(BostedsPeriodeAvklaring bostedsPeriodeAvklaring) {
-        return new BostedAvklaringInnhold(
+    public static BostedVarselInnhold mapTilBostedAvklaringInnhold(BostedsPeriodeAvklaring bostedsPeriodeAvklaring) {
+        return new BostedVarselInnhold(
             bostedsPeriodeAvklaring.getPeriode().tilPeriode(),
             bostedsPeriodeAvklaring.getIkkeOppfyltÅrsak(),
-            bostedsPeriodeAvklaring.getBegrunnelse(),
             bostedsPeriodeAvklaring.skalSendeVarsel(),
             bostedsPeriodeAvklaring.getFritekstTilVarsel(),
-            bostedsPeriodeAvklaring.getBegrunnelseIkkeVarsel(),
+            bostedsPeriodeAvklaring.getKilde(),
+            bostedsPeriodeAvklaring.getKildeFritekst(),
             bostedsPeriodeAvklaring.getAvklaringtype()
         );
     }
 
-    public static BostedsPeriodeAvklaring mapTilBostedsPeriodeAvklaring(BostedAvklaringInnhold bostedAvklaringInnhold, String vurdertAv, LocalDateTime vurdertTidspunkt) {
-        return new BostedsPeriodeAvklaring(
-            bostedAvklaringInnhold.hentPeriodeSomDatoIntervallEntitet(),
-            bostedAvklaringInnhold.ikkeOppfyltÅrsak(),
-            bostedAvklaringInnhold.begrunnelse(),
-            bostedAvklaringInnhold.skalSendeVarsel(),
-            bostedAvklaringInnhold.fritekstTilVarsel(),
-            bostedAvklaringInnhold.begrunnelseIkkeVarsel(),
-            vurdertAv,
-            vurdertTidspunkt,
-            bostedAvklaringInnhold.avklaringtype()
+    public static BostedsPeriodeAvklaringForeslått mapTilBostedsPeriodeAvklaring(BostedAvklaring bostedAvklaring, UUID referanse) {
+        var innhold = bostedAvklaring.innhold();
+        return new BostedsPeriodeAvklaringForeslått(
+            referanse,
+            innhold.hentPeriodeSomDatoIntervallEntitet(),
+            innhold.ikkeOppfyltÅrsak(),
+            bostedAvklaring.begrunnelse(),
+            innhold.skalSendeVarsel(),
+            innhold.fritekstTilVarsel(),
+            bostedAvklaring.begrunnelseIkkeVarsel(),
+            innhold.kilde(),
+            innhold.kildeFritekst(),
+            bostedAvklaring.vurdertAv(),
+            bostedAvklaring.vurdertTidspunkt(),
+            innhold.avklaringtype()
         );
     }
 
-    public static BostedAvklaringInnhold mapTilBostedAvklaringInnhold(BostedFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode) {
+    public static BostedAvklaring mapTilBostedAvklaring(BostedFaktaavklaringPeriodeDto dto, LocalDate maksDatoFraVilkårsperiode, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         var avklaringtype = dto.periode().getTom() != null ? Avklaringtype.AVSLAG : Avklaringtype.OPPHØR;
         var fom = dto.periode().getFom();
         // Konverterer opphør til en lukket periode, slik at det i ettertid er tydelig hvilken periode opphøret er utført på.
         var tom = dto.periode().getTom() != null ? dto.periode().getTom() : maksDatoFraVilkårsperiode;
 
-        return new BostedAvklaringInnhold(
+        var innhold = new BostedVarselInnhold(
             new Periode(fom, tom),
             dto.vurdering().fraflyttingsÅrsak(),
-            dto.vurdering().begrunnelse(),
             dto.skalSendeVarsel(),
             dto.vurdering().fritekstTilVarsel(),
-            dto.vurdering().begrunnelseIkkeVarsel(),
+            dto.vurdering().kilde(),
+            dto.vurdering().kildeFritekst(),
             avklaringtype
         );
+
+        return new BostedAvklaring(innhold, dto.vurdering().begrunnelse(), dto.vurdering().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
 
 }

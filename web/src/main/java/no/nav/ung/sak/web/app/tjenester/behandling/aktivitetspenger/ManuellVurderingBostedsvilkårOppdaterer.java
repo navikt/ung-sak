@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
@@ -14,6 +15,7 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -24,8 +26,10 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
@@ -50,6 +54,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
     private HistorikkinnslagRepository historikkinnslagRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private AvkortTjeneste avkortTjeneste;
+    private VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste;
 
     ManuellVurderingBostedsvilkårOppdaterer() {
         // for CDI proxy
@@ -61,13 +66,15 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
                                                    InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
                                                    HistorikkinnslagRepository historikkinnslagRepository,
-                                                   AvkortTjeneste avkortTjeneste) {
+                                                   AvkortTjeneste avkortTjeneste,
+                                                   @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) VilkårsPerioderTilVurderingTjeneste vilkårsPerioderTilVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.avkortTjeneste = avkortTjeneste;
+        this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
     }
 
     @Override
@@ -95,7 +102,8 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), it))
             .toList());
 
-        validerLukkedePerioder(vurderteLukkedePerioder, eksisterendeVilkårperioder, erEndretBosted);
+        LocalDateTimeline<Boolean> tilVurderingTidlinje = TidslinjeUtil.tilTidslinje(vilkårsPerioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.BOSTEDSVILKÅR));
+        validerLukkedePerioder(vurderteLukkedePerioder, eksisterendeVilkårperioder, tilVurderingTidlinje, erEndretBosted);
         validerAvkortingBruktRiktig(dto, param.getBehandlingId());
 
         var periodeVurderinger = vurderteÅpnePerioder.crossJoin(vurderteLukkedePerioder).segmenter().stream()
@@ -131,13 +139,13 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         return OppdateringResultat.nyttResultat();
     }
 
-    private static void validerLukkedePerioder(LocalDateTimeline<VilkårBostedPeriodeVurderingDto> vurderteLukkedePerioder, LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperiode, boolean erEndretBosted) {
+    private static void validerLukkedePerioder(LocalDateTimeline<VilkårBostedPeriodeVurderingDto> vurderteLukkedePerioder, LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperiode, LocalDateTimeline<Boolean> tilVurderingTidlinje, boolean erEndretBosted) {
         LocalDateTimeline<VilkårBostedPeriodeVurderingDto> uforventedePerioder = vurderteLukkedePerioder.disjoint(eksisterendeVilkårperiode);
         if (!uforventedePerioder.isEmpty()) {
             throw new IllegalArgumentException("Forsøker å vurdere perioder som ikke er til vurdering. Gjelder perioder: " + uforventedePerioder);
         }
 
-        LocalDateTimeline<?> manglendePerioder = eksisterendeVilkårperiode.disjoint(vurderteLukkedePerioder);
+        LocalDateTimeline<?> manglendePerioder = eksisterendeVilkårperiode.disjoint(vurderteLukkedePerioder).intersection(tilVurderingTidlinje);
         if (!manglendePerioder.isEmpty() && !erEndretBosted) {
             // Brukers uttalelse kan føre til at ikke hele perioden opprinnelig satt til IKKE_VURDERT skal revurderes likevel.
             throw new IllegalArgumentException("Forventer at alle perioder til vurdering vurderes. Mangler : " + manglendePerioder);

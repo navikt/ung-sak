@@ -38,8 +38,8 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim. " +
-                    "Fordi du ikke har bostedsadresse i Trondheim, har vi avslått søknaden din."
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune. " +
+                    "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din."
             );
     }
 
@@ -95,7 +95,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "bo eller være folkeregistrert i Trondheim"
+                "bo eller være folkeregistrert i Trondheim kommune"
             );
     }
 
@@ -113,7 +113,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "studere eller jobbe i Trondheim"
+                "studere eller jobbe i Trondheim kommune"
             );
     }
 

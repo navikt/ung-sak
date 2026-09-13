@@ -7,26 +7,23 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.AvklaringStatus;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
-import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
-import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringUnderArbeid;
+import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,22 +54,27 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
         this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
-    public List<BostedsPeriodeAvklaring> hentBostedPeriodeAvklaringUnderArbeid(long behandlingId) {
+    public List<BostedsPeriodeAvklaring> hentForeslåtteAvklaringer(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(g -> g.getForeslåtteAvklaringerMedStatus(AvklaringStatus.UNDER_ARBEID))
+            .map(g -> List.copyOf(g.getForeslåtteAvklaringer()))
             .orElse(List.of());
     }
 
-    public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaringInnhold> nyeAvklaringer, String vurdertAv, LocalDateTime vurdertTidspunkt, long behandlingId) {
+    public Set<BostedsPeriodeAvklaring> lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(List<BostedAvklaring> nyeAvklaringer, long behandlingId) {
+        // Gjenbruker referansen når varselet er uendret, slik at etterlysningen som beholdes fortsatt peker på en
+        // avklaring i det aktive grunnlaget
+        var referanserPerVarselinnhold = hentForeslåtteAvklaringer(behandlingId).stream()
+            .collect(Collectors.toMap(BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold, BostedsPeriodeAvklaring::getReferanse));
         var nyePeriodeAvklaringer = nyeAvklaringer.stream()
-            .map(it -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(it, vurdertAv, vurdertTidspunkt))
+            .map(avklaring -> BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(avklaring,
+                referanserPerVarselinnhold.getOrDefault(avklaring.innhold(), UUID.randomUUID())))
             .collect(Collectors.toSet());
         return bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, nyePeriodeAvklaringer);
     }
 
     public void oppdaterEtterlysninger(Behandling behandling,
-                                       Collection<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid,
-                                       Collection<BostedsPeriodeAvklaring> alleAvklaringerUnderArbeid) {
+                                       Collection<BostedsPeriodeAvklaring> tidligereForeslåtteAvklaringer,
+                                       Collection<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer) {
 
         long behandlingId = behandling.getId();
 
@@ -81,13 +83,13 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .filter(e -> e.getType() == EtterlysningType.UTTALELSE_BOSTED)
             .toList();
 
-        Map<BostedAvklaringInnhold, UUID> tidligereAvklaringer = tidligereAvklaringerUnderArbeid.stream()
+        Map<BostedVarselInnhold, UUID> tidligereAvklaringer = tidligereForeslåtteAvklaringer.stream()
             .collect(Collectors.toMap(
                 BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold,
                 BostedsPeriodeAvklaring::getReferanse
             ));
 
-        Map<BostedAvklaringInnhold, UUID> avklaringerSomSkalVarsles = alleAvklaringerUnderArbeid.stream()
+        Map<BostedVarselInnhold, UUID> avklaringerSomSkalVarsles = nyeForeslåtteAvklaringer.stream()
             .filter(BostedsPeriodeAvklaring::skalSendeVarsel)
             .collect(Collectors.toMap(
                 BostedsAvklaringDataMapper::mapTilBostedAvklaringInnhold,
@@ -135,36 +137,25 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
         }
     }
 
-    // Hvis saksbehandler endrer perioden det avklares for etter at vilkårsvurdering er utført, gjelder ikke lenger vurderingen og den delen som ikke overlapper med ny avklaring må gjenopprettes fra forrige behandling.
-    // Vilkårsperioden som avklaringen gjelder for settes til ikke vurdert, slik at den kan vurderes på nytt (automatisk eller i aksjonspunkt)
-    public void gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(AksjonspunktOppdaterParameter param, List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid, List<BostedAvklaringInnhold> nyeAvklaringer) {
-        var tidligereTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(tidligereAvklaringerUnderArbeid.stream().map(BostedsPeriodeAvklaring::getPeriode).toList());
-        var nyTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nyeAvklaringer.stream().map(BostedAvklaringInnhold::periode).toList());
-        var tidslinjeSomIkkeHåndteresAvNyAvklaring = tidligereTidslinje.disjoint(nyTidslinje);
-
-        inngangsvilkårVurderingTjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, tidslinjeSomIkkeHåndteresAvNyAvklaring);
-        inngangsvilkårVurderingTjeneste.oppdaterBostedsvilkårResultatFraVurdering(param.getBehandlingId(), param.getVilkårResultatBuilder());
-
-        var perioderSomSkalVurderesPåNytt = TidslinjeUtil.tilDatoIntervallEntiteter(nyTidslinje);
-        inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(param.getVilkårResultatBuilder(), VilkårType.BOSTEDSVILKÅR, perioderSomSkalVurderesPåNytt);
+    @Override
+    public void ferdigstillForeslåtteAvklaringer(long behandlingId) {
+        bostedsGrunnlagRepository.ferdigstillForeslåtteAvklaringer(behandlingId);
     }
 
     @Override
-    public void settAlleAvklaringerTilFerdig(long behandlingId) {
-        bostedsGrunnlagRepository.settAlleAvklaringerFerdig(behandlingId);
-    }
-
-    @Override
-    public void settVilkårsperioderTilIkkeVurdertForVilkårsavklaringerUnderArbeid(long behandlingId) {
-        var perioderTidligereVurdertEtterAvklaring = hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
+    public void settVilkårsperioderTilIkkeVurdertForForeslåtteAvklaringer(long behandlingId) {
+        var perioderTidligereVurdertEtterAvklaring = hentForeslåtteAvklaringer(behandlingId).stream().map(BostedsPeriodeAvklaring::getPeriode).toList();
         inngangsvilkårVurderingTjeneste.settVilkårResultatIkkeVurdertForPeriode(behandlingId, VilkårType.BOSTEDSVILKÅR, perioderTidligereVurdertEtterAvklaring);
     }
 
     @Override
-    public Optional<VilkårsavklaringUnderArbeid> hentSenesteAvklaringUnderArbeid(long behandlingId) {
-        return hentBostedPeriodeAvklaringUnderArbeid(behandlingId).stream()
-            .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt))
-            .map(avklaring -> new VilkårsavklaringUnderArbeid(avklaring.getAvklaringtype(), avklaring.getPeriode()));
+    public Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId) {
+        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .map(BostedsGrunnlag::getForeslåtteAvklaringer)
+            .orElse(Set.of())
+            .stream()
+            .max(Comparator.comparing(BostedsPeriodeAvklaring::getVurdertTidspunkt)
+                .thenComparing(avklaring -> avklaring.getPeriode().getFomDato()))
+            .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode(), avklaring.getKilde(), avklaring.getKildeFritekst()));
     }
-
 }

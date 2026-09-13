@@ -15,6 +15,7 @@ import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -31,6 +32,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
@@ -121,7 +123,8 @@ class VurderFaktaOmBostedOppdatererTest {
             behandlingRepository,
             historikkinnslagRepository,
             vilkårsPerioderTilVurderingTjenester,
-            bostedAvklaringTjeneste
+            bostedAvklaringTjeneste,
+            inngangsvilkårVurderingTjeneste
         );
 
         behandling = opprettBehandlingMedVilkårOgPeriode();
@@ -132,7 +135,7 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
-        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto);
+        var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto, behandling);
 
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(bostedAvklaringPeriode));
 
@@ -142,11 +145,28 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
-    private static BostedsPeriodeAvklaring konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto) {
+    @Test
+    void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
+        var opprinnelig = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "opprinnelig begrunnelse");
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(konverterTilBostedAvklaringPeriode(opprinnelig, behandling)));
+
+        oppdater(dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "rettet begrunnelse"));
+
+        assertThat(hentSorterteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getBegrunnelse)
+            .as("den rettede begrunnelsen skal lagres")
+            .containsExactly("rettet begrunnelse");
+
+        assertThat(etterlysningRepository.hentEtterlysninger(behandling.getId()))
+            .as("begrunnelsen vises ikke for bruker, så varselet skal ikke sendes på nytt")
+            .isEmpty();
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
+    }
+
+    private static BostedsPeriodeAvklaringForeslått konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
         return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
-            BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(dto.getAvklaringer().getFirst(), TOM),
-            UUID.randomUUID().toString(),
-            LocalDateTime.now()
+            BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now()),
+            UUID.randomUUID()
         );
     }
 
@@ -292,8 +312,8 @@ class VurderFaktaOmBostedOppdatererTest {
         .toList();
     }
 
-    private List<BostedsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
-        return inngangsvilkårVurderingRepository.hentGrunnlag(behandling.getId())
+    private Set<BostedsvilkårResultatPeriode> hentVilkårsvurderinger(Behandling behandling) {
+        return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
             .orElseThrow();
     }
@@ -401,7 +421,7 @@ class VurderFaktaOmBostedOppdatererTest {
     private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
-            .getForeslåtteAvklaringerEllerTomListe()
+            .getForeslåtteAvklaringer()
             .stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
             .toList();
@@ -412,18 +432,26 @@ class VurderFaktaOmBostedOppdatererTest {
             årsak,
             "begrunnelse",
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
-            BEGRUNNELSE_IKKE_VARSEL
+            BEGRUNNELSE_IKKE_VARSEL,
+            BostedsavklaringKildeType.BRUKER,
+            null
         );
         var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), vurdering, true);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");
     }
 
     private static VurderFaktaOmBostedDto dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel) {
+        return dtoMedEnAvklaring(årsak, skalSendeVarsel, "begrunnelse");
+    }
+
+    private static VurderFaktaOmBostedDto dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel, String begrunnelse) {
         var vurdering = new BostedVurderingIkkeOppfyltDto(
             årsak,
-            "begrunnelse",
+            begrunnelse,
             (årsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET) ? "Fritekstbegrunnelse til bruker" : null,
-            skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL
+            skalSendeVarsel ? null : BEGRUNNELSE_IKKE_VARSEL,
+            BostedsavklaringKildeType.BRUKER,
+            null
         );
         var avklaring = new BostedFaktaavklaringPeriodeDto(new ÅpenPeriode(FOM, TOM), vurdering, !skalSendeVarsel);
         return new VurderFaktaOmBostedDto(List.of(avklaring), "begrunnelse");

@@ -5,9 +5,9 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 @Entity(name = "AktivitetspengerInngangsvilkårResultatGrunnlag")
 @Table(name = "gr_akt_inngangsvilkaar_res")
@@ -72,32 +72,51 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         return Optional.ofNullable(bistandsvilkårResultatHolder);
     }
 
-    public Optional<AktivitetsvilkårResultatHolder> getAktivitetsvilkårResultatHolder() {
+    Optional<AktivitetsvilkårResultatHolder> getAktivitetsvilkårResultatHolder() {
         return Optional.ofNullable(aktivitetsvilkårResultatHolder);
     }
 
-    public List<AktivitetsvilkårResultatPeriode> hentAktivitetsvilkårResultatPerioder() {
-        return getAktivitetsvilkårResultatHolder().map(AktivitetsvilkårResultatHolder::getVurderinger).orElse(List.of());
+    public Set<AktivitetsvilkårResultatPeriode> hentAktivitetsvilkårResultatPerioder() {
+        return getAktivitetsvilkårResultatHolder().map(AktivitetsvilkårResultatHolder::getVurderinger).orElse(Set.of());
+    }
+
+    public Set<BistandsvilkårResultatPeriode> hentBistandsvilkårResultatPerioder() {
+        return getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke BistandsvilkårResultatPerioder"));
+    }
+
+    public LocalDateTimeline<VilkårsvurderingResultat> hentBistandTidslinje() {
+        return new LocalDateTimeline<>(getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger).orElse(Set.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.tilVilkårsvurderingResultat()))
+            .toList());
     }
 
     public Optional<AndreLivsoppholdsytelserResultatHolder> getAndreLivsoppholdsytelserResultatHolder() {
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
     }
 
+    public Set<AndreLivsoppholdsytelserResultatPeriode> hentAndreLivsoppholdsytelserResultatPerioder() {
+        return getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke AndreLivsoppholdsytelserResultatPerioder"));
+    }
+
+    public LocalDateTimeline<VilkårsvurderingResultat> hentLivsoppholdTidslinje() {
+        return new LocalDateTimeline<>(getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger).orElse(Set.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.tilVilkårsvurderingResultat()))
+            .toList());
+    }
+
     Optional<BostedsvilkårResultatHolder> getBostedsvilkårResultatHolder() {
         return Optional.ofNullable(bostedsvilkårResultatHolder);
     }
 
-    public List<BostedsvilkårResultatPeriode> hentBostedsvilkårResultatPerioder() {
-        return getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(List.of());
+    public Set<BostedsvilkårResultatPeriode> hentBostedsvilkårResultatPerioder() {
+        return getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger)
+            .orElseThrow(() -> new IllegalStateException("Fant ikke BostedsvilkårResultatPerioder"));
     }
 
     public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {
-        if (bostedsvilkårResultatHolder == null) {
-            return LocalDateTimeline.empty();
-        }
-
-        return new LocalDateTimeline<>(bostedsvilkårResultatHolder.getVurderinger().stream()
+        return new LocalDateTimeline<>(getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(Set.of()).stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }
@@ -112,7 +131,6 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
 
     @Override
     public boolean equals(Object o) {
-        //FIXME denne kaller videre på holderne, som IKKE har implementert egne equals-metoder. Enten implementer i holderne også, eller gjør noe annet her
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AktivitetspengerInngangsvilkårResultatGrunnlag that = (AktivitetspengerInngangsvilkårResultatGrunnlag) o;
@@ -124,7 +142,6 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
 
     @Override
     public int hashCode() {
-        //FIXME denne kaller videre på holderne, som IKKE har implementert egne hashCode-metoder. Enten implementer i holderne også, eller gjør noe annet her
         return Objects.hash(bistandsvilkårResultatHolder, aktivitetsvilkårResultatHolder, andreLivsoppholdsytelserResultatHolder, bostedsvilkårResultatHolder);
     }
 }

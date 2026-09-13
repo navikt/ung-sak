@@ -4,9 +4,8 @@ import jakarta.persistence.*;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import org.hibernate.annotations.BatchSize;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity(name = "BistandsvilkårResultatHolder")
 @Table(name = "bistand_resultat_holder")
@@ -20,20 +19,31 @@ public class BistandsvilkårResultatHolder extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "bistand_resultat_holder_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<BistandsvilkårResultatPeriode> vurderinger = new ArrayList<>();
+    private Set<BistandsvilkårResultatPeriode> vurderinger = new HashSet<>();
 
     public BistandsvilkårResultatHolder() {
     }
 
-    public BistandsvilkårResultatHolder(List<BistandsvilkårResultatPeriode> vurderinger) {
-        this.vurderinger = new ArrayList<>(vurderinger);
+    public BistandsvilkårResultatHolder(Collection<BistandsvilkårResultatPeriode> vurderinger) {
+        this.vurderinger = vurderinger.stream().map(BistandsvilkårResultatPeriode::new).collect(Collectors.toSet());
     }
 
     public Long getId() {
         return id;
     }
 
-    public List<BistandsvilkårResultatPeriode> getVurderinger() {
-        return Collections.unmodifiableList(vurderinger);
+    public Set<BistandsvilkårResultatPeriode> getVurderinger() {
+        return Collections.unmodifiableSet(vurderinger);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return o instanceof BistandsvilkårResultatHolder annen
+            && Objects.equals(vurderinger, annen.vurderinger);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(vurderinger);
     }
 }

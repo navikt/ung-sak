@@ -17,6 +17,7 @@ import java.util.UUID;
 @ScopedRestIntegration(scopeKey = "ungdomsprogramregister.scope", defaultScope = "api://prod-gcp.k9saksbehandling.ung-deltakelse-opplyser/.default")
 public class UngdomsprogramRegisterKlient {
     private final OidcRestClient restClient;
+    private final String url;
     private final URI hentUri;
 
     @Inject
@@ -24,6 +25,7 @@ public class UngdomsprogramRegisterKlient {
         OidcRestClient restClient,
         @KonfigVerdi(value = "ungdomsprogramregister.url", defaultVerdi = "http://ung-deltakelse-opplyser.k9saksbehandling") String url) {
         this.restClient = restClient;
+        this.url = url;
         hentUri = tilUri(url, "register/hent/alle");
 
     }
@@ -35,6 +37,15 @@ public class UngdomsprogramRegisterKlient {
             throw UngdomsprogramRegisterFeil.FACTORY.feilVedKallTilUngRegister(e).toException();
         }
 
+    }
+
+    public void markerSomSøkt(String aktørId, UUID deltakelseId) {
+        try {
+            URI markerSomSøktUri = tilUri(url, "register/" + deltakelseId + "/marker-sokt");
+            restClient.patch(markerSomSøktUri, new AktørIdDto(aktørId));
+        } catch (Exception e) {
+            throw UngdomsprogramRegisterFeil.FACTORY.feilVedKallTilUngRegister(e).toException();
+        }
     }
 
 

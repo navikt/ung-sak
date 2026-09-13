@@ -3,6 +3,7 @@ package no.nav.ung.sak.behandlingslager.bosatt;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import org.junit.jupiter.api.Test;
@@ -11,42 +12,46 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 class BostedsGrunnlagTest {
 
     @Test
-    void setForeslåttAvklaring_delerIkkeReferanserFraTidligereForeslåttHolderVedNyAvklaring() {
+    void setForeslåtteAvklaringer_delerIkkeReferanserFraTidligereForeslåttHolderVedNyAvklaring() {
         // Arrange
         var grunnlag = new BostedsGrunnlag(1L);
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2024, 1, 1), LocalDate.of(2024, 12, 31));
 
         var førsteAvklaring = lagBostedAvklaring(periode, "Første begrunnelse");
 
-        grunnlag.setForeslåttAvklaring(Set.of(førsteAvklaring));
-        var førsteHolder = grunnlag.getForeslått();
+        grunnlag.setForeslåtteAvklaringer(Set.of(førsteAvklaring));
+        var førsteHolder = grunnlag.getAvklaringer();
 
         var andreAvklaring = lagBostedAvklaring(periode, "Andre begrunnelse");
-        grunnlag.setForeslåttAvklaring(Set.of(andreAvklaring));
-        var andreHolder = grunnlag.getForeslått();
+        grunnlag.setForeslåtteAvklaringer(Set.of(andreAvklaring));
+        var andreHolder = grunnlag.getAvklaringer();
 
         // Assert - ny holder er en annen instans enn den forrige, og den forrige er urørt
         assertThat(andreHolder).isNotSameAs(førsteHolder);
-        assertThat(førsteHolder.hentPeriodeAvklaringer()).hasSize(1);
-        assertThat(førsteHolder.hentPeriodeAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Første begrunnelse");
+        assertThat(førsteHolder.hentForeslåtteAvklaringer()).hasSize(1);
+        assertThat(førsteHolder.hentForeslåtteAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Første begrunnelse");
 
-        assertThat(andreHolder.hentPeriodeAvklaringer()).hasSize(1);
-        assertThat(andreHolder.hentPeriodeAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Andre begrunnelse");
+        assertThat(andreHolder.hentForeslåtteAvklaringer()).hasSize(1);
+        assertThat(andreHolder.hentForeslåtteAvklaringer().iterator().next().getBegrunnelse()).isEqualTo("Andre begrunnelse");
     }
 
-    private static BostedsPeriodeAvklaring lagBostedAvklaring(DatoIntervallEntitet periode, String begrunnelse) {
-        return new BostedsPeriodeAvklaring(
+    private static BostedsPeriodeAvklaringForeslått lagBostedAvklaring(DatoIntervallEntitet periode, String begrunnelse) {
+        return new BostedsPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             periode,
             BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
             begrunnelse,
             true,
             null,
+            null,
+            BostedsavklaringKildeType.FOLKEREGISTER,
             null,
             "saksbehandler2",
             LocalDateTime.of(2024, 2, 1, 12, 0),

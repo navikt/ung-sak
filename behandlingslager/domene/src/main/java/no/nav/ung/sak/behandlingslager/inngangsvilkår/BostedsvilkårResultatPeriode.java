@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
@@ -46,7 +47,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_av", updatable = false)
     private String vurdertAv;
 
-    @Column(name = "vurdert_tidspunkt",  updatable = false)
+    @Column(name = "vurdert_tidspunkt", updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
     protected BostedsvilkårResultatPeriode() {
@@ -55,6 +56,10 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, BostedsvilkårResultatPeriode kilde) {
         this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.erManuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+    }
+
+    public BostedsvilkårResultatPeriode(BostedsvilkårResultatPeriode kilde) {
+        this(kilde.getPeriode(), kilde);
     }
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
@@ -81,6 +86,10 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         return id;
     }
 
+    public VilkårType getVilkårType() {
+        return VilkårType.BOSTEDSVILKÅR;
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }
@@ -103,6 +112,10 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
 
     public String getFritekstVurderingBrev() {
         return fritekstVurderingBrev;
+    }
+
+    public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
+        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {

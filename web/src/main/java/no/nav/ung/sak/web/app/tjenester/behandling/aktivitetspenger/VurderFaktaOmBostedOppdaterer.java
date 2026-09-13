@@ -16,7 +16,8 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringInnhold;
+import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaring;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsAvklaringDataMapper;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -38,6 +39,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
     private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste;
     private BostedAvklaringTjeneste bostedAvklaringTjeneste;
+    private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
 
 
     VurderFaktaOmBostedOppdaterer() {
@@ -48,11 +50,13 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
     public VurderFaktaOmBostedOppdaterer(BehandlingRepository behandlingRepository,
                                          HistorikkinnslagRepository historikkinnslagRepository,
                                          @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
-                                         @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste) {
+                                         @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste,
+                                         InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.vilkårsPerioderTilVurderingTjeneste = vilkårsPerioderTilVurderingTjeneste;
         this.bostedAvklaringTjeneste = bostedAvklaringTjeneste;
+        this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
     }
 
     @Override
@@ -66,19 +70,26 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
             .max(Comparator.naturalOrder())
             .orElseThrow(() -> new IllegalStateException("Må ha perioder til vurdering"));
 
-        List<BostedsPeriodeAvklaring> tidligereAvklaringerUnderArbeid = bostedAvklaringTjeneste.hentBostedPeriodeAvklaringUnderArbeid(behandlingId);
+        List<BostedsPeriodeAvklaring> tidligereForeslåtteAvklaringer = bostedAvklaringTjeneste.hentForeslåtteAvklaringer(behandlingId);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        List<BostedAvklaringInnhold> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
-            .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaringInnhold(a, maxTomDato)).toList();
+        List<BostedAvklaring> nyeAvklaringer = dto.getAvklaringer().stream().filter(a -> a.vurdering() != null)
+            .map(a -> BostedsAvklaringDataMapper.mapTilBostedAvklaring(a, maxTomDato, vurdertAv, vurdertTidspunkt)).toList();
 
-        Set<BostedsPeriodeAvklaring> alleGrunnlagsreferanserUnderArbeid = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, vurdertAv, vurdertTidspunkt, behandlingId);
+        if (nyeAvklaringer.size() > 1) {
+            throw new IllegalArgumentException("Støtter kun lagring av én avklaring for bostedsvilkåret samtidig");
+        }
 
-        bostedAvklaringTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param, tidligereAvklaringerUnderArbeid, nyeAvklaringer);
+        Set<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, behandlingId);
 
-        bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereAvklaringerUnderArbeid, alleGrunnlagsreferanserUnderArbeid);
+        inngangsvilkårVurderingTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param,
+            VilkårType.BOSTEDSVILKÅR,
+            tidligereForeslåtteAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList(),
+            nyeAvklaringer.stream().map(a -> a.innhold().hentPeriodeSomDatoIntervallEntitet()).toList());
+
+        bostedAvklaringTjeneste.oppdaterEtterlysninger(behandling, tidligereForeslåtteAvklaringer, nyeForeslåtteAvklaringer);
 
         var historikkinnslag = new Historikkinnslag.Builder()
             .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)

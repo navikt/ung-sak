@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -142,8 +144,8 @@ class BostedsGrunnlagRepositoryTest {
 
         var avklaringerPåNyBehandling = repository.hentGrunnlagHvisEksisterer(nyBehandling.getId())
             .orElseThrow()
-            .getForeslått()
-            .hentPeriodeAvklaringer();
+            .getAvklaringer()
+            .hentForeslåtteAvklaringer();
 
         assertThat(avklaringerPåNyBehandling)
             .extracting(BostedsPeriodeAvklaring::getReferanse)
@@ -151,37 +153,94 @@ class BostedsGrunnlagRepositoryTest {
 
         var avklaringerPåGammelBehandling = repository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
-            .getForeslått()
-            .hentPeriodeAvklaringer();
+            .getAvklaringer()
+            .hentForeslåtteAvklaringer();
 
         assertThat(avklaringerPåGammelBehandling).hasSize(1);
         assertThat(avklaringerPåGammelBehandling.iterator().next().getReferanse()).isEqualTo(opprinnelig.getReferanse());
     }
 
+    @Test
+    void skal_ikke_kopiere_foreslaatte_avklaringer_til_ny_behandling() {
+        var foreslått = lagAvklaring(FOM, TOM);
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(foreslått));
+
+        Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
+        behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
+        repository.kopierGrunnlagFraEksisterendeBehandling(behandling.getId(), nyBehandling.getId());
+
+        var nyttGrunnlag = repository.hentGrunnlagHvisEksisterer(nyBehandling.getId()).orElseThrow();
+        assertThat(nyttGrunnlag.getForeslåtteAvklaringer()).isEmpty();
+        assertThat(nyttGrunnlag.getFerdigstilteAvklaringer()).isEmpty();
+
+        // Forslaget skal fortsatt ligge på den opprinnelige behandlingen
+        assertThat(repository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow().getForeslåtteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getReferanse)
+            .containsExactly(foreslått.getReferanse());
+    }
+
+    @Test
+    void skal_kopiere_ferdigstilte_avklaringer_til_ny_behandling() {
+        var foreslått = lagAvklaring(FOM, TOM);
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(foreslått));
+        repository.ferdigstillForeslåtteAvklaringer(behandling.getId());
+
+        Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
+        behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
+        repository.kopierGrunnlagFraEksisterendeBehandling(behandling.getId(), nyBehandling.getId());
+
+        var nyttGrunnlag = repository.hentGrunnlagHvisEksisterer(nyBehandling.getId()).orElseThrow();
+        assertThat(nyttGrunnlag.getForeslåtteAvklaringer()).isEmpty();
+        assertThat(nyttGrunnlag.getFerdigstilteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getReferanse)
+            .containsExactly(foreslått.getReferanse());
+    }
+
+    @Test
+    void ferdigstilling_skal_beholde_foreslaatte_avklaringer_og_vaere_idempotent() {
+        var foreslått = lagAvklaring(FOM, TOM);
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(foreslått));
+
+        repository.ferdigstillForeslåtteAvklaringer(behandling.getId());
+        repository.ferdigstillForeslåtteAvklaringer(behandling.getId());
+
+        var grunnlag = repository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
+        assertThat(grunnlag.getForeslåtteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getReferanse)
+            .containsExactly(foreslått.getReferanse());
+        assertThat(grunnlag.getFerdigstilteAvklaringer())
+            .extracting(BostedsPeriodeAvklaring::getReferanse)
+            .containsExactly(foreslått.getReferanse());
+    }
+
     private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
         return repository.hentGrunnlagHvisEksisterer(behandling.getId())
             .orElseThrow()
-            .getForeslått()
-            .hentPeriodeAvklaringer()
+            .getAvklaringer()
+            .hentForeslåtteAvklaringer()
             .stream()
             .sorted(Comparator.comparing(a -> a.getPeriode().getFomDato()))
             .toList();
     }
 
-    private static BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom) {
+    private BostedsPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom) {
         return lagAvklaring(fom, tom, "begrunnelse for hvorfor det ikke varsles");
     }
 
-    private static BostedsPeriodeAvklaring lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
-        return new BostedsPeriodeAvklaring(
+    private BostedsPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, String begrunnelse) {
+        return new BostedsPeriodeAvklaringForeslått(
+            UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
             BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM,
             begrunnelse,
             false,
             null,
             "begrunnelse for hvorfor det ikke varsles",
+            BostedsavklaringKildeType.BRUKER,
+            null,
             VURDERT_AV,
             VURDERT_TIDSPUNKT,
-            tom == null ? Avklaringtype.OPPHØR : Avklaringtype.AVSLAG);
+            tom == null ? Avklaringtype.OPPHØR : Avklaringtype.AVSLAG
+        );
     }
 }

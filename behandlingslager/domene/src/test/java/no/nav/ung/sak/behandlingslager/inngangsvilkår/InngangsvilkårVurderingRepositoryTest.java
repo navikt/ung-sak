@@ -1,6 +1,7 @@
 package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.inject.Inject;
+import jakarta.persistence.EntityManager;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
@@ -25,6 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @CdiDbAwareTest
 class InngangsvilkårVurderingRepositoryTest {
+
+    @Inject
+    private EntityManager entityManager;
 
     @Inject
     private FagsakRepository fagsakRepository;
@@ -55,13 +59,13 @@ class InngangsvilkårVurderingRepositoryTest {
         var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(vurdering));
 
-        var grunnlag = repository.hentGrunnlag(behandling.getId());
+        var grunnlag = repository.hentEksisterendeGrunnlag(behandling.getId());
 
         assertThat(grunnlag).isPresent();
         var holder = grunnlag.get().getBistandsvilkårResultatHolder();
         assertThat(holder).isPresent();
         assertThat(holder.get().getVurderinger()).hasSize(1);
-        var lagretVurdering = holder.get().getVurderinger().get(0);
+        var lagretVurdering = holder.get().getVurderinger().iterator().next();
         assertThat(lagretVurdering.getPeriode()).isEqualTo(PERIODE_1);
         assertThat(lagretVurdering.isGodkjent()).isTrue();
         assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isNull();
@@ -74,12 +78,12 @@ class InngangsvilkårVurderingRepositoryTest {
         var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(vurdering));
 
-        var holder = repository.hentGrunnlag(behandling.getId())
+        var holder = repository.hentEksisterendeGrunnlag(behandling.getId())
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
             .orElseThrow();
 
         assertThat(holder.getVurderinger()).hasSize(1);
-        var lagretVurdering = holder.getVurderinger().get(0);
+        var lagretVurdering = holder.getVurderinger().iterator().next();
         assertThat(lagretVurdering.isGodkjent()).isFalse();
         assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
     }
@@ -89,14 +93,14 @@ class InngangsvilkårVurderingRepositoryTest {
         var vurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(vurdering));
 
-        var grunnlag = repository.hentGrunnlag(behandling.getId());
+        var grunnlag = repository.hentEksisterendeGrunnlag(behandling.getId());
 
         assertThat(grunnlag).isPresent();
         assertThat(grunnlag.get().getBistandsvilkårResultatHolder()).as("bistandsholder skal være tom").isEmpty();
         var holder = grunnlag.get().getAndreLivsoppholdsytelserResultatHolder();
         assertThat(holder).isPresent();
         assertThat(holder.get().getVurderinger()).hasSize(1);
-        var lagretVurdering = holder.get().getVurderinger().get(0);
+        var lagretVurdering = holder.get().getVurderinger().iterator().next();
         assertThat(lagretVurdering.isGodkjent()).isFalse();
         assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE);
     }
@@ -109,7 +113,7 @@ class InngangsvilkårVurderingRepositoryTest {
         var bistandVurdering = new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(bistandVurdering));
 
-        var grunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow();
+        var grunnlag = repository.hentEksisterendeGrunnlag(behandling.getId()).orElseThrow();
         assertThat(grunnlag.getBistandsvilkårResultatHolder()).isPresent();
         assertThat(grunnlag.getAndreLivsoppholdsytelserResultatHolder())
             .as("livsopphold-holder skal bevares ved oppdatering av bistand")
@@ -124,7 +128,7 @@ class InngangsvilkårVurderingRepositoryTest {
         var livsoppholdVurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_2, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
 
-        var grunnlag = repository.hentGrunnlag(behandling.getId()).orElseThrow();
+        var grunnlag = repository.hentEksisterendeGrunnlag(behandling.getId()).orElseThrow();
         assertThat(grunnlag.getAndreLivsoppholdsytelserResultatHolder()).isPresent();
         assertThat(grunnlag.getBistandsvilkårResultatHolder())
             .as("bistand-holder skal bevares ved oppdatering av livsopphold")
@@ -142,7 +146,7 @@ class InngangsvilkårVurderingRepositoryTest {
                 new BistandsvilkårResultatPeriode(PERIODE_2, true, null, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))
             ));
 
-        var holder = repository.hentGrunnlag(behandling.getId())
+        var holder = repository.hentEksisterendeGrunnlag(behandling.getId())
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
             .orElseThrow();
 
@@ -156,14 +160,21 @@ class InngangsvilkårVurderingRepositoryTest {
                 new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT),
                 new BistandsvilkårResultatPeriode(PERIODE_2, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)
             ));
+        var opprinneligHolder = repository.hentEksisterendeGrunnlag(behandling.getId())
+            .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
+            .orElseThrow();
+        entityManager.flush();
+        entityManager.clear();
+
 
         // Kun PERIODE_2 oppdateres — PERIODE_1 skal beholdes fra eksisterende
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(new BistandsvilkårResultatPeriode(PERIODE_2, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
 
-        var vurderinger = repository.hentGrunnlag(behandling.getId())
+        BistandsvilkårResultatHolder nyHolder = repository.hentEksisterendeGrunnlag(behandling.getId())
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)
-            .orElseThrow()
+            .orElseThrow();
+        var vurderinger = nyHolder
             .getVurderinger();
 
         assertThat(vurderinger).hasSize(2);
@@ -174,6 +185,16 @@ class InngangsvilkårVurderingRepositoryTest {
         var periode1Vurdering = vurderinger.stream().filter(v -> v.getPeriode().equals(PERIODE_1)).findFirst().orElseThrow();
         assertThat(periode1Vurdering.isGodkjent()).isTrue();
         assertThat(periode1Vurdering.getVurdertAv()).isEqualTo(VURDERT_AV);
+
+        entityManager.flush();
+        entityManager.clear();
+
+        //sikrer at det ikke er endret på opprinnelig holder. Endring på opprinnelig holder kan i verste fall endre på
+        //grunnlag for tidligere behandling, siden holdere
+        opprinneligHolder = entityManager.find(BistandsvilkårResultatHolder.class, opprinneligHolder.getId());
+        assertThat(opprinneligHolder.getVurderinger()).hasSize(2);
+
+
     }
 
     @Test
@@ -187,11 +208,11 @@ class InngangsvilkårVurderingRepositoryTest {
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
         repository.kopier(behandling.getId(), revurdering.getId());
 
-        var kopiert = repository.hentGrunnlag(revurdering.getId()).orElseThrow();
+        var kopiert = repository.hentEksisterendeGrunnlag(revurdering.getId()).orElseThrow();
         assertThat(kopiert.getBistandsvilkårResultatHolder()).isPresent();
         assertThat(kopiert.getAndreLivsoppholdsytelserResultatHolder()).isPresent();
 
-        var original = repository.hentGrunnlag(behandling.getId()).orElseThrow();
+        var original = repository.hentEksisterendeGrunnlag(behandling.getId()).orElseThrow();
         assertThat(kopiert.getBistandsvilkårResultatHolder().get().getId())
             .as("Kopiert grunnlag skal dele samme bistand-holder")
             .isEqualTo(original.getBistandsvilkårResultatHolder().get().getId());
@@ -203,6 +224,6 @@ class InngangsvilkårVurderingRepositoryTest {
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
         repository.kopier(behandling.getId(), revurdering.getId());
 
-        assertThat(repository.hentGrunnlag(revurdering.getId())).isEmpty();
+        assertThat(repository.hentEksisterendeGrunnlag(revurdering.getId())).isEmpty();
     }
 }
