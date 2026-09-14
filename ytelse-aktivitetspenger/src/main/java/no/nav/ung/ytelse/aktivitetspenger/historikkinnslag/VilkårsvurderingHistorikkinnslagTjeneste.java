@@ -47,8 +47,7 @@ public class VilkårsvurderingHistorikkinnslagTjeneste {
             LocalDateSegment<HistorikkinnslagData> sisteEksisterendeSegment = historikkinnslagInput.getEksisterendeVurderinger().segmenter().stream().max(Comparator.naturalOrder()).orElse(null);
             boolean varOpphørFør = sisteEksisterendeSegment != null && sisteEksisterendeSegment.getValue().utfall() == Utfall.IKKE_OPPFYLT;
             if (avslåttTidsserie.isEmpty()) {
-                String tekst = varOpphørFør ? "Opphør ble fjernet" : "Det ble ikke satt en opphørsdato";
-                historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje(tekst));
+                historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje("Opphør ble fjernet"));
             } else {
                 Avslagsårsak avslagsårsak = avslåttTidsserie.segmenter().getFirst().getValue().avslagsårsak();
                 LocalDate opphørsdato = sisteInnvilgedeDato != null ? sisteInnvilgedeDato.plusDays(1) : historikkinnslagInput.getNyeVurderinger().getMinLocalDate();

@@ -187,7 +187,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Det ble ikke satt en opphørsdato", 0)
+            HistorikkinnslagLinje.tekst("Vilkåret ble vurdert uten endringer i utfall.", 0)
         );
     }
 
@@ -214,7 +214,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Opphør ble fjernet", 0)
+            HistorikkinnslagLinje.tekst("Opphør ble fjernet.", 0)
         );
     }
 
@@ -314,7 +314,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Perioden 03.09.2027 - 09.09.2027 har ikke lenger en vurdering", 0)
+            HistorikkinnslagLinje.tekst("Perioden 03.09.2027 - 09.09.2027 har ikke lenger en vurdering.", 0)
         );
     }
 }
