@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -38,15 +39,22 @@ public class VilkårsvurderingHistorikkinnslagTjeneste {
         Historikkinnslag.Builder historikkinnslagBuilder = lagBuilder(fagsakId, historikkinnslagInput);
 
         if (historikkinnslagInput.getEksisterendeVurderinger().equals(historikkinnslagInput.getNyeVurderinger())) {
-
             historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje("Vilkåret ble vurdert uten endringer i utfall."));
         } else if (historikkinnslagInput.getGjelderOpphør()) {
             LocalDateTimeline<HistorikkinnslagData> innvilgetTidsserie = historikkinnslagInput.getNyeVurderinger().filterValue(v -> v.utfall() == Utfall.OPPFYLT);
             LocalDateTimeline<HistorikkinnslagData> avslåttTidsserie = historikkinnslagInput.getNyeVurderinger().disjoint(innvilgetTidsserie);
             LocalDate sisteInnvilgedeDato = innvilgetTidsserie.isEmpty() ? null : innvilgetTidsserie.getMaxLocalDate();
-            Avslagsårsak avslagsårsak = avslåttTidsserie.segmenter().getFirst().getValue().avslagsårsak();
-            LocalDate opphørsdato = sisteInnvilgedeDato != null ? sisteInnvilgedeDato.plusDays(1) : historikkinnslagInput.getNyeVurderinger().getMinLocalDate();
-            historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje("Opphørsdato satt til " + HistorikkinnslagLinjeBuilder.format(opphørsdato) + ". " + HistorikkinnslagLinjeBuilder.format(avslagsårsak)));
+            LocalDateSegment<HistorikkinnslagData> sisteEksisterendeSegment = historikkinnslagInput.getEksisterendeVurderinger().segmenter().stream().max(Comparator.naturalOrder()).orElse(null);
+            boolean varOpphørFør = sisteEksisterendeSegment != null && sisteEksisterendeSegment.getValue().utfall() == Utfall.IKKE_OPPFYLT;
+            if (avslåttTidsserie.isEmpty()) {
+                String tekst = varOpphørFør ? "Opphør ble fjernet" : "Det ble ikke satt en opphørsdato";
+                historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje(tekst));
+            } else {
+                Avslagsårsak avslagsårsak = avslåttTidsserie.segmenter().getFirst().getValue().avslagsårsak();
+                LocalDate opphørsdato = sisteInnvilgedeDato != null ? sisteInnvilgedeDato.plusDays(1) : historikkinnslagInput.getNyeVurderinger().getMinLocalDate();
+                String tekst = varOpphørFør ? "Opphørsdato endret til " : "Opphørsdato satt til ";
+                historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje(tekst + HistorikkinnslagLinjeBuilder.format(opphørsdato) + ". " + HistorikkinnslagLinjeBuilder.format(avslagsårsak)));
+            }
         } else {
             LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> sammenligningTidslinje = historikkinnslagInput.getEksisterendeVurderinger().crossJoin(historikkinnslagInput.getNyeVurderinger(), (intervall, lhs, rhs) -> {
                 HistorikkinnslagData lhsVerdi = lhs != null ? lhs.getValue() : null;
