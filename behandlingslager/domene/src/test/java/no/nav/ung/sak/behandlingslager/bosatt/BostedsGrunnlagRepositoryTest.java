@@ -131,6 +131,24 @@ class BostedsGrunnlagRepositoryTest {
     }
 
     @Test
+    void skal_erstatte_søknadsinformasjon_når_ny_søknad_kommer_for_samme_virkningsdato() {
+        // setUp har allerede lagret jp-1 for FOM (virkningsdato) med erBosattITrondheim=true.
+        // Ny søknad for samme virkningsdato med ny journalpostId og endret opplysning skal overskrive den forrige.
+        repository.lagreInformasjonFraSøknad(behandling.getId(), "jp-2", FOM, false);
+
+        var informasjon = repository.hentGrunnlagHvisEksisterer(behandling.getId())
+            .orElseThrow()
+            .getOppgittFraSøknad()
+            .getInformasjon();
+
+        assertThat(informasjon).hasSize(1);
+        var eneste = informasjon.iterator().next();
+        assertThat(eneste.getJournalpostId()).isEqualTo("jp-2");
+        assertThat(eneste.getFomDato()).isEqualTo(FOM);
+        assertThat(eneste.isErBosattITrondheim()).isFalse();
+    }
+
+    @Test
     void skal_opprette_nytt_grunnlag_med_ny_avklaring_uten_å_mutere_avklaringer_pa_tidligere_behandling() {
         var opprinnelig = lagAvklaring(FOM, TOM);
         repository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(opprinnelig));
