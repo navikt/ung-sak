@@ -40,7 +40,11 @@ class BostedsinformasjonFraSøknadHolder extends BaseEntitet {
     }
 
     void leggTilInformasjon(BostedsinformasjonFraSøknad info) {
+        //ikke vits å legge til samme informasjon to ganger:
         informasjon.removeIf(i -> i.getJournalpostId().equals(info.getJournalpostId()));
+        //vi får normalt ikke ny søknad for samme virkningsdato, men det kan skje dersom bruker får avslag samme dag og søker på nytt
+        //ny søknad overskriver opplysninger fra samme søknad. Historikk finnes i inaktive grunnlag inntil de evt. slettes
+        informasjon.removeIf(i -> i.getFomDato().equals(info.getFomDato()));
         informasjon.add(info);
     }
 
