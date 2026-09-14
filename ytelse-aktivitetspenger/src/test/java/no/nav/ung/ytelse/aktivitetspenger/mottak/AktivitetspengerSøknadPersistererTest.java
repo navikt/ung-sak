@@ -68,7 +68,7 @@ class AktivitetspengerSøknadPersistererTest {
     @Test
     void skal_lagre_tom_bostedliste_når_ingen_bosteder_oppgitt() {
         var søknadsperiode = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
-        var utenlandsopphold = Utenlandsopphold.tomt();
+        var utenlandsopphold = new Utenlandsopphold(Map.of());
 
         persister.lagreMedlemskapGrunnlag(utenlandsopphold, søknadsperiode, JP, behandling.getId());
 
