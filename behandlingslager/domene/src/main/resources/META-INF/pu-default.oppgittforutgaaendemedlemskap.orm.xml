@@ -7,7 +7,7 @@
     <sequence-generator name="SEQ_OPPGITT_FMEDLEMSKAP_HOLDER" allocation-size="50" sequence-name="SEQ_OPPGITT_FMEDLEMSKAP_HOLDER"/>
     <sequence-generator name="SEQ_OPPGITT_FMEDLEMSKAP" allocation-size="50" sequence-name="SEQ_OPPGITT_FMEDLEMSKAP"/>
     <sequence-generator name="SEQ_GR_OPPGITT_FMEDLEMSKAP" allocation-size="50" sequence-name="SEQ_GR_OPPGITT_FMEDLEMSKAP"/>
-    <sequence-generator name="SEQ_OPPGITT_FMEDLEMSKAP_BOSTED" allocation-size="50" sequence-name="SEQ_OPPGITT_FMEDLEMSKAP_BOSTED"/>
+    <sequence-generator name="SEQ_OPPGITT_FMEDLEMSKAP_UTENLANDSOPPHOLD" allocation-size="50" sequence-name="SEQ_OPPGITT_FMEDLEMSKAP_UTENLANDSOPPHOLD"/>
 
     <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode"/>

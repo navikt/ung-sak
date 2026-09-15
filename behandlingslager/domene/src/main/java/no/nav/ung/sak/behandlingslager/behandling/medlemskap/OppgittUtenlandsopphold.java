@@ -12,12 +12,12 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity(name = "OppgittUtenlandsopphold")
-@Table(name = "OPPGITT_FMEDLEMSKAP_BOSTED")
+@Table(name = "OPPGITT_FMEDLEMSKAP_UTENLANDSOPPHOLD")
 @Immutable
 public class OppgittUtenlandsopphold extends BaseEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OPPGITT_FMEDLEMSKAP_BOSTED")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OPPGITT_FMEDLEMSKAP_UTENLANDSOPPHOLD")
     private Long id;
 
     @Type(PostgreSQLRangeType.class)
