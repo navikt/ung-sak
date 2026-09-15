@@ -11,10 +11,10 @@ import org.hibernate.annotations.Type;
 import java.time.LocalDate;
 import java.util.Objects;
 
-@Entity(name = "OppgittBosted")
+@Entity(name = "OppgittUtenlandsopphold")
 @Table(name = "OPPGITT_FMEDLEMSKAP_BOSTED")
 @Immutable
-public class OppgittBosted extends BaseEntitet {
+public class OppgittUtenlandsopphold extends BaseEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_OPPGITT_FMEDLEMSKAP_BOSTED")
@@ -27,10 +27,10 @@ public class OppgittBosted extends BaseEntitet {
     @Column(name = "landkode", nullable = false)
     private String landkode;
 
-    public OppgittBosted() {
+    public OppgittUtenlandsopphold() {
     }
 
-    public OppgittBosted(LocalDate fom, LocalDate tom, String landkode) {
+    public OppgittUtenlandsopphold(LocalDate fom, LocalDate tom, String landkode) {
         Objects.requireNonNull(fom, "fom");
         Objects.requireNonNull(tom, "tom");
         Objects.requireNonNull(landkode, "landkode");
@@ -38,7 +38,7 @@ public class OppgittBosted extends BaseEntitet {
         this.landkode = landkode;
     }
 
-    OppgittBosted(OppgittBosted other) {
+    OppgittUtenlandsopphold(OppgittUtenlandsopphold other) {
         this.periode = other.periode;
         this.landkode = other.landkode;
     }
@@ -59,7 +59,7 @@ public class OppgittBosted extends BaseEntitet {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        OppgittBosted that = (OppgittBosted) o;
+        OppgittUtenlandsopphold that = (OppgittUtenlandsopphold) o;
         return Objects.equals(periode, that.periode)
             && Objects.equals(landkode, that.landkode);
     }
@@ -71,7 +71,7 @@ public class OppgittBosted extends BaseEntitet {
 
     @Override
     public String toString() {
-        return "OppgittBosted{" +
+        return "OppgittUtenlandsopphold{" +
             "periode=" + periode +
             ", landkode='" + landkode + '\'' +
             '}';

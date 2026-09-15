@@ -4,11 +4,10 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Språk;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
@@ -79,13 +78,13 @@ public class AktivitetspengerSøknadPersisterer {
         return Språkkode.UDEFINERT;
     }
 
-    public void lagreMedlemskapGrunnlag(Utenlandsopphold utenlandsopphold, no.nav.k9.søknad.felles.type.Periode søknadsperiode, JournalpostId journalpostId, Long behandlingId) {
+    public void lagreMedlemskapGrunnlag(no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold utenlandsopphold, no.nav.k9.søknad.felles.type.Periode søknadsperiode, JournalpostId journalpostId, Long behandlingId) {
         LocalDate søknadsperiodeFom = søknadsperiode.getFraOgMed();
         LocalDate forutgåendeFom = søknadsperiodeFom.minusYears(5);
         LocalDate forutgåendeTom = søknadsperiodeFom.minusDays(1);
 
-        Set<OppgittBosted> bosteder = utenlandsopphold.perioder().entrySet().stream()
-            .map(entry -> new OppgittBosted(
+        Set<OppgittUtenlandsopphold> bosteder = utenlandsopphold.perioder().entrySet().stream()
+            .map(entry -> new OppgittUtenlandsopphold(
                 entry.getKey().getFraOgMed(),
                 entry.getKey().getTilOgMed(),
                 entry.getValue().land().getLandkode()))

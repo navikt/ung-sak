@@ -12,6 +12,6 @@
     <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode"/>
     <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag"/>
-    <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted"/>
+    <entity class="no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold"/>
 
 </entity-mappings>

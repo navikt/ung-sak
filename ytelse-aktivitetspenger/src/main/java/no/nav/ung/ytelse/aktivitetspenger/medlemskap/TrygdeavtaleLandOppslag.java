@@ -67,7 +67,7 @@ public final class TrygdeavtaleLandOppslag {
 
     /**
      * Sjekker om et land er et gyldig EØS-/trygdeavtaleland fra og med den oppgitte startdatoen.
-     * Bostedsperioden anses som gyldig dersom den starter på eller etter landets inntredelsesdato.
+     * Utenlandsopphold anses som gyldig dersom den starter på eller etter landets inntredelsesdato.
      */
     public static boolean erGyldigTrygdeavtaleLand(Landkode landkode, LocalDate fom) {
         Objects.requireNonNull(landkode, "landkode kan ikke være null");

@@ -52,8 +52,8 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         var fom = LocalDate.of(2019, 7, 1);
         var tom = LocalDate.of(2024, 6, 30);
         var bosteder = Set.of(
-            new OppgittBosted(LocalDate.of(2019, 7, 1), LocalDate.of(2022, 12, 31), "SWE"),
-            new OppgittBosted(LocalDate.of(2023, 1, 1), LocalDate.of(2024, 6, 30), "DEU")
+            new OppgittUtenlandsopphold(LocalDate.of(2019, 7, 1), LocalDate.of(2022, 12, 31), "SWE"),
+            new OppgittUtenlandsopphold(LocalDate.of(2023, 1, 1), LocalDate.of(2024, 6, 30), "DEU")
         );
 
         repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom, tom, bosteder);
@@ -64,7 +64,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         var periode = grunnlag.getOppgittePerioder().iterator().next();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
-        assertThat(periode.getBostederUtland()).hasSize(2);
+        assertThat(periode.getUtenlandsopphold()).hasSize(2);
         assertThat(periode.getJournalpostId()).isEqualTo(JP1);
         assertThat(grunnlag.isAktiv()).isTrue();
     }
@@ -78,18 +78,18 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
-        assertThat(grunnlag.getOppgittePerioder().iterator().next().getBostederUtland()).isEmpty();
+        assertThat(grunnlag.getOppgittePerioder().iterator().next().getUtenlandsopphold()).isEmpty();
     }
 
     @Test
     void skal_legge_til_perioder_ved_ny_søknad_på_samme_behandling() {
         var fom1 = LocalDate.of(2019, 7, 1);
         var tom1 = LocalDate.of(2024, 6, 30);
-        repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom1, tom1, Set.of(new OppgittBosted(fom1, tom1, "SWE")));
+        repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom1, tom1, Set.of(new OppgittUtenlandsopphold(fom1, tom1, "SWE")));
 
         var fom2 = LocalDate.of(2020, 1, 1);
         var tom2 = LocalDate.of(2025, 1, 1);
-        repository.leggTilOppgittPeriode(behandling.getId(), JP2, fom2, tom2, Set.of(new OppgittBosted(fom2, tom2, "FIN")));
+        repository.leggTilOppgittPeriode(behandling.getId(), JP2, fom2, tom2, Set.of(new OppgittUtenlandsopphold(fom2, tom2, "FIN")));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
@@ -107,7 +107,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         var fom = LocalDate.of(2019, 7, 1);
         var tom = LocalDate.of(2024, 6, 30);
         repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom, tom,
-            Set.of(new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "DEU")));
+            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "DEU")));
 
         Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
@@ -119,7 +119,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         assertThat(kopiert.getOppgittePerioder()).hasSize(1);
         var periode = kopiert.getOppgittePerioder().iterator().next();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
-        assertThat(periode.getBostederUtland()).hasSize(1);
+        assertThat(periode.getUtenlandsopphold()).hasSize(1);
 
         var original = repository.hentGrunnlag(behandling.getId());
         assertThat(kopiert.getHolder().getId())
@@ -130,7 +130,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
     @Test
     void skal_kopiere_holder_ved_ny_søknad_på_revurdering_med_delt_holder() {
         repository.leggTilOppgittPeriode(behandling.getId(), JP1, LocalDate.of(2019, 7, 1), LocalDate.of(2024, 6, 30),
-            Set.of(new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "DEU")));
+            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "DEU")));
 
         Behandling revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
@@ -139,7 +139,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         var holderIdFørNySøknad = repository.hentGrunnlag(revurdering.getId()).getHolder().getId();
 
         repository.leggTilOppgittPeriode(revurdering.getId(), JP2, LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1),
-            Set.of(new OppgittBosted(LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1), "FIN")));
+            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1), "FIN")));
 
         var revGrunnlag = repository.hentGrunnlag(revurdering.getId());
         assertThat(revGrunnlag.getOppgittePerioder()).hasSize(2);

@@ -19,7 +19,7 @@ public class ForutgåendeMedlemskapTjeneste {
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
     }
 
-    public List<MedlemskapsPeriodeDto> hentBostederSomDto(Long behandlingId) {
+    public List<MedlemskapsPeriodeDto> hentUtenlandsoppholdSomDto(Long behandlingId) {
         return forutgåendeMedlemskapRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(ForutgåendeMedlemskapTjeneste::mapTilDto)
             .orElse(List.of());
@@ -27,9 +27,9 @@ public class ForutgåendeMedlemskapTjeneste {
 
     private static List<MedlemskapsPeriodeDto> mapTilDto(OppgittForutgåendeMedlemskapGrunnlag grunnlag) {
         return grunnlag.getOppgittePerioder().stream()
-            .flatMap(p -> p.getBostederUtland().stream().map(bosted -> {
-                var landkode = bosted.getLandkode();
-                var periode = bosted.getPeriode();
+            .flatMap(p -> p.getUtenlandsopphold().stream().map(utenlandsopphold -> {
+                var landkode = utenlandsopphold.getLandkode();
+                var periode = utenlandsopphold.getPeriode();
 
                 return new MedlemskapsPeriodeDto(
                     new Periode(periode.getFomDato(), periode.getTomDato()),

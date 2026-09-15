@@ -54,7 +54,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
 
-        var bostederDto = forutgåendeMedlemskapTjeneste.hentBostederSomDto(param.getBehandlingId());
+        var bostederDto = forutgåendeMedlemskapTjeneste.hentUtenlandsoppholdSomDto(param.getBehandlingId());
         String regelInput = new VilkårJsonObjectMapper().writeValueAsString(bostederDto);
 
         relevantePerioder.stream()

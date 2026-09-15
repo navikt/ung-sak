@@ -38,7 +38,7 @@ public class OppgittForutgåendeMedlemskapRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void leggTilOppgittPeriode(Long behandlingId, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
+    public void leggTilOppgittPeriode(Long behandlingId, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Set<OppgittUtenlandsopphold> bosteder) {
         var eksisterende = hentEksisterendeGrunnlag(behandlingId);
         var nyPeriode = new OppgittForutgåendeMedlemskapPeriode(journalpostId, fom, tom, bosteder);
 

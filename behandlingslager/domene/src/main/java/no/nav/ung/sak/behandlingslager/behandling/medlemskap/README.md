@@ -18,4 +18,4 @@ Grunnlag (per behandling, aktiv-flagg)
 | `OppgittForutgåendeMedlemskapGrunnlag` | Knytter en behandling til en holder. Kun én aktiv rad per behandling. |
 | `OppgittForutgåendeMedlemskapHolder` | Aggregator som samler alle søknadsperioder. Immutable — nye opplysninger gir ny holder. Deles mellom behandlinger ved revurdering. |
 | `OppgittForutgåendeMedlemskapPeriode` | Immutable data fra én søknad (journalpostId, mottattTidspunkt, forutgående periode, bosteder). |
-| `OppgittBosted` | Enkeltbosted i utlandet med landkode (ISO 3166-1 alpha-3) og periode. |
+| `OppgittUtenlandsopphold` | Enkeltbosted i utlandet med landkode (ISO 3166-1 alpha-3) og periode. |

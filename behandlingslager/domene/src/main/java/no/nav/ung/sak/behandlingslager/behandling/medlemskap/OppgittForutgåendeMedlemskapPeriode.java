@@ -36,25 +36,25 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
     @BatchSize(size = 20)
     @JoinColumn(name = "oppgitt_fmedlemskap_id", nullable = false)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<OppgittBosted> bostederUtland = new LinkedHashSet<>();
+    private Set<OppgittUtenlandsopphold> utenlandsopphold = new LinkedHashSet<>();
 
     public OppgittForutgåendeMedlemskapPeriode() {
     }
 
-    public OppgittForutgåendeMedlemskapPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
+    public OppgittForutgåendeMedlemskapPeriode(JournalpostId journalpostId, LocalDate fom, LocalDate tom, Set<OppgittUtenlandsopphold> bosteder) {
         Objects.requireNonNull(journalpostId, "journalpostId");
         Objects.requireNonNull(fom, "fom");
         Objects.requireNonNull(tom, "tom");
         this.journalpostId = journalpostId.getVerdi();
         this.periode = Range.closed(fom, tom);
-        this.bostederUtland = bosteder != null ? new LinkedHashSet<>(bosteder) : new LinkedHashSet<>();
+        this.utenlandsopphold = bosteder != null ? new LinkedHashSet<>(bosteder) : new LinkedHashSet<>();
     }
 
     OppgittForutgåendeMedlemskapPeriode(OppgittForutgåendeMedlemskapPeriode other) {
         this.journalpostId = other.journalpostId;
         this.periode = other.periode;
-        this.bostederUtland = other.bostederUtland.stream()
-            .map(OppgittBosted::new)
+        this.utenlandsopphold = other.utenlandsopphold.stream()
+            .map(OppgittUtenlandsopphold::new)
             .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 
@@ -70,8 +70,8 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
         return DatoIntervallEntitet.fra(periode);
     }
 
-    public Set<OppgittBosted> getBostederUtland() {
-        return Collections.unmodifiableSet(bostederUtland);
+    public Set<OppgittUtenlandsopphold> getUtenlandsopphold() {
+        return Collections.unmodifiableSet(utenlandsopphold);
     }
 
     @Override
@@ -81,11 +81,11 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
         OppgittForutgåendeMedlemskapPeriode that = (OppgittForutgåendeMedlemskapPeriode) o;
         return Objects.equals(journalpostId, that.journalpostId)
             && Objects.equals(periode, that.periode)
-            && Objects.equals(bostederUtland, that.bostederUtland);
+            && Objects.equals(utenlandsopphold, that.utenlandsopphold);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId, periode, bostederUtland);
+        return Objects.hash(journalpostId, periode, utenlandsopphold);
     }
 }

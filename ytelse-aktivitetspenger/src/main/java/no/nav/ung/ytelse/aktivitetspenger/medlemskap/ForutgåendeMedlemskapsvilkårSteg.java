@@ -113,39 +113,39 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         }
 
         var grunnlag = grunnlagOpt.get();
-        var bostederTidslinje = lagBostederTidslinje(grunnlag, fagsakId);
+        var medlemskapslandTidslinje = lagForutgåendeMedlemskapslandTidslinje(grunnlag, fagsakId);
 
         var stegerVurderinger = perioderTilVurdering.stream()
-            .map(periode -> vurder(periode, bostederTidslinje))
+            .map(periode -> vurder(periode, medlemskapslandTidslinje))
             .toList();
 
         var trengerManuellVurdering = stegerVurderinger.stream()
             .anyMatch(v -> !v.vurdering().filterValue(u -> u != Utfall.OPPFYLT).isEmpty());
 
         if (trengerManuellVurdering) {
-            log.info("Fant bosteder som ikke har trygdeavtale, lager aksjonspunkt.");
+            log.info("Fant utenlandsopphold som ikke har trygdeavtale, lager aksjonspunkt.");
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
-        oppfyllVilkår(behandlingId, bostederTidslinje, stegerVurderinger);
+        oppfyllVilkår(behandlingId, medlemskapslandTidslinje, stegerVurderinger);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static StegVurdering vurder(DatoIntervallEntitet periodeTilVurdering, LocalDateTimeline<String> bostederTidslinje) {
+    private static StegVurdering vurder(DatoIntervallEntitet periodeTilVurdering, LocalDateTimeline<String> utenlandsoppholdTidslinje) {
         LocalDate virkningsdato = periodeTilVurdering.getFomDato();
         var forutgåendePeriodeTilVurdering = new LocalDateInterval(virkningsdato.minusYears(5), virkningsdato.minusDays(1));
-        var bostedVurdering = new LocalDateTimeline<>(forutgåendePeriodeTilVurdering, Boolean.TRUE)
-            .combine(bostederTidslinje, ForutgåendeMedlemskapsvilkårSteg::vurderBosted, JoinStyle.LEFT_JOIN);
-        return new StegVurdering(periodeTilVurdering, forutgåendePeriodeTilVurdering, bostedVurdering);
+        var forutgåendeMedlemskapsvurdering = new LocalDateTimeline<>(forutgåendePeriodeTilVurdering, Boolean.TRUE)
+            .combine(utenlandsoppholdTidslinje, ForutgåendeMedlemskapsvilkårSteg::vurderUtenlandsopphold, JoinStyle.LEFT_JOIN);
+        return new StegVurdering(periodeTilVurdering, forutgåendePeriodeTilVurdering, forutgåendeMedlemskapsvurdering);
     }
 
-    private void oppfyllVilkår(Long behandlingId, LocalDateTimeline<String> bostederTidslinje, List<StegVurdering> stegVurderinger) {
+    private void oppfyllVilkår(Long behandlingId, LocalDateTimeline<String> utenlandsoppholdTidslinje, List<StegVurdering> stegVurderinger) {
         var jsonMapper = new VilkårJsonObjectMapper();
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandlingId));
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
 
         stegVurderinger.forEach(stegVurdering -> {
-            var regelInput = jsonMapper.writeValueAsString(new RegelInput(bostederTidslinje));
+            var regelInput = jsonMapper.writeValueAsString(new RegelInput(utenlandsoppholdTidslinje));
             var regelEvaluering = jsonMapper.writeValueAsString(stegVurdering);
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(stegVurdering.periodeTilVurdering())
                 .medUtfall(Utfall.OPPFYLT)
@@ -158,7 +158,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         vilkårResultatRepository.lagre(behandlingId, vilkårResultatBuilder.build());
     }
 
-    private static LocalDateSegment<Utfall> vurderBosted(LocalDateInterval intervall, LocalDateSegment<Boolean> forutgåendePeriodeTilVurdering, LocalDateSegment<String> landkode) {
+    private static LocalDateSegment<Utfall> vurderUtenlandsopphold(LocalDateInterval intervall, LocalDateSegment<Boolean> forutgåendePeriodeTilVurdering, LocalDateSegment<String> landkode) {
         if (landkode == null || landkode.getValue() == null) {
             return new LocalDateSegment<>(intervall, Utfall.IKKE_VURDERT);
         }
@@ -168,7 +168,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         return new LocalDateSegment<>(intervall, Utfall.IKKE_OPPFYLT);
     }
 
-    private LocalDateTimeline<String> lagBostederTidslinje(OppgittForutgåendeMedlemskapGrunnlag grunnlag, Long fagsakId) {
+    private LocalDateTimeline<String> lagForutgåendeMedlemskapslandTidslinje(OppgittForutgåendeMedlemskapGrunnlag grunnlag, Long fagsakId) {
         var journalpostIder = grunnlag.getOppgittePerioder().stream()
             .map(OppgittForutgåendeMedlemskapPeriode::getJournalpostId)
             .toList();
@@ -186,12 +186,12 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
 
         var antattBostedNorgeTidslinje = new LocalDateTimeline<>(nyestePeriode.getPeriode().getFomDato(), nyestePeriode.getPeriode().getTomDato(), Landkode.NORGE.getLandkode());
 
-        var bostederUtlandTidslinje = new LocalDateTimeline<>(
-            nyestePeriode.getBostederUtland().stream()
+        var utenlandsoppholdTidslinje = new LocalDateTimeline<>(
+            nyestePeriode.getUtenlandsopphold().stream()
                 .map(b -> new LocalDateSegment<>(b.getPeriode().getFomDato(), b.getPeriode().getTomDato(), b.getLandkode()))
                 .toList());
 
-        return bostederUtlandTidslinje.crossJoin(antattBostedNorgeTidslinje);
+        return utenlandsoppholdTidslinje.crossJoin(antattBostedNorgeTidslinje);
     }
 
     private static LocalDateTimeline<Boolean> lagAvslåttTidslinje(Vilkårene vilkårene) {
