@@ -68,7 +68,7 @@ public class LokalkontorBeslutteVilkårAksjonspunkt {
             totrinnsvurderinger.add(vurderingBuilder.build());
         }
         totrinnTjeneste.settNyeTotrinnaksjonspunktvurderinger(behandling, totrinnsvurderinger);
-        lokalKontorTotrinnHistorikkinnslagTjeneste.lagHistorikkinnslagFattVedtak(behandling);
+        lokalKontorTotrinnHistorikkinnslagTjeneste.lagHistorikkinnslagBeslutteVilkår(behandling);
 
         // Noe spesialhåndtering ifm totrinn og tilbakeføring fra FVED
         behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, skalReåpnes, true);

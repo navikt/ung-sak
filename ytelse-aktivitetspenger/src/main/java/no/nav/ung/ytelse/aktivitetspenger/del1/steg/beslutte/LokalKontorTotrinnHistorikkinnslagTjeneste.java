@@ -38,7 +38,7 @@ public class LokalKontorTotrinnHistorikkinnslagTjeneste {
         this.behandlingAnsvarligRepository = behandlingAnsvarligRepository;
     }
 
-    public void lagHistorikkinnslagFattVedtak(Behandling behandling) {
+    public void lagHistorikkinnslagBeslutteVilkår(Behandling behandling) {
         boolean erTotrinn = behandlingAnsvarligRepository.erTotrinnsBehandling(behandling.getId(), BehandlingDel.LOKAL);
 
         if (erTotrinn) {
