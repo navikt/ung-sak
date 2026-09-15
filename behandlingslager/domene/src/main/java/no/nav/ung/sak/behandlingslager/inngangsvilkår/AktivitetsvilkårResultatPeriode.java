@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.AktivitetsvilkåretIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
@@ -92,6 +93,10 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
         return id;
     }
 
+    public VilkårType getVilkårType() {
+        return VilkårType.AKTIVITETSVILKÅR;
+    }
+
     public DatoIntervallEntitet getPeriode() {
         return DatoIntervallEntitet.fra(periode);
     }
@@ -114,6 +119,10 @@ public class AktivitetsvilkårResultatPeriode extends BaseEntitet {
 
     public String getFritekstVurderingBrev() {
         return fritekstVurderingBrev;
+    }
+
+    public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
+        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {
