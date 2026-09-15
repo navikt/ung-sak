@@ -29,13 +29,13 @@ import no.nav.ung.sak.db.util.CdiDbAwareTest;
 @CdiDbAwareTest
 public class BehandlingskontrollEventPublisererTest {
     private final BehandlingType behandlingType = BehandlingType.FØRSTEGANGSSØKNAD;
-    private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.FORELDREPENGER;
+    private final FagsakYtelseType fagsakYtelseType = FagsakYtelseType.AKTIVITETSPENGER;
 
     private static final BehandlingStegType STEG_1 = BehandlingStegType.INNHENT_REGISTEROPP;
     private static final BehandlingStegType STEG_2 = BehandlingStegType.KONTROLLER_REGISTER_INNTEKT;
     private static final BehandlingStegType STEG_3 = BehandlingStegType.VURDER_KOMPLETTHET;
 
-    private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_TILBAKETREKK;
+    private static final BehandlingStegType STEG_4 = BehandlingStegType.VURDER_BOSTEDVILKÅR;
 
     @Inject
     BehandlingskontrollEventPubliserer eventPubliserer;
@@ -143,7 +143,7 @@ public class BehandlingskontrollEventPublisererTest {
     public void skal_fyre_event_for_behandlingskontroll_tilbakeføring_ved_prosessering() throws Exception {
         // Arrange
         TestScenario scenario = nyttScenario(STEG_3);
-        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_TILBAKETREKK, STEG_4);
+        scenario.leggTilAksjonspunkt(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR, STEG_4);
 
         Behandling behandling = scenario.lagre(serviceProvider);
 
@@ -200,7 +200,7 @@ public class BehandlingskontrollEventPublisererTest {
         // Arrange - noen utvalge, tilfeldige aksjonspunkter
         AksjonspunktDefinisjon a0_1 = AksjonspunktDefinisjon.KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST;
         AksjonspunktDefinisjon a1_1 = AksjonspunktDefinisjon.VURDER_FEILUTBETALING;
-        AksjonspunktDefinisjon a2_1 = AksjonspunktDefinisjon.VURDER_TILBAKETREKK;
+        AksjonspunktDefinisjon a2_1 = AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR;
 
         DummySteg steg = new DummySteg();
         DummySteg steg0 = new DummySteg(opprettForAksjonspunkt(a2_1));
