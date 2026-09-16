@@ -1297,9 +1297,9 @@
         "x-enum-varnames" : [ "BARN_IKKE_REGISTRERT_FOLKEREGISTER", "ARBEIDS_I_STØNADSPERIODEN", "BEREGNINGSGRUNNLAG_UNDER_HALV_G", "BRUKER_REGISTRERT_UTVANDRET", "ARBEID_I_UTLANDET", "IKKE_LOVLIG_OPPHOLD", "OPPTJENING_IKKE_OPPFYLT", "MOR_AKTIVITET_IKKE_OPPFYLT", "ANNET" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon" : {
-        "enum" : [ "5015", "5016", "5200", "5100", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "5130", "5140", "5144", "5141", "5143", "5142", "6006", "5301", "6100", "7001", "7003", "7005", "7014", "7040", "7041", "7042", "8000", "5082", "5035", "7100", "UNDEFINED" ],
+        "enum" : [ "5015", "5016", "5200", "5100", "5017", "5018", "5028", "5055", "5056", "5084", "5085", "5090", "5077", "5130", "5140", "5145", "5144", "5141", "5146", "5143", "5142", "6006", "5301", "6100", "7001", "7003", "7005", "7014", "7040", "7041", "7042", "8000", "5082", "5035", "7100", "UNDEFINED" ],
         "type" : "string",
-        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "LOKALKONTOR_BESLUTTER_VILKÅR", "LOKALKONTOR_FORESLÅR_VILKÅR", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "VURDER_FAKTA_OM_BOSTED", "VURDER_BOSTEDVILKÅR", "VURDER_FAKTA_OM_BISTAND", "VURDER_BISTANDSVILKÅR", "VURDER_AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "AVKLAR_GYLDIG_MEDLEMSKAP", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE", "AUTO_SATT_PÅ_VENT_ETTERLYST_BISTANDUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
+        "x-enum-varnames" : [ "FORESLÅ_VEDTAK", "FATTER_VEDTAK", "LOKALKONTOR_BESLUTTER_VILKÅR", "LOKALKONTOR_FORESLÅR_VILKÅR", "SØKERS_OPPLYSNINGSPLIKT_MANU", "VEDTAK_UTEN_TOTRINNSKONTROLL", "FORESLÅ_VEDTAK_MANUELT", "KONTROLLER_REVURDERINGSBEHANDLING_VARSEL_VED_UGUNST", "KONTROLL_AV_MANUELT_OPPRETTET_REVURDERINGSBEHANDLING", "VURDER_FEILUTBETALING", "SJEKK_TILBAKEKREVING", "VURDER_TILBAKETREKK", "KONTROLLER_OPPLYSNINGER_OM_SØKNADSFRIST", "VURDER_FAKTA_OM_BOSTED", "VURDER_BOSTEDVILKÅR", "VURDER_BOSTEDSVILKÅR_OPPHØR", "VURDER_FAKTA_OM_BISTAND", "VURDER_BISTANDSVILKÅR", "VURDER_BISTANDSVILKÅR_OPPHØR", "VURDER_AKTIVITETSVILKÅR", "VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "OVERSTYRING_AV_SØKNADSFRISTVILKÅRET", "AVKLAR_GYLDIG_MEDLEMSKAP", "OVERSTYRING_AV_INNTEKT", "AUTO_MANUELT_SATT_PÅ_VENT", "AUTO_VENTER_PÅ_KOMPLETT_SØKNAD", "AUTO_SATT_PÅ_VENT_REVURDERING", "AUTO_SATT_PÅ_VENT_RAPPORTERINGSFRIST", "AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE", "AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE", "AUTO_SATT_PÅ_VENT_ETTERLYST_BISTANDUTTALELSE", "KONTROLLER_INNTEKT", "VURDERING_AV_FORMKRAV_KLAGE_VEDTAKSINSTANS", "MANUELL_VURDERING_AV_KLAGE_VEDTAKSINSTANS", "AUTO_OVERFØRT_NK", "UNDEFINED" ]
       },
       "ung.kodeverk.behandling.aksjonspunkt.AksjonspunktStatus" : {
         "enum" : [ "AVBR", "OPPR", "UTFO" ],
@@ -2000,6 +2000,8 @@
             "5142" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto",
             "5143" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.VurderAktivitetDto",
             "5144" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto",
+            "5145" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VurderingAvBostedsvilkårEtterAvklaringDto",
+            "5146" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderingAvBistandsvilkårEtterAvklaringDto",
             "5200" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto",
             "5301" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto",
             "8000" : "#/components/schemas/ung.sak.kontrakt.kontroll.FastsettInntektDto"
@@ -2021,7 +2023,11 @@
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto"
         }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderingAvBistandsvilkårEtterAvklaringDto"
+        }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VurderingAvBostedsvilkårEtterAvklaringDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto"
         }, {
@@ -2469,6 +2475,30 @@
         "required" : [ "avklaringer" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 5000,
+            "minLength" : 3,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "erVilkårOppfylt" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "maxLength" : 10000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode"
+          }
+        },
+        "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.aktivitet.VilkårAktivitetPeriodeVurderingDto" : {
         "properties" : {
           "avslagsårsak" : {
@@ -2646,6 +2676,26 @@
         "required" : [ "avklaringer" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderingAvBistandsvilkårEtterAvklaringDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "vurdertePerioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto"
+            },
+            "maxItems" : 100,
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurdertePerioder" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingBostedsvilkårDto" : {
         "properties" : {
           "begrunnelse" : {
@@ -2697,6 +2747,26 @@
           }
         },
         "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VurderingAvBostedsvilkårEtterAvklaringDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "vurdertePerioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto"
+            },
+            "maxItems" : 100,
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurdertePerioder" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VilkårLivsoppholdsytelserPeriodeVurderingDto" : {
