@@ -33,7 +33,7 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderingAvBistandsvilkårEtterAvklaringDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
@@ -180,12 +180,12 @@ class VurderingAvBistandsvilkårEtterAvklaringOppdatererTest {
                 Avklaringtype.OPPHØR)));
     }
 
-    private static VurderingAvBistandsvilkårEtterAvklaringDto dto(VurderingAvVilkårPeriodeDto... perioder) {
+    private static VurderingAvBistandsvilkårEtterAvklaringDto dto(VurderingAvVilkårPeriodeEtterAvklaringDto... perioder) {
         return new VurderingAvBistandsvilkårEtterAvklaringDto(List.of(perioder), "begrunnelse for aksjonspunktet");
     }
 
-    private static VurderingAvVilkårPeriodeDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
-        return new VurderingAvVilkårPeriodeDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev);
+    private static VurderingAvVilkårPeriodeEtterAvklaringDto vurdering(Periode periode, boolean erVilkårOppfylt, String begrunnelse, String fritekstVurderingBrev) {
+        return new VurderingAvVilkårPeriodeEtterAvklaringDto(new ÅpenPeriode(periode.getFom(), periode.getTom()), erVilkårOppfylt, begrunnelse, fritekstVurderingBrev);
     }
 
     private static DatoIntervallEntitet tilDatoIntervallEntitet(Periode periode) {

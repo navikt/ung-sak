@@ -6,7 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
 
 import java.util.List;
 
@@ -19,20 +19,20 @@ public class VurderingAvBistandsvilkårEtterAvklaringDto extends BekreftetAksjon
     @JsonProperty("vurdertePerioder")
     @NotNull
     @Size(min = 1, max = 100)
-    private List<@Valid VurderingAvVilkårPeriodeDto> vurdertePerioder;
+    private List<@Valid VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder;
 
     public VurderingAvBistandsvilkårEtterAvklaringDto() {
         // for Jackson
     }
 
     @JsonCreator
-    public VurderingAvBistandsvilkårEtterAvklaringDto(@JsonProperty("vurdertePerioder") List<VurderingAvVilkårPeriodeDto> vurdertePerioder,
+    public VurderingAvBistandsvilkårEtterAvklaringDto(@JsonProperty("vurdertePerioder") List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
                                                       @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
         this.vurdertePerioder = vurdertePerioder;
     }
 
-    public List<VurderingAvVilkårPeriodeDto> getVurdertePerioder() {
+    public List<VurderingAvVilkårPeriodeEtterAvklaringDto> getVurdertePerioder() {
         return vurdertePerioder;
     }
 }

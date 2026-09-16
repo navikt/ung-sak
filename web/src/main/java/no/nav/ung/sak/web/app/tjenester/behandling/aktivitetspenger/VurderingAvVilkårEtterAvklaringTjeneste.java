@@ -12,7 +12,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
@@ -40,7 +40,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
 
     public LocalDateTimeline<VilkårsvurderingResultat> utled(long behandlingId,
                                                              VilkårType vilkårType,
-                                                             List<VurderingAvVilkårPeriodeDto> vurdertePerioder,
+                                                             List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
                                                              LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElseThrow();
         LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(vilkårType)
@@ -51,7 +51,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         }
         LocalDate maksDatoIVilkårsperioden = eksisterendeVilkårperioder.getMaxLocalDate();
 
-        LocalDateTimeline<VurderingAvVilkårPeriodeDto> vurdertTidslinje = new LocalDateTimeline<>(
+        LocalDateTimeline<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertTidslinje = new LocalDateTimeline<>(
             vurdertePerioder.stream()
                 .map(it -> new LocalDateSegment<>(
                     it.periode().getFom(),
@@ -75,7 +75,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
 
     private static void validerVurdertPeriodeErDekketAvAvklaring(long behandlingId,
                                                                  VilkårType vilkårType,
-                                                                 LocalDateTimeline<VurderingAvVilkårPeriodeDto> vurdertTidslinje,
+                                                                 LocalDateTimeline<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertTidslinje,
                                                                  LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
         if (årsakTidslinje.isEmpty()) {
             throw new IllegalArgumentException("Kan ikke vurdere " + vilkårType
@@ -90,7 +90,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
 
     private static VilkårsvurderingResultat byggResultat(LocalDateInterval interval,
                                                          VilkårType vilkårType,
-                                                         VurderingAvVilkårPeriodeDto vurdering,
+                                                         VurderingAvVilkårPeriodeEtterAvklaringDto vurdering,
                                                          IkkeOppfyltDetaljertÅrsak årsakFraAvklaring,
                                                          String vurdertAv,
                                                          LocalDateTime vurdertTidspunkt) {

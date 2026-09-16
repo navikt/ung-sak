@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 import no.nav.ung.sak.kontrakt.Patterns;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 
-public record VurderingAvVilkårPeriodeDto(
+public record VurderingAvVilkårPeriodeEtterAvklaringDto(
 
     @JsonProperty(value = "periode", required = true)
     @Valid
@@ -21,13 +21,13 @@ public record VurderingAvVilkårPeriodeDto(
 
     @JsonProperty(value = "begrunnelse", required = true)
     @NotNull
-    @Size(min = 3, max = 4000)
+    @Size(min = 3, max = 5000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String begrunnelse,
 
     @JsonProperty("fritekstVurderingBrev")
-    @Size(max = 4000)
+    @Size(max = 10000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     String fritekstVurderingBrev
