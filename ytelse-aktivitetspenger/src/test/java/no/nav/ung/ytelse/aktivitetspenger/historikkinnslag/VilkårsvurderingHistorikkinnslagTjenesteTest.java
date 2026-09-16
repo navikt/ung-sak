@@ -36,11 +36,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(LocalDateTimeline.empty())
             .setEksisterendeVurderinger(LocalDateTimeline.empty())
-            .setGjelderOpphør(false)
             .setNyeVurderinger(vilkårtidslinje)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)            ;
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -58,11 +57,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(LocalDateTimeline.empty())
             .setEksisterendeVurderinger(LocalDateTimeline.empty())
-            .setGjelderOpphør(false)
             .setNyeVurderinger(vilkårtidslinje)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -82,11 +80,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(LocalDateTimeline.empty())
             .setEksisterendeVurderinger(vilkårtidslinjeFør)
-            .setGjelderOpphør(false)
             .setNyeVurderinger(vilkårtidslinjeNå)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -105,11 +102,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(opprinneligInnvilgetTidslinje)
             .setEksisterendeVurderinger(opprinneligInnvilgetTidslinje)
-            .setGjelderOpphør(true)
             .setNyeVurderinger(nyVilkårTidslinje)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -130,11 +126,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(opprinneligInnvilgetTidslinje)
             .setEksisterendeVurderinger(opprinneligInnvilgetTidslinje)
-            .setGjelderOpphør(true)
             .setNyeVurderinger(nyVilkårTidslinje)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -154,11 +149,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(opprinneligInnvilgetTidslinje)
             .setEksisterendeVurderinger(opprinneligInnvilgetTidslinje)
-            .setGjelderOpphør(true)
             .setNyeVurderinger(nyVilkårTidslinje)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -179,11 +173,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(vilkårtidslinjeFør)
             .setEksisterendeVurderinger(vilkårtidslinjeFør)
-            .setGjelderOpphør(true)
             .setNyeVurderinger(vilkårtidslinjeNå)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -206,11 +199,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(heltInnvilget)
             .setEksisterendeVurderinger(vilkårtidslinjeFør)
-            .setGjelderOpphør(true)
             .setNyeVurderinger(heltInnvilget)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -234,11 +226,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(heltInnvilget)
             .setEksisterendeVurderinger(vilkårtidslinjeFør)
-            .setGjelderOpphør(true)
             .setNyeVurderinger(vilkårtidslinjeNå)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -251,23 +242,23 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         LocalDate innvilgetFom = LocalDate.of(2026, 9, 11);
         LocalDate innvilgetTom = innvilgetFom.plusWeeks(52).minusDays(1);
         LocalDate avslagFom = LocalDate.of(2026, 9, 30);
+        LocalDate avslagTom = LocalDate.of(2026, 10, 30);
 
         LocalDateTimeline<HistorikkinnslagData> vilkårtidslinjeFør = new LocalDateTimeline<>(innvilgetFom, innvilgetTom, HistorikkinnslagData.oppfylt());
-        LocalDateTimeline<HistorikkinnslagData> avslag = new LocalDateTimeline<>(avslagFom, innvilgetTom, HistorikkinnslagData.avslått(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED));
+        LocalDateTimeline<HistorikkinnslagData> avslag = new LocalDateTimeline<>(avslagFom, avslagTom, HistorikkinnslagData.avslått(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED));
         LocalDateTimeline<HistorikkinnslagData> vilkårtidslinjeNå = vilkårtidslinjeFør.crossJoin(avslag, StandardCombinators::coalesceRightHandSide);
 
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(vilkårtidslinjeFør)
             .setEksisterendeVurderinger(vilkårtidslinjeFør)
-            .setGjelderOpphør(false)
             .setNyeVurderinger(vilkårtidslinjeNå)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Vurdering ble endret for perioden 30.09.2026 - 09.09.2027 til Ikke oppfylt. Søker bor et sted som ikke er forenelig med ytelsen.", 0)
+            HistorikkinnslagLinje.tekst("Vurdering ble endret for perioden 30.09.2026 - 30.10.2026 til Ikke oppfylt. Søker bor et sted som ikke er forenelig med ytelsen.", 0)
         );
     }
 
@@ -282,11 +273,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(vilkårtidslinjeFør)
             .setEksisterendeVurderinger(vilkårtidslinjeFør)
-            .setGjelderOpphør(false)
             .setNyeVurderinger(vilkårtidslinjeNå)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
@@ -306,11 +296,10 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         HistorikkinnslagInput input = new HistorikkinnslagInput()
             .setVilkårType(VilkårType.BOSTEDSVILKÅR)
             .setBehandlingId(behanldingId)
+            .setVedtatteVurderinger(vilkårtidslinjeFør)
             .setEksisterendeVurderinger(vilkårtidslinjeFør)
-            .setGjelderOpphør(false)
             .setNyeVurderinger(vilkårtidslinjeNå)
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent("Z000000");
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(

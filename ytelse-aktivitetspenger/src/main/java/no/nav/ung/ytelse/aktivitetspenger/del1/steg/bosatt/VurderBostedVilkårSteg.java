@@ -124,6 +124,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         var tidligereVilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
             .orElse(new LocalDateTimeline<>(List.of()));
+        HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, getAktuellVilkårType());
 
         var avklaringTidslinje = avgrensTilForeslåtteAvklaringerHvisFinnes(
             grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering)
@@ -173,13 +174,10 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         inngangsvilkårVurderingTjeneste.oppdaterVilkårResultatFraVurdering(behandlingId, getAktuellVilkårType());
 
         //lag historikkinnslag for endringer gjort automatisk
-        vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(new HistorikkinnslagInput()
-            .setSkjermlenkeType(SkjermlenkeType.BOSTEDSVILKÅR)
-            .setBehandlingId(behandlingId)
-            .setEksisterendeVilkårVurderinger(tidligereVilkårVurderingResultat.mapValue(BostedsvilkårResultatPeriode::tilVilkårsvurderingResultat))
+        historikkinnslagInput.setSkjermlenkeType(SkjermlenkeType.BOSTEDSVILKÅR)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, getAktuellVilkårType()))
-            .setGjelderOpphør(behandlingRepository.hentBehandling(behandlingId).harBehandlingÅrsak(ENDRET_BOSTED))
-            .setHistorikkAktør(HistorikkAktør.VEDTAKSLØSNINGEN));
+            .setHistorikkAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+        vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }

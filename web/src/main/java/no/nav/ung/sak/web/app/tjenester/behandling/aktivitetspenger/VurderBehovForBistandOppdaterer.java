@@ -19,7 +19,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderBehovForBistandDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
@@ -60,7 +59,7 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
 
     @Override
     public OppdateringResultat oppdater(VurderBehovForBistandDto dto, AksjonspunktOppdaterParameter param) {
-        LocalDateTimeline<VilkårsvurderingResultat> opprinneligVilkårsvurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR);
+        HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(param.getBehandlingId(), AKTUELT_VILKÅR);
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
         LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(AKTUELT_VILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
@@ -90,14 +89,10 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
 
         inngangsvilkårVurderingTjeneste.settBistandsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
-        HistorikkinnslagInput historikkinnslagInput = new HistorikkinnslagInput()
+        historikkinnslagInput
             .setSkjermlenkeType(SkjermlenkeType.BISTANDSVILKÅR)
-            .setBehandlingId(param.getBehandlingId())
-            .setEksisterendeVilkårVurderinger(opprinneligVilkårsvurdering)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR))
-            .setGjelderOpphør(false) //opphør ikke implementert enda for vilkåret
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent(vurdertAv);
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return OppdateringResultat.nyttResultat();

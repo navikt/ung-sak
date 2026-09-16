@@ -14,11 +14,10 @@ public class HistorikkinnslagInput {
     private Long behandlingId;
     private SkjermlenkeType skjermlenkeType;
     private VilkårType vilkårType;
-    private Boolean gjelderOpphør;
+    private LocalDateTimeline<HistorikkinnslagData> vedtatteVilkårVurderinger;
     private LocalDateTimeline<HistorikkinnslagData> eksisterendeVurderinger;
     private LocalDateTimeline<HistorikkinnslagData> nyeVurderinger;
     private HistorikkAktør historikkAktør;
-    private String saksbehandlerIdent;
 
     public HistorikkinnslagInput setBehandlingId(Long behandlingId) {
         this.behandlingId = behandlingId;
@@ -35,8 +34,15 @@ public class HistorikkinnslagInput {
         return this;
     }
 
-    public HistorikkinnslagInput setGjelderOpphør(Boolean gjelderOpphør) {
-        this.gjelderOpphør = gjelderOpphør;
+    public HistorikkinnslagInput setVedtatteVilkårVurderinger(LocalDateTimeline<VilkårsvurderingResultat> vedtatteVilkårVurderinger) {
+        this.vedtatteVilkårVurderinger = vedtatteVilkårVurderinger
+            .filterValue(vr -> !erAvkortet(vr))
+            .mapValue(vr -> new HistorikkinnslagData(vr.godkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT, vr.ikkeOppfyltÅrsak()));
+        return this;
+    }
+
+    public HistorikkinnslagInput setVedtatteVurderinger(LocalDateTimeline<HistorikkinnslagData> vedtatteVurderinger) {
+        this.vedtatteVilkårVurderinger = vedtatteVurderinger;
         return this;
     }
 
@@ -45,10 +51,6 @@ public class HistorikkinnslagInput {
             .filterValue(vr -> !erAvkortet(vr))
             .mapValue(vr -> new HistorikkinnslagData(vr.godkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT, vr.ikkeOppfyltÅrsak()));
         return this;
-    }
-
-    private static boolean erAvkortet(VilkårsvurderingResultat vilkårsvurderingResultat){
-        return vilkårsvurderingResultat.ikkeOppfyltÅrsak() != null && Optional.of(Avslagsårsak.AVKORTET).equals(vilkårsvurderingResultat.ikkeOppfyltÅrsak().avslagsårsak());
     }
 
     public HistorikkinnslagInput setEksisterendeVurderinger(LocalDateTimeline<HistorikkinnslagData> eksisterendeVurderinger) {
@@ -73,11 +75,6 @@ public class HistorikkinnslagInput {
         return this;
     }
 
-    public HistorikkinnslagInput setSaksbehandlerIdent(String saksbehandlerIdent) {
-        this.saksbehandlerIdent = saksbehandlerIdent;
-        return this;
-    }
-
     public Long getBehandlingId() {
         return behandlingId;
     }
@@ -90,8 +87,8 @@ public class HistorikkinnslagInput {
         return vilkårType;
     }
 
-    public Boolean getGjelderOpphør() {
-        return gjelderOpphør;
+    public LocalDateTimeline<HistorikkinnslagData> getVedtatteVilkårVurderinger() {
+        return vedtatteVilkårVurderinger;
     }
 
     public LocalDateTimeline<HistorikkinnslagData> getEksisterendeVurderinger() {
@@ -106,7 +103,7 @@ public class HistorikkinnslagInput {
         return historikkAktør;
     }
 
-    public String getSaksbehandlerIdent() {
-        return saksbehandlerIdent;
+    private static boolean erAvkortet(VilkårsvurderingResultat vilkårsvurderingResultat) {
+        return vilkårsvurderingResultat.ikkeOppfyltÅrsak() != null && Optional.of(Avslagsårsak.AVKORTET).equals(vilkårsvurderingResultat.ikkeOppfyltÅrsak().avslagsårsak());
     }
 }

@@ -6,11 +6,13 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -22,11 +24,27 @@ public class VilkårsvurderingHistorikkinnslagTjeneste {
 
     private final BehandlingRepository behandlingRepository;
     private final HistorikkinnslagRepository historikkinnslagRepository;
+    private final InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
 
     @Inject
-    public VilkårsvurderingHistorikkinnslagTjeneste(BehandlingRepository behandlingRepository, HistorikkinnslagRepository historikkinnslagRepository) {
+    public VilkårsvurderingHistorikkinnslagTjeneste(BehandlingRepository behandlingRepository,
+                                                    HistorikkinnslagRepository historikkinnslagRepository,
+                                                    InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
         this.behandlingRepository = behandlingRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
+        this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
+    }
+
+    /**
+     * denne kan brukes for å fylle ut opprinnelige verdier i HistorikkinnslagInput. Må kalles før nye verdier lagres
+     */
+    public HistorikkinnslagInput hentInitielleVerdier(Long behandlingId, VilkårType vilkårType) {
+        HistorikkinnslagInput input = new HistorikkinnslagInput();
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
+        input.setBehandlingId(behandlingId);
+        input.setEksisterendeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, vilkårType));
+        input.setVedtatteVilkårVurderinger(behandling.getOriginalBehandlingId().map(id -> inngangsvilkårVurderingRepository.hentVurderingTidslinje(id, vilkårType)).orElse(LocalDateTimeline.empty()));
+        return input;
     }
 
     public void lagreHistorikkinnslag(HistorikkinnslagInput historikkinnslagInput) {
@@ -38,9 +56,12 @@ public class VilkårsvurderingHistorikkinnslagTjeneste {
     public List<Historikkinnslag> lagHistorikkinnslag(Long fagsakId, HistorikkinnslagInput historikkinnslagInput) {
         Historikkinnslag.Builder historikkinnslagBuilder = lagBuilder(fagsakId, historikkinnslagInput);
 
-        if (historikkinnslagInput.getEksisterendeVurderinger().equals(historikkinnslagInput.getNyeVurderinger())) {
+        LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> førOgEtterTidslinje = lagFørOgEtterTidslinje(historikkinnslagInput);
+        LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> endretVurderingTidslinje = førOgEtterTidslinje.filterValue(FørOgEtter::erEndret);
+
+        if (endretVurderingTidslinje.isEmpty()) {
             historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje("Vilkåret ble vurdert uten endringer i utfall."));
-        } else if (historikkinnslagInput.getGjelderOpphør()) {
+        } else if (opphørErEnesteEndring(historikkinnslagInput)) {
             LocalDateTimeline<HistorikkinnslagData> innvilgetTidsserie = historikkinnslagInput.getNyeVurderinger().filterValue(v -> v.utfall() == Utfall.OPPFYLT);
             LocalDateTimeline<HistorikkinnslagData> avslåttTidsserie = historikkinnslagInput.getNyeVurderinger().disjoint(innvilgetTidsserie);
             LocalDate sisteInnvilgedeDato = innvilgetTidsserie.isEmpty() ? null : innvilgetTidsserie.getMaxLocalDate();
@@ -55,12 +76,6 @@ public class VilkårsvurderingHistorikkinnslagTjeneste {
                 historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje(tekst + HistorikkinnslagLinjeBuilder.format(opphørsdato) + ". " + HistorikkinnslagLinjeBuilder.format(avslagsårsak)));
             }
         } else {
-            LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> sammenligningTidslinje = historikkinnslagInput.getEksisterendeVurderinger().crossJoin(historikkinnslagInput.getNyeVurderinger(), (intervall, lhs, rhs) -> {
-                HistorikkinnslagData lhsVerdi = lhs != null ? lhs.getValue() : null;
-                HistorikkinnslagData rhsVerdi = rhs != null ? rhs.getValue() : null;
-                return new LocalDateSegment<>(intervall, new FørOgEtter<>(lhsVerdi, rhsVerdi));
-            });
-            LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> endretVurderingTidslinje = sammenligningTidslinje.filterValue(FørOgEtter::erEndret);
             endretVurderingTidslinje.segmenter().forEach(segment -> {
                 HistorikkinnslagData før = segment.getValue().før;
                 HistorikkinnslagData etter = segment.getValue().etter;
@@ -84,11 +99,48 @@ public class VilkårsvurderingHistorikkinnslagTjeneste {
                 }
                 historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje(tekst));
             });
-            if (endretVurderingTidslinje.isEmpty()) {
-                historikkinnslagBuilder.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje("Vilkåret ble vurdert uten endringer i utfall."));
-            }
         }
         return List.of(historikkinnslagBuilder.build());
+    }
+
+    private boolean opphørErEnesteEndring(HistorikkinnslagInput historikkinnslagInput) {
+        LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> forrigeTilEksisterende = lagFørOgEtterTidslinje(historikkinnslagInput.getVedtatteVilkårVurderinger(), historikkinnslagInput.getNyeVurderinger());
+        LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> forrigeTilNy = lagFørOgEtterTidslinje(historikkinnslagInput.getVedtatteVilkårVurderinger(), historikkinnslagInput.getNyeVurderinger());
+
+        return (erUendret(forrigeTilNy) || erOpphørUtenAndreEndringer(forrigeTilNy))
+            && (erUendret(forrigeTilEksisterende) || erOpphørUtenAndreEndringer(forrigeTilEksisterende));
+    }
+
+    private boolean erUendret(LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> sammensatt) {
+        return sammensatt.filterValue(FørOgEtter::erEndret).isEmpty();
+    }
+
+    private boolean erOpphørUtenAndreEndringer(LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> sammensatt) {
+        LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> endretTidslinje = sammensatt.filterValue(FørOgEtter::erEndret).compress();
+        if (endretTidslinje.segmenter().size() > 1) {
+            return false;
+        }
+        boolean sistePeriodeErEndret = endretTidslinje.getMaxLocalDate().equals(sammensatt.getMaxLocalDate());
+        if (!sistePeriodeErEndret) {
+            return false;
+        }
+        LocalDateSegment<FørOgEtter<HistorikkinnslagData>> segmentet = endretTidslinje.segmenter().getFirst();
+        return segmentet.getValue().før != null
+            && segmentet.getValue().før.utfall() == Utfall.OPPFYLT
+            && segmentet.getValue().etter != null
+            && segmentet.getValue().etter.utfall() == Utfall.IKKE_OPPFYLT;
+    }
+
+    private static LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> lagFørOgEtterTidslinje(HistorikkinnslagInput historikkinnslagInput) {
+        return lagFørOgEtterTidslinje(historikkinnslagInput.getEksisterendeVurderinger(), historikkinnslagInput.getNyeVurderinger());
+    }
+
+    private static LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> lagFørOgEtterTidslinje(LocalDateTimeline<HistorikkinnslagData> før, LocalDateTimeline<HistorikkinnslagData> etter) {
+        return før.crossJoin(etter, (intervall, lhs, rhs) -> {
+            HistorikkinnslagData lhsVerdi = lhs != null ? lhs.getValue() : null;
+            HistorikkinnslagData rhsVerdi = rhs != null ? rhs.getValue() : null;
+            return new LocalDateSegment<>(intervall, new FørOgEtter<>(lhsVerdi, rhsVerdi));
+        });
     }
 
     private Historikkinnslag.Builder lagBuilder(long fagsakId, HistorikkinnslagInput input) {

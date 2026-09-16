@@ -60,7 +60,7 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
 
     @Override
     public OppdateringResultat oppdater(VurderAktivitetDto dto, AksjonspunktOppdaterParameter param) {
-        LocalDateTimeline<VilkårsvurderingResultat> opprinneligVilkårsvurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR);
+        HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(param.getBehandlingId(), AKTUELT_VILKÅR);
         Vilkårene vilkårene = vilkårResultatRepository.hentHvisEksisterer(param.getBehandlingId()).orElseThrow();
         LocalDateTimeline<VilkårPeriode> perioderTilVurdering = vilkårene.getVilkårTimeline(AKTUELT_VILKÅR)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
@@ -89,14 +89,10 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
         inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(param.getBehandlingId(), periodeVurderinger);
         inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());
 
-        HistorikkinnslagInput historikkinnslagInput = new HistorikkinnslagInput()
+        historikkinnslagInput
             .setSkjermlenkeType(SkjermlenkeType.AKTIVITETSVILKÅR)
-            .setBehandlingId(param.getBehandlingId())
-            .setEksisterendeVilkårVurderinger(opprinneligVilkårsvurdering)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR))
-            .setGjelderOpphør(false) //opphør ikke implementert enda for vilkåret
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
-            .setSaksbehandlerIdent(vurdertAv);
+            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return OppdateringResultat.nyttResultat();
