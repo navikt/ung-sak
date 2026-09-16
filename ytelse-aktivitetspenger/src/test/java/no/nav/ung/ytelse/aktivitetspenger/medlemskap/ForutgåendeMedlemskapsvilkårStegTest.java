@@ -98,7 +98,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var forskjøvetVilkårPeriode = new Periode(forskjøvetFom, TOM);
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, forskjøvetVilkårPeriode)
-            .medVirkningstidspunkt(FOM)
+            .medVirkningstidspunkt(forskjøvetFom)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of()));
@@ -110,7 +110,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     }
 
     @Test
-    void skal_returnere_aksjonspunkt_når_ett_bosted_er_utenfor_eøs() {
+    void skal_returnere_aksjonspunkt_når_utenlandsopphold_er_ikke_norge() {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
             .medVirkningstidspunkt(FOM)
@@ -128,7 +128,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     }
 
     @Test
-    void skal_oppfylle_vilkår_for_flere_perioder_med_eøs_bosted() {
+    void skal_oppfylle_vilkår_for_flere_perioder_med_utenlandsopphold_norge() {
         var periode1 = new Periode(FOM, LocalDate.of(2024, 7, 31));
         var periode2 = new Periode(LocalDate.of(2024, 9, 1), TOM);
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
@@ -138,7 +138,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), TOM.minusDays(1), Set.of(
-            new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 9, 29), "SWE")
+            new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 9, 29), "NOR")
         )));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
@@ -152,7 +152,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         assertThat(vilkår.getPerioder()).hasSize(2);
         assertThat(vilkår.getPerioder()).allSatisfy(p -> {
             assertThat(p.getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
-            assertThat(p.getRegelInput()).contains("SWE");
+            assertThat(p.getRegelInput()).contains("NOR");
             assertThat(p.getRegelEvaluering()).contains("OPPFYLT");
         });
     }
