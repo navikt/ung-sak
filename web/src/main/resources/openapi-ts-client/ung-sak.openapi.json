@@ -5648,10 +5648,7 @@
       "ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse" : {
         "properties" : {
           "medlemskapFraBruker" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto"
-            },
-            "type" : "array"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto"
           },
           "vilkårsperioder" : {
             "items" : {
@@ -5662,13 +5659,33 @@
         },
         "type" : "object"
       },
-      "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto" : {
+      "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto" : {
         "properties" : {
-          "harTrygdeavtale" : {
+          "harBoddINorge" : {
+            "type" : "boolean"
+          },
+          "harJobbetINorge" : {
+            "type" : "boolean"
+          },
+          "harJobbetUtenforNorge" : {
             "type" : "boolean"
           },
           "journalpostId" : {
             "type" : "string"
+          },
+          "utenlandsopphold" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto"
+            },
+            "type" : "array"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto" : {
+        "properties" : {
+          "harJobbetIPerioden" : {
+            "type" : "boolean"
           },
           "land" : {
             "type" : "string"
@@ -5678,6 +5695,9 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "utenlandskNasjonalId" : {
+            "type" : "string"
           }
         },
         "type" : "object"
