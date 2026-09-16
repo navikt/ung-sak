@@ -65,7 +65,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
     public ForutgåendeMedlemskapResponse medlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
-        var medlemskap = forutgåendeMedlemskapTjeneste.hentUtenlandsoppholdSomDto(behandling.getId());
+        var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapRelevantForBehandlingSomDto(behandling.getId());
 
         var vilkår = vilkårResultatRepository.hent(behandling.getId())
             .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)

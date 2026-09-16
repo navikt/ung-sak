@@ -1,7 +1,7 @@
 package no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap;
 
 public enum MedlemskapAvslagsÅrsakType {
-    SØKER_IKKE_MEDLEM("Søker har ikke bodd i et land med trygdeavtale siste 5 år.");
+    SØKER_IKKE_MEDLEM("Søker oppfyller ikke krav om forutgående medlemskap.");
 
     private final String beskrivelse;
 
