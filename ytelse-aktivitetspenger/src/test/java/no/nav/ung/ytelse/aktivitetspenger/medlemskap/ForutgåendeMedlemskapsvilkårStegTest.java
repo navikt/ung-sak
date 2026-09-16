@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
+import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
@@ -27,6 +28,8 @@ import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder.MottattDokumentTestGrunnlag;
 import org.junit.jupiter.api.BeforeEach;
@@ -61,6 +64,8 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private ForutgåendeMedlemskapsvilkårSteg steg;
+    private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
+    private VilkårTjeneste vilkårTjeneste;
 
     @BeforeEach
     void setUp() {
@@ -70,13 +75,15 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         forutgåendeMedlemskapRepository = new OppgittForutgåendeMedlemskapRepository(entityManager);
         mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
+        manuelleVilkårRekkefølgeTjeneste = new ManuelleVilkårRekkefølgeTjeneste(new BehandlingModellRepository());
+        vilkårTjeneste = new VilkårTjeneste(behandlingRepository, perioderTilVurderingTjenester, vilkårResultatRepository);
         steg = new ForutgåendeMedlemskapsvilkårSteg(
             vilkårResultatRepository,
             forutgåendeMedlemskapRepository,
             mottatteDokumentRepository,
             perioderTilVurderingTjenester,
-            behandlingRepository
-        );
+            behandlingRepository,
+            manuelleVilkårRekkefølgeTjeneste, vilkårTjeneste);
     }
 
     @Test
@@ -187,11 +194,12 @@ class ForutgåendeMedlemskapsvilkårStegTest {
 
     @Test
     void skal_vurdere_perioden_når_annet_vilkår_er_delvis_avslått_i_samme_periode() {
+        LocalDate andreFom = LocalDate.of(2024, 8, 16);
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
             .medVirkningstidspunkt(FOM)
-            .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.OPPFYLT, new Periode(FOM, LocalDate.of(2024, 8, 15)))
-            .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(LocalDate.of(2024, 8, 16), TOM))
+            .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.OPPFYLT, new Periode(FOM, andreFom.minusDays(1)))
+            .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(andreFom, TOM))
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of()));
@@ -203,8 +211,10 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var vilkår = vilkårResultatRepository.hent(behandling.getId())
             .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
             .orElseThrow();
-        assertThat(vilkår.getPerioder()).hasSize(1);
-        assertThat(vilkår.getPerioder().getFirst().getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
+        assertThat(vilkår.getPerioder()).hasSize(2);
+        var perioderListe = vilkår.getPerioder().stream().sorted(Comparator.comparing(VilkårPeriode::getFom)).toList();
+        assertThat(perioderListe.get(0).getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
+        assertThat(perioderListe.get(1).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_RELEVANT);
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {

@@ -8,7 +8,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.k9.søknad.felles.type.Landkode;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
@@ -22,18 +21,18 @@ import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgående
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkår;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
+import no.nav.ung.sak.vilkår.VilkårTjeneste;
+import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR;
 
@@ -41,16 +40,14 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅE
 @BehandlingStegRef(value = VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
+public class ForutgåendeMedlemskapsvilkårSteg extends VilkårVurderingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(ForutgåendeMedlemskapsvilkårSteg.class);
 
     private VilkårResultatRepository vilkårResultatRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
-    private BehandlingRepository behandlingRepository;
-    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
-
+    private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     public ForutgåendeMedlemskapsvilkårSteg() {
     }
 
@@ -59,53 +56,46 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
                                             OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
                                             MottatteDokumentRepository mottatteDokumentRepository,
                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                            BehandlingRepository behandlingRepository) {
+                                            BehandlingRepository behandlingRepository,
+                                            ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
+                                            VilkårTjeneste vilkårTjeneste) {
+        super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, perioderTilVurderingTjenester);
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
-        this.behandlingRepository = behandlingRepository;
+        this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
     }
 
     @Override
-    public BehandleStegResultat utførSteg(BehandlingskontrollKontekst kontekst) {
+    public VilkårType getAktuellVilkårType() {
+        return VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET;
+    }
+
+    @Override
+    public Set<VilkårType> getVilkårAvhengigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        EnumSet<VilkårType> avhengigheter = EnumSet.noneOf(VilkårType.class);
+        avhengigheter.add(VilkårType.ALDERSVILKÅR);
+        avhengigheter.add(VilkårType.SØKNADSFRIST);
+        avhengigheter.add(VilkårType.BOSTEDSVILKÅR);
+        avhengigheter.add(VilkårType.BISTANDSVILKÅR);
+        avhengigheter.add(VilkårType.AKTIVITETSVILKÅR);
+        avhengigheter.addAll(manuelleVilkårRekkefølgeTjeneste.finnManuelleVilkårSomErFør(getAktuellVilkårType(), ytelseType, behandlingType));
+        return avhengigheter;
+    }
+
+    @Override
+    public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
         var behandlingId = kontekst.getBehandlingId();
-        var behandling = behandlingRepository.hentBehandling(behandlingId);
-
-        var periodeTilVurdering = getPerioderTilVurderingTjeneste(behandling.getFagsakYtelseType(), behandling.getType())
-            .utled(behandlingId, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
-
+        var periodeTilVurdering = finnPerioderSomSkalVurderes(kontekst);
         if (periodeTilVurdering.isEmpty()) {
             log.info("Ingen perioder til vurdering");
             return BehandleStegResultat.utførtUtenAksjonspunkter();
         }
 
-        var vilkårene = vilkårResultatRepository.hent(behandlingId);
-        periodeTilVurdering = filtrerBortIkkeRelevantePerioder(periodeTilVurdering, vilkårene.getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET));
-
-        if (periodeTilVurdering.isEmpty()) {
-            log.info("Ingen relevante perioder til vurdering");
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
-        //TODO endre til å hente fra kun vilkår som vurderes før dette vilkåret
-        var avslåttTidslinje = lagAvslåttTidslinje(vilkårene);
-        var avslåttePerioder = finnAvslåttePerioder(periodeTilVurdering, avslåttTidslinje);
-        if (!avslåttePerioder.isEmpty()) {
-            log.info("Setter perioder til ikke relevant pga andre avslåtte vilkår på hele periodeTilVurdering.");
-            vilkårResultatRepository.settPerioderTilIkkeRelevant(behandlingId, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, avslåttePerioder);
-            periodeTilVurdering.removeAll(avslåttePerioder);
-        }
-
-        if (periodeTilVurdering.isEmpty()) {
-            log.info("Ingen periode til vurdering etter å ha fjernet avslåtte vilkår");
-            return BehandleStegResultat.utførtUtenAksjonspunkter();
-        }
-
-        return vurderForutgåendeMedlemskap(periodeTilVurdering, behandlingId, behandling.getFagsakId());
+        return vurderForutgåendeMedlemskap(periodeTilVurdering.segmenter(), behandlingId, kontekst.getFagsakId());
     }
 
-    private BehandleStegResultat vurderForutgåendeMedlemskap(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Long behandlingId, Long fagsakId) {
+    private BehandleStegResultat vurderForutgåendeMedlemskap(SequencedCollection<LocalDateSegment<Boolean>> perioderTilVurdering, Long behandlingId, Long fagsakId) {
         var grunnlagOpt = forutgåendeMedlemskapRepository.hentGrunnlagHvisEksisterer(behandlingId);
         if (grunnlagOpt.isEmpty()) {
             log.info("Fant ingen grunnlag. Lager aksjonspunkt.");
@@ -116,7 +106,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         var forutgåendeMedlemskapslandTidslinje = lagForutgåendeMedlemskapslandTidslinje(grunnlag, fagsakId);
 
         var stegerVurderinger = perioderTilVurdering.stream()
-            .map(periode -> vurder(periode, forutgåendeMedlemskapslandTidslinje))
+            .map(periode -> vurder(periode.getLocalDateInterval(), forutgåendeMedlemskapslandTidslinje))
             .toList();
 
         var trengerManuellVurdering = stegerVurderinger.stream()
@@ -131,23 +121,23 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static StegVurdering vurder(DatoIntervallEntitet periodeTilVurdering, LocalDateTimeline<String> landTidslinje) {
-        LocalDate virkningsdato = periodeTilVurdering.getFomDato();
+    private static StegVurdering vurder(LocalDateInterval periode, LocalDateTimeline<String> landTidslinje) {
+        LocalDate virkningsdato = periode.getFomDato();
         var forutgåendePeriodeTilVurdering = new LocalDateInterval(virkningsdato.minusYears(5), virkningsdato.minusDays(1));
         var forutgåendeMedlemskapsvurdering = new LocalDateTimeline<>(forutgåendePeriodeTilVurdering, Boolean.TRUE)
             .combine(landTidslinje, ForutgåendeMedlemskapsvilkårSteg::vurderUtenlandsopphold, JoinStyle.LEFT_JOIN);
-        return new StegVurdering(periodeTilVurdering, forutgåendePeriodeTilVurdering, forutgåendeMedlemskapsvurdering);
+        return new StegVurdering(periode, forutgåendePeriodeTilVurdering, forutgåendeMedlemskapsvurdering);
     }
 
     private void oppfyllVilkår(Long behandlingId, LocalDateTimeline<String> utenlandsoppholdTidslinje, List<StegVurdering> stegVurderinger) {
         var jsonMapper = new VilkårJsonObjectMapper();
-        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandlingId));
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårTjeneste.hentVilkårResultat(behandlingId));
         var vilkårBuilder = vilkårResultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
 
         stegVurderinger.forEach(stegVurdering -> {
             var regelInput = jsonMapper.writeValueAsString(new RegelInput(utenlandsoppholdTidslinje));
             var regelEvaluering = jsonMapper.writeValueAsString(stegVurdering);
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(stegVurdering.periodeTilVurdering())
+            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(stegVurdering.periode().getFomDato(), stegVurdering.periode().getTomDato())
                 .medUtfall(Utfall.OPPFYLT)
                 .medAvslagsårsak(null)
                 .medRegelInput(regelInput)
@@ -194,45 +184,8 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         return utenlandsoppholdTidslinje.crossJoin(antattBostedNorgeTidslinje);
     }
 
-    private static LocalDateTimeline<Boolean> lagAvslåttTidslinje(Vilkårene vilkårene) {
-        var avslåtteSegmenter = vilkårene.getVilkårene().stream()
-            .flatMap(v -> v.getPerioder().stream())
-            .filter(p -> Utfall.IKKE_OPPFYLT.equals(p.getGjeldendeUtfall()))
-            .map(p -> new LocalDateSegment<>(p.getFom(), p.getTom(), Boolean.TRUE))
-            .toList();
-        return new LocalDateTimeline<>(avslåtteSegmenter, StandardCombinators::alwaysTrueForMatch)
-            .compress();
-    }
-
-    private static NavigableSet<DatoIntervallEntitet> filtrerBortIkkeRelevantePerioder(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, Optional<Vilkår> vilkår) {
-        var ikkeRelevantePerioder = vilkår
-            .stream()
-            .flatMap(v -> v.getPerioder().stream())
-            .filter(p -> Utfall.IKKE_RELEVANT.equals(p.getGjeldendeUtfall()))
-            .map(p -> DatoIntervallEntitet.fraOgMedTilOgMed(p.getFom(), p.getTom()))
-            .toList();
-        if (ikkeRelevantePerioder.isEmpty()) {
-            return perioderTilVurdering;
-        }
-        var resultat = new TreeSet<>(perioderTilVurdering);
-        resultat.removeAll(ikkeRelevantePerioder);
-        return resultat;
-    }
-
-    private static NavigableSet<DatoIntervallEntitet> finnAvslåttePerioder(NavigableSet<DatoIntervallEntitet> perioderTilVurdering, LocalDateTimeline<Boolean> avslåttTidslinje) {
-        if (avslåttTidslinje.isEmpty()) {
-            return new TreeSet<>();
-        }
-        return perioderTilVurdering.stream()
-            .filter(p -> new LocalDateTimeline<>(p.getFomDato(), p.getTomDato(), Boolean.TRUE).disjoint(avslåttTidslinje).isEmpty())
-            .collect(Collectors.toCollection(TreeSet::new));
-    }
-
     record RegelInput(LocalDateTimeline<String> bostederLandkodeTidslinje) { }
 
-    record StegVurdering(DatoIntervallEntitet periodeTilVurdering, LocalDateInterval forutgåendePeriode, LocalDateTimeline<Utfall> vurdering) {}
+    record StegVurdering(LocalDateInterval periode, LocalDateInterval forutgåendePeriode, LocalDateTimeline<Utfall> vurdering) {}
 
-    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) {
-        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, fagsakYtelseType, behandlingType);
-    }
 }
