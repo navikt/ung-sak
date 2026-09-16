@@ -10,6 +10,8 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -30,6 +32,8 @@ import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.sak.vilkår.VilkårVurderingSteg;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall;
 import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfallUtleder;
 
@@ -55,6 +59,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private Vilkårsutfallsporing vilkårsutfallsporing;
+    private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
 
     BistandsvilkårSteg() {
         //for CDI proxy
@@ -70,7 +75,8 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                               VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
                               InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                               InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
-                              Vilkårsutfallsporing vilkårsutfallsporing) {
+                              Vilkårsutfallsporing vilkårsutfallsporing,
+                              VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -79,6 +85,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.vilkårsutfallsporing = vilkårsutfallsporing;
+        this.vilkårsvurderingHistorikkinnslagTjeneste = vilkårsvurderingHistorikkinnslagTjeneste;
     }
 
     @Override
@@ -105,6 +112,8 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
 
         List<EtterlysningData> etterlysninger = etterlysningTjeneste.hentGjeldendeEtterlysninger(
             behandlingId, kontekst.getFagsakId(), EtterlysningType.UTTALELSE_BISTAND);
+
+        HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, getAktuellVilkårType());
 
         var etterlysningTidslinje = new LocalDateTimeline<>(
             etterlysninger.stream().map(e ->
@@ -168,6 +177,13 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
 
         // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
         oppdaterBistandsvilkårResultatFraVurdering(behandlingId);
+
+        //lag historikkinnslag for endringer gjort automatisk
+        historikkinnslagInput.setSkjermlenkeType(SkjermlenkeType.BISTANDSVILKÅR)
+            .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, getAktuellVilkårType()))
+            .setHistorikkAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
+        vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 

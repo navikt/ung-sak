@@ -40,6 +40,7 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -70,6 +71,9 @@ class BistandsvilkårStegTest {
 
     @Inject
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
+
+    @Inject
+    private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
 
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
@@ -407,7 +411,8 @@ class BistandsvilkårStegTest {
             vilkårsavklaringGrunnlagRepository,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
-            vilkårsutfallsporing
+            vilkårsutfallsporing,
+            vilkårsvurderingHistorikkinnslagTjeneste
         );
     }
 
