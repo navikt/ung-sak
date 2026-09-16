@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
@@ -17,6 +18,9 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinje;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
@@ -41,6 +45,7 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.vilkår.ManuelleVilkårRekkefølgeTjeneste;
 import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -71,28 +76,32 @@ class VurderBostedVilkårStegTest {
     @Inject
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
 
+    @Inject
+    private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
+    @Inject
+    private HistorikkinnslagRepository historikkinnslagRepository;
+
+    @Inject
     private BehandlingRepository behandlingRepository;
+    @Inject
     private VilkårResultatRepository vilkårResultatRepository;
+    @Inject
     private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    @Inject
     private StartdatoRepository startdatoRepository;
+    @Inject
     private ProsessTriggereRepository prosessTriggereRepository;
-    private VurderBostedVilkårSteg steg;
+    @Inject
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    @Inject
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    @Inject
     private BehandingprosessSporingRepository behandlingprosessSporingRepository;
+
+    private VurderBostedVilkårSteg steg;
 
     @BeforeEach
     void setUp() {
-        behandlingRepository = new BehandlingRepository(entityManager);
-        var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
-        vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
-        bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
-        startdatoRepository = new StartdatoRepository(entityManager);
-        prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
-        inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
-        inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        behandlingprosessSporingRepository = new BehandingprosessSporingRepository(entityManager);
-
         steg = lagSteg(List.of());
     }
 
@@ -139,6 +148,12 @@ class VurderBostedVilkårStegTest {
         assertThat(bostedsvurdering.getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(bostedsvurdering.getPeriode().getTomDato()).isEqualTo(TOM);
         assertThat(bostedsvurdering.getIkkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
+
+        List<Historikkinnslag> historikkinnslag = historikkinnslagRepository.hent(behandling.getId());
+        assertThat(historikkinnslag).hasSize(1);
+        Historikkinnslag innslaget = historikkinnslag.getFirst();
+        assertThat(innslaget.getAktør()).isEqualByComparingTo(HistorikkAktør.VEDTAKSLØSNINGEN);
+        assertThat(innslaget.getLinjer()).containsOnly(HistorikkinnslagLinje.tekst("Perioden 01.01.2026 - 31.01.2026 ble vurdert til Ikke oppfylt. Søker har verken bosted eller folkeregistrert adresse som er forenlig med ytelsen.", 0));
     }
 
     @Test
@@ -168,6 +183,8 @@ class VurderBostedVilkårStegTest {
 
         var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BOSTEDSVILKÅR).get().getPerioder().stream();
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
+
+        assertThat(historikkinnslagRepository.hent(behandling.getId())).isEmpty();
     }
 
     @Test
@@ -360,7 +377,8 @@ class VurderBostedVilkårStegTest {
             etterlysningTjeneste,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
-            behandlingprosessSporingRepository
+            behandlingprosessSporingRepository,
+            vilkårsvurderingHistorikkinnslagTjeneste
         );
     }
 

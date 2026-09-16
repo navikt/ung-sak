@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 @Dependent
 public class K9OppdragRestKlient {
 
-    private static final Domene DOMENE = Domene.UNG;
+    private static final Domene DOMENE =  Domene.UNG;
 
     private OidcRestClient restClient;
     private URI uriIverksett;

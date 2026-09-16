@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.historikk;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.ung.kodeverk.api.Kodeverdi;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -167,6 +168,7 @@ public class HistorikkinnslagLinjeBuilder {
             case String tekst -> tekst;
             case LocalDate localDate -> DATE_FORMATTER.format(localDate);
             case LocalDateInterval interval -> DATE_FORMATTER.format(interval.getFomDato()) + " - " + DATE_FORMATTER.format(interval.getTomDato());
+            case DatoIntervallEntitet interval -> DATE_FORMATTER.format(interval.getFomDato()) + " - " + DATE_FORMATTER.format(interval.getTomDato());
             case BigDecimal bd -> bd.toString();
             case Number n -> n.toString();
             case Boolean b -> b ? "Ja" : "Nei";
