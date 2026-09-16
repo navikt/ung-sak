@@ -16,7 +16,6 @@ import java.util.List;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR_KODE)
 public class VurderingAvBistandsvilkårEtterAvklaringDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty("vurdertePerioder")
     @NotNull
     @Size(min = 1, max = 100)
     private List<@Valid VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder;

@@ -40,6 +40,7 @@ import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -76,6 +77,9 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VurderingAvBostedsvilkårEtterAvklaringOppdaterer oppdaterer;
 
+    @Inject
+    private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
+
     private Fagsak fagsak;
 
     @BeforeAll
@@ -107,8 +111,7 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
             bostedAvklaringTjeneste,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
-            behandlingRepository,
-            historikkinnslagRepository);
+            vilkårsvurderingHistorikkinnslagTjeneste);
 
         fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, new AktørId("1122334455667"), new Saksnummer("BOSTEDOPP1"),
             LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));

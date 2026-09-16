@@ -16,7 +16,6 @@ import java.util.List;
 @JsonTypeName(AksjonspunktKodeDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR_KODE)
 public class VurderingAvBostedsvilkårEtterAvklaringDto extends BekreftetAksjonspunktDto {
 
-    @JsonProperty("vurdertePerioder")
     @NotNull
     @Size(min = 1, max = 100)
     private List<@Valid VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder;
@@ -27,7 +26,7 @@ public class VurderingAvBostedsvilkårEtterAvklaringDto extends BekreftetAksjons
 
     @JsonCreator
     public VurderingAvBostedsvilkårEtterAvklaringDto(@JsonProperty("vurdertePerioder") List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
-                                       @JsonProperty("begrunnelse") String begrunnelse) {
+                                                     @JsonProperty("begrunnelse") String begrunnelse) {
         super(begrunnelse);
         this.vurdertePerioder = vurdertePerioder;
     }

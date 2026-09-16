@@ -1,11 +1,12 @@
 package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.sikkerhet.context.SubjectHandler;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -24,14 +25,10 @@ import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 /**
  * Felles logikk for vurdering av et inngangsvilkår ved opphør eller avslått periode.
  */
-@ApplicationScoped
+@Dependent
 public class VurderingAvVilkårEtterAvklaringTjeneste {
 
-    private VilkårResultatRepository vilkårResultatRepository;
-
-    VurderingAvVilkårEtterAvklaringTjeneste() {
-        // for CDI proxy
-    }
+    private final VilkårResultatRepository vilkårResultatRepository;
 
     @Inject
     public VurderingAvVilkårEtterAvklaringTjeneste(VilkårResultatRepository vilkårResultatRepository) {
@@ -44,7 +41,9 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                                                              LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElseThrow();
         LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(vilkårType)
-            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT);
+            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT)
+            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
+
         if (eksisterendeVilkårperioder.isEmpty()) {
             throw new IllegalArgumentException("Fant ingen relevante vilkårsperioder for " + vilkårType
                 + " på behandlingId=" + behandlingId);

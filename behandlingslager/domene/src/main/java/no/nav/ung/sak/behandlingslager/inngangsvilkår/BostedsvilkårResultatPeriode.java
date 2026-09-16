@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.inngangsvilkår;
 
 import jakarta.persistence.*;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -65,12 +66,19 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
         this(periode,
             vilkårsvurderingResultat.godkjent(),
-            (BostedsvilkårIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
+            validerOgCastÅrsak(vilkårsvurderingResultat.ikkeOppfyltÅrsak()),
             vilkårsvurderingResultat.erManuellVurdering(),
             vilkårsvurderingResultat.begrunnelse(),
             vilkårsvurderingResultat.fritekstVurderingBrev(),
             vilkårsvurderingResultat.vurdertAv(),
             vilkårsvurderingResultat.vurdertTidspunkt());
+    }
+
+    private static BostedsvilkårIkkeOppfyltÅrsak validerOgCastÅrsak(IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak) {
+        if (ikkeOppfyltÅrsak != null && !(ikkeOppfyltÅrsak instanceof BostedsvilkårIkkeOppfyltÅrsak)) {
+            throw new IllegalArgumentException("ikkeOppfyltÅrsak må være av typen BostedsvilkårIkkeOppfyltÅrsak, var " + ikkeOppfyltÅrsak.getClass());
+        }
+        return (BostedsvilkårIkkeOppfyltÅrsak) ikkeOppfyltÅrsak;
     }
 
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
