@@ -123,7 +123,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
             .anyMatch(v -> !v.vurdering().filterValue(u -> u != Utfall.OPPFYLT).isEmpty());
 
         if (trengerManuellVurdering) {
-            log.info("Fant utenlandsopphold, lager aksjonspunkt.");
+            log.info("Fant utenlandsopphold, lager aksjonspunkt for vilkårsvurdering.");
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
