@@ -83,7 +83,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     void skal_returnere_aksjonspunkt_når_ingen_grunnlag_eksisterer() {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
-            .medSøktStartdato(FOM)
+            .medVirkningstidspunkt(FOM)
             .lagre(entityManager);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
@@ -98,7 +98,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var forskjøvetVilkårPeriode = new Periode(forskjøvetFom, TOM);
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, forskjøvetVilkårPeriode)
-            .medSøktStartdato(FOM)
+            .medVirkningstidspunkt(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of()));
@@ -113,7 +113,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     void skal_returnere_aksjonspunkt_når_ett_bosted_er_utenfor_eøs() {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
-            .medSøktStartdato(FOM)
+            .medVirkningstidspunkt(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of(
@@ -134,7 +134,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, periode1)
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, periode2)
-            .medSøktStartdato(FOM)
+            .medVirkningstidspunkt(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), TOM.minusDays(1), Set.of(
@@ -166,7 +166,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, periode2)
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_OPPFYLT, periode1)
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.OPPFYLT, periode2)
-            .medSøktStartdato(FOM)
+            .medVirkningstidspunkt(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), TOM.minusDays(1), Set.of()));
@@ -189,7 +189,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     void skal_vurdere_perioden_når_annet_vilkår_er_delvis_avslått_i_samme_periode() {
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
-            .medSøktStartdato(FOM)
+            .medVirkningstidspunkt(FOM)
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.OPPFYLT, new Periode(FOM, LocalDate.of(2024, 8, 15)))
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(LocalDate.of(2024, 8, 16), TOM))
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
