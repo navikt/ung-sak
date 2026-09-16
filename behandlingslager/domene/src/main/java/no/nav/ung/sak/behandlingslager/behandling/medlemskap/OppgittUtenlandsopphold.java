@@ -24,23 +24,35 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
-    @Column(name = "landkode", nullable = false)
+    @Column(name = "landkode", nullable = false, updatable = false)
     private String landkode;
 
+    @Column(name = "har_jobbet_i_perioden", nullable = false, updatable = false)
+    private boolean harJobbetIPerioden;
+
+    @Column(name = "utenlandsk_nasjonal_id", updatable = false)
+    private String utenlandskNasjonalId;
+
     public OppgittUtenlandsopphold() {
+
     }
 
-    public OppgittUtenlandsopphold(LocalDate fom, LocalDate tom, String landkode) {
+    public OppgittUtenlandsopphold(LocalDate fom, LocalDate tom, String landkode, boolean harJobbetIPerioden, String utenlandsNasjonalId) {
         Objects.requireNonNull(fom, "fom");
         Objects.requireNonNull(tom, "tom");
         Objects.requireNonNull(landkode, "landkode");
+
         this.periode = Range.closed(fom, tom);
         this.landkode = landkode;
+        this.harJobbetIPerioden = harJobbetIPerioden;
+        this.utenlandskNasjonalId = utenlandsNasjonalId;
     }
 
     OppgittUtenlandsopphold(OppgittUtenlandsopphold other) {
         this.periode = other.periode;
         this.landkode = other.landkode;
+        this.harJobbetIPerioden = other.harJobbetIPerioden;
+        this.utenlandskNasjonalId = other.utenlandskNasjonalId;
     }
 
     public Long getId() {
@@ -61,12 +73,22 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
         if (o == null || getClass() != o.getClass()) return false;
         OppgittUtenlandsopphold that = (OppgittUtenlandsopphold) o;
         return Objects.equals(periode, that.periode)
-            && Objects.equals(landkode, that.landkode);
+            && Objects.equals(landkode, that.landkode)
+            && Objects.equals(harJobbetIPerioden, that.harJobbetIPerioden)
+            && Objects.equals(utenlandskNasjonalId, that.utenlandskNasjonalId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, landkode);
+        return Objects.hash(periode, landkode, harJobbetIPerioden, utenlandskNasjonalId);
+    }
+
+    public boolean harJobbetIPerioden() {
+        return harJobbetIPerioden;
+    }
+
+    public String getUtenlandskNasjonalId() {
+        return utenlandskNasjonalId;
     }
 
     @Override
@@ -74,6 +96,8 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
         return "OppgittUtenlandsopphold{" +
             "periode=" + periode +
             ", landkode='" + landkode + '\'' +
+            ", harJobbetIPerioden=" + harJobbetIPerioden +
+            ", utenlandskNasjonalId='" + (utenlandskNasjonalId != null) + '\'' +
             '}';
     }
 }

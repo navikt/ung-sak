@@ -87,7 +87,9 @@ public class AktivitetspengerSøknadPersisterer {
             .map(entry -> new OppgittUtenlandsopphold(
                 entry.getKey().getFraOgMed(),
                 entry.getKey().getTilOgMed(),
-                entry.getValue().land().getLandkode()))
+                entry.getValue().land().getLandkode(),
+                entry.getValue().jobbetIPerioden(),
+                entry.getValue().utenlandskNasjonalId()))
             .collect(Collectors.toSet());
 
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandlingId, OppgittForutgåendeMedlemskapPeriode.builder()

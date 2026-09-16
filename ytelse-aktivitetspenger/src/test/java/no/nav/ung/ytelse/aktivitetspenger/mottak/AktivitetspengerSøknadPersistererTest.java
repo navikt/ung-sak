@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,10 +47,12 @@ class AktivitetspengerSøknadPersistererTest {
     void skal_lagre_forutgående_periode_5_år_før_virkningstidspunkt() {
         LocalDate virkningstidspunkt = LocalDate.of(2026, 5, 1);
         String utenlandskNasjonalId = "010185-1234";
+        Periode periode1 = new Periode(LocalDate.of(2021, 5, 1), LocalDate.of(2024, 4, 30));
+        Periode periode2 = new Periode(LocalDate.of(2024, 5, 1), LocalDate.of(2026, 4, 30));
         var utenlandsopphold = new Utenlandsopphold(Map.of(
-            new Periode(LocalDate.of(2021, 5, 1), LocalDate.of(2024, 4, 30)),
+            periode1,
             new UtenlandsoppholdPeriodeInfo(Landkode.of("DEU"), false, null),
-            new Periode(LocalDate.of(2024, 5, 1), LocalDate.of(2026, 4, 30)),
+            periode2,
             new UtenlandsoppholdPeriodeInfo(Landkode.of("FIN"), true, utenlandskNasjonalId)
         ));
 
@@ -68,6 +71,15 @@ class AktivitetspengerSøknadPersistererTest {
         assertThat(periode.getUtenlandsopphold()).hasSize(2);
         assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getLandkode)
             .containsExactlyInAnyOrder("DEU", "FIN");
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getPeriode)
+            .containsExactlyInAnyOrder(DatoIntervallEntitet.fra(periode1.getFraOgMed(), periode1.getTilOgMed()),
+                DatoIntervallEntitet.fra(periode2.getFraOgMed(), periode2.getTilOgMed()));
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::harJobbetIPerioden)
+            .containsExactlyInAnyOrder(true, false);
+
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getUtenlandskNasjonalId)
+            .containsExactlyInAnyOrder(null, utenlandskNasjonalId);
+
     }
 
     @Test

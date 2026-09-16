@@ -10,6 +10,9 @@ alter table if exists oppgitt_fmedlemskap add column if not exists har_bodd_i_no
 alter table if exists oppgitt_fmedlemskap add column if not exists har_jobbet_i_norge boolean;
 alter table if exists oppgitt_fmedlemskap add column if not exists har_jobbet_utenfor_norge boolean;
 
+alter table if exists oppgitt_fmedlemskap_utenlandsopphold add column if not exists har_jobbet_i_perioden boolean not null default false;
+alter table if exists oppgitt_fmedlemskap_utenlandsopphold add column if not exists utenlandsk_nasjonal_id varchar(50);
+
 -- backfill basert på om perioden har oppgitt utenlandsopphold
 update oppgitt_fmedlemskap set har_bodd_i_norge = true, har_jobbet_utenfor_norge = false
 where not exists (select 1 from oppgitt_fmedlemskap_utenlandsopphold u where u.oppgitt_fmedlemskap_id = oppgitt_fmedlemskap.id);
