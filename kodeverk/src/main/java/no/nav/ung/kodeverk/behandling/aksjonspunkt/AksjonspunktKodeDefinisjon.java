@@ -53,6 +53,8 @@ public class AksjonspunktKodeDefinisjon {
     public static final String VURDER_FAKTA_OM_BISTAND_KODE = "5144";
     public static final String VURDER_AKTIVITETSVILKÅR_KODE = "5143";
     public static final String VURDER_ANDRE_LIVSOPPHOLDSYTELSER_KODE = "5142";
+    public static final String VURDER_BOSTEDSVILKÅR_OPPHØR_KODE = "5145";
+    public static final String VURDER_BISTANDSVILKÅR_OPPHØR_KODE = "5146";
     public static final String LOKALKONTOR_FORESLÅR_VILKÅR_KODE = "5100";
     public static final String LOKALKONTOR_BESLUTTER_VILKÅR_KODE = "5200";
 

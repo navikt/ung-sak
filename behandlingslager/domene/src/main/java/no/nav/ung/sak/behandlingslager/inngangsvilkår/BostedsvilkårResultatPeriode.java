@@ -62,6 +62,17 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
         this(kilde.getPeriode(), kilde);
     }
 
+    public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
+        this(periode,
+            vilkårsvurderingResultat.godkjent(),
+            (BostedsvilkårIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
+            vilkårsvurderingResultat.erManuellVurdering(),
+            vilkårsvurderingResultat.begrunnelse(),
+            vilkårsvurderingResultat.fritekstVurderingBrev(),
+            vilkårsvurderingResultat.vurdertAv(),
+            vilkårsvurderingResultat.vurdertTidspunkt());
+    }
+
     public BostedsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean erManuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         if (erManuellVurdering) {
