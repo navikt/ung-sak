@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 @ApplicationScoped
 public class LokalkontorBeslutteVilkårAksjonspunkt {
 
+    private LokalKontorTotrinnHistorikkinnslagTjeneste lokalKontorTotrinnHistorikkinnslagTjeneste;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingskontrollTjeneste behandlingskontrollTjeneste;
     private OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste;
@@ -32,9 +33,11 @@ public class LokalkontorBeslutteVilkårAksjonspunkt {
     }
 
     @Inject
-    public LokalkontorBeslutteVilkårAksjonspunkt(BehandlingskontrollTjeneste behandlingskontrollTjeneste,
+    public LokalkontorBeslutteVilkårAksjonspunkt(LokalKontorTotrinnHistorikkinnslagTjeneste lokalKontorTotrinnHistorikkinnslagTjeneste,
+                                                 BehandlingskontrollTjeneste behandlingskontrollTjeneste,
                                                  TotrinnTjeneste totrinnTjeneste,
                                                  @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER) OppdaterAnsvarligSaksbehandlerTjeneste oppdaterAnsvarligSaksbehandlerTjeneste) {
+        this.lokalKontorTotrinnHistorikkinnslagTjeneste = lokalKontorTotrinnHistorikkinnslagTjeneste;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingskontrollTjeneste = behandlingskontrollTjeneste;
         this.oppdaterAnsvarligSaksbehandlerTjeneste = oppdaterAnsvarligSaksbehandlerTjeneste;
@@ -65,6 +68,7 @@ public class LokalkontorBeslutteVilkårAksjonspunkt {
             totrinnsvurderinger.add(vurderingBuilder.build());
         }
         totrinnTjeneste.settNyeTotrinnaksjonspunktvurderinger(behandling, totrinnsvurderinger);
+        lokalKontorTotrinnHistorikkinnslagTjeneste.lagHistorikkinnslagBeslutteVilkår(behandling);
 
         // Noe spesialhåndtering ifm totrinn og tilbakeføring fra FVED
         behandlingskontrollTjeneste.lagreAksjonspunkterReåpnet(kontekst, skalReåpnes, true);

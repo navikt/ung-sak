@@ -80,6 +80,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
         return getAktivitetsvilkårResultatHolder().map(AktivitetsvilkårResultatHolder::getVurderinger).orElse(Set.of());
     }
 
+    public LocalDateTimeline<VilkårsvurderingResultat> hentAktivitetsvilkårTidslinje() {
+        return new LocalDateTimeline<>(getAktivitetsvilkårResultatHolder().map(AktivitetsvilkårResultatHolder::getVurderinger).orElse(Set.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.tilVilkårsvurderingResultat()))
+            .toList());
+    }
+
     public Set<BistandsvilkårResultatPeriode> hentBistandsvilkårResultatPerioder() {
         return getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger)
             .orElseThrow(() -> new IllegalStateException("Fant ikke BistandsvilkårResultatPerioder"));
@@ -118,6 +124,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     public LocalDateTimeline<BostedsvilkårResultatPeriode> hentBostedTidslinje() {
         return new LocalDateTimeline<>(getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(Set.of()).stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+    }
+
+    public LocalDateTimeline<VilkårsvurderingResultat> hentBostedTidslinjeVilkårResultat() {
+        return new LocalDateTimeline<>(getBostedsvilkårResultatHolder().map(BostedsvilkårResultatHolder::getVurderinger).orElse(Set.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.tilVilkårsvurderingResultat()))
             .toList());
     }
 

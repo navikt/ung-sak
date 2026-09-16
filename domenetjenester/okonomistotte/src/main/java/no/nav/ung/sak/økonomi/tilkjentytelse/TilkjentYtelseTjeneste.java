@@ -154,8 +154,7 @@ public class TilkjentYtelseTjeneste {
     }
 
     private static YtelseType mapYtelseType(Behandling behandling) {
-        // TODO: Fikse mapping når k9-oppdrag fullt ut støtter aktivitetspengerr
-        return behandling.getFagsakYtelseType() == FagsakYtelseType.AKTIVITETSPENGER ? YtelseType.UNGDOMSYTELSE : YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
+        return YtelseType.fraKode(behandling.getFagsakYtelseType().getKode());
     }
 
 

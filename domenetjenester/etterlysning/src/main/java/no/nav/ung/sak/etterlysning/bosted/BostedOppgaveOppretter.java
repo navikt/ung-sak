@@ -17,8 +17,6 @@ import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
@@ -26,7 +24,6 @@ import java.util.Objects;
 @Dependent
 public class BostedOppgaveOppretter {
 
-    private final static Logger logger = LoggerFactory.getLogger(BostedOppgaveOppretter.class);
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
     private final BostedsGrunnlagRepository bostedsGrunnlagRepository;
 
@@ -49,11 +46,11 @@ public class BostedOppgaveOppretter {
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
 
             var ikkeOppfyltÅrsak = periodeAvklaring.getIkkeOppfyltÅrsak();
-            if (ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.AVKORTET){
+            if (ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.AVKORTET) {
                 throw new IllegalStateException("Det er ikke forventet at AVKORTET skal brukes på periode det skal varsles om. Det er antagelig feil i løsningen som gjør at saksbehandler kan sette denne årsaken her.");
             }
             if (ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.ANNET || ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT) {
-                Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "FritekstTilVarsel må være satt når årsak er "+ ikkeOppfyltÅrsak);
+                Objects.requireNonNull(periodeAvklaring.getFritekstTilVarsel(), "FritekstTilVarsel må være satt når årsak er " + ikkeOppfyltÅrsak);
             }
 
             var mappetÅrsak = mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak);
@@ -96,11 +93,15 @@ public class BostedOppgaveOppretter {
 
     static no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak mapIkkeOppfyltÅrsak(BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
         return switch (ikkeOppfyltÅrsak) {
-            case IKKE_BOSATTADRESSE_I_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
-            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM;
-            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
+            case IKKE_BOSATTADRESSE_I_TRONDHEIM ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
+            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM;
+            case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
             case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.ANNET;
-            case UDEFINERT -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT;
+            case UDEFINERT ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT;
             case AVKORTET -> throw new IllegalArgumentException("Ikke-støttet årsak for varsling: " + ikkeOppfyltÅrsak);
         };
     }
@@ -108,7 +109,8 @@ public class BostedOppgaveOppretter {
     static no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType mapKilde(BostedsavklaringKildeType kilde) {
         return switch (kilde) {
             case BRUKER -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType.BRUKER;
-            case FOLKEREGISTER -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType.FOLKEREGISTER;
+            case FOLKEREGISTER ->
+                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType.FOLKEREGISTER;
             case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsavklaringKildeType.ANNET;
         };
     }
