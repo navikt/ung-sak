@@ -21,7 +21,6 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,7 +61,7 @@ public class AktivitetspengerSøknadPersisterer {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    public void lagreVirkningsdato(LocalDate virkningsdato, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId, Boolean erBosattITrondheim) {
+    public void lagreVirkningsdato(LocalDate virkningsdato, JournalpostId journalpostId, Long behandlingId, Boolean erBosattITrondheim) {
         startdatoRepository.lagre(behandlingId, List.of(new SøktStartdato(virkningsdato, journalpostId)));
         if (erBosattITrondheim != null) {
             bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), virkningsdato, erBosattITrondheim);
