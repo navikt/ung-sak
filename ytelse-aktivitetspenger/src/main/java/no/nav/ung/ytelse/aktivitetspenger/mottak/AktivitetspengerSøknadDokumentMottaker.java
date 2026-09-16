@@ -66,7 +66,7 @@ public class AktivitetspengerSøknadDokumentMottaker implements Dokumentmottaker
             LocalDateTimeline<Boolean> tidslinjeFraVirkningstidspunkt = AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(virkningstidspunkt);
             søknadPersisterer.lagreVirkningsdato(virkningstidspunkt, dokument.getJournalpostId(), dokument.getMottattTidspunkt(), behandlingId, ytelse.getErBosattITrondheim());
             søknadPersisterer.oppdaterFagsakperiode(new Periode(tidslinjeFraVirkningstidspunkt.getMinLocalDate(), tidslinjeFraVirkningstidspunkt.getMaxLocalDate()), behandling);
-            søknadPersisterer.lagreMedlemskapGrunnlag(ytelse.getMedlemskap().utenlandsopphold(), ytelse.getSøknadsperiode(), dokument.getJournalpostId(), behandlingId);
+            søknadPersisterer.lagreMedlemskapGrunnlag(ytelse.getMedlemskap(), virkningstidspunkt, dokument.getJournalpostId(), behandlingId);
 
             historikkinnslagTjeneste.opprettHistorikkinnslagForVedlegg(behandling.getFagsakId(), behandlingId, dokument.getJournalpostId());
         }

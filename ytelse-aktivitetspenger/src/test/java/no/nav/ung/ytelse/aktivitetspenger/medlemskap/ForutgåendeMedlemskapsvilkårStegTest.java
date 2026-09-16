@@ -12,6 +12,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
@@ -100,7 +101,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .medSøktStartdato(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), FOM.minusDays(1), Set.of());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of()));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
         var resultat = utførSteg(behandling);
@@ -115,10 +116,10 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .medSøktStartdato(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), FOM.minusDays(1), Set.of(
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of(
             new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2022, 3, 31), "SWE"),
             new OppgittUtenlandsopphold(LocalDate.of(2022, 4, 1), LocalDate.of(2024, 6, 30), "USA")
-        ));
+        )));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
         var resultat = utførSteg(behandling);
@@ -136,9 +137,9 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .medSøktStartdato(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), TOM.minusDays(1), Set.of(
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), TOM.minusDays(1), Set.of(
             new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 9, 29), "SWE")
-        ));
+        )));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
 
@@ -168,7 +169,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .medSøktStartdato(FOM)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), TOM.minusDays(1), Set.of());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), TOM.minusDays(1), Set.of()));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
         var resultat = utførSteg(behandling);
@@ -193,7 +194,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_OPPFYLT, new Periode(LocalDate.of(2024, 8, 16), TOM))
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), JP, FOM.minusYears(5), FOM.minusDays(1), Set.of());
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of()));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
         var resultat = utførSteg(behandling);
@@ -212,5 +213,21 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             behandling.getAktørId(),
             behandlingRepository.taSkriveLås(behandling.getId()));
         return steg.utførSteg(kontekst);
+    }
+
+    private static OppgittForutgåendeMedlemskapPeriode nyPeriode(
+        JournalpostId journalpostId,
+        LocalDate fom,
+        LocalDate tom,
+        Set<OppgittUtenlandsopphold> utenlandsopphold) {
+        return OppgittForutgåendeMedlemskapPeriode.builder()
+            .medJournalpostId(journalpostId)
+            .medFom(fom)
+            .medTom(tom)
+            .medUtenlandsopphold(utenlandsopphold)
+            .medHarBoddINorge(true)
+            .medHarJobbetINorge(null)
+            .medHarJobbetUtenforNorge(!utenlandsopphold.isEmpty())
+            .build();
     }
 }

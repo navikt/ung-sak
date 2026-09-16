@@ -48,15 +48,15 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
     }
 
     @Test
-    void skal_lagre_og_hente_grunnlag_med_bosteder() {
+    void skal_lagre_og_hente_grunnlag_med_utenlandsopphold() {
         var fom = LocalDate.of(2019, 7, 1);
         var tom = LocalDate.of(2024, 6, 30);
-        var bosteder = Set.of(
+        var utenlandsopphold = Set.of(
             new OppgittUtenlandsopphold(LocalDate.of(2019, 7, 1), LocalDate.of(2022, 12, 31), "SWE"),
             new OppgittUtenlandsopphold(LocalDate.of(2023, 1, 1), LocalDate.of(2024, 6, 30), "DEU")
         );
 
-        repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom, tom, bosteder);
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom, tom, utenlandsopphold));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
@@ -64,32 +64,39 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         var periode = grunnlag.getOppgittePerioder().iterator().next();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(fom);
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(tom);
+        assertThat(periode.harBoddINorge()).isTrue();
+        assertThat(periode.harJobbetINorge()).isNull();
+        assertThat(periode.harJobbetUtenforNorge()).isTrue();
         assertThat(periode.getUtenlandsopphold()).hasSize(2);
         assertThat(periode.getJournalpostId()).isEqualTo(JP1);
         assertThat(grunnlag.isAktiv()).isTrue();
     }
 
     @Test
-    void skal_lagre_grunnlag_uten_bosteder() {
+    void skal_lagre_grunnlag_uten_utenlandsopphold() {
         var fom = LocalDate.of(2019, 7, 1);
         var tom = LocalDate.of(2024, 6, 30);
 
-        repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom, tom, Set.of());
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom, tom, Set.of()));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
-        assertThat(grunnlag.getOppgittePerioder().iterator().next().getUtenlandsopphold()).isEmpty();
+        var periode = grunnlag.getOppgittePerioder().iterator().next();
+        assertThat(periode.getUtenlandsopphold()).isEmpty();
+        assertThat(periode.harBoddINorge()).isTrue();
+        assertThat(periode.harJobbetINorge()).isNull();
+        assertThat(periode.harJobbetUtenforNorge()).isFalse();
     }
 
     @Test
     void skal_legge_til_perioder_ved_ny_søknad_på_samme_behandling() {
         var fom1 = LocalDate.of(2019, 7, 1);
         var tom1 = LocalDate.of(2024, 6, 30);
-        repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom1, tom1, Set.of(new OppgittUtenlandsopphold(fom1, tom1, "SWE")));
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom1, tom1, Set.of(new OppgittUtenlandsopphold(fom1, tom1, "SWE"))));
 
         var fom2 = LocalDate.of(2020, 1, 1);
         var tom2 = LocalDate.of(2025, 1, 1);
-        repository.leggTilOppgittPeriode(behandling.getId(), JP2, fom2, tom2, Set.of(new OppgittUtenlandsopphold(fom2, tom2, "FIN")));
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP2, fom2, tom2, Set.of(new OppgittUtenlandsopphold(fom2, tom2, "FIN"))));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
@@ -106,8 +113,9 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
     void skal_kopiere_grunnlag_til_ny_behandling_og_dele_holder() {
         var fom = LocalDate.of(2019, 7, 1);
         var tom = LocalDate.of(2024, 6, 30);
-        repository.leggTilOppgittPeriode(behandling.getId(), JP1, fom, tom,
-            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "DEU")));
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom, tom,
+            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1),
+                LocalDate.of(2024, 6, 30), "DEU"))));
 
         Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
@@ -129,8 +137,12 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
     @Test
     void skal_kopiere_holder_ved_ny_søknad_på_revurdering_med_delt_holder() {
-        repository.leggTilOppgittPeriode(behandling.getId(), JP1, LocalDate.of(2019, 7, 1), LocalDate.of(2024, 6, 30),
-            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 6, 30), "DEU")));
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1,
+            LocalDate.of(2019, 7, 1), LocalDate.of(2024, 6, 30),
+            Set.of(new OppgittUtenlandsopphold(
+                LocalDate.of(2020, 1, 1),
+                LocalDate.of(2024, 6, 30),
+                "DEU"))));
 
         Behandling revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
@@ -138,8 +150,8 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
 
         var holderIdFørNySøknad = repository.hentGrunnlag(revurdering.getId()).getHolder().getId();
 
-        repository.leggTilOppgittPeriode(revurdering.getId(), JP2, LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1),
-            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1), "FIN")));
+        repository.leggTilOppgittPeriode(revurdering.getId(), nyPeriode(JP2, LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1),
+            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1), "FIN"))));
 
         var revGrunnlag = repository.hentGrunnlag(revurdering.getId());
         assertThat(revGrunnlag.getOppgittePerioder()).hasSize(2);
@@ -160,5 +172,21 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         repository.kopierGrunnlagFraEksisterendeBehandling(behandling.getId(), nyBehandling.getId());
 
         assertThat(repository.hentGrunnlagHvisEksisterer(nyBehandling.getId())).isEmpty();
+    }
+
+    private static OppgittForutgåendeMedlemskapPeriode nyPeriode(
+        JournalpostId journalpostId,
+        LocalDate fom,
+        LocalDate tom,
+        Set<OppgittUtenlandsopphold> utenlandsopphold) {
+        return OppgittForutgåendeMedlemskapPeriode.builder()
+            .medJournalpostId(journalpostId)
+            .medFom(fom)
+            .medTom(tom)
+            .medUtenlandsopphold(utenlandsopphold)
+            .medHarBoddINorge(true)
+            .medHarJobbetINorge(null)
+            .medHarJobbetUtenforNorge(!utenlandsopphold.isEmpty())
+            .build();
     }
 }
