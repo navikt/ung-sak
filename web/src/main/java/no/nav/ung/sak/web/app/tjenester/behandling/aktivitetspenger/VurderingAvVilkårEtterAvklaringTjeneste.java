@@ -81,6 +81,12 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             throw new IllegalArgumentException("Kan ikke vurdere " + vilkårType
                 + " ved avslått periode/opphør uten at det finnes en ikkeOppfyltÅrsak (foreslått vilkårsavklaring) på behandlingen. behandlingId=" + behandlingId);
         }
+
+        if (vurdertTidslinje.isEmpty()) {
+            throw new IllegalArgumentException("Må ha minst 1 vurdert periode, og må overlappe eksisterende vilkårtidslinje for " + vilkårType
+                + " på behandlingId=" + behandlingId);
+        }
+
         var utenAvklaring = vurdertTidslinje.disjoint(årsakTidslinje);
         if (!utenAvklaring.isEmpty()) {
             throw new IllegalArgumentException(
