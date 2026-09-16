@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepo
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.etterlysning.bistand.BistandOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.bosted.BostedOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.kontroll.InntektkontrollOppgaveOppretter;
 import no.nav.ung.sak.etterlysning.opphorvedmaksdato.OpphørVedMaksdatoOppgaveOppretter;
@@ -34,6 +35,7 @@ public class OpprettOppgaveTjeneste {
     private final EndretPeriodeOppgaveOppretter endretPeriodeOppgaveOppretter;
     private final OpphørVedMaksdatoOppgaveOppretter opphørVedMaksdatoOppgaveOppretter;
     private final BostedOppgaveOppretter bostedOppgaveOppretter;
+    private final BistandOppgaveOppretter bistandOppgaveOppretter;
     private final EtterlysningRepository etterlysningRepository;
     private final HistorikkinnslagRepository historikkinnslagRepository;
     private final Duration ventePeriode;
@@ -47,6 +49,7 @@ public class OpprettOppgaveTjeneste {
         EndretPeriodeOppgaveOppretter endretPeriodeOppgaveOppretter,
         OpphørVedMaksdatoOppgaveOppretter opphørVedMaksdatoOppgaveOppretter,
         BostedOppgaveOppretter bostedOppgaveOppretter,
+        BistandOppgaveOppretter bistandOppgaveOppretter,
         EtterlysningRepository etterlysningRepository,
         HistorikkinnslagRepository historikkinnslagRepository,
         @KonfigVerdi(value = "VENTEFRIST_UTTALELSE", defaultVerdi = "P14D") String ventePeriode,
@@ -58,6 +61,7 @@ public class OpprettOppgaveTjeneste {
         this.endretPeriodeOppgaveOppretter = endretPeriodeOppgaveOppretter;
         this.opphørVedMaksdatoOppgaveOppretter = opphørVedMaksdatoOppgaveOppretter;
         this.bostedOppgaveOppretter = bostedOppgaveOppretter;
+        this.bistandOppgaveOppretter = bistandOppgaveOppretter;
         this.etterlysningRepository = etterlysningRepository;
         this.historikkinnslagRepository = historikkinnslagRepository;
         this.ventePeriode = Duration.parse(ventePeriode);
@@ -86,7 +90,10 @@ public class OpprettOppgaveTjeneste {
                 endretPeriodeOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             case UTTALELSE_OPPHOR_VED_MAKSDATO ->
                 opphørVedMaksdatoOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
-            case UTTALELSE_BOSTED -> bostedOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
+            case UTTALELSE_BOSTED ->
+                bostedOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
+            case UTTALELSE_BISTAND ->
+                bistandOppgaveOppretter.opprettOppgave(behandling, etterlysninger, aktørId);
             default ->
                 throw new IllegalArgumentException("Har ikke implementert oppretting av oppgave for etterlysningstype: " + etterlysningType);
         }

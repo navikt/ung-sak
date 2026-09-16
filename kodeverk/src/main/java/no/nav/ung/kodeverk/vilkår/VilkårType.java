@@ -50,7 +50,10 @@ public enum VilkårType implements Kodeverdi {
         "AKT_VK_2",
         "Bistandsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
-        Avslagsårsak.IKKE_14A_VEDTAK
+        Avslagsårsak.IKKE_14A_VEDTAK,
+        Avslagsårsak.SØKER_HAR_KOMMET_I_UTDANNING,
+        Avslagsårsak.SØKER_HAR_KOMMET_I_ARBEID,
+        Avslagsårsak.BISTANDSVILKÅR_ANNET_AVSLAGSÅRSAK
     ),
     AKTIVITETSVILKÅR(
         "AKT_VK_5",

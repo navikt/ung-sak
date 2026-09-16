@@ -42,6 +42,15 @@ public enum Avslagsårsak implements Kodeverdi {
     IKKE_14A_VEDTAK("3002", "Søker har ikke oppfølgingsvedtak etter Navloven §14a.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
+    SØKER_HAR_KOMMET_I_UTDANNING("3006", "Søker har kommet i utdanning.",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
+    SØKER_HAR_KOMMET_I_ARBEID("3007", "Søker har kommet i arbeid.",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
+    BISTANDSVILKÅR_ANNET_AVSLAGSÅRSAK("3008", "Søker oppfyller ikke bistandsvilkåret av annen årsak.",
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+
     //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
     AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK("3011", "Søker oppfyller ikke aktivitetsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 public enum BistandsavklaringKildeType implements AvklaringKilde {
 
     BRUKER(false),
+    NAV(false),
     ANNET(true),
     ;
 

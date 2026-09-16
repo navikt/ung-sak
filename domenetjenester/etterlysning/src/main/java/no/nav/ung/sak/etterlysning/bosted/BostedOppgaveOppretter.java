@@ -100,9 +100,8 @@ public class BostedOppgaveOppretter {
             case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM ->
                 no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM;
             case ANNET -> no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.ANNET;
-            case UDEFINERT ->
-                no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BostedsvilkårIkkeOppfyltÅrsak.UDEFINERT;
-            case AVKORTET -> throw new IllegalArgumentException("Ikke-støttet årsak for varsling: " + ikkeOppfyltÅrsak);
+            case UDEFINERT, AVKORTET ->
+                throw new IllegalArgumentException("Ikke-støttet årsak for varsling: " + ikkeOppfyltÅrsak);
         };
     }
 

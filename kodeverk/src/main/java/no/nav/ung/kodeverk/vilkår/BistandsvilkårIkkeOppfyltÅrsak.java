@@ -8,6 +8,9 @@ public enum BistandsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrs
 
     // Søker har ikke oppfølgingsvedtak etter Navloven §14a.
     IKKE_14A_VEDTAK(Avslagsårsak.IKKE_14A_VEDTAK, true),
+    KOMMET_I_UTDANNING(Avslagsårsak.SØKER_HAR_KOMMET_I_UTDANNING, false),
+    KOMMET_I_ARBEID(Avslagsårsak.SØKER_HAR_KOMMET_I_ARBEID, false),
+    ANNET(Avslagsårsak.BISTANDSVILKÅR_ANNET_AVSLAGSÅRSAK, true),
     // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
     AVKORTET(Avslagsårsak.AVKORTET, false),
     UDEFINERT(null, false),
