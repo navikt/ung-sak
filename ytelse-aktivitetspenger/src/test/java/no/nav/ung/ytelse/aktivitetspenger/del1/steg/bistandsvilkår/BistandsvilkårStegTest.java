@@ -4,6 +4,8 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
@@ -42,6 +44,7 @@ import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
+import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfallUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -158,7 +161,7 @@ class BistandsvilkårStegTest {
 
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR);
         assertThat(hentVurderinger(behandling)).isEmpty();
     }
 
@@ -169,7 +172,7 @@ class BistandsvilkårStegTest {
 
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR);
         assertThat(hentVurderinger(behandling)).isEmpty();
     }
 
@@ -232,7 +235,7 @@ class BistandsvilkårStegTest {
         assertThat(resultat.getAksjonspunktListe())
             .containsExactly(EtterlysningType.UTTALELSE_BISTAND.tilAutopunktDefinisjon());
         assertThat(resultat.getAksjonspunktListe())
-            .doesNotContain(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
+            .doesNotContain(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR, AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR);
     }
 
     @Test
@@ -315,6 +318,49 @@ class BistandsvilkårStegTest {
 
         assertThat(resultat.getAksjonspunktListe()).isEmpty();
         assertThat(hentVurderinger(behandling)).isEmpty();
+    }
+
+    @Test
+    void skal_gi_opphørsaksjonspunkt_nar_hele_den_manuelle_tidslinjen_har_foreslatt_avklaring() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BISTANDSVILKÅR, Set.of(
+            lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, false),
+            lagAvklaring(fom2, tom2, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, false)
+        ));
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR);
+    }
+
+    @Test
+    void skal_gi_avslagsaksjonspunkt_nar_ingen_manuell_periode_har_foreslatt_avklaring() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe())
+            .as("saksbehandler kan ha avklart fakta uten å foreslå en vurdering; da må avslagsårsaken oppgis i 5141")
+            .containsExactly(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR);
+    }
+
+    @Test
+    void skal_ikke_regne_delvis_dekket_tidslinje_som_dekket_av_foreslatt_avklaring() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var avklaring = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+
+        var blandetTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(FOM, TOM, new VilkårsavklaringUtfallUtleder(VilkårType.BISTANDSVILKÅR, avklaring)),
+            new LocalDateSegment<>(fom2, tom2, new VilkårsavklaringUtfallUtleder(VilkårType.BISTANDSVILKÅR, null))));
+
+        assertThat(BistandsvilkårSteg.erDekketAvForeslåttAvklaring(blandetTidslinje)).isFalse();
+        assertThat(BistandsvilkårSteg.erDekketAvForeslåttAvklaring(
+            blandetTidslinje.intersection(new LocalDateTimeline<>(FOM, TOM, Boolean.TRUE)))).isTrue();
     }
 
     private UUID finnReferanse(Set<VilkårPeriodeAvklaring> lagrede, LocalDate fom) {

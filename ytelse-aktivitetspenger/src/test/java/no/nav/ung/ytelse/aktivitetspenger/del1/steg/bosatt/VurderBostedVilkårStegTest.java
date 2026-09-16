@@ -4,17 +4,14 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
-import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
-import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -22,11 +19,10 @@ import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinje;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
-import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
@@ -176,7 +172,7 @@ class VurderBostedVilkårStegTest {
         steg = lagSteg(List.of(ventendeEtterlysning));
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR);
         var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId());
         var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
         assertThat(inngangsvilkårVurderinger.get()).isEmpty();
@@ -207,7 +203,7 @@ class VurderBostedVilkårStegTest {
         steg = lagSteg(List.of(ventendeEtterlysning));
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR);
         var vilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId());
         var inngangsvilkårVurderinger = vilkårVurderingResultat.map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder);
         assertThat(inngangsvilkårVurderinger.get()).isEmpty();
@@ -271,7 +267,7 @@ class VurderBostedVilkårStegTest {
         assertThat(resultat.getAksjonspunktListe())
             .containsExactly(EtterlysningType.UTTALELSE_BOSTED.tilAutopunktDefinisjon());
         assertThat(resultat.getAksjonspunktListe())
-            .doesNotContain(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
+            .doesNotContain(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR, AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR);
     }
 
     @Test
@@ -318,6 +314,56 @@ class VurderBostedVilkårStegTest {
         assertThat(periodeMedAvklaring.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         // Perioden uten foreslått avklaring skal ikke ha blitt rørt, siden den avgrenses bort fra vurderingen.
         assertThat(periodeUtenAvklaring.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_VURDERT);
+    }
+
+    @Test
+    void skal_gi_opphørsaksjonspunkt_når_hele_den_manuelle_tidslinjen_har_foreslått_avklaring() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+            lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true),
+            lagBostedsPeriodeAvklaring(fom2, tom2, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true)
+        ));
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe()).containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR);
+    }
+
+    @Test
+    void skal_gi_avslagsaksjonspunkt_når_ingen_manuell_periode_har_foreslått_avklaring() {
+        var fom2 = TOM.plusDays(1);
+        var tom2 = fom2.plusDays(30);
+        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+
+        var resultat = utførSteg(behandling);
+
+        assertThat(resultat.getAksjonspunktListe())
+            .as("saksbehandler kan ha avklart fakta uten å foreslå en vurdering; da må avslagsårsaken oppgis i 5140")
+            .containsExactly(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR);
+    }
+
+    @Test
+    void skal_ikke_regne_delvis_dekket_tidslinje_som_dekket_av_foreslått_avklaring() {
+        var behandling = opprettBehandlingMedVilkårOgPeriode();
+        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+            lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true)
+        ));
+
+        // Søknadsfakta løper videre etter TOM, så tidslinjen har et haleparti uten avklaring.
+        LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> blandetTidslinje = bostedsGrunnlagRepository
+            .hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow()
+            .hentOppgittOgForeslåttFaktaSomTidslinje()
+            .mapValue(BostedAvklaringOgUttalelseOgResultat::new);
+
+        assertThat(blandetTidslinje.segmenter()).hasSizeGreaterThan(1);
+        assertThat(VurderBostedVilkårSteg.erDekketAvForeslåttAvklaring(blandetTidslinje)).isFalse();
+        assertThat(VurderBostedVilkårSteg.erDekketAvForeslåttAvklaring(
+            blandetTidslinje.intersection(new LocalDateTimeline<>(FOM, TOM, Boolean.TRUE)))).isTrue();
     }
 
     private Behandling opprettBehandlingMedVilkårOgPeriode() {

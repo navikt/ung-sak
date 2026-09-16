@@ -168,17 +168,20 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                     foreslåttAvklaring.getVurdertTidspunkt());
             }).collect(Collectors.toList());
 
-        // Kalles også med tom liste, slik at grunnlaget alltid finnes når settBistandsvilkårResultat kjører under.
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, vurderingResultat);
 
-        if (!stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT).isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR));
+        var manuellVurderingTidslinje = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT));
+        if (!manuellVurderingTidslinje.isEmpty()) {
+            var aksjonspunkt = erDekketAvForeslåttAvklaring(manuellVurderingTidslinje)
+                ? AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR
+                : AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR;
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunkt));
         }
 
-        // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
-        oppdaterBistandsvilkårResultatFraVurdering(behandlingId);
+        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandlingId));
+        inngangsvilkårVurderingTjeneste.settBistandsvilkårResultat(behandlingId, resultatBuilder);
+        vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
 
-        //lag historikkinnslag for endringer gjort automatisk
         historikkinnslagInput.setSkjermlenkeType(SkjermlenkeType.BISTANDSVILKÅR)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId, getAktuellVilkårType()))
             .setHistorikkAktør(HistorikkAktør.VEDTAKSLØSNINGEN);
@@ -187,15 +190,14 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
+    static boolean erDekketAvForeslåttAvklaring(LocalDateTimeline<VilkårsavklaringUtfallUtleder> manuellTidslinje) {
+        return manuellTidslinje.segmenter().stream()
+            .allMatch(s -> s.getValue().getForeslåttAvklaring() != null);
+    }
+
      private static LocalDateTimeline<Boolean> avgrensTilForeslåtteAvklaringerHvisFinnes(
         LocalDateTimeline<Boolean> tidslinjeTilVurdering, LocalDateTimeline<VilkårPeriodeAvklaring> avklaringTidslinje) {
         return avklaringTidslinje.isEmpty() ? tidslinjeTilVurdering : tidslinjeTilVurdering.intersection(avklaringTidslinje);
-    }
-
-    private void oppdaterBistandsvilkårResultatFraVurdering(long behandlingId) {
-        var resultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandlingId));
-        inngangsvilkårVurderingTjeneste.settBistandsvilkårResultat(behandlingId, resultatBuilder);
-        vilkårResultatRepository.lagre(behandlingId, resultatBuilder.build());
     }
 
     private LocalDateTimeline<VilkårPeriodeAvklaring> hentForeslåttAvklaringTidslinje(long behandlingId) {
@@ -236,5 +238,4 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
             )
         ));
     }
-
 }

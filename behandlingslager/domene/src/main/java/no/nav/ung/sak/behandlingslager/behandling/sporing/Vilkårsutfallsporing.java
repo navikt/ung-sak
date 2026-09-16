@@ -8,11 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-/**
- * Pakker inn {@link BehandingprosessSporingRepository#lagreSporing} med JSON-serialisering og feilhåndtering,
- * slik at et steg kan lagre sporing av vilkårutfallutledning for feilsøking uten å la en serialiseringsfeil stoppe
- * behandlingen.
- */
 @Dependent
 public class Vilkårsutfallsporing {
 

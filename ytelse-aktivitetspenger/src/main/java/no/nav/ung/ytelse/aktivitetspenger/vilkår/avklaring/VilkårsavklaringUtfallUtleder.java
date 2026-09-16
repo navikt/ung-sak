@@ -9,10 +9,6 @@ import no.nav.ung.sak.etterlysning.EtterlysningData;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-/**
- * Per-segment hjelpeobjekt som bygges opp via tidslinje-combinators. Automatisk avslag krever at samtlige
- * forutsetninger er innfridd; alt annet faller tilbake til manuell vurdering.
- */
 public class VilkårsavklaringUtfallUtleder {
 
     private final VilkårType vilkårType;
