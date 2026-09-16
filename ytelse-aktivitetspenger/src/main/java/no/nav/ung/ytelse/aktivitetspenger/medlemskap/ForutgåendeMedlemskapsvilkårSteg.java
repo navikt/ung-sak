@@ -113,29 +113,29 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         }
 
         var grunnlag = grunnlagOpt.get();
-        var medlemskapslandTidslinje = lagForutgåendeMedlemskapslandTidslinje(grunnlag, fagsakId);
+        var forutgåendeMedlemskapslandTidslinje = lagForutgåendeMedlemskapslandTidslinje(grunnlag, fagsakId);
 
         var stegerVurderinger = perioderTilVurdering.stream()
-            .map(periode -> vurder(periode, medlemskapslandTidslinje))
+            .map(periode -> vurder(periode, forutgåendeMedlemskapslandTidslinje))
             .toList();
 
         var trengerManuellVurdering = stegerVurderinger.stream()
             .anyMatch(v -> !v.vurdering().filterValue(u -> u != Utfall.OPPFYLT).isEmpty());
 
         if (trengerManuellVurdering) {
-            log.info("Fant utenlandsopphold som ikke har trygdeavtale, lager aksjonspunkt.");
+            log.info("Fant utenlandsopphold, lager aksjonspunkt.");
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
-        oppfyllVilkår(behandlingId, medlemskapslandTidslinje, stegerVurderinger);
+        oppfyllVilkår(behandlingId, forutgåendeMedlemskapslandTidslinje, stegerVurderinger);
         return BehandleStegResultat.utførtUtenAksjonspunkter();
     }
 
-    private static StegVurdering vurder(DatoIntervallEntitet periodeTilVurdering, LocalDateTimeline<String> utenlandsoppholdTidslinje) {
+    private static StegVurdering vurder(DatoIntervallEntitet periodeTilVurdering, LocalDateTimeline<String> landTidslinje) {
         LocalDate virkningsdato = periodeTilVurdering.getFomDato();
         var forutgåendePeriodeTilVurdering = new LocalDateInterval(virkningsdato.minusYears(5), virkningsdato.minusDays(1));
         var forutgåendeMedlemskapsvurdering = new LocalDateTimeline<>(forutgåendePeriodeTilVurdering, Boolean.TRUE)
-            .combine(utenlandsoppholdTidslinje, ForutgåendeMedlemskapsvilkårSteg::vurderUtenlandsopphold, JoinStyle.LEFT_JOIN);
+            .combine(landTidslinje, ForutgåendeMedlemskapsvilkårSteg::vurderUtenlandsopphold, JoinStyle.LEFT_JOIN);
         return new StegVurdering(periodeTilVurdering, forutgåendePeriodeTilVurdering, forutgåendeMedlemskapsvurdering);
     }
 
@@ -162,7 +162,7 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
         if (landkode == null || landkode.getValue() == null) {
             return new LocalDateSegment<>(intervall, Utfall.IKKE_VURDERT);
         }
-        if (TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(landkode.getValue(), intervall.getFomDato())) {
+        if (landkode.getValue().equals("NOR")) {
             return new LocalDateSegment<>(intervall, Utfall.OPPFYLT);
         }
         return new LocalDateSegment<>(intervall, Utfall.IKKE_OPPFYLT);
@@ -179,15 +179,15 @@ public class ForutgåendeMedlemskapsvilkårSteg implements BehandlingSteg {
             .map(MottattDokument::getJournalpostId)
             .orElseThrow();
 
-        var nyestePeriode = grunnlag.getOppgittePerioder().stream()
+        var nyesteGrunnlagPeriode = grunnlag.getOppgittePerioder().stream()
             .filter(p -> p.getJournalpostId().equals(nyesteJournalpostId))
             .findFirst()
             .orElseThrow();
 
-        var antattBostedNorgeTidslinje = new LocalDateTimeline<>(nyestePeriode.getPeriode().getFomDato(), nyestePeriode.getPeriode().getTomDato(), Landkode.NORGE.getLandkode());
+        var antattBostedNorgeTidslinje = new LocalDateTimeline<>(nyesteGrunnlagPeriode.getPeriode().getFomDato(), nyesteGrunnlagPeriode.getPeriode().getTomDato(), Landkode.NORGE.getLandkode());
 
         var utenlandsoppholdTidslinje = new LocalDateTimeline<>(
-            nyestePeriode.getUtenlandsopphold().stream()
+            nyesteGrunnlagPeriode.getUtenlandsopphold().stream()
                 .map(b -> new LocalDateSegment<>(b.getPeriode().getFomDato(), b.getPeriode().getTomDato(), b.getLandkode()))
                 .toList());
 
