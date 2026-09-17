@@ -29,10 +29,10 @@ public class ForutgåendeMedlemskapTjeneste {
         this.behandlingRepository = behandlingRepository;
     }
 
-    public MedlemskapDto hentMedlemskapRelevantForBehandlingSomDto(Long behandlingId) {
+    public Optional<MedlemskapDto> hentMedlemskapRelevantForBehandlingSomDto(Long behandlingId) {
         Optional<OppgittForutgåendeMedlemskapGrunnlag> grunnlagOpt = forutgåendeMedlemskapRepository.hentGrunnlagHvisEksisterer(behandlingId);
         if (grunnlagOpt.isEmpty()) {
-            return null;
+            return Optional.empty();
         }
         var grunnlag = grunnlagOpt.get();
 
@@ -42,8 +42,7 @@ public class ForutgåendeMedlemskapTjeneste {
         return grunnlag.getOppgittePerioder().stream()
             .filter(p -> p.getJournalpostId().equals(nyesteJournalpostId))
             .map(ForutgåendeMedlemskapTjeneste::mapTilDto)
-            .findFirst()
-            .orElseThrow();
+            .findFirst();
     }
 
     private JournalpostId finnNyesteJournalpostIdForGrunnlaget(Long behandlingId, OppgittForutgåendeMedlemskapGrunnlag grunnlag) {

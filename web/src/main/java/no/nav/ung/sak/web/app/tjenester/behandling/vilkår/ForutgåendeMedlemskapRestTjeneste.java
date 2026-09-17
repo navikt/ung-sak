@@ -80,7 +80,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
             ))
             .toList();
 
-        return new ForutgåendeMedlemskapResponse(medlemskap, vilkårsperioder);
+        return new ForutgåendeMedlemskapResponse(medlemskap.orElse(null), vilkårsperioder);
     }
 
     private static MedlemskapAvslagsÅrsakType mapAvslagsårsak(Avslagsårsak avslagsårsak) {
