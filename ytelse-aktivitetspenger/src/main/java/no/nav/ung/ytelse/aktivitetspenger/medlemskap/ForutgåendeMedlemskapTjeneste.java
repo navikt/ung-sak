@@ -68,8 +68,8 @@ public class ForutgåendeMedlemskapTjeneste {
             m.getUtenlandsopphold().stream().map(u ->
                 new UtenlandsoppholdDto(
                     new Periode(u.getPeriode().getFomDato(), u.getPeriode().getTomDato()),
-                    mapLandTilNorskNavn(u.getLandkode()),
-                    u.getLandkode(),
+                    mapLandTilNorskNavn(u.getLand().getKode()),
+                    u.getLand().getKode(),
                     u.harJobbetIPerioden(),
                     u.getUtenlandskNasjonalId()
                 )).toList());

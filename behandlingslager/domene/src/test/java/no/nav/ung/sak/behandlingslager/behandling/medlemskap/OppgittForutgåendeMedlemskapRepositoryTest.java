@@ -4,6 +4,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.jpa.TomtResultatException;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -55,8 +56,8 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         LocalDate fom2 = LocalDate.of(2023, 1, 1);
         LocalDate tom2 = LocalDate.of(2024, 6, 30);
         var utenlandsopphold = Set.of(
-            new OppgittUtenlandsopphold(fom1, tom1, "SWE", true, "ABC123"),
-            new OppgittUtenlandsopphold(fom2, tom2, "DEU", true, null)
+            new OppgittUtenlandsopphold(fom1, tom1, Landkoder.SWE, true, "ABC123"),
+            new OppgittUtenlandsopphold(fom2, tom2, Landkoder.fraKode("DEU"), true, null)
         );
 
         repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom1, tom2, utenlandsopphold));
@@ -103,11 +104,11 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
     void skal_legge_til_perioder_ved_ny_søknad_på_samme_behandling() {
         var fom1 = LocalDate.of(2019, 7, 1);
         var tom1 = LocalDate.of(2024, 6, 30);
-        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom1, tom1, Set.of(new OppgittUtenlandsopphold(fom1, tom1, "SWE", false, null ))));
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom1, tom1, Set.of(new OppgittUtenlandsopphold(fom1, tom1, Landkoder.SWE, false, null ))));
 
         var fom2 = LocalDate.of(2020, 1, 1);
         var tom2 = LocalDate.of(2025, 1, 1);
-        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP2, fom2, tom2, Set.of(new OppgittUtenlandsopphold(fom2, tom2, "FIN", false, null ))));
+        repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP2, fom2, tom2, Set.of(new OppgittUtenlandsopphold(fom2, tom2, Landkoder.FIN, false, null ))));
 
         var grunnlag = repository.hentGrunnlag(behandling.getId());
 
@@ -126,7 +127,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         var tom = LocalDate.of(2024, 6, 30);
         repository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP1, fom, tom,
             Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1),
-                LocalDate.of(2024, 6, 30), "DEU", false, null ))));
+                LocalDate.of(2024, 6, 30), Landkoder.fraKode("DEU"), false, null ))));
 
         Behandling nyBehandling = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(nyBehandling, new BehandlingLås(null));
@@ -153,7 +154,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
             Set.of(new OppgittUtenlandsopphold(
                 LocalDate.of(2020, 1, 1),
                 LocalDate.of(2024, 6, 30),
-                "DEU", false, null ))));
+                Landkoder.fraKode("DEU"), false, null ))));
 
         Behandling revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
@@ -162,7 +163,7 @@ class OppgittForutgåendeMedlemskapRepositoryTest {
         var holderIdFørNySøknad = repository.hentGrunnlag(revurdering.getId()).getHolder().getId();
 
         repository.leggTilOppgittPeriode(revurdering.getId(), nyPeriode(JP2, LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1),
-            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1), "FIN", false, null ))));
+            Set.of(new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2025, 1, 1), Landkoder.FIN, false, null ))));
 
         var revGrunnlag = repository.hentGrunnlag(revurdering.getId());
         assertThat(revGrunnlag.getOppgittePerioder()).hasSize(2);

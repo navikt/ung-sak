@@ -7,6 +7,7 @@ import no.nav.k9.søknad.felles.type.Periode;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Medlemskap;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold.UtenlandsoppholdPeriodeInfo;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
@@ -69,7 +70,8 @@ class AktivitetspengerSøknadPersistererTest {
         assertThat(periode.harJobbetINorge()).isEqualTo(false);
         assertThat(periode.harJobbetUtenforNorge()).isEqualTo(true);
         assertThat(periode.getUtenlandsopphold()).hasSize(2);
-        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getLandkode)
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getLand)
+            .extracting(Landkoder::getKode)
             .containsExactlyInAnyOrder("DEU", "FIN");
         assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getPeriode)
             .containsExactlyInAnyOrder(DatoIntervallEntitet.fra(periode1.getFraOgMed(), periode1.getTilOgMed()),

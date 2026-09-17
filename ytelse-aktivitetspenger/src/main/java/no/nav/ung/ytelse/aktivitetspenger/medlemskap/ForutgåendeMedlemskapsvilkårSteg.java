@@ -178,7 +178,7 @@ public class ForutgåendeMedlemskapsvilkårSteg extends VilkårVurderingSteg {
 
         var utenlandsoppholdTidslinje = new LocalDateTimeline<>(
             nyesteGrunnlagPeriode.getUtenlandsopphold().stream()
-                .map(b -> new LocalDateSegment<>(b.getPeriode().getFomDato(), b.getPeriode().getTomDato(), b.getLandkode()))
+                .map(b -> new LocalDateSegment<>(b.getPeriode().getFomDato(), b.getPeriode().getTomDato(), b.getLand().getKode()))
                 .toList());
 
         return utenlandsoppholdTidslinje.crossJoin(antattBostedNorgeTidslinje);

@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
@@ -124,8 +125,8 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of(
-            new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2022, 3, 31), "SWE", false,  "ABC123"),
-            new OppgittUtenlandsopphold(LocalDate.of(2022, 4, 1), LocalDate.of(2024, 6, 30), "USA", true, null)
+            new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2022, 3, 31), Landkoder.SWE, false,  "ABC123"),
+            new OppgittUtenlandsopphold(LocalDate.of(2022, 4, 1), LocalDate.of(2024, 6, 30), Landkoder.USA, true, null)
         )));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 
@@ -145,7 +146,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
             .lagre(entityManager);
         forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), TOM.minusDays(1), Set.of(
-            new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 9, 29), "NOR", false, "ABC123")
+            new OppgittUtenlandsopphold(LocalDate.of(2020, 1, 1), LocalDate.of(2024, 9, 29), Landkoder.NOR, false, "ABC123")
         )));
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
 

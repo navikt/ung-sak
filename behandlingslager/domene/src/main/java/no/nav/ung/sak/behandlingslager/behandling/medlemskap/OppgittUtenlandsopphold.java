@@ -1,7 +1,9 @@
 package no.nav.ung.sak.behandlingslager.behandling.medlemskap;
 
 import jakarta.persistence.*;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.BaseEntitet;
+import no.nav.ung.sak.behandlingslager.kodeverk.LandkoderKodeverdiConverter;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.PostgreSQLRangeType;
 import no.nav.ung.sak.domene.typer.tid.Range;
@@ -24,8 +26,9 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
     @Column(name = "periode", columnDefinition = "daterange")
     private Range<LocalDate> periode;
 
-    @Column(name = "landkode", nullable = false, updatable = false)
-    private String landkode;
+    @Column(name = "land", nullable = false, updatable = false)
+    @Convert(converter = LandkoderKodeverdiConverter.class)
+    private Landkoder land;
 
     @Column(name = "har_jobbet_i_perioden", nullable = false, updatable = false)
     private boolean harJobbetIPerioden;
@@ -37,20 +40,20 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
 
     }
 
-    public OppgittUtenlandsopphold(LocalDate fom, LocalDate tom, String landkode, boolean harJobbetIPerioden, String utenlandsNasjonalId) {
+    public OppgittUtenlandsopphold(LocalDate fom, LocalDate tom, Landkoder land, boolean harJobbetIPerioden, String utenlandskNasjonalId) {
         Objects.requireNonNull(fom, "fom");
         Objects.requireNonNull(tom, "tom");
-        Objects.requireNonNull(landkode, "landkode");
+        Objects.requireNonNull(land, "land");
 
         this.periode = Range.closed(fom, tom);
-        this.landkode = landkode;
+        this.land = land;
         this.harJobbetIPerioden = harJobbetIPerioden;
-        this.utenlandskNasjonalId = utenlandsNasjonalId;
+        this.utenlandskNasjonalId = utenlandskNasjonalId;
     }
 
     OppgittUtenlandsopphold(OppgittUtenlandsopphold other) {
         this.periode = other.periode;
-        this.landkode = other.landkode;
+        this.land = other.land;
         this.harJobbetIPerioden = other.harJobbetIPerioden;
         this.utenlandskNasjonalId = other.utenlandskNasjonalId;
     }
@@ -63,8 +66,8 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
         return DatoIntervallEntitet.fra(periode);
     }
 
-    public String getLandkode() {
-        return landkode;
+    public Landkoder getLand() {
+        return land;
     }
 
     @Override
@@ -73,14 +76,14 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
         if (o == null || getClass() != o.getClass()) return false;
         OppgittUtenlandsopphold that = (OppgittUtenlandsopphold) o;
         return Objects.equals(getPeriode(), that.getPeriode())
-            && Objects.equals(landkode, that.landkode)
+            && Objects.equals(land, that.land)
             && Objects.equals(harJobbetIPerioden, that.harJobbetIPerioden)
             && Objects.equals(utenlandskNasjonalId, that.utenlandskNasjonalId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getPeriode(), landkode, harJobbetIPerioden, utenlandskNasjonalId);
+        return Objects.hash(getPeriode(), land, harJobbetIPerioden, utenlandskNasjonalId);
     }
 
     public boolean harJobbetIPerioden() {
@@ -95,7 +98,7 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
     public String toString() {
         return "OppgittUtenlandsopphold{" +
             "periode=" + periode +
-            ", landkode='" + landkode + '\'' +
+            ", land=" + land +
             ", harJobbetIPerioden=" + harJobbetIPerioden +
             ", utenlandskNasjonalId='" + (utenlandskNasjonalId != null) + '\'' +
             '}';

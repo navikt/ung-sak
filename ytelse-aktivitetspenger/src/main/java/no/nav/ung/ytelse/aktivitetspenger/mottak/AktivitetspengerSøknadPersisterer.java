@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Språk;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Medlemskap;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
@@ -87,7 +88,7 @@ public class AktivitetspengerSøknadPersisterer {
             .map(entry -> new OppgittUtenlandsopphold(
                 entry.getKey().getFraOgMed(),
                 entry.getKey().getTilOgMed(),
-                entry.getValue().land().getLandkode(),
+                Landkoder.fraKode(entry.getValue().land().getLandkode()),
                 entry.getValue().jobbetIPerioden(),
                 entry.getValue().utenlandskNasjonalId()))
             .collect(Collectors.toSet());

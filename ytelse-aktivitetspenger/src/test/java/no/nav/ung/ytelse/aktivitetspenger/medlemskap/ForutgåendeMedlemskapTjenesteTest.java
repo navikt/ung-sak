@@ -3,6 +3,7 @@ package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
@@ -50,8 +51,8 @@ class ForutgåendeMedlemskapTjenesteTest {
                 .medHarJobbetINorge(false)
                 .medHarJobbetUtenforNorge(true)
                 .medUtenlandsopphold(Set.of(
-                    new OppgittUtenlandsopphold(LocalDate.of(2019, 7, 1), LocalDate.of(2022, 12, 31), "SWE", true, "010185-1234"),
-                    new OppgittUtenlandsopphold(LocalDate.of(2023, 1, 1), LocalDate.of(2024, 6, 30), "DEU", false, null)
+                    new OppgittUtenlandsopphold(LocalDate.of(2019, 7, 1), LocalDate.of(2022, 12, 31), Landkoder.SWE, true, "010185-1234"),
+                    new OppgittUtenlandsopphold(LocalDate.of(2023, 1, 1), LocalDate.of(2024, 6, 30), Landkoder.fraKode("DEU"), false, null)
                 ))
                 .build());
 
