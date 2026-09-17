@@ -56,8 +56,10 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
 
-        var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapRelevantForBehandlingSomDto(param.getBehandlingId())
-            .map(this::maskerUtenlandskNasjonalId).orElseThrow();
+        var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapForBehandlingSomDto(param.getBehandlingId())
+            .stream()
+            .map(this::maskerUtenlandskNasjonalId)
+            .toList();
 
         String regelInput = new VilkårJsonObjectMapper().writeValueAsString(medlemskap);
 
@@ -78,6 +80,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
     private MedlemskapDto maskerUtenlandskNasjonalId(MedlemskapDto medlemskapDto) {
         return new MedlemskapDto(
+            medlemskapDto.forutgåendePeriode(),
             medlemskapDto.harBoddINorge(),
             medlemskapDto.harJobbetINorge(),
             medlemskapDto.harJobbetUtenforNorge(),

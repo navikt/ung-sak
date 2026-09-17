@@ -56,7 +56,7 @@ class ForutgåendeMedlemskapTjenesteTest {
                 ))
                 .build());
 
-        var medlemskapDto = tjeneste.hentMedlemskapRelevantForBehandlingSomDto(behandling.getId()).orElseThrow();
+        var medlemskapDto = tjeneste.hentMedlemskapForBehandlingSomDto(behandling.getId()).stream().findFirst().orElseThrow();
 
         assertThat(medlemskapDto.journalpostId()).isEqualTo(JP.getVerdi());
         assertThat(medlemskapDto.harBoddINorge()).isFalse();

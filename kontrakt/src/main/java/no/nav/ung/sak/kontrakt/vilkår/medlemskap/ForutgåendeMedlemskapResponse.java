@@ -4,6 +4,6 @@ import java.util.List;
 
 public record ForutgåendeMedlemskapResponse(
     MedlemskapDto medlemskapFraBruker,
-    List<VilkårsPeriodeResultatDto> vilkårsperioder
+    List<MedlemskapPeriodeResultatDto> resultater
 ) {
 }
