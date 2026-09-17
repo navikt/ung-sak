@@ -9,6 +9,7 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 
@@ -20,15 +21,9 @@ import java.util.stream.Collectors;
 /**
  * Fletter vilkårsavklaringene på behandlingen (som styres av {@link BehandlingÅrsakType}) sammen med
  * vilkårsvurderingene (som er knyttet til {@link VilkårType}) til én tidslinje.
- * <p>
- * Utlederen sier ingenting om utfallet — avgrensning mot avslåtte eller oppfylte perioder gjøres av kalleren.
  */
 @Dependent
 public class VilkårsavklaringOgVurderingTidslinjeUtleder {
-
-    private static final Map<VilkårType, BehandlingÅrsakType> VILKÅR_OG_BEHANDLINGSÅRSAK = Map.of(
-        VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED
-    );
 
     private final InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private final Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
@@ -43,7 +38,7 @@ public class VilkårsavklaringOgVurderingTidslinjeUtleder {
     public LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> utled(long behandlingId) {
         var vurderingTidslinje = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId);
 
-        return VILKÅR_OG_BEHANDLINGSÅRSAK.entrySet().stream()
+        return VilkårsavklaringÅrsaker.alle().entrySet().stream()
             .map(entry -> lagTidslinjeForVilkår(behandlingId, vurderingTidslinje, entry.getKey(), entry.getValue()).mapValue(Set::of))
             .reduce(LocalDateTimeline.empty(), (akkumulert, neste) ->
                 akkumulert.combine(neste, StandardCombinators::union, LocalDateTimeline.JoinStyle.CROSS_JOIN)
