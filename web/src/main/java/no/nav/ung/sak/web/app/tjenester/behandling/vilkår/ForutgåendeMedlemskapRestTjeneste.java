@@ -16,6 +16,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -81,6 +82,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
 
         var startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId()).orElseThrow();
         var vilkårsperioder = vilkår.getPerioder().stream()
+            .filter(it -> it.getUtfall() != Utfall.IKKE_RELEVANT)
             .map(vp -> new MedlemskapPeriodeResultatDto(
                 new Periode(vp.getPeriode().getFomDato(), vp.getPeriode().getTomDato()),
                 vp.getGjeldendeUtfall(),
