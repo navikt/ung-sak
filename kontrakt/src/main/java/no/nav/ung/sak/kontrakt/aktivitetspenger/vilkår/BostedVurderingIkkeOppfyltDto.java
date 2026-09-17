@@ -24,15 +24,6 @@ public record BostedVurderingIkkeOppfyltDto(
     @Size(max = 1000) @Pattern(regexp = InputValideringRegex.FRITEKST) String kildeFritekst
 ) {
     @JsonIgnore
-    @AssertTrue(message = "fritekstTilVarsel er påkrevd når fraflyttingsÅrsak krever fritekst")
-    public boolean isFritekstTilVarselGyldig() {
-        if (fraflyttingsÅrsak == null) {
-            return true; // dekkes av @NotNull på fraflyttingsÅrsak
-        }
-        return !fraflyttingsÅrsak.kreverFritekst() || (fritekstTilVarsel != null && !fritekstTilVarsel.isBlank());
-    }
-
-    @JsonIgnore
     @AssertTrue(message = "kildeFritekst er påkrevd når kilde krever fritekst")
     public boolean isKildeFritekstGyldig() {
         if (kilde == null) {

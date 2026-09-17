@@ -28,4 +28,14 @@ public record BostedFaktaavklaringPeriodeDto(
         return vurdering.begrunnelseIkkeVarsel() == null || vurdering.begrunnelseIkkeVarsel().isBlank();
     }
 
+    @JsonIgnore
+    @AssertTrue(message = "fritekstTilVarsel er påkrevd når fraflyttingsÅrsak krever fritekst og varsel skal sendes")
+    public boolean isFritekstTilVarselGyldig() {
+        if (vurdering == null || vurdering.fraflyttingsÅrsak() == null) {
+            return true; // dekkes av @NotNull på vurdering/fraflyttingsÅrsak
+        }
+        return !skalSendeVarsel() || !vurdering.fraflyttingsÅrsak().kreverFritekst()
+            || (vurdering.fritekstTilVarsel() != null && !vurdering.fritekstTilVarsel().isBlank());
+    }
+
 }
