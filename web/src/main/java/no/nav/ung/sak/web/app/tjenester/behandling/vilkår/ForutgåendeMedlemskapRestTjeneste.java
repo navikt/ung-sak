@@ -65,7 +65,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
     public ForutgåendeMedlemskapResponse medlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
-        var medlemskap = forutgåendeMedlemskapTjeneste.hentBostederSomDto(behandling.getId());
+        var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapRelevantForBehandlingSomDto(behandling.getId());
 
         var vilkår = vilkårResultatRepository.hent(behandling.getId())
             .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
@@ -80,7 +80,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
             ))
             .toList();
 
-        return new ForutgåendeMedlemskapResponse(medlemskap, vilkårsperioder);
+        return new ForutgåendeMedlemskapResponse(medlemskap.orElse(null), vilkårsperioder);
     }
 
     private static MedlemskapAvslagsÅrsakType mapAvslagsårsak(Avslagsårsak avslagsårsak) {

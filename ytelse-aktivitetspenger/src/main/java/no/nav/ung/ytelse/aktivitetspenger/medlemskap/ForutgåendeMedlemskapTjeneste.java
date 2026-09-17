@@ -3,8 +3,14 @@ package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
-import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapsPeriodeDto;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
+import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
+import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 
 import java.util.*;
@@ -13,32 +19,60 @@ import java.util.*;
 public class ForutgåendeMedlemskapTjeneste {
 
     private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
+    private final MottatteDokumentRepository mottatteDokumentRepository;
+    private final BehandlingRepository behandlingRepository;
 
     @Inject
-    public ForutgåendeMedlemskapTjeneste(OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository) {
+    public ForutgåendeMedlemskapTjeneste(OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository, MottatteDokumentRepository mottatteDokumentRepository, BehandlingRepository behandlingRepository) {
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.behandlingRepository = behandlingRepository;
     }
 
-    public List<MedlemskapsPeriodeDto> hentBostederSomDto(Long behandlingId) {
-        return forutgåendeMedlemskapRepository.hentGrunnlagHvisEksisterer(behandlingId)
-            .map(ForutgåendeMedlemskapTjeneste::mapTilDto)
-            .orElse(List.of());
-    }
+    public Optional<MedlemskapDto> hentMedlemskapRelevantForBehandlingSomDto(Long behandlingId) {
+        Optional<OppgittForutgåendeMedlemskapGrunnlag> grunnlagOpt = forutgåendeMedlemskapRepository.hentGrunnlagHvisEksisterer(behandlingId);
+        if (grunnlagOpt.isEmpty()) {
+            return Optional.empty();
+        }
+        var grunnlag = grunnlagOpt.get();
 
-    private static List<MedlemskapsPeriodeDto> mapTilDto(OppgittForutgåendeMedlemskapGrunnlag grunnlag) {
+        //Da grunnlagene kopierer fra tidligere behandlinger finner vi den nyeste relevant for denne behandlingen.
+        var nyesteJournalpostId = finnNyesteJournalpostIdForGrunnlaget(behandlingId, grunnlag);
+
         return grunnlag.getOppgittePerioder().stream()
-            .flatMap(p -> p.getBostederUtland().stream().map(bosted -> {
-                var landkode = bosted.getLandkode();
-                var periode = bosted.getPeriode();
+            .filter(p -> p.getJournalpostId().equals(nyesteJournalpostId))
+            .map(ForutgåendeMedlemskapTjeneste::mapTilDto)
+            .findFirst();
+    }
 
-                return new MedlemskapsPeriodeDto(
-                    new Periode(periode.getFomDato(), periode.getTomDato()),
-                    mapLandTilNorskNavn(landkode),
-                    landkode,
-                    TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(landkode, periode.getFomDato()),
-                    p.getJournalpostId().getVerdi()
-                );
-            })).toList();
+    private JournalpostId finnNyesteJournalpostIdForGrunnlaget(Long behandlingId, OppgittForutgåendeMedlemskapGrunnlag grunnlag) {
+        var journalpostIderFraGrunnlag = grunnlag.getOppgittePerioder().stream()
+            .map(OppgittForutgåendeMedlemskapPeriode::getJournalpostId)
+            .toList();
+
+        var fagsakId = behandlingRepository.hentBehandling(behandlingId).getFagsakId();
+
+        var mottatteDokumenter = mottatteDokumentRepository.hentMottatteDokument(fagsakId, journalpostIderFraGrunnlag);
+        return mottatteDokumenter.stream()
+            .max(Comparator.comparing(MottattDokument::getMottattTidspunkt))
+            .map(MottattDokument::getJournalpostId)
+            .orElseThrow();
+    }
+
+    private static MedlemskapDto mapTilDto(OppgittForutgåendeMedlemskapPeriode m) {
+        return new MedlemskapDto(
+            m.harBoddINorge(),
+            m.harJobbetINorge(),
+            m.harJobbetUtenforNorge(),
+            m.getJournalpostId().getVerdi(),
+            m.getUtenlandsopphold().stream().map(u ->
+                new UtenlandsoppholdDto(
+                    new Periode(u.getPeriode().getFomDato(), u.getPeriode().getTomDato()),
+                    mapLandTilNorskNavn(u.getLand().getKode()),
+                    u.getLand().getKode(),
+                    u.harJobbetIPerioden(),
+                    u.getUtenlandskNasjonalId()
+                )).toList());
     }
 
     private static final Map<String, String> LANDKODE_TIL_NORSK_NAVN = lagLandkodeTilNorskNavn();

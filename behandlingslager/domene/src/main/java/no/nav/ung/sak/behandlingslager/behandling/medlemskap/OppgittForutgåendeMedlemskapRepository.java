@@ -4,12 +4,9 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.jpa.HibernateVerktøy;
-import no.nav.ung.sak.typer.JournalpostId;
 
-import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 
 @Dependent
 public class OppgittForutgåendeMedlemskapRepository {
@@ -38,13 +35,10 @@ public class OppgittForutgåendeMedlemskapRepository {
         return hentEksisterendeGrunnlag(behandlingId);
     }
 
-    public void leggTilOppgittPeriode(Long behandlingId, JournalpostId journalpostId, LocalDate fom, LocalDate tom, Set<OppgittBosted> bosteder) {
+    public void leggTilOppgittPeriode(Long behandlingId, OppgittForutgåendeMedlemskapPeriode nyPeriode) {
         var eksisterende = hentEksisterendeGrunnlag(behandlingId);
-        var nyPeriode = new OppgittForutgåendeMedlemskapPeriode(journalpostId, fom, tom, bosteder);
-
-        OppgittForutgåendeMedlemskapHolder nyHolder;
-        nyHolder = eksisterende.map(
-            it -> new OppgittForutgåendeMedlemskapHolder(it.getHolder()))
+        OppgittForutgåendeMedlemskapHolder nyHolder = eksisterende.map(
+                it -> new OppgittForutgåendeMedlemskapHolder(it.getHolder()))
             .orElseGet(OppgittForutgåendeMedlemskapHolder::new);
         nyHolder.leggTilPeriode(nyPeriode);
 

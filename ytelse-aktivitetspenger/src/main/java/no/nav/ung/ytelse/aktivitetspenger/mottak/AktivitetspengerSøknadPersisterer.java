@@ -4,11 +4,13 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.k9.søknad.Søknad;
 import no.nav.k9.søknad.felles.type.Språk;
-import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold;
+import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Medlemskap;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.kodeverk.geografisk.Språkkode;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
@@ -20,7 +22,6 @@ import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class AktivitetspengerSøknadPersisterer {
         søknadRepository.lagreOgFlush(behandlingId, søknadEntitet);
     }
 
-    public void lagreVirkningsdato(LocalDate virkningsdato, JournalpostId journalpostId, LocalDateTime mottattTid, Long behandlingId, Boolean erBosattITrondheim) {
+    public void lagreVirkningsdato(LocalDate virkningsdato, JournalpostId journalpostId, Long behandlingId, Boolean erBosattITrondheim) {
         startdatoRepository.lagre(behandlingId, List.of(new SøktStartdato(virkningsdato, journalpostId)));
         if (erBosattITrondheim != null) {
             bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), virkningsdato, erBosattITrondheim);
@@ -79,18 +80,27 @@ public class AktivitetspengerSøknadPersisterer {
         return Språkkode.UDEFINERT;
     }
 
-    public void lagreMedlemskapGrunnlag(Utenlandsopphold utenlandsopphold, no.nav.k9.søknad.felles.type.Periode søknadsperiode, JournalpostId journalpostId, Long behandlingId) {
-        LocalDate søknadsperiodeFom = søknadsperiode.getFraOgMed();
-        LocalDate forutgåendeFom = søknadsperiodeFom.minusYears(5);
-        LocalDate forutgåendeTom = søknadsperiodeFom.minusDays(1);
+    public void lagreMedlemskapGrunnlag(Medlemskap medlemskap, LocalDate virkningstidspunkt, JournalpostId journalpostId, Long behandlingId) {
+        LocalDate forutgåendeFom = virkningstidspunkt.minusYears(5);
+        LocalDate forutgåendeTom = virkningstidspunkt.minusDays(1);
 
-        Set<OppgittBosted> bosteder = utenlandsopphold.perioder().entrySet().stream()
-            .map(entry -> new OppgittBosted(
+        Set<OppgittUtenlandsopphold> oppgitteUtenlandsopphold = medlemskap.utenlandsopphold().perioder().entrySet().stream()
+            .map(entry -> new OppgittUtenlandsopphold(
                 entry.getKey().getFraOgMed(),
                 entry.getKey().getTilOgMed(),
-                entry.getValue().land().getLandkode()))
+                Landkoder.fraKode(entry.getValue().land().getLandkode()),
+                entry.getValue().jobbetIPerioden(),
+                entry.getValue().utenlandskNasjonalId()))
             .collect(Collectors.toSet());
 
-        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandlingId, journalpostId, forutgåendeFom, forutgåendeTom, bosteder);
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandlingId, OppgittForutgåendeMedlemskapPeriode.builder()
+            .medFom(forutgåendeFom)
+            .medTom(forutgåendeTom)
+            .medJournalpostId(journalpostId)
+            .medHarBoddINorge(medlemskap.harBoddINorge())
+            .medHarJobbetINorge(medlemskap.harJobbetINorge())
+            .medHarJobbetUtenforNorge(medlemskap.harJobbetUtenforNorge())
+            .medUtenlandsopphold(oppgitteUtenlandsopphold)
+            .build());
     }
 }

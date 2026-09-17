@@ -4,12 +4,15 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.søknad.felles.type.Landkode;
 import no.nav.k9.søknad.felles.type.Periode;
+import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Medlemskap;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold;
 import no.nav.k9.søknad.ytelse.aktivitetspenger.v1.medlemskap.Utenlandsopphold.UtenlandsoppholdPeriodeInfo;
+import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittBosted;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
+import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,67 +45,61 @@ class AktivitetspengerSøknadPersistererTest {
     }
 
     @Test
-    void skal_lagre_forutgående_periode_5_år_før_søknadsperiode_fom() {
-        var søknadsperiode = new Periode(LocalDate.of(2026, 5, 1), LocalDate.of(2027, 4, 30));
+    void skal_lagre_forutgående_periode_5_år_før_virkningstidspunkt() {
+        LocalDate virkningstidspunkt = LocalDate.of(2026, 5, 1);
         String utenlandskNasjonalId = "010185-1234";
+        Periode periode1 = new Periode(LocalDate.of(2021, 5, 1), LocalDate.of(2024, 4, 30));
+        Periode periode2 = new Periode(LocalDate.of(2024, 5, 1), LocalDate.of(2026, 4, 30));
         var utenlandsopphold = new Utenlandsopphold(Map.of(
-            new Periode(LocalDate.of(2021, 5, 1), LocalDate.of(2024, 4, 30)),
+            periode1,
             new UtenlandsoppholdPeriodeInfo(Landkode.of("DEU"), false, null),
-            new Periode(LocalDate.of(2024, 5, 1), LocalDate.of(2026, 4, 30)),
+            periode2,
             new UtenlandsoppholdPeriodeInfo(Landkode.of("FIN"), true, utenlandskNasjonalId)
         ));
 
-        persister.lagreMedlemskapGrunnlag(utenlandsopphold, søknadsperiode, JP, behandling.getId());
+        Medlemskap medlemskap = new Medlemskap(false, false, true, utenlandsopphold);
+        persister.lagreMedlemskapGrunnlag(medlemskap, virkningstidspunkt, JP, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
-        assertThat(grunnlag.getOppgittePerioder()).hasSize(1);
+
         var periode = grunnlag.getOppgittePerioder().iterator().next();
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 5, 1));
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2026, 4, 30));
-        assertThat(periode.getBostederUtland()).hasSize(2);
-        assertThat(periode.getBostederUtland()).extracting(OppgittBosted::getLandkode)
+        assertThat(periode.harBoddINorge()).isEqualTo(false);
+        assertThat(periode.harJobbetINorge()).isEqualTo(false);
+        assertThat(periode.harJobbetUtenforNorge()).isEqualTo(true);
+        assertThat(periode.getUtenlandsopphold()).hasSize(2);
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getLand)
+            .extracting(Landkoder::getKode)
             .containsExactlyInAnyOrder("DEU", "FIN");
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getPeriode)
+            .containsExactlyInAnyOrder(DatoIntervallEntitet.fra(periode1.getFraOgMed(), periode1.getTilOgMed()),
+                DatoIntervallEntitet.fra(periode2.getFraOgMed(), periode2.getTilOgMed()));
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::harJobbetIPerioden)
+            .containsExactlyInAnyOrder(true, false);
+
+        assertThat(periode.getUtenlandsopphold()).extracting(OppgittUtenlandsopphold::getUtenlandskNasjonalId)
+            .containsExactlyInAnyOrder(null, utenlandskNasjonalId);
+
     }
 
     @Test
-    void skal_lagre_tom_bostedliste_når_ingen_bosteder_oppgitt() {
-        var søknadsperiode = new Periode(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
+    void skal_lagre_tom_utenlandsopphold_når_ingen_utenlandsopphold_oppgitt() {
+        LocalDate virkningstidspunkt = LocalDate.of(2026, 1, 1);
         var utenlandsopphold = new Utenlandsopphold(Map.of());
-
-        persister.lagreMedlemskapGrunnlag(utenlandsopphold, søknadsperiode, JP, behandling.getId());
+        var medlemskap = new Medlemskap(true, null, false, utenlandsopphold);
+        persister.lagreMedlemskapGrunnlag(medlemskap, virkningstidspunkt, JP, behandling.getId());
 
 
         var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
+
         var periode = grunnlag.getOppgittePerioder().iterator().next();
+        assertThat(periode.harBoddINorge()).isEqualTo(true);
+        assertThat(periode.harJobbetINorge()).isNull();
+        assertThat(periode.harJobbetUtenforNorge()).isEqualTo(false);
         assertThat(periode.getPeriode().getFomDato()).isEqualTo(LocalDate.of(2021, 1, 1));
         assertThat(periode.getPeriode().getTomDato()).isEqualTo(LocalDate.of(2025, 12, 31));
-        assertThat(periode.getBostederUtland()).isEmpty();
-    }
-
-    @Test
-    void skal_legge_til_perioder_ved_ny_søknad_på_samme_behandling() {
-        var søknadsperiode = new Periode(LocalDate.of(2026, 7, 1), LocalDate.of(2027, 6, 30));
-        var jp1 = new JournalpostId("JP-FIRST");
-        var jp2 = new JournalpostId("JP-SECOND");
-
-        var førsteOpphold = new Utenlandsopphold(Map.of(
-            new Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2026, 6, 30)),
-            new UtenlandsoppholdPeriodeInfo(Landkode.SVERIGE, false, null)
-        ));
-
-        persister.lagreMedlemskapGrunnlag(førsteOpphold, søknadsperiode, jp1, behandling.getId());
-
-
-        var andreOpphold = new Utenlandsopphold(Map.of(
-            new Periode(LocalDate.of(2021, 7, 1), LocalDate.of(2026, 6, 30)),
-            new UtenlandsoppholdPeriodeInfo(Landkode.of("DEU"), false, null)
-        ));
-
-        persister.lagreMedlemskapGrunnlag(andreOpphold, søknadsperiode, jp2, behandling.getId());
-
-
-        var grunnlag = forutgåendeMedlemskapRepository.hentGrunnlag(behandling.getId());
-        assertThat(grunnlag.getOppgittePerioder()).hasSize(2);
+        assertThat(periode.getUtenlandsopphold()).isEmpty();
     }
 }

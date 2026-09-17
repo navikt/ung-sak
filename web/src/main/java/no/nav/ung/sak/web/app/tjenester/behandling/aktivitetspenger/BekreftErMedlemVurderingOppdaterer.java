@@ -18,6 +18,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
+import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
+import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
 
@@ -34,8 +36,8 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
     @Inject
     public BekreftErMedlemVurderingOppdaterer(@Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
-                                             ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste,
-                                             VilkårResultatRepository vilkårResultatRepository) {
+                                              ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste,
+                                              VilkårResultatRepository vilkårResultatRepository) {
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
         this.forutgåendeMedlemskapTjeneste = forutgåendeMedlemskapTjeneste;
         this.vilkårResultatRepository = vilkårResultatRepository;
@@ -54,8 +56,10 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
 
-        var bostederDto = forutgåendeMedlemskapTjeneste.hentBostederSomDto(param.getBehandlingId());
-        String regelInput = new VilkårJsonObjectMapper().writeValueAsString(bostederDto);
+        var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapRelevantForBehandlingSomDto(param.getBehandlingId())
+            .map(this::maskerUtenlandskNasjonalId).orElseThrow();
+
+        String regelInput = new VilkårJsonObjectMapper().writeValueAsString(medlemskap);
 
         relevantePerioder.stream()
             .map(periode -> forutgåendeMedlemskapBuilder
@@ -70,6 +74,24 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         resultatBuilder.leggTil(forutgåendeMedlemskapBuilder);
 
         return OppdateringResultat.nyttResultat();
+    }
+
+    private MedlemskapDto maskerUtenlandskNasjonalId(MedlemskapDto medlemskapDto) {
+        return new MedlemskapDto(
+            medlemskapDto.harBoddINorge(),
+            medlemskapDto.harJobbetINorge(),
+            medlemskapDto.harJobbetUtenforNorge(),
+            medlemskapDto.journalpostId(),
+            medlemskapDto.utenlandsopphold().stream()
+                .map(u -> new UtenlandsoppholdDto(
+                        u.periode(),
+                        u.land(),
+                        u.landkode(),
+                        u.harJobbetIPerioden(),
+                        u.utenlandskNasjonalId() != null ? "[MASKERT]" : null
+                    )
+                ).toList(
+                ));
     }
 
     private NavigableSet<DatoIntervallEntitet> filtrerBortIkkeRelevantePerioder(Long behandlingId, NavigableSet<DatoIntervallEntitet> perioderTilVurdering) {

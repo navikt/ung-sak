@@ -532,26 +532,50 @@ public class MittSteg implements BehandlingSteg {
 
 #### IKKE_RELEVANT-håndtering i steg (betinget: kun hvis valgt i steg 0)
 
-Legg til etter periode-utledning:
+IKKE_RELEVANT-filtrering skal **ikke** kodes manuelt i steget. Extend `VilkårVurderingSteg`
+i stedet for å implementere `BehandlingSteg` direkte — basisklassen håndterer automatisk
+tilbakestilling/filtrering av perioder som er avslått av andre vilkår, via
+`getVilkårAvhengigheter(...)`:
 
 ```java
-var vilkårene = vilkårResultatRepository.hent(behandlingId);
-perioderTilVurdering = filtrerBortIkkeRelevantePerioder(perioderTilVurdering,
-    vilkårene.getVilkår(VilkårType.MITT_VILKÅR));
+public class MittSteg extends VilkårVurderingSteg {
 
-var avslåttTidslinje = lagAvslåttTidslinje(vilkårene);
-var avslåttePerioder = finnAvslåttePerioder(perioderTilVurdering, avslåttTidslinje);
-if (!avslåttePerioder.isEmpty()) {
-    vilkårResultatRepository.settPerioderTilIkkeRelevant(
-        behandlingId, VilkårType.MITT_VILKÅR, avslåttePerioder);
-    perioderTilVurdering.removeAll(avslåttePerioder);
+    @Inject
+    public MittSteg(VilkårResultatRepository vilkårResultatRepository,
+                     VilkårTjeneste vilkårTjeneste,
+                     BehandlingRepository behandlingRepository,
+                     @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjeneste,
+                     ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste) {
+        super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, perioderTilVurderingTjeneste);
+        this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
+    }
+
+    @Override
+    public VilkårType getAktuellVilkårType() {
+        return VilkårType.MITT_VILKÅR;
+    }
+
+    @Override
+    public Set<VilkårType> getVilkårAvhengigheter(FagsakYtelseType ytelseType, BehandlingType behandlingType) {
+        EnumSet<VilkårType> avhengigheter = EnumSet.noneOf(VilkårType.class);
+        avhengigheter.add(VilkårType.ALDERSVILKÅR); // vilkår som, hvis avslått, gjør MITT_VILKÅR ikke-relevant
+        avhengigheter.addAll(manuelleVilkårRekkefølgeTjeneste.finnManuelleVilkårSomErFør(getAktuellVilkårType(), ytelseType, behandlingType));
+        return avhengigheter;
+    }
+
+    @Override
+    public BehandleStegResultat utførResten(BehandlingskontrollKontekst kontekst) {
+        var perioderTilVurdering = finnPerioderSomSkalVurderes(kontekst); // allerede filtrert for IKKE_RELEVANT
+        // Valgfritt: auto-vurder perioder der data finnes
+        return BehandleStegResultat.utførtMedAksjonspunkter(
+            List.of(AksjonspunktDefinisjon.MITT_AKSJONSPUNKT));
+    }
 }
 ```
 
 **Referansefiler:**
-- Enkel (alltid aksjonspunkt): `ytelse-aktivitetspenger/.../bistandsvilkår/BistandsvilkårSteg.java`
-- Med IKKE_RELEVANT-filtrering: `ytelse-aktivitetspenger/.../medlemskap/ForutgåendeMedlemskapsvilkårSteg.java`
-- Auto-vurdert: `ytelse-aktivitetspenger/.../aldersvilkår/VurderAldersvilkåretSteg.java`
+- Uten IKKE_RELEVANT (ingen avhengigheter av andre vilkår): `ytelse-aktivitetspenger/.../aldersvilkår/VurderAldersvilkåretSteg.java` (`implements BehandlingSteg` direkte)
+- Med IKKE_RELEVANT via `VilkårVurderingSteg`: `ytelse-aktivitetspenger/.../bistandsvilkår/BistandsvilkårSteg.java`, `ytelse-aktivitetspenger/.../medlemskap/ForutgåendeMedlemskapsvilkårSteg.java`, `ytelse-aktivitetspenger/.../bosatt/VurderBostedVilkårSteg.java`
 
 ---
 
