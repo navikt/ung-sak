@@ -166,8 +166,13 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, vurderingResultat);
 
-        if (!stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals).isEmpty()) {
-            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR));
+        var manuellVurderingTidslinje = vurderingTidslinje.intersection(
+            stegutfallTidslinje.filterValue(StegUtfall.VILKÅR_VURDERES_MANUELT::equals));
+        if (!manuellVurderingTidslinje.isEmpty()) {
+            var aksjonspunkt = erDekketAvForeslåttAvklaring(manuellVurderingTidslinje)
+                ? AksjonspunktDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR
+                : AksjonspunktDefinisjon.VURDER_BOSTEDVILKÅR;
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(aksjonspunkt));
         }
 
         // Hvis det kun var automatiske vurderinger og/eller tidligere vurderinger, utleder vi vilkåret automatisk basert på vurderingresultatene
@@ -180,6 +185,11 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    static boolean erDekketAvForeslåttAvklaring(LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> manuellTidslinje) {
+        return manuellTidslinje.segmenter().stream()
+            .allMatch(s -> s.getValue().getForeslåttAvklaring() != null);
     }
 
     /**

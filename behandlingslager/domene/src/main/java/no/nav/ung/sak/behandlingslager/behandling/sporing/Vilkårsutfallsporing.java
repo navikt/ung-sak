@@ -1,0 +1,37 @@
+package no.nav.ung.sak.behandlingslager.behandling.sporing;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.UncheckedIOException;
+
+@Dependent
+public class Vilkårsutfallsporing {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Vilkårsutfallsporing.class);
+
+    private final BehandingprosessSporingRepository behandingprosessSporingRepository;
+
+    @Inject
+    public Vilkårsutfallsporing(BehandingprosessSporingRepository behandingprosessSporingRepository) {
+        this.behandingprosessSporingRepository = behandingprosessSporingRepository;
+    }
+
+    public void lagreSporing(long behandlingId, Object input, Object utfall, BehandlingStegType stegKode) {
+        try {
+            behandingprosessSporingRepository.lagreSporing(new BehandlingprosessSporing(
+                behandlingId,
+                JsonObjectMapper.getJson(input),
+                JsonObjectMapper.getJson(utfall),
+                stegKode.getKode())
+            );
+        } catch (IOException e) {
+            throw new UncheckedIOException("Feil ved lagring av sporing for utledning av vilkårutfall for steg " + stegKode, e);
+        }
+    }
+}
