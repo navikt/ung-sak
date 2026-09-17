@@ -147,7 +147,7 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
         private LocalDate fom;
         private LocalDate tom;
         private Set<OppgittUtenlandsopphold> utenlandsopphold;
-        private boolean harBoddINorge;
+        private Boolean harBoddINorge;
         private Boolean harJobbetINorge;
         private Boolean harJobbetUtenforNorge;
 
@@ -187,6 +187,7 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
         }
 
         public OppgittForutgåendeMedlemskapPeriode build() {
+            Objects.requireNonNull(harBoddINorge, "harBoddINorge");
             return new OppgittForutgåendeMedlemskapPeriode(journalpostId, fom, tom, utenlandsopphold, harBoddINorge, harJobbetINorge, harJobbetUtenforNorge);
         }
     }
