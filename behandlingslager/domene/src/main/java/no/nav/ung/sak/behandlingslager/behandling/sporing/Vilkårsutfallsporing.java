@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 
 @Dependent
 public class Vilkårsutfallsporing {
@@ -30,7 +31,7 @@ public class Vilkårsutfallsporing {
                 stegKode.getKode())
             );
         } catch (IOException e) {
-            LOG.warn("Feil ved lagring av sporing for utledning av vilkårutfall for steg {}", stegKode, e);
+            throw new UncheckedIOException("Feil ved lagring av sporing for utledning av vilkårutfall for steg " + stegKode, e);
         }
     }
 }
