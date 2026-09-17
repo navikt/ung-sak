@@ -131,7 +131,7 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
         OppgittForutgåendeMedlemskapPeriode that = (OppgittForutgåendeMedlemskapPeriode) o;
         return harBoddINorge == that.harBoddINorge
             && Objects.equals(journalpostId, that.journalpostId)
-            && Objects.equals(periode, that.periode)
+            && Objects.equals(getPeriode(), that.getPeriode())
             && Objects.equals(harJobbetINorge, that.harJobbetINorge)
             && Objects.equals(harJobbetUtenforNorge, that.harJobbetUtenforNorge)
             && Objects.equals(utenlandsopphold, that.utenlandsopphold);
@@ -139,7 +139,7 @@ public class OppgittForutgåendeMedlemskapPeriode extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(journalpostId, periode, harBoddINorge, harJobbetINorge, harJobbetUtenforNorge, utenlandsopphold);
+        return Objects.hash(journalpostId, getPeriode(), harBoddINorge, harJobbetINorge, harJobbetUtenforNorge, utenlandsopphold);
     }
 
     public static class Builder {

@@ -72,7 +72,7 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OppgittUtenlandsopphold that = (OppgittUtenlandsopphold) o;
-        return Objects.equals(periode, that.periode)
+        return Objects.equals(getPeriode(), that.getPeriode())
             && Objects.equals(landkode, that.landkode)
             && Objects.equals(harJobbetIPerioden, that.harJobbetIPerioden)
             && Objects.equals(utenlandskNasjonalId, that.utenlandskNasjonalId);
@@ -80,7 +80,7 @@ public class OppgittUtenlandsopphold extends BaseEntitet {
 
     @Override
     public int hashCode() {
-        return Objects.hash(periode, landkode, harJobbetIPerioden, utenlandskNasjonalId);
+        return Objects.hash(getPeriode(), landkode, harJobbetIPerioden, utenlandskNasjonalId);
     }
 
     public boolean harJobbetIPerioden() {
