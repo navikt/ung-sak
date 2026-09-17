@@ -2,6 +2,7 @@ package no.nav.ung.sak.behandlingslager.behandling.sporing;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,13 +21,13 @@ public class Vilkårsutfallsporing {
         this.behandingprosessSporingRepository = behandingprosessSporingRepository;
     }
 
-    public void lagreSporing(long behandlingId, Object input, Object utfall, String stegKode) {
+    public void lagreSporing(long behandlingId, Object input, Object utfall, BehandlingStegType stegKode) {
         try {
             behandingprosessSporingRepository.lagreSporing(new BehandlingprosessSporing(
                 behandlingId,
                 JsonObjectMapper.getJson(input),
                 JsonObjectMapper.getJson(utfall),
-                stegKode)
+                stegKode.getKode())
             );
         } catch (IOException e) {
             LOG.warn("Feil ved lagring av sporing for utledning av vilkårutfall for steg {}", stegKode, e);

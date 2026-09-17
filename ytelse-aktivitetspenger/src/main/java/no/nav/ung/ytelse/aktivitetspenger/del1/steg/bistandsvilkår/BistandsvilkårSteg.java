@@ -127,7 +127,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
         LocalDateTimeline<VilkårsavklaringUtfallUtleder> vurderingTidslinje = perioderTilVurderingAvgrenset
             .combine(
                 avklaringTidslinje,
-                leggTilAvklaring(),
+                opprettUtfallUtleder(),
                 LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .combine(
                 etterlysningTidslinje,
@@ -135,7 +135,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         LocalDateTimeline<VilkårsavklaringUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(VilkårsavklaringUtfallUtleder::utledUtfall);
-        vilkårsutfallsporing.lagreSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje, VURDER_BISTANDSVILKÅR.getKode());
+        vilkårsutfallsporing.lagreSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje, VURDER_BISTANDSVILKÅR);
 
         if (!stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
             return settPåVent(vurderingTidslinje);
@@ -210,7 +210,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
             .toList());
     }
 
-    private static LocalDateSegmentCombinator<Boolean, VilkårPeriodeAvklaring, VilkårsavklaringUtfallUtleder> leggTilAvklaring() {
+    private static LocalDateSegmentCombinator<Boolean, VilkårPeriodeAvklaring, VilkårsavklaringUtfallUtleder> opprettUtfallUtleder() {
         return (di, lhs, rhs) ->
             new LocalDateSegment<>(di, new VilkårsavklaringUtfallUtleder(VilkårType.BISTANDSVILKÅR, rhs != null ? rhs.getValue() : null));
     }
