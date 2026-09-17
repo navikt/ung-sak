@@ -3,7 +3,7 @@ package no.nav.ung.sak.kontrakt.vilkår.medlemskap;
 import java.util.List;
 
 public record MedlemskapDto(
-    Boolean harBoddINorge,
+    boolean harBoddINorge,
     Boolean harJobbetINorge,
     Boolean harJobbetUtenforNorge,
     String journalpostId,
