@@ -6,6 +6,7 @@ public record UtenlandsoppholdDto(
     Periode periode,
     String land,
     String landkode,
+    boolean harTrygdeavtale,
     Boolean harJobbetIPerioden,
     String utenlandskNasjonalId) {
 }

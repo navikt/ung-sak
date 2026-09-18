@@ -48,36 +48,39 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(param.getRef().getFagsakYtelseType(), param.getRef().getBehandlingType());
 
         var resultatBuilder = param.getVilkårResultatBuilder();
-        var forutgåendeMedlemskapBuilder = resultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
+        var vilkårPeriodeBuilder = resultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
 
         var perioderTilVurdering = perioderTilVurderingTjeneste.utled(param.getBehandlingId(), VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
         var relevantePerioder = filtrerBortIkkeRelevantePerioder(param.getBehandlingId(), perioderTilVurdering);
+        var periodeVurdert = relevantePerioder.stream().filter(it -> it.equals(DatoIntervallEntitet.fra(dto.getVilkårsperiode()))).findFirst().orElseThrow(
+            () -> new IllegalStateException("Kunne ikke finne periode " + dto.getVilkårsperiode() + " i relevante perioder " + relevantePerioder)
+        );
 
-        Utfall utfall = dto.getErVilkarOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
+        Utfall utfall = dto.getErVilkårOk() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
 
-        var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapRelevantForBehandlingSomDto(param.getBehandlingId())
-            .map(this::maskerUtenlandskNasjonalId).orElseThrow();
+        var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapForBehandlingSomDto(param.getBehandlingId())
+            .stream()
+            .map(this::maskerUtenlandskNasjonalId)
+            .toList();
 
         String regelInput = new VilkårJsonObjectMapper().writeValueAsString(medlemskap);
 
-        relevantePerioder.stream()
-            .map(periode -> forutgåendeMedlemskapBuilder
-                .hentBuilderFor(periode)
-                .medUtfallManuell(utfall)
-                .medAvslagsårsak(avslagsårsak)
-                .medRegelInput(regelInput)
-                .medBegrunnelse(dto.getBegrunnelse())
-            )
-            .forEach(forutgåendeMedlemskapBuilder::leggTil);
+        vilkårPeriodeBuilder.leggTil(vilkårPeriodeBuilder
+            .hentBuilderFor(periodeVurdert)
+            .medUtfallManuell(utfall)
+            .medAvslagsårsak(avslagsårsak)
+            .medRegelInput(regelInput)
+            .medBegrunnelse(dto.getBegrunnelse()));
 
-        resultatBuilder.leggTil(forutgåendeMedlemskapBuilder);
+        resultatBuilder.leggTil(vilkårPeriodeBuilder);
 
         return OppdateringResultat.nyttResultat();
     }
 
     private MedlemskapDto maskerUtenlandskNasjonalId(MedlemskapDto medlemskapDto) {
         return new MedlemskapDto(
+            medlemskapDto.forutgåendePeriode(),
             medlemskapDto.harBoddINorge(),
             medlemskapDto.harJobbetINorge(),
             medlemskapDto.harJobbetUtenforNorge(),
@@ -87,6 +90,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
                         u.periode(),
                         u.land(),
                         u.landkode(),
+                        u.harTrygdeavtale(),
                         u.harJobbetIPerioden(),
                         u.utenlandskNasjonalId() != null ? "[MASKERT]" : null
                     )

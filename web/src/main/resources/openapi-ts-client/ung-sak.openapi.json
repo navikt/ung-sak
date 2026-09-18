@@ -2152,11 +2152,14 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
-          "erVilkarOk" : {
+          "erVilkårOk" : {
             "type" : "boolean"
+          },
+          "vilkårsperiode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
-        "required" : [ "erVilkarOk" ],
+        "required" : [ "erVilkårOk", "vilkårsperiode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto" : {
@@ -5819,12 +5822,9 @@
       },
       "ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse" : {
         "properties" : {
-          "medlemskapFraBruker" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto"
-          },
-          "vilkårsperioder" : {
+          "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.VilkårsPeriodeResultatDto"
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto"
             },
             "type" : "array"
           }
@@ -5833,6 +5833,9 @@
       },
       "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto" : {
         "properties" : {
+          "forutgåendePeriode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
           "harBoddINorge" : {
             "type" : "boolean"
           },
@@ -5854,9 +5857,38 @@
         },
         "type" : "object"
       },
+      "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
+          },
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "erManueltVurdert" : {
+            "type" : "boolean"
+          },
+          "medlemskapFraBruker" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "utfall" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
+          },
+          "vurderesIBehandlingen" : {
+            "type" : "boolean"
+          }
+        },
+        "type" : "object"
+      },
       "ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto" : {
         "properties" : {
           "harJobbetIPerioden" : {
+            "type" : "boolean"
+          },
+          "harTrygdeavtale" : {
             "type" : "boolean"
           },
           "land" : {
@@ -5870,23 +5902,6 @@
           },
           "utenlandskNasjonalId" : {
             "type" : "string"
-          }
-        },
-        "type" : "object"
-      },
-      "ung.sak.kontrakt.vilkår.medlemskap.VilkårsPeriodeResultatDto" : {
-        "properties" : {
-          "avslagsårsak" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
-          },
-          "begrunnelse" : {
-            "type" : "string"
-          },
-          "periode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
-          },
-          "utfall" : {
-            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
           }
         },
         "type" : "object"
