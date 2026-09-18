@@ -2433,7 +2433,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "fraflyttingsÅrsak", "kilde" ],
+        "required" : [ "begrunnelse", "fraflyttingsÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto" : {
@@ -2599,7 +2599,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto" : {
@@ -2816,7 +2816,7 @@
             "type" : "boolean"
           }
         },
-        "required" : [ "ikkeOppfyltÅrsak", "kilde" ],
+        "required" : [ "begrunnelse", "ikkeOppfyltÅrsak", "kilde" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserFaktaavklaringPeriodeDto" : {
