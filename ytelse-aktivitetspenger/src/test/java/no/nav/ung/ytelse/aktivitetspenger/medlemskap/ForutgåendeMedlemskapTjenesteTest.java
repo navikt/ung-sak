@@ -7,6 +7,9 @@ import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
@@ -29,10 +32,14 @@ class ForutgåendeMedlemskapTjenesteTest {
     @Inject
     private EntityManager entityManager;
 
+    private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository = new OppgittForutgåendeMedlemskapRepository(entityManager);
+    private final BehandlingRepository behandlingRepository = new BehandlingRepository(entityManager);
+    private final VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(entityManager);
+    private final StartdatoRepository startdatoRepository = new StartdatoRepository(entityManager);
+
     @Test
     void skal_mappe_oppgitt_periode_til_medlemskap_dto() {
-        var forutgåendeMedlemskapRepository = new OppgittForutgåendeMedlemskapRepository(entityManager);
-        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository);
+        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, behandlingRepository, vilkårResultatRepository, startdatoRepository);
 
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
