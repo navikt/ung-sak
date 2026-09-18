@@ -15,9 +15,6 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
-import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
@@ -34,23 +31,15 @@ public class ForutgåendeMedlemskapRestTjeneste {
 
     public static final String MEDLEMSKAP = "/behandling/medlemskap";
 
-    private BehandlingRepository behandlingRepository;
-    private VilkårResultatRepository vilkårResultatRepository;
     private ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste;
-    private StartdatoRepository startdatoRepository;
 
     public ForutgåendeMedlemskapRestTjeneste() {
         // for CDI proxy
     }
 
     @Inject
-    public ForutgåendeMedlemskapRestTjeneste(BehandlingRepository behandlingRepository,
-                                             VilkårResultatRepository vilkårResultatRepository,
-                                             ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste, StartdatoRepository startdatoRepository) {
-        this.behandlingRepository = behandlingRepository;
-        this.vilkårResultatRepository = vilkårResultatRepository;
+    public ForutgåendeMedlemskapRestTjeneste(ForutgåendeMedlemskapTjeneste forutgåendeMedlemskapTjeneste) {
         this.forutgåendeMedlemskapTjeneste = forutgåendeMedlemskapTjeneste;
-        this.startdatoRepository = startdatoRepository;
     }
 
     @GET
