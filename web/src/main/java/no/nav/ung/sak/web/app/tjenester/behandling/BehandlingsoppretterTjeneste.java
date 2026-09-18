@@ -150,7 +150,10 @@ public class BehandlingsoppretterTjeneste {
     }
 
     private List<GyldigePerioderForRevurderingPrÅrsakUtleder> finnUtledereForFagsak(Fagsak fagsak) {
-        return FagsakYtelseTypeRef.Lookup.find(gyldigePerioderForRevurderingUtledere, fagsak.getYtelseType()).stream().toList();
+        return FagsakYtelseTypeRef.Lookup.list(GyldigePerioderForRevurderingPrÅrsakUtleder.class, gyldigePerioderForRevurderingUtledere, fagsak.getYtelseType())
+            .stream()
+            .flatMap(Instance::stream)
+            .toList();
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
