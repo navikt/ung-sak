@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BISTANDUTTALELSE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_LIVSOPPHOLDSYTELSEUTTALELSE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_BOSTEDUTTALELSE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_ETTERLYST_INNTEKTUTTALELSE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon.AUTO_SATT_PÅ_VENT_REVURDERING;
@@ -24,6 +25,7 @@ public enum EtterlysningType implements Kodeverdi {
     UTTALELSE_OPPHOR_VED_MAKSDATO("UTTALELSE_OPPHOR_VED_MAKSDATO", "Svar på varsel: Opphør ved maksdato"),
     UTTALELSE_BOSTED("UTTALELSE_BOSTED", "Svar på varsel: Bostedavklaring"),
     UTTALELSE_BISTAND("UTTALELSE_BISTAND", "Svar på varsel: Bistandsavklaring"),
+    UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER("UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER", "Svar på varsel: Avklaring av andre livsoppholdsytelser"),
 
     ;
 
@@ -90,6 +92,9 @@ public enum EtterlysningType implements Kodeverdi {
             case UTTALELSE_BISTAND -> {
                 return AUTO_SATT_PÅ_VENT_ETTERLYST_BISTANDUTTALELSE;
             }
+            case UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER -> {
+                return AUTO_SATT_PÅ_VENT_ETTERLYST_LIVSOPPHOLDSYTELSEUTTALELSE;
+            }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + this);
         }
     }
@@ -107,6 +112,9 @@ public enum EtterlysningType implements Kodeverdi {
             }
             case UTTALELSE_BISTAND -> {
                 return Venteårsak.VENTER_PÅ_ETTERLYST_BISTANDUTTALELSE;
+            }
+            case UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER -> {
+                return Venteårsak.VENTER_PÅ_ETTERLYST_LIVSOPPHOLDSYTELSEUTTALELSE;
             }
             default -> throw new IllegalArgumentException("Ukjent etterlysningstype: " + this);
         }

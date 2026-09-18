@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand;
+package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.validation.constraints.AssertTrue;
@@ -6,21 +6,17 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import no.nav.k9.felles.validering.InputValideringRegex;
-import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 
-/**
- * Saksbehandlers avklaring av hvorfor bistandsvilkåret ikke er oppfylt for én periode.
- * Brukes som felles undertype i {@link BistandFaktaavklaringPeriodeDto}
- */
-public record BistandAvklaringIkkeOppfyltDto(
-    @NotNull BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
+public record AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(
+    @NotNull AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
     @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     boolean skalIkkeSendeVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
     /** Hvor Nav har fått opplysningene fra. */
-    @NotNull BistandsavklaringKildeType kilde,
+    @NotNull AndreLivsoppholdsytelserAvklaringKildeType kilde,
     /** Påkrevd når kilde er ANNET. Skal ikke settes for andre kilder. */
     @Size(max = 1000) @Pattern(regexp = InputValideringRegex.FRITEKST) String kildeFritekst
 ) {
@@ -54,8 +50,8 @@ public record BistandAvklaringIkkeOppfyltDto(
     }
 
     @JsonIgnore
-    @AssertTrue(message = "Ikke-støttet årsak for bistandsavklaring: AVKORTET")
+    @AssertTrue(message = "Ikke-støttet årsak for avklaring av andre livsoppholdsytelser: AVKORTET")
     public boolean isIkkeOppfyltÅrsakStøttet() {
-        return ikkeOppfyltÅrsak != BistandsvilkårIkkeOppfyltÅrsak.AVKORTET;
+        return ikkeOppfyltÅrsak != AndreLivsoppholdsytelserIkkeOppfyltÅrsak.AVKORTET;
     }
 }

@@ -45,6 +45,9 @@ public enum BehandlingÅrsakType implements Kodeverdi {
     // Bistandsendring
     ENDRET_BISTANDSBEHOV("ENDRET-BISTANDSBEHOV", "Endret bistandsbehov"),
 
+    // Endring i andre livsoppholdsytelser
+    ENDRET_LIVSOPPHOLDSYTELSE("ENDRET-LIVSOPPHOLDSYTELSE", "Endret livsoppholdsytelse"),
+
     // Generell oppgavebekreftelse
     UTTALELSE_FRA_BRUKER("UTTALELSE-FRA-BRUKER", "Uttalelse fra bruker"),
 

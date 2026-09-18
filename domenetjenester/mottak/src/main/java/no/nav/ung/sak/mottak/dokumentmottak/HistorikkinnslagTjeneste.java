@@ -108,6 +108,7 @@ public class HistorikkinnslagTjeneste {
             case OPPHOR_VED_MAKSDATO -> "Svar på varsel: Opphør ved maksdato";
             case AVKLAR_BOSTED -> "Svar på varsel: Bostedavklaring";
             case AVKLAR_BISTAND -> "Svar på varsel: Bistandsavklaring";
+            case AVKLAR_ANDRE_LIVSOPPHOLDSYTELSER -> "Svar på varsel: Avklaring av andre livsoppholdsytelser";
         };
     }
 

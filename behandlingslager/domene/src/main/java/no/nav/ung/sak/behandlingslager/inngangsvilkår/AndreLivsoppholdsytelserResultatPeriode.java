@@ -63,6 +63,16 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         this(kilde.getPeriode(), kilde);
     }
 
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
+        this(periode,
+            vilkårsvurderingResultat.godkjent(),
+            (AndreLivsoppholdsytelserIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
+            vilkårsvurderingResultat.erManuellVurdering(),
+            vilkårsvurderingResultat.begrunnelse(),
+            vilkårsvurderingResultat.fritekstVurderingBrev(),
+            vilkårsvurderingResultat.vurdertAv(),
+            vilkårsvurderingResultat.vurdertTidspunkt());
+    }
 
     public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
