@@ -172,8 +172,8 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
         // Kalles også med tom liste, slik at grunnlaget alltid finnes når settAndreLivsoppholdsytelserResultat kjører under.
         inngangsvilkårVurderingRepository.lagreYtelseVurderinger(behandlingId, vurderingResultat);
 
-        if (!stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT).isEmpty()) {
-            var manuellVurderingTidslinje = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT));
+        var manuellVurderingTidslinje = vurderingTidslinje.intersection(stegutfallTidslinje.filterValue(v -> v == VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT));
+        if (!manuellVurderingTidslinje.isEmpty()) {
             var aksjonspunkt = erDekketAvForeslåttAvklaring(manuellVurderingTidslinje)
                 ? AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_OPPHØR
                 : AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER;
@@ -194,7 +194,7 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
     }
 
     static boolean erDekketAvForeslåttAvklaring(LocalDateTimeline<VilkårsavklaringUtfallUtleder> manuellTidslinje) {
-        return manuellTidslinje.segmenter().stream()
+        return !manuellTidslinje.isEmpty() && manuellTidslinje.segmenter().stream()
             .allMatch(s -> s.getValue().getForeslåttAvklaring() != null);
     }
 

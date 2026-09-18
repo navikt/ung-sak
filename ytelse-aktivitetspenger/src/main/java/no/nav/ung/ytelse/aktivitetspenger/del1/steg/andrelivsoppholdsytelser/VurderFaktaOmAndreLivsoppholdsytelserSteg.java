@@ -45,7 +45,6 @@ public class VurderFaktaOmAndreLivsoppholdsytelserSteg implements BehandlingSteg
         long behandlingId = kontekst.getBehandlingId();
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
         LocalDateTimeline<Boolean> tidslinjeForManuellFaktavurdering = finnTidslinjeForManuellFaktavurdering(behandling, behandlingId);
-        // Saksbehandler må vurdere andre livsoppholdsytelser for perioder uten grunnlag — prioritert over vent
         if (!tidslinjeForManuellFaktavurdering.isEmpty()) {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER));
         }

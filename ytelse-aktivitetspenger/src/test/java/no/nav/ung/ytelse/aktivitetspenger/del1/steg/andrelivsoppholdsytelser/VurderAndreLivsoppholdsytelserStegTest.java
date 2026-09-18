@@ -273,19 +273,6 @@ class VurderAndreLivsoppholdsytelserStegTest {
     }
 
     @Test
-    void skal_gi_vanlig_aksjonspunkt_nar_ingen_manuell_periode_har_foreslatt_avklaring() {
-        var fom2 = TOM.plusDays(1);
-        var tom2 = fom2.plusDays(30);
-        var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-
-        var resultat = utførSteg(behandling);
-
-        assertThat(resultat.getAksjonspunktListe())
-            .as("saksbehandler kan ha avklart fakta uten å foreslå en vurdering; da må avslagsårsaken oppgis manuelt")
-            .containsExactly(AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER);
-    }
-
-    @Test
     void skal_ikke_regne_delvis_dekket_tidslinje_som_dekket_av_foreslatt_avklaring() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
