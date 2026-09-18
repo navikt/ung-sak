@@ -7,8 +7,6 @@ import no.nav.ung.kodeverk.geografisk.Landkoder;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
@@ -33,10 +31,8 @@ class ForutgåendeMedlemskapTjenesteTest {
 
     @Test
     void skal_mappe_oppgitt_periode_til_medlemskap_dto() {
-        var behandlingRepository = new BehandlingRepository(entityManager);
         var forutgåendeMedlemskapRepository = new OppgittForutgåendeMedlemskapRepository(entityManager);
-        var mottatteDokumentRepository = new MottatteDokumentRepository(entityManager);
-        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, mottatteDokumentRepository, behandlingRepository);
+        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository);
 
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))

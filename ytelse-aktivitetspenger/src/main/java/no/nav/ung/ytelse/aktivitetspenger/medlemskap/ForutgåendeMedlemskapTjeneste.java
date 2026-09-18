@@ -5,8 +5,6 @@ import jakarta.inject.Inject;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
-import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
 import no.nav.ung.sak.typer.Periode;
@@ -17,14 +15,10 @@ import java.util.*;
 public class ForutgåendeMedlemskapTjeneste {
 
     private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
-    private final MottatteDokumentRepository mottatteDokumentRepository;
-    private final BehandlingRepository behandlingRepository;
 
     @Inject
-    public ForutgåendeMedlemskapTjeneste(OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository, MottatteDokumentRepository mottatteDokumentRepository, BehandlingRepository behandlingRepository) {
+    public ForutgåendeMedlemskapTjeneste(OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository) {
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
-        this.mottatteDokumentRepository = mottatteDokumentRepository;
-        this.behandlingRepository = behandlingRepository;
     }
 
     public List<MedlemskapDto> hentMedlemskapForBehandlingSomDto(Long behandlingId) {

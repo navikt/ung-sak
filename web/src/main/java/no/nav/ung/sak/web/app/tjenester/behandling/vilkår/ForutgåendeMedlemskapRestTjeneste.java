@@ -28,7 +28,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrs
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
-import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeResultatDto;
+import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
@@ -81,9 +81,9 @@ public class ForutgåendeMedlemskapRestTjeneste {
             .orElseThrow(() -> new IllegalStateException("Mangler vilkårsvurdering av forutgående medlemskap"));
 
         var startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId()).orElseThrow();
-        var vilkårsperioder = vilkår.getPerioder().stream()
+        var medlemskapsperiodeInfo = vilkår.getPerioder().stream()
             .filter(it -> it.getUtfall() != Utfall.IKKE_RELEVANT)
-            .map(vp -> new MedlemskapPeriodeResultatDto(
+            .map(vp -> new MedlemskapPeriodeInfoDto(
                 new Periode(vp.getPeriode().getFomDato(), vp.getPeriode().getTomDato()),
                 vp.getGjeldendeUtfall(),
                 mapAvslagsårsak(vp.getAvslagsårsak()),
@@ -92,7 +92,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
             ))
             .toList();
 
-        return new ForutgåendeMedlemskapResponse(medlemskap.stream().findFirst().orElse(null), vilkårsperioder);
+        return new ForutgåendeMedlemskapResponse(medlemskapsperiodeInfo);
     }
 
     private static MedlemskapDto finnOppgittMedlemskapRelevantForPerioden(VilkårPeriode vp, List<MedlemskapDto> medlemskap, StartdatoGrunnlag startdatoGrunnlag) {

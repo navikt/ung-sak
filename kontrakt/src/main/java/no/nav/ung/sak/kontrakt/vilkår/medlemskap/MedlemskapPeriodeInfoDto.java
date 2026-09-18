@@ -4,7 +4,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.typer.Periode;
 
-public record MedlemskapPeriodeResultatDto(
+public record MedlemskapPeriodeInfoDto(
     Periode periode,
     Utfall utfall,
     MedlemskapAvslagsÅrsakType avslagsårsak,
