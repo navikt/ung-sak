@@ -33,29 +33,30 @@ public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder impl
     }
 
     @Override
-    public ÅrsakOgPerioderDto utledPerioder(long fagsakId) {
+    public List<ÅrsakOgPerioderDto> utledPerioder(long fagsakId) {
         var behandling = behandlingRepository.hentSisteYtelsesBehandlingForFagsakId(fagsakId);
-        return new ÅrsakOgPerioderDto(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, behandling.map(value -> tilkjentYtelseRepository.hentKontrollertInntektPerioder(value.getId())
+        return List.of(new ÅrsakOgPerioderDto(BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT, behandling.map(value -> tilkjentYtelseRepository.hentKontrollertInntektPerioder(value.getId())
             .stream()
             .flatMap(it -> it.getPerioder().stream())
             .map(KontrollertInntektPeriode::getPeriode)
             .map(p -> new Periode(p.getFomDato(), p.getTomDato()))
             .sorted()
-            .toList()).orElse(List.of()));
+            .toList()).orElse(List.of())));
     }
 
     @Override
-    public BehandlingÅrsakType støttetÅrsak() {
-        return BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT;
+    public boolean støtterÅrsak(BehandlingÅrsakType årsak) {
+        return årsak == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT;
     }
 
     @Override
-    public boolean periodeErGyldigForÅrsak(long fagsakId, Optional<DatoIntervallEntitet> periode) {
+    public boolean periodeErGyldigForÅrsak(long fagsakId, Optional<DatoIntervallEntitet> periode, BehandlingÅrsakType årsak) {
         if (periode.isEmpty()) {
             return false;
         }
-        var utledtePerioder = utledPerioder(fagsakId);
-        return utledtePerioder.perioder().stream()
+        return utledPerioder(fagsakId).stream()
+            .filter(dto -> dto.årsak() == årsak)
+            .flatMap(dto -> dto.perioder().stream())
             .map(DatoIntervallEntitet::fra)
             .anyMatch(periode.get()::equals);
     }

@@ -10,6 +10,7 @@ import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
@@ -36,6 +37,8 @@ import no.nav.ung.sak.trigger.Trigger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
@@ -142,15 +145,17 @@ class BehandlingsoppretterTjenesteTest {
         assertTrue(perioderMedGjennomfortKontroll.stream().anyMatch(it -> it.årsak() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT));
     }
 
-    @Test
-    void skalOppretteRevurderingForEndretBostedNårPeriodeErInnenfor() {
+    @ParameterizedTest
+    @EnumSource(value = VilkårType.class, names = {"BOSTEDSVILKÅR", "ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR"})
+    void skalOppretteRevurderingForVilkårsavklaringNårPeriodeErInnenfor(VilkårType vilkårType) {
+        var årsak = VilkårsavklaringÅrsaker.avklaringsårsakFor(vilkårType).orElseThrow();
         behandling = opprettRevurderingsKandidat(FagsakYtelseType.AKTIVITETSPENGER);
         Fagsak fagsak = behandling.getFagsak();
         var fagsakPeriode = fagsak.getPeriode();
 
-        opprettBostedsvilkår(behandling, fagsakPeriode);
+        opprettVilkår(vilkårType, behandling, fagsakPeriode);
 
-        var revurdering = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.ENDRET_BOSTED, Optional.of(fagsakPeriode));
+        var revurdering = behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, årsak, Optional.of(fagsakPeriode));
         assertTrue(revurdering.erRevurdering());
 
         Optional<ProsessTriggere> prosessTriggere = prosessTriggereRepository.hentGrunnlag(revurdering.getId());
@@ -160,19 +165,21 @@ class BehandlingsoppretterTjenesteTest {
         assertEquals(triggere.iterator().next().getPeriode(), fagsakPeriode);
     }
 
-    @Test
-    void skalFeileForEndretBostedNårPeriodeErOppgittOgUtenforVilkårsperioder() {
+    @ParameterizedTest
+    @EnumSource(value = VilkårType.class, names = {"BOSTEDSVILKÅR", "ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR"})
+    void skalFeileForVilkårsavklaringNårPeriodeErOppgittOgUtenforVilkårsperioder(VilkårType vilkårType) {
+        var årsak = no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker.avklaringsårsakFor(vilkårType).orElseThrow();
         behandling = opprettRevurderingsKandidat(FagsakYtelseType.AKTIVITETSPENGER);
         Fagsak fagsak = behandling.getFagsak();
         var fagsakPeriode = fagsak.getPeriode();
 
-        opprettBostedsvilkår(behandling, fagsakPeriode);
+        opprettVilkår(vilkårType, behandling, fagsakPeriode);
 
         var periodeUtenfor = DatoIntervallEntitet.fraOgMedTilOgMed(
             fagsakPeriode.getTomDato().plusDays(1), fagsakPeriode.getTomDato().plusDays(30));
 
         assertThrows(IllegalArgumentException.class, () ->
-            behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, BehandlingÅrsakType.ENDRET_BOSTED, Optional.of(periodeUtenfor)));
+            behandlingsoppretterTjeneste.opprettManuellRevurdering(fagsak, årsak, Optional.of(periodeUtenfor)));
     }
 
     private Behandling opprettRevurderingsKandidat(FagsakYtelseType ytelseType) {
@@ -186,9 +193,9 @@ class BehandlingsoppretterTjenesteTest {
         return b;
     }
 
-    private void opprettBostedsvilkår(Behandling behandling, DatoIntervallEntitet periode) {
+    private void opprettVilkår(VilkårType vilkårType, Behandling behandling, DatoIntervallEntitet periode) {
         var vilkårene = Vilkårene.builder()
-            .leggTil(new VilkårBuilder(VilkårType.BOSTEDSVILKÅR)
+            .leggTil(new VilkårBuilder(vilkårType)
                 .leggTil(new VilkårPeriodeBuilder().medPeriode(periode).medUtfall(Utfall.OPPFYLT)))
             .build();
         vilkårResultatRepository.lagre(behandling.getId(), vilkårene);
