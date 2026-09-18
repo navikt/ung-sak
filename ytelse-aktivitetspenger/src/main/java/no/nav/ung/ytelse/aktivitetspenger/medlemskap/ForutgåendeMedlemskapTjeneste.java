@@ -1,7 +1,12 @@
 package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 
 import jakarta.enterprise.context.Dependent;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.behandling.BehandlingType;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -14,12 +19,14 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
 
 import java.util.*;
@@ -31,13 +38,20 @@ public class ForutgåendeMedlemskapTjeneste {
     private final BehandlingRepository behandlingRepository;
     private final StartdatoRepository startdatoRepository;
     private final VilkårResultatRepository vilkårResultatRepository;
+    private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
     @Inject
-    public ForutgåendeMedlemskapTjeneste(OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository, BehandlingRepository behandlingRepository, VilkårResultatRepository vilkårResultatRepository, StartdatoRepository startdatoRepository) {
+    public ForutgåendeMedlemskapTjeneste(
+        OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
+        BehandlingRepository behandlingRepository,
+        VilkårResultatRepository vilkårResultatRepository,
+        StartdatoRepository startdatoRepository,
+        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.startdatoRepository = startdatoRepository;
+        this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
     }
 
 
@@ -51,18 +65,38 @@ public class ForutgåendeMedlemskapTjeneste {
             .orElseThrow(() -> new IllegalStateException("Mangler vilkårsvurdering av forutgående medlemskap"));
 
         var startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId()).orElseThrow();
+
+        var periodeTilVurderingTidslinje = lagPeriodeTilVurderingTidslinje(behandling);
+
         var medlemskapsperiodeInfo = vilkår.getPerioder().stream()
             .filter(it -> it.getUtfall() != Utfall.IKKE_RELEVANT)
-            .map(vp -> new MedlemskapPeriodeInfoDto(
-                new Periode(vp.getPeriode().getFomDato(), vp.getPeriode().getTomDato()),
-                vp.getGjeldendeUtfall(),
-                mapAvslagsårsak(vp.getAvslagsårsak()),
-                vp.getBegrunnelse(),
-                finnOppgittMedlemskapRelevantForPerioden(vp, medlemskap, startdatoGrunnlag)
-            ))
+            .map(vp -> mapPeriode(vp, medlemskap, startdatoGrunnlag, periodeTilVurderingTidslinje))
             .toList();
 
         return new ForutgåendeMedlemskapResponse(medlemskapsperiodeInfo);
+    }
+
+    private LocalDateTimeline<Boolean> lagPeriodeTilVurderingTidslinje(Behandling behandling) {
+        var perioderTilVurderingTjeneste = getPerioderTilVurderingTjeneste(behandling.getFagsakYtelseType(), behandling.getType());
+        return TidslinjeUtil.tilTidslinje(perioderTilVurderingTjeneste.utled(behandling.getId(), VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET));
+    }
+
+    private static MedlemskapPeriodeInfoDto mapPeriode(VilkårPeriode vp, List<MedlemskapDto> medlemskap, StartdatoGrunnlag startdatoGrunnlag, LocalDateTimeline<Boolean> tilVurderingTidslinje) {
+        var tilVurdering = tilVurderingTidslinje.intersection(vp.getPeriode().toLocalDateInterval()).isEmpty();
+        var medlemskapFraBruker = finnOppgittMedlemskapRelevantForPerioden(vp, medlemskap, startdatoGrunnlag);
+        var avslagsårsak = mapAvslagsårsak(vp.getAvslagsårsak());
+
+        return new MedlemskapPeriodeInfoDto(
+            new Periode(vp.getPeriode().getFomDato(), vp.getPeriode().getTomDato()),
+            vp.getGjeldendeUtfall(),
+            avslagsårsak,
+            vp.getBegrunnelse(),
+            tilVurdering, vp.getErManueltVurdert(), medlemskapFraBruker
+        );
+    }
+
+    private VilkårsPerioderTilVurderingTjeneste getPerioderTilVurderingTjeneste(FagsakYtelseType fagsakYtelseType, BehandlingType behandlingType) {
+        return VilkårsPerioderTilVurderingTjeneste.finnTjeneste(perioderTilVurderingTjenester, fagsakYtelseType, behandlingType);
     }
 
     private static MedlemskapDto finnOppgittMedlemskapRelevantForPerioden(VilkårPeriode vp, List<MedlemskapDto> medlemskap, StartdatoGrunnlag startdatoGrunnlag) {

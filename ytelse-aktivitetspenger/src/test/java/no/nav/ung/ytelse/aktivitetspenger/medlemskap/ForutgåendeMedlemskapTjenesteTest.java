@@ -1,5 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.medlemskap;
 
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -11,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder.MottattDokumentTestGrunnlag;
@@ -32,14 +35,23 @@ class ForutgåendeMedlemskapTjenesteTest {
     @Inject
     private EntityManager entityManager;
 
-    private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository = new OppgittForutgåendeMedlemskapRepository(entityManager);
-    private final BehandlingRepository behandlingRepository = new BehandlingRepository(entityManager);
-    private final VilkårResultatRepository vilkårResultatRepository = new VilkårResultatRepository(entityManager);
-    private final StartdatoRepository startdatoRepository = new StartdatoRepository(entityManager);
+    @Inject
+    private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
+    @Inject
+    private BehandlingRepository behandlingRepository;
+    @Inject
+    private VilkårResultatRepository vilkårResultatRepository;
+    @Inject
+    private StartdatoRepository startdatoRepository;
+
+    @Inject
+    @Any
+    private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+
 
     @Test
     void skal_mappe_oppgitt_periode_til_medlemskap_dto() {
-        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, behandlingRepository, vilkårResultatRepository, startdatoRepository);
+        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, behandlingRepository, vilkårResultatRepository, startdatoRepository, perioderTilVurderingTjenester);
 
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))

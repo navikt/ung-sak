@@ -9,6 +9,8 @@ public record MedlemskapPeriodeInfoDto(
     Utfall utfall,
     MedlemskapAvslagsÅrsakType avslagsårsak,
     String begrunnelse,
+    boolean vurderesIBehandlingen,
+    boolean erManueltVurdert,
     MedlemskapDto medlemskapFraBruker
 ) {
 }
