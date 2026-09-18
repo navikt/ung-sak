@@ -6,7 +6,17 @@ import java.util.Optional;
 
 public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
-    HAR_ANNEN_LIVSOPPHOLDSYTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_ARBEIDSAVKLARINGSPENGER(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_TILTAKSPENGER(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_KVALIFISERINGSSTØNAD(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_DAGPENGER(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_FORELDREPENGER(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_SVANGERSKAPSPENGER(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_UFØRETRYGD(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_INTRODUKSJONSSTØNAD(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    MOTTAR_BARNEPENSJON(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
+    // Ytelsen må navngis i fritekst, og avklaringen kan derfor aldri avslås automatisk.
+    MOTTAR_ANNEN_YTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, true),
     // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
     AVKORTET(Avslagsårsak.AVKORTET, false),
     UDEFINERT(null, false),
