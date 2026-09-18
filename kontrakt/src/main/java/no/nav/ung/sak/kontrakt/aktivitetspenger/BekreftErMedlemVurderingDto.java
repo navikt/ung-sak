@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
+import no.nav.ung.sak.typer.Periode;
 
 @JsonFormat(shape = JsonFormat.Shape.OBJECT)
 @JsonAutoDetect(getterVisibility = JsonAutoDetect.Visibility.NONE, setterVisibility = JsonAutoDetect.Visibility.NONE, fieldVisibility = JsonAutoDetect.Visibility.ANY)
@@ -14,35 +15,44 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrs
 @JsonTypeName(AksjonspunktKodeDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP_KODE)
 public class BekreftErMedlemVurderingDto extends BekreftetAksjonspunktDto {
     @NotNull
-    @JsonProperty(value = "erVilkarOk", required = true)
-    private Boolean erVilkarOk;
+    @JsonProperty(value = "erVilkårOk", required = true)
+    private Boolean erVilkårOk;
 
-    /** Angitt avslagsårsak (dersom erVilkarOk==false) */
+    /** Angitt avslagsårsak (dersom erVilkårOk==false) */
     @Valid
     @JsonProperty(value = "avslagsårsak")
     private MedlemskapAvslagsÅrsakType avslagsårsak;
+
+    @Valid
+    @NotNull
+    @JsonProperty(value = "vilkårsperiode", required = true)
+    private Periode vilkårsperiode;
 
     public BekreftErMedlemVurderingDto() {
         //Jackson
     }
 
-    public BekreftErMedlemVurderingDto(String begrunnelse, Boolean erVilkarOk, MedlemskapAvslagsÅrsakType avslagsårsak) {
+    public BekreftErMedlemVurderingDto(String begrunnelse, Boolean erVilkårOk, MedlemskapAvslagsÅrsakType avslagsårsak, Periode vilkårsperiode) {
         super(begrunnelse);
-        this.erVilkarOk = erVilkarOk;
+        this.erVilkårOk = erVilkårOk;
         this.avslagsårsak = avslagsårsak;
+        this.vilkårsperiode = vilkårsperiode;
     }
 
-    public Boolean getErVilkarOk() {
-        return erVilkarOk;
+    public Boolean getErVilkårOk() {
+        return erVilkårOk;
     }
 
     public MedlemskapAvslagsÅrsakType getAvslagsårsak() {
         return avslagsårsak;
     }
 
-    @AssertTrue(message = "avslagsårsak må være satt hvis erVilkarOk er false")
-    public boolean avslagsårsakSattHvisVilkårIkkeOk() {
-        return erVilkarOk || avslagsårsak != null;
+    public Periode getVilkårsperiode() {
+        return vilkårsperiode;
     }
 
+    @AssertTrue(message = "avslagsårsak må være satt hvis erVilkarOk er false")
+    public boolean avslagsårsakSattHvisVilkårIkkeOk() {
+        return erVilkårOk || avslagsårsak != null;
+    }
 }
