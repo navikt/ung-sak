@@ -68,6 +68,7 @@ class ForutgåendeMedlemskapTjenesteTest {
             .filter(u -> u.landkode().equals("SWE"))
             .findFirst().orElseThrow();
         assertThat(sverige.land()).isEqualTo("Sverige");
+        assertThat(sverige.harTrygdeavtale()).isTrue();
         assertThat(sverige.periode().getFom()).isEqualTo(LocalDate.of(2019, 7, 1));
         assertThat(sverige.periode().getTom()).isEqualTo(LocalDate.of(2022, 12, 31));
         assertThat(sverige.harJobbetIPerioden()).isTrue();

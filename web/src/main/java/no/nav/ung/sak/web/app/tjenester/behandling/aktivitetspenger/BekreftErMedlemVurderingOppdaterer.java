@@ -90,6 +90,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
                         u.periode(),
                         u.land(),
                         u.landkode(),
+                        u.harTrygdeavtale(),
                         u.harJobbetIPerioden(),
                         u.utenlandskNasjonalId() != null ? "[MASKERT]" : null
                     )

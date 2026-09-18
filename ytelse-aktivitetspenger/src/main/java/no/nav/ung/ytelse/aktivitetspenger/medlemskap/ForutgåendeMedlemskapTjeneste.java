@@ -51,6 +51,7 @@ public class ForutgåendeMedlemskapTjeneste {
                     new Periode(u.getPeriode().getFomDato(), u.getPeriode().getTomDato()),
                     mapLandTilNorskNavn(u.getLand().getKode()),
                     u.getLand().getKode(),
+                    TrygdeavtaleLandOppslag.erGyldigTrygdeavtaleLand(u.getLand(), u.getPeriode().getFomDato()),
                     u.harJobbetIPerioden(),
                     u.getUtenlandskNasjonalId()
                 )).toList());
