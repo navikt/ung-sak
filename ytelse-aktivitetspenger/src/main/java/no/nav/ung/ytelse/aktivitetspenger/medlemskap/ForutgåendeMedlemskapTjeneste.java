@@ -82,7 +82,7 @@ public class ForutgåendeMedlemskapTjeneste {
     }
 
     private static MedlemskapPeriodeInfoDto mapPeriode(VilkårPeriode vp, List<MedlemskapDto> medlemskap, StartdatoGrunnlag startdatoGrunnlag, LocalDateTimeline<Boolean> tilVurderingTidslinje) {
-        var tilVurdering = tilVurderingTidslinje.intersection(vp.getPeriode().toLocalDateInterval()).isEmpty();
+        var tilVurdering = !tilVurderingTidslinje.intersection(vp.getPeriode().toLocalDateInterval()).isEmpty();
         var medlemskapFraBruker = finnOppgittMedlemskapRelevantForPerioden(vp, medlemskap, startdatoGrunnlag);
         var avslagsårsak = mapAvslagsårsak(vp.getAvslagsårsak());
 
