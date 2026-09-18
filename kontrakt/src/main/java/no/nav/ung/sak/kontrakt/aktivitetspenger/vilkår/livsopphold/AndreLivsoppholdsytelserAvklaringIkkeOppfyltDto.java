@@ -9,13 +9,9 @@ import no.nav.k9.felles.validering.InputValideringRegex;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 
-/**
- * Saksbehandlers avklaring av hvorfor vilkåret om andre livsoppholdsytelser ikke er oppfylt for én periode.
- * Brukes som felles undertype i {@link AndreLivsoppholdsytelserFaktaavklaringPeriodeDto}
- */
 public record AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(
     @NotNull AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
-    @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
+    @NotNull @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelse,
     boolean skalIkkeSendeVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String fritekstTilVarsel,
     @Size(max = 4000) @Pattern(regexp = InputValideringRegex.FRITEKST) String begrunnelseIkkeVarsel,
