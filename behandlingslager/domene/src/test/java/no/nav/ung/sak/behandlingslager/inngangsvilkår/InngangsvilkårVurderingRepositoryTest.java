@@ -90,7 +90,7 @@ class InngangsvilkårVurderingRepositoryTest {
 
     @Test
     void skal_lagre_og_hente_livsoppholdsytelsevurdering() {
-        var vurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var vurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(vurdering));
 
         var grunnlag = repository.hentEksisterendeGrunnlag(behandling.getId());
@@ -102,7 +102,7 @@ class InngangsvilkårVurderingRepositoryTest {
         assertThat(holder.get().getVurderinger()).hasSize(1);
         var lagretVurdering = holder.get().getVurderinger().iterator().next();
         assertThat(lagretVurdering.isGodkjent()).isFalse();
-        assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE);
+        assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER);
     }
 
     @Test
@@ -125,7 +125,7 @@ class InngangsvilkårVurderingRepositoryTest {
         var bistandVurdering = new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(bistandVurdering));
 
-        var livsoppholdVurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_2, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var livsoppholdVurdering = new AndreLivsoppholdsytelserResultatPeriode(PERIODE_2, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreYtelseVurderinger(behandling.getId(), List.of(livsoppholdVurdering));
 
         var grunnlag = repository.hentEksisterendeGrunnlag(behandling.getId()).orElseThrow();
@@ -202,7 +202,7 @@ class InngangsvilkårVurderingRepositoryTest {
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(new BistandsvilkårResultatPeriode(PERIODE_1, true, null, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
         repository.lagreYtelseVurderinger(behandling.getId(),
-            List.of(new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.HAR_ANNEN_LIVSOPPHOLDSYTELSE, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
+            List.of(new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT)));
 
         var revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
@@ -216,6 +216,28 @@ class InngangsvilkårVurderingRepositoryTest {
         assertThat(kopiert.getBistandsvilkårResultatHolder().get().getId())
             .as("Kopiert grunnlag skal dele samme bistand-holder")
             .isEqualTo(original.getBistandsvilkårResultatHolder().get().getId());
+    }
+
+    @Test
+    void livsoppholdtidslinjen_skal_kunne_gjenopprettes_som_nye_resultatperioder() {
+        repository.lagreYtelseVurderinger(behandling.getId(),
+            List.of(new AndreLivsoppholdsytelserResultatPeriode(PERIODE_1, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, false, "avslått automatisk", null, VURDERT_AV, VURDERT_TIDSPUNKT)));
+
+        var tidslinje = repository.hentEksisterendeGrunnlag(behandling.getId()).orElseThrow().hentLivsoppholdTidslinje();
+
+        // Dette er gjenopprettingen InngangsvilkårVurderingTjeneste gjør når en avklaringsperiode krymper
+        var gjenopprettet = tidslinje.segmenter().stream()
+            .map(it -> new AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
+            .toList();
+
+        assertThat(gjenopprettet).hasSize(1);
+        var vurdering = gjenopprettet.getFirst();
+        assertThat(vurdering.getPeriode()).isEqualTo(PERIODE_1);
+        assertThat(vurdering.isGodkjent()).isFalse();
+        assertThat(vurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER);
+        assertThat(vurdering.isManuellVurdering()).isFalse();
+        assertThat(vurdering.getBegrunnelse()).isEqualTo("avslått automatisk");
+        assertThat(vurdering.getVurdertAv()).isEqualTo(VURDERT_AV);
     }
 
     @Test

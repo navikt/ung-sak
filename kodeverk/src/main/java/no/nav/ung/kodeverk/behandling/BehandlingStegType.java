@@ -41,6 +41,7 @@ public enum BehandlingStegType implements Kodeverdi {
     VURDER_FAKTA_OM_BISTAND("VURDER_FAKTA_OM_BISTAND", "Avklarer brukers behov for bistand", UTREDES),
     VURDER_BISTANDSVILKÅR("VURDER_BISTANDSVILKÅR", "Vurder brukers behov om bistand ref 14a vedtak", UTREDES),
     VURDER_AKTIVITETSVILKÅR("VURDER_AKTIVITETSVILKÅR", "Vurder om bruker oppfyller aktivitetsvilkåret", UTREDES),
+    VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER("VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER", "Avklarer om bruker mottar en annen livsoppholdsytelse", UTREDES),
     VURDER_ANDRE_LIVSOPPHOLDSYTELSER("VURDER_ANDRE_LIVSOPPHOLDSYTELSER", "Vurder om bruker har en annen livsoppholdsytelse", UTREDES),
     VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR("VURDER_FORUTGÅENDE_MEDLEMSKAP", "Vurder bosteder i søknad opp mot EØS-/trygdeavtaleland", UTREDES),
     AKTIVITETSPENGER_BEREGNING("AKTIVITETSPENGER_BEREGNING", "Beregner sats for aktivitetspenger", UTREDES),

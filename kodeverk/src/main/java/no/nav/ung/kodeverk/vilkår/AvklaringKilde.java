@@ -17,6 +17,7 @@ public interface AvklaringKilde {
         return switch (vilkårType) {
             case BOSTEDSVILKÅR -> BostedsavklaringKildeType.fraKode(kode);
             case BISTANDSVILKÅR -> BistandsavklaringKildeType.fraKode(kode);
+            case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> AndreLivsoppholdsytelserAvklaringKildeType.fraKode(kode);
             default -> throw new IllegalArgumentException("Vilkår " + vilkårType + " har ingen avklaringskilder");
         };
     }

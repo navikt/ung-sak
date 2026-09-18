@@ -1,7 +1,5 @@
 package no.nav.ung.kodeverk.vilkår;
 
-import no.nav.ung.kodeverk.api.Kodeverdi;
-
 import java.util.Optional;
 
 // Dette er en mer detaljert årsak brukt for å spesifisere hvorfor en avslagsårsak er valgt.
