@@ -18,7 +18,6 @@ import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.sak.web.server.caching.CacheControl;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -47,7 +46,6 @@ public class ForutgåendeMedlemskapRestTjeneste {
     @Operation(description = "Hent informasjon om forutgående medlemskap", tags = "forutgående medlemskap")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    @CacheControl()
     public ForutgåendeMedlemskapResponse medlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         return forutgåendeMedlemskapTjeneste.hentMedlemskapOgVilkårSomDto(behandlingUuid);
     }
