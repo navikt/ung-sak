@@ -2152,14 +2152,14 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
-          "erVilkårOk" : {
+          "erVilkårInnvilget" : {
             "type" : "boolean"
           },
           "vilkårsperiode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
           }
         },
-        "required" : [ "erVilkårOk", "vilkårsperiode" ],
+        "required" : [ "erVilkårInnvilget", "vilkårsperiode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto" : {
