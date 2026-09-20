@@ -13,6 +13,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
@@ -63,10 +64,13 @@ class ForutgåendeMedlemskapTjenesteTest {
     @Any
     private Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
 
+    @Inject
+    private MottatteDokumentRepository mottatteDokumentRepository;
+
 
     @Test
     void skal_mappe_oppgitt_periode_til_medlemskap_dto() {
-        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, behandlingRepository, vilkårResultatRepository, startdatoRepository, perioderTilVurderingTjenester);
+        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, behandlingRepository, vilkårResultatRepository, startdatoRepository, perioderTilVurderingTjenester, mottatteDokumentRepository);
 
         var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
@@ -114,7 +118,7 @@ class ForutgåendeMedlemskapTjenesteTest {
 
     @Test
     void skal_koble_riktig_medlemskap_til_riktig_vilkårsperiode_basert_på_startdato_og_journalpost() {
-        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, behandlingRepository, vilkårResultatRepository, startdatoRepository, perioderTilVurderingTjenester);
+        var tjeneste = new ForutgåendeMedlemskapTjeneste(forutgåendeMedlemskapRepository, behandlingRepository, vilkårResultatRepository, startdatoRepository, perioderTilVurderingTjenester, mottatteDokumentRepository);
 
         var periode1 = new Periode(LocalDate.of(2024, 7, 1), LocalDate.of(2024, 7, 31));
         var periode2 = new Periode(LocalDate.of(2025, 8, 1), LocalDate.of(2025, 9, 30));
@@ -127,6 +131,7 @@ class ForutgåendeMedlemskapTjenesteTest {
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_OPPFYLT, periode2, Avslagsårsak.SØKER_ER_IKKE_MEDLEM, null)
             .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_RELEVANT, ikkeRelevantPeriode)
             .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), jp1))
+            .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now().plusHours(1), jp2))
             .lagre(entityManager);
 
         // To oppgitte medlemskapsperioder, koblet til hver sin journalpost

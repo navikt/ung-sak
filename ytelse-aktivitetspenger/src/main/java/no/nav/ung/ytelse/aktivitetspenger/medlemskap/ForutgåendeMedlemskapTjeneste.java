@@ -10,6 +10,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -17,8 +18,9 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
-import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -32,10 +34,12 @@ import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.perioder.AktivitetspengerSøknadsperiodeTjeneste;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Dependent
 public class ForutgåendeMedlemskapTjeneste {
@@ -45,6 +49,7 @@ public class ForutgåendeMedlemskapTjeneste {
     private final StartdatoRepository startdatoRepository;
     private final VilkårResultatRepository vilkårResultatRepository;
     private final Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester;
+    private final MottatteDokumentRepository mottatteDokumentRepository;
 
     @Inject
     public ForutgåendeMedlemskapTjeneste(
@@ -52,12 +57,13 @@ public class ForutgåendeMedlemskapTjeneste {
         BehandlingRepository behandlingRepository,
         VilkårResultatRepository vilkårResultatRepository,
         StartdatoRepository startdatoRepository,
-        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester) {
+        @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester, MottatteDokumentRepository mottatteDokumentRepository) {
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.behandlingRepository = behandlingRepository;
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.startdatoRepository = startdatoRepository;
         this.perioderTilVurderingTjenester = perioderTilVurderingTjenester;
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
     }
 
 
@@ -65,7 +71,7 @@ public class ForutgåendeMedlemskapTjeneste {
         return (LocalDateInterval di, LocalDateSegment<VilkårPeriode> lhs, LocalDateSegment<MedlemskapDto> rhs) -> {
             var vp = lhs.getValue();
             var tilVurdering = !periodeTilVurderingTidslinje.intersection(di).isEmpty();
-            var medlemskapFraBruker = rhs.getValue() != null ? rhs.getValue() : null;
+            var medlemskapFraBruker = rhs != null && rhs.getValue() != null ? rhs.getValue() : null;
             var avslagsårsak = mapAvslagsårsak(vp.getAvslagsårsak());
             MedlemskapPeriodeInfoDto medlemskapPeriodeInfoDto = new MedlemskapPeriodeInfoDto(
                 new Periode(di.getFomDato(), di.getTomDato()),
@@ -95,8 +101,7 @@ public class ForutgåendeMedlemskapTjeneste {
             .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), it))
             .toList());
 
-        var startdatoGrunnlag = startdatoRepository.hentGrunnlag(behandling.getId()).orElseThrow();
-        var oppgittMedlemskapTidslinje = lagOppgittMedlemskapTidslinjeSplittetPåStartdatoer(medlemskap, startdatoGrunnlag);
+        var oppgittMedlemskapTidslinje = lagOppgittMedlemskapTidslinjeFraStartdatoer(medlemskap, behandling);
         var periodeTilVurderingTidslinje = lagPeriodeTilVurderingTidslinje(behandling);
         var medlemskapsInfoTidslinje = vilkårTidslinje
             .combine(oppgittMedlemskapTidslinje,
@@ -106,19 +111,47 @@ public class ForutgåendeMedlemskapTjeneste {
         return new ForutgåendeMedlemskapResponse(TidslinjeUtil.values(medlemskapsInfoTidslinje));
     }
 
-    private LocalDateTimeline<MedlemskapDto> lagOppgittMedlemskapTidslinjeSplittetPåStartdatoer(List<MedlemskapDto> medlemskap, StartdatoGrunnlag startdatoGrunnlag) {
-        LocalDateTimeline<SøktStartdato> virkningstidspunktTidslinje = startdatoGrunnlag.getOppgitteStartdatoer().getStartdatoer().stream()
-            .sorted(Comparator.comparing(SøktStartdato::getStartdato).reversed())
+    private LocalDateTimeline<MedlemskapDto> lagOppgittMedlemskapTidslinjeFraStartdatoer(List<MedlemskapDto> medlemskap, Behandling behandling) {
+        var startdatoer = startdatoRepository.hentGrunnlag(behandling.getId()).orElseThrow()
+            .getOppgitteStartdatoer()
+            .getStartdatoer();
+
+        List<SøktStartdato> sorterteStartdatoer = sorterStartdatoerPåMottattTidspunkt(behandling, startdatoer);
+
+        var virkningstidspunktTidslinje = sorterteStartdatoer.stream()
             .map(s -> AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(s.getStartdato(), s))
             .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin)
             .compress();
 
-        return virkningstidspunktTidslinje.mapSegment(s ->
-            medlemskap.stream()
-                .filter(it -> it.journalpostId().equals(s.getJournalpostId().getVerdi()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("Finner ikke oppgitt medlemskap for journalpostId " + s.getJournalpostId().getVerdi())));
+        Map<String, MedlemskapDto> medlemskapPerJournalpost = medlemskap.stream()
+            .collect(Collectors.toMap(MedlemskapDto::journalpostId, m -> m));
 
+        return virkningstidspunktTidslinje.mapSegment(s -> {
+            var medlemskapDto = medlemskapPerJournalpost.get(s.getJournalpostId().getVerdi());
+            Objects.requireNonNull(medlemskapDto, "Finner ikke oppgitt medlemskap for jp " + s.getJournalpostId().getVerdi());
+            return medlemskapDto;
+        });
+    }
+
+    private List<SøktStartdato> sorterStartdatoerPåMottattTidspunkt(Behandling behandling, Set<SøktStartdato> startdatoer) {
+        if (startdatoer.size() <= 1) {
+            return startdatoer.stream().toList();
+        }
+
+        Map<JournalpostId, SøktStartdato> startdatoPerJournalpost = startdatoer.stream()
+            .collect(Collectors.toMap(SøktStartdato::getJournalpostId, s -> s));
+
+        //Nyeste søknadopplysninger har presedens.
+        return mottatteDokumentRepository.hentMottatteDokument(
+                behandling.getFagsakId(),
+                startdatoPerJournalpost.keySet(),
+                DokumentStatus.GYLDIG)
+            .stream()
+            .sorted(Comparator.comparing(MottattDokument::getMottattTidspunkt).reversed())
+            .map(MottattDokument::getJournalpostId)
+            .map(startdatoPerJournalpost::get)
+            .filter(Objects::nonNull)
+            .toList();
     }
 
     private LocalDateTimeline<Boolean> lagPeriodeTilVurderingTidslinje(Behandling behandling) {

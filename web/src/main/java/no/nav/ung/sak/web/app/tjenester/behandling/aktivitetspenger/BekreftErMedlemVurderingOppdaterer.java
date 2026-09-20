@@ -26,6 +26,7 @@ import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.medlemskap.ForutgåendeMedlemskapTjeneste;
 
+import java.util.List;
 import java.util.NavigableSet;
 
 @ApplicationScoped
@@ -85,8 +86,9 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
             .toList());
 
         var relevantePerioder = vilkårTidslinje.intersection(periodeTilVurderingTidslinje);
-        var periodeVurdert = DatoIntervallEntitet.fra(dto.getVilkårsperiode());
-        if (!relevantePerioder.disjoint(periodeVurdert.toLocalDateInterval()).isEmpty()) {
+        DatoIntervallEntitet periodeVurdert = DatoIntervallEntitet.fra(dto.getVilkårsperiode());
+        var periodeVurdertTidslinje = TidslinjeUtil.tilTidslinje(List.of(periodeVurdert));
+        if (!periodeVurdertTidslinje.disjoint(relevantePerioder).isEmpty()) {
             throw new IllegalStateException("Periode vurdert " + periodeVurdert + " er ikke delmengde av periode til vurdering " + relevantePerioder);
         }
         return periodeVurdert;
