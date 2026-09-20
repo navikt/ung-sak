@@ -61,7 +61,7 @@ public class ForutgåendeMedlemskapTjeneste {
     }
 
 
-    private static LocalDateSegmentCombinator<VilkårPeriode,MedlemskapDto, MedlemskapPeriodeInfoDto> combinatorVilkårPeriodeTilVurderingOgMedlemskapFraBruker(LocalDateTimeline<Boolean> periodeTilVurderingTidslinje) {
+    private static LocalDateSegmentCombinator<VilkårPeriode, MedlemskapDto, MedlemskapPeriodeInfoDto> combinatorVilkårPeriodeTilVurderingOgMedlemskapFraBruker(LocalDateTimeline<Boolean> periodeTilVurderingTidslinje) {
         return (LocalDateInterval di, LocalDateSegment<VilkårPeriode> lhs, LocalDateSegment<MedlemskapDto> rhs) -> {
             var vp = lhs.getValue();
             var tilVurdering = !periodeTilVurderingTidslinje.intersection(di).isEmpty();
@@ -99,7 +99,9 @@ public class ForutgåendeMedlemskapTjeneste {
         var oppgittMedlemskapTidslinje = lagOppgittMedlemskapTidslinjeSplittetPåStartdatoer(medlemskap, startdatoGrunnlag);
         var periodeTilVurderingTidslinje = lagPeriodeTilVurderingTidslinje(behandling);
         var medlemskapsInfoTidslinje = vilkårTidslinje
-            .combine(oppgittMedlemskapTidslinje, combinatorVilkårPeriodeTilVurderingOgMedlemskapFraBruker(periodeTilVurderingTidslinje), LocalDateTimeline.JoinStyle.LEFT_JOIN);
+            .combine(oppgittMedlemskapTidslinje,
+                combinatorVilkårPeriodeTilVurderingOgMedlemskapFraBruker(periodeTilVurderingTidslinje),
+                LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         return new ForutgåendeMedlemskapResponse(TidslinjeUtil.values(medlemskapsInfoTidslinje));
     }
