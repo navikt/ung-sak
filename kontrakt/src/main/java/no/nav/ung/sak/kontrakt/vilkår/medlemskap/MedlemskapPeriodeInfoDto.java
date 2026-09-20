@@ -8,12 +8,12 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrs
 import no.nav.ung.sak.typer.Periode;
 
 public record MedlemskapPeriodeInfoDto(
-    @JsonProperty(value = "periode", required = true)
+    @JsonProperty(required = true)
     @NotNull
     @Valid
     Periode periode,
 
-    @JsonProperty(value = "utfall", required = true)
+    @JsonProperty(required = true)
     @NotNull
     @Valid
     Utfall utfall,
@@ -23,10 +23,10 @@ public record MedlemskapPeriodeInfoDto(
 
     String begrunnelse,
 
-    @JsonProperty(value = "vurderesIBehandlingen", required = true)
+    @JsonProperty(required = true)
     boolean vurderesIBehandlingen,
 
-    @JsonProperty(value = "erManueltVurdert", required = true)
+    @JsonProperty(required = true)
     boolean erManueltVurdert,
 
     @Valid
