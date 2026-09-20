@@ -108,6 +108,7 @@ public class ForutgåendeMedlemskapTjeneste {
 
     private LocalDateTimeline<MedlemskapDto> lagOppgittMedlemskapTidslinjeSplittetPåStartdatoer(List<MedlemskapDto> medlemskap, StartdatoGrunnlag startdatoGrunnlag) {
         LocalDateTimeline<SøktStartdato> virkningstidspunktTidslinje = startdatoGrunnlag.getOppgitteStartdatoer().getStartdatoer().stream()
+            .sorted(Comparator.comparing(SøktStartdato::getStartdato).reversed())
             .map(s -> AktivitetspengerSøknadsperiodeTjeneste.tidslinjeFraVirkningstidspunkt(s.getStartdato(), s))
             .reduce(LocalDateTimeline.empty(), LocalDateTimeline::crossJoin)
             .compress();
