@@ -3,7 +3,6 @@ package no.nav.ung.ytelse.aktivitetspenger.perioder;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.k9.søknad.TidsserieUtils;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
@@ -66,11 +65,15 @@ public class AktivitetspengerSøknadsperiodeTjeneste {
     }
 
     public static LocalDateTimeline<Boolean> tidslinjeFraVirkningstidspunkt(LocalDate virkningstidspunkt){
+        return tidslinjeFraVirkningstidspunkt(virkningstidspunkt, true);
+    }
+
+    public static <T> LocalDateTimeline<T> tidslinjeFraVirkningstidspunkt(LocalDate virkningstidspunkt, T value) {
         LocalDate tomDato = virkningstidspunkt.plusWeeks(52).minusDays(1);
         while (tomDato.getDayOfWeek() == DayOfWeek.SATURDAY || tomDato.getDayOfWeek() == DayOfWeek.SUNDAY){
             tomDato = tomDato.minusDays(1);
         }
-        return new LocalDateTimeline<>(virkningstidspunkt, tomDato, true);
+        return new LocalDateTimeline<>(virkningstidspunkt, tomDato, value);
     }
 
 }
