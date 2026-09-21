@@ -119,6 +119,12 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             throw new IllegalArgumentException(
                 "Forsøker å vurdere perioder som ikke dekkes av en ikkeOppfyltÅrsak (mangler foreslått vilkårsavklaring). Gjelder perioder: " + utenAvklaring);
         }
+
+        var utenVurdering = årsakTidslinje.disjoint(vurdertTidslinje);
+        if (!utenVurdering.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Vilkårsvurdering fyller ikke hele perioden som er avklart, og som derfor må vurderes på nytt. Gjelder perioder: " + utenVurdering);
+        }
     }
 
     private static VilkårsvurderingResultat byggResultat(LocalDateInterval interval,
