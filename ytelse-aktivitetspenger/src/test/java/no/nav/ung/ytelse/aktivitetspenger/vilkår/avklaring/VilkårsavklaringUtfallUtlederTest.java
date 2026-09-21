@@ -26,6 +26,7 @@ class VilkårsavklaringUtfallUtlederTest {
 
     private static final String BOSTED_KILDE = BostedsavklaringKildeType.FOLKEREGISTER.getKode();
     private static final String BISTAND_KILDE = BistandsavklaringKildeType.BRUKER.getKode();
+    private static final String LIVSOPPHOLD_KILDE = AndreLivsoppholdsytelserAvklaringKildeType.NAV.getKode();
 
     @Test
     void skal_avslå_automatisk_når_varslet_avklaring_har_maskinell_årsak_uten_uttalelse() {
@@ -83,6 +84,28 @@ class VilkårsavklaringUtfallUtlederTest {
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
 
         assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+    }
+
+    @Test
+    void skal_avslå_automatisk_når_livsoppholdsytelsen_er_valgt_med_standardårsak() {
+        var utleder = utleder(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
+            avklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, LIVSOPPHOLD_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
+
+        assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+    }
+
+    @Test
+    void mottar_annen_ytelse_skal_aldri_avslås_automatisk() {
+        var avklaring = avklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, LIVSOPPHOLD_KILDE, true);
+
+        assertThat(utleder(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, avklaring)
+            .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false)).utledUtfall())
+            .as("ytelsen står kun i fritekst, så saksbehandler må vurdere den")
+            .isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+        assertThat(utleder(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, avklaring)
+            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, false)).utledUtfall())
+            .isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
     }
 
     @Test

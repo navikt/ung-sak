@@ -145,12 +145,15 @@ public class BehandlingsoppretterTjeneste {
 
     public List<ÅrsakOgPerioderDto> finnGyldigeVurderingsperioderPrÅrsak(Fagsak fagsak) {
         return finnUtledereForFagsak(fagsak).stream()
-            .map(utleder -> utleder.utledPerioder(fagsak.getId()))
+            .flatMap(utleder -> utleder.utledPerioder(fagsak.getId()).stream())
             .toList();
     }
 
     private List<GyldigePerioderForRevurderingPrÅrsakUtleder> finnUtledereForFagsak(Fagsak fagsak) {
-        return FagsakYtelseTypeRef.Lookup.find(gyldigePerioderForRevurderingUtledere, fagsak.getYtelseType()).stream().toList();
+        return FagsakYtelseTypeRef.Lookup.list(GyldigePerioderForRevurderingPrÅrsakUtleder.class, gyldigePerioderForRevurderingUtledere, fagsak.getYtelseType())
+            .stream()
+            .flatMap(Instance::stream)
+            .toList();
     }
 
     private boolean kanOppretteFørstegangsbehandling(Long fagsakId) {
@@ -190,12 +193,12 @@ public class BehandlingsoppretterTjeneste {
 
     private boolean periodeKanRevurderesForÅrsak(Fagsak fagsak, BehandlingÅrsakType behandlingÅrsakType, Optional<DatoIntervallEntitet> periode) {
         var relevanteUtledere = finnUtledereForFagsak(fagsak).stream()
-            .filter(utleder -> utleder.støttetÅrsak() == behandlingÅrsakType)
+            .filter(utleder -> utleder.støtterÅrsak(behandlingÅrsakType))
             .toList();
         if (relevanteUtledere.isEmpty()) {
             return true;
         }
         return relevanteUtledere.stream()
-            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), periode));
+            .allMatch(utleder -> utleder.periodeErGyldigForÅrsak(fagsak.getId(), periode, behandlingÅrsakType));
     }
 }

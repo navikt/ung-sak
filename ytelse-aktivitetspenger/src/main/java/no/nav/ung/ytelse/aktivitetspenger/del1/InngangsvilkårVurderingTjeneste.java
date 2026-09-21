@@ -12,6 +12,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
@@ -104,11 +105,18 @@ public class InngangsvilkårVurderingTjeneste {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? avslagsårsak(vurdering.getIkkeOppfyltÅrsak()) : null;
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+
+            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medUtfallManuell(utfall)
-                .medAvslagsårsak(avslagsårsak));
+                .medAvslagsårsak(avslagsårsak);
+
+            if (vurdering.isManuellVurdering()) {
+                vilkårPeriodeBuilder.medUtfallManuell(utfall);
+            } else {
+                vilkårPeriodeBuilder.tilbakestillManuellVurdering().medUtfall(utfall);
+            }
+            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }
@@ -191,6 +199,13 @@ public class InngangsvilkårVurderingTjeneste {
                     .map(it -> new BistandsvilkårResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
                     .toList();
                 vilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
+            }
+            case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> {
+                var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentLivsoppholdTidslinje().intersection(perioderSomSkalGjenopprettes)
+                    .segmenter().stream()
+                    .map(it -> new AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
+                    .toList();
+                vilkårVurderingRepository.lagreYtelseVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
             }
             default -> throw new IllegalArgumentException("Gjenoppretting av forrige vurdering er ikke støttet for vilkårtype " + vilkårType);
         }
