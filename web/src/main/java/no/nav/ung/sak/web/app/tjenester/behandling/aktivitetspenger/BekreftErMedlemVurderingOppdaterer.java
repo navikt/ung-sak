@@ -50,7 +50,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
     public OppdateringResultat oppdater(BekreftErMedlemVurderingDto dto, AksjonspunktOppdaterParameter param) {
         var periodeTilVurderingTidslinje = lagPeriodeTilVurderingTidslinje(param.getRef().getFagsakYtelseType(), param.getRef().getBehandlingType(), param.getBehandlingId());
 
-        var periodeVurdert = finnOgValiderPeriodeVurdert(dto, param, periodeTilVurderingTidslinje);
+        var perioderVurdert = finnOgValiderPeriodeVurdert(dto, param, periodeTilVurderingTidslinje);
 
         Utfall utfall = dto.getErVilkårInnvilget() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
@@ -64,19 +64,23 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
         var resultatBuilder = param.getVilkårResultatBuilder();
         var vilkårPeriodeBuilder = resultatBuilder.hentBuilderFor(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
-        vilkårPeriodeBuilder.leggTil(vilkårPeriodeBuilder
-            .hentBuilderFor(periodeVurdert)
-            .medUtfallManuell(utfall)
-            .medAvslagsårsak(avslagsårsak)
-            .medRegelInput(regelInput)
-            .medBegrunnelse(dto.getBegrunnelse()));
+        perioderVurdert.forEach(
+            periodeVurdert -> {
+                vilkårPeriodeBuilder.leggTil(vilkårPeriodeBuilder
+                    .hentBuilderFor(periodeVurdert)
+                    .medUtfallManuell(utfall)
+                    .medAvslagsårsak(avslagsårsak)
+                    .medRegelInput(regelInput)
+                    .medBegrunnelse(dto.getBegrunnelse()));
+            }
+        );
 
         resultatBuilder.leggTil(vilkårPeriodeBuilder);
 
         return OppdateringResultat.nyttResultat();
     }
 
-    private DatoIntervallEntitet finnOgValiderPeriodeVurdert(BekreftErMedlemVurderingDto dto, AksjonspunktOppdaterParameter param, LocalDateTimeline<Boolean> periodeTilVurderingTidslinje) {
+    private List<DatoIntervallEntitet> finnOgValiderPeriodeVurdert(BekreftErMedlemVurderingDto dto, AksjonspunktOppdaterParameter param, LocalDateTimeline<Boolean> periodeTilVurderingTidslinje) {
         var vilkår = vilkårResultatRepository.hent(param.getRef().getBehandlingId())
             .getVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET).orElseThrow();
 
@@ -86,13 +90,22 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
             .toList());
 
         var relevantePerioder = vilkårTidslinje.intersection(periodeTilVurderingTidslinje);
-        DatoIntervallEntitet periodeVurdert = DatoIntervallEntitet.fra(dto.getVilkårsperiode());
-        var periodeVurdertTidslinje = TidslinjeUtil.tilTidslinje(List.of(periodeVurdert));
-        LocalDateTimeline<Boolean> periodeUtenforRelevantPeriode = periodeVurdertTidslinje.disjoint(relevantePerioder);
-        if (!periodeUtenforRelevantPeriode.isEmpty()) {
-            throw new IllegalStateException("Periode vurdert " + periodeVurdert + " er utenfor periode til vurdering " + relevantePerioder.segmenter() + ". Periode utenfor: " + periodeUtenforRelevantPeriode.segmenter());
+        var perioderVurdert = dto.getPerioderVurdert().stream()
+            .map(DatoIntervallEntitet::fra)
+            .toList();
+
+
+        var periodeVurdertTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(perioderVurdert);
+        var periodeUtenforRelevantPeriode = periodeVurdertTidslinje.disjoint(relevantePerioder);
+        var periodeIkkeVurdert = relevantePerioder.disjoint(periodeVurdertTidslinje);
+
+        if (!periodeUtenforRelevantPeriode.isEmpty() || !periodeIkkeVurdert.isEmpty()) {
+            throw new IllegalStateException("Perioder vurdert " + perioderVurdert
+                + " samsvarer ikke med periode til vurdering " + relevantePerioder.segmenter()
+                + ". Utenfor: " + periodeUtenforRelevantPeriode.segmenter()
+                + ", ikke vurdert: " + periodeIkkeVurdert.segmenter());
         }
-        return periodeVurdert;
+        return perioderVurdert;
     }
 
     private LocalDateTimeline<Boolean> lagPeriodeTilVurderingTidslinje(FagsakYtelseType fagsakYtelseType, BehandlingType type, Long id) {
