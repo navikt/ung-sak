@@ -2155,11 +2155,16 @@
           "erVilkårInnvilget" : {
             "type" : "boolean"
           },
-          "vilkårsperiode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          "perioderVurdert" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+            },
+            "maxItems" : 2147483647,
+            "minItems" : 1,
+            "type" : "array"
           }
         },
-        "required" : [ "erVilkårInnvilget", "vilkårsperiode" ],
+        "required" : [ "erVilkårInnvilget", "perioderVurdert" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto" : {
