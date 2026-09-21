@@ -26,11 +26,10 @@ public class BekreftErMedlemVurderingDto extends BekreftetAksjonspunktDto {
     @Valid
     private MedlemskapAvslagsÅrsakType avslagsårsak;
 
-    @Valid
     @NotNull
     @Size(min = 1)
     @JsonProperty(required = true)
-    private List<Periode> perioderVurdert;
+    private List<@Valid @NotNull Periode> perioderVurdert;
 
     public BekreftErMedlemVurderingDto() {
         //Jackson
