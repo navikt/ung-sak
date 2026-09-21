@@ -2155,11 +2155,16 @@
           "erVilkårInnvilget" : {
             "type" : "boolean"
           },
-          "vilkårsperiode" : {
-            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          "perioderVurdert" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+            },
+            "maxItems" : 2147483647,
+            "minItems" : 1,
+            "type" : "array"
           }
         },
-        "required" : [ "erVilkårInnvilget", "vilkårsperiode" ],
+        "required" : [ "erVilkårInnvilget", "perioderVurdert" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto" : {
@@ -5829,6 +5834,7 @@
             "type" : "array"
           }
         },
+        "required" : [ "perioder" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto" : {
@@ -5855,6 +5861,7 @@
             "type" : "array"
           }
         },
+        "required" : [ "forutgåendePeriode", "harBoddINorge", "journalpostId", "utenlandsopphold" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto" : {
@@ -5881,6 +5888,7 @@
             "type" : "boolean"
           }
         },
+        "required" : [ "erManueltVurdert", "periode", "utfall", "vurderesIBehandlingen" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto" : {
@@ -5904,6 +5912,7 @@
             "type" : "string"
           }
         },
+        "required" : [ "harTrygdeavtale", "land", "landkode", "periode" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.økonomi.tilbakekreving.SjekkTilbakekrevingFørVedtakDto" : {
