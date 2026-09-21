@@ -88,8 +88,9 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
         var relevantePerioder = vilkårTidslinje.intersection(periodeTilVurderingTidslinje);
         DatoIntervallEntitet periodeVurdert = DatoIntervallEntitet.fra(dto.getVilkårsperiode());
         var periodeVurdertTidslinje = TidslinjeUtil.tilTidslinje(List.of(periodeVurdert));
-        if (!periodeVurdertTidslinje.disjoint(relevantePerioder).isEmpty()) {
-            throw new IllegalStateException("Periode vurdert " + periodeVurdert + " er ikke delmengde av periode til vurdering " + relevantePerioder);
+        LocalDateTimeline<Boolean> periodeUtenforRelevantPeriode = periodeVurdertTidslinje.disjoint(relevantePerioder);
+        if (!periodeUtenforRelevantPeriode.isEmpty()) {
+            throw new IllegalStateException("Periode vurdert " + periodeVurdert + " er utenfor periode til vurdering " + relevantePerioder.segmenter() + ". Periode utenfor: " + periodeUtenforRelevantPeriode.segmenter());
         }
         return periodeVurdert;
     }
