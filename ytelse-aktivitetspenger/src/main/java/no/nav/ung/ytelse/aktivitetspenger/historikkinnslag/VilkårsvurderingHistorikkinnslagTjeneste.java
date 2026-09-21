@@ -104,7 +104,7 @@ public class VilkårsvurderingHistorikkinnslagTjeneste {
     }
 
     private boolean opphørErEnesteEndring(HistorikkinnslagInput historikkinnslagInput) {
-        LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> forrigeTilEksisterende = lagFørOgEtterTidslinje(historikkinnslagInput.getVedtatteVilkårVurderinger(), historikkinnslagInput.getNyeVurderinger());
+        LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> forrigeTilEksisterende = lagFørOgEtterTidslinje(historikkinnslagInput.getVedtatteVilkårVurderinger(), historikkinnslagInput.getEksisterendeVurderinger());
         LocalDateTimeline<FørOgEtter<HistorikkinnslagData>> forrigeTilNy = lagFørOgEtterTidslinje(historikkinnslagInput.getVedtatteVilkårVurderinger(), historikkinnslagInput.getNyeVurderinger());
 
         return (erUendret(forrigeTilNy) || erOpphørUtenAndreEndringer(forrigeTilNy))

@@ -96,7 +96,7 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
 
         Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = bistandAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyeAvklaringer);
 
-        inngangsvilkårVurderingTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param,
+        inngangsvilkårVurderingTjeneste.nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(param,
             VilkårType.BISTANDSVILKÅR,
             tilPerioder(tidligereForeslåtteAvklaringer.keySet()),
             tilPerioder(nyeForeslåtteAvklaringer.keySet()));

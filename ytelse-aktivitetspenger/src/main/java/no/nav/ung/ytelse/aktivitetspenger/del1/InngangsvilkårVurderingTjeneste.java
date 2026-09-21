@@ -138,22 +138,23 @@ public class InngangsvilkårVurderingTjeneste {
         }
     }
 
-    // Hvis saksbehandler endrer perioden det avklares for etter at vilkårsvurdering er utført,
-    // gjelder ikke lenger vurderingen og den delen som ikke overlapper med ny avklaring må gjenopprettes fra forrige behandling.
+    // Hvis saksbehandler endrer perioden det avklares for etter at vilkårsvurdering er utført:
+    // Perioden som må vurderes på nytt kan ikke ha tidligere vurderinger, så denne slettes.
+    // Den delen som eventuelt ikke lenger overlapper med ny avklaring må gjenopprettes fra forrige behandling.
     // Vilkårsperioden som avklaringen gjelder for settes til ikke vurdert, slik at den kan vurderes på nytt (automatisk eller i aksjonspunkt)
-    public void gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(AksjonspunktOppdaterParameter param,
-                                                                                              VilkårType vilkårType,
-                                                                                              Collection<DatoIntervallEntitet> tidligereAvklartePerioder,
-                                                                                              Collection<DatoIntervallEntitet> nyeAvklartePerioder) {
+    public void nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(AksjonspunktOppdaterParameter param,
+                                                                             VilkårType vilkårType,
+                                                                             Collection<DatoIntervallEntitet> tidligereAvklartePerioder,
+                                                                             Collection<DatoIntervallEntitet> nyeAvklartePerioder) {
         var tidligereTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(tidligereAvklartePerioder);
         var nyTidslinje = TidslinjeUtil.tilTidslinjeKomprimert(nyeAvklartePerioder);
         var tidslinjeSomIkkeHåndteresAvNyAvklaring = tidligereTidslinje.disjoint(nyTidslinje);
 
         gjenopprettForrigeVurderingForPerioderIkkeVurdert(param.getBehandlingId(), param.getVilkårResultatBuilder(), vilkårType, tidslinjeSomIkkeHåndteresAvNyAvklaring);
+        vilkårVurderingRepository.fjernResultatForTidslinjer(param.getBehandlingId(), Map.of(vilkårType, TidslinjeUtil.toBooleanTimeline(nyTidslinje)));
         oppdaterVilkårResultatFraVurdering(param.getBehandlingId(), param.getVilkårResultatBuilder(), vilkårType);
 
-        var perioderSomSkalVurderesPåNytt = TidslinjeUtil.tilDatoIntervallEntiteter(nyTidslinje);
-        settVilkårResultatIkkeVurdertForPeriode(param.getVilkårResultatBuilder(), vilkårType, perioderSomSkalVurderesPåNytt);
+        settVilkårResultatIkkeVurdertForPeriode(param.getVilkårResultatBuilder(), vilkårType, TidslinjeUtil.tilDatoIntervallEntiteter(nyTidslinje));
     }
 
     public void settVilkårResultatIkkeVurdertForPeriode(Long behandlingId, VilkårType vilkårType, SequencedCollection<DatoIntervallEntitet> perioder) {

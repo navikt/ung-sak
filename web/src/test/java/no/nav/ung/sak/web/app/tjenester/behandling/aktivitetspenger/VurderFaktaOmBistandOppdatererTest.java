@@ -253,6 +253,10 @@ class VurderFaktaOmBistandOppdatererTest {
             .isEqualTo(Utfall.OPPFYLT);
 
         assertThat(hentAllePerioderMedIkkeVurdert(vilkårResultat)).containsExactly(PERIODE_2);
+
+        assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_2))
+            .as("vurderingen som overlapper med ny avklaring skal slettes, slik at vurderingsskjermbildet ikke forhåndsutfylles")
+            .isEmpty();
     }
 
     @Test
@@ -271,9 +275,8 @@ class VurderFaktaOmBistandOppdatererTest {
             .isEqualTo(Utfall.IKKE_VURDERT);
 
         assertThat(hentVilkårsvurderinger(revurdering))
-            .as("ingenting skal gjenopprettes når ny avklaring dekker hele forrige avklaring")
-            .extracting(BistandsvilkårResultatPeriode::getPeriode, BistandsvilkårResultatPeriode::isGodkjent, BistandsvilkårResultatPeriode::getBegrunnelse)
-            .containsExactly(tuple(tilDatoIntervallEntitet(heleperioden), true, "original vurdering"));
+            .as("ingenting skal gjenopprettes, og vurderingen som overlapper med ny avklaring skal være slettet")
+            .isEmpty();
     }
 
     private void oppdater(VurderFaktaOmBistandDto dto) {

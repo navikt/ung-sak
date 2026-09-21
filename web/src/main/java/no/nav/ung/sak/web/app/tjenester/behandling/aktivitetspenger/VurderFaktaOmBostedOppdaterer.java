@@ -84,7 +84,7 @@ public class VurderFaktaOmBostedOppdaterer implements AksjonspunktOppdaterer<Vur
 
         Set<BostedsPeriodeAvklaring> nyeForeslåtteAvklaringer = bostedAvklaringTjeneste.lagreForeslåttAvklaringOgSettVilkårIkkeVurdert(nyeAvklaringer, behandlingId);
 
-        inngangsvilkårVurderingTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param,
+        inngangsvilkårVurderingTjeneste.nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(param,
             VilkårType.BOSTEDSVILKÅR,
             tidligereForeslåtteAvklaringer.stream().map(BostedsPeriodeAvklaring::getPeriode).toList(),
             nyeAvklaringer.stream().map(a -> a.innhold().hentPeriodeSomDatoIntervallEntitet()).toList());
