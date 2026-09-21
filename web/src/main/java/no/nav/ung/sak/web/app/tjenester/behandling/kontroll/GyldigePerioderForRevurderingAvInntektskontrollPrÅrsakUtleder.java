@@ -55,8 +55,8 @@ public class GyldigePerioderForRevurderingAvInntektskontrollPrÅrsakUtleder impl
             return false;
         }
         return utledPerioder(fagsakId).stream()
-            .filter(dto -> dto.årsak() == årsak)
-            .flatMap(dto -> dto.perioder().stream())
+            .filter(årsakOgPerioder -> årsakOgPerioder.årsak() == årsak)
+            .flatMap(årsakOgPerioder -> årsakOgPerioder.perioder().stream())
             .map(DatoIntervallEntitet::fra)
             .anyMatch(periode.get()::equals);
     }

@@ -110,7 +110,8 @@ class VurderFaktaOmAndreLivsoppholdsytelserOppdatererTest {
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
         var avklaringTjeneste = new AndreLivsoppholdsytelserAvklaringTjeneste(
             vilkårsavklaringGrunnlagRepository,
-            inngangsvilkårVurderingTjeneste);
+            inngangsvilkårVurderingTjeneste,
+            vilkårResultatRepository);
 
         oppdaterer = new VurderFaktaOmAndreLivsoppholdsytelserOppdaterer(
             behandlingRepository,

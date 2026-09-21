@@ -22,9 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Utleder gyldige revurderingsperioder for alle behandlingsårsakene knyttet til vilkårsavklaring,
- * jf. {@link VilkårsavklaringÅrsaker}. Logikken er identisk for alle vilkårene (hent vilkårsperiodene
- * for siste ytelsesbehandling, map til {@link Periode}), så én utleder dekker alle årsakene.
+ * Utleder gyldige revurderingsperioder for alle behandlingsårsakene knyttet til vilkårsavklaring, jf. {@link VilkårsavklaringÅrsaker}.
  */
 @ApplicationScoped
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)

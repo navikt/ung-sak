@@ -50,6 +50,8 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         }
         LocalDate maksDatoIVilkårsperioden = eksisterendeVilkårperioder.getMaxLocalDate();
 
+        validerPerioderFraDtoOverlapperEksisterendeVilkårperioder(behandlingId, vilkårType, vurdertePerioder, eksisterendeVilkårperioder);
+
         LocalDateTimeline<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertTidslinje = new LocalDateTimeline<>(
             vurdertePerioder.stream()
                 .map(it -> new LocalDateSegment<>(
@@ -70,6 +72,32 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                 new LocalDateSegment<>(di, byggResultat(di, vilkårType, vurdering.getValue(), årsak.getValue(), vurdertAv, vurdertTidspunkt)),
             LocalDateTimeline.JoinStyle.INNER_JOIN
         );
+    }
+
+    private static void validerPerioderFraDtoOverlapperEksisterendeVilkårperioder(long behandlingId,
+                                                                                  VilkårType vilkårType,
+                                                                                  List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
+                                                                                  LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder) {
+        for (var dto : vurdertePerioder) {
+            Periode periode = dto.periode();
+            LocalDate fom = periode.getFom();
+            LocalDate tom = periode.getTom();
+            boolean erÅpenPeriode = tom == null || tom.equals(TIDENES_ENDE);
+
+            if (erÅpenPeriode) {
+                var fomTidslinje = new LocalDateTimeline<>(fom, fom, Boolean.TRUE);
+                if (!fomTidslinje.intersects(eksisterendeVilkårperioder)) {
+                    throw new IllegalArgumentException("Fom for åpen vurdert periode " + periode
+                        + " overlapper ikke eksisterende vilkårperioder for " + vilkårType + " på behandlingId=" + behandlingId);
+                }
+            } else {
+                var periodeTidslinje = new LocalDateTimeline<>(fom, tom, Boolean.TRUE);
+                if (!periodeTidslinje.disjoint(eksisterendeVilkårperioder).isEmpty()) {
+                    throw new IllegalArgumentException("Lukket vurdert periode " + periode
+                        + " overlapper ikke i sin helhet med eksisterende vilkårperioder for " + vilkårType + " på behandlingId=" + behandlingId);
+                }
+            }
+        }
     }
 
     private static void validerVurdertPeriodeErDekketAvAvklaring(long behandlingId,

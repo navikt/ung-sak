@@ -37,16 +37,16 @@ class AndreLivsoppholdsytelserAvklaringTjenesteTest {
     @Inject
     private EntityManager entityManager;
 
+    @Inject
     private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
     private AndreLivsoppholdsytelserAvklaringTjeneste tjeneste;
     private Behandling behandling;
 
     @BeforeEach
     void setUp() {
-        vilkårsavklaringGrunnlagRepository = new VilkårsavklaringGrunnlagRepository(entityManager);
-
         tjeneste = new AndreLivsoppholdsytelserAvklaringTjeneste(
             vilkårsavklaringGrunnlagRepository,
+            null,
             null
         );
 
