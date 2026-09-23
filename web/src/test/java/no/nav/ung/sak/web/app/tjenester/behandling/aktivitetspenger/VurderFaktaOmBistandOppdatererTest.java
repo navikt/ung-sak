@@ -118,7 +118,8 @@ class VurderFaktaOmBistandOppdatererTest {
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
         var bistandAvklaringTjeneste = new BistandAvklaringTjeneste(
             vilkårsavklaringGrunnlagRepository,
-            inngangsvilkårVurderingTjeneste);
+            inngangsvilkårVurderingTjeneste,
+            vilkårResultatRepository);
 
         oppdaterer = new VurderFaktaOmBistandOppdaterer(
             behandlingRepository,
