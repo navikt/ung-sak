@@ -4,22 +4,19 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.behandling.ÅrsakOgPerioderDto;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface GyldigePerioderForRevurderingPrÅrsakUtleder {
 
+    List<ÅrsakOgPerioderDto> utledPerioder(long fagsakId);
 
-    ÅrsakOgPerioderDto utledPerioder(long fagsakId);
-
-    /**
-     * Returnerer behandlingsårsaken denne utlederen håndterer.
-     */
-    BehandlingÅrsakType støttetÅrsak();
+    boolean støtterÅrsak(BehandlingÅrsakType årsak);
 
     /**
-     * Sjekker om en gitt periode er gyldig for revurdering.
-     * Skal kun kalles for årsaken returnert av {@link #støttetÅrsak()}.
+     * Sjekker om en gitt periode er gyldig for revurdering med den gitte årsaken.
+     * Skal kun kalles for årsaker der {@link #støtterÅrsak(BehandlingÅrsakType)} er {@code true}.
      */
-    boolean periodeErGyldigForÅrsak(long fagsakId, Optional<DatoIntervallEntitet> periode);
+    boolean periodeErGyldigForÅrsak(long fagsakId, Optional<DatoIntervallEntitet> periode, BehandlingÅrsakType årsak);
 
 }

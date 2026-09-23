@@ -1,4 +1,4 @@
-package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.andrelivsoppholdsytelser;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -14,23 +14,23 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.felles.VurderFaktaOmVilkårSteg;
 
-import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FAKTA_OM_BOSTED;
+import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER;
 
 @ApplicationScoped
-@BehandlingStegRef(value = VURDER_FAKTA_OM_BOSTED)
+@BehandlingStegRef(value = VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER)
 @BehandlingTypeRef
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
-public class VurderFaktaBostedSteg extends VurderFaktaOmVilkårSteg {
+public class VurderFaktaOmAndreLivsoppholdsytelserSteg extends VurderFaktaOmVilkårSteg {
 
-    VurderFaktaBostedSteg() {
+    VurderFaktaOmAndreLivsoppholdsytelserSteg() {
         // for CDI proxy
     }
 
     @Inject
-    public VurderFaktaBostedSteg(BehandlingRepository behandlingRepository,
-                                  @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere) {
+    public VurderFaktaOmAndreLivsoppholdsytelserSteg(BehandlingRepository behandlingRepository,
+                                                      @Any Instance<ProsessTriggerPeriodeUtleder> prosessTriggerPeriodeUtledere) {
         super(behandlingRepository, prosessTriggerPeriodeUtledere,
-            BehandlingÅrsakType.ENDRET_BOSTED,
-            AksjonspunktDefinisjon.VURDER_FAKTA_OM_BOSTED);
+            BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE,
+            AksjonspunktDefinisjon.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER);
     }
 }

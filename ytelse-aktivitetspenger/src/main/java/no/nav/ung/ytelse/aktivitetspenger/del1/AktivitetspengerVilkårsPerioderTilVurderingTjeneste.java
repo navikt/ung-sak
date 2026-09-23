@@ -7,6 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingskontroll.BehandlingTypeRef;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.IngenVurdering;
@@ -76,12 +77,7 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
 
     private Set<BehandlingÅrsakType> hentRelevanteÅrsaker(VilkårType vilkårType) {
         EnumSet<BehandlingÅrsakType> årsaker = EnumSet.of(BehandlingÅrsakType.NY_SØKT_PERIODE);
-        if (vilkårType == VilkårType.BOSTEDSVILKÅR) {
-            årsaker.add(BehandlingÅrsakType.ENDRET_BOSTED);
-        }
-        if (vilkårType == VilkårType.BISTANDSVILKÅR) {
-            årsaker.add(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV);
-        }
+        VilkårsavklaringÅrsaker.avklaringsårsakFor(vilkårType).ifPresent(årsaker::add);
         return årsaker;
     }
 

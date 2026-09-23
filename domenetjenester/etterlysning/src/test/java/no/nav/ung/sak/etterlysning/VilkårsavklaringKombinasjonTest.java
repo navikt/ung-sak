@@ -31,8 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 /**
- * Verifiserer at to vilkår kan ha hver sin vilkårsavklaring — med hver sin etterlysning — på samme behandling,
- * uten å påvirke hverandre. Bruker BOSTEDSVILKÅR og BISTANDSVILKÅR som de to vilkårstypene.
+ * Verifiserer at flere vilkår kan ha hver sin vilkårsavklaring — med hver sin etterlysning — på samme behandling,
+ * uten å påvirke hverandre. Bruker BOSTEDSVILKÅR, BISTANDSVILKÅR og ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR.
  */
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -43,6 +43,7 @@ class VilkårsavklaringKombinasjonTest {
     private static final DatoIntervallEntitet PERIODE = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
     private static final BostedsvilkårIkkeOppfyltÅrsak BOSTED_ÅRSAK = BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
     private static final BistandsvilkårIkkeOppfyltÅrsak BISTAND_ÅRSAK = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
+    private static final AndreLivsoppholdsytelserIkkeOppfyltÅrsak LIVSOPPHOLD_ÅRSAK = AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER;
 
     @Inject
     private EntityManager entityManager;
@@ -64,11 +65,12 @@ class VilkårsavklaringKombinasjonTest {
     }
 
     @Test
-    void to_vilkarstyper_skal_ha_hvert_sitt_grunnlag_pa_samme_behandling() {
+    void tre_vilkarstyper_skal_ha_hvert_sitt_grunnlag_pa_samme_behandling() {
         var bosted = lagreAvklaring(VilkårType.BOSTEDSVILKÅR, BOSTED_ÅRSAK, BostedsavklaringKildeType.FOLKEREGISTER);
         var bistand = lagreAvklaring(VilkårType.BISTANDSVILKÅR, BISTAND_ÅRSAK, BistandsavklaringKildeType.BRUKER);
+        var livsopphold = lagreAvklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, LIVSOPPHOLD_ÅRSAK, AndreLivsoppholdsytelserAvklaringKildeType.NAV);
 
-        assertThat(bosted.getReferanse()).isNotEqualTo(bistand.getReferanse());
+        assertThat(List.of(bosted.getReferanse(), bistand.getReferanse(), livsopphold.getReferanse())).doesNotHaveDuplicates();
 
         assertThat(hentForeslåtte(VilkårType.BOSTEDSVILKÅR))
             .extracting(VilkårPeriodeAvklaring::getIkkeOppfyltÅrsakKode)
@@ -76,12 +78,16 @@ class VilkårsavklaringKombinasjonTest {
         assertThat(hentForeslåtte(VilkårType.BISTANDSVILKÅR))
             .extracting(VilkårPeriodeAvklaring::getIkkeOppfyltÅrsakKode)
             .containsExactly(BISTAND_ÅRSAK.getKode());
+        assertThat(hentForeslåtte(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR))
+            .extracting(VilkårPeriodeAvklaring::getIkkeOppfyltÅrsakKode)
+            .containsExactly(LIVSOPPHOLD_ÅRSAK.getKode());
     }
 
     @Test
-    void ferdigstilling_av_ett_vilkar_skal_ikke_pavirke_det_andre() {
+    void ferdigstilling_av_ett_vilkar_skal_ikke_pavirke_de_andre() {
         lagreAvklaring(VilkårType.BOSTEDSVILKÅR, BOSTED_ÅRSAK, BostedsavklaringKildeType.FOLKEREGISTER);
         lagreAvklaring(VilkårType.BISTANDSVILKÅR, BISTAND_ÅRSAK, BistandsavklaringKildeType.BRUKER);
+        lagreAvklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, LIVSOPPHOLD_ÅRSAK, AndreLivsoppholdsytelserAvklaringKildeType.NAV);
 
         grunnlagRepository.ferdigstillForeslåtteAvklaringer(behandling.getId(), VilkårType.BISTANDSVILKÅR);
 
@@ -98,15 +104,25 @@ class VilkårsavklaringKombinasjonTest {
         assertThat(bostedGrunnlag.getForeslåtteAvklaringer())
             .extracting(VilkårPeriodeAvklaring::getIkkeOppfyltÅrsakKode)
             .containsExactly(BOSTED_ÅRSAK.getKode());
+
+        var livsoppholdGrunnlag = grunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR).orElseThrow();
+        assertThat(livsoppholdGrunnlag.getFerdigstilteAvklaringer())
+            .as("livsoppholdsavklaringen skal ikke ferdigstilles når bistandsavklaringen ferdigstilles")
+            .isEmpty();
+        assertThat(livsoppholdGrunnlag.getForeslåtteAvklaringer())
+            .extracting(VilkårPeriodeAvklaring::getIkkeOppfyltÅrsakKode)
+            .containsExactly(LIVSOPPHOLD_ÅRSAK.getKode());
     }
 
     @Test
-    void to_samtidige_etterlysninger_av_ulik_type_skal_leve_side_om_side() {
+    void tre_samtidige_etterlysninger_av_ulik_type_skal_leve_side_om_side() {
         var bosted = lagreAvklaring(VilkårType.BOSTEDSVILKÅR, BOSTED_ÅRSAK, BostedsavklaringKildeType.FOLKEREGISTER);
         var bistand = lagreAvklaring(VilkårType.BISTANDSVILKÅR, BISTAND_ÅRSAK, BistandsavklaringKildeType.BRUKER);
+        var livsopphold = lagreAvklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, LIVSOPPHOLD_ÅRSAK, AndreLivsoppholdsytelserAvklaringKildeType.NAV);
 
         etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BOSTED, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BOSTEDSVILKÅR, bosted));
         etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand));
+        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, livsopphold));
 
         assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BOSTED))
             .extracting(Etterlysning::getGrunnlagsreferanse)
@@ -114,15 +130,20 @@ class VilkårsavklaringKombinasjonTest {
         assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BISTAND))
             .extracting(Etterlysning::getGrunnlagsreferanse)
             .containsExactly(bistand.getReferanse());
+        assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER))
+            .extracting(Etterlysning::getGrunnlagsreferanse)
+            .containsExactly(livsopphold.getReferanse());
     }
 
     @Test
     void endring_av_ett_vilkar_skal_kun_avbryte_egen_etterlysning() {
         var bosted = lagreAvklaring(VilkårType.BOSTEDSVILKÅR, BOSTED_ÅRSAK, BostedsavklaringKildeType.FOLKEREGISTER);
         var bistand = lagreAvklaring(VilkårType.BISTANDSVILKÅR, BISTAND_ÅRSAK, BistandsavklaringKildeType.BRUKER);
+        var livsopphold = lagreAvklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, LIVSOPPHOLD_ÅRSAK, AndreLivsoppholdsytelserAvklaringKildeType.NAV);
 
         etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BOSTED, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BOSTEDSVILKÅR, bosted));
         etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand));
+        etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, livsopphold));
 
         var endretBistand = lagreAvklaring(VilkårType.BISTANDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.AVKORTET, BistandsavklaringKildeType.BRUKER);
         etterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, bistand), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, endretBistand));
@@ -133,6 +154,11 @@ class VilkårsavklaringKombinasjonTest {
 
         assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BOSTED))
             .as("bostedsetterlysningen skal være urørt")
+            .extracting(Etterlysning::getStatus)
+            .containsExactly(EtterlysningStatus.OPPRETTET);
+
+        assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER))
+            .as("livsoppholdsetterlysningen skal være urørt")
             .extracting(Etterlysning::getStatus)
             .containsExactly(EtterlysningStatus.OPPRETTET);
 

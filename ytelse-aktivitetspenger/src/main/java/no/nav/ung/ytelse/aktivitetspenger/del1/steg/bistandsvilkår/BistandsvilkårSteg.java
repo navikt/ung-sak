@@ -191,7 +191,7 @@ public class BistandsvilkårSteg extends VilkårVurderingSteg {
     }
 
     static boolean erDekketAvForeslåttAvklaring(LocalDateTimeline<VilkårsavklaringUtfallUtleder> manuellTidslinje) {
-        return manuellTidslinje.segmenter().stream()
+        return !manuellTidslinje.isEmpty() && manuellTidslinje.segmenter().stream()
             .allMatch(s -> s.getValue().getForeslåttAvklaring() != null);
     }
 
