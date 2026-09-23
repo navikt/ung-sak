@@ -29,7 +29,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         super(1, "Du får ikke lenger aktivitetspenger");
     }
 
-    @DisplayName("Opphør pga bostedsvilkåret - ytelseIkkeTilgjengeligPåBosted")
+    @DisplayName("Opphør pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED")
     @Test
     void opphørBosted() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBosted(FOM);
@@ -47,7 +47,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Opphør pga bostedsvilkåret - ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse")
+    @DisplayName("Opphør pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE")
     @Test
     void opphørBostedFolkeregistrert() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedFolkeregistrert(FOM);
@@ -65,7 +65,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Opphør pga bostedsvilkåret - ytelseIkkePåArbeidsstedStudiested")
+    @DisplayName("Opphør pga bostedsvilkåret - YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED")
     @Test
     void opphørArbeidsstedStudiested() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaArbeidsstedStudiested(FOM);
@@ -102,7 +102,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Endring/avslag pga bostedsvilkåret - ytelseIkkeTilgjengeligPåBosted")
+    @DisplayName("Endring/avslag pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED")
     @Test
     void endringAvslagBosted() {
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBosted(FOM);
@@ -122,7 +122,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Endring/avslag pga bostedsvilkåret - ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse")
+    @DisplayName("Endring/avslag pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE")
     @Test
     void endringAvslagBostedFolkeregistrert() {
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBostedFolkeregistrert(FOM);
@@ -142,7 +142,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Endring/avslag pga bostedsvilkåret - ytelseIkkePåArbeidsstedStudiested")
+    @DisplayName("Endring/avslag pga bostedsvilkåret - YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED")
     @Test
     void endringAvslagArbeidsstedStudiested() {
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaArbeidsstedStudiested(FOM);
@@ -217,15 +217,16 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Det er fordi du får uføretrygd fra denne datoen",
-                "Vi har fått opplysninger om dette fra Nav."
+                "Opplysningene om dette kommer fra Navs systemer."
             );
     }
 
-    @DisplayName("Opphør pga andre livsoppholdsytelser - MOTTAR_ANNEN_YTELSE navngir ingen ytelse")
+    @DisplayName("Opphør pga andre livsoppholdsytelser - MOTTAR_ANNEN_YTELSE navngir ytelsen i friteksten")
     @Test
     void opphørAndreLivsoppholdsytelserAnnenYtelse() {
+        var fritekst = "Du får en ytelse fra en annen ordning som dekker livsoppholdet ditt.";
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
-            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, null);
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, fritekst);
         var behandling = lagOpphørScenario(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
@@ -234,7 +235,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "Det er fordi du får en annen livsoppholdsytelse fra denne datoen. Du kan ikke få aktivitetspenger samtidig."
+                "Det er fordi du får en annen livsoppholdsytelse fra denne datoen. Du kan ikke få aktivitetspenger samtidig.",
+                fritekst
             );
     }
 

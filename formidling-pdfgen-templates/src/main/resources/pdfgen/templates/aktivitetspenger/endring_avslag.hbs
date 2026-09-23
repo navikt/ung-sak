@@ -7,26 +7,27 @@
 
         <h2>Hvorfor får du ikke aktivitetspenger i perioden?</h2>
         {{#with bosted}}
-            {{#if ytelseIkkeTilgjengeligPåBosted}}
+            {{#eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi du ikke har bostedsadresse i Trondheim kommune i denne perioden, får du ikke aktivitetspenger.
                 </p>
-            {{/if}}
-            {{#if ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse}}
+            {{else eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi du ikke har bostedsadresse i Trondheim kommune i denne perioden, får du ikke aktivitetspenger.
                 </p>
-            {{/if}}
-            {{#if ytelseIkkePåArbeidsstedStudiested}}
+            {{else eq årsak "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du studere eller jobbe i Trondheim kommune.
                     Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune i denne perioden, får du ikke aktivitetspenger.
                 </p>
-            {{/if}}
+            {{else eq årsak "ANNEN_ÅRSAK"}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
+                </p>
+            {{/eq}}
             {{#if fritekstBrev}}
-                For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                 <p>
                     {{fritekstBrev}}
                 </p>
@@ -40,12 +41,12 @@
                     Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
                 </p>
             {{/if}}
-            {{#if annenYtelse}}
+            {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
                 <p>
                     Det er fordi du får en annen livsoppholdsytelse i denne perioden.
                     Du kan ikke få aktivitetspenger samtidig.
                 </p>
-            {{/if}}
+            {{/eq}}
             {{#if fritekstBrev}}
                 <p>
                     {{fritekstBrev}}

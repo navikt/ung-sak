@@ -28,7 +28,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         super(1, "Vi har avslått din søknad om aktivitetspenger");
     }
 
-    @DisplayName("Avslag pga bostedsvilkåret - ytelseIkkeTilgjengeligPåBosted")
+    @DisplayName("Avslag pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED")
     @Test
     void avslagBosted() {
         var fom = LocalDate.of(2025, 8, 1);
@@ -47,11 +47,11 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             );
     }
 
-    @DisplayName("Avslag pga bistandsvilkåret - harIkke14aVedtak")
+    @DisplayName("Avslag pga bistandsvilkåret - HAR_IKKE_14A_VEDTAK med fritekst i tillegg")
     @Test
     void avslagBistand() {
         var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom, null);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom, FRITEKST_BISTAND);
 
         var behandling = lagAvslåttBehandling(scenario);
 
@@ -61,31 +61,12 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a"
-            );
-    }
-
-    @DisplayName("Avslag pga bistandsvilkåret - harIkke14aVedtak med fritekstBrev")
-    @Test
-    void avslagBistand_fritekst() {
-        var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBistand(fom, FRITEKST_BISTAND);
-
-        var behandling = lagAvslåttBehandling(scenario);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
-
-        var brevtekst = generertBrev.dokument().html();
-
-        assertThatHtml(brevtekst)
-            .containsHtmlSubSequenceOnce(
-                "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
+                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a",
                 FRITEKST_BISTAND
             );
     }
 
-    @DisplayName("Avslag pga bostedsvilkåret - ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse")
+    @DisplayName("Avslag pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE")
     @Test
     void avslagBostedFolkeregistrertEllerBostedsadresse() {
         var fom = LocalDate.of(2025, 8, 1);
@@ -103,7 +84,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             );
     }
 
-    @DisplayName("Avslag pga bostedsvilkåret - ytelseIkkePåArbeidsstedStudiested")
+    @DisplayName("Avslag pga bostedsvilkåret - YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED")
     @Test
     void avslagArbeidsstedStudiested() {
         var fom = LocalDate.of(2025, 8, 1);
@@ -125,7 +106,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     @Test
     void avslagBostedOgBistand() {
         var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBostedOgBistand(fom);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBostedOgBistand(fom, FRITEKST_BISTAND);
 
         var behandling = lagAvslåttBehandling(scenario);
 
@@ -137,7 +118,8 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune. " +
                     "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.",
-                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a"
+                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a",
+                FRITEKST_BISTAND
             );
     }
 
@@ -194,7 +176,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     void avslagAndreLivsoppholdsytelserAnnenYtelse() {
         var fom = LocalDate.of(2025, 8, 1);
         var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttAndreLivsoppholdsytelser(
-            fom, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, null);
+            fom, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, FRITEKST_LIVSOPPHOLD);
 
         var behandling = lagAvslåttBehandling(scenario);
 
@@ -204,13 +186,13 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse. "
-                    + "Derfor har vi avslått søknaden din."
+                "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
+                FRITEKST_LIVSOPPHOLD
             )
             .asPlainTextNotContains("Det er fordi du får");
     }
 
-    @DisplayName("Avslag pga andre livsoppholdsytelser - fritekst erstatter årsakssetningen")
+    @DisplayName("Avslag pga andre livsoppholdsytelser - fritekst kommer i tillegg til årsakssetningen")
     @Test
     void avslagAndreLivsoppholdsytelserFritekst() {
         var fom = LocalDate.of(2025, 8, 1);
@@ -225,9 +207,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
+                "Det er fordi du får dagpenger.",
                 FRITEKST_LIVSOPPHOLD
-            )
-            .asPlainTextNotContains("Det er fordi du får dagpenger");
+            );
     }
 
     @DisplayName("Vilkår som kun er avkortet omtales ikke, selv om et annet vilkår er avslått")

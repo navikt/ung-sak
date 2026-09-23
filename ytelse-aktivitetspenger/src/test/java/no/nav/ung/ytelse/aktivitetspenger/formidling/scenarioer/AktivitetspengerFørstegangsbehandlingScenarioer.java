@@ -208,10 +208,10 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         return avslåttBistandScenario(fom, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstBrev);
     }
 
-    public static AktivitetspengerTestScenario avslåttBostedOgBistand(LocalDate fom) {
+    public static AktivitetspengerTestScenario avslåttBostedOgBistand(LocalDate fom, String fritekstBistand) {
         var vurderinger = InngangsvilkårVurderingTestData.builder()
             .medBostedsvilkårResultat(false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null)
-            .medBistandsvilkårResultat(false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, null);
+            .medBistandsvilkårResultat(false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstBistand);
         return fullAvslagScenario(fom, Map.of(
             VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
             VilkårType.BISTANDSVILKÅR, Avslagsårsak.IKKE_14A_VEDTAK), null, vurderinger);
