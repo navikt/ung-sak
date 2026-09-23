@@ -6,7 +6,7 @@
         <p>Du har ikke rett på aktivitetspenger.</p>
 
         <h2>Hvorfor får du ikke aktivitetspenger?</h2>
-        {{#with avslåttBosted}}
+        {{#with bosted}}
             {{#if ytelseIkkeTilgjengeligPåBosted}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
@@ -32,10 +32,29 @@
             {{/if}}
         {{/with}}
 
-        {{#with avslåttBistand}}
+        {{#with bistand}}
             {{#if harIkke14aVedtak}}
                 <p>
                     For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. Fordi du ikke har et slikt vedtak, har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+        {{/with}}
+
+        {{#with andreLivsoppholdsytelser}}
+            {{#if ytelse}}
+                <p>
+                    Det er fordi du får {{ytelse}}. Du kan ikke få aktivitetspenger samtidig som du får en annen
+                    livsoppholdsytelse. Derfor har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#if annenYtelse}}
+                <p>
+                    Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
                 </p>
             {{/if}}
             {{#if fritekstBrev}}

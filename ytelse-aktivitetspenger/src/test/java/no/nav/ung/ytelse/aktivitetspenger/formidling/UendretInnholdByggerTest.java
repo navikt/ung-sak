@@ -2,6 +2,8 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
@@ -10,6 +12,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.Aktivitetspenger
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårsavklaringTestData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -84,6 +87,30 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
+                fritekst
+            );
+    }
+
+    @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga andre livsoppholdsytelser")
+    @Test
+    void uendretEtterVarsletOpphørLivsopphold() {
+        var fritekst = "Du får likevel aktivitetspenger fordi den andre ytelsen er stanset.";
+        var scenario = AktivitetspengerUendretScenarioer.uendretLivsoppholdScenario(
+            FOM,
+            VilkårsavklaringTestData.opphør(vurdertPeriode(FOM),
+                AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER,
+                AndreLivsoppholdsytelserAvklaringKildeType.NAV),
+            fritekst
+        );
+        var behandling = lagUendretScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
+                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(vurdertPeriode(FOM).getFom()),
                 fritekst
             );
     }

@@ -2,8 +2,12 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerEndringAvslagScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerOpphørScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
@@ -177,6 +181,106 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 fritekst,
                 "Vi har fått opplysninger om dette fra veileder ved Nav Trondheim."
             );
+    }
+
+    @DisplayName("Opphør pga andre livsoppholdsytelser - ytelsen navngis, kilde fra bruker")
+    @Test
+    void opphørAndreLivsoppholdsytelser() {
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, null);
+        var behandling = lagOpphørScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
+                "Det er fordi du får dagpenger fra denne datoen. Du kan ikke få aktivitetspenger samtidig som du får "
+                    + "en annen livsoppholdsytelse.",
+                "Vi har fått opplysninger om dette fra deg."
+            );
+    }
+
+    @DisplayName("Opphør pga andre livsoppholdsytelser - kilde fra Nav")
+    @Test
+    void opphørAndreLivsoppholdsytelserFraNav() {
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_UFØRETRYGD, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
+        var behandling = lagOpphørScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Det er fordi du får uføretrygd fra denne datoen",
+                "Vi har fått opplysninger om dette fra Nav."
+            );
+    }
+
+    @DisplayName("Opphør pga andre livsoppholdsytelser - MOTTAR_ANNEN_YTELSE navngir ingen ytelse")
+    @Test
+    void opphørAndreLivsoppholdsytelserAnnenYtelse() {
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, null);
+        var behandling = lagOpphørScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Det er fordi du får en annen livsoppholdsytelse fra denne datoen. Du kan ikke få aktivitetspenger samtidig."
+            );
+    }
+
+    @DisplayName("Opphør på både bosteds- og livsoppholdsvilkåret - innledning og kilde skrives én gang")
+    @Test
+    void opphørBostedOgAndreLivsoppholdsytelser() {
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedOgAndreLivsoppholdsytelser(FOM);
+        var behandling = lagOpphørScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
+                "Det er fordi du får dagpenger fra denne datoen",
+                "Vi har fått opplysninger om dette fra deg."
+            );
+    }
+
+    @DisplayName("Endring/avslag pga andre livsoppholdsytelser - ytelsen navngis")
+    @Test
+    void endringAvslagAndreLivsoppholdsytelser() {
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaAndreLivsoppholdsytelser(
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_TILTAKSPENGER, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, null);
+        var behandling = lagEndringAvslagScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har endret aktivitetspengene dine</h1>",
+                "Du får ikke aktivitetspenger i perioden fra "
+                    + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
+                    + brevDatoString(livsoppholdsperiode(scenario).getTom()),
+                "Det er fordi du får tiltakspenger i denne perioden. Du kan ikke få aktivitetspenger samtidig som du får "
+                    + "en annen livsoppholdsytelse.",
+                "Vi har fått opplysninger om dette fra deg."
+            );
+    }
+
+    private static Periode livsoppholdsperiode(AktivitetspengerTestScenario scenario) {
+        return scenario.vilkårsavklaringer().get(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR).getFirst().periode();
     }
 
     private Behandling lagOpphørScenario(AktivitetspengerTestScenario scenario) {

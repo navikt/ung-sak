@@ -34,7 +34,8 @@ public record AktivitetspengerTestScenario(
     LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder,
     Map<VilkårType, LocalDateTimeline<VilkårUtfall>> vilkår,
     InngangsvilkårVurderingTestData inngangsvilkårVurderinger,
-    List<BostedsAvklaringTestData> bostedsAvklaringer) {
+    List<BostedsAvklaringTestData> bostedsAvklaringer,
+    Map<VilkårType, List<VilkårsavklaringTestData>> vilkårsavklaringer) {
 
     public AktivitetspengerTestScenario(
         String navn,
@@ -49,7 +50,7 @@ public record AktivitetspengerTestScenario(
         LocalDate dødsdato,
         LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder) {
         this(navn, søknadsperioder, satsperioder, beregningsgrunnlag, tilkjentYtelsePerioder, aldersvilkår, fødselsdato,
-            behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.of(), InngangsvilkårVurderingTestData.tom(), List.of());
+            behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.of(), InngangsvilkårVurderingTestData.tom(), List.of(), Map.of());
     }
 
     public static Builder builder() {
@@ -71,6 +72,7 @@ public record AktivitetspengerTestScenario(
         private final Map<VilkårType, LocalDateTimeline<VilkårUtfall>> vilkår = new LinkedHashMap<>();
         private InngangsvilkårVurderingTestData inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.tom();
         private List<BostedsAvklaringTestData> bostedsAvklaringer = List.of();
+        private final Map<VilkårType, List<VilkårsavklaringTestData>> vilkårsavklaringer = new LinkedHashMap<>();
 
         public Builder medNavn(String navn) {
             this.navn = navn;
@@ -147,10 +149,24 @@ public record AktivitetspengerTestScenario(
             return this;
         }
 
+        /**
+         * Avklaringer på det generiske vilkårsavklaringsgrunnlaget. Bostedsvilkåret har sitt eget grunnlag
+         * og settes med {@link #medBostedsAvklaringer}.
+         */
+        public Builder medVilkårsavklaringer(VilkårType vilkårType, List<VilkårsavklaringTestData> avklaringer) {
+            if (vilkårType == VilkårType.BOSTEDSVILKÅR) {
+                throw new IllegalArgumentException("Bostedsavklaringer settes med medBostedsAvklaringer");
+            }
+            if (vilkårsavklaringer.put(vilkårType, List.copyOf(avklaringer)) != null) {
+                throw new IllegalArgumentException("Vilkårsavklaringer er allerede satt: " + vilkårType);
+            }
+            return this;
+        }
+
         public AktivitetspengerTestScenario build() {
             return new AktivitetspengerTestScenario(navn, søknadsperioder, satsperioder, beregningsgrunnlag, tilkjentYtelsePerioder,
                 aldersvilkår, fødselsdato, behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.copyOf(vilkår), inngangsvilkårVurderinger,
-                List.copyOf(bostedsAvklaringer));
+                List.copyOf(bostedsAvklaringer), Map.copyOf(vilkårsavklaringer));
         }
     }
 }

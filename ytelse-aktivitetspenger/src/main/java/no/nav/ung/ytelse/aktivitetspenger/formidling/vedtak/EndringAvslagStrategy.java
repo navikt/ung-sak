@@ -35,7 +35,8 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
     private Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
 
     private static final Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingÅrsak = Map.of(
-        VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED
+        VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED,
+        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE
     );
 
     public EndringAvslagStrategy() {

@@ -5,7 +5,7 @@ import no.nav.ung.sak.typer.Periode;
 
 public record EndringAvslagDto(
     Periode periode,
-    AvslåttBosted avslåttBosted,
-    KildeTilOpplysninger kilde
+    KildeTilOpplysninger kilde,
+    AvslåttBosted bosted,
+    AvslåttAndreLivsoppholdsytelser andreLivsoppholdsytelser
 ) implements TemplateInnholdDto { }
-

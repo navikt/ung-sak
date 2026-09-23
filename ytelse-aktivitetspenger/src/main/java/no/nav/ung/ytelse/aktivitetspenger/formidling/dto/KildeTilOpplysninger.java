@@ -47,9 +47,6 @@ public record KildeTilOpplysninger(
                 case NAV -> nyFraNav();
                 case ANNET -> nyFraAnnet(kildeFritekst);
             };
-
-            // Nye vilkår kobles på etter hvert som brevinnholdet for dem er på plass.
-            default -> throw new IllegalArgumentException("Vedtaksbrev støtter ikke kildetypen " + kilde.getClass().getSimpleName() + "." + kilde.getKode());
         };
     }
 }
