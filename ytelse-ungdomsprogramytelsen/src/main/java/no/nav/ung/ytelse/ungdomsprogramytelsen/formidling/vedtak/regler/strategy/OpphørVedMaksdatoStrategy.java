@@ -7,7 +7,6 @@ import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørUtleder;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeGrunnlag;
 import no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramPeriodeRepository;
 import no.nav.ung.sak.formidling.vedtak.regler.strategy.VedtaksbrevInnholdbyggerStrategy;
@@ -40,10 +39,12 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
         }
         var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
 
-        // Opphør ved maksdato gir kun brev når varselet er innenfor varslingsvinduet og programperioden fortsatt er åpen;
-        // er den lukket har det i stedet skjedd en reell sluttdatoendring (opphør/flytting).
-        if (erRelevantForVarslingOmOpphørVedMaksdato(grunnlag)
-            && !UngdomsprogramOpphørUtleder.harLukketSluttdato(grunnlag)) {
+        // Opphør ved maksdato gir kun brev når varselet er innenfor varslingsvinduet og tom-dato er etter eller på maksdato.
+        // opphørshendelse) — det er nettopp dette varselet skal dekke, så det skal IKKE kreve at
+        // perioden fortsatt er åpen. erRelevantForVarslingOmOpphørVedMaksdato garanterer allerede at
+        // sluttdatoen ikke er satt tidligere enn maksdato; er den satt pga. et reelt, uavhengig opphør,
+        // håndteres det av ProgramPeriodeStrategy (RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM) i tillegg.
+        if (erRelevantForVarslingOmOpphørVedMaksdato(grunnlag)) {
             return List.of(VedtaksbrevStrategyResultat.medUredigerbarBrev(
                 DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, opphørVedMaksdatoInnholdBygger,
                 "Automatisk brev ved opphør grunnet maksdato."));
