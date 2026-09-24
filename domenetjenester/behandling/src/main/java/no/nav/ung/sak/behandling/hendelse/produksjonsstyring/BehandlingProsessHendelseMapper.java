@@ -88,6 +88,7 @@ public class BehandlingProsessHendelseMapper {
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
             .medAnsvarligSaksbehandlerForTotrinn( behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medAnsvarligBeslutterForTotrinn(behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
+            .medNavKontorBehandlendeEnhet(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null))
             .medNavKontorAnsvarligSaksbehandler(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medNavKontorBeslutter(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
