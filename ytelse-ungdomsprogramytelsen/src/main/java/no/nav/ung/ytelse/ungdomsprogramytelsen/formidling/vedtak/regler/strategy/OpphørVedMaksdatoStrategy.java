@@ -39,7 +39,7 @@ public final class OpphørVedMaksdatoStrategy implements VedtaksbrevInnholdbygge
         }
         var grunnlag = ungdomsprogramPeriodeRepository.hentGrunnlag(behandling.getId()).orElseThrow();
 
-        // Programperioden kan lukkes helt naturlig nøyaktig på periodeMaksDato (uten noen egen
+        // Opphør ved maksdato gir kun brev når varselet er innenfor varslingsvinduet og tom-dato er etter eller på maksdato.
         // opphørshendelse) — det er nettopp dette varselet skal dekke, så det skal IKKE kreve at
         // perioden fortsatt er åpen. erRelevantForVarslingOmOpphørVedMaksdato garanterer allerede at
         // sluttdatoen ikke er satt tidligere enn maksdato; er den satt pga. et reelt, uavhengig opphør,
