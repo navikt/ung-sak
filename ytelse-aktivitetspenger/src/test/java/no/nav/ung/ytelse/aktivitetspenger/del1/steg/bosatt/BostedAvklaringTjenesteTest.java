@@ -63,7 +63,8 @@ class BostedAvklaringTjenesteTest {
             bostedsGrunnlagRepository,
             null,
             etterlysningRepository,
-            prosessTaskTjeneste
+            prosessTaskTjeneste,
+            null
         );
 
         behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad().lagre(entityManager);

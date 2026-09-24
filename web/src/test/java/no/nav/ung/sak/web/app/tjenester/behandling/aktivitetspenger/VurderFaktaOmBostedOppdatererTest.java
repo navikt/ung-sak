@@ -63,7 +63,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -117,7 +116,7 @@ class VurderFaktaOmBostedOppdatererTest {
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, inngangsvilkårVurderingTjeneste, etterlysningRepository, prosessTaskTjeneste);
+        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, inngangsvilkårVurderingTjeneste, etterlysningRepository, prosessTaskTjeneste, vilkårResultatRepository);
 
         oppdaterer = new VurderFaktaOmBostedOppdaterer(
             behandlingRepository,
@@ -250,9 +249,9 @@ class VurderFaktaOmBostedOppdatererTest {
             .as("det skal finnes nøyaktig én periode med IKKE_VURDERT, og den skal være lik perioden for ny avklaring")
             .containsExactly(PERIODE_2);
 
-        assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_2).getFirst().getBegrunnelse())
-            .as("vilkårsvurdering som overlapper med ny avklaring skal ikke påvirkes i dette aksjonspunktet")
-            .isEqualTo("original vilkårsvurdering");
+        assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_2))
+            .as("vurderingen som overlapper med ny avklaring skal slettes, slik at vurderingsskjermbildet ikke forhåndsutfylles")
+            .isEmpty();
     }
 
     @Test
@@ -275,9 +274,8 @@ class VurderFaktaOmBostedOppdatererTest {
             .isEqualTo(Utfall.IKKE_VURDERT);
 
         assertThat(hentVilkårsvurderinger(revurdering))
-            .as("ingenting skal gjenopprettes når ny avklaring dekker hele forrige avklaring")
-            .extracting(BostedsvilkårResultatPeriode::getPeriode, BostedsvilkårResultatPeriode::isGodkjent, BostedsvilkårResultatPeriode::getBegrunnelse)
-            .containsExactly(tuple(tilDatoIntervallEntitet(heleperioden), true, "original vurdering"));
+            .as("ingenting skal gjenopprettes, og vurderingen som overlapper med ny avklaring skal være slettet")
+            .isEmpty();
     }
 
     private void oppdater(VurderFaktaOmBostedDto dto) {

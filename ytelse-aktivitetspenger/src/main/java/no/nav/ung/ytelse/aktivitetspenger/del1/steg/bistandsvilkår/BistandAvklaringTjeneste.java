@@ -2,26 +2,34 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
 import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
+
 @ApplicationScoped
 @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV)
 public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
+    private static final VilkårType VILKÅR_TYPE = VilkårType.BISTANDSVILKÅR;
+
     private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
     public BistandAvklaringTjeneste() {
         // for CDI proxy
@@ -29,9 +37,34 @@ public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     @Inject
     public BistandAvklaringTjeneste(VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
-                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste) {
+                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
+                                    VilkårResultatRepository vilkårResultatRepository) {
         this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+    }
+
+    public void validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(long behandlingId, List<ÅpenPeriode> perioder) {
+        var eksisterendeVilkårperioder = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
+            .map(vilkårene -> vilkårene.getVilkårTimeline(VILKÅR_TYPE))
+            .orElseThrow(() -> new IllegalArgumentException("Fant ingen vilkårsperioder for " + VILKÅR_TYPE + " på behandlingId=" + behandlingId));
+
+        for (var periode : perioder) {
+            boolean erÅpenPeriode = periode.getTom() == null || periode.getTom().equals(TIDENES_ENDE);
+            if (erÅpenPeriode) {
+                var fomTidslinje = new LocalDateTimeline<>(periode.getFom(), periode.getFom(), Boolean.TRUE);
+                if (!fomTidslinje.intersects(eksisterendeVilkårperioder)) {
+                    throw new IllegalArgumentException("Fom for åpen vurdert periode " + periode
+                        + " overlapper ikke eksisterende vilkårperioder for " + VILKÅR_TYPE + " på behandlingId=" + behandlingId);
+                }
+            } else {
+                var periodeTidslinje = new LocalDateTimeline<>(periode.getFom(), periode.getTom(), Boolean.TRUE);
+                if (!periodeTidslinje.disjoint(eksisterendeVilkårperioder).isEmpty()) {
+                    throw new IllegalArgumentException("Lukket vurdert periode " + periode
+                        + " overlapper ikke i sin helhet med eksisterende vilkårperioder for " + VILKÅR_TYPE + " på behandlingId=" + behandlingId);
+                }
+            }
+        }
     }
 
     public Map<VilkårsvarselInnhold, UUID> hentForeslåtteAvklaringerSomInnhold(long behandlingId) {

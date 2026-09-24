@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -10,6 +11,7 @@ import no.nav.ung.kodeverk.varsel.EtterlysningType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
@@ -20,6 +22,7 @@ import no.nav.ung.sak.etterlysning.AvbrytEtterlysningTask;
 import no.nav.ung.sak.etterlysning.OpprettEtterlysningTask;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
 import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.ÅpenPeriode;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +30,13 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
+
 @ApplicationScoped
 @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED)
 public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
+
+    private static final VilkårType VILKÅR_TYPE = VilkårType.BOSTEDSVILKÅR;
 
     private static final Logger log = LoggerFactory.getLogger(BostedAvklaringTjeneste.class);
 
@@ -38,6 +45,7 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
 
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
+    private VilkårResultatRepository vilkårResultatRepository;
 
 
     public BostedAvklaringTjeneste() {
@@ -47,11 +55,36 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     public BostedAvklaringTjeneste(BostedsGrunnlagRepository bostedsGrunnlagRepository,
                                    InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
                                    EtterlysningRepository etterlysningRepository,
-                                   ProsessTaskTjeneste prosessTaskTjeneste) {
+                                   ProsessTaskTjeneste prosessTaskTjeneste,
+                                   VilkårResultatRepository vilkårResultatRepository) {
         this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.etterlysningRepository = etterlysningRepository;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
+        this.vilkårResultatRepository = vilkårResultatRepository;
+    }
+
+    public void validerAvklartePerioderOverlapperEksisterendeVilkårsperioder(long behandlingId, List<ÅpenPeriode> perioder) {
+        var eksisterendeVilkårperioder = vilkårResultatRepository.hentHvisEksisterer(behandlingId)
+            .map(vilkårene -> vilkårene.getVilkårTimeline(VILKÅR_TYPE))
+            .orElseThrow(() -> new IllegalArgumentException("Fant ingen vilkårsperioder for " + VILKÅR_TYPE + " på behandlingId=" + behandlingId));
+
+        for (var periode : perioder) {
+            boolean erÅpenPeriode = periode.getTom() == null || periode.getTom().equals(TIDENES_ENDE);
+            if (erÅpenPeriode) {
+                var fomTidslinje = new LocalDateTimeline<>(periode.getFom(), periode.getFom(), Boolean.TRUE);
+                if (!fomTidslinje.intersects(eksisterendeVilkårperioder)) {
+                    throw new IllegalArgumentException("Fom for åpen vurdert periode " + periode
+                        + " overlapper ikke eksisterende vilkårperioder for " + VILKÅR_TYPE + " på behandlingId=" + behandlingId);
+                }
+            } else {
+                var periodeTidslinje = new LocalDateTimeline<>(periode.getFom(), periode.getTom(), Boolean.TRUE);
+                if (!periodeTidslinje.disjoint(eksisterendeVilkårperioder).isEmpty()) {
+                    throw new IllegalArgumentException("Lukket vurdert periode " + periode
+                        + " overlapper ikke i sin helhet med eksisterende vilkårperioder for " + VILKÅR_TYPE + " på behandlingId=" + behandlingId);
+                }
+            }
+        }
     }
 
     public List<BostedsPeriodeAvklaring> hentForeslåtteAvklaringer(long behandlingId) {
