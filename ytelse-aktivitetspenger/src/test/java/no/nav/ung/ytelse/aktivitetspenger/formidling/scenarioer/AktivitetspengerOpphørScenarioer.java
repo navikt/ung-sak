@@ -9,7 +9,6 @@ import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -32,24 +31,19 @@ import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.Aktivitet
 public class AktivitetspengerOpphørScenarioer {
 
     public static AktivitetspengerTestScenario opphørPgaBosted(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null, BostedsavklaringKildeType.BRUKER, null);
+        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null);
     }
 
     public static AktivitetspengerTestScenario opphørPgaBostedAnnet(LocalDate fom, String fritekstTilBrev) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.ANNET, fritekstTilBrev, BostedsavklaringKildeType.ANNET, "veileder ved Nav Trondheim");
-    }
-
-    public static AktivitetspengerTestScenario opphørPgaBostedFolkeregistrert(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null, BostedsavklaringKildeType.FOLKEREGISTER, null);
+        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.ANNET, fritekstTilBrev);
     }
 
     public static AktivitetspengerTestScenario opphørPgaArbeidsstedStudiested(LocalDate fom) {
-        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null, BostedsavklaringKildeType.BRUKER, null);
+        return opphørMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null);
     }
 
     public static AktivitetspengerTestScenario opphørPgaAndreLivsoppholdsytelser(LocalDate fom,
                                                                                  AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
-                                                                                 AndreLivsoppholdsytelserAvklaringKildeType kilde,
                                                                                  String fritekstTilBrev) {
         var opphørtVilkårPeriode = opphørtPeriode(fom);
 
@@ -63,13 +57,11 @@ public class AktivitetspengerOpphørScenarioer {
             .medVilkår(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
                 avslåttTidslinje(opphørtVilkårPeriode, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, fritekstTilBrev))
             .medVilkårsavklaringer(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
-                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, kilde)))
+                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER)))
             .build();
     }
 
-    public static AktivitetspengerTestScenario opphørPgaBistand(LocalDate fom,
-                                                                BistandsavklaringKildeType kilde,
-                                                                String fritekstTilBrev) {
+    public static AktivitetspengerTestScenario opphørPgaBistand(LocalDate fom, String fritekstTilBrev) {
         var opphørtVilkårPeriode = opphørtPeriode(fom);
         var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
 
@@ -83,7 +75,7 @@ public class AktivitetspengerOpphørScenarioer {
             .medVilkår(VilkårType.BISTANDSVILKÅR,
                 avslåttTidslinje(opphørtVilkårPeriode, Avslagsårsak.IKKE_14A_VEDTAK, fritekstTilBrev))
             .medVilkårsavklaringer(VilkårType.BISTANDSVILKÅR,
-                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, kilde)))
+                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, BistandsavklaringKildeType.BRUKER)))
             .build();
     }
 
@@ -112,7 +104,7 @@ public class AktivitetspengerOpphørScenarioer {
             .build();
     }
 
-    private static AktivitetspengerTestScenario opphørMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev, BostedsavklaringKildeType kilde, String kildeFritekst) {
+    private static AktivitetspengerTestScenario opphørMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
         var opphørtVilkårPeriode = opphørtPeriode(fom);
 
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
@@ -123,7 +115,7 @@ public class AktivitetspengerOpphørScenarioer {
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(lagPeriodeMedEttÅrFra(fom)))))
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
             .medVilkår(vilkårType, avslåttTidslinje(opphørtVilkårPeriode, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, fritekstTilBrev))
-            .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak).medKilde(kilde, kildeFritekst)))
+            .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak)))
             .build();
     }
 

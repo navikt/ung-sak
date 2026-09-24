@@ -4,12 +4,9 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.AvklaringKilde;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -27,7 +24,6 @@ import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOgVurderingTidslinjeUtleder;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringAvslagDto;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.KildeTilOpplysninger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -69,18 +65,17 @@ class EndringAvslagInnholdByggerTest {
         lenient().when(behandling.getId()).thenReturn(BEHANDLING_ID);
     }
 
-    @DisplayName("Vilkår avklart likt gir ett brev med felles periode og kilde, og en blokk per vilkår")
+    @DisplayName("Vilkår avklart likt gir ett brev med felles periode og en blokk per vilkår")
     @Test
     void likeAvklaringerGirBrev() {
-        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR, BostedsavklaringKildeType.BRUKER),
-            livsopphold(FOM, TOM, Avklaringtype.OPPHØR, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER));
+        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR),
+            livsopphold(FOM, TOM, Avklaringtype.OPPHØR));
 
         var resultat = bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, VilkårType.BOSTEDSVILKÅR));
 
         assertThat(resultat.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
         var dto = (EndringAvslagDto) resultat.templateInnholdDto();
         assertThat(dto.periode()).isEqualTo(new Periode(FOM, TOM));
-        assertThat(dto.kilde()).isEqualTo(KildeTilOpplysninger.nyFraBruker());
         assertThat(dto.bosted()).isNotNull();
         assertThat(dto.andreLivsoppholdsytelser()).isNotNull();
     }
@@ -88,13 +83,12 @@ class EndringAvslagInnholdByggerTest {
     @DisplayName("Vilkår som ikke er avslått får null, og malen skriver da ingenting om det")
     @Test
     void kunEttAvslåttVilkår() {
-        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.AVSLAG, BostedsavklaringKildeType.FOLKEREGISTER));
+        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.AVSLAG));
 
         var resultat = bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.BOSTEDSVILKÅR));
 
         assertThat(resultat.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
         var dto = (EndringAvslagDto) resultat.templateInnholdDto();
-        assertThat(dto.kilde()).isEqualTo(KildeTilOpplysninger.nyFraFolkeregisteret());
         assertThat(dto.bosted()).isNotNull();
         assertThat(dto.andreLivsoppholdsytelser()).isNull();
     }
@@ -102,8 +96,8 @@ class EndringAvslagInnholdByggerTest {
     @DisplayName("Avklaringtypen velger mal, og kan derfor ikke være ulik")
     @Test
     void ulikAvklaringtype() {
-        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR, BostedsavklaringKildeType.BRUKER),
-            livsopphold(FOM, TOM, Avklaringtype.AVSLAG, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER));
+        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR),
+            livsopphold(FOM, TOM, Avklaringtype.AVSLAG));
 
         assertThatThrownBy(() -> bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, VilkårType.BOSTEDSVILKÅR)))
             .isInstanceOf(IllegalStateException.class)
@@ -113,19 +107,8 @@ class EndringAvslagInnholdByggerTest {
     @DisplayName("Innledningssetningen skrives én gang, så perioden kan ikke være ulik")
     @Test
     void ulikPeriode() {
-        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR, BostedsavklaringKildeType.BRUKER),
-            livsopphold(FOM.plusDays(1), TOM, Avklaringtype.OPPHØR, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER));
-
-        assertThatThrownBy(() -> bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, VilkårType.BOSTEDSVILKÅR)))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("avklart ulikt");
-    }
-
-    @DisplayName("Kildeavsnittet skrives én gang, så kilden kan ikke være ulik")
-    @Test
-    void ulikKilde() {
-        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR, BostedsavklaringKildeType.BRUKER),
-            livsopphold(FOM, TOM, Avklaringtype.OPPHØR, AndreLivsoppholdsytelserAvklaringKildeType.NAV));
+        avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR),
+            livsopphold(FOM.plusDays(1), TOM, Avklaringtype.OPPHØR));
 
         assertThatThrownBy(() -> bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, VilkårType.BOSTEDSVILKÅR)))
             .isInstanceOf(IllegalStateException.class)
@@ -138,8 +121,8 @@ class EndringAvslagInnholdByggerTest {
         var fom = LocalDate.of(2025, 3, 1);
         var tom = LocalDate.of(2025, 12, 31);
         avklaringerErUtledet(
-            bosted(fom, tom, Avklaringtype.AVSLAG, BostedsavklaringKildeType.FOLKEREGISTER),
-            livsopphold(LocalDate.of(2025, 6, 1), tom, Avklaringtype.AVSLAG, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER));
+            bosted(fom, tom, Avklaringtype.AVSLAG),
+            livsopphold(LocalDate.of(2025, 6, 1), tom, Avklaringtype.AVSLAG));
 
         var resultat = bygger.bygg(behandling, avslåtteVilkårTidslinje(fom, tom, VilkårType.BOSTEDSVILKÅR));
 
@@ -176,13 +159,13 @@ class EndringAvslagInnholdByggerTest {
         when(tidslinjeUtleder.utled(BEHANDLING_ID)).thenReturn(tidslinje);
     }
 
-    private static Map.Entry<VilkårType, LocalDateSegment<VilkårsavklaringMedVurdering>> bosted(LocalDate fom, LocalDate tom, Avklaringtype avklaringtype, AvklaringKilde kilde) {
-        return avklaring(VilkårType.BOSTEDSVILKÅR, fom, tom, avklaringtype, kilde,
+    private static Map.Entry<VilkårType, LocalDateSegment<VilkårsavklaringMedVurdering>> bosted(LocalDate fom, LocalDate tom, Avklaringtype avklaringtype) {
+        return avklaring(VilkårType.BOSTEDSVILKÅR, fom, tom, avklaringtype,
             BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM);
     }
 
-    private static Map.Entry<VilkårType, LocalDateSegment<VilkårsavklaringMedVurdering>> livsopphold(LocalDate fom, LocalDate tom, Avklaringtype avklaringtype, AvklaringKilde kilde) {
-        return avklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, fom, tom, avklaringtype, kilde,
+    private static Map.Entry<VilkårType, LocalDateSegment<VilkårsavklaringMedVurdering>> livsopphold(LocalDate fom, LocalDate tom, Avklaringtype avklaringtype) {
+        return avklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, fom, tom, avklaringtype,
             AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER);
     }
 
@@ -190,9 +173,8 @@ class EndringAvslagInnholdByggerTest {
                                                                                                     LocalDate fom,
                                                                                                     LocalDate tom,
                                                                                                     Avklaringtype avklaringtype,
-                                                                                                    AvklaringKilde kilde,
                                                                                                     IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak) {
-        var vilkårsavklaring = new Vilkårsavklaring(avklaringtype, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), kilde, null);
+        var vilkårsavklaring = new Vilkårsavklaring(avklaringtype, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), null, null);
         var vurdering = new VilkårsvurderingResultat(vilkårType, false, ikkeOppfyltÅrsak, true,
             "Begrunnelse fra test", null, "A111111", LocalDateTime.now());
         var medVurdering = new VilkårsavklaringMedVurdering(vilkårType, BehandlingÅrsakType.UDEFINERT, vilkårsavklaring, vurdering);

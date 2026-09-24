@@ -16,7 +16,6 @@ import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOgVurderingTidslinjeUtleder;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringAvslagDto;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.KildeTilOpplysninger;
 
 import java.util.Collection;
 import java.util.EnumMap;
@@ -57,11 +56,10 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
         var avklaringer = avslåtteSegmenter.values().stream().map(LocalDateSegment::getValue).toList();
         var avklaringstyper = distinkt(avklaringer, it -> it.vilkårsavklaring().avklaringtype());
         var perioder = distinkt(avslåtteSegmenter.values(), EndringAvslagInnholdBygger::periodeFor);
-        var kilder = distinkt(avklaringer, EndringAvslagInnholdBygger::kildeFor);
 
-        if (avklaringstyper.size() > 1 || perioder.size() > 1 || kilder.size() > 1) {
+        if (avklaringstyper.size() > 1 || perioder.size() > 1) {
             throw new IllegalStateException("Vedtaksbrev kan ikke omtale vilkår som er avklart ulikt"
-                + " - perioder: " + perioder + ", avklaringstyper: " + avklaringstyper + ", kilder: " + kilder
+                + " - perioder: " + perioder + ", avklaringstyper: " + avklaringstyper
                 + ", behandlingId: " + behandling.getId());
         }
 
@@ -78,7 +76,7 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
         return new TemplateInnholdResultat(
             avklaringstyper.getFirst() == Avklaringtype.OPPHØR ? TemplateType.AKTIVITETSPENGER_OPPHØR : TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG,
-            new EndringAvslagDto(perioder.getFirst(), kilder.getFirst(), bosted, bistand, andreLivsoppholdsytelser));
+            new EndringAvslagDto(perioder.getFirst(), bosted, bistand, andreLivsoppholdsytelser));
     }
 
     private static <T, V> List<V> distinkt(Collection<T> elementer, Function<T, V> egenskap) {
@@ -97,10 +95,5 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private static Periode periodeFor(LocalDateSegment<VilkårsavklaringMedVurdering> segment) {
         return new Periode(segment.getFom(), segment.getTom());
-    }
-
-    private static KildeTilOpplysninger kildeFor(VilkårsavklaringMedVurdering avklaringMedVurdering) {
-        var avklaring = avklaringMedVurdering.vilkårsavklaring();
-        return KildeTilOpplysninger.av(avklaring.kilde(), avklaring.kildeFritekst());
     }
 }

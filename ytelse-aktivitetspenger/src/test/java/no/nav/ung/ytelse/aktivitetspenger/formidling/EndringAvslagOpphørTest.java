@@ -2,9 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
@@ -34,7 +32,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void opphørBosted() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBosted(FOM);
-        var behandling = lagOpphørScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
@@ -43,26 +41,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
-                "Vi har fått opplysninger om dette fra deg."
-            );
-    }
-
-    @DisplayName("Opphør pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE")
-    @Test
-    void opphørBostedFolkeregistrert() {
-        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedFolkeregistrert(FOM);
-        var behandling = lagOpphørScenario(scenario);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
-                "Vi har fått opplysninger om dette fra Folkeregisteret."
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
             );
     }
 
@@ -70,7 +49,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void opphørArbeidsstedStudiested() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaArbeidsstedStudiested(FOM);
-        var behandling = lagOpphørScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
@@ -79,8 +58,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "studere eller jobbe i Trondheim kommune",
-                "Vi har fått opplysninger om dette fra deg."
+                "studere eller jobbe i Trondheim kommune"
             );
     }
 
@@ -89,7 +67,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     void opphørBostedFritekst() {
         var fritekst = "Du har flyttet til et sted utenfor Trondheim kommune og har derfor ikke lenger rett.";
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedAnnet(FOM, fritekst);
-        var behandling = lagOpphørScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
@@ -98,8 +76,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                fritekst,
-                "Vi har fått opplysninger om dette fra veileder ved Nav Trondheim."
+                fritekst
             );
     }
 
@@ -107,7 +84,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void endringAvslagBosted() {
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBosted(FOM);
-        var behandling = lagEndringAvslagScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
@@ -118,28 +95,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
-                "Vi har fått opplysninger om dette fra deg."
-            );
-    }
-
-    @DisplayName("Endring/avslag pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE")
-    @Test
-    void endringAvslagBostedFolkeregistrert() {
-        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBostedFolkeregistrert(FOM);
-        var behandling = lagEndringAvslagScenario(scenario);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Nav har endret aktivitetspengene dine</h1>",
-                "Du får ikke aktivitetspenger i perioden fra "
-                    + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
-                    + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
-                "Vi har fått opplysninger om dette fra Folkeregisteret."
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
             );
     }
 
@@ -147,7 +103,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void endringAvslagArbeidsstedStudiested() {
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaArbeidsstedStudiested(FOM);
-        var behandling = lagEndringAvslagScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
@@ -158,8 +114,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "studere eller jobbe i Trondheim kommune",
-                "Vi har fått opplysninger om dette fra deg."
+                "studere eller jobbe i Trondheim kommune"
             );
     }
 
@@ -168,7 +123,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     void endringAvslagBostedFritekst() {
         var fritekst = "Du har midlertidig ikke bostedsadresse i Trondheim kommune og har derfor ikke rett i perioden.";
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBostedAnnet(FOM, fritekst);
-        var behandling = lagEndringAvslagScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
@@ -179,8 +134,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                fritekst,
-                "Vi har fått opplysninger om dette fra veileder ved Nav Trondheim."
+                fritekst
             );
     }
 
@@ -188,7 +142,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void endringAvslagBostedMedAvkortetHale() {
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBostedMedAvkortetHale(FOM);
-        var behandling = lagEndringAvslagScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
@@ -199,17 +153,16 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
-                "Vi har fått opplysninger om dette fra deg."
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
             );
     }
 
-    @DisplayName("Opphør pga andre livsoppholdsytelser - ytelsen navngis, kilde fra bruker")
+    @DisplayName("Opphør pga andre livsoppholdsytelser - ytelsen navngis")
     @Test
     void opphørAndreLivsoppholdsytelser() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
-            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, null);
-        var behandling = lagOpphørScenario(scenario);
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, null);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
@@ -219,26 +172,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "Det er fordi du får dagpenger fra denne datoen. Du kan ikke få aktivitetspenger samtidig som du får "
-                    + "en annen livsoppholdsytelse.",
-                "Vi har fått opplysninger om dette fra deg."
-            );
-    }
-
-    @DisplayName("Opphør pga andre livsoppholdsytelser - kilde fra Nav")
-    @Test
-    void opphørAndreLivsoppholdsytelserFraNav() {
-        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
-            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_UFØRETRYGD, AndreLivsoppholdsytelserAvklaringKildeType.NAV, null);
-        var behandling = lagOpphørScenario(scenario);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "Det er fordi du får uføretrygd fra denne datoen",
-                "Opplysningene om dette kommer fra Nav."
+                    + "en annen livsoppholdsytelse."
             );
     }
 
@@ -247,8 +181,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     void opphørAndreLivsoppholdsytelserAnnenYtelse() {
         var fritekst = "Du får en ytelse fra en annen ordning som dekker livsoppholdet ditt.";
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
-            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, fritekst);
-        var behandling = lagOpphørScenario(scenario);
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, fritekst);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
@@ -261,11 +195,11 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Opphør på både bosteds- og livsoppholdsvilkåret - innledning og kilde skrives én gang")
+    @DisplayName("Opphør på både bosteds- og livsoppholdsvilkåret - innledning skrives én gang")
     @Test
     void opphørBostedOgAndreLivsoppholdsytelser() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedOgAndreLivsoppholdsytelser(FOM);
-        var behandling = lagOpphørScenario(scenario);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
@@ -275,8 +209,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
-                "Det er fordi du får dagpenger fra denne datoen",
-                "Vi har fått opplysninger om dette fra deg."
+                "Det er fordi du får dagpenger fra denne datoen"
             );
     }
 
@@ -284,8 +217,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void endringAvslagAndreLivsoppholdsytelser() {
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaAndreLivsoppholdsytelser(
-            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_TILTAKSPENGER, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER, null);
-        var behandling = lagEndringAvslagScenario(scenario);
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_TILTAKSPENGER, null);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
@@ -297,8 +230,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
                     + brevDatoString(livsoppholdsperiode(scenario).getTom()),
                 "Det er fordi du får tiltakspenger i denne perioden. Du kan ikke få aktivitetspenger samtidig som du får "
-                    + "en annen livsoppholdsytelse.",
-                "Vi har fått opplysninger om dette fra deg."
+                    + "en annen livsoppholdsytelse."
             );
     }
 
@@ -306,8 +238,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void opphørBistand() {
         var fritekst = "Oppfølgingsvedtaket ditt etter § 14a er avsluttet.";
-        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBistand(FOM, BistandsavklaringKildeType.BRUKER, fritekst);
-        var behandling = lagOpphørScenario(scenario);
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBistand(FOM, fritekst);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
@@ -318,8 +250,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. "
                     + "Fordi du ikke lenger har et slikt vedtak, får du ikke lenger aktivitetspenger.",
-                fritekst,
-                "Vi har fått opplysninger om dette fra deg."
+                fritekst
             );
     }
 
@@ -327,8 +258,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Test
     void endringAvslagBistand() {
         var fritekst = "Du hadde ikke oppfølgingsvedtak etter § 14a i denne perioden.";
-        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBistand(FOM, BistandsavklaringKildeType.BRUKER, fritekst);
-        var behandling = lagEndringAvslagScenario(scenario);
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBistand(FOM, fritekst);
+        var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
@@ -341,8 +272,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(bistandsperiode(scenario).getTom()),
                 "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. "
                     + "Fordi du ikke har et slikt vedtak i denne perioden, får du ikke aktivitetspenger.",
-                fritekst,
-                "Vi har fått opplysninger om dette fra deg."
+                fritekst
             );
     }
 
@@ -354,17 +284,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         return scenario.vilkårsavklaringer().get(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR).getFirst().periode();
     }
 
-    private Behandling lagOpphørScenario(AktivitetspengerTestScenario scenario) {
-        AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(scenario);
-
-        var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
-        return behandling;
-    }
-
-    private Behandling lagEndringAvslagScenario(AktivitetspengerTestScenario scenario) {
+    private Behandling lagBehandling(AktivitetspengerTestScenario scenario) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medAktivitetspengerTestGrunnlag(scenario);
 
@@ -377,10 +297,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @Override
     protected Behandling lagScenarioForFellesTester() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBosted(FOM);
-        return lagOpphørScenario(scenario);
+        return lagBehandling(scenario);
     }
-
-
-
-
 }
