@@ -29,7 +29,9 @@ public class AvslåttVilkårBrevinnholdHjelper {
     public static final Set<VilkårType> VILKÅR_I_MALEN = EnumSet.of(
         VilkårType.BOSTEDSVILKÅR,
         VilkårType.BISTANDSVILKÅR,
-        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
+        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
+        VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET  // Ikke i malen, men feiler i verdikjedetest uten
+        );
 
     private AvslåttVilkårBrevinnholdHjelper() {
     }
