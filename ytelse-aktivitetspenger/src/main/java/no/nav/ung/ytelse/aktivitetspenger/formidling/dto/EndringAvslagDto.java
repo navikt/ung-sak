@@ -7,5 +7,6 @@ public record EndringAvslagDto(
     Periode periode,
     KildeTilOpplysninger kilde,
     AvslåttBosted bosted,
+    AvslåttBistand bistand,
     AvslåttAndreLivsoppholdsytelser andreLivsoppholdsytelser
 ) implements TemplateInnholdDto { }

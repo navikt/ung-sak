@@ -34,6 +34,20 @@
             {{/if}}
         {{/with}}
 
+        {{#with bistand}}
+            {{#eq årsak "HAR_IKKE_14A_VEDTAK"}}
+                <p>
+                    For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a.
+                    Fordi du ikke lenger har et slikt vedtak, får du ikke lenger aktivitetspenger.
+                </p>
+            {{/eq}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+        {{/with}}
+
         {{#with andreLivsoppholdsytelser}}
             {{#if ytelse}}
                 <p>

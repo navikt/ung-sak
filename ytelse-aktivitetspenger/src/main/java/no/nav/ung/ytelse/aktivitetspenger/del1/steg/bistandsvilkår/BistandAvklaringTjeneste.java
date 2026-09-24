@@ -4,6 +4,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
@@ -120,6 +121,10 @@ public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
             .stream()
             .max(Comparator.comparing(VilkårPeriodeAvklaring::getVurdertTidspunkt)
                 .thenComparing(avklaring -> avklaring.getPeriode().getFomDato()))
-            .map(avklaring -> new Vilkårsavklaring(avklaring.getAvklaringtype(), avklaring.getPeriode(), null, null));
+            .map(avklaring -> new Vilkårsavklaring(
+                avklaring.getAvklaringtype(),
+                avklaring.getPeriode(),
+                BistandsavklaringKildeType.fraKode(avklaring.getKildeKode()),
+                avklaring.getKildeFritekst()));
     }
 }

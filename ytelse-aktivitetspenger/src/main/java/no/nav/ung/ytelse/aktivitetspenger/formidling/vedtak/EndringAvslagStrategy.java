@@ -1,17 +1,16 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.vedtak;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.vedtak.regler.VedtaksbrevEgenskaper;
@@ -24,7 +23,6 @@ import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.EndringAvslagInnholdBygger;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @ApplicationScoped
@@ -33,11 +31,6 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
 
     private EndringAvslagInnholdBygger endringAvslagInnholdBygger;
     private Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester;
-
-    private static final Map<VilkårType, BehandlingÅrsakType> vilkårOgBehandlingÅrsak = Map.of(
-        VilkårType.BOSTEDSVILKÅR, BehandlingÅrsakType.ENDRET_BOSTED,
-        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, BehandlingÅrsakType.ENDRET_LIVSOPPHOLDSYTELSE
-    );
 
     public EndringAvslagStrategy() {
     }
@@ -51,7 +44,7 @@ public final class EndringAvslagStrategy implements VedtaksbrevInnholdbyggerStra
 
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
-        List<Vilkårsavklaring> vilkårsavklaringerForAvslåtteVilkår = vilkårOgBehandlingÅrsak.entrySet().stream()
+        List<Vilkårsavklaring> vilkårsavklaringerForAvslåtteVilkår = VilkårsavklaringÅrsaker.alle().entrySet().stream()
             .map(entry -> harVilkårsavklaringForAvslåttVilkår(behandling, resultatTidslinje.tilVurdering(), entry.getKey(), entry.getValue()))
             .filter(Optional::isPresent)
             .map(Optional::get)

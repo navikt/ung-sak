@@ -33,8 +33,9 @@ import java.util.stream.Collectors;
 @Dependent
 public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
 
-    private static final Set<VilkårType> VILKÅR_I_MALEN = EnumSet.of(
+    static final Set<VilkårType> VILKÅR_I_MALEN = EnumSet.of(
         VilkårType.BOSTEDSVILKÅR,
+        VilkårType.BISTANDSVILKÅR,
         VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
 
     private final VilkårsavklaringOgVurderingTidslinjeUtleder vilkårsavklaringOgVurderingTidslinjeUtleder;
@@ -83,12 +84,13 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
         }
 
         var bosted = AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurderingFor(avslåtteSegmenter, VilkårType.BOSTEDSVILKÅR));
+        var bistand = AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurderingFor(avslåtteSegmenter, VilkårType.BISTANDSVILKÅR));
         var andreLivsoppholdsytelser = AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(
             vurderingFor(avslåtteSegmenter, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR));
 
         return new TemplateInnholdResultat(
             avklaringstyper.getFirst() == Avklaringtype.OPPHØR ? TemplateType.AKTIVITETSPENGER_OPPHØR : TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG,
-            new EndringAvslagDto(perioder.getFirst(), kilder.getFirst(), bosted, andreLivsoppholdsytelser));
+            new EndringAvslagDto(perioder.getFirst(), kilder.getFirst(), bosted, bistand, andreLivsoppholdsytelser));
     }
 
     private static <T, V> List<V> distinkt(Collection<T> elementer, Function<T, V> egenskap) {

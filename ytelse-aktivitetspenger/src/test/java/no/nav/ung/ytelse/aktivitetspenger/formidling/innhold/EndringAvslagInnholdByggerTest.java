@@ -14,6 +14,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -44,6 +45,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,7 +66,7 @@ class EndringAvslagInnholdByggerTest {
     @BeforeEach
     void setUp() {
         bygger = new EndringAvslagInnholdBygger(tidslinjeUtleder);
-        when(behandling.getId()).thenReturn(BEHANDLING_ID);
+        lenient().when(behandling.getId()).thenReturn(BEHANDLING_ID);
     }
 
     @DisplayName("Vilkår avklart likt gir ett brev med felles periode og kilde, og en blokk per vilkår")
@@ -128,6 +130,13 @@ class EndringAvslagInnholdByggerTest {
         assertThatThrownBy(() -> bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, VilkårType.BOSTEDSVILKÅR)))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("avklart ulikt");
+    }
+
+    @DisplayName("EndringAvslagStrategy velger brevet ut fra VilkårsavklaringÅrsaker, så malen må dekke alle vilkårene der")
+    @Test
+    void maleneDekkerAlleVilkårMedAvklaringsårsak() {
+        assertThat(EndringAvslagInnholdBygger.VILKÅR_I_MALEN)
+            .containsAll(VilkårsavklaringÅrsaker.alle().keySet());
     }
 
     @SafeVarargs

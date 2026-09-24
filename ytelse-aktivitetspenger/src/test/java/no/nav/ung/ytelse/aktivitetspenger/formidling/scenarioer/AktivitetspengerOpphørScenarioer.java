@@ -7,6 +7,8 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -61,6 +63,26 @@ public class AktivitetspengerOpphørScenarioer {
             .medVilkår(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
                 avslåttTidslinje(opphørtVilkårPeriode, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, fritekstTilBrev))
             .medVilkårsavklaringer(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
+                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, kilde)))
+            .build();
+    }
+
+    public static AktivitetspengerTestScenario opphørPgaBistand(LocalDate fom,
+                                                                BistandsavklaringKildeType kilde,
+                                                                String fritekstTilBrev) {
+        var opphørtVilkårPeriode = opphørtPeriode(fom);
+        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
+
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBistandsvilkårResultat(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
+            .build();
+
+        return opphørBuilder(fom, opphørtVilkårPeriode)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, DatoIntervallEntitet.fra(lagPeriodeMedEttÅrFra(fom)))))
+            .medInngangsvilkårVurderinger(vurderinger)
+            .medVilkår(VilkårType.BISTANDSVILKÅR,
+                avslåttTidslinje(opphørtVilkårPeriode, Avslagsårsak.IKKE_14A_VEDTAK, fritekstTilBrev))
+            .medVilkårsavklaringer(VilkårType.BISTANDSVILKÅR,
                 List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, kilde)))
             .build();
     }

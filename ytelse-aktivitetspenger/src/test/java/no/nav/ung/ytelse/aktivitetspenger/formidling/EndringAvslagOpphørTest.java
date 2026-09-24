@@ -4,6 +4,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
@@ -217,7 +218,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Det er fordi du får uføretrygd fra denne datoen",
-                "Opplysningene om dette kommer fra Navs systemer."
+                "Opplysningene om dette kommer fra Nav."
             );
     }
 
@@ -279,6 +280,54 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + "en annen livsoppholdsytelse.",
                 "Vi har fått opplysninger om dette fra deg."
             );
+    }
+
+    @DisplayName("Opphør pga bistandsvilkåret - mangler oppfølgingsvedtak etter § 14a")
+    @Test
+    void opphørBistand() {
+        var fritekst = "Oppfølgingsvedtaket ditt etter § 14a er avsluttet.";
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBistand(FOM, BistandsavklaringKildeType.BRUKER, fritekst);
+        var behandling = lagOpphørScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
+                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. "
+                    + "Fordi du ikke lenger har et slikt vedtak, får du ikke lenger aktivitetspenger.",
+                fritekst,
+                "Vi har fått opplysninger om dette fra deg."
+            );
+    }
+
+    @DisplayName("Endring/avslag pga bistandsvilkåret - mangler oppfølgingsvedtak etter § 14a")
+    @Test
+    void endringAvslagBistand() {
+        var fritekst = "Du hadde ikke oppfølgingsvedtak etter § 14a i denne perioden.";
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBistand(FOM, BistandsavklaringKildeType.BRUKER, fritekst);
+        var behandling = lagEndringAvslagScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har endret aktivitetspengene dine</h1>",
+                "Du får ikke aktivitetspenger i perioden fra "
+                    + brevDatoString(bistandsperiode(scenario).getFom()) + " til "
+                    + brevDatoString(bistandsperiode(scenario).getTom()),
+                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. "
+                    + "Fordi du ikke har et slikt vedtak i denne perioden, får du ikke aktivitetspenger.",
+                fritekst,
+                "Vi har fått opplysninger om dette fra deg."
+            );
+    }
+
+    private static Periode bistandsperiode(AktivitetspengerTestScenario scenario) {
+        return scenario.vilkårsavklaringer().get(VilkårType.BISTANDSVILKÅR).getFirst().periode();
     }
 
     private static Periode livsoppholdsperiode(AktivitetspengerTestScenario scenario) {

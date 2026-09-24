@@ -111,4 +111,46 @@ public class AktivitetspengerUendretScenarioer {
             .medVilkårsavklaringer(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, List.of(avklaring))
             .build();
     }
+
+    public static AktivitetspengerTestScenario uendretBistandScenario(LocalDate fom, VilkårsavklaringTestData avklaring, String fritekstTilBrev) {
+        LocalDate fødselsdato = fom.minusYears(20);
+        var tom = fom.plusWeeks(52).minusDays(1);
+        var p = new LocalDateInterval(fom, tom);
+        var vurdertPeriode = avklaring.periode();
+
+        var lavSats = lavSatsBuilder(fom).build();
+        var satsperioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats))
+        ));
+
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, tom, lavSats)
+        ));
+
+        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
+        ));
+
+        var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBistandsvilkårResultat(vurdertPeriode, true, null, fritekstTilBrev)
+            .build();
+
+        var vilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt())
+        ));
+
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, tom)))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), p))
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdato)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, DatoIntervallEntitet.fra(p))))
+            .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .medVilkår(VilkårType.BISTANDSVILKÅR, vilkårTidslinje)
+            .medVilkårsavklaringer(VilkårType.BISTANDSVILKÅR, List.of(avklaring))
+            .build();
+    }
 }

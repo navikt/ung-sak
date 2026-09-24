@@ -1,7 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.foreslåresultat;
 
 import java.util.List;
-import java.util.Set;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
@@ -10,10 +9,10 @@ import jakarta.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
@@ -74,13 +73,9 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
     @Override
     protected boolean skalBehandlingResultatSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
         // Avgrenser hvilke behandlingsårsaker vi leter etter opphør for
-        var behandlingårsakerSomSkalKunneEndreBehandlingResultat = Set.of(
-            BehandlingÅrsakType.ENDRET_BOSTED
-        );
-
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
         var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper()
-                .stream().filter(behandlingårsakerSomSkalKunneEndreBehandlingResultat::contains)
+                .stream().filter(VilkårsavklaringÅrsaker.alleÅrsaker()::contains)
                 .toList();
 
         // Det er kun opphør dersom avklaringen faktisk gjelder en periode med avslått vilkår (overlapp).

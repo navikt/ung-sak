@@ -77,6 +77,8 @@ class BistandAvklaringTjenesteTest {
 
         assertThat(senesteAvklaring.avklaringtype()).isEqualTo(Avklaringtype.AVSLAG);
         assertThat(senesteAvklaring.periode()).isEqualTo(avklaring.getPeriode());
+        assertThat(senesteAvklaring.kilde()).isEqualTo(BistandsavklaringKildeType.BRUKER);
+        assertThat(senesteAvklaring.kildeFritekst()).isNull();
     }
 
     @Test

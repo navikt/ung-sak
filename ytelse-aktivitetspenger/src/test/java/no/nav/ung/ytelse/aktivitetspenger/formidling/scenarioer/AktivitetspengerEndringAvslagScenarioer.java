@@ -7,6 +7,8 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
@@ -65,6 +67,26 @@ public class AktivitetspengerEndringAvslagScenarioer {
             .medVilkår(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
                 avslåttTidslinje(avslåttVilkårPeriode, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, fritekstTilBrev))
             .medVilkårsavklaringer(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
+                List.of(VilkårsavklaringTestData.avslag(avslåttVilkårPeriode, ikkeOppfyltÅrsak, kilde)))
+            .build();
+    }
+
+    public static AktivitetspengerTestScenario avslagPgaBistand(LocalDate fom,
+                                                                BistandsavklaringKildeType kilde,
+                                                                String fritekstTilBrev) {
+        var avslåttVilkårPeriode = avslåttPeriode(fom);
+        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
+
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBistandsvilkårResultat(avslåttVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
+            .build();
+
+        return avslagBuilder(fom, avslåttVilkårPeriode)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BISTANDSBEHOV, DatoIntervallEntitet.fra(lagPeriodeForEttÅrFra(fom)))))
+            .medInngangsvilkårVurderinger(vurderinger)
+            .medVilkår(VilkårType.BISTANDSVILKÅR,
+                avslåttTidslinje(avslåttVilkårPeriode, Avslagsårsak.IKKE_14A_VEDTAK, fritekstTilBrev))
+            .medVilkårsavklaringer(VilkårType.BISTANDSVILKÅR,
                 List.of(VilkårsavklaringTestData.avslag(avslåttVilkårPeriode, ikkeOppfyltÅrsak, kilde)))
             .build();
     }
