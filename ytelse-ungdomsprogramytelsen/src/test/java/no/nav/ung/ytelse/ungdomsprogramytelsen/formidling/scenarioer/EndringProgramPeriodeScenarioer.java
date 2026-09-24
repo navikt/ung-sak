@@ -94,7 +94,7 @@ public class EndringProgramPeriodeScenarioer {
     }
 
     /**
-     * Naturlig avslutning ved maksdato: programperioden er allerede lukket (registrert sluttdato)
+     * Opphørsdato lik maksdato: programperioden er allerede lukket (registrert sluttdato)
      * nøyaktig på {@code maksDato}, uten at noen egen opphørshendelse (RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
      * noensinne har oppstått — jf. at {@link no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørFagsakTilVurderingUtleder}
      * ignorerer opphørshendelser der opphørsdato == periodeMaksDato. Dette skiller seg fra
@@ -102,7 +102,7 @@ public class EndringProgramPeriodeScenarioer {
      *
      * @param maksDato - maksDato, som her også er programperiodens faktiske (lukkede) sluttdato
      */
-    public static UngTestScenario opphørMaksDatoNaturligLukketPeriode(LocalDate fom, LocalDate maksDato) {
+    public static UngTestScenario opphørsdatoLikMaksdato(LocalDate fom, LocalDate maksDato) {
         var fagsakPeriode = new LocalDateInterval(fom, maksDato);
         var satser = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), BrevScenarioerUtils.lavSatsBuilder(fom).build())

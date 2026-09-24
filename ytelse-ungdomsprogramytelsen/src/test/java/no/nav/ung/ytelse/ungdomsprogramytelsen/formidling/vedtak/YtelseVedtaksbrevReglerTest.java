@@ -398,7 +398,7 @@ class YtelseVedtaksbrevReglerTest {
         LocalDate maksdato = LocalDate.now().plusWeeks(1);
         LocalDate fom = maksdato.minusMonths(6);
 
-        var scenario = EndringProgramPeriodeScenarioer.opphørMaksDatoNaturligLukketPeriode(fom, maksdato);
+        var scenario = EndringProgramPeriodeScenarioer.opphørsdatoLikMaksdato(fom, maksdato);
         var behandling = lagBehandling(scenario);
 
         BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
