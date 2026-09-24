@@ -131,6 +131,13 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "ansvarligSaksbehandlerForTotrinn", required = false)
     private String ansvarligSaksbehandlerForTotrinn;
 
+
+    @Valid
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @JsonProperty(value = "navKontorbehandlendeEnhet", required = false)
+    private String navKontorbehandlendeEnhet;
+
     /**
      * Ident for ansvarlig saksbehandler ved nav-kontor (brukes for aktivitetspenger)
      */
@@ -399,13 +406,18 @@ public class BehandlingProsessHendelse {
             return this;
         }
 
-        public Builder medNavKontorAnsvarligSaksbehandler(String navKontorAnsvarligSaksbehandler){
-            kladd.navKontorAnsvarligSaksbehandler= navKontorAnsvarligSaksbehandler;
+        public Builder medNavKontorBehandlendeEnhet(String navKontorBehandlendeEnhet) {
+            kladd.navKontorbehandlendeEnhet = navKontorBehandlendeEnhet;
             return this;
         }
 
-        public Builder medNavKontorBeslutter(String navKontorBeslutter){
-            kladd.navKontorBeslutter= navKontorBeslutter;
+        public Builder medNavKontorAnsvarligSaksbehandler(String navKontorAnsvarligSaksbehandler) {
+            kladd.navKontorAnsvarligSaksbehandler = navKontorAnsvarligSaksbehandler;
+            return this;
+        }
+
+        public Builder medNavKontorBeslutter(String navKontorBeslutter) {
+            kladd.navKontorBeslutter = navKontorBeslutter;
             return this;
         }
 
