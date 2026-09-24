@@ -1,12 +1,15 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser.Livsoppholdsårsak;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand;
@@ -14,22 +17,47 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand.Bistand
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted.Bostedsårsak;
 
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Set;
+
 // Beskrivelser av avslag og opphør er begge implementert vha ikkeOppfylteÅrsaker fra vilkårsvurdering.
 // Gjenbruker derfor funksjonalitet på tvers av avslag- og opphørsbrev.
 public class AvslåttVilkårBrevinnholdHjelper {
 
+    public static final Set<VilkårType> VILKÅR_I_MALEN = EnumSet.of(
+        VilkårType.BOSTEDSVILKÅR,
+        VilkårType.BISTANDSVILKÅR,
+        VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
+
     private AvslåttVilkårBrevinnholdHjelper() {
     }
 
-    public static boolean erFunksjoneltAvslag(DetaljertVilkårResultat vilkår) {
-        return vilkår.avslagsårsak() != null && vilkår.avslagsårsak() != Avslagsårsak.AVKORTET;
+    /**
+     * Periodene der vilkåret både er avklart i behandlingen og avslått, per vilkårtype.
+     * Vilkår uten slike perioder er utelatt.
+     */
+    public static Map<VilkårType, LocalDateTimeline<VilkårsavklaringMedVurdering>> avklarteAvslag(
+        LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> avklaringTidslinje,
+        DetaljertResultatTidslinje resultatTidslinje) {
+
+        Map<VilkårType, LocalDateTimeline<VilkårsavklaringMedVurdering>> avklarteAvslag = new EnumMap<>(VilkårType.class);
+        for (var vilkårType : VilkårsavklaringÅrsaker.alle().keySet()) {
+            var avklartOgAvslått = avklaringTidslinje
+                .mapValue(it -> it.get(vilkårType))
+                .filterValue(it -> it != null && it.harVilkårsAvklaring())
+                .intersection(resultatTidslinje.avslåttPeriode(vilkårType))
+                .compress();
+            if (!avklartOgAvslått.isEmpty()) {
+                avklarteAvslag.put(vilkårType, avklartOgAvslått);
+            }
+        }
+        return avklarteAvslag;
     }
 
     public static AvslåttBosted lagAvslåttBosted(VilkårsvurderingResultat vurdering) {
         var årsak = årsakFra(vurdering, BostedsvilkårIkkeOppfyltÅrsak.class);
-        if (årsak == null) {
-            return null;
-        }
         var brevårsak = switch (årsak) {
             case IKKE_BOSATTADRESSE_I_TRONDHEIM -> Bostedsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED;
             case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM -> Bostedsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
@@ -42,9 +70,6 @@ public class AvslåttVilkårBrevinnholdHjelper {
 
     public static AvslåttBistand lagAvslåttBistand(VilkårsvurderingResultat vurdering) {
         var årsak = årsakFra(vurdering, BistandsvilkårIkkeOppfyltÅrsak.class);
-        if (årsak == null) {
-            return null;
-        }
         var brevårsak = switch (årsak) {
             case IKKE_14A_VEDTAK -> Bistandsårsak.HAR_IKKE_14A_VEDTAK;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
@@ -54,9 +79,6 @@ public class AvslåttVilkårBrevinnholdHjelper {
 
     public static AvslåttAndreLivsoppholdsytelser lagAvslåttAndreLivsoppholdsytelser(VilkårsvurderingResultat vurdering) {
         var årsak = årsakFra(vurdering, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.class);
-        if (årsak == null) {
-            return null;
-        }
         var brevårsak = switch (årsak) {
             case MOTTAR_ARBEIDSAVKLARINGSPENGER -> Livsoppholdsårsak.MOTTAR_ARBEIDSAVKLARINGSPENGER;
             case MOTTAR_TILTAKSPENGER -> Livsoppholdsårsak.MOTTAR_TILTAKSPENGER;
@@ -74,9 +96,6 @@ public class AvslåttVilkårBrevinnholdHjelper {
     }
 
     private static <T extends IkkeOppfyltDetaljertÅrsak> T årsakFra(VilkårsvurderingResultat vurdering, Class<T> årsakstype) {
-        if (vurdering == null) {
-            return null;
-        }
         var årsak = vurdering.ikkeOppfyltÅrsak();
         if (!årsakstype.isInstance(årsak)) {
             throw new IllegalStateException("Ukjent ikkeOppfyltÅrsak for " + vurdering.vilkårType() + ": " + årsak);

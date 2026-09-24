@@ -116,14 +116,6 @@ class AvslåttVilkårBrevinnholdHjelperTest {
             .hasMessageContaining("AVKORTET");
     }
 
-    @DisplayName("Vilkår som ikke er vurdert omtales ikke i brevet")
-    @Test
-    void ingenVurderingGirIngenInnhold() {
-        assertThat(AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(null)).isNull();
-        assertThat(AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(null)).isNull();
-        assertThat(AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(null)).isNull();
-    }
-
     private static <K extends Enum<K> & IkkeOppfyltDetaljertÅrsak, B> List<B> oversett(Class<K> kodeverk,
                                                                                       VilkårType vilkårType,
                                                                                       Function<VilkårsvurderingResultat, B> tilBrevårsak) {

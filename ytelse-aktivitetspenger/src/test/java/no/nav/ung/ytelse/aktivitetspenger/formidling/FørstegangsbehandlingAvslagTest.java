@@ -233,6 +233,24 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             .asPlainTextNotContains("bosted");
     }
 
+    @DisplayName("Avslag fra startdatoen og avkortet hale gir avslagsbrev, ikke innvilgelsesbrev")
+    @Test
+    void avslagBostedMedAvkortetHale() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBostedMedAvkortetHale(fom);
+
+        var behandling = lagAvslåttBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
+                "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din."
+            );
+    }
+
     private Behandling lagAvslåttBehandling(AktivitetspengerTestScenario scenario) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medAktivitetspengerTestGrunnlag(scenario);

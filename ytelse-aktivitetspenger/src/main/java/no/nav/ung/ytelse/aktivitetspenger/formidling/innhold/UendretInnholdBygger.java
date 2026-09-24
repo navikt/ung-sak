@@ -11,6 +11,7 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
+import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
@@ -63,7 +64,7 @@ public class UendretInnholdBygger implements VedtaksbrevInnholdBygger {
 
     private static LocalDateTimeline<Boolean> avslåttVilkårsPeriode(DetaljertResultatTidslinje tidslinje) {
         return tidslinje.tilVurdering()
-            .filterValue(r -> !r.avslåtteVilkår().isEmpty())
+            .filterValue(DetaljertResultat::erAvslåttEllerAvkortet)
             .mapValue(_ -> Boolean.TRUE);
     }
 

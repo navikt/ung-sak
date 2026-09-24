@@ -17,7 +17,6 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringHendelseDto;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtleder;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
@@ -34,7 +33,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.S
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.NavigableSet;
+import java.util.SequencedCollection;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
@@ -65,17 +64,16 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var ytelseFom = periode.getMinLocalDate();
 
-        var avslåttTidslinje = tilVurdering.filterValue(
-            it -> !it.avslåtteVilkår().isEmpty());
-        var ytelseTom = avslåttTidslinje.isEmpty() ? null : avslåttTidslinje.getMinLocalDate().minusDays(1);
-        var avkortingsårsak = bestemAvkortingsårsak(avslåttTidslinje);
+        var avslåttEllerAvkortetTidslinje = tilVurdering.filterValue(DetaljertResultat::erAvslåttEllerAvkortet);
+        var ytelseTom = avslåttEllerAvkortetTidslinje.isEmpty() ? null : avslåttEllerAvkortetTidslinje.getMinLocalDate().minusDays(1);
+        var søkerBlirOverHøyesteAlder = søkerBlirOverHøyesteAlder(avslåttEllerAvkortetTidslinje);
 
         var aktivitetspengerGrunnlag = beregningsgrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow(
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
         );
 
         var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje().intersection(tilVurdering);
-        var førsteSegment = satsTidslinje.toSegments().first();
+        var førsteSegment = satsTidslinje.segmenter().getFirst();
         var førsteSatser = førsteSegment.getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
@@ -90,19 +88,18 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 dagsatsFom,
                 utbetalingDto,
                 satsendringer,
-                byggSatsOgBeregning(satsTidslinje.toSegments()),
-                Avslagsårsak.SØKER_OVER_HØYESTE_ALDER == avkortingsårsak));
+                byggSatsOgBeregning(satsTidslinje.segmenter()),
+                søkerBlirOverHøyesteAlder));
     }
 
-    private Avslagsårsak bestemAvkortingsårsak(LocalDateTimeline<DetaljertResultat> avslåttTidslinje) {
-        if (avslåttTidslinje.isEmpty()) {
-            return null;
+    private static boolean søkerBlirOverHøyesteAlder(LocalDateTimeline<DetaljertResultat> avslåttEllerAvkortetTidslinje) {
+        if (avslåttEllerAvkortetTidslinje.isEmpty()) {
+            return false;
         }
-        return avslåttTidslinje.segmenter()
+        return avslåttEllerAvkortetTidslinje.segmenter()
             .getFirst().getValue()
             .avslåtteVilkår().stream()
-            .map(DetaljertVilkårResultat::avslagsårsak).findFirst()
-            .orElse(null);
+            .anyMatch(it -> it.avslagsårsak() == Avslagsårsak.SØKER_OVER_HØYESTE_ALDER);
     }
 
     private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {
@@ -122,7 +119,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
 
     private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<AktivitetspengerSatser> satsTidslinje) {
-        var inputs = satsTidslinje.toSegments().stream()
+        var inputs = satsTidslinje.segmenter().stream()
             .map(FørstegangsInnvilgelseInnholdBygger::tilSatsEndringUtlederInput)
             .toList();
         return new SatsEndringUtleder(inputs).lagSatsEndringHendelser();
@@ -140,7 +137,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static SatsOgBeregningDto byggSatsOgBeregning(NavigableSet<LocalDateSegment<AktivitetspengerSatser>> beregningOgSatsSegmenter) {
+    private static SatsOgBeregningDto byggSatsOgBeregning(SequencedCollection<LocalDateSegment<AktivitetspengerSatser>> beregningOgSatsSegmenter) {
         var satsTyper = beregningOgSatsSegmenter.stream()
             .map(it -> it.getValue().hentSatsType())
             .collect(Collectors.toSet());
@@ -149,7 +146,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             throw new IllegalStateException("Brevet støtter ikke beregninger med besteberegning, lav og høy sats samtdig.");
         }
 
-        var tidligsteSegment = beregningOgSatsSegmenter.first();
+        var tidligsteSegment = beregningOgSatsSegmenter.getFirst();
         var tidligsteSatsOgBeregning = tidligsteSegment.getValue();
         var grunnsatsType = tidligsteSatsOgBeregning.utledGrunnsatsBenyttet();
         var harLavSatstype = UngdomsytelseSatsType.LAV.equals(tidligsteSatsOgBeregning.satsGrunnlag().satsType());
@@ -162,7 +159,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             mapTilSatsgrunnlagDto(tidligsteSegment) :
             null;
 
-        var senesteSegment = beregningOgSatsSegmenter.last();
+        var senesteSegment = beregningOgSatsSegmenter.getLast();
         var senesteSats = senesteSegment.getValue().satsGrunnlag();
         var minsteYtelsegrunnlagOvergangTilHøySats = satsTyper.size() > 1 ? kontrollerOgLagOvergangTilHøySats(senesteSegment) :  null;
         var grunnbeløp = tilHeltall(senesteSats.grunnbeløp());

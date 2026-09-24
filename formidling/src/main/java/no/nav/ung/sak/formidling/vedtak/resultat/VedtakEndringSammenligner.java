@@ -62,7 +62,7 @@ public class VedtakEndringSammenligner {
             var original = originale.getOrDefault(vilkårType, LocalDateTimeline.empty());
 
             var avvik = ny.crossJoin(original, (interval, nySegment, originalSegment) ->
-                    new LocalDateSegment<>(interval, erEndret(behandlingId, verdi(nySegment), verdi(originalSegment))))
+                    new LocalDateSegment<>(interval, erEndret(verdi(nySegment), verdi(originalSegment))))
                 .filterValue(Boolean::booleanValue);
 
             if (!avvik.isEmpty()) {
@@ -100,11 +100,7 @@ public class VedtakEndringSammenligner {
         return perType;
     }
 
-    private static boolean erEndret(long behandlingId, DetaljertVilkårResultat ny, DetaljertVilkårResultat original) {
-        // Brevreglene kjører etter at vilkårene er vurdert, så IKKE_VURDERT innenfor avgrensningen er en prosessfeil - ikke en «uendring».
-        if (ny != null && ny.utfall() == Utfall.IKKE_VURDERT) {
-            throw new IllegalStateException("Vilkår " + ny.vilkårType() + " er ikke vurdert innenfor perioden til vurdering, behandlingId: " + behandlingId);
-        }
+    private static boolean erEndret(DetaljertVilkårResultat ny, DetaljertVilkårResultat original) {
         if (ny == null || original == null) {
             return true;
         }

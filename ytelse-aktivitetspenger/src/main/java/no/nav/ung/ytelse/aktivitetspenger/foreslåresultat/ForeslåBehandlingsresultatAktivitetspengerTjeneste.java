@@ -9,8 +9,11 @@ import jakarta.inject.Inject;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
@@ -66,28 +69,31 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
     }
 
     /**
-     * Behandlingen skal opphøres dersom det finnes en {@link VilkårsavklaringTjeneste} som gjelder for en av
-     * behandlingens årsaker, hvis seneste avklaring foreslått i behandlingen er av typen {@link Avklaringtype#OPPHØR},
-     * og det finnes en avslått vilkårsperiode som overlapper avklaringens periode.
+     * Behandlingen skal opphøres dersom seneste avklaring for et vilkår i behandlingen er av typen {@link Avklaringtype#OPPHØR},
+     * og det samme vilkåret er avslått i avklaringens periode. Avkortede perioder regnes ikke som avslag.
      */
     @Override
     protected boolean skalBehandlingResultatSettesTilOpphør(BehandlingReferanse ref, Vilkårene vilkårene) {
-        // Avgrenser hvilke behandlingsårsaker vi leter etter opphør for
         Behandling behandling = behandlingRepository.hentBehandling(ref.getBehandlingId());
-        var behandlingÅrsakerTyper = behandling.getBehandlingÅrsakerTyper()
-                .stream().filter(VilkårsavklaringÅrsaker.alleÅrsaker()::contains)
-                .toList();
+        var behandlingÅrsaker = behandling.getBehandlingÅrsakerTyper();
 
-        // Det er kun opphør dersom avklaringen faktisk gjelder en periode med avslått vilkår (overlapp).
-        return behandlingÅrsakerTyper.stream()
-            .flatMap(årsak -> VilkårsavklaringTjeneste.finnForÅrsak(alleVilkårsavklaringTjenester, årsak).stream())
-            .flatMap(oppdaterer -> oppdaterer.hentSenesteAvklaringForBehandling(ref.getBehandlingId()).stream())
-            .filter(avklaring -> Avklaringtype.OPPHØR.equals(avklaring.avklaringtype()))
-            .anyMatch(avklaring -> harOverlappendeAvslåttVilkårsperiode(vilkårene, avklaring.periode()));
+        return VilkårsavklaringÅrsaker.alle().entrySet().stream()
+            .filter(entry -> behandlingÅrsaker.contains(entry.getValue()))
+            .anyMatch(entry -> harOpphørMedAvslag(ref.getBehandlingId(), vilkårene, entry.getKey(), entry.getValue()));
     }
 
-    private boolean harOverlappendeAvslåttVilkårsperiode(Vilkårene vilkårene, DatoIntervallEntitet periode) {
-        var vilkårTidslinjer = vilkårene.getVilkårTidslinjer(periode);
-        return vilkårTidslinjer.values().stream().anyMatch(this::harAvslåtteVilkårsPerioder);
+    private boolean harOpphørMedAvslag(Long behandlingId, Vilkårene vilkårene, VilkårType vilkårType, BehandlingÅrsakType årsak) {
+        return VilkårsavklaringTjeneste.finnForÅrsak(alleVilkårsavklaringTjenester, årsak).stream()
+            .flatMap(tjeneste -> tjeneste.hentSenesteAvklaringForBehandling(behandlingId).stream())
+            .filter(avklaring -> Avklaringtype.OPPHØR.equals(avklaring.avklaringtype()))
+            .anyMatch(avklaring -> harAvslagIPeriode(vilkårene, vilkårType, avklaring.periode()));
+    }
+
+    private static boolean harAvslagIPeriode(Vilkårene vilkårene, VilkårType vilkårType, DatoIntervallEntitet periode) {
+        return !vilkårene.getVilkårTimeline(vilkårType, periode.getFomDato(), periode.getTomDato())
+            .filterValue(vp -> vp.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT
+                && vp.getAvslagsårsak() != null
+                && vp.getAvslagsårsak() != Avslagsårsak.AVKORTET)
+            .isEmpty();
     }
 }

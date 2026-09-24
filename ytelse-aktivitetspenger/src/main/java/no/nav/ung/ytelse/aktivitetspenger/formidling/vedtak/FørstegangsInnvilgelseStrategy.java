@@ -42,7 +42,7 @@ public final class FørstegangsInnvilgelseStrategy implements VedtaksbrevInnhold
     private static boolean erInnvilgelse(DetaljertResultat r, boolean manueltOpprettet) {
         boolean nyPeriode = r.harÅrsak(BehandlingÅrsakType.NY_SØKT_PERIODE)
             || (manueltOpprettet && r.harÅrsak(BehandlingÅrsakType.RE_SATS_ENDRING));
-        return nyPeriode && r.avslåtteVilkår().isEmpty() && r.ikkeVurderteVilkår().isEmpty();
+        return nyPeriode && !r.erAvslåttEllerAvkortet() && r.ikkeVurderteVilkår().isEmpty();
     }
 
     @Override

@@ -13,7 +13,6 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingR
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslagInngangsvilkårDto;
@@ -24,6 +23,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.AvslåttVilkårBrevinnholdHjelper.VILKÅR_I_MALEN;
 
 @Dependent
 public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -43,44 +44,47 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        LocalDateTimeline<DetaljertResultat> avslagPeriode = tidslinje.tilVurdering()
-            .filterValue(r -> r.avslåtteVilkår().stream().anyMatch(AvslåttVilkårBrevinnholdHjelper::erFunksjoneltAvslag));
-
-        Set<VilkårType> avslåtteVilkårTyper = avslagPeriode.stream()
+        Set<VilkårType> avslåtteVilkårTyper = tidslinje.tilVurdering().stream()
             .flatMap(s -> s.getValue().avslåtteVilkår().stream())
-            .filter(AvslåttVilkårBrevinnholdHjelper::erFunksjoneltAvslag)
             .map(DetaljertVilkårResultat::vilkårType)
             .collect(Collectors.toSet());
 
+        if (avslåtteVilkårTyper.stream().noneMatch(VILKÅR_I_MALEN::contains)) {
+            throw new IllegalStateException("Avslag for vilkårtyper ikke implementert: " + avslåtteVilkårTyper + ", behandlingId: " + behandling.getId());
+        }
+
         var vilkårVurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandling.getId());
 
-        Function<VilkårType, VilkårsvurderingResultat> vurderingFor = vilkårType -> avslåtteVilkårTyper.contains(vilkårType)
-            ? hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, ekteAvslagsperiodeFor(avslagPeriode, vilkårType), vilkårType)
-            : null;
+        Function<VilkårType, VilkårsvurderingResultat> vurderingFor = vilkårType ->
+            hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, tidslinje.avslåttPeriode(vilkårType), vilkårType, behandling);
 
-        var bosted = AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurderingFor.apply(VilkårType.BOSTEDSVILKÅR));
-        var bistand = AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurderingFor.apply(VilkårType.BISTANDSVILKÅR));
-        var andreLivsoppholdsytelser = AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(
-            vurderingFor.apply(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR));
+        var bosted = avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurderingFor.apply(VilkårType.BOSTEDSVILKÅR))
+            : null;
+        var bistand = avslåtteVilkårTyper.contains(VilkårType.BISTANDSVILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurderingFor.apply(VilkårType.BISTANDSVILKÅR))
+            : null;
+        var andreLivsoppholdsytelser = avslåtteVilkårTyper.contains(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(vurderingFor.apply(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR))
+            : null;
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG,
             new AvslagInngangsvilkårDto(bosted, bistand, andreLivsoppholdsytelser));
     }
 
-    private static LocalDateTimeline<Boolean> ekteAvslagsperiodeFor(LocalDateTimeline<DetaljertResultat> avslagPeriode, VilkårType vilkårType) {
-        return avslagPeriode
-            .filterValue(r -> r.avslåtteVilkår().stream()
-                .anyMatch(v -> v.vilkårType() == vilkårType && AvslåttVilkårBrevinnholdHjelper.erFunksjoneltAvslag(v)))
-            .mapValue(_ -> Boolean.TRUE);
-    }
-
-    private static VilkårsvurderingResultat hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vilkårVurdering, LocalDateTimeline<Boolean> avslagsperiodeForVilkår, VilkårType vilkårType) {
+    private static VilkårsvurderingResultat hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vilkårVurdering,
+                                                                                        LocalDateTimeline<Boolean> avslagsperiodeForVilkår,
+                                                                                        VilkårType vilkårType,
+                                                                                        Behandling behandling) {
         var vilkårResultatPeriode = vilkårVurdering.intersection(avslagsperiodeForVilkår)
             .mapValue(it -> it.get(vilkårType))
             .segmenter().stream().map(LocalDateSegment::getValue)
             .distinct()
             .toList();
 
+        if (vilkårResultatPeriode.isEmpty() || vilkårResultatPeriode.contains(null)) {
+            throw new IllegalStateException("Mangler vilkårsvurdering for avslått vilkår " + vilkårType + ", behandlingId: " + behandling.getId());
+        }
         if (vilkårResultatPeriode.size() > 1) {
             throw new IllegalStateException("Forventer kun en periode for vilkårstype " + vilkårType + ", men fant " + vilkårResultatPeriode.size());
         }

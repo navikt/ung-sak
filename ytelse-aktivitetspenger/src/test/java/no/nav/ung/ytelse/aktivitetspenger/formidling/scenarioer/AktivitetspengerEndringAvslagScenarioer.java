@@ -47,6 +47,33 @@ public class AktivitetspengerEndringAvslagScenarioer {
         return avslagMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null, BostedsavklaringKildeType.FOLKEREGISTER, null);
     }
 
+    public static AktivitetspengerTestScenario avslagPgaBostedMedAvkortetHale(LocalDate fom) {
+        var maksTom = fom.plusWeeks(52).minusDays(1);
+        var avslåttFom = fom.plusMonths(3);
+        var avslåttTom = fom.plusMonths(5).minusDays(1);
+        var avkortetFom = avslåttTom.plusDays(1);
+        var avslåttPeriode = new Periode(avslåttFom, avslåttTom);
+
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBostedsvilkårResultat(avslåttPeriode, false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null)
+            .medBostedsvilkårResultat(new Periode(avkortetFom, maksTom), false, BostedsvilkårIkkeOppfyltÅrsak.AVKORTET, null)
+            .build();
+
+        var bostedTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(avslåttFom, avslåttTom, VilkårUtfall.avslått(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED)),
+            new LocalDateSegment<>(avkortetFom, maksTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+        ));
+
+        return avslagBuilder(fom, avslåttPeriode)
+            .medVilkår(VilkårType.BOSTEDSVILKÅR, bostedTidslinje)
+            .medInngangsvilkårVurderinger(vurderinger)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fra(lagPeriodeForEttÅrFra(fom)))))
+            .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.avslag(
+                avslåttPeriode,
+                BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)))
+            .build();
+    }
+
     public static AktivitetspengerTestScenario avslagPgaArbeidsstedStudiested(LocalDate fom) {
         return avslagMedÅrsak(fom, VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, null, BostedsavklaringKildeType.BRUKER, null);
     }

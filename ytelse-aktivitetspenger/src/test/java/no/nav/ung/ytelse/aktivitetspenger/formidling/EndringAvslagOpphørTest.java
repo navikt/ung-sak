@@ -184,6 +184,26 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
+    @DisplayName("Endring/avslag fra en periode før avkortet hale gir endrings-/avslagsbrev")
+    @Test
+    void endringAvslagBostedMedAvkortetHale() {
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBostedMedAvkortetHale(FOM);
+        var behandling = lagEndringAvslagScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har endret aktivitetspengene dine</h1>",
+                "Du får ikke aktivitetspenger i perioden fra "
+                    + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
+                    + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
+                "Vi har fått opplysninger om dette fra deg."
+            );
+    }
+
     @DisplayName("Opphør pga andre livsoppholdsytelser - ytelsen navngis, kilde fra bruker")
     @Test
     void opphørAndreLivsoppholdsytelser() {

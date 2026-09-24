@@ -132,10 +132,27 @@ class EndringAvslagInnholdByggerTest {
             .hasMessageContaining("avklart ulikt");
     }
 
+    @DisplayName("En avklaring på et annet vilkår deler ikke perioden til det avslåtte vilkåret")
+    @Test
+    void periodenSlutterIkkeVedAnnenAvklaring() {
+        var fom = LocalDate.of(2025, 3, 1);
+        var tom = LocalDate.of(2025, 12, 31);
+        avklaringerErUtledet(
+            bosted(fom, tom, Avklaringtype.AVSLAG, BostedsavklaringKildeType.FOLKEREGISTER),
+            livsopphold(LocalDate.of(2025, 6, 1), tom, Avklaringtype.AVSLAG, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER));
+
+        var resultat = bygger.bygg(behandling, avslåtteVilkårTidslinje(fom, tom, VilkårType.BOSTEDSVILKÅR));
+
+        var dto = (EndringAvslagDto) resultat.templateInnholdDto();
+        assertThat(dto.periode()).isEqualTo(new Periode(fom, tom));
+        assertThat(dto.bosted()).isNotNull();
+        assertThat(dto.andreLivsoppholdsytelser()).isNull();
+    }
+
     @DisplayName("EndringAvslagStrategy velger brevet ut fra VilkårsavklaringÅrsaker, så malen må dekke alle vilkårene der")
     @Test
     void maleneDekkerAlleVilkårMedAvklaringsårsak() {
-        assertThat(EndringAvslagInnholdBygger.VILKÅR_I_MALEN)
+        assertThat(AvslåttVilkårBrevinnholdHjelper.VILKÅR_I_MALEN)
             .containsAll(VilkårsavklaringÅrsaker.alle().keySet());
     }
 
@@ -183,11 +200,15 @@ class EndringAvslagInnholdByggerTest {
     }
 
     private static DetaljertResultatTidslinje avslåtteVilkårTidslinje(VilkårType... vilkårTyper) {
+        return avslåtteVilkårTidslinje(FOM, TOM, vilkårTyper);
+    }
+
+    private static DetaljertResultatTidslinje avslåtteVilkårTidslinje(LocalDate fom, LocalDate tom, VilkårType... vilkårTyper) {
         var avslåtteVilkår = Arrays.stream(vilkårTyper)
             .map(vilkårType -> new DetaljertVilkårResultat(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED, vilkårType, Utfall.IKKE_OPPFYLT))
             .collect(Collectors.toSet());
 
-        var resultat = new DetaljertResultat(Set.of(), avslåtteVilkår, Set.of(), UtbetalingsgradType.INGEN_UTBETALING, true);
-        return DetaljertResultatTidslinje.av(new LocalDateTimeline<>(FOM, TOM, resultat));
+        var resultat = new DetaljertResultat(Set.of(), avslåtteVilkår, Set.of(), Set.of(), UtbetalingsgradType.INGEN_UTBETALING, true);
+        return DetaljertResultatTidslinje.av(new LocalDateTimeline<>(fom, tom, resultat));
     }
 }
