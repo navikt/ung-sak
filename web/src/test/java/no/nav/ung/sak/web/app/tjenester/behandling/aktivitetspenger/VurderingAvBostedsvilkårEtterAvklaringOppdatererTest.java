@@ -56,6 +56,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -102,7 +103,7 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        var bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, null, null, null);
+        var bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, null, null, null, null);
         var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(vilkårResultatRepository);
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
 
@@ -136,18 +137,15 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
     }
 
     @Test
-    void lagrer_kun_periodene_som_er_vurdert() {
+    void delvis_vurdering_av_avklaring_med_flere_relevante_vilkårsperioder_gir_feil() {
         var behandling = opprettFørstegangsbehandling(PERIODE_1, PERIODE_2);
         lagreForeslåtteAvklaringer(behandling, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, PERIODE_1, PERIODE_2);
 
         var dto = dto(vurdering(PERIODE_1, false, "kun periode 1 vurdert nå", null));
-        utførOppdatering(behandling, dto);
 
-        var lagrede = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
-            .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedsvilkårResultatPerioder)
-            .orElseThrow();
-        assertThat(lagrede).extracting(BostedsvilkårResultatPeriode::getPeriode)
-            .containsExactly(tilDatoIntervallEntitet(PERIODE_1));
+        assertThatThrownBy(() -> utførOppdatering(behandling, dto))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("fyller ikke hele perioden som er avklart");
     }
 
     private void utførOppdatering(Behandling behandling, VurderingAvBostedsvilkårEtterAvklaringDto dto) {

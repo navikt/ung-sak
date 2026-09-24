@@ -108,7 +108,10 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
 
     @Test
     void hull_i_vilkårsperiodene_etter_opphørsdato_fylles_ikke() {
-        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_VURDERT));
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            vilkårsperiode(MARS, Utfall.IKKE_VURDERT)
+        );
         var opphørsdato = LocalDate.of(2026, 1, 15);
 
         var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
@@ -124,27 +127,33 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
 
     @Test
     void ikke_relevante_vilkårsperioder_vurderes_ikke() {
-        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_RELEVANT));
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            vilkårsperiode(MARS, Utfall.IKKE_RELEVANT)
+        );
 
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
-            List.of(vurdering(new Periode(JANUAR.getFom(), null), false, "opphørt", null)),
-            årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
+        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
+                vurdering(new Periode(JANUAR.getFom(), null), false, "opphørt", null)
+            ),
+            årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)
+        );
 
         assertThat(resultat.getMaxLocalDate()).isEqualTo(JANUAR.getTom());
     }
 
     @Test
-    void kun_periodene_som_er_vurdert_gir_resultat() {
-        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_VURDERT));
+    void delvis_vurdering_av_avklart_periode_med_flere_relevante_vilkårsperioder_gir_feil() {
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            vilkårsperiode(MARS, Utfall.IKKE_VURDERT)
+        );
 
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
+        assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
             List.of(vurdering(JANUAR, false, "kun januar vurdert nå", null)),
             årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)
-                .crossJoin(årsakTidslinje(MARS, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)));
-
-        assertThat(resultat.getLocalDateIntervals())
-            .extracting(it -> tuple(it.getFomDato(), it.getTomDato()))
-            .containsExactly(tuple(JANUAR.getFom(), JANUAR.getTom()));
+                .crossJoin(årsakTidslinje(MARS, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM))))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("fyller ikke hele perioden som er avklart");
     }
 
     @Test

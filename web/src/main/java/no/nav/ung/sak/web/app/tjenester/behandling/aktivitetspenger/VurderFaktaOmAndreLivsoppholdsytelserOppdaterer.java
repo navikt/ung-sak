@@ -102,7 +102,7 @@ public class VurderFaktaOmAndreLivsoppholdsytelserOppdaterer implements Aksjonsp
 
         Map<VilkårsvarselInnhold, UUID> nyeForeslåtteAvklaringer = andreLivsoppholdsytelserAvklaringTjeneste.lagreForeslåtteAvklaringer(behandlingId, nyeAvklaringer);
 
-        inngangsvilkårVurderingTjeneste.gjenopprettTidligereVilkårsvurderingVedBehovOgSettAvklartPeriodeTilIkkeVurdert(param,
+        inngangsvilkårVurderingTjeneste.nullstillOverlappendeVurderingOgGjenopprettTidligereVedBehov(param,
             VILKÅR_TYPE,
             tilPerioder(tidligereForeslåtteAvklaringer.keySet()),
             tilPerioder(nyeForeslåtteAvklaringer.keySet()));
