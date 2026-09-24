@@ -73,7 +73,7 @@ class AndreLivsoppholdsytelserAvklaringTjenesteTest {
     void skal_hente_seneste_avklaring_med_kilde() {
         var avklaring = lagreAvklaring(lagAvklaring(FOM, TOM, true));
 
-        var senesteAvklaring = tjeneste.hentSenesteAvklaringForBehandling(behandling.getId()).orElseThrow();
+        var senesteAvklaring = tjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandling.getId()).orElseThrow();
 
         assertThat(senesteAvklaring.avklaringtype()).isEqualTo(Avklaringtype.AVSLAG);
         assertThat(senesteAvklaring.periode()).isEqualTo(avklaring.getPeriode());

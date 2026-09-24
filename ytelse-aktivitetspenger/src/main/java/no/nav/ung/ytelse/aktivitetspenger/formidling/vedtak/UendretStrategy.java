@@ -58,12 +58,12 @@ public final class UendretStrategy implements VedtaksbrevInnholdbyggerStrategy {
             return List.of();
         }
 
-        var avklaringer = vilkårsavklaringOgVurderingTidslinjeUtleder.utled(behandling.getId());
-        if (!harVilkårsavklaring(avklaringer, tilVurdering)) {
+        LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> avklaringOgVurderingTidslinje = vilkårsavklaringOgVurderingTidslinjeUtleder.utled(behandling.getId());
+        if (!harVilkårsavklaring(avklaringOgVurderingTidslinje, tilVurdering)) {
             return List.of();
         }
         // Avslag skal ikke beskrives med brev for uendret vedtak, men alltid bruke mal for avslag.
-        if (!AvslåttVilkårBrevinnholdHjelper.avklarteAvslag(avklaringer, resultatTidslinje).isEmpty()) {
+        if (!AvslåttVilkårBrevinnholdHjelper.avklarteAvslag(avklaringOgVurderingTidslinje, resultatTidslinje).isEmpty()) {
             return List.of();
         }
 

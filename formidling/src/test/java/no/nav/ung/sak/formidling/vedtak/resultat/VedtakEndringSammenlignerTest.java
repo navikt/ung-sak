@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,7 +63,7 @@ class VedtakEndringSammenlignerTest {
         assertThat(sammenligner.sammenlignMedOriginal(behandling, AVGRENSNING)).isEmpty();
     }
 
-    @DisplayName("Like vilkår og lik tilkjent ytelse er uendret")
+    @DisplayName("Like vilkår og lik dagsats er uendret")
     @Test
     void identiskeVedtak() {
         vilkårErLagret(ORIGINAL_BEHANDLING_ID, oppfylt(FOM, TOM));
@@ -70,7 +71,9 @@ class VedtakEndringSammenlignerTest {
         tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("500", "10000"));
         tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "10000"));
 
-        assertThat(endring().erUendret()).isTrue();
+        var endring = endring();
+        assertThat(endring.erUendret()).isTrue();
+        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET)));
     }
 
     @DisplayName("Endret utfall på et vilkår er en endring")
@@ -78,11 +81,11 @@ class VedtakEndringSammenlignerTest {
     void endretUtfall() {
         vilkårErLagret(ORIGINAL_BEHANDLING_ID, oppfylt(FOM, TOM));
         vilkårErLagret(BEHANDLING_ID, avslått(FOM, TOM, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED));
-        likTilkjentYtelse();
+        likDagsats();
 
         var endring = endring();
         assertThat(endring.erUendret()).isFalse();
-        assertThat(endring.endredeVilkår().getLocalDateIntervals()).hasSize(1);
+        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.ENDRET)));
     }
 
     @DisplayName("Samme utfall med ny avslagsårsak er en endring - deltakeren får avslag av en annen grunn")
@@ -90,14 +93,14 @@ class VedtakEndringSammenlignerTest {
     void endretAvslagsårsak() {
         vilkårErLagret(ORIGINAL_BEHANDLING_ID, avslått(FOM, TOM, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED));
         vilkårErLagret(BEHANDLING_ID, avslått(FOM, TOM, Avslagsårsak.IKKE_14A_VEDTAK));
-        likTilkjentYtelse();
+        likDagsats();
 
         assertThat(endring().erUendret()).isFalse();
     }
 
-    @DisplayName("Samme beløp med ulik skala er samme beløp")
+    @DisplayName("Samme dagsats med ulik skala er samme dagsats")
     @Test
-    void ulikSkalaPåSammeBeløp() {
+    void ulikSkalaPåSammeDagsats() {
         likeVilkår();
         tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("500.00", "10000.00"));
         tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500.0", "10000.0"));
@@ -105,28 +108,100 @@ class VedtakEndringSammenlignerTest {
         assertThat(endring().erUendret()).isTrue();
     }
 
-    @DisplayName("Endret dagsats er en endring selv om vilkårene er like")
+    @DisplayName("Økt dagsats er en endring selv om vilkårene er like")
     @Test
-    void endretDagsats() {
+    void øktDagsats() {
         likeVilkår();
         tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("500", "10000"));
         tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("600", "10000"));
 
         var endring = endring();
         assertThat(endring.erUendret()).isFalse();
-        assertThat(endring.endredeVilkår()).isEmpty();
-        assertThat(endring.endretTilkjentYtelse().getLocalDateIntervals()).hasSize(1);
+        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET)));
+        assertThat(endring.dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.ØKNING));
     }
 
-    @DisplayName("Et vilkår som kun finnes i én av behandlingene er en endring")
+    @DisplayName("Redusert dagsats er en reduksjon")
+    @Test
+    void redusertDagsats() {
+        likeVilkår();
+        tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("600", "10000"));
+        tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "10000"));
+
+        assertThat(endring().dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.REDUKSJON));
+    }
+
+    @DisplayName("Dagsats i en periode som ikke hadde tilkjent ytelse i originalbehandlingen er en økning")
+    @Test
+    void dagsatsUtenTilkjentYtelseIOriginalbehandlingen() {
+        likeVilkår();
+        when(tilkjentYtelseRepository.hentTidslinje(ORIGINAL_BEHANDLING_ID)).thenReturn(LocalDateTimeline.empty());
+        tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "10000"));
+
+        assertThat(endring().dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.ØKNING));
+    }
+
+    @DisplayName("Tilkjent ytelse som er fjernet siden originalbehandlingen er en reduksjon")
+    @Test
+    void tilkjentYtelseFjernet() {
+        likeVilkår();
+        tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("500", "10000"));
+        when(tilkjentYtelseRepository.hentTidslinje(BEHANDLING_ID)).thenReturn(LocalDateTimeline.empty());
+
+        assertThat(endring().dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.REDUKSJON));
+    }
+
+    @DisplayName("Endret tilkjent beløp med samme dagsats er ikke en endring")
+    @Test
+    void endretTilkjentBeløpMedSammeDagsats() {
+        likeVilkår();
+        tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("500", "10000"));
+        tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "8000"));
+
+        assertThat(endring().erUendret()).isTrue();
+    }
+
+    @DisplayName("Et vilkår som kun finnes i behandlingen (ikke originalbehandlingen) er nytt")
     @Test
     void vilkårKunIÉnBehandling() {
         vilkårErLagret(ORIGINAL_BEHANDLING_ID, oppfylt(FOM, TOM));
         vilkårErLagret(BEHANDLING_ID, oppfylt(FOM, TOM),
             new VilkårPeriodeResultatDto(VilkårType.BISTANDSVILKÅR, new Periode(FOM, TOM), null, Utfall.OPPFYLT));
-        likTilkjentYtelse();
+        likDagsats();
 
-        assertThat(endring().erUendret()).isFalse();
+        var endring = endring();
+        assertThat(endring.erUendret()).isFalse();
+        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(
+            VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET,
+            VilkårType.BISTANDSVILKÅR, VilkårEndringType.NY)));
+    }
+
+    @DisplayName("Et vilkår som kun finnes i originalbehandlingen er trukket")
+    @Test
+    void vilkårKunIOriginalbehandlingen() {
+        vilkårErLagret(ORIGINAL_BEHANDLING_ID, oppfylt(FOM, TOM),
+            new VilkårPeriodeResultatDto(VilkårType.BISTANDSVILKÅR, new Periode(FOM, TOM), null, Utfall.OPPFYLT));
+        vilkårErLagret(BEHANDLING_ID, oppfylt(FOM, TOM));
+        likDagsats();
+
+        var endring = endring();
+        assertThat(endring.erUendret()).isFalse();
+        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(
+            VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET,
+            VilkårType.BISTANDSVILKÅR, VilkårEndringType.TRUKKET)));
+    }
+
+    @DisplayName("Flere endrede vilkår i samme periode gir én endringstype per vilkår")
+    @Test
+    void flereEndredeVilkårISammePeriode() {
+        vilkårErLagret(ORIGINAL_BEHANDLING_ID, oppfylt(FOM, TOM));
+        vilkårErLagret(BEHANDLING_ID, avslått(FOM, TOM, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED),
+            new VilkårPeriodeResultatDto(VilkårType.BISTANDSVILKÅR, new Periode(FOM, TOM), null, Utfall.OPPFYLT));
+        likDagsats();
+
+        assertThat(endring().vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(
+            VilkårType.BOSTEDSVILKÅR, VilkårEndringType.ENDRET,
+            VilkårType.BISTANDSVILKÅR, VilkårEndringType.NY)));
     }
 
     @DisplayName("Endringer utenfor avgrensningen teller ikke")
@@ -135,7 +210,7 @@ class VedtakEndringSammenlignerTest {
         vilkårErLagret(ORIGINAL_BEHANDLING_ID, oppfylt(FOM, TOM), oppfylt(TOM.plusDays(1), TOM.plusMonths(1)));
         vilkårErLagret(BEHANDLING_ID, oppfylt(FOM, TOM),
             avslått(TOM.plusDays(1), TOM.plusMonths(1), Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED));
-        likTilkjentYtelse();
+        likDagsats();
 
         assertThat(endring().erUendret()).isTrue();
     }
@@ -144,12 +219,16 @@ class VedtakEndringSammenlignerTest {
         return sammenligner.sammenlignMedOriginal(behandling, AVGRENSNING).orElseThrow();
     }
 
+    private static LocalDateTimeline<Map<VilkårType, VilkårEndringType>> vilkårEndringer(Map<VilkårType, VilkårEndringType> endringer) {
+        return new LocalDateTimeline<>(FOM, TOM, endringer);
+    }
+
     private void likeVilkår() {
         vilkårErLagret(ORIGINAL_BEHANDLING_ID, oppfylt(FOM, TOM));
         vilkårErLagret(BEHANDLING_ID, oppfylt(FOM, TOM));
     }
 
-    private void likTilkjentYtelse() {
+    private void likDagsats() {
         tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("500", "10000"));
         tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "10000"));
     }

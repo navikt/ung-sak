@@ -121,7 +121,7 @@ public class AndreLivsoppholdsytelserAvklaringTjeneste implements Vilkårsavklar
     }
 
     @Override
-    public Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId) {
+    public Optional<Vilkårsavklaring> hentSenesteForeslåtteAvklaringForBehandling(long behandlingId) {
         return hentForeslåtteAvklaringer(behandlingId).stream()
             .max(Comparator.comparing(VilkårPeriodeAvklaring::getVurdertTidspunkt)
                 .thenComparing(avklaring -> avklaring.getPeriode().getFomDato()))

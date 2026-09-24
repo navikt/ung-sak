@@ -84,7 +84,7 @@ public class ForeslåBehandlingsresultatAktivitetspengerTjeneste extends Foresl�
 
     private boolean harOpphørMedAvslag(Long behandlingId, Vilkårene vilkårene, VilkårType vilkårType, BehandlingÅrsakType årsak) {
         return VilkårsavklaringTjeneste.finnForÅrsak(alleVilkårsavklaringTjenester, årsak).stream()
-            .flatMap(tjeneste -> tjeneste.hentSenesteAvklaringForBehandling(behandlingId).stream())
+            .flatMap(tjeneste -> tjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandlingId).stream())
             .filter(avklaring -> Avklaringtype.OPPHØR.equals(avklaring.avklaringtype()))
             .anyMatch(avklaring -> harAvslagIPeriode(vilkårene, vilkårType, avklaring.periode()));
     }

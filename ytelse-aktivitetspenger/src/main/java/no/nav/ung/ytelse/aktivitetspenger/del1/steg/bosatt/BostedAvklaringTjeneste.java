@@ -182,7 +182,7 @@ public class BostedAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     @Override
-    public Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId) {
+    public Optional<Vilkårsavklaring> hentSenesteForeslåtteAvklaringForBehandling(long behandlingId) {
         return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
             .map(BostedsGrunnlag::getForeslåtteAvklaringer)
             .orElse(Set.of())

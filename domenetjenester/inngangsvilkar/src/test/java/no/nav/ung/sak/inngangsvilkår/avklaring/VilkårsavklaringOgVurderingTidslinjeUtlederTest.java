@@ -38,7 +38,7 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
     void skal_kombinere_avklaring_og_vurdering_for_perioden_som_overlapper_og_beholde_avklaring_uten_vurdering_for_resten() {
         var behandlingId = 1L;
         var avklaringsperiode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
-        when(vilkårsavklaringTjeneste.hentSenesteAvklaringForBehandling(behandlingId))
+        when(vilkårsavklaringTjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandlingId))
             .thenReturn(Optional.of(new Vilkårsavklaring(Avklaringtype.AVSLAG, avklaringsperiode, BostedsavklaringKildeType.BRUKER, null)));
 
         // Vurdering finnes kun for første halvdel av perioden
@@ -70,7 +70,7 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
     @Test
     void skal_returnere_tom_tidslinje_naar_det_ikke_finnes_noen_avklaring() {
         var behandlingId = 2L;
-        when(vilkårsavklaringTjeneste.hentSenesteAvklaringForBehandling(behandlingId)).thenReturn(Optional.empty());
+        when(vilkårsavklaringTjeneste.hentSenesteForeslåtteAvklaringForBehandling(behandlingId)).thenReturn(Optional.empty());
         when(inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandlingId)).thenReturn(LocalDateTimeline.empty());
 
         var resultat = utleder.utled(behandlingId);

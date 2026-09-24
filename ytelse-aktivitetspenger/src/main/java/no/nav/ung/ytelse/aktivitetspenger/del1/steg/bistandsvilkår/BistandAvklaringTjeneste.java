@@ -114,7 +114,7 @@ public class BistandAvklaringTjeneste implements VilkårsavklaringTjeneste {
     }
 
     @Override
-    public Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId) {
+    public Optional<Vilkårsavklaring> hentSenesteForeslåtteAvklaringForBehandling(long behandlingId) {
         return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId, VilkårType.BISTANDSVILKÅR)
             .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
             .orElse(Set.of())

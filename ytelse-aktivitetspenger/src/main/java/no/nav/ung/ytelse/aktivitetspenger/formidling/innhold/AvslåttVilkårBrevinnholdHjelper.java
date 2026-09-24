@@ -41,12 +41,12 @@ public class AvslåttVilkårBrevinnholdHjelper {
      * Vilkår uten slike perioder er utelatt.
      */
     public static Map<VilkårType, LocalDateTimeline<VilkårsavklaringMedVurdering>> avklarteAvslag(
-        LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> avklaringTidslinje,
+        LocalDateTimeline<Map<VilkårType, VilkårsavklaringMedVurdering>> avklaringOgVurderingTidslinje,
         DetaljertResultatTidslinje resultatTidslinje) {
 
         Map<VilkårType, LocalDateTimeline<VilkårsavklaringMedVurdering>> avklarteAvslag = new EnumMap<>(VilkårType.class);
         for (var vilkårType : VilkårsavklaringÅrsaker.alle().keySet()) {
-            var avklartOgAvslått = avklaringTidslinje
+            var avklartOgAvslått = avklaringOgVurderingTidslinje
                 .mapValue(it -> it.get(vilkårType))
                 .filterValue(it -> it != null && it.harVilkårsAvklaring())
                 .intersection(resultatTidslinje.avslåttPeriode(vilkårType))
