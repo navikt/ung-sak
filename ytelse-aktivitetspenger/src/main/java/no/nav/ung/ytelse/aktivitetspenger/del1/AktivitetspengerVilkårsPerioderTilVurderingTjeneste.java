@@ -101,11 +101,15 @@ public class AktivitetspengerVilkårsPerioderTilVurderingTjeneste implements Vil
         return new IngenVurdering();
     }
 
-
     @Override
     public Set<VilkårType> definerendeVilkår() {
-        //FIXME AKT. Dette er sannsynligvis ikke riktig vilkår (spesielt ikke dersom vilkåret flyttes til del2)
-        return Set.of(VilkårType.ALDERSVILKÅR);
+        Set<VilkårType> vilkårIRekkefølge = new LinkedHashSet<>();
+        vilkårIRekkefølge.add(VilkårType.BOSTEDSVILKÅR);
+        vilkårIRekkefølge.add(VilkårType.BISTANDSVILKÅR);
+        vilkårIRekkefølge.add(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
+        vilkårIRekkefølge.add(VilkårType.AKTIVITETSVILKÅR);
+        vilkårIRekkefølge.add(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET);
+        return vilkårIRekkefølge;
     }
 
     /**
