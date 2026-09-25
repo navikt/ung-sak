@@ -140,8 +140,10 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
 
     private void lagreKopi(ProsessTaskData prosessTaskData) {
         var kopi = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
-        kopi.setBehandling(prosessTaskData.getSaksnummer(), prosessTaskData.getBehandlingId());
         kopi.setCallIdFraEksisterende();
+        kopi.setFagsakId(prosessTaskData.getFagsakId());
+        Optional.ofNullable(prosessTaskData.getBehandlingId()).ifPresent(it -> kopi.setBehandling(prosessTaskData.getFagsakId(), Long.valueOf(it)));
+        Optional.ofNullable(prosessTaskData.getAktørId()).ifPresent(kopi::setAktørId);
         Optional.ofNullable(prosessTaskData.getPropertyValue(PERIODER)).ifPresent(it -> kopi.setProperty(PERIODER, it));
         Optional.ofNullable(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK)).ifPresent(it -> kopi.setProperty(BEHANDLING_ÅRSAK, it));
         prosessTaskTjeneste.lagre(kopi);
