@@ -80,7 +80,7 @@ public class InntektkontrollOppgaveOppretter {
         if (overlapp.size() != 1) {
             throw new IllegalStateException("Forventer nøyaktig ett segment med overlapp mot etterlysningsperiode");
         }
-        return !overlapp.toSegments().first().getValue().gjelderHelePerioden();
+        return !overlapp.segmenter().first().getValue().gjelderHelePerioden();
     }
 
 

@@ -30,7 +30,7 @@ public class FinnForbrukteDager {
 
         int antallDager = 0;
         LocalDateTimeline<Boolean> resultatTidslinje = LocalDateTimeline.empty();
-        for (LocalDateSegment<Boolean> virkedagSegment : kunVirkedager.toSegments()) {
+        for (LocalDateSegment<Boolean> virkedagSegment : kunVirkedager.segmenter()) {
             var antallDagerISegment = virkedagSegment.getLocalDateInterval().totalDays();
             if (antallDagerISegment > 5) {
                 throw new IllegalStateException("Kan ikke ha en sammenhengende periode av virkedager på mer enn 5 dager");
@@ -80,7 +80,7 @@ public class FinnForbrukteDager {
 
     private static LocalDateTimeline<Boolean> leggTilbakeHelgerIHverEndeAvSegmenter(LocalDateTimeline<Boolean> helgerSomBleFjernet, LocalDateTimeline<Boolean> medTettetMellomliggendeHelg) {
         var intervaller = medTettetMellomliggendeHelg.compress().getLocalDateIntervals();
-        var tilstøtendeHelger = helgerSomBleFjernet.toSegments().stream().filter(helg -> intervaller.stream().anyMatch(periode -> helg.getLocalDateInterval().abuts(periode))).toList();
+        var tilstøtendeHelger = helgerSomBleFjernet.segmenter().stream().filter(helg -> intervaller.stream().anyMatch(periode -> helg.getLocalDateInterval().abuts(periode))).toList();
         // Legger tilbake helger i endene som ble fjernet
         return medTettetMellomliggendeHelg.crossJoin(new LocalDateTimeline<>(tilstøtendeHelger)).compress();
     }

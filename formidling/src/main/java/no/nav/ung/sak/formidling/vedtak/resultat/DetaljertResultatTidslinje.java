@@ -59,7 +59,7 @@ public final class DetaljertResultatTidslinje {
 
     @Override
     public String toString() {
-        return totalTidslinje.toSegments().stream()
+        return totalTidslinje.segmenter().stream()
             .map(it -> {
                 var v = it.getValue();
                 return it.getLocalDateInterval() + " -> "

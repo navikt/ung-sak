@@ -20,7 +20,7 @@ public class LagRegelSporing {
     public static String lagRegelSporingFraTidslinjer(Map<String, LocalDateTimeline<?>> tidslinjer) {
         final var resultatMap = new HashMap<String, List<Periode>>();
         for (Map.Entry<String, LocalDateTimeline<?>> entry : tidslinjer.entrySet()) {
-            final var segmenter = entry.getValue().toSegments();
+            final var segmenter = entry.getValue().segmenter();
             for (var segment : segmenter) {
                 final List<Periode> verdier = resultatMap.getOrDefault(entry.getKey(), new ArrayList<>());
                 if (segment.getValue() instanceof IngenVerdi) {

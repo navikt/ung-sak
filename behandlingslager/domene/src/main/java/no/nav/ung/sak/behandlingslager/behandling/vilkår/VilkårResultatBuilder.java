@@ -190,7 +190,7 @@ public class VilkårResultatBuilder {
             return new LocalDateSegment<>(iv, nyVilkårPeriode);
         });
 
-        var vilkårPerioder = nyTimeline.toSegments().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
+        var vilkårPerioder = nyTimeline.segmenter().stream().map(LocalDateSegment::getValue).collect(Collectors.toList());
         vilkår.setPerioder(vilkårPerioder);
     }
 

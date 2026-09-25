@@ -75,7 +75,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
 
         var satsTidslinje = aktivitetspengerGrunnlag.hentAktivitetspengerSatsTidslinje().intersection(tilVurdering);
-        var førsteSegment = satsTidslinje.toSegments().first();
+        var førsteSegment = satsTidslinje.segmenter().first();
         var førsteSatser = førsteSegment.getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
@@ -90,7 +90,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 dagsatsFom,
                 utbetalingDto,
                 satsendringer,
-                byggSatsOgBeregning(satsTidslinje.toSegments()),
+                byggSatsOgBeregning(satsTidslinje.segmenter()),
                 Avslagsårsak.SØKER_OVER_HØYESTE_ALDER == avkortingsårsak));
     }
 
@@ -122,7 +122,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
 
     private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<AktivitetspengerSatser> satsTidslinje) {
-        var inputs = satsTidslinje.toSegments().stream()
+        var inputs = satsTidslinje.segmenter().stream()
             .map(FørstegangsInnvilgelseInnholdBygger::tilSatsEndringUtlederInput)
             .toList();
         return new SatsEndringUtleder(inputs).lagSatsEndringHendelser();

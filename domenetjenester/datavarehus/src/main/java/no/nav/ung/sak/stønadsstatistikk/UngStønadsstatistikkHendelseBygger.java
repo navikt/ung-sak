@@ -133,7 +133,7 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
 
     private List<StønadstatistikkPeriode> hentBehandlingsperioder(Behandling behandling) {
         LocalDateTimeline<Map<VilkårType, Utfall>> vilkårResultatTidslinje = lagVilkårTidslineFraVilkårResultat(behandling);
-        return vilkårResultatTidslinje.toSegments().stream()
+        return vilkårResultatTidslinje.segmenter().stream()
             .map(this::map)
             .toList();
     }
@@ -151,7 +151,7 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
         List<LocalDateSegment<Map<VilkårType, Utfall>>> segmenter = new ArrayList<>();
         Map<VilkårType, LocalDateTimeline<VilkårPeriode>> vilkårTidslinjer = vilkårene.getVilkårTidslinjer(DatoIntervallEntitet.fra(TIDENES_BEGYNNELSE, TIDENES_ENDE));
         for (Map.Entry<VilkårType, LocalDateTimeline<VilkårPeriode>> entry : vilkårTidslinjer.entrySet()) {
-            for (LocalDateSegment<VilkårPeriode> vilkårSegment : entry.getValue().toSegments()) {
+            for (LocalDateSegment<VilkårPeriode> vilkårSegment : entry.getValue().segmenter()) {
                 segmenter.add(new LocalDateSegment<>(vilkårSegment.getLocalDateInterval(), Map.of(entry.getKey(), vilkårSegment.getValue().getUtfall())));
             }
         }
@@ -163,7 +163,7 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
         if (ungdomsytelseGrunnlag == null) {
             return List.of();
         }
-        return ungdomsytelseGrunnlag.getSatsTidslinje().toSegments()
+        return ungdomsytelseGrunnlag.getSatsTidslinje().segmenter()
             .stream().map(it -> new StønadsstatistikkSatsPeriode(
                 it.getFom(),
                 it.getTom(),
@@ -177,7 +177,7 @@ public class UngStønadsstatistikkHendelseBygger implements StønadstatistikkHen
     }
 
     private List<StønadstatistikkInntektPeriode> hentInntektPerioder(Behandling behandling) {
-        return kontrollerteInntektperioderTjeneste.hentTidslinje(behandling.getId()).toSegments().stream()
+        return kontrollerteInntektperioderTjeneste.hentTidslinje(behandling.getId()).segmenter().stream()
             .map(it -> new StønadstatistikkInntektPeriode(
                 it.getFom(),
                 it.getTom(),

@@ -79,7 +79,7 @@ class LagTilkjentYtelseTest {
         assertNotNull(resultat);
         assertEquals(2, resultat.getLocalDateIntervals().size());
 
-        final var iterator = resultat.toSegments().iterator();
+        final var iterator = resultat.segmenter().iterator();
         final var forventetDagsats1 = BigDecimal.valueOf(14);
         final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
         LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();
@@ -119,7 +119,7 @@ class LagTilkjentYtelseTest {
         assertNotNull(resultat);
         assertEquals(1, resultat.getLocalDateIntervals().size());
 
-        final var iterator = resultat.toSegments().iterator();
+        final var iterator = resultat.segmenter().iterator();
         final var forventetDagsats = BigDecimal.valueOf(7);
         final var forventetReduksjon = rapportertInntekt.multiply(BigDecimal.valueOf(0.66));
         final var forventetUredusertBeløp = grunnsats.add(BigDecimal.valueOf(barnetilleggSats));
@@ -171,7 +171,7 @@ class LagTilkjentYtelseTest {
         assertNotNull(resultat);
         assertEquals(1, resultat.getLocalDateIntervals().size());
 
-        final var iterator = resultat.toSegments().iterator();
+        final var iterator = resultat.segmenter().iterator();
         final var forventetDagsats1 = BigDecimal.valueOf(14);
         final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
         LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();
@@ -217,7 +217,7 @@ class LagTilkjentYtelseTest {
         assertNotNull(resultat);
         assertEquals(2, resultat.getLocalDateIntervals().size());
 
-        final var iterator = resultat.toSegments().iterator();
+        final var iterator = resultat.segmenter().iterator();
         final var forventetDagsats1 = BigDecimal.valueOf(14);
         final var forventetUredusertBeløp1 = grunnsats1.add(BigDecimal.valueOf(barnetilleggSats1));
         LocalDateSegment<TilkjentYtelseVerdi> segment1 = iterator.next();

@@ -43,7 +43,7 @@ public class UtbetalingstatusUtleder {
             var erEndretTidslinje = finnEndretFraForrigeTidslinje(gjeldendeTilkjentYtelse, gjeldendeEntry.getValue());
             // Bruker forrige utledet status for perioder med uendret ytelse
             final var forrigeStatus = gjeldendeStatus;
-            var statusForUendretYtelse = erEndretTidslinje.filterValue(Boolean.FALSE::equals).map(it -> forrigeStatus.intersection(it.getLocalDateInterval()).toSegments().stream().toList());
+            var statusForUendretYtelse = erEndretTidslinje.filterValue(Boolean.FALSE::equals).map(it -> forrigeStatus.intersection(it.getLocalDateInterval()).segmenter().stream().toList());
             var statusForEndretYtelse = finnUtbetalingstatusForEndring(dagensDato, erEndretTidslinje.filterValue(Boolean.TRUE::equals), gjeldendeEntry.getKey());
             var statusForBehandling = statusForEndretYtelse.crossJoin(statusForUendretYtelse);
 

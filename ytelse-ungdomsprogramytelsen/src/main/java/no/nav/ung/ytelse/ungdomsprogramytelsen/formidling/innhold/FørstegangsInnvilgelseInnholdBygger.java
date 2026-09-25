@@ -77,12 +77,12 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
 
-        var førsteSatser = satsTidslinje.toSegments().first().getValue();
+        var førsteSatser = satsTidslinje.segmenter().first().getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
         var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje);
 
-        var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.toSegments());
+        var satsOgBeregningDto = mapSatsOgBeregning(satsTidslinje.segmenter());
 
         var erEtterbetaling = erEtterbetaling(innvilgetTidslinje);
 
@@ -130,7 +130,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
     private List<SatsEndringHendelseDto> lagSatsEndringHendelser(LocalDateTimeline<UngdomsytelseSatser> satsTidslinje) {
         List<SatsEndringHendelseDto> resultat = new ArrayList<>();
-        var satsSegments = satsTidslinje.toSegments();
+        var satsSegments = satsTidslinje.segmenter();
         LocalDateSegment<UngdomsytelseSatser> previous = null;
         for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
             if (previous == null) {

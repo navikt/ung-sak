@@ -93,7 +93,7 @@ public class UngBeregnYtelseSteg implements BeregnYtelseSteg {
     }
 
     private static String lagSporing(LocalDateTimeline<TilkjentYtelsePeriodeResultat> tilkjentYtelseTidslinje) {
-        final var list = tilkjentYtelseTidslinje.toSegments()
+        final var list = tilkjentYtelseTidslinje.segmenter()
             .stream()
             .map(it -> it.getValue().sporing())
             .toList();

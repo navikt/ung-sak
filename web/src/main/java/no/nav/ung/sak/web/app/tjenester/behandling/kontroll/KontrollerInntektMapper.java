@@ -80,7 +80,7 @@ public class KontrollerInntektMapper {
                                                                              LocalDateTimeline<Boolean> perioderTilKontroll,
                                                                              LocalDateTimeline<Boolean> vurdertePerioderTidslinje) {
         final var ikkeVurdertTidslinje = perioderTilKontroll.disjoint(vurdertePerioderTidslinje);
-        return ikkeVurdertTidslinje.toSegments().stream()
+        return ikkeVurdertTidslinje.segmenter().stream()
             .map(it -> {
                 final var rapporterteInntekter = mapRapporterteInntekter(rapporterteInntekterTidslinje, registerinntekter, it.getLocalDateInterval());
                 final var uttalelse = finnUttalelse(gjeldendeEtterlysninger, it.getLocalDateInterval());
@@ -123,10 +123,10 @@ public class KontrollerInntektMapper {
         if (overlappendeEtterlysning.isEmpty()) {
             return Optional.empty();
         }
-        if (overlappendeEtterlysning.toSegments().size() > 1) {
-            throw new IllegalStateException("Forventet å finne maks en overlappende etterlysninger for periode " + periode + ", men fant " + overlappendeEtterlysning.toSegments().size());
+        if (overlappendeEtterlysning.segmenter().size() > 1) {
+            throw new IllegalStateException("Forventet å finne maks en overlappende etterlysninger for periode " + periode + ", men fant " + overlappendeEtterlysning.segmenter().size());
         }
-        final var uttalelseData = overlappendeEtterlysning.toSegments().first().getValue().uttalelseData();
+        final var uttalelseData = overlappendeEtterlysning.segmenter().first().getValue().uttalelseData();
         return uttalelseData != null ? Optional.ofNullable(uttalelseData.uttalelse()) : Optional.empty();
     }
 
@@ -135,12 +135,12 @@ public class KontrollerInntektMapper {
                                                                    LocalDateInterval periode) {
         final var overlappendeRapporterteInntekter = rapporterteInntekterTidslinje.intersection(periode);
 
-        if (overlappendeRapporterteInntekter.toSegments().size() > 1) {
+        if (overlappendeRapporterteInntekter.segmenter().size() > 1) {
             throw new IllegalStateException("Fant flere overlappende rapporterte inntekter for periode " + periode);
         }
 
-        final var brukerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.toSegments().getFirst().getValue().brukerRapporterteInntekter();
-        final var registerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.toSegments().getFirst().getValue().registerRapporterteInntekter();
+        final var brukerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.segmenter().getFirst().getValue().brukerRapporterteInntekter();
+        final var registerRapporterteInntekter = overlappendeRapporterteInntekter.isEmpty() ? new HashSet<RapportertInntekt>() : overlappendeRapporterteInntekter.segmenter().getFirst().getValue().registerRapporterteInntekter();
 
         final var brukersRapporterteArbeidsinntekt = finnRapporterteInntektForType(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, brukerRapporterteInntekter);
         final var brukersRapporterteYtelse = finnRapporterteInntektForType(InntektType.YTELSE, brukerRapporterteInntekter);

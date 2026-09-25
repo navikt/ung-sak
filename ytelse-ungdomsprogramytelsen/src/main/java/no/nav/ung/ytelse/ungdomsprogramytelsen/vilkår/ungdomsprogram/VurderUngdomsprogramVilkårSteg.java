@@ -88,7 +88,7 @@ public class VurderUngdomsprogramVilkårSteg implements BehandlingSteg {
     private static List<VilkårPeriodeBuilder> vurderPerioder(LocalDateTimeline<Boolean> ungdomsprogramTidslinje, NavigableSet<DatoIntervallEntitet> perioderTilVurdering, VilkårBuilder vilkårBuilder) {
         var builders = TidslinjeUtil.tilTidslinjeKomprimert(perioderTilVurdering)
             .combine(ungdomsprogramTidslinje, VurderUngdomsprogramVilkårSteg::settUtfall, LocalDateTimeline.JoinStyle.LEFT_JOIN)
-            .toSegments()
+            .segmenter()
             .stream()
             .map(p -> vilkårBuilder.hentBuilderFor(DatoIntervallEntitet.fra(p.getLocalDateInterval()))
                 .medUtfall(p.getValue())
