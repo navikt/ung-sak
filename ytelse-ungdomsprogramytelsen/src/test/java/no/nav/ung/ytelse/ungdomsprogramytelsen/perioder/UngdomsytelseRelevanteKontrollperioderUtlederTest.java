@@ -156,7 +156,7 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
         assertEquals(1, result.segmenter().size());
-        final var første = result.segmenter().first();
+        final var første = result.segmenter().getFirst();
         assertTrue(første.getValue().gjelderFørstePeriode());
         assertThat(første.getFom()).isEqualTo(førstePeriodeFom);
         assertThat(første.getTom()).isEqualTo(førstePeriodeTom);
@@ -176,7 +176,7 @@ class UngdomsytelseRelevanteKontrollperioderUtlederTest {
         LocalDateTimeline<RelevanteKontrollperioderUtleder.FritattForKontroll> result = RelevanteKontrollperioderUtleder.finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
 
         assertEquals(1, result.segmenter().size());
-        final var første = result.segmenter().first();
+        final var første = result.segmenter().getFirst();
         assertTrue(første.getValue().gjelderFørstePeriode());
         assertThat(første.getFom()).isEqualTo(førstePeriodeFom);
         assertThat(første.getTom()).isEqualTo(førstePeriodeTom);

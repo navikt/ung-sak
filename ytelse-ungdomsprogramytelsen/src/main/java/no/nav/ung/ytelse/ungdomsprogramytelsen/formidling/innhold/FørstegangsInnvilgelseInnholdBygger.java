@@ -30,10 +30,7 @@ import org.slf4j.Logger;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NavigableSet;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger.tilHeltall;
@@ -77,7 +74,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.getSatsTidslinje();
 
-        var førsteSatser = satsTidslinje.segmenter().first().getValue();
+        var førsteSatser = satsTidslinje.segmenter().getFirst().getValue();
         var dagsatsFom = Satsberegner.beregnDagsatsInklBarnetillegg(førsteSatser);
 
         var satsEndringHendelseDtos = lagSatsEndringHendelser(satsTidslinje);
@@ -170,16 +167,16 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static SatsOgBeregningDto mapSatsOgBeregning(NavigableSet<LocalDateSegment<UngdomsytelseSatser>> satsSegments) {
+    private static SatsOgBeregningDto mapSatsOgBeregning(SequencedCollection<LocalDateSegment<UngdomsytelseSatser>> satsSegments) {
         var satser = satsSegments.stream()
             .map(it -> it.getValue().satsType())
             .collect(Collectors.toSet());
 
         var kunHøySats = Set.of(UngdomsytelseSatsType.HØY).equals(satser);
 
-        var beregning = mapTilBeregningDto(satsSegments.first());
+        var beregning = mapTilBeregningDto(satsSegments.getFirst());
 
-        var nyesteSegment = satsSegments.last();
+        var nyesteSegment = satsSegments.getLast();
         var nyesteSats = nyesteSegment.getValue();
 
         var overgangTilHøySats = satser.size() > 1 ? mapOvergangTilHøySats(nyesteSegment) :  null;

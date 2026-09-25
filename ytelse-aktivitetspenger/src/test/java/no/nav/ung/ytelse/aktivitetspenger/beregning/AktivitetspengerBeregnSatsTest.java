@@ -44,7 +44,7 @@ class AktivitetspengerBeregnSatsTest {
         var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(1);
 
-        var first = segmenter.first();
+        var first = segmenter.getFirst();
         assertThat(first.getFom()).isEqualTo(fom);
         assertThat(first.getTom()).isEqualTo(tom);
         assertThat(first.getValue().grunnbeløpFaktor()).isEqualByComparingTo(BigDecimal.valueOf(1.3606666667));

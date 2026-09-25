@@ -126,7 +126,7 @@ public class KontrollerInntektMapper {
         if (overlappendeEtterlysning.segmenter().size() > 1) {
             throw new IllegalStateException("Forventet å finne maks en overlappende etterlysninger for periode " + periode + ", men fant " + overlappendeEtterlysning.segmenter().size());
         }
-        final var uttalelseData = overlappendeEtterlysning.segmenter().first().getValue().uttalelseData();
+        final var uttalelseData = overlappendeEtterlysning.segmenter().getFirst().getValue().uttalelseData();
         return uttalelseData != null ? Optional.ofNullable(uttalelseData.uttalelse()) : Optional.empty();
     }
 
