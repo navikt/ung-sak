@@ -146,6 +146,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
         Optional.ofNullable(prosessTaskData.getAktørId()).ifPresent(kopi::setAktørId);
         Optional.ofNullable(prosessTaskData.getPropertyValue(PERIODER)).ifPresent(it -> kopi.setProperty(PERIODER, it));
         Optional.ofNullable(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK)).ifPresent(it -> kopi.setProperty(BEHANDLING_ÅRSAK, it));
+        Optional.ofNullable(prosessTaskData.getPayloadAsString()).ifPresent(kopi::setPayload);
         prosessTaskTjeneste.lagre(kopi);
     }
 
