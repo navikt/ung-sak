@@ -28,7 +28,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class VedtakEndringSammenlignerTest {
+class VedtakSammenligningResultatSammenlignerTest {
 
     private static final long BEHANDLING_ID = 2L;
     private static final long ORIGINAL_BEHANDLING_ID = 1L;
@@ -73,7 +73,7 @@ class VedtakEndringSammenlignerTest {
 
         var endring = endring();
         assertThat(endring.erUendret()).isTrue();
-        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET)));
+        assertThat(endring.vilkårDifferanse()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET)));
     }
 
     @DisplayName("Endret utfall på et vilkår er en endring")
@@ -85,7 +85,7 @@ class VedtakEndringSammenlignerTest {
 
         var endring = endring();
         assertThat(endring.erUendret()).isFalse();
-        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.ENDRET)));
+        assertThat(endring.vilkårDifferanse()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.ENDRET)));
     }
 
     @DisplayName("Samme utfall med ny avslagsårsak er en endring - deltakeren får avslag av en annen grunn")
@@ -117,8 +117,8 @@ class VedtakEndringSammenlignerTest {
 
         var endring = endring();
         assertThat(endring.erUendret()).isFalse();
-        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET)));
-        assertThat(endring.dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.ØKNING));
+        assertThat(endring.vilkårDifferanse()).isEqualTo(vilkårEndringer(Map.of(VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET)));
+        assertThat(endring.dagsatsDifferanse()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.ØKNING));
     }
 
     @DisplayName("Redusert dagsats er en reduksjon")
@@ -128,7 +128,7 @@ class VedtakEndringSammenlignerTest {
         tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("600", "10000"));
         tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "10000"));
 
-        assertThat(endring().dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.REDUKSJON));
+        assertThat(endring().dagsatsDifferanse()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.REDUKSJON));
     }
 
     @DisplayName("Dagsats i en periode som ikke hadde tilkjent ytelse i originalbehandlingen er en økning")
@@ -138,7 +138,7 @@ class VedtakEndringSammenlignerTest {
         when(tilkjentYtelseRepository.hentTidslinje(ORIGINAL_BEHANDLING_ID)).thenReturn(LocalDateTimeline.empty());
         tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "10000"));
 
-        assertThat(endring().dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.ØKNING));
+        assertThat(endring().dagsatsDifferanse()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.ØKNING));
     }
 
     @DisplayName("Tilkjent ytelse som er fjernet siden originalbehandlingen er en reduksjon")
@@ -148,7 +148,7 @@ class VedtakEndringSammenlignerTest {
         tilkjentYtelseErLagret(ORIGINAL_BEHANDLING_ID, tilkjentYtelse("500", "10000"));
         when(tilkjentYtelseRepository.hentTidslinje(BEHANDLING_ID)).thenReturn(LocalDateTimeline.empty());
 
-        assertThat(endring().dagsatsEndringer()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.REDUKSJON));
+        assertThat(endring().dagsatsDifferanse()).isEqualTo(new LocalDateTimeline<>(FOM, TOM, DagsatsEndringType.REDUKSJON));
     }
 
     @DisplayName("Endret tilkjent beløp med samme dagsats er ikke en endring")
@@ -171,7 +171,7 @@ class VedtakEndringSammenlignerTest {
 
         var endring = endring();
         assertThat(endring.erUendret()).isFalse();
-        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(
+        assertThat(endring.vilkårDifferanse()).isEqualTo(vilkårEndringer(Map.of(
             VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET,
             VilkårType.BISTANDSVILKÅR, VilkårEndringType.NY)));
     }
@@ -186,7 +186,7 @@ class VedtakEndringSammenlignerTest {
 
         var endring = endring();
         assertThat(endring.erUendret()).isFalse();
-        assertThat(endring.vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(
+        assertThat(endring.vilkårDifferanse()).isEqualTo(vilkårEndringer(Map.of(
             VilkårType.BOSTEDSVILKÅR, VilkårEndringType.UENDRET,
             VilkårType.BISTANDSVILKÅR, VilkårEndringType.TRUKKET)));
     }
@@ -199,7 +199,7 @@ class VedtakEndringSammenlignerTest {
             new VilkårPeriodeResultatDto(VilkårType.BISTANDSVILKÅR, new Periode(FOM, TOM), null, Utfall.OPPFYLT));
         likDagsats();
 
-        assertThat(endring().vilkårEndringer()).isEqualTo(vilkårEndringer(Map.of(
+        assertThat(endring().vilkårDifferanse()).isEqualTo(vilkårEndringer(Map.of(
             VilkårType.BOSTEDSVILKÅR, VilkårEndringType.ENDRET,
             VilkårType.BISTANDSVILKÅR, VilkårEndringType.NY)));
     }
@@ -215,7 +215,7 @@ class VedtakEndringSammenlignerTest {
         assertThat(endring().erUendret()).isTrue();
     }
 
-    private VedtakEndring endring() {
+    private VedtakSammenligningResultat endring() {
         return sammenligner.sammenlignMedOriginal(behandling, AVGRENSNING).orElseThrow();
     }
 

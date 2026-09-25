@@ -49,7 +49,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
             var avklartOgAvslått = avklaringOgVurderingTidslinje
                 .mapValue(it -> it.get(vilkårType))
                 .filterValue(it -> it != null && it.harVilkårsAvklaring())
-                .intersection(resultatTidslinje.avslåttPeriode(vilkårType))
+                .intersection(resultatTidslinje.avslåttTidslinjeForVilkår(vilkårType))
                 .compress();
             if (!avklartOgAvslått.isEmpty()) {
                 avklarteAvslag.put(vilkårType, avklartOgAvslått);

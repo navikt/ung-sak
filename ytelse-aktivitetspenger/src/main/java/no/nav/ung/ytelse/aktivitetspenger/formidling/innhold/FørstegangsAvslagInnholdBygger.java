@@ -56,7 +56,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
         var vilkårVurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandling.getId());
 
         Function<VilkårType, VilkårsvurderingResultat> vurderingFor = vilkårType ->
-            hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, tidslinje.avslåttPeriode(vilkårType), vilkårType, behandling);
+            hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, tidslinje.avslåttTidslinjeForVilkår(vilkårType), vilkårType, behandling);
 
         var bosted = avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR)
             ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurderingFor.apply(VilkårType.BOSTEDSVILKÅR))

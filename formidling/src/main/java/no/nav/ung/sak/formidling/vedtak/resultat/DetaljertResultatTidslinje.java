@@ -46,7 +46,7 @@ public final class DetaljertResultatTidslinje {
         return tilVurdering.filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
     }
 
-    public LocalDateTimeline<Boolean> avslåttPeriode(VilkårType vilkårType) {
+    public LocalDateTimeline<Boolean> avslåttTidslinjeForVilkår(VilkårType vilkårType) {
         return tilVurdering
             .filterValue(it -> it.avslåtteVilkår().stream().anyMatch(vilkår -> vilkår.vilkårType() == vilkårType))
             .mapValue(_ -> Boolean.TRUE)

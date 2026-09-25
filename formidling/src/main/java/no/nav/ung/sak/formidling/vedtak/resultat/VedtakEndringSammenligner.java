@@ -36,21 +36,21 @@ public class VedtakEndringSammenligner {
      * Sammenligner behandlingen med originalbehandlingen innenfor avgrensningen.
      * Tom når behandlingen ikke har en originalbehandling.
      */
-    public Optional<VedtakEndring> sammenlignMedOriginal(Behandling behandling, LocalDateTimeline<?> avgrensning) {
-        return behandling.getOriginalBehandlingId().map(originalBehandlingId -> new VedtakEndring(
-            vilkårEndringer(behandling.getId(), originalBehandlingId, avgrensning),
-            dagsatsEndringer(behandling.getId(), originalBehandlingId, avgrensning)));
+    public Optional<VedtakSammenligningResultat> sammenlignMedOriginal(Behandling behandling, LocalDateTimeline<?> avgrensning) {
+        return behandling.getOriginalBehandlingId().map(originalBehandlingId -> new VedtakSammenligningResultat(
+            vilkårDifferanse(behandling.getId(), originalBehandlingId, avgrensning),
+            dagsatsDifferanse(behandling.getId(), originalBehandlingId, avgrensning)));
     }
 
-    private LocalDateTimeline<Map<VilkårType, VilkårEndringType>> vilkårEndringer(long behandlingId, long originalBehandlingId, LocalDateTimeline<?> avgrensning) {
-        var nye = detaljertVilkårResultatPerType(behandlingId, avgrensning);
-        var originale = detaljertVilkårResultatPerType(originalBehandlingId, avgrensning);
+    private LocalDateTimeline<Map<VilkårType, VilkårEndringType>> vilkårDifferanse(long behandlingId, long originalBehandlingId, LocalDateTimeline<?> avgrensning) {
+        Map<VilkårType, LocalDateTimeline<DetaljertVilkårResultat>> nye = detaljertVilkårResultatPerType(behandlingId, avgrensning);
+        Map<VilkårType, LocalDateTimeline<DetaljertVilkårResultat>> originale = detaljertVilkårResultatPerType(originalBehandlingId, avgrensning);
 
         var vilkårTyper = EnumSet.noneOf(VilkårType.class);
         vilkårTyper.addAll(nye.keySet());
         vilkårTyper.addAll(originale.keySet());
 
-        var endringer = vilkårTyper.stream()
+        List<LocalDateSegment<Map<VilkårType, VilkårEndringType>>> endringer = vilkårTyper.stream()
             .flatMap(vilkårType -> nye.getOrDefault(vilkårType, LocalDateTimeline.empty())
                 .crossJoin(originale.getOrDefault(vilkårType, LocalDateTimeline.empty()), (interval, nySegment, originalSegment) ->
                     new LocalDateSegment<>(interval, Map.of(vilkårType, endringType(verdi(nySegment), verdi(originalSegment)))))
@@ -67,7 +67,7 @@ public class VedtakEndringSammenligner {
         return new LocalDateSegment<>(interval, sammenslått);
     }
 
-    private LocalDateTimeline<DagsatsEndringType> dagsatsEndringer(long behandlingId, long originalBehandlingId, LocalDateTimeline<?> avgrensning) {
+    private LocalDateTimeline<DagsatsEndringType> dagsatsDifferanse(long behandlingId, long originalBehandlingId, LocalDateTimeline<?> avgrensning) {
         var ny = dagsats(behandlingId, avgrensning);
         var original = dagsats(originalBehandlingId, avgrensning);
 
