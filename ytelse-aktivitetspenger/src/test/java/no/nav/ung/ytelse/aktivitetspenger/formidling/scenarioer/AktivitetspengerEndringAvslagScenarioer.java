@@ -4,11 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
@@ -93,6 +89,65 @@ public class AktivitetspengerEndringAvslagScenarioer {
             .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
             .medVilkår(vilkårType, bostedVilkårTidslinje)
             .medBostedsAvklaringer(List.of(BostedsAvklaringTestData.avslag(avslåttVilkårPeriode, ikkeOppfyltÅrsak).medKilde(kilde, kildeFritekst)))
+            .build();
+    }
+
+    /**
+     * Bosted er innvilget de 2 første månedene
+     * Bistandsvilkåret er avslått de 2 månedene bostedsvilkåret er innvilget.
+     */
+    public static AktivitetspengerTestScenario avslagPgaBistandMedForkortetBosted(LocalDate fom) {
+        LocalDate fødselsdato = fom.minusYears(20);
+        var maksTom = fom.plusWeeks(52).minusDays(1);
+        var innvilgetTom = fom.plusMonths(2).minusDays(1);
+        var p = new LocalDateInterval(fom, maksTom);
+        var innvilgetPeriode = new Periode(fom, innvilgetTom);
+        var avkortetFom = innvilgetTom.plusDays(1);
+
+        var lavSats = lavSatsBuilder(fom).build();
+        var satsperioder = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, innvilgetTom, new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, innvilgetTom), lavSats))
+        ));
+
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, innvilgetTom, lavSats)
+        ));
+
+        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
+        ));
+
+        var satserTidslinje = lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag);
+        var tilkjentYtelse = tilkjentYtelsePerioder(satserTidslinje, new LocalDateInterval(fom, innvilgetTom));
+
+        var bostedVilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(innvilgetPeriode.getFom(), innvilgetPeriode.getTom(), VilkårUtfall.oppfylt()),
+            new LocalDateSegment<>(avkortetFom, maksTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+        ));
+
+        var bistandVilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(innvilgetPeriode.getFom(), innvilgetPeriode.getTom(),
+                VilkårUtfall.avslått(Avslagsårsak.IKKE_14A_VEDTAK)),
+            new LocalDateSegment<>(avkortetFom, maksTom, VilkårUtfall.ikkeRelevant())
+        ));
+
+        var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBostedsvilkårResultat(new Periode(fom, maksTom), true, null, null)
+            .medBistandsvilkårResultat(innvilgetPeriode, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, null)
+            .build();
+
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, maksTom)))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelse)
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdato)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))))
+            .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .medVilkår(VilkårType.BOSTEDSVILKÅR, bostedVilkårTidslinje)
+            .medVilkår(VilkårType.BISTANDSVILKÅR, bistandVilkårTidslinje)
             .build();
     }
 }

@@ -4,6 +4,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerEndringAvslagScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
@@ -133,6 +134,18 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 FRITEKST_BOSTED
             );
+    }
+
+    @DisplayName("Bosted innvilget 2 måneder bistand avslått de 2 innvilgede månedene")
+    @Test
+    void avslagBistandEtterBostedInnvilget() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBistandMedForkortetBosted(fom);
+
+        var behandling = lagAvslåttBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
     }
 
     private Behandling lagAvslåttBehandling(AktivitetspengerTestScenario scenario) {
