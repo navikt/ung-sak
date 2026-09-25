@@ -212,7 +212,7 @@ public class TilkjentYtelseRepository {
 
 
     public void lagre(Long behandlingId, LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseTidslinje, String input, String sporing) {
-        final var tilkjentYtelsePerioder = tilkjentYtelseTidslinje.toSegments().stream()
+        final var tilkjentYtelsePerioder = tilkjentYtelseTidslinje.segmenter().stream()
             .map(it -> TilkjentYtelsePeriode.ny()
                 .medUtbetalingsgrad(it.getValue().utbetalingsgrad())
                 .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()))

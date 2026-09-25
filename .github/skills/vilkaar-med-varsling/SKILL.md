@@ -423,7 +423,7 @@ private void autoVurder(long behandlingId,
                         LocalDateTimeline<StegUtfall> stegutfallTidslinje,
                         <Vilkår>AvklaringHolder holder) {
     stegutfallTidslinje.filterValue(VILKÅR_VURDERES_AUTOMATISK::equals)
-        .toSegments()
+        .segmenter()
         .forEach(s -> {
             var avklaring = holder.getPeriodeAvklaring(s.getFom()).orElseThrow(...);
             // sett OPPFYLT eller IKKE_OPPFYLT basert på faktafelt

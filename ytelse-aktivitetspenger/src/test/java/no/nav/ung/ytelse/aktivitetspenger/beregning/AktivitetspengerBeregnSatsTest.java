@@ -41,10 +41,10 @@ class AktivitetspengerBeregnSatsTest {
         var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(
             lagInput(perioder, fødselsdag));
 
-        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(1);
 
-        var first = segmenter.first();
+        var first = segmenter.getFirst();
         assertThat(first.getFom()).isEqualTo(fom);
         assertThat(first.getTom()).isEqualTo(tom);
         assertThat(first.getValue().grunnbeløpFaktor()).isEqualByComparingTo(BigDecimal.valueOf(1.3606666667));
@@ -61,7 +61,7 @@ class AktivitetspengerBeregnSatsTest {
         var fødselsdag = fom.minusYears(18).minusDays(1);
         var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdag));
 
-        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();
@@ -91,7 +91,7 @@ class AktivitetspengerBeregnSatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdato));
 
-        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(1);
 
         var iterator = segmenter.iterator();
@@ -112,7 +112,7 @@ class AktivitetspengerBeregnSatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(new BeregnDagsatsInput(perioder, fødselsdato, false, true, List.of()));
 
-        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(3);
 
         var iterator = segmenter.iterator();
@@ -150,7 +150,7 @@ class AktivitetspengerBeregnSatsTest {
         var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(
             lagInput(perioder, fødselsdato, true));
 
-        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(3);
 
         var iterator = segmenter.iterator();
@@ -189,7 +189,7 @@ class AktivitetspengerBeregnSatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdato, true));
 
-        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(3);
 
         var iterator = segmenter.iterator();
@@ -226,7 +226,7 @@ class AktivitetspengerBeregnSatsTest {
         var fødselsdato = tjuefemårsdag.minusYears(25);
         var dagsatsTidslinje = AktivitetspengerBeregnSats.beregnSats(lagInput(perioder, fødselsdato, true));
 
-        var segmenter = dagsatsTidslinje.resultatTidslinje().toSegments();
+        var segmenter = dagsatsTidslinje.resultatTidslinje().segmenter();
         assertThat(segmenter.size()).isEqualTo(2);
 
         var iterator = segmenter.iterator();

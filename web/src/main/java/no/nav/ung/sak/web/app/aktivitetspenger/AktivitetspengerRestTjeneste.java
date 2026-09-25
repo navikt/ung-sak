@@ -177,7 +177,7 @@ public class AktivitetspengerRestTjeneste {
         Map<Year, BigDecimal> sumAvkortetOgOppjustertPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
         PgiHjelper pgiHjelper = new PgiHjelper(inntektsposter, beregningInput.sisteLignedeÅr());
 
-        List<PgiÅrsinntektDto> pgiÅrsinntekter = beregningInput.lagTidslinje().toSegments().stream()
+        List<PgiÅrsinntektDto> pgiÅrsinntekter = beregningInput.lagTidslinje().segmenter().stream()
             .map(segment -> {
                 Year år = Year.of(segment.getFom().getYear());
 

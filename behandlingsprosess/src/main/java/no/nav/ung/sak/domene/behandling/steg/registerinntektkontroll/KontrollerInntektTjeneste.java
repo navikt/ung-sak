@@ -82,7 +82,7 @@ public class KontrollerInntektTjeneste {
 
 
     private static boolean harEtterlysningerUtenSvar(LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {
-        return etterlysningTidslinje.toSegments().stream().anyMatch(it -> VENTER_STATUSER.contains(it.getValue().etterlysning().etterlysningStatus()));
+        return etterlysningTidslinje.segmenter().stream().anyMatch(it -> VENTER_STATUSER.contains(it.getValue().etterlysning().etterlysningStatus()));
     }
 
     private static LocalDateTimeline<Kontrollresultat> finnResultatFraGodkjenteInntekterEllerUtløptEtterlysning(LocalDateTimeline<Boolean> relevantTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje) {

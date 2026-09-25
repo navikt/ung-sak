@@ -138,7 +138,7 @@ public class TidslinjeUtil {
 
     public static <T> LocalDateTimeline<T> begrensTilAntallDager(LocalDateTimeline<T> tidslinje, int maxAntallDager, boolean tellHelg) {
         int antallDager = 0;
-        Iterator<LocalDateSegment<T>> segmentIterator = tidslinje.toSegments().iterator();
+        Iterator<LocalDateSegment<T>> segmentIterator = tidslinje.segmenter().iterator();
         LocalDate dato = null;
         while (segmentIterator.hasNext() && antallDager < maxAntallDager) {
             LocalDateSegment<T> segment = segmentIterator.next();

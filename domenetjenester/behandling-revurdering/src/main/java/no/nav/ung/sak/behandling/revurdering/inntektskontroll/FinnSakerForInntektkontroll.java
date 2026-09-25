@@ -74,7 +74,7 @@ public class FinnSakerForInntektkontroll {
 
     private boolean harIkkeAvslåtteVilkår(Behandling behandling, LocalDate fom, LocalDate tom) {
         var samletResultat = vilkårTjeneste.samletVilkårsresultat(behandling.getId()).intersection(new LocalDateInterval(fom, tom));
-        var harVilkårSomIkkeErVurdert = samletResultat.toSegments().stream().anyMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_VURDERT));
+        var harVilkårSomIkkeErVurdert = samletResultat.segmenter().stream().anyMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_VURDERT));
         if (samletResultat.isEmpty() || harVilkårSomIkkeErVurdert) {
             //behandling som ikke har fått behandlet vilkår
             LOG.warn("Behandling {} for Fagsak {} har ikke vilkår vurdert i perioden, oppretter likevel kontroll av inntekt", behandling.getId(), behandling.getFagsak().getId());
@@ -84,7 +84,7 @@ public class FinnSakerForInntektkontroll {
     }
 
     private static boolean erInnvilget(LocalDateTimeline<VilkårUtfallSamlet> samletResultat) {
-        return samletResultat.toSegments().stream().noneMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_OPPFYLT));
+        return samletResultat.segmenter().stream().noneMatch(segment -> segment.getValue().getSamletUtfall().equals(Utfall.IKKE_OPPFYLT));
     }
 
     // Inntektsrapportering gjelder bare fra måned nr 2 og inkluderer ikke evt. opphørsmåned

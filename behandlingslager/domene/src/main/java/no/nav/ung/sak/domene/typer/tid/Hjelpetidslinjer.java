@@ -67,7 +67,7 @@ public final class Hjelpetidslinjer {
     }
 
     public static <T> LocalDateTimeline<T> utledHullSomMåTettes(LocalDateTimeline<T> tidslinjen, KantIKantVurderer kantIKantVurderer) {
-        var segmenter = tidslinjen.compress().toSegments();
+        var segmenter = tidslinjen.compress().segmenter();
 
         LocalDateSegment<T> periode = null;
         var resultat = new ArrayList<LocalDateSegment<T>>();

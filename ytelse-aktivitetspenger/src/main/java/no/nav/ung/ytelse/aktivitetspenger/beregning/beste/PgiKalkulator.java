@@ -42,7 +42,7 @@ public class PgiKalkulator {
     public Map<Year, BigDecimal> avgrensOgOppjusterÅrsinntekter() {
         return hentPeriodisertPgiUtregner()
             .mapValue(PgiØvreGrenseVurderer::avgrensOgOppjusterårsinntekt)
-            .toSegments().stream()
+            .segmenter().stream()
             .collect(Collectors.groupingBy(
                 segment -> Year.of(segment.getFom().getYear()),
                 Collectors.reducing(BigDecimal.ZERO,
@@ -54,7 +54,7 @@ public class PgiKalkulator {
     public Map<Year, BigDecimal> avgrensÅrsinntekterUtenOppjustering() {
         return hentPeriodisertPgiUtregner()
             .mapValue(PgiØvreGrenseVurderer::avkortÅrsinntektMotSeksG)
-            .toSegments().stream()
+            .segmenter().stream()
             .collect(Collectors.groupingBy(
                 segment -> Year.of(segment.getFom().getYear()),
                 Collectors.reducing(BigDecimal.ZERO, LocalDateSegment::getValue, BigDecimal::add)

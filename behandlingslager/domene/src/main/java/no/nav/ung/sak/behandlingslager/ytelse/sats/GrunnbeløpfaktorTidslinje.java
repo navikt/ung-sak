@@ -34,7 +34,7 @@ public class GrunnbeløpfaktorTidslinje {
     }
 
     public static BigDecimal finnStandardGrunnbeløpFaktorFor(LocalDateInterval periode){
-        var gFaktorer = HØY_GRUNNBELØPFAKTOR_TIDSLINJE.toSegments().stream().filter(it -> periode.overlaps(it.getLocalDateInterval())).toList();
+        var gFaktorer = HØY_GRUNNBELØPFAKTOR_TIDSLINJE.segmenter().stream().filter(it -> periode.overlaps(it.getLocalDateInterval())).toList();
         if (gFaktorer.size() > 1) {
             throw new IllegalStateException("Kan ikke ha flere enn 1 grunnbeløpfaktor for samme periode: " + periode + ", fant: " + gFaktorer);
         }

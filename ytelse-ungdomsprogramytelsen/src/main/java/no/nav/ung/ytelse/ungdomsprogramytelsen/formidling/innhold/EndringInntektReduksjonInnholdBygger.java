@@ -61,14 +61,14 @@ public class EndringInntektReduksjonInnholdBygger implements VedtaksbrevInnholdB
             EndringInntektReduksjonInnholdBygger::mapTilPeriodeDto,
             LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
-        var utbetalingsperioder = periodeDtoTidslinje.toSegments().stream()
+        var utbetalingsperioder = periodeDtoTidslinje.segmenter().stream()
             .filter(it -> it.getValue().utbetalingBeløp() > 0)
             .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
             .map(LocalDateSegment::getValue)
             .toList();
         var harFlereUtbetalingsperioder = utbetalingsperioder.size() > 1;
 
-        var ingenUtbetalingsperioder = periodeDtoTidslinje.toSegments().stream()
+        var ingenUtbetalingsperioder = periodeDtoTidslinje.segmenter().stream()
             .filter(it -> it.getValue().utbetalingBeløp() == 0)
             .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
             .map(LocalDateSegment::getValue)

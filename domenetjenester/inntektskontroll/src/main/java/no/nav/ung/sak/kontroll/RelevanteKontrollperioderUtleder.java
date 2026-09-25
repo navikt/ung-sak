@@ -77,7 +77,7 @@ public class RelevanteKontrollperioderUtleder {
      */
     public LocalDateTimeline<InfoOmRådata> utledPerioderRelevantForKontrollAvInntekt(LocalDateTimeline<YearMonth> ytelsesPerioder) {
         LocalDateTimeline<Boolean> perioderForKontroll = LocalDateTimeline.empty();
-        if (ytelsesPerioder.toSegments().size() > 1) {
+        if (ytelsesPerioder.segmenter().size() > 1) {
             final var ikkePåkrevdKontrollTidslinje = finnPerioderDerKontrollIkkeErPåkrevd(ytelsesPerioder);
             perioderForKontroll = ytelsesPerioder.disjoint(ikkePåkrevdKontrollTidslinje).mapValue(it -> true);
         }
@@ -86,7 +86,7 @@ public class RelevanteKontrollperioderUtleder {
 
     private static LocalDateTimeline<InfoOmRådata> utvidTilHeleMåneder(LocalDateTimeline<Boolean> perioderForKontroll) {
         var mappedSegments = perioderForKontroll
-            .toSegments()
+            .segmenter()
             .stream()
             .map(it -> new LocalDateSegment<>(it.getFom().withDayOfMonth(1), it.getTom().with(TemporalAdjusters.lastDayOfMonth()), new InfoOmRådata(it.getTom().equals(it.getTom().with(TemporalAdjusters.lastDayOfMonth())))))
             .toList(); // Mapper segmenter til å dekke hele måneder
@@ -95,7 +95,7 @@ public class RelevanteKontrollperioderUtleder {
     }
 
     public static LocalDateTimeline<FritattForKontroll> finnPerioderDerKontrollIkkeErPåkrevd(LocalDateTimeline<YearMonth> ytelsesPerioder) {
-        var ikkePåkrevdKontrollSegmenter = ytelsesPerioder.toSegments().stream()
+        var ikkePåkrevdKontrollSegmenter = ytelsesPerioder.segmenter().stream()
             .filter(it -> harIkkeYtelseDagenFør(ytelsesPerioder, it))
             .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new FritattForKontroll(harIkkeYtelseDagenFør(ytelsesPerioder, it), false)))
             .toList();
