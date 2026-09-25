@@ -46,6 +46,7 @@ class BistandAvklaringTjenesteTest {
 
         tjeneste = new BistandAvklaringTjeneste(
             vilkårsavklaringGrunnlagRepository,
+            null,
             null
         );
 

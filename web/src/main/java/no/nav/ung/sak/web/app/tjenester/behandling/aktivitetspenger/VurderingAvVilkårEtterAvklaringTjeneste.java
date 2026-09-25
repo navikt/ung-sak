@@ -39,6 +39,11 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                                                              VilkårType vilkårType,
                                                              List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
                                                              LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
+        if (årsakTidslinje.isEmpty()) {
+            throw new IllegalArgumentException("Kan ikke vurdere " + vilkårType
+                + " ved avslått periode/opphør uten at det finnes en ikkeOppfyltÅrsak (foreslått vilkårsavklaring) på behandlingen. behandlingId=" + behandlingId);
+        }
+
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElseThrow();
         LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(vilkårType)
             .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT)
@@ -62,12 +67,14 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             // unngår å innføre avslag der det er hull i de eksisterende vilkårsperiodene
             .intersection(eksisterendeVilkårperioder);
 
-        validerVurdertPeriodeErDekketAvAvklaring(behandlingId, vilkårType, vurdertTidslinje, årsakTidslinje);
+        // avklaringen kan strekke seg over hull i vilkårsperiodene (f.eks. etter opphørsdato); der finnes ingen vilkårsperiode å vurdere
+        var avklaringTidslinje = årsakTidslinje.intersection(eksisterendeVilkårperioder);
+        validerVurdertPeriodeErDekketAvAvklaring(behandlingId, vilkårType, vurdertTidslinje, avklaringTidslinje);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        return vurdertTidslinje.combine(årsakTidslinje,
+        return vurdertTidslinje.combine(avklaringTidslinje,
             (di, vurdering, årsak) ->
                 new LocalDateSegment<>(di, byggResultat(di, vilkårType, vurdering.getValue(), årsak.getValue(), vurdertAv, vurdertTidspunkt)),
             LocalDateTimeline.JoinStyle.INNER_JOIN
@@ -103,21 +110,22 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
     private static void validerVurdertPeriodeErDekketAvAvklaring(long behandlingId,
                                                                  VilkårType vilkårType,
                                                                  LocalDateTimeline<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertTidslinje,
-                                                                 LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
-        if (årsakTidslinje.isEmpty()) {
-            throw new IllegalArgumentException("Kan ikke vurdere " + vilkårType
-                + " ved avslått periode/opphør uten at det finnes en ikkeOppfyltÅrsak (foreslått vilkårsavklaring) på behandlingen. behandlingId=" + behandlingId);
-        }
-
+                                                                 LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> avklaringTidslinje) {
         if (vurdertTidslinje.isEmpty()) {
             throw new IllegalArgumentException("Må ha minst 1 vurdert periode, og må overlappe eksisterende vilkårtidslinje for " + vilkårType
                 + " på behandlingId=" + behandlingId);
         }
 
-        var utenAvklaring = vurdertTidslinje.disjoint(årsakTidslinje);
+        var utenAvklaring = vurdertTidslinje.disjoint(avklaringTidslinje);
         if (!utenAvklaring.isEmpty()) {
             throw new IllegalArgumentException(
                 "Forsøker å vurdere perioder som ikke dekkes av en ikkeOppfyltÅrsak (mangler foreslått vilkårsavklaring). Gjelder perioder: " + utenAvklaring);
+        }
+
+        var utenVurdering = avklaringTidslinje.disjoint(vurdertTidslinje);
+        if (!utenVurdering.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Vilkårsvurdering fyller ikke hele perioden som er avklart, og som derfor må vurderes på nytt. Gjelder perioder: " + utenVurdering);
         }
     }
 

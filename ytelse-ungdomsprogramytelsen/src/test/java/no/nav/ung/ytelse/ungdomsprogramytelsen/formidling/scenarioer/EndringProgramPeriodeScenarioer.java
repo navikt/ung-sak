@@ -94,6 +94,43 @@ public class EndringProgramPeriodeScenarioer {
     }
 
     /**
+     * Opphørsdato lik maksdato: programperioden er allerede lukket (registrert sluttdato)
+     * nøyaktig på {@code maksDato}, uten at noen egen opphørshendelse (RE_HENDELSE_OPPHØR_UNGDOMSPROGRAM)
+     * noensinne har oppstått — jf. at {@link no.nav.ung.sak.behandlingslager.perioder.UngdomsprogramOpphørFagsakTilVurderingUtleder}
+     * ignorerer opphørshendelser der opphørsdato == periodeMaksDato. Dette skiller seg fra
+     * {@link #opphørMaksDato}, som modellerer perioden som fortsatt åpen (TIDENES_ENDE) fram til maksdato.
+     *
+     * @param maksDato - maksDato, som her også er programperiodens faktiske (lukkede) sluttdato
+     */
+    public static UngTestScenario opphørsdatoLikMaksdato(LocalDate fom, LocalDate maksDato) {
+        var fagsakPeriode = new LocalDateInterval(fom, maksDato);
+        var satser = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fagsakPeriode.getFomDato(), fagsakPeriode.getTomDato(), BrevScenarioerUtils.lavSatsBuilder(fom).build())
+        ));
+
+        return new UngTestScenario(
+            BrevScenarioerUtils.DEFAULT_NAVN,
+            List.of(new UngdomsprogramPeriode(fom, maksDato)),
+            satser,
+            BrevScenarioerUtils.uttaksPerioder(fagsakPeriode),
+            BrevScenarioerUtils.tilkjentYtelsePerioder(satser, fagsakPeriode),
+            new LocalDateTimeline<>(fagsakPeriode, Utfall.OPPFYLT),
+            new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fagsakPeriode, Utfall.OPPFYLT))
+            ),
+            fom.minusYears(19).plusDays(42),
+            List.of(fom),
+            Set.of(
+                new Trigger(BehandlingÅrsakType.UTTALELSE_FRA_BRUKER, DatoIntervallEntitet.fra(maksDato, maksDato)),
+                new Trigger(BehandlingÅrsakType.RE_VARSEL_OPPHOR_VED_MAKSDATO, DatoIntervallEntitet.fra(maksDato, maksDato))
+            ),
+            Collections.emptyList(),
+            null,
+            null,
+            maksDato, false);
+    }
+
+    /**
      * Har allerede opphørt, endrer opphørsdato
      */
     public static UngTestScenario endringSluttdato(LocalDate nySluttdato, LocalDateInterval opprinneligProgramPeriode) {

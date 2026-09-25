@@ -392,6 +392,25 @@ class YtelseVedtaksbrevReglerTest {
             .doesNotContain(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
     }
 
+
+    @Test
+    void skal_sende_opphor_ved_maksdato_brev_når_periode_lukkes_naturlig_på_maksdato() {
+        LocalDate maksdato = LocalDate.now().plusWeeks(1);
+        LocalDate fom = maksdato.minusMonths(6);
+
+        var scenario = EndringProgramPeriodeScenarioer.opphørsdatoLikMaksdato(fom, maksdato);
+        var behandling = lagBehandling(scenario);
+
+        BehandlingVedtaksbrevResultat totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
+        assertThat(totalresultater.harBrev()).isTrue();
+        assertThat(totalresultater.vedtaksbrevResultater())
+            .extracting(Vedtaksbrev::dokumentMalType)
+            .containsExactly(DokumentMalType.OPPHOR_VED_MAKSDATO_DOK);
+
+        var opphørVedMaksdatoResultat = totalresultater.vedtaksbrevResultater().getFirst();
+        assertFullAutomatiskBrev(opphørVedMaksdatoResultat, DokumentMalType.OPPHOR_VED_MAKSDATO_DOK, OpphørVedMaksdatoInnholdBygger.class);
+    }
+
     @Test
     void skal_gi_kun_opphorsbrev_ved_forlenget_periode_og_opphor() {
         LocalDate fom = LocalDate.of(2025, 1, 1);
