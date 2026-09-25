@@ -110,6 +110,58 @@ public class AktivitetspengerEndringAvslagScenarioer {
             .build();
     }
 
+    /**
+     * Bosted er innvilget de 2 første månedene
+     * Bistandsvilkåret er avslått de 2 månedene bostedsvilkåret er innvilget.
+     */
+    public static AktivitetspengerTestScenario avslagPgaBistandMedForkortetBosted(LocalDate fom, String fritekstTilBrev) {
+        LocalDate fødselsdato = fom.minusYears(20);
+        var maksTom = fom.plusWeeks(52).minusDays(1);
+        var innvilgetTom = fom.plusMonths(2).minusDays(1);
+        var p = new LocalDateInterval(fom, maksTom);
+        var innvilgetPeriode = new Periode(fom, innvilgetTom);
+        var avkortetFom = innvilgetTom.plusDays(1);
+
+        var lavSats = lavSatsBuilder(fom).build();
+        var satsperioder = new LocalDateTimeline<>(fom, innvilgetTom, new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, innvilgetTom), lavSats));
+
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(fom, innvilgetTom, lavSats);
+
+        var beregningsgrunnlag = new LocalDateTimeline<>(fom, null, lagBeregningsgrunnlag(fom));
+
+        var satserTidslinje = lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag);
+        var tilkjentYtelse = tilkjentYtelsePerioder(satserTidslinje, new LocalDateInterval(fom, innvilgetTom));
+
+        var bostedVilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(innvilgetPeriode.getFom(), innvilgetPeriode.getTom(), VilkårUtfall.oppfylt()),
+            new LocalDateSegment<>(avkortetFom, maksTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+        ));
+
+        var bistandVilkårTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(innvilgetPeriode.getFom(), innvilgetPeriode.getTom(), VilkårUtfall.avslått(Avslagsårsak.IKKE_14A_VEDTAK)),
+            new LocalDateSegment<>(avkortetFom, maksTom, VilkårUtfall.ikkeRelevant())
+        ));
+
+        var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBostedsvilkårResultat(new Periode(fom, maksTom), true, null, null)
+            .medBistandsvilkårResultat(innvilgetPeriode, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstTilBrev)
+            .build();
+
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, maksTom)))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelse)
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdato)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))))
+            .medInngangsvilkårVurderinger(inngangsvilkårVurderinger)
+            .medVilkår(VilkårType.BOSTEDSVILKÅR, bostedVilkårTidslinje)
+            .medVilkår(VilkårType.BISTANDSVILKÅR, bistandVilkårTidslinje)
+            .build();
+    }
+
     private static AktivitetspengerTestScenario avslagMedÅrsak(LocalDate fom, VilkårType vilkårType, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
         var avslåttVilkårPeriode = avslåttPeriode(fom);
 
