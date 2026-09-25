@@ -245,6 +245,7 @@ public class BehandlingProsessHendelse {
         this.fagsakPeriode = kopierFra.fagsakPeriode;
         this.ansvarligSaksbehandlerForTotrinn = kopierFra.ansvarligSaksbehandlerForTotrinn;
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
+        this.navKontorbehandlendeEnhet = kopierFra.navKontorbehandlendeEnhet;
         this.navKontorAnsvarligSaksbehandler = kopierFra.navKontorAnsvarligSaksbehandler;
         this.navKontorBeslutter = kopierFra.navKontorBeslutter;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
@@ -303,6 +304,10 @@ public class BehandlingProsessHendelse {
 
     public LocalDateTime getOpprettetBehandling() {
         return opprettetBehandling;
+    }
+
+    public String getNavKontorbehandlendeEnhet() {
+        return navKontorbehandlendeEnhet;
     }
 
     public String getAnsvarligBeslutterForTotrinn() {
