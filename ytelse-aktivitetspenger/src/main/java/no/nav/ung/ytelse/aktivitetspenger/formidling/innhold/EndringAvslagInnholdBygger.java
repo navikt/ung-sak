@@ -3,25 +3,27 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
-import no.nav.ung.sak.inngangsvilkår.avklaring.Vilkårsavklaring;
+import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringOgVurderingTidslinjeUtleder;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.EndringAvslagDto;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.KildeTilOpplysninger;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.Collection;
+import java.util.EnumMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+
+import static no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.AvslåttVilkårBrevinnholdHjelper.VILKÅR_I_MALEN;
 
 @Dependent
 public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -36,49 +38,62 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        Set<VilkårType> avslåtteVilkårTyper = tidslinje.tilVurdering()
-            .filterValue(r -> !r.avslåtteVilkår().isEmpty())
-            .stream()
-            .flatMap(s -> s.getValue().avslåtteVilkår().stream())
-            .map(DetaljertVilkårResultat::vilkårType)
-            .collect(Collectors.toSet());
+        var avklarteAvslag = AvslåttVilkårBrevinnholdHjelper.avklarteAvslag(
+            vilkårsavklaringOgVurderingTidslinjeUtleder.utled(behandling.getId()), tidslinje);
 
-        var avklartOgVurdertTidslinje = vilkårsavklaringOgVurderingTidslinjeUtleder.utled(behandling.getId());
-
-        if (avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR)) {
-            var avslåttPeriode = avklartOgVurdertTidslinje
-                .mapValue(it -> it.get(VilkårType.BOSTEDSVILKÅR))
-                .filterValue(it -> it != null && it.harVilkårsAvklaring())
-                .intersection(avslåttVilkårsPeriode(tidslinje, VilkårType.BOSTEDSVILKÅR));
-
-            if (avslåttPeriode.isEmpty()) {
-                throw new IllegalStateException("Fant ingen vilkårsavklaring med avslått periode for behandlingId: " + behandling.getId());
+        // Et vilkår kan være avslått uten at det er avklart i denne behandlingen - da har brevet ingenting å si om det.
+        Map<VilkårType, LocalDateSegment<VilkårsavklaringMedVurdering>> avslåtteSegmenter = new EnumMap<>(VilkårType.class);
+        avklarteAvslag.forEach((vilkårType, perioder) -> {
+            if (VILKÅR_I_MALEN.contains(vilkårType)) {
+                avslåtteSegmenter.put(vilkårType, perioder.segmenter().getFirst());
             }
-
-            var vilkårsavklaringOgVurdering = avslåttPeriode.segmenter().getFirst();
-            return lagDto(
-                vilkårsavklaringOgVurdering.getLocalDateInterval(),
-                vilkårsavklaringOgVurdering.getValue().vilkårsavklaring(),
-                 AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vilkårsavklaringOgVurdering.getValue().vilkårsvurdering())
-            );
+        });
+        if (avslåtteSegmenter.isEmpty()) {
+            throw new IllegalStateException("Fant ingen vilkårsavklaring med avslått periode for vilkår i malen, avklarte avslag: "
+                + avklarteAvslag.keySet() + ", behandlingId: " + behandling.getId());
         }
-        throw new IllegalStateException("Avslag for vilkårtyper ikke implementert: " + avslåtteVilkårTyper + ", behandlingId: " + behandling.getId());
-    }
 
-    private static LocalDateTimeline<Boolean> avslåttVilkårsPeriode(DetaljertResultatTidslinje tidslinje, VilkårType vilkårType) {
-        return tidslinje.tilVurdering()
-            .filterValue(r -> r.avslåtteVilkår().stream().anyMatch(v -> v.vilkårType() == vilkårType))
-            .mapValue(_ -> Boolean.TRUE);
-    }
+        var avklaringer = avslåtteSegmenter.values().stream().map(LocalDateSegment::getValue).toList();
+        var avklaringstyper = distinkt(avklaringer, it -> it.vilkårsavklaring().avklaringtype());
+        var perioder = distinkt(avslåtteSegmenter.values(), EndringAvslagInnholdBygger::periodeFor);
 
-    public TemplateInnholdResultat lagDto(LocalDateInterval localDateInterval, Vilkårsavklaring vilkårsavklaring, AvslåttBosted avslåttBosted) {
+        if (avklaringstyper.size() > 1 || perioder.size() > 1) {
+            throw new IllegalStateException("Vedtaksbrev kan ikke omtale vilkår som er avklart ulikt"
+                + " - perioder: " + perioder + ", avklaringstyper: " + avklaringstyper
+                + ", behandlingId: " + behandling.getId());
+        }
+
+        var bosted = avslåtteSegmenter.containsKey(VilkårType.BOSTEDSVILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurderingFor(avslåtteSegmenter, VilkårType.BOSTEDSVILKÅR, behandling))
+            : null;
+        var bistand = avslåtteSegmenter.containsKey(VilkårType.BISTANDSVILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurderingFor(avslåtteSegmenter, VilkårType.BISTANDSVILKÅR, behandling))
+            : null;
+        var andreLivsoppholdsytelser = avslåtteSegmenter.containsKey(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(
+                vurderingFor(avslåtteSegmenter, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, behandling))
+            : null;
+
         return new TemplateInnholdResultat(
-            vilkårsavklaring.avklaringtype() == Avklaringtype.OPPHØR ? TemplateType.AKTIVITETSPENGER_OPPHØR : TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG,
-            new EndringAvslagDto(
-                new Periode(localDateInterval.getFomDato(), localDateInterval.getTomDato()),
-                avslåttBosted,
-                KildeTilOpplysninger.av(vilkårsavklaring.kilde(), vilkårsavklaring.kildeFritekst())
-            )
-        );
+            avklaringstyper.getFirst() == Avklaringtype.OPPHØR ? TemplateType.AKTIVITETSPENGER_OPPHØR : TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG,
+            new EndringAvslagDto(perioder.getFirst(), bosted, bistand, andreLivsoppholdsytelser));
+    }
+
+    private static <T, V> List<V> distinkt(Collection<T> elementer, Function<T, V> egenskap) {
+        return elementer.stream().map(egenskap).distinct().toList();
+    }
+
+    private static VilkårsvurderingResultat vurderingFor(Map<VilkårType, LocalDateSegment<VilkårsavklaringMedVurdering>> avslåtteSegmenter,
+                                                         VilkårType vilkårType,
+                                                         Behandling behandling) {
+        var vurdering = avslåtteSegmenter.get(vilkårType).getValue().vilkårsvurdering();
+        if (vurdering == null) {
+            throw new IllegalStateException("Mangler vilkårsvurdering for avslått vilkår " + vilkårType + ", behandlingId: " + behandling.getId());
+        }
+        return vurdering;
+    }
+
+    private static Periode periodeFor(LocalDateSegment<VilkårsavklaringMedVurdering> segment) {
+        return new Periode(segment.getFom(), segment.getTom());
     }
 }

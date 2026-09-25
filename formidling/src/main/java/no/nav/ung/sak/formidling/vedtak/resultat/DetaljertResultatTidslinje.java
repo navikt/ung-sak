@@ -46,6 +46,13 @@ public final class DetaljertResultatTidslinje {
         return tilVurdering.filterValue(it -> it.behandlingsårsaker().stream().anyMatch(ønskedeÅrsaker::contains));
     }
 
+    public LocalDateTimeline<Boolean> avslåttTidslinjeForVilkår(VilkårType vilkårType) {
+        return tilVurdering
+            .filterValue(it -> it.avslåtteVilkår().stream().anyMatch(vilkår -> vilkår.vilkårType() == vilkårType))
+            .mapValue(_ -> Boolean.TRUE)
+            .compress();
+    }
+
     /**
      * Gjelder hele tidslinjen, ikke bare periodene til vurdering — vilkår er vurdert også utenfor disse.
      * Krever avslag i samtlige perioder, slik at delvise avslag overlates til de øvrige strategiene.
@@ -66,6 +73,7 @@ public final class DetaljertResultatTidslinje {
                     + (v.tilVurdering() ? "tilVurdering" : "ikkeTilVurdering")
                     + ", behandlingÅrsaker: " + v.behandlingsårsaker()
                     + ", avslåtteVilkår: " + v.avslåtteVilkår()
+                    + ", avkortedeVilkår: " + v.avkortedeVilkår()
                     + ", ikkeVurderteVilkår: " + v.ikkeVurderteVilkår()
                     + ", utbetalingsgrad: " + v.utbetalingsgrad();
             })

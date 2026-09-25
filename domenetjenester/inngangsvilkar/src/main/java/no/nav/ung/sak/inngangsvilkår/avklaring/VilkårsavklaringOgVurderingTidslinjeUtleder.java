@@ -51,7 +51,7 @@ public class VilkårsavklaringOgVurderingTidslinjeUtleder {
                                                                                   VilkårType vilkårType,
                                                                                   BehandlingÅrsakType behandlingÅrsakType) {
         var vilkårsavklaring = VilkårsavklaringTjeneste.finnForÅrsak(vilkårsavklaringTjenester, behandlingÅrsakType)
-            .flatMap(it -> it.hentSenesteAvklaringForBehandling(behandlingId));
+            .flatMap(it -> it.hentSenesteForeslåtteAvklaringForBehandling(behandlingId));
         if (vilkårsavklaring.isEmpty()) {
             return LocalDateTimeline.empty();
         }

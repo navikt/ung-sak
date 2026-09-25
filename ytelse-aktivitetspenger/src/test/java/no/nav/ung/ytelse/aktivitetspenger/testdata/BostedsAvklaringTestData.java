@@ -23,8 +23,4 @@ public record BostedsAvklaringTestData(
     public static BostedsAvklaringTestData avslag(Periode periode, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak) {
         return new BostedsAvklaringTestData(periode, Avklaringtype.AVSLAG, ikkeOppfyltÅrsak, BostedsavklaringKildeType.BRUKER, null);
     }
-
-    public BostedsAvklaringTestData medKilde(BostedsavklaringKildeType nyKilde, String nyKildeFritekst) {
-        return new BostedsAvklaringTestData(periode, avklaringtype, ikkeOppfyltÅrsak, nyKilde, nyKildeFritekst);
-    }
 }

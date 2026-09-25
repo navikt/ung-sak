@@ -1,15 +1,19 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
-import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.typer.Periode;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerRevurderingTestOppsett;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerUendretScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårsavklaringTestData;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -88,14 +92,57 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    private Behandling lagUendretScenario(AktivitetspengerTestScenario scenario) {
-        AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(scenario);
+    @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga andre livsoppholdsytelser")
+    @Test
+    void uendretEtterVarsletOpphørLivsopphold() {
+        var fritekst = "Du får likevel aktivitetspenger fordi den andre ytelsen er stanset.";
+        var scenario = AktivitetspengerUendretScenarioer.uendretLivsoppholdScenario(
+            FOM,
+            VilkårsavklaringTestData.opphør(vurdertPeriode(FOM),
+                AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER,
+                AndreLivsoppholdsytelserAvklaringKildeType.NAV),
+            fritekst
+        );
+        var behandling = lagUendretScenario(scenario);
 
-        var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
-        behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
-        behandling.avsluttBehandling();
-        return behandling;
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
+                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(vurdertPeriode(FOM).getFom()),
+                fritekst
+            );
+    }
+
+    @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga bistandsvilkåret")
+    @Test
+    void uendretEtterVarsletOpphørBistand() {
+        var fritekst = "Du får likevel aktivitetspenger fordi oppfølgingsvedtaket ditt fortsatt gjelder.";
+        var scenario = AktivitetspengerUendretScenarioer.uendretBistandScenario(
+            FOM,
+            VilkårsavklaringTestData.opphør(vurdertPeriode(FOM),
+                BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK,
+                BistandsavklaringKildeType.BRUKER),
+            fritekst
+        );
+        var behandling = lagUendretScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
+                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(vurdertPeriode(FOM).getFom()),
+                fritekst
+            );
+    }
+
+    // Uendret-brevet krever en originalbehandling å sammenligne resultatet mot, så scenarioet bygges som en revurdering.
+    private Behandling lagUendretScenario(AktivitetspengerTestScenario scenario) {
+        return AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, scenario, scenario);
     }
 
     private static Periode vurdertPeriode(LocalDate fom) {

@@ -1,0 +1,139 @@
+package no.nav.ung.sak.formidling.vedtak.resultat;
+
+import jakarta.enterprise.context.Dependent;
+import jakarta.inject.Inject;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
+
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.stream.Collectors;
+
+/**
+ * Sammenligner vilkårsutfall og dagsats i en behandling med originalbehandlingen.
+ */
+@Dependent
+public class VedtakEndringSammenligner {
+
+    private final VilkårResultatRepository vilkårResultatRepository;
+    private final TilkjentYtelseRepository tilkjentYtelseRepository;
+    private final BehandlingRepository behandlingRepository;
+
+    @Inject
+    public VedtakEndringSammenligner(VilkårResultatRepository vilkårResultatRepository,
+                                     TilkjentYtelseRepository tilkjentYtelseRepository,
+                                     BehandlingRepository behandlingRepository) {
+        this.vilkårResultatRepository = vilkårResultatRepository;
+        this.tilkjentYtelseRepository = tilkjentYtelseRepository;
+        this.behandlingRepository = behandlingRepository;
+    }
+
+    /**
+     * Sammenligner behandlingen med originalbehandlingen innenfor avgrensningen.
+     * Tom når behandlingen ikke har en originalbehandling.
+     */
+    public Optional<VedtakSammenligningResultat> sammenlignMedOriginal(Behandling behandling, LocalDateTimeline<?> avgrensning) {
+        return behandling.getOriginalBehandlingId()
+            .map(originalBehandlingId -> forrigeIkkeHenlagteBehandlingId(behandling, originalBehandlingId))
+            .map(forrigeBehandlingId -> new VedtakSammenligningResultat(
+                vilkårDifferanse(behandling.getId(), forrigeBehandlingId, avgrensning),
+                dagsatsDifferanse(behandling.getId(), forrigeBehandlingId, avgrensning)));
+    }
+
+    private long forrigeIkkeHenlagteBehandlingId(Behandling behandling, long originalBehandlingId) {
+        Behandling originalBehandling = behandlingRepository.hentBehandling(originalBehandlingId);
+        if (!originalBehandling.erHenlagt()) {
+            return originalBehandlingId;
+        }
+        return behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(behandling.getFagsakId())
+            .map(Behandling::getId)
+            .orElseThrow(() -> new IllegalStateException("Fant ingen ikke-henlagt ytelsesbehandling for fagsak %d".formatted(behandling.getFagsakId())));
+    }
+
+    private LocalDateTimeline<Map<VilkårType, VilkårEndringType>> vilkårDifferanse(long behandlingId, long originalBehandlingId, LocalDateTimeline<?> avgrensning) {
+        Map<VilkårType, LocalDateTimeline<DetaljertVilkårResultat>> nye = detaljertVilkårResultatPerType(behandlingId, avgrensning);
+        Map<VilkårType, LocalDateTimeline<DetaljertVilkårResultat>> originale = detaljertVilkårResultatPerType(originalBehandlingId, avgrensning);
+
+        var vilkårTyper = EnumSet.noneOf(VilkårType.class);
+        vilkårTyper.addAll(nye.keySet());
+        vilkårTyper.addAll(originale.keySet());
+
+        List<LocalDateSegment<Map<VilkårType, VilkårEndringType>>> endringer = vilkårTyper.stream()
+            .flatMap(vilkårType -> nye.getOrDefault(vilkårType, LocalDateTimeline.empty())
+                .crossJoin(originale.getOrDefault(vilkårType, LocalDateTimeline.empty()), (interval, nySegment, originalSegment) ->
+                    new LocalDateSegment<>(interval, Map.of(vilkårType, endringType(verdi(nySegment), verdi(originalSegment)))))
+                .stream())
+            .toList();
+        return new LocalDateTimeline<>(endringer, VedtakEndringSammenligner::slåSammen).compress();
+    }
+
+    private static LocalDateSegment<Map<VilkårType, VilkårEndringType>> slåSammen(LocalDateInterval interval,
+                                                                                  LocalDateSegment<Map<VilkårType, VilkårEndringType>> lhs,
+                                                                                  LocalDateSegment<Map<VilkårType, VilkårEndringType>> rhs) {
+        var sammenslått = new EnumMap<>(lhs.getValue());
+        sammenslått.putAll(rhs.getValue());
+        return new LocalDateSegment<>(interval, sammenslått);
+    }
+
+    private LocalDateTimeline<DagsatsEndringType> dagsatsDifferanse(long behandlingId, long originalBehandlingId, LocalDateTimeline<?> avgrensning) {
+        LocalDateTimeline<BigDecimal> ny = dagsats(behandlingId, avgrensning);
+        LocalDateTimeline<BigDecimal> original = dagsats(originalBehandlingId, avgrensning);
+
+        return ny.crossJoin(original, (interval, nySegment, originalSegment) ->
+                new LocalDateSegment<>(interval, endringType(dagsatsEller0(nySegment), dagsatsEller0(originalSegment))))
+            .compress();
+    }
+
+    private LocalDateTimeline<BigDecimal> dagsats(long behandlingId, LocalDateTimeline<?> avgrensning) {
+        return tilkjentYtelseRepository.hentTidslinje(behandlingId).intersection(avgrensning).mapValue(TilkjentYtelseVerdi::dagsats);
+    }
+
+    private Map<VilkårType, LocalDateTimeline<DetaljertVilkårResultat>> detaljertVilkårResultatPerType(long behandlingId, LocalDateTimeline<?> avgrensning) {
+        return vilkårResultatRepository.hentVilkårResultater(behandlingId).stream()
+            .collect(Collectors.groupingBy(
+                VilkårPeriodeResultatDto::getVilkårType,
+                () -> new EnumMap<>(VilkårType.class),
+                Collectors.collectingAndThen(
+                    Collectors.mapping(resultat -> new LocalDateSegment<>(resultat.getPeriode().getFom(), resultat.getPeriode().getTom(), new DetaljertVilkårResultat(resultat.getAvslagsårsak(), resultat.getVilkårType(), resultat.getUtfall())), Collectors.toList()),
+                    segmenter -> new LocalDateTimeline<>(segmenter).intersection(avgrensning)
+                ))
+            );
+    }
+
+    private static VilkårEndringType endringType(DetaljertVilkårResultat ny, DetaljertVilkårResultat original) {
+        if (original == null) {
+            return VilkårEndringType.NY;
+        }
+        if (ny == null) {
+            return VilkårEndringType.TRUKKET;
+        }
+        var erLike = ny.utfall() == original.utfall() && ny.avslagsårsak() == original.avslagsårsak();
+        return erLike ? VilkårEndringType.UENDRET : VilkårEndringType.ENDRET;
+    }
+
+    private static DagsatsEndringType endringType(BigDecimal ny, BigDecimal original) {
+        int cmp = ny.compareTo(original);
+        if (cmp > 0) {
+            return DagsatsEndringType.ØKNING;
+        } else if (cmp < 0) {
+            return DagsatsEndringType.REDUKSJON;
+        }
+        return DagsatsEndringType.UENDRET;
+    }
+
+    private static BigDecimal dagsatsEller0(LocalDateSegment<BigDecimal> segment) {
+        return segment == null || segment.getValue() == null ? BigDecimal.ZERO : segment.getValue();
+    }
+
+    private static <V> V verdi(LocalDateSegment<V> segment) {
+        return segment == null ? null : segment.getValue();
+    }
+}

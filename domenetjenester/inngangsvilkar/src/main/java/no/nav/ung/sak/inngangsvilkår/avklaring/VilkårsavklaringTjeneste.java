@@ -24,7 +24,7 @@ public interface VilkårsavklaringTjeneste {
     void settVilkårsperioderTilIkkeVurdertForForeslåtteAvklaringer(long behandlingId);
 
     // Henter seneste vilkårsavklaring for behandling. Hvis det er flere vilkårsavklaringer lagret samtidig velges den med senest fom.
-    Optional<Vilkårsavklaring> hentSenesteAvklaringForBehandling(long behandlingId);
+    Optional<Vilkårsavklaring> hentSenesteForeslåtteAvklaringForBehandling(long behandlingId);
 
     static List<VilkårsavklaringTjeneste> sortert(Instance<VilkårsavklaringTjeneste> vilkårsavklaringTjenester) {
         return vilkårsavklaringTjenester.stream().sorted(Comparator.comparing(it -> it.getClass().getName())).toList();

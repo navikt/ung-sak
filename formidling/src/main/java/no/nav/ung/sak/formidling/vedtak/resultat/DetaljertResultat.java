@@ -7,6 +7,7 @@ import java.util.Set;
 public record DetaljertResultat(
     Set<BehandlingÅrsakType> behandlingsårsaker,
     Set<DetaljertVilkårResultat> avslåtteVilkår,
+    Set<DetaljertVilkårResultat> avkortedeVilkår,
     Set<DetaljertVilkårResultat> ikkeVurderteVilkår,
     UtbetalingsgradType utbetalingsgrad,
     boolean tilVurdering
@@ -14,6 +15,18 @@ public record DetaljertResultat(
 
     public boolean harÅrsak(BehandlingÅrsakType årsak) {
         return behandlingsårsaker.contains(årsak);
+    }
+
+    public boolean erAvslått() {
+        return !avslåtteVilkår.isEmpty();
+    }
+
+    public boolean erAvkortet() {
+        return !avkortedeVilkår.isEmpty();
+    }
+
+    public boolean erAvslåttEllerAvkortet() {
+        return erAvslått() || erAvkortet();
     }
 
 }

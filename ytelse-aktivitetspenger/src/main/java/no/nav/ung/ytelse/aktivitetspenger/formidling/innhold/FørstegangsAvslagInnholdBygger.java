@@ -9,11 +9,10 @@ import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslagInngangsvilkårDto;
@@ -21,8 +20,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.AvslåttVilkårBrevinnholdHjelper.VILKÅR_I_MALEN;
 
 @Dependent
 public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
@@ -42,44 +45,48 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
     @WithSpan
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, DetaljertResultatTidslinje tidslinje) {
-        var detaljertResultatTidslinje = tidslinje.tilVurdering();
-        LocalDateTimeline<DetaljertResultat> avslagPeriode = detaljertResultatTidslinje
-            .filterValue(r -> !r.avslåtteVilkår().isEmpty());
-        var fom = avslagPeriode.getMinLocalDate();
-
-        Set<DetaljertVilkårResultat> alleAvslåtteVilkår = avslagPeriode.stream()
+        Set<VilkårType> avslåtteVilkårTyper = tidslinje.tilVurdering().stream()
             .flatMap(s -> s.getValue().avslåtteVilkår().stream())
-            .collect(Collectors.toSet());
-
-        Set<VilkårType> avslåtteVilkårTyper = alleAvslåtteVilkår.stream()
             .map(DetaljertVilkårResultat::vilkårType)
             .collect(Collectors.toSet());
 
-        var vurdertPeriode = avslagPeriode.mapValue(_ -> true);
+        if (avslåtteVilkårTyper.stream().noneMatch(VILKÅR_I_MALEN::contains)) {
+            throw new IllegalStateException("Avslag for vilkårtyper ikke implementert: " + avslåtteVilkårTyper + ", behandlingId: " + behandling.getId());
+        }
 
         var vilkårVurdering = inngangsvilkårVurderingRepository.hentVurderingTidslinje(behandling.getId());
 
-        var avslåttBosted = avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR) ?
-            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(
-                hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, vurdertPeriode, VilkårType.BOSTEDSVILKÅR)
-            ) : null;
+        Function<VilkårType, VilkårsvurderingResultat> vurderingFor = vilkårType ->
+            hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, tidslinje.avslåttTidslinjeForVilkår(vilkårType), vilkårType, behandling);
 
-        var avslåttBistand = avslåtteVilkårTyper.contains(VilkårType.BISTANDSVILKÅR) ?
-            AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(
-                hentVilkårsvurderingResultatPeriodeForVilkår(vilkårVurdering, vurdertPeriode, VilkårType.BISTANDSVILKÅR)
-            ) : null;
+        var bosted = avslåtteVilkårTyper.contains(VilkårType.BOSTEDSVILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurderingFor.apply(VilkårType.BOSTEDSVILKÅR))
+            : null;
+        var bistand = avslåtteVilkårTyper.contains(VilkårType.BISTANDSVILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurderingFor.apply(VilkårType.BISTANDSVILKÅR))
+            : null;
+        var andreLivsoppholdsytelser = avslåtteVilkårTyper.contains(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(vurderingFor.apply(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR))
+            : null;
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG,
-            new AvslagInngangsvilkårDto(fom, avslåttBosted, avslåttBistand));
+            new AvslagInngangsvilkårDto(bosted, bistand, andreLivsoppholdsytelser));
     }
 
-    private static VilkårsvurderingResultat hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vilkårVurdering, LocalDateTimeline<Boolean> vurdertPeriode, VilkårType vilkårType) {
-        var vilkårResultatPeriode = vilkårVurdering.intersection(vurdertPeriode)
+    private static VilkårsvurderingResultat hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vilkårVurdering,
+                                                                                        LocalDateTimeline<Boolean> avslagsperiodeForVilkår,
+                                                                                        VilkårType vilkårType,
+                                                                                        Behandling behandling) {
+        var vilkårResultatPeriode = vilkårVurdering.intersection(avslagsperiodeForVilkår)
             .mapValue(it -> it.get(vilkårType))
             .segmenter().stream().map(LocalDateSegment::getValue)
+            .filter(Objects::nonNull)
             .distinct()
             .toList();
 
+        if (vilkårResultatPeriode.isEmpty()) {
+            throw new IllegalStateException("Mangler vilkårsvurdering for avslått vilkår " + vilkårType + ", behandlingId: " + behandling.getId());
+        }
         if (vilkårResultatPeriode.size() > 1) {
             throw new IllegalStateException("Forventer kun en periode for vilkårstype " + vilkårType + ", men fant " + vilkårResultatPeriode.size());
         }

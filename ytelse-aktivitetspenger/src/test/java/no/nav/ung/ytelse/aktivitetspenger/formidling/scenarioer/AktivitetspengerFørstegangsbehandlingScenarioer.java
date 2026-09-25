@@ -208,10 +208,24 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         return avslåttBistandScenario(fom, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstBrev);
     }
 
-    /**
-     * Avslag pga bostedsvilkåret ikke oppfylt - folkeregistrert eller bostedsadresse.
-     * Bruker er 20 år, men har verken bosted eller folkeregistrert adresse i Trondheim.
-     */
+    public static AktivitetspengerTestScenario avslåttBostedOgBistand(LocalDate fom, String fritekstBistand) {
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBostedsvilkårResultat(false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null)
+            .medBistandsvilkårResultat(false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstBistand);
+        return fullAvslagScenario(fom, Map.of(
+            VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
+            VilkårType.BISTANDSVILKÅR, Avslagsårsak.IKKE_14A_VEDTAK), null, vurderinger);
+    }
+
+    public static AktivitetspengerTestScenario avslåttAndreLivsoppholdsytelser(LocalDate fom,
+                                                                               AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
+                                                                               String fritekstBrev) {
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medAndreYtelser(false, ikkeOppfyltÅrsak, fritekstBrev);
+        return fullAvslagScenario(fom, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
+            Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, fritekstBrev, vurderinger);
+    }
+
     public static AktivitetspengerTestScenario avslåttBostedFolkeregistrertEllerBostedsadresse(LocalDate fom) {
         return avslåttBostedScenario(fom, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null);
     }
@@ -233,20 +247,86 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
 
     private static AktivitetspengerTestScenario fullAvslagScenario(LocalDate fom, VilkårType vilkårType, Avslagsårsak avslagsårsak, String fritekstBrev,
                                                                      InngangsvilkårVurderingTestData.Builder vurderinger) {
+        return fullAvslagScenario(fom, Map.of(vilkårType, avslagsårsak), fritekstBrev, vurderinger);
+    }
+
+    private static AktivitetspengerTestScenario fullAvslagScenario(LocalDate fom, Map<VilkårType, Avslagsårsak> avslåtteVilkår, String fritekstBrev,
+                                                                     InngangsvilkårVurderingTestData.Builder vurderinger) {
         LocalDate fødselsdato = fom.minusYears(20);
         var tom = fom.plusWeeks(52).minusDays(1);
         var p = new LocalDateInterval(fom, tom);
         var periode = new Periode(fom, tom);
 
-        return AktivitetspengerTestScenario.builder()
+        var builder = AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
             .medSøknadsperioder(List.of(periode))
             .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))))
-            .medVilkår(vilkårType, new LocalDateTimeline<>(p, VilkårUtfall.avslått(avslagsårsak, fritekstBrev)))
-            .medInngangsvilkårVurderinger(vurderinger.medPeriode(periode).build())
+            .medInngangsvilkårVurderinger(vurderinger.medPeriode(periode).build());
+
+        avslåtteVilkår.forEach((vilkårType, avslagsårsak) ->
+            builder.medVilkår(vilkårType, new LocalDateTimeline<>(p, VilkårUtfall.avslått(avslagsårsak, fritekstBrev))));
+
+        return builder.build();
+    }
+
+    /**
+     * Livsoppholdsvilkåret er avslått for hele perioden, mens bostedsvilkåret kun er avkortet på halen.
+     */
+    public static AktivitetspengerTestScenario avslåttAndreLivsoppholdsytelserMedAvkortetBosted(LocalDate fom) {
+        var maksTom = fom.plusWeeks(52).minusDays(1);
+        var avkortetFom = fom.plusMonths(3);
+
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medAndreYtelser(new Periode(fom, maksTom), false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, null)
+            .medBostedsvilkårResultat(new Periode(avkortetFom, maksTom), false, BostedsvilkårIkkeOppfyltÅrsak.AVKORTET, null);
+
+        var bostedTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, avkortetFom.minusDays(1), VilkårUtfall.oppfylt()),
+            new LocalDateSegment<>(avkortetFom, maksTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+        ));
+
+        return avslagBuilder(fom, vurderinger)
+            .medVilkår(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
+                new LocalDateTimeline<>(List.of(new LocalDateSegment<>(fom, maksTom,
+                    VilkårUtfall.avslått(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE)))))
+            .medVilkår(VilkårType.BOSTEDSVILKÅR, bostedTidslinje)
             .build();
+    }
+
+    /**
+     * Bostedsvilkåret er avslått fra startdatoen, og avkortet på halen.
+     */
+    public static AktivitetspengerTestScenario avslåttBostedMedAvkortetHale(LocalDate fom) {
+        var maksTom = fom.plusWeeks(52).minusDays(1);
+        var avkortetFom = fom.plusMonths(3);
+
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBostedsvilkårResultat(new Periode(fom, avkortetFom.minusDays(1)), false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null)
+            .medBostedsvilkårResultat(new Periode(avkortetFom, maksTom), false, BostedsvilkårIkkeOppfyltÅrsak.AVKORTET, null);
+
+        var bostedTidslinje = new LocalDateTimeline<>(List.of(
+            new LocalDateSegment<>(fom, avkortetFom.minusDays(1), VilkårUtfall.avslått(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED)),
+            new LocalDateSegment<>(avkortetFom, maksTom, VilkårUtfall.avslått(Avslagsårsak.AVKORTET))
+        ));
+
+        return avslagBuilder(fom, vurderinger)
+            .medVilkår(VilkårType.BOSTEDSVILKÅR, bostedTidslinje)
+            .build();
+    }
+
+    private static AktivitetspengerTestScenario.Builder avslagBuilder(LocalDate fom, InngangsvilkårVurderingTestData.Builder vurderinger) {
+        var tom = fom.plusWeeks(52).minusDays(1);
+        var p = new LocalDateInterval(fom, tom);
+
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, tom)))
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fom.minusYears(20))
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))))
+            .medInngangsvilkårVurderinger(vurderinger.build());
     }
 
     /**
@@ -256,11 +336,23 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         return innvilgetMedAvslåttVilkår(fom, tom, avkortetVilkårType, Avslagsårsak.AVKORTET);
     }
 
-    /**
-     * Som {@link #innvilgetMedAvkortetVilkår}, men med valgfri avslagsårsak slik at delvis avslag
-     * kan skilles fra avkorting.
-     */
     public static AktivitetspengerTestScenario innvilgetMedAvslåttVilkår(LocalDate fom, LocalDate tom, VilkårType avslåttVilkår, Avslagsårsak avslagsårsak) {
+        return innvilgetMedAvslåttVilkårBuilder(fom, tom, avslåttVilkår, avslagsårsak).build();
+    }
+
+    /**
+     * Bostedsvilkåret er avkortet fra dagen etter tom, og deltakeren blir 30 år senere i den avkortede perioden.
+     */
+    public static AktivitetspengerTestScenario innvilgetMedAvkortetBostedFørAldersgrensen(LocalDate fom, LocalDate tom, LocalDate trettiårsdag) {
+        var maksTom = fom.plusWeeks(52).minusDays(1);
+        return innvilgetMedAvslåttVilkårBuilder(fom, tom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.AVKORTET)
+            .medAldersvilkår(new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fom, trettiårsdag, Utfall.OPPFYLT),
+                new LocalDateSegment<>(trettiårsdag.plusDays(1), maksTom, Utfall.IKKE_OPPFYLT))))
+            .build();
+    }
+
+    private static AktivitetspengerTestScenario.Builder innvilgetMedAvslåttVilkårBuilder(LocalDate fom, LocalDate tom, VilkårType avslåttVilkår, Avslagsårsak avslagsårsak) {
         LocalDate maksTom = fom.plusWeeks(52).minusDays(1);
         if (!tom.isAfter(fom) || !tom.isBefore(maksTom)) {
             throw new IllegalArgumentException("tom må være etter fom og før maksimal sluttdato " + maksTom + ", var " + tom);
@@ -326,7 +418,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
                         new LocalDateSegment<>(tom.plusDays(1), maksTom, VilkårUtfall.ikkeRelevant()))
                     )));
 
-        return builder.build();
+        return builder;
     }
 
 }

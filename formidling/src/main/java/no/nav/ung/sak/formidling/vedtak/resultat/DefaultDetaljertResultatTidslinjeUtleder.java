@@ -129,6 +129,7 @@ public class DefaultDetaljertResultatTidslinjeUtleder implements DetaljertResult
             var resultat = new DetaljertResultat(
                 grunnlag.behandlingÅrsaker(),
                 grunnlag.avslåtteVilkår(),
+                grunnlag.avkortedeVilkår(),
                 grunnlag.ikkeVurderteVilkår(),
                 UtbetalingsgradType.av(rhs != null ? rhs.getValue() : null),
                 grunnlag.tilVurdering());

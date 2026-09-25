@@ -17,7 +17,6 @@ import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
-import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringHendelseDto;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtleder;
 import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
@@ -65,10 +64,9 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
 
         var ytelseFom = periode.getMinLocalDate();
 
-        var avslåttTidslinje = tilVurdering.filterValue(
-            it -> !it.avslåtteVilkår().isEmpty());
-        var ytelseTom = avslåttTidslinje.isEmpty() ? null : avslåttTidslinje.getMinLocalDate().minusDays(1);
-        var avkortingsårsak = bestemAvkortingsårsak(avslåttTidslinje);
+        var avslåttEllerAvkortetTidslinje = tilVurdering.filterValue(DetaljertResultat::erAvslåttEllerAvkortet);
+        var ytelseTom = avslåttEllerAvkortetTidslinje.isEmpty() ? null : avslåttEllerAvkortetTidslinje.getMinLocalDate().minusDays(1);
+        var søkerBlirOverHøyesteAlder = søkerBlirOverHøyesteAlder(avslåttEllerAvkortetTidslinje);
 
         var aktivitetspengerGrunnlag = beregningsgrunnlagRepository.hentGrunnlag(behandling.getId()).orElseThrow(
             () -> new IllegalStateException("Finner ikke beregningsgrunnlag for behandling " + behandling.getId())
@@ -91,18 +89,17 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
                 utbetalingDto,
                 satsendringer,
                 byggSatsOgBeregning(satsTidslinje.segmenter()),
-                Avslagsårsak.SØKER_OVER_HØYESTE_ALDER == avkortingsårsak));
+                søkerBlirOverHøyesteAlder));
     }
 
-    private Avslagsårsak bestemAvkortingsårsak(LocalDateTimeline<DetaljertResultat> avslåttTidslinje) {
-        if (avslåttTidslinje.isEmpty()) {
-            return null;
+    private static boolean søkerBlirOverHøyesteAlder(LocalDateTimeline<DetaljertResultat> avslåttEllerAvkortetTidslinje) {
+        if (avslåttEllerAvkortetTidslinje.isEmpty()) {
+            return false;
         }
-        return avslåttTidslinje.segmenter()
+        return avslåttEllerAvkortetTidslinje.segmenter()
             .getFirst().getValue()
             .avslåtteVilkår().stream()
-            .map(DetaljertVilkårResultat::avslagsårsak).findFirst()
-            .orElse(null);
+            .anyMatch(it -> it.avslagsårsak() == Avslagsårsak.SØKER_OVER_HØYESTE_ALDER);
     }
 
     private UtbetalingDto opprettUtbetalingDto(Behandling behandling, LocalDateTimeline<DetaljertResultat> detaljertResultatTidslinje) {

@@ -1,6 +1,7 @@
 package no.nav.ung.sak.formidling.vedtak.resultat;
 
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 
 import java.util.List;
@@ -12,8 +13,18 @@ public record DetaljertResultatPeriodeGrunnlag(List<DetaljertVilkårResultat> vi
                                                boolean tilVurdering) {
 
     public Set<DetaljertVilkårResultat> avslåtteVilkår() {
+        // Avkortet trumfer avslått hvis det skulle forekomme, fordi perioden funksjonelt ikke er vurdert i behandlingen.
+        if (!avkortedeVilkår().isEmpty()) {
+            return Set.of();
+        }
         return vilkårsresultater.stream()
             .filter(it -> it.utfall() == Utfall.IKKE_OPPFYLT)
+            .collect(Collectors.toSet());
+    }
+
+    public Set<DetaljertVilkårResultat> avkortedeVilkår() {
+        return vilkårsresultater.stream()
+            .filter(it -> it.utfall() == Utfall.IKKE_OPPFYLT && it.avslagsårsak() == Avslagsårsak.AVKORTET)
             .collect(Collectors.toSet());
     }
 
@@ -24,4 +35,3 @@ public record DetaljertResultatPeriodeGrunnlag(List<DetaljertVilkårResultat> vi
     }
 
 }
-

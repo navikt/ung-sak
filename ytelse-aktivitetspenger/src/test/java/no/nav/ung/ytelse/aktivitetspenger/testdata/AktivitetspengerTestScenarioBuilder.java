@@ -39,6 +39,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.*;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
@@ -530,6 +532,9 @@ public class AktivitetspengerTestScenarioBuilder {
             lagreBostedsAvklaringer(repositories.bostedsGrunnlagRepository(), behandling1);
         }
 
+        aktivitetspengerTestscenario.vilkårsavklaringer().forEach((vilkårType, avklaringer) ->
+            lagreVilkårsavklaringer(repositories.vilkårsavklaringGrunnlagRepository(), behandling1, vilkårType, avklaringer));
+
         var inngangsvilkårVurderinger = aktivitetspengerTestscenario.inngangsvilkårVurderinger();
         repositories.inngangsvilkårVurderingRepository().lagreBostedVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bostedsvilkårResultater());
         repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bistandsvilkårResultater());
@@ -564,6 +569,29 @@ public class AktivitetspengerTestScenarioBuilder {
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
         bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, avklaringer);
+    }
+
+    private void lagreVilkårsavklaringer(VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
+                                         Behandling behandling1,
+                                         VilkårType vilkårType,
+                                         List<VilkårsavklaringTestData> avklaringer) {
+        var foreslåtteAvklaringer = avklaringer.stream()
+            .map(it -> new VilkårPeriodeAvklaringForeslått(
+                UUID.randomUUID(),
+                DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
+                it.ikkeOppfyltÅrsak().getKode(),
+                "Begrunnelse fra testscenario",
+                false,
+                null,
+                "Varsles ikke i testscenario",
+                it.kilde(),
+                it.kildeFritekst(),
+                "VL",
+                it.periode().getFom().atStartOfDay(),
+                it.avklaringtype()))
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling1.getId(), vilkårType, foreslåtteAvklaringer);
     }
 
     private BehandlingRepository lagMockedRepositoryForOpprettingAvBehandlingInternt() {

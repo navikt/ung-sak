@@ -6,42 +6,65 @@
         <p>Fra {{periode.fom}} får du ikke lenger aktivitetspenger.</p>
 
         <h2>Hvorfor får du ikke aktivitetspenger?</h2>
-        {{#with avslåttBosted}}
-            {{#if ytelseIkkeTilgjengeligPåBosted}}
+        {{#with bosted}}
+            {{#eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi du ikke lenger har bostedsadresse i Trondheim kommune, får du ikke lenger aktivitetspenger.
                 </p>
-            {{/if}}
-            {{#if ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse}}
+            {{else eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi du ikke lenger har bostedsadresse i Trondheim kommune, får du ikke lenger aktivitetspenger.
                 </p>
-            {{/if}}
-            {{#if ytelseIkkePåArbeidsstedStudiested}}
+            {{else eq årsak "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du studere eller jobbe i Trondheim kommune.
                     Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune, får du ikke lenger aktivitetspenger.
                 </p>
-            {{/if}}
+            {{else eq årsak "ANNEN_ÅRSAK"}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
+                </p>
+            {{/eq}}
             {{#if fritekstBrev}}
-                For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                 <p>
                     {{fritekstBrev}}
                 </p>
             {{/if}}
         {{/with}}
 
-        {{#with kilde}}
-            {{#if fraBruker}}
-                <p>Vi har fått opplysninger om dette fra deg.</p>
+        {{#with bistand}}
+            {{#eq årsak "HAR_IKKE_14A_VEDTAK"}}
+                <p>
+                    For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a.
+                    Fordi du ikke lenger har et slikt vedtak, får du ikke lenger aktivitetspenger.
+                </p>
+            {{/eq}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
             {{/if}}
-            {{#if fraFolkeregisteret}}
-                <p>Vi har fått opplysninger om dette fra Folkeregisteret.</p>
+        {{/with}}
+
+        {{#with andreLivsoppholdsytelser}}
+            {{#if ytelseNavn}}
+                <p>
+                    Det er fordi du får {{ytelseNavn}} fra denne datoen.
+                    Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
+                </p>
             {{/if}}
-            {{#if annet}}
-                <p>Vi har fått opplysninger om dette fra {{annet}}.</p>
+            {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
+                <p>
+                    Det er fordi du får en annen livsoppholdsytelse fra denne datoen.
+                    Du kan ikke få aktivitetspenger samtidig.
+                </p>
+            {{/eq}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
             {{/if}}
         {{/with}}
 

@@ -299,6 +299,25 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
     }
 
 
+    @DisplayName("Avkorting før aldersgrensen gir sluttdato uten setningen om 30 år")
+    @Test
+    void avkortetBostedFørAldersgrensen() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var tom = LocalDate.of(2025, 9, 5);
+        var trettiårsdag = LocalDate.of(2025, 10, 31);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer
+            .innvilgetMedAvkortetBostedFørAldersgrensen(fom, tom, trettiårsdag);
+
+        var behandling = lagScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_INNVILGELSE);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce("Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025.")
+            .asPlainTextNotContains("30 år");
+    }
+
     static String hvorforFårDuPengerAvsnitt() {
         return """
             Hvorfor får du aktivitetspenger? \

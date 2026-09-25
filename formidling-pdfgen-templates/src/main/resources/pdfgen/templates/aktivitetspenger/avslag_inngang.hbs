@@ -6,25 +6,23 @@
         <p>Du har ikke rett på aktivitetspenger.</p>
 
         <h2>Hvorfor får du ikke aktivitetspenger?</h2>
-        {{#with avslåttBosted}}
-            {{#if ytelseIkkeTilgjengeligPåBosted}}
+        {{#with bosted}}
+            {{#eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.
                 </p>
-            {{/if}}
-            {{#if ytelseIkkeTilgjengeligPåFolkeregistrertEllerBostedsadresse}}
+            {{else eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo eller være folkeregistrert i Trondheim kommune.
                     Fordi du ikke har bostedsadresse eller er folkeregistrert i Trondheim kommune, har vi avslått søknaden din.
                 </p>
-            {{/if}}
-            {{#if ytelseIkkePåArbeidsstedStudiested}}
+            {{else eq årsak "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du studere eller jobbe i Trondheim kommune.
                     Fordi studie- eller arbeidsstedet ditt er utenfor Trondheim kommune, har vi avslått søknaden din.
                 </p>
-            {{/if}}
+            {{/eq}}
             {{#if fritekstBrev}}
                 <p>
                     {{fritekstBrev}}
@@ -32,12 +30,31 @@
             {{/if}}
         {{/with}}
 
-        {{#with avslåttBistand}}
-            {{#if harIkke14aVedtak}}
+        {{#with bistand}}
+            {{#eq årsak "HAR_IKKE_14A_VEDTAK"}}
                 <p>
                     For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. Fordi du ikke har et slikt vedtak, har vi avslått søknaden din.
                 </p>
+            {{/eq}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
             {{/if}}
+        {{/with}}
+
+        {{#with andreLivsoppholdsytelser}}
+            {{#if ytelseNavn}}
+                <p>
+                    Det er fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger samtidig som du får en annen
+                    livsoppholdsytelse. Derfor har vi avslått søknaden din.
+                </p>
+            {{/if}}
+            {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
+                <p>
+                    Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
+                </p>
+            {{/eq}}
             {{#if fritekstBrev}}
                 <p>
                     {{fritekstBrev}}
