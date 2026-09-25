@@ -30,12 +30,7 @@ import no.nav.ung.sak.typer.Periode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -105,7 +100,7 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             var sisteVedtak = behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(fagsakId);
             if (sisteVedtak.isPresent() && skalUtsetteKjøring(prosessTaskData, sisteVedtak)) {
                 log.info("Siste vedtatte behandling var under iverksettelse='{}'. Oppretter ny task med samme parametere som kjøres etter iverksetting", sisteVedtak.get());
-                prosessTaskTjeneste.lagre(prosessTaskData);
+                lagreKopi(prosessTaskData);
                 return;
             }
 
@@ -141,6 +136,18 @@ public class OpprettRevurderingEllerOpprettDiffTask extends FagsakProsessTask {
             // Legger til sist, ønsker diffen denne gir for å sette startpunkt
             leggTilTriggere(perioderOgÅrsaker, behandling);
         }
+    }
+
+    private void lagreKopi(ProsessTaskData prosessTaskData) {
+        var kopi = ProsessTaskData.forProsessTask(OpprettRevurderingEllerOpprettDiffTask.class);
+        kopi.setCallIdFraEksisterende();
+        kopi.setFagsakId(prosessTaskData.getFagsakId());
+        Optional.ofNullable(prosessTaskData.getBehandlingId()).ifPresent(it -> kopi.setBehandling(prosessTaskData.getFagsakId(), Long.valueOf(it)));
+        Optional.ofNullable(prosessTaskData.getAktørId()).ifPresent(kopi::setAktørId);
+        Optional.ofNullable(prosessTaskData.getPropertyValue(PERIODER)).ifPresent(it -> kopi.setProperty(PERIODER, it));
+        Optional.ofNullable(prosessTaskData.getPropertyValue(BEHANDLING_ÅRSAK)).ifPresent(it -> kopi.setProperty(BEHANDLING_ÅRSAK, it));
+        Optional.ofNullable(prosessTaskData.getPayloadAsString()).ifPresent(kopi::setPayload);
+        prosessTaskTjeneste.lagre(kopi);
     }
 
     private void leggTilTriggere(List<ÅrsakOgPerioder> perioderOgÅrsaker, Behandling behandling) {
