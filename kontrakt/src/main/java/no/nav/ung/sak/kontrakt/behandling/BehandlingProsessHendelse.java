@@ -107,6 +107,11 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "behandlingSteg", required = false)
     private String behandlingSteg;
 
+    /**
+     * Indikerer om behandlingen ligger hos Nav kontor. Dette er utledet fra behandlingsteg, så behandlingen kan ha denne tilstanden uten å ha aksjonpunkt. Brukes kun for aktivitetspenger
+     */
+    private Boolean behandlingenErHosNavKontor;
+
     @Valid
     @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -236,6 +241,7 @@ public class BehandlingProsessHendelse {
         this.eventHendelse = kopierFra.eventHendelse;
         this.behandlingStatus = kopierFra.behandlingStatus;
         this.behandlingSteg = kopierFra.behandlingSteg;
+        this.behandlingenErHosNavKontor = kopierFra.behandlingenErHosNavKontor;
         this.behandlendeEnhet = kopierFra.behandlendeEnhet;
         this.ytelseTypeKode = kopierFra.ytelseTypeKode;
         this.resultatType = kopierFra.resultatType;
@@ -288,6 +294,10 @@ public class BehandlingProsessHendelse {
 
     public String getBehandlingSteg() {
         return behandlingSteg;
+    }
+
+    public Boolean getBehandlingenErHosNavKontor() {
+        return behandlingenErHosNavKontor;
     }
 
     public String getBehandlendeEnhet() {
@@ -398,6 +408,11 @@ public class BehandlingProsessHendelse {
 
         public Builder medBehandlingSteg(String behandlingSteg) {
             kladd.behandlingSteg = behandlingSteg;
+            return this;
+        }
+
+        public Builder medBehandlingenErHosNavKontor(Boolean behandlingenErHosNavKontor) {
+            kladd.behandlingenErHosNavKontor = behandlingenErHosNavKontor;
             return this;
         }
 
