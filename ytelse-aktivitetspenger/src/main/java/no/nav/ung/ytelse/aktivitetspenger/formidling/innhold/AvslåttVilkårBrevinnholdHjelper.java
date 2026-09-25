@@ -30,7 +30,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
         VilkårType.BOSTEDSVILKÅR,
         VilkårType.BISTANDSVILKÅR,
         VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
-        VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET  // Ikke i malen, men feiler i verdikjedetest uten
+        VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET  // TODO: Ikke i malen, men feiler i verdikjedetest uten
         );
 
     private AvslåttVilkårBrevinnholdHjelper() {
@@ -79,7 +79,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
         return new AvslåttBistand(brevårsak, fritekstFra(vurdering, årsak));
     }
 
-    public static AvslåttAndreLivsoppholdsytelser lagAvslåttAndreLivsoppholdsytelser(VilkårsvurderingResultat vurdering) {
+    public static AvslåttAndreLivsoppholdsytelser lagAvslåttPgaAndreLivsoppholdsytelser(VilkårsvurderingResultat vurdering) {
         var årsak = årsakFra(vurdering, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.class);
         var brevårsak = switch (årsak) {
             case MOTTAR_ARBEIDSAVKLARINGSPENGER -> Livsoppholdsårsak.MOTTAR_ARBEIDSAVKLARINGSPENGER;

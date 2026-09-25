@@ -5,6 +5,7 @@ import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårPeriodeResultatDto;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
@@ -24,6 +25,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -32,6 +34,8 @@ class VedtakSammenligningResultatSammenlignerTest {
 
     private static final long BEHANDLING_ID = 2L;
     private static final long ORIGINAL_BEHANDLING_ID = 1L;
+    private static final long FORRIGE_IKKE_HENLAGTE_BEHANDLING_ID = 3L;
+    private static final long FAGSAK_ID = 100L;
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
     private static final LocalDate TOM = LocalDate.of(2025, 8, 31);
 
@@ -46,13 +50,22 @@ class VedtakSammenligningResultatSammenlignerTest {
     @Mock
     private Behandling behandling;
 
+    @Mock
+    private BehandlingRepository behandlingRepository;
+
+    @Mock
+    private Behandling originalBehandling;
+
     private VedtakEndringSammenligner sammenligner;
 
     @BeforeEach
     void setUp() {
-        sammenligner = new VedtakEndringSammenligner(vilkårResultatRepository, tilkjentYtelseRepository);
+        sammenligner = new VedtakEndringSammenligner(vilkårResultatRepository, tilkjentYtelseRepository, behandlingRepository);
         lenient().when(behandling.getId()).thenReturn(BEHANDLING_ID);
+        lenient().when(behandling.getFagsakId()).thenReturn(FAGSAK_ID);
         lenient().when(behandling.getOriginalBehandlingId()).thenReturn(Optional.of(ORIGINAL_BEHANDLING_ID));
+        lenient().when(behandlingRepository.hentBehandling(ORIGINAL_BEHANDLING_ID)).thenReturn(originalBehandling);
+        lenient().when(originalBehandling.erHenlagt()).thenReturn(false);
     }
 
     @DisplayName("Uten originalbehandling finnes det ikke noe forrige vedtak å sammenligne med")
@@ -61,6 +74,38 @@ class VedtakSammenligningResultatSammenlignerTest {
         when(behandling.getOriginalBehandlingId()).thenReturn(Optional.empty());
 
         assertThat(sammenligner.sammenlignMedOriginal(behandling, AVGRENSNING)).isEmpty();
+    }
+
+    @DisplayName("Henlagt originalbehandling erstattes med forrige ikke-henlagte ytelsesbehandling")
+    @Test
+    void henlagtOriginalbehandlingBrukerForrigeIkkeHenlagte() {
+        when(originalBehandling.erHenlagt()).thenReturn(true);
+        Behandling forrigeIkkeHenlagteBehandling = forrigeIkkeHenlagteBehandling();
+        when(behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(FAGSAK_ID))
+            .thenReturn(Optional.of(forrigeIkkeHenlagteBehandling));
+        vilkårErLagret(FORRIGE_IKKE_HENLAGTE_BEHANDLING_ID, oppfylt(FOM, TOM));
+        vilkårErLagret(BEHANDLING_ID, oppfylt(FOM, TOM));
+        tilkjentYtelseErLagret(FORRIGE_IKKE_HENLAGTE_BEHANDLING_ID, tilkjentYtelse("500", "10000"));
+        tilkjentYtelseErLagret(BEHANDLING_ID, tilkjentYtelse("500", "10000"));
+
+        assertThat(endring().erUendret()).isTrue();
+    }
+
+    @DisplayName("Henlagt originalbehandling uten forrige ikke-henlagte ytelsesbehandling skal feile")
+    @Test
+    void henlagtOriginalbehandlingUtenForrigeSkalFeile() {
+        when(originalBehandling.erHenlagt()).thenReturn(true);
+        when(behandlingRepository.finnSisteAvsluttedeIkkeHenlagteYtelsebehandling(FAGSAK_ID))
+            .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> sammenligner.sammenlignMedOriginal(behandling, AVGRENSNING))
+            .isInstanceOf(IllegalStateException.class);
+    }
+
+    private Behandling forrigeIkkeHenlagteBehandling() {
+        Behandling b = org.mockito.Mockito.mock(Behandling.class);
+        lenient().when(b.getId()).thenReturn(FORRIGE_IKKE_HENLAGTE_BEHANDLING_ID);
+        return b;
     }
 
     @DisplayName("Like vilkår og lik dagsats er uendret")

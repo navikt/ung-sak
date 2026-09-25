@@ -51,7 +51,7 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     @Test
     void livsoppholdsårsakerOversettesEntydig() {
         var brevårsaker = oversett(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.class, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
-            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(vurdering).årsak());
+            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(vurdering).årsak());
 
         assertThat(brevårsaker).doesNotHaveDuplicates().containsExactlyInAnyOrder(Livsoppholdsårsak.values());
     }
@@ -60,19 +60,19 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     @Test
     void livsoppholdsårsakerNavngirYtelsen() {
         for (var årsak : EnumSet.complementOf(EnumSet.of(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE))) {
-            assertThat(AvslåttAndreLivsoppholdsytelser.av(årsak, FRITEKST).ytelse()).isNotBlank();
+            assertThat(AvslåttAndreLivsoppholdsytelser.av(årsak, FRITEKST).ytelseNavn()).isNotBlank();
         }
-        assertThat(AvslåttAndreLivsoppholdsytelser.av(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE, FRITEKST).ytelse()).isNull();
+        assertThat(AvslåttAndreLivsoppholdsytelser.av(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE, FRITEKST).ytelseNavn()).isNull();
     }
 
     @DisplayName("Fritekst følger med standardårsaken, den erstatter den ikke")
     @Test
     void fritekstKommerITilleggTilStandardårsaken() {
-        var livsopphold = AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(
+        var livsopphold = AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(
             vurdering(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, FRITEKST));
 
         assertThat(livsopphold.årsak()).isEqualTo(Livsoppholdsårsak.MOTTAR_DAGPENGER);
-        assertThat(livsopphold.ytelse()).isEqualTo("dagpenger");
+        assertThat(livsopphold.ytelseNavn()).isEqualTo("dagpenger");
         assertThat(livsopphold.fritekstBrev()).isEqualTo(FRITEKST);
     }
 

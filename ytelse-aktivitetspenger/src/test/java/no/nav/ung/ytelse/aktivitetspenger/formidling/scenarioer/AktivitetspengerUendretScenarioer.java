@@ -121,25 +121,16 @@ public class AktivitetspengerUendretScenarioer {
         var vurdertPeriode = avklaring.periode();
 
         var lavSats = lavSatsBuilder(fom).build();
-        var satsperioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats))
-        ));
+        var satsperioder = new LocalDateTimeline<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats));
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(fom, tom, lavSats);
 
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, lavSats)
-        ));
-
-        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
-        ));
+        var beregningsgrunnlag = new LocalDateTimeline<>(fom, null, lagBeregningsgrunnlag(fom));
 
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(vurdertPeriode, true, null, fritekstTilBrev)
             .build();
 
-        var vilkårTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt())
-        ));
+        var vilkårTidslinje = new LocalDateTimeline<>(vurdertPeriode.getFom(), vurdertPeriode.getTom(), VilkårUtfall.oppfylt());
 
         return AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
@@ -166,17 +157,11 @@ public class AktivitetspengerUendretScenarioer {
         var vurdertPeriode = avklaring.periode();
 
         var lavSats = lavSatsBuilder(fom).build();
-        var satsperioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats))
-        ));
+        var satsperioder = new LocalDateTimeline<>(fom, tom, new AktivitetspengerSatsPeriode(p, lavSats));
 
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tom, lavSats)
-        ));
+        var satsGrunnlagTidslinje = new LocalDateTimeline<>(fom, tom, lavSats);
 
-        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
-        ));
+        var beregningsgrunnlag = new LocalDateTimeline<>(fom, null, lagBeregningsgrunnlag(fom));
 
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(new Periode(vurdertPeriode.getFom(), avkortetFom.minusDays(1)), true, null, null)

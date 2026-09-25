@@ -50,7 +50,7 @@ public final class UendretStrategy implements VedtaksbrevInnholdbyggerStrategy {
     @Override
     public List<VedtaksbrevStrategyResultat> evaluer(Behandling behandling, DetaljertResultatTidslinje resultatTidslinje) {
         var tilVurdering = resultatTidslinje.tilVurdering();
-        if (tilVurdering.stream().anyMatch(it -> !it.getValue().ikkeVurderteVilkår().isEmpty())) {
+        if (tilVurdering.stream().anyMatch(detaljertResultatSegmenter -> !detaljertResultatSegmenter.getValue().ikkeVurderteVilkår().isEmpty())) {
             return List.of();
         }
         // Andre årsaker kan gi endringer som sammenligneren ikke fanger, f.eks. inntekt som ikke gir reduksjon.

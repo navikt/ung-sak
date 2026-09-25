@@ -2,12 +2,12 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.dto;
 
 public record AvslåttAndreLivsoppholdsytelser(
     Livsoppholdsårsak årsak,
-    // Bøyd ytelsesnavn, f.eks. "dagpenger". Null når ytelsen ikke navngis i brevet.
-    String ytelse,
+    // Ytelsesnavn i ubestemt form, f.eks. "dagpenger". Null når ytelsen ikke navngis i brevet.
+    String ytelseNavn,
     String fritekstBrev
 ) {
     public static AvslåttAndreLivsoppholdsytelser av(Livsoppholdsårsak årsak, String fritekstBrev) {
-        return new AvslåttAndreLivsoppholdsytelser(årsak, årsak.ytelse, fritekstBrev);
+        return new AvslåttAndreLivsoppholdsytelser(årsak, årsak.ytelseNavn, fritekstBrev);
     }
 
     public enum Livsoppholdsårsak {
@@ -20,14 +20,13 @@ public record AvslåttAndreLivsoppholdsytelser(
         MOTTAR_UFØRETRYGD("uføretrygd"),
         MOTTAR_INTRODUKSJONSSTØNAD("introduksjonsstønad"),
         MOTTAR_BARNEPENSJON("barnepensjon"),
-        // Ytelsen navngis ikke av kodeverket - den står i friteksten saksbehandler skriver.
         MOTTAR_ANNEN_YTELSE(null);
 
-        // Bøyd ytelsesnavn slik det leses i setningen "du får {{ytelse}}". Samme ordvalg som varselet til deltakeren.
-        private final String ytelse;
+        // Ytelsesnavn i ubestemt form slik det leses i setningen "du får {{ytelseNavn}}"
+        private final String ytelseNavn;
 
-        Livsoppholdsårsak(String ytelse) {
-            this.ytelse = ytelse;
+        Livsoppholdsårsak(String ytelseNavn) {
+            this.ytelseNavn = ytelseNavn;
         }
     }
 }

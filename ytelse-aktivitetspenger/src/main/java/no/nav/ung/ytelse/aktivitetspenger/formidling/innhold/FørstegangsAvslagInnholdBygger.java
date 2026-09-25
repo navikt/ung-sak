@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -65,7 +66,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
             ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurderingFor.apply(VilkårType.BISTANDSVILKÅR))
             : null;
         var andreLivsoppholdsytelser = avslåtteVilkårTyper.contains(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
-            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(vurderingFor.apply(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR))
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(vurderingFor.apply(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR))
             : null;
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG,
@@ -79,10 +80,11 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
         var vilkårResultatPeriode = vilkårVurdering.intersection(avslagsperiodeForVilkår)
             .mapValue(it -> it.get(vilkårType))
             .segmenter().stream().map(LocalDateSegment::getValue)
+            .filter(Objects::nonNull)
             .distinct()
             .toList();
 
-        if (vilkårResultatPeriode.isEmpty() || vilkårResultatPeriode.contains(null)) {
+        if (vilkårResultatPeriode.isEmpty()) {
             throw new IllegalStateException("Mangler vilkårsvurdering for avslått vilkår " + vilkårType + ", behandlingId: " + behandling.getId());
         }
         if (vilkårResultatPeriode.size() > 1) {

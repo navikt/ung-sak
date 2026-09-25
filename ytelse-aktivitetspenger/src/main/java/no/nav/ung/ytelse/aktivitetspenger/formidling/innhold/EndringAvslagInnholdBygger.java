@@ -70,7 +70,7 @@ public class EndringAvslagInnholdBygger implements VedtaksbrevInnholdBygger {
             ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurderingFor(avslåtteSegmenter, VilkårType.BISTANDSVILKÅR, behandling))
             : null;
         var andreLivsoppholdsytelser = avslåtteSegmenter.containsKey(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
-            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttAndreLivsoppholdsytelser(
+            ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(
                 vurderingFor(avslåtteSegmenter, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, behandling))
             : null;
 
