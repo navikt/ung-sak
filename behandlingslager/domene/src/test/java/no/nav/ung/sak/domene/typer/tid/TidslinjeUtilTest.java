@@ -113,7 +113,7 @@ class TidslinjeUtilTest {
 
         var tidslinje = TidslinjeUtil.tilTidslinjeKomprimertMedMuligOverlapp(List.of(DatoIntervallEntitet.fraOgMedTilOgMed(torsdag, fredag), DatoIntervallEntitet.fraOgMedTilOgMed(mandag, tirsdag)), new PåTversAvHelgErKantIKantVurderer());
 
-        assertThat(tidslinje.toSegments().size()).isEqualTo(1);
+        assertThat(tidslinje.segmenter().size()).isEqualTo(1);
         var localDateIntervals = tidslinje.getLocalDateIntervals();
         assertThat(localDateIntervals.size()).isEqualTo(1);
         assertThat(localDateIntervals.getFirst().getFomDato()).isEqualTo(torsdag);
@@ -134,7 +134,7 @@ class TidslinjeUtilTest {
             DatoIntervallEntitet.fraOgMedTilOgMed(laurdag, laurdag),
             DatoIntervallEntitet.fraOgMedTilOgMed(mandag, tirsdag)), new PåTversAvHelgErKantIKantVurderer());
 
-        assertThat(tidslinje.toSegments().size()).isEqualTo(1);
+        assertThat(tidslinje.segmenter().size()).isEqualTo(1);
         var localDateIntervals = tidslinje.getLocalDateIntervals();
         assertThat(localDateIntervals.size()).isEqualTo(1);
         assertThat(localDateIntervals.getFirst().getFomDato()).isEqualTo(torsdag);
@@ -155,7 +155,7 @@ class TidslinjeUtilTest {
             DatoIntervallEntitet.fraOgMedTilOgMed(fredag, laurdag),
             DatoIntervallEntitet.fraOgMedTilOgMed(mandag, tirsdag)), new PåTversAvHelgErKantIKantVurderer());
 
-        assertThat(tidslinje.toSegments().size()).isEqualTo(1);
+        assertThat(tidslinje.segmenter().size()).isEqualTo(1);
         var localDateIntervals = tidslinje.getLocalDateIntervals();
         assertThat(localDateIntervals.size()).isEqualTo(1);
         assertThat(localDateIntervals.getFirst().getFomDato()).isEqualTo(torsdag);

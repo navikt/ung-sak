@@ -34,7 +34,7 @@ public class MånedsvisningDtoMapper {
 
         var statusTidslinje = UtbetalingstatusUtleder.finnUtbetalingsstatusTidslinje(aktuellAvsluttetTid, tidslinjeMap, LocalDate.now());
         final var månederMedYtelse = månedsvisPeriodisering.intersection(tilkjentYtelseTidslinje.mapValue(it -> true).compress());
-        return månederMedYtelse.toSegments().stream().map(måned -> {
+        return månederMedYtelse.segmenter().stream().map(måned -> {
             final var tilkjentYtelseForMåned = tilkjentYtelseTidslinje.intersection(måned.getLocalDateInterval());
             final var kontrollertInntektForMåned = kontrollertInntektTidslinje.intersection(måned.getLocalDateInterval());
             final var satsperioder = mapSatsperioderForMåned(måned, satsTidslinje);
@@ -73,25 +73,25 @@ public class MånedsvisningDtoMapper {
     }
 
     private static List<AktivitetspengerSatsPeriodeDto> mapSatsperioderForMåned(LocalDateSegment<YearMonth> måned, LocalDateTimeline<AktivitetspengerSatser> satsTidslinje) {
-        return satsTidslinje.intersection(måned.getLocalDateInterval()).toSegments().stream()
+        return satsTidslinje.intersection(måned.getLocalDateInterval()).segmenter().stream()
             .map(it -> mapTilSatsperiode(it.getLocalDateInterval(), it.getValue()))
             .toList();
     }
 
     private static BigDecimal finnUtbetaltBeløp(LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseForMåned) {
-        return tilkjentYtelseForMåned.toSegments().stream().map(LocalDateSegment::getValue)
+        return tilkjentYtelseForMåned.segmenter().stream().map(LocalDateSegment::getValue)
             .map(TilkjentYtelseVerdi::tilkjentBeløp)
             .reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }
 
     private static Optional<BigDecimal> finnRapportertInntekt(LocalDateTimeline<KontrollerteInntekter> kontrollertInntektForMåned) {
-        return kontrollertInntektForMåned.toSegments().stream().map(LocalDateSegment::getValue)
+        return kontrollertInntektForMåned.segmenter().stream().map(LocalDateSegment::getValue)
             .map(KontrollerteInntekter::inntekt)
             .reduce(BigDecimal::add);
     }
 
     private static BigDecimal finnReduksjon(LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelseForMåned) {
-        return tilkjentYtelseForMåned.toSegments().stream().map(LocalDateSegment::getValue)
+        return tilkjentYtelseForMåned.segmenter().stream().map(LocalDateSegment::getValue)
             .map(TilkjentYtelseVerdi::reduksjon)
             .reduce(BigDecimal::add).orElse(BigDecimal.ZERO);
     }

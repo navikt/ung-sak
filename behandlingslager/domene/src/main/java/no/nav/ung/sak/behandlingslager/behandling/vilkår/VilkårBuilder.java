@@ -133,7 +133,7 @@ public class VilkårBuilder {
 
     public boolean harDataPåPeriode(DatoIntervallEntitet periode) {
         return vilkårTidslinje.intersection(periode.toLocalDateInterval())
-            .toSegments()
+            .segmenter()
             .stream()
             .anyMatch(it -> Objects.nonNull(it.getValue()));
     }
@@ -201,7 +201,7 @@ public class VilkårBuilder {
     private void kobleSammenMellomliggendeVilkårsPerioder() {
         var mellomliggendeSegmenter = new TreeSet<DatoIntervallEntitet>();
         LocalDate tom = null;
-        for (LocalDateSegment<WrappedVilkårPeriode> periode : vilkårTidslinje.toSegments()) {
+        for (LocalDateSegment<WrappedVilkårPeriode> periode : vilkårTidslinje.segmenter()) {
             if (tom != null && erMellomliggendePeriode(tom, periode.getFom())) {
                 mellomliggendeSegmenter.add(DatoIntervallEntitet.fraOgMedTilOgMed(tom, periode.getFom().minusDays(1)));
             }
@@ -261,7 +261,7 @@ public class VilkårBuilder {
         bygget = true;
         vilkårTidslinje = vilkårTidslinje.compress();
         var vilkårsPerioderRaw = vilkårTidslinje
-            .toSegments()
+            .segmenter()
             .stream()
             .filter(it -> it.getValue() != null)
             .map(this::opprettHoldKonsistens)
@@ -336,7 +336,7 @@ public class VilkårBuilder {
             .map(it -> new LocalDateSegment<>(it.getFom(), it.getTom(), new WrappedVilkårPeriode(it)))
             .collect(Collectors.toList()));
         timeline = timeline.compress();
-        return timeline.toSegments()
+        return timeline.segmenter()
             .stream()
             .filter(it -> it.getValue() != null)
             .map(this::opprettHoldKonsistens)
@@ -367,7 +367,7 @@ public class VilkårBuilder {
         }
 
         var vilkårsPerioderRaw = vilkårTidslinje
-            .toSegments()
+            .segmenter()
             .stream()
             .filter(it -> it.getValue() != null)
             .map(this::opprettHoldKonsistens)

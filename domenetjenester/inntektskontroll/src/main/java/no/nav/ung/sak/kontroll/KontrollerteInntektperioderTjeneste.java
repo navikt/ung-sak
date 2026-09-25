@@ -143,7 +143,7 @@ public class KontrollerteInntektperioderTjeneste {
     private static List<KontrollertInntektPeriode> mapAutomatiskKontrollerteInntektperioder(
         LocalDateTimeline<Inntektsresultat> inntektTidslinje,
         LocalDateTimeline<RapporterteInntekter> rapporterteInntekterTidslinje) {
-        return inntektTidslinje.toSegments().stream().map(vurdertInntektTidslinjesegment -> {
+        return inntektTidslinje.segmenter().stream().map(vurdertInntektTidslinjesegment -> {
                 var rapporterteInntekter = Optional.ofNullable(rapporterteInntekterTidslinje.getSegment(vurdertInntektTidslinjesegment.getLocalDateInterval())).map(it -> it.getValue());
                 return KontrollertInntektPeriode.ny()
                     .medPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(vurdertInntektTidslinjesegment.getFom(), vurdertInntektTidslinjesegment.getTom()))
@@ -166,7 +166,7 @@ public class KontrollerteInntektperioderTjeneste {
      * @return List med kontrollerte perioder
      */
     private static List<KontrollertInntektPeriode> mapManueltKontrollerteInntektperioder(LocalDateTimeline<ManueltKontrollertInntekt> inntektTidslinje, LocalDateTimeline<RapporterteInntekter> rapportertInntektTidslinje) {
-        return inntektTidslinje.toSegments().stream().map(
+        return inntektTidslinje.segmenter().stream().map(
             s -> {
                 var rapporterteInntekter = Optional.ofNullable(rapportertInntektTidslinje.getSegment(s.getLocalDateInterval())).map(it -> it.getValue());
                 return KontrollertInntektPeriode.ny()

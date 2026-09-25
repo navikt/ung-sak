@@ -23,7 +23,7 @@ class UngdomsytelseGrunnlagBuilder {
     }
 
     UngdomsytelseGrunnlagBuilder medSatsPerioder(LocalDateTimeline<UngdomsytelseSatser> nyePerioder, String regelInput, String regelSporing) {
-        var entitetPerioder = nyePerioder.toSegments().stream().map(UngdomsytelseGrunnlagBuilder::mapTilPeriode).toList();
+        var entitetPerioder = nyePerioder.segmenter().stream().map(UngdomsytelseGrunnlagBuilder::mapTilPeriode).toList();
         this.satsPerioder = new UngdomsytelseSatsPerioder(entitetPerioder, regelInput, regelSporing);
         return this;
     }

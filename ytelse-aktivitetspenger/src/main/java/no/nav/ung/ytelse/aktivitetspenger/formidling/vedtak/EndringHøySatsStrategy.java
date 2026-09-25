@@ -53,7 +53,7 @@ public final class EndringHøySatsStrategy implements VedtaksbrevInnholdbyggerSt
             return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,
                 "Har ikke tidligere beregnet sats"));
         } else {
-            boolean allePerioderErBeregningsgrunnlag = satstidslinje.get().toSegments().stream()
+            boolean allePerioderErBeregningsgrunnlag = satstidslinje.get().segmenter().stream()
                 .allMatch(s -> s.getValue().hentSatsType() == AktivitetspengerSatsType.BEREGNINGSGRUNNLAG);
             if (allePerioderErBeregningsgrunnlag) {
                 return List.of(VedtaksbrevStrategyResultat.utenBrev(IngenBrevÅrsakType.IKKE_RELEVANT,

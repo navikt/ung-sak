@@ -49,7 +49,7 @@ public class EndringInntektUtenReduksjonInnholdBygger implements VedtaksbrevInnh
 
         var fullUtbetalingsperioder = relevantTilkjentYtelse.mapValue(_ -> true)
             .compress()
-            .toSegments().stream()
+            .segmenter().stream()
             .sorted(Comparator.comparing(LocalDateSegment::getLocalDateInterval))
             .map(it -> new PeriodeDto(it.getFom(), it.getTom()))
             .collect(Collectors.toSet());

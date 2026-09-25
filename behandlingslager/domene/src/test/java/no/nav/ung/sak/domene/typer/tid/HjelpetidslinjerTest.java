@@ -23,7 +23,7 @@ public class HjelpetidslinjerTest {
             new LocalDateSegment<>(mandag, mandag, true))
         );
         var hullSomMåTettes = Hjelpetidslinjer.utledHullSomMåTettes(tidslinje, new PåTversAvHelgErKantIKantVurderer());
-        var segmenter = hullSomMåTettes.toSegments();
+        var segmenter = hullSomMåTettes.segmenter();
         Assertions.assertThat(segmenter.size()).isEqualTo(1);
         Assertions.assertThat(segmenter.getFirst().getFom()).isEqualTo(fredag.plusDays(1));
         Assertions.assertThat(segmenter.getFirst().getTom()).isEqualTo(mandag.minusDays(1));
@@ -323,7 +323,7 @@ public class HjelpetidslinjerTest {
     }
 
     private <V> void assertTidslinjeInneholder(LocalDateTimeline<V> resultat, LocalDate... datoer) {
-        final var segments = resultat.toSegments();
+        final var segments = resultat.segmenter();
         assertThat(segments.size()).isEqualTo(datoer.length / 2);
         int index = 0;
         for (LocalDateSegment<V> segment : segments) {

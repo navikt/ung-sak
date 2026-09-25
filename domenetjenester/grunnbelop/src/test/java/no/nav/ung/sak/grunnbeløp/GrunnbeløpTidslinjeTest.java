@@ -16,7 +16,7 @@ class GrunnbeløpSnittTidslinjeTest {
     void skal_ha_oppjusteringsfaktor_for_siste_tre_år() {
         var grunnbeløpVedStp = BigDecimal.valueOf(130160); // Grunnbeløp 2026
         LocalDateTimeline<BigDecimal> oppjusteringsTidslinje = GrunnbeløpSnittTidslinje.lagOppjusteringsfaktorTidslinje(Year.of(2026), grunnbeløpVedStp, 3);
-        for (LocalDateSegment<BigDecimal> segment : oppjusteringsTidslinje.toSegments()) {
+        for (LocalDateSegment<BigDecimal> segment : oppjusteringsTidslinje.segmenter()) {
             int år = segment.getFom().getYear();
 
             var verdi = segment.getValue();
@@ -27,7 +27,7 @@ class GrunnbeløpSnittTidslinjeTest {
             }
         }
 
-        long antallTidligereÅr = oppjusteringsTidslinje.toSegments().stream()
+        long antallTidligereÅr = oppjusteringsTidslinje.segmenter().stream()
             .filter(s -> s.getFom().getYear() < 2026)
             .count();
 

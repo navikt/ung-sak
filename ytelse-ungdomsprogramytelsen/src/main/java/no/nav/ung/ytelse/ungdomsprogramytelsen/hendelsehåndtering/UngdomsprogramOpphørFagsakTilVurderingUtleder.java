@@ -107,7 +107,7 @@ public class UngdomsprogramOpphørFagsakTilVurderingUtleder implements FagsakerT
         }
 
 
-        final var perioder = tidslinje.toSegments();
+        final var perioder = tidslinje.segmenter();
 
         if (perioder.size() > 1) {
             throw new IllegalStateException("Støtter ikke endring av periode for mer enn en periode");

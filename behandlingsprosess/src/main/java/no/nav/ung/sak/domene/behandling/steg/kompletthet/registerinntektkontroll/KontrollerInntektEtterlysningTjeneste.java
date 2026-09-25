@@ -105,7 +105,7 @@ public class KontrollerInntektEtterlysningTjeneste {
         List<Etterlysning> etterlysningerSomSkalAvbrytes = new ArrayList<>();
         List<Etterlysning> etterlysningerSomSkalOpprettes = new ArrayList<>();
         var grunnlag = inntektArbeidYtelseTjeneste.finnGrunnlag(behandlingReferanse.getBehandlingId());
-        for (var kontrollSegment : resultat.toSegments()) {
+        for (var kontrollSegment : resultat.segmenter()) {
             switch (kontrollSegment.getValue()) {
                 case ERSTATT_EKSISTERENDE -> {
                     log.info("Oppretter ny etterlysning med utvidet frist for periode {}", kontrollSegment.getLocalDateInterval());

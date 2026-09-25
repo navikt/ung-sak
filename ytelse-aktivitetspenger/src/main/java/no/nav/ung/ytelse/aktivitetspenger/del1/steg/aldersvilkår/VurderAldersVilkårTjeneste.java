@@ -30,17 +30,17 @@ public class VurderAldersVilkårTjeneste {
         LocalDateTimeline<Boolean> forGammelTidslinje = tilVurderingTidslinje.intersection(new LocalDateTimeline<>(sisteDagMedGodkjentAlder.plusDays(1), LocalDate.MAX, true));
         LocalDateTimeline<Boolean> godkjentAlderTidsinje = tilVurderingTidslinje.disjoint(forUngTidslinje).disjoint(forGammelTidslinje);
 
-        for (LocalDateSegment<Boolean> segment : forUngTidslinje.toSegments()) {
+        for (LocalDateSegment<Boolean> segment : forUngTidslinje.segmenter()) {
             VilkårPeriodeBuilder builder = vilkårBuilder.hentBuilderFor(segment.getFom(), segment.getTom());
             builder.medUtfall(Utfall.IKKE_OPPFYLT).medAvslagsårsak(Avslagsårsak.SØKER_UNDER_MINSTE_ALDER).medRegelInput(regelInput);
             vilkårBuilder.leggTil(builder);
         }
-        for (LocalDateSegment<Boolean> segment : forGammelTidslinje.toSegments()) {
+        for (LocalDateSegment<Boolean> segment : forGammelTidslinje.segmenter()) {
             VilkårPeriodeBuilder builder = vilkårBuilder.hentBuilderFor(segment.getFom(), segment.getTom());
             builder.medUtfall(Utfall.IKKE_OPPFYLT).medAvslagsårsak(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER).medRegelInput(regelInput);
             vilkårBuilder.leggTil(builder);
         }
-        for (LocalDateSegment<Boolean> segment : godkjentAlderTidsinje.toSegments()) {
+        for (LocalDateSegment<Boolean> segment : godkjentAlderTidsinje.segmenter()) {
             VilkårPeriodeBuilder builder = vilkårBuilder.hentBuilderFor(segment.getFom(), segment.getTom());
             builder.medUtfall(Utfall.OPPFYLT).medRegelInput(regelInput);
             vilkårBuilder.leggTil(builder);

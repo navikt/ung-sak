@@ -54,7 +54,7 @@ public final class EndringBarnDødsfallStrategy implements VedtaksbrevInnholdbyg
         if (ungdomsytelseGrunnlag.isPresent()) {
             LocalDateTimeline<UngdomsytelseSatser> satsTidslinje = ungdomsytelseGrunnlag.get().getSatsTidslinje()
                 .intersection(detaljertResultat);
-            var satsSegments = satsTidslinje.toSegments();
+            var satsSegments = satsTidslinje.segmenter();
             LocalDateSegment<UngdomsytelseSatser> previous = null;
             for (LocalDateSegment<UngdomsytelseSatser> current : satsSegments) {
                 if (previous == null) {

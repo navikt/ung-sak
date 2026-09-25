@@ -58,7 +58,7 @@ public class AktivitetspengerGrunnlagRepository {
         var grunnlagOptional = hentGrunnlag(behandlingId);
         var aktivtGrunnlag = grunnlagOptional.orElse(new AktivitetspengerGrunnlag());
 
-        var perioder = satsResultat.resultatTidslinje().toSegments().stream()
+        var perioder = satsResultat.resultatTidslinje().segmenter().stream()
             .map(s -> new AktivitetspengerSatsPeriode(s.getLocalDateInterval(), s.getValue()))
             .toList();
         var grunnsatser = new AktivitetspengerSatsPerioder(perioder, satsResultat.regelInput(), satsResultat.regelSporing());

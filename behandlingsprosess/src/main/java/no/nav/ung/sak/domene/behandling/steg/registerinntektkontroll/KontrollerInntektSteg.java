@@ -84,7 +84,7 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         var input = inputMapper.mapInput(behandlingReferanse);
         var kontrollResultat = new KontrollerInntektTjeneste(BigDecimal.valueOf(akseptertDifferanse)).utførKontroll(input);
 
-        log.info("Kontrollresultat ble {}", kontrollResultat.toSegments());
+        log.info("Kontrollresultat ble {}", kontrollResultat.segmenter());
         // Oppretter kontrollerte perioder
         opprettKontrollerteInntektPerioder(kontekst, kontrollResultat, input);
 

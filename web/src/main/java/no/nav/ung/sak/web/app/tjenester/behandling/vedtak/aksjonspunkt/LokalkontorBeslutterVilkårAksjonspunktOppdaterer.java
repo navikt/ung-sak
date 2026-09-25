@@ -6,7 +6,9 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.VurderÅrsak;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
@@ -14,6 +16,9 @@ import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktRepository;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.domene.vedtak.VedtakAksjonspunktData;
 import no.nav.ung.sak.kontrakt.vedtak.AksjonspunktGodkjenningDto;
@@ -21,12 +26,9 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilk
 import no.nav.ung.sak.produksjonsstyring.totrinn.TotrinnTjeneste;
 import no.nav.ung.sak.produksjonsstyring.totrinn.Totrinnsvurdering;
 import no.nav.ung.ytelse.aktivitetspenger.del1.steg.beslutte.LokalkontorBeslutteVilkårAksjonspunkt;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.beslutte.LokalkontorBeslutteVilkårTjeneste;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -36,6 +38,7 @@ public class LokalkontorBeslutterVilkårAksjonspunktOppdaterer implements Aksjon
     private LokalkontorBeslutteVilkårAksjonspunkt beslutteVilkårAksjonspunkt;
     private TotrinnTjeneste totrinnTjeneste;
     private BehandlingRepository behandlingRepository;
+    private HistorikkinnslagRepository historikkinnslagRepository;
 
     LokalkontorBeslutterVilkårAksjonspunktOppdaterer() {
         // for CDI proxy
@@ -44,10 +47,12 @@ public class LokalkontorBeslutterVilkårAksjonspunktOppdaterer implements Aksjon
     @Inject
     public LokalkontorBeslutterVilkårAksjonspunktOppdaterer(LokalkontorBeslutteVilkårAksjonspunkt beslutteVilkårAksjonspunkt,
                                                             TotrinnTjeneste totrinnTjeneste,
-                                                            BehandlingRepository behandlingRepository) {
+                                                            BehandlingRepository behandlingRepository,
+                                                            HistorikkinnslagRepository historikkinnslagRepository) {
         this.beslutteVilkårAksjonspunkt = beslutteVilkårAksjonspunkt;
         this.totrinnTjeneste = totrinnTjeneste;
         this.behandlingRepository = behandlingRepository;
+        this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     @Override
@@ -76,10 +81,64 @@ public class LokalkontorBeslutterVilkårAksjonspunktOppdaterer implements Aksjon
         boolean sendesTilbake = dto.getAksjonspunktGodkjenningDtos().stream().anyMatch(a -> !a.isGodkjent());
         if (!sendesTilbake) {
             validerAlleTotrinnsaksjonspunkterVurdert(param.getBehandlingId());
+            lagHistorikkInnslagBesluttetVilkår(behandling);
+        } else {
+            lagHistorikkInnslagVurderPåNytt(behandling, totrinnTjeneste.hentTotrinnaksjonspunktvurderinger(behandling));
         }
-
         return OppdateringResultat.nyttResultat();
     }
+
+    private void lagHistorikkInnslagBesluttetVilkår(Behandling behandling) {
+        var historikkinnslag = new Historikkinnslag.Builder()
+            .medAktør(HistorikkAktør.LOKALKONTOR_BESLUTTER)
+            .medFagsakId(behandling.getFagsakId())
+            .medBehandlingId(behandling.getId())
+            .medTittel(SkjermlenkeType.LOKALKONTOR_BESLUTTER_VILKÅR)
+            .addLinje("Vilkår som behandles ved lokalkontor er besluttet")
+            .build();
+        historikkinnslagRepository.lagre(historikkinnslag);
+    }
+
+
+    private void lagHistorikkInnslagVurderPåNytt(Behandling behandling, Collection<Totrinnsvurdering> medTotrinnskontroll) {
+        var historikkinnslag = new Historikkinnslag.Builder()
+            .medAktør(HistorikkAktør.LOKALKONTOR_BESLUTTER)
+            .medFagsakId(behandling.getFagsakId())
+            .medBehandlingId(behandling.getId())
+            .medTittel("Sak retur")
+            .medLinjer(lagTekstForHverTotrinnkontroll(medTotrinnskontroll))
+            .build();
+        historikkinnslagRepository.lagre(historikkinnslag);
+    }
+
+    private static List<HistorikkinnslagLinjeBuilder> lagTekstForHverTotrinnkontroll(Collection<Totrinnsvurdering> medTotrinnskontroll) {
+        return medTotrinnskontroll.stream()
+            .sorted(Comparator.comparing(ttv -> ttv.getEndretTidspunkt() != null ? ttv.getEndretTidspunkt() : ttv.getOpprettetTidspunkt()))
+            .map(LokalkontorBeslutterVilkårAksjonspunktOppdaterer::tilHistorikkinnslagTekst)
+            .map(LokalkontorBeslutterVilkårAksjonspunktOppdaterer::leggTilLinjeskift)
+            .flatMap(Collection::stream)
+            .toList();
+    }
+
+    private static List<HistorikkinnslagLinjeBuilder> tilHistorikkinnslagTekst(Totrinnsvurdering ttv) {
+        var aksjonspunktNavn = ttv.getAksjonspunktDefinisjon().getNavn();
+        if (Boolean.TRUE.equals(ttv.isGodkjent())) {
+            return List.of(new HistorikkinnslagLinjeBuilder().bold(aksjonspunktNavn).bold("er godkjent"));
+        }
+        var linjer = new ArrayList<HistorikkinnslagLinjeBuilder>();
+        linjer.add(new HistorikkinnslagLinjeBuilder().bold(aksjonspunktNavn).bold("må vurderes på nytt"));
+        if (ttv.getBegrunnelse() != null) {
+            linjer.add(new HistorikkinnslagLinjeBuilder().tekst("Kommentar:").tekst(ttv.getBegrunnelse()));
+        }
+        return linjer;
+    }
+
+    private static List<HistorikkinnslagLinjeBuilder> leggTilLinjeskift(List<HistorikkinnslagLinjeBuilder> eksistrendeLinjer) {
+        var linjer = new ArrayList<>(eksistrendeLinjer);
+        linjer.add(HistorikkinnslagLinjeBuilder.LINJESKIFT);
+        return linjer;
+    }
+
 
     private void validerAlleTotrinnsaksjonspunkterVurdert(Long behandlingId) {
         Behandling behandling = behandlingRepository.hentBehandling(behandlingId);
