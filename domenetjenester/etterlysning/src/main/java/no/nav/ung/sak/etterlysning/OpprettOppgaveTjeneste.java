@@ -107,7 +107,7 @@ public class OpprettOppgaveTjeneste {
         String tittel = "Oppretter oppgave til bruker";
         List<DatoIntervallEntitet> sortertePerioder = etterlysninger.stream().map(Etterlysning::getPeriode).sorted().toList();
         List<HistorikkinnslagLinjeBuilder> linjer = new ArrayList<>();
-        linjer.add(HistorikkinnslagLinjeBuilder.plainTekstLinje(HistorikkinnslagLinjeBuilder.format(etterlysningType)));
+        linjer.add(HistorikkinnslagLinjeBuilder.plainTekstLinje(tilHistorikkNavn(etterlysningType)));
         String prefix = "for periode ";
         for (DatoIntervallEntitet periode : sortertePerioder) {
             linjer.add(HistorikkinnslagLinjeBuilder.plainTekstLinje(prefix + HistorikkinnslagLinjeBuilder.format(periode)));
@@ -120,6 +120,19 @@ public class OpprettOppgaveTjeneste {
             .medLinjer(linjer)
             .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN)
             .build());
+    }
+
+    private String tilHistorikkNavn(EtterlysningType etterlysningType){
+        return switch (etterlysningType) {
+            case UTTALELSE_KONTROLL_INNTEKT -> "Varsel: Avvik i registerinntekt";
+            case UTTALELSE_ENDRET_STARTDATO -> "Varsel: Endret startdato";
+            case UTTALELSE_ENDRET_SLUTTDATO -> "Varsel: Endret sluttdato";
+            case UTTALELSE_ENDRET_PERIODE -> "Varsel: Endret programperiode";
+            case UTTALELSE_OPPHOR_VED_MAKSDATO -> "Varsel: Opphør ved maksdato";
+            case UTTALELSE_BOSTED -> "Varsel: Bostedavklaring";
+            case UTTALELSE_BISTAND -> "Varsel: Bistandsavklaring";
+            case UTTALELSE_ANDRE_LIVSOPPHOLDSYTELSER -> "Varsel: Avklaring av andre livsoppholdsytelser";
+        };
     }
 
 }
