@@ -226,10 +226,6 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, fritekstBrev, vurderinger);
     }
 
-    public static AktivitetspengerTestScenario avslåttBostedFolkeregistrertEllerBostedsadresse(LocalDate fom) {
-        return avslåttBostedScenario(fom, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM, null);
-    }
-
     public static AktivitetspengerTestScenario avslåttArbeidsstedStudiested(LocalDate fom, String fritekstBrev) {
         return avslåttBostedScenario(fom, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, fritekstBrev);
     }

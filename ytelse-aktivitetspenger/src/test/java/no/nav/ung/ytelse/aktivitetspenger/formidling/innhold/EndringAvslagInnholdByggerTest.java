@@ -65,7 +65,7 @@ class EndringAvslagInnholdByggerTest {
         lenient().when(behandling.getId()).thenReturn(BEHANDLING_ID);
     }
 
-    @DisplayName("Vilkår avklart likt gir ett brev med felles periode og en blokk per vilkår")
+    @DisplayName("Vilkår avklart likt gir ett brev med periode og en blokk per vilkår")
     @Test
     void likeAvklaringerGirBrev() {
         avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR),
@@ -75,9 +75,10 @@ class EndringAvslagInnholdByggerTest {
 
         assertThat(resultat.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
         var dto = (EndringAvslagDto) resultat.templateInnholdDto();
-        assertThat(dto.periode()).isEqualTo(new Periode(FOM, TOM));
         assertThat(dto.bosted()).isNotNull();
+        assertThat(dto.bosted().periode()).isEqualTo(new Periode(FOM, TOM));
         assertThat(dto.andreLivsoppholdsytelser()).isNotNull();
+        assertThat(dto.andreLivsoppholdsytelser().periode()).isEqualTo(new Periode(FOM, TOM));
     }
 
     @DisplayName("Vilkår som ikke er avslått får null, og malen skriver da ingenting om det")
@@ -104,15 +105,17 @@ class EndringAvslagInnholdByggerTest {
             .hasMessageContaining("avklart ulikt");
     }
 
-    @DisplayName("Innledningssetningen skrives én gang, så perioden kan ikke være ulik")
+    @DisplayName("Periode er en del av hvert vilkårs avsnitt, så vilkår kan avklares med ulik periode")
     @Test
-    void ulikPeriode() {
+    void ulikPeriodeErStøttet() {
         avklaringerErUtledet(bosted(FOM, TOM, Avklaringtype.OPPHØR),
             livsopphold(FOM.plusDays(1), TOM, Avklaringtype.OPPHØR));
 
-        assertThatThrownBy(() -> bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, VilkårType.BOSTEDSVILKÅR)))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("avklart ulikt");
+        var resultat = bygger.bygg(behandling, avslåtteVilkårTidslinje(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, VilkårType.BOSTEDSVILKÅR));
+
+        var dto = (EndringAvslagDto) resultat.templateInnholdDto();
+        assertThat(dto.bosted().periode()).isEqualTo(new Periode(FOM, TOM));
+        assertThat(dto.andreLivsoppholdsytelser().periode()).isEqualTo(new Periode(FOM.plusDays(1), TOM));
     }
 
     @DisplayName("En avklaring på et annet vilkår deler ikke perioden til det avslåtte vilkåret")
@@ -127,8 +130,8 @@ class EndringAvslagInnholdByggerTest {
         var resultat = bygger.bygg(behandling, avslåtteVilkårTidslinje(fom, tom, VilkårType.BOSTEDSVILKÅR));
 
         var dto = (EndringAvslagDto) resultat.templateInnholdDto();
-        assertThat(dto.periode()).isEqualTo(new Periode(fom, tom));
         assertThat(dto.bosted()).isNotNull();
+        assertThat(dto.bosted().periode()).isEqualTo(new Periode(fom, tom));
         assertThat(dto.andreLivsoppholdsytelser()).isNull();
     }
 
