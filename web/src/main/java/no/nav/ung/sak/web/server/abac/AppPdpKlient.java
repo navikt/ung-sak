@@ -5,10 +5,12 @@ import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Alternative;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.konfigurasjon.env.Environment;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.PdpKlient;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.TilgangType;
 import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
+import no.nav.k9.felles.sikkerhet.abac.ÅrsakIkkeTilgang;
 import no.nav.sif.abac.kontrakt.abac.AbacFagsakYtelseType;
 import no.nav.sif.abac.kontrakt.abac.ResourceType;
 import no.nav.sif.abac.kontrakt.abac.dto.SaksinformasjonOgPersonerTilgangskontrollInputDto;
@@ -33,6 +35,11 @@ public class AppPdpKlient implements PdpKlient {
     @Override
     public Tilgangsbeslutning forespørTilgang(PdpRequest pdpRequest) {
         TilgangType tilgangType = TilgangType.INTERNBRUKER; //resterende tilgangtyper er håntdert i PepImpl
+
+        if (pdpRequest.getResourceType() == BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD) {
+            //kun for systemkall fra tilleggsstønader (se AppPdpRequestBuilderImpl), aldri for innloggede brukere
+            return new Tilgangsbeslutning(false, Set.of(ÅrsakIkkeTilgang.HAR_IKKE_TILGANG_TIL_APPLIKASJONEN), pdpRequest, tilgangType);
+        }
 
         SaksinformasjonOgPersonerTilgangskontrollInputDto tilgangskontrollInput = PdpRequestMapper.map(pdpRequest);
 
