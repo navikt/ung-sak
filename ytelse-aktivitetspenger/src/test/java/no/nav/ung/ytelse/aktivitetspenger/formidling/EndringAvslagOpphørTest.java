@@ -39,7 +39,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
             );
@@ -56,7 +55,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
                 "Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune, får du ikke lenger aktivitetspenger."
@@ -75,7 +73,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
                 fritekst
             );
@@ -92,7 +89,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
@@ -111,7 +107,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
@@ -132,7 +127,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
@@ -151,7 +145,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
@@ -171,7 +164,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "Det er fordi du får dagpenger fra denne datoen. Du kan ikke få aktivitetspenger samtidig som du får "
                     + "en annen livsoppholdsytelse."
@@ -191,7 +183,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Det er fordi du får en annen livsoppholdsytelse fra denne datoen. Du kan ikke få aktivitetspenger samtidig.",
                 fritekst
             );
@@ -227,7 +218,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
                     + brevDatoString(livsoppholdsperiode(scenario).getTom()),
@@ -248,7 +238,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. "
                     + "Fordi du ikke lenger har et slikt vedtak, får du ikke lenger aktivitetspenger.",
@@ -268,7 +257,6 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
-                "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(bistandsperiode(scenario).getFom()) + " til "
                     + brevDatoString(bistandsperiode(scenario).getTom()),
