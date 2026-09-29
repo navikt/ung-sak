@@ -8,6 +8,8 @@ public record AvslåttBistand(
     Periode periode
 ) {
     public enum Bistandsårsak {
-        HAR_IKKE_14A_VEDTAK
+        KOMMET_I_ARBEID,
+        KOMMET_I_UTDANNING,
+        ANNEN_ÅRSAK
     }
 }

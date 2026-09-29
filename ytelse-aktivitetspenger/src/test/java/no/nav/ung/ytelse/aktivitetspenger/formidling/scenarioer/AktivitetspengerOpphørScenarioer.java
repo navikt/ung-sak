@@ -63,7 +63,7 @@ public class AktivitetspengerOpphørScenarioer {
 
     public static AktivitetspengerTestScenario opphørPgaBistand(LocalDate fom, String fritekstTilBrev) {
         var opphørtVilkårPeriode = opphørtPeriode(fom);
-        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
+        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID;
 
         var vurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)

@@ -94,7 +94,7 @@ public class AktivitetspengerEndringAvslagScenarioer {
 
     public static AktivitetspengerTestScenario avslagPgaBistand(LocalDate fom, String fritekstTilBrev) {
         var avslåttVilkårPeriode = avslåttPeriode(fom);
-        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
+        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID;
 
         var vurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(avslåttVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
@@ -144,7 +144,7 @@ public class AktivitetspengerEndringAvslagScenarioer {
 
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medBostedsvilkårResultat(new Periode(fom, maksTom), true, null, null)
-            .medBistandsvilkårResultat(innvilgetPeriode, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstTilBrev)
+            .medBistandsvilkårResultat(innvilgetPeriode, false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, fritekstTilBrev)
             .build();
 
         return AktivitetspengerTestScenario.builder()

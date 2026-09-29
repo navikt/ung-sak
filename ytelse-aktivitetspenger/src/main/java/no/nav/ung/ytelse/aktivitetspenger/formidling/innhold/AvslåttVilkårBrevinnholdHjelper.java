@@ -80,7 +80,9 @@ public class AvslåttVilkårBrevinnholdHjelper {
         var vurdering = avslag.vurdering();
         var årsak = årsakFra(vurdering, BistandsvilkårIkkeOppfyltÅrsak.class);
         var brevårsak = switch (årsak) {
-            case IKKE_14A_VEDTAK -> Bistandsårsak.HAR_IKKE_14A_VEDTAK;
+            case KOMMET_I_ARBEID -> Bistandsårsak.KOMMET_I_ARBEID;
+            case KOMMET_I_UTDANNING -> Bistandsårsak.KOMMET_I_UTDANNING;
+            case ANNET -> Bistandsårsak.ANNEN_ÅRSAK;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
         return new AvslåttBistand(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());

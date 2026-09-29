@@ -94,17 +94,17 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     @DisplayName("Årsak som krever fritekst feiler uten")
     @Test
     void fritekstErPåkrevdNårÅrsakenKreverDen() {
-        var vurdering = vurdering(VilkårType.BISTANDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, null);
+        var vurdering = vurdering(VilkårType.BISTANDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.ANNET, null);
 
         assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(new AvslåttVurdering(vurdering, PERIODE)))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("IKKE_14A_VEDTAK");
+            .hasMessageContaining("ANNET");
     }
 
     @DisplayName("Årsak fra et annet vilkår feiler")
     @Test
     void årsakFraFeilVilkårFeiler() {
-        var vurdering = vurdering(VilkårType.BOSTEDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, FRITEKST);
+        var vurdering = vurdering(VilkårType.BOSTEDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, FRITEKST);
 
         assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(new AvslåttVurdering(vurdering, PERIODE)))
             .isInstanceOf(IllegalStateException.class)
