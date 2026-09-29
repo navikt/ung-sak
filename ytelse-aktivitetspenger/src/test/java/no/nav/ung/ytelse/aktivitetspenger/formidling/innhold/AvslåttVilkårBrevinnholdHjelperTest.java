@@ -6,6 +6,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
+import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttAndreLivsoppholdsytelser.Livsoppholdsårsak;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBistand.Bistandsårsak;
@@ -13,6 +14,7 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttBosted.Bosteds�
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -25,15 +27,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AvslåttVilkårBrevinnholdHjelperTest {
 
     private static final String FRITEKST = "Saksbehandlers begrunnelse.";
+    private static final Periode PERIODE = new Periode(LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 31));
 
-    // AVKORTET er kun et teknisk avslag, som ikke brevet kal begrunne, og UDEFINERT er ingen årsak.
+    // AVKORTET er kun et teknisk avslag, som ikke brevet skal begrunne, og UDEFINERT er ingen årsak.
     private static final Set<String> IKKE_I_BREVET = Set.of("AVKORTET", "UDEFINERT");
 
     @DisplayName("Hver bostedsårsak i kodeverket oversettes til sin egen årsak i brevet")
     @Test
     void bostedsårsakerOversettesEntydig() {
         var brevårsaker = oversett(BostedsvilkårIkkeOppfyltÅrsak.class, VilkårType.BOSTEDSVILKÅR,
-            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurdering).årsak());
+            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(new AvslåttVurdering(vurdering, PERIODE)).årsak());
 
         assertThat(brevårsaker).doesNotHaveDuplicates().containsExactlyInAnyOrder(Bostedsårsak.values());
     }
@@ -42,7 +45,7 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     @Test
     void bistandsårsakerOversettesEntydig() {
         var brevårsaker = oversett(BistandsvilkårIkkeOppfyltÅrsak.class, VilkårType.BISTANDSVILKÅR,
-            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurdering).årsak());
+            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(new AvslåttVurdering(vurdering, PERIODE)).årsak());
 
         assertThat(brevårsaker).doesNotHaveDuplicates().containsExactlyInAnyOrder(Bistandsårsak.values());
     }
@@ -51,7 +54,7 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     @Test
     void livsoppholdsårsakerOversettesEntydig() {
         var brevårsaker = oversett(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.class, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
-            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(vurdering).årsak());
+            vurdering -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(new AvslåttVurdering(vurdering, PERIODE)).årsak());
 
         assertThat(brevårsaker).doesNotHaveDuplicates().containsExactlyInAnyOrder(Livsoppholdsårsak.values());
     }
@@ -60,30 +63,32 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     @Test
     void livsoppholdsårsakerNavngirYtelsen() {
         for (var årsak : EnumSet.complementOf(EnumSet.of(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE))) {
-            assertThat(AvslåttAndreLivsoppholdsytelser.av(årsak, FRITEKST).ytelseNavn()).isNotBlank();
+            assertThat(AvslåttAndreLivsoppholdsytelser.av(årsak, FRITEKST, PERIODE).ytelseNavn()).isNotBlank();
         }
-        assertThat(AvslåttAndreLivsoppholdsytelser.av(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE, FRITEKST).ytelseNavn()).isNull();
+        assertThat(AvslåttAndreLivsoppholdsytelser.av(Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE, FRITEKST, PERIODE).ytelseNavn()).isNull();
     }
 
     @DisplayName("Fritekst følger med standardårsaken, den erstatter den ikke")
     @Test
     void fritekstKommerITilleggTilStandardårsaken() {
         var livsopphold = AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(
-            vurdering(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, FRITEKST));
+            new AvslåttVurdering(vurdering(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, FRITEKST), PERIODE));
 
         assertThat(livsopphold.årsak()).isEqualTo(Livsoppholdsårsak.MOTTAR_DAGPENGER);
         assertThat(livsopphold.ytelseNavn()).isEqualTo("dagpenger");
         assertThat(livsopphold.fritekstBrev()).isEqualTo(FRITEKST);
+        assertThat(livsopphold.periode()).isEqualTo(PERIODE);
     }
 
     @DisplayName("Årsak som ikke krever fritekst kan stå uten")
     @Test
     void fritekstErValgfriNårÅrsakenIkkeKreverDen() {
         var bosted = AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(
-            vurdering(VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null));
+            new AvslåttVurdering(vurdering(VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null), PERIODE));
 
         assertThat(bosted.årsak()).isEqualTo(Bostedsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED);
         assertThat(bosted.fritekstBrev()).isNull();
+        assertThat(bosted.periode()).isEqualTo(PERIODE);
     }
 
     @DisplayName("Årsak som krever fritekst feiler uten")
@@ -91,7 +96,7 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     void fritekstErPåkrevdNårÅrsakenKreverDen() {
         var vurdering = vurdering(VilkårType.BISTANDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, null);
 
-        assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(vurdering))
+        assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(new AvslåttVurdering(vurdering, PERIODE)))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("IKKE_14A_VEDTAK");
     }
@@ -101,7 +106,7 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     void årsakFraFeilVilkårFeiler() {
         var vurdering = vurdering(VilkårType.BOSTEDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, FRITEKST);
 
-        assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(vurdering))
+        assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(new AvslåttVurdering(vurdering, PERIODE)))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("Ukjent ikkeOppfyltÅrsak");
     }
@@ -111,7 +116,7 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     void årsakUtenBrevtekstFeiler() {
         var avkortet = vurdering(VilkårType.BOSTEDSVILKÅR, BostedsvilkårIkkeOppfyltÅrsak.AVKORTET, FRITEKST);
 
-        assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(avkortet))
+        assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(new AvslåttVurdering(avkortet, PERIODE)))
             .isInstanceOf(IllegalStateException.class)
             .hasMessageContaining("AVKORTET");
     }

@@ -27,16 +27,16 @@ public enum Avslagsårsak implements Kodeverdi {
     ENDRET_STARTDATO_UNGDOMSPROGRAM("2002", "Endret start av ungdomsprogram",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8")),
 
-    YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED("3001", "Søker bor et sted som ikke er forenelig med ytelsen.",
+    YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED("3001", "Søker har ikke bostedsadresse i Trondheim kommune.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
-    SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE("3003", "Søker har livsoppholdsytelse som ikke er forenelig med ytelsen.",
+    SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE("3003", "Søker har annen livsoppholdsytelse.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
-    YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE("3004", "Søker har verken bosted eller folkeregistrert adresse som er forenlig med ytelsen.",
+    YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE("3004", "Søker har ikke bostedsadresse i Trondheim kommune.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
-    YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED("3005", "Søker har arbeidssted eller studiested som ikke er forenlig med ytelsen.",
+    YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED("3005", "Søker har ikke bostedsadresse i Trondheim kommune.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
 
     IKKE_14A_VEDTAK("3002", "Søker har ikke oppfølgingsvedtak etter Navloven §14a.",

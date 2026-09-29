@@ -3,27 +3,22 @@
     {{#> felles/seksjon/hoved }}
         <h1>Du får ikke lenger aktivitetspenger</h1>
 
-        <p>Fra {{periode.fom}} får du ikke lenger aktivitetspenger.</p>
-
-        <h2>Hvorfor får du ikke aktivitetspenger?</h2>
         {{#with bosted}}
             {{#eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED"}}
                 <p>
-                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
-                    Fordi du ikke lenger har bostedsadresse i Trondheim kommune, får du ikke lenger aktivitetspenger.
-                </p>
-            {{else eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE"}}
-                <p>
+                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi du ikke lenger har bostedsadresse i Trondheim kommune, får du ikke lenger aktivitetspenger.
                 </p>
             {{else eq årsak "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED"}}
                 <p>
-                    For å ha rett til aktivitetspenger må du studere eller jobbe i Trondheim kommune.
+                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
+                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune, får du ikke lenger aktivitetspenger.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
                 <p>
+                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                 </p>
             {{/eq}}
@@ -37,6 +32,7 @@
         {{#with bistand}}
             {{#eq årsak "HAR_IKKE_14A_VEDTAK"}}
                 <p>
+                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
                     For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a.
                     Fordi du ikke lenger har et slikt vedtak, får du ikke lenger aktivitetspenger.
                 </p>
@@ -51,12 +47,14 @@
         {{#with andreLivsoppholdsytelser}}
             {{#if ytelseNavn}}
                 <p>
+                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
                     Det er fordi du får {{ytelseNavn}} fra denne datoen.
                     Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
                 </p>
             {{/if}}
             {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
                 <p>
+                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
                     Det er fordi du får en annen livsoppholdsytelse fra denne datoen.
                     Du kan ikke få aktivitetspenger samtidig.
                 </p>

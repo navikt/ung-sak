@@ -1,13 +1,16 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.dto;
 
+import no.nav.ung.sak.typer.Periode;
+
 public record AvslåttAndreLivsoppholdsytelser(
     Livsoppholdsårsak årsak,
     // Ytelsesnavn i ubestemt form, f.eks. "dagpenger". Null når ytelsen ikke navngis i brevet.
     String ytelseNavn,
-    String fritekstBrev
+    String fritekstBrev,
+    Periode periode
 ) {
-    public static AvslåttAndreLivsoppholdsytelser av(Livsoppholdsårsak årsak, String fritekstBrev) {
-        return new AvslåttAndreLivsoppholdsytelser(årsak, årsak.ytelseNavn, fritekstBrev);
+    public static AvslåttAndreLivsoppholdsytelser av(Livsoppholdsårsak årsak, String fritekstBrev, Periode periode) {
+        return new AvslåttAndreLivsoppholdsytelser(årsak, årsak.ytelseNavn, fritekstBrev, periode);
     }
 
     public enum Livsoppholdsårsak {

@@ -149,7 +149,7 @@ class VurderBostedVilkårStegTest {
         assertThat(historikkinnslag).hasSize(1);
         Historikkinnslag innslaget = historikkinnslag.getFirst();
         assertThat(innslaget.getAktør()).isEqualByComparingTo(HistorikkAktør.VEDTAKSLØSNINGEN);
-        assertThat(innslaget.getLinjer()).containsOnly(HistorikkinnslagLinje.tekst("Perioden 01.01.2026 - 31.01.2026 ble vurdert til Ikke oppfylt. Søker har verken bosted eller folkeregistrert adresse som er forenlig med ytelsen.", 0));
+        assertThat(innslaget.getLinjer()).containsOnly(HistorikkinnslagLinje.tekst("Perioden 01.01.2026 - 31.01.2026 ble vurdert til Ikke oppfylt. Søker har ikke bostedsadresse i Trondheim kommune.", 0));
     }
 
     @Test

@@ -25,7 +25,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
 
     EndringAvslagOpphørTest() {
-        super(1, "Du får ikke lenger aktivitetspenger");
+        super(1, "får du ikke lenger aktivitetspenger");
     }
 
     @DisplayName("Opphør pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED")
@@ -58,7 +58,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "studere eller jobbe i Trondheim kommune"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
+                "Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune, får du ikke lenger aktivitetspenger."
             );
     }
 
@@ -114,7 +115,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "studere eller jobbe i Trondheim kommune"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
+                "Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune i denne perioden, får du ikke aktivitetspenger."
             );
     }
 
@@ -195,7 +197,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Opphør på både bosteds- og livsoppholdsvilkåret - innledning skrives én gang")
+    @DisplayName("Opphør på både bosteds- og livsoppholdsvilkåret - hvert vilkår har sin egen innledning")
     @Test
     void opphørBostedOgAndreLivsoppholdsytelser() {
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBostedOgAndreLivsoppholdsytelser(FOM);
@@ -204,12 +206,12 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
 
+        var innledning = "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger. ";
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
-                "Det er fordi du får dagpenger fra denne datoen"
+                innledning + "For å ha rett til aktivitetspenger må du bo i Trondheim kommune",
+                innledning + "Det er fordi du får dagpenger fra denne datoen"
             );
     }
 
