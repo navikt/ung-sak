@@ -83,6 +83,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
             case KOMMET_I_ARBEID -> Bistandsårsak.KOMMET_I_ARBEID;
             case KOMMET_I_UTDANNING -> Bistandsårsak.KOMMET_I_UTDANNING;
             case ANNET -> Bistandsårsak.ANNEN_ÅRSAK;
+            case IKKE_14A_VEDTAK -> Bistandsårsak.ANNEN_ÅRSAK;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
         return new AvslåttBistand(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());

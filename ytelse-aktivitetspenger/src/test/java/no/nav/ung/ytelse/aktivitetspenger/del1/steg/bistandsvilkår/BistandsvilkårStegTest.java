@@ -114,10 +114,8 @@ class BistandsvilkårStegTest {
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
     }
 
-
-    @Disabled("Venter på avklaring om årsaker for ikkeOppfyltÅrsaker for bistandsvilkåret")
     @Test
-    void skal_avslå_automatisk_nar_ikke_14a_vedtak_og_bruker_ikke_har_uttalelse() {
+    void skal_avslå_automatisk_nar_kommer_i_arbeid_og_bruker_ikke_har_uttalelse() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 

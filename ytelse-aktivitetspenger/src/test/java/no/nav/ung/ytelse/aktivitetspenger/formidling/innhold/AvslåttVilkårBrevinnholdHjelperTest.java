@@ -30,7 +30,7 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     private static final Periode PERIODE = new Periode(LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 31));
 
     // AVKORTET er kun et teknisk avslag, som ikke brevet skal begrunne, og UDEFINERT er ingen årsak.
-    private static final Set<String> IKKE_I_BREVET = Set.of("AVKORTET", "UDEFINERT");
+    private static final Set<String> IKKE_I_BREVET = Set.of("AVKORTET", "UDEFINERT", "IKKE_14A_VEDTAK");
 
     @DisplayName("Hver bostedsårsak i kodeverket oversettes til sin egen årsak i brevet")
     @Test
