@@ -63,7 +63,7 @@ class BistandAvklaringTjenesteTest {
         assertThat(lagret).hasSize(1);
         assertThat(tjeneste.hentForeslåtteAvklaringerSomInnhold(behandling.getId()).keySet())
             .extracting(VilkårsvarselInnhold::ikkeOppfyltÅrsak).map(IkkeOppfyltDetaljertÅrsak::getKode)
-            .containsExactly(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode());
+            .containsExactly(BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode());
 
         // Skal ikke berøre andre vilkårstyper
         assertThat(vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BOSTEDSVILKÅR)).isEmpty();
@@ -113,7 +113,7 @@ class BistandAvklaringTjenesteTest {
         var opprinneligReferanse = hentReferanser().getFirst();
 
         var medEndretPeriode = new BistandAvklaring(
-            new BistandVarselInnhold(new Periode(FOM, TOM.minusDays(1)), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null,
+            new BistandVarselInnhold(new Periode(FOM, TOM.minusDays(1)), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, null,
                 BistandsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG),
             "begrunnelse", null, "A12345", LocalDateTime.now());
         tjeneste.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(medEndretPeriode));
@@ -133,7 +133,7 @@ class BistandAvklaringTjenesteTest {
     }
 
     private BistandAvklaring lagBistandAvklaring(String begrunnelse) {
-        var innhold = new BistandVarselInnhold(new Periode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null,
+        var innhold = new BistandVarselInnhold(new Periode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, null,
             BistandsavklaringKildeType.BRUKER, null, Avklaringtype.AVSLAG);
         return new BistandAvklaring(innhold, begrunnelse, null, "A12345", LocalDateTime.now());
     }
@@ -150,7 +150,7 @@ class BistandAvklaringTjenesteTest {
         return new VilkårPeriodeAvklaringForeslått(
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode(),
+            BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode(),
             "begrunnelse",
             skalSendeVarsel,
             null,

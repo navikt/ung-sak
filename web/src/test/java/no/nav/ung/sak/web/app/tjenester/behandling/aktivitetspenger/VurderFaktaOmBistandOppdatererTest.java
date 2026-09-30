@@ -135,12 +135,12 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void skal_lagre_foreslatt_avklaring_og_opprette_etterlysning() {
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
+        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
         var avklaringer = hentSorterteAvklaringer();
         assertThat(avklaringer).hasSize(1);
         assertThat(avklaringer.getFirst().getPeriode()).isEqualTo(DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM));
-        assertThat(avklaringer.getFirst().getIkkeOppfyltÅrsakKode()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode());
+        assertThat(avklaringer.getFirst().getIkkeOppfyltÅrsakKode()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode());
         assertThat(avklaringer.getFirst().getVurdertAv()).isEqualTo(SAKSBEHANDLER);
 
         var etterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BISTAND);
@@ -151,7 +151,7 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_avklaring_er_uendret() {
-        var dto = dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
+        var dto = dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
         oppdater(dto);
 
         var referanseFørstegang = hentSorterteAvklaringer().getFirst().getReferanse();
@@ -168,11 +168,11 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, "opprinnelig begrunnelse"));
+        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, "opprinnelig begrunnelse"));
 
         var referanseFørstegang = hentSorterteAvklaringer().getFirst().getReferanse();
 
-        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, "rettet begrunnelse"));
+        oppdater(dtoMedVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, "rettet begrunnelse"));
 
         assertThat(hentSorterteAvklaringer())
             .extracting(VilkårPeriodeAvklaring::getBegrunnelse)
@@ -190,7 +190,7 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void skal_lagre_avklaring_uten_varsel_uten_a_opprette_etterlysning() {
-        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
         var avklaringer = hentSorterteAvklaringer();
         assertThat(avklaringer).hasSize(1);
@@ -203,7 +203,7 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void apen_tom_skal_lukkes_mot_maksdato_i_vilkarsperioden() {
-        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
+        oppdater(dtoUtenVarsel(new ÅpenPeriode(FOM.plusMonths(1), null), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
         var avklaringer = hentSorterteAvklaringer();
         assertThat(avklaringer).hasSize(1);
@@ -212,7 +212,7 @@ class VurderFaktaOmBistandOppdatererTest {
 
     @Test
     void skal_sette_vilkarsperiode_for_avklaringen_til_ikke_vurdert() {
-        var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
+        var dto = dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
         var param = new AksjonspunktOppdaterParameter(behandling, Optional.empty(), dto);
 
         oppdaterer.oppdater(dto, param);
@@ -231,19 +231,19 @@ class VurderFaktaOmBistandOppdatererTest {
 
         var revurdering = opprettRevurderingMedGrunnlagKopiert(originalBehandling, vilkårsperiode(heleperioden, Utfall.OPPFYLT));
 
-        var vilkårResultat1 = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(PERIODE_1.getFom(), PERIODE_1.getTom()), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
+        var vilkårResultat1 = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(PERIODE_1.getFom(), PERIODE_1.getTom()), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
         assertThat(hentAllePerioderMedIkkeVurdert(vilkårResultat1))
             .as("det skal finnes nøyaktig én periode med IKKE_VURDERT, og den skal være lik perioden for ny avklaring")
             .containsExactly(PERIODE_1);
 
         // Simulerer at saksbehandler har utført vilkårsvurderingen, men at behandlingen er retur fra beslutter.
-        lagreVilkårsvurderinger(revurdering, ikkeOppfyltVurdering(PERIODE_1, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, "vilkårsvurdering etter avklaring1"));
+        lagreVilkårsvurderinger(revurdering, ikkeOppfyltVurdering(PERIODE_1, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, "vilkårsvurdering etter avklaring1"));
 
         assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_1).getFirst().getBegrunnelse())
             .isEqualTo("vilkårsvurdering etter avklaring1");
 
-        var vilkårResultat = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(PERIODE_2.getFom(), PERIODE_2.getTom()), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
+        var vilkårResultat = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(PERIODE_2.getFom(), PERIODE_2.getTom()), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
         assertThat(hentVilkårsvurderingerForPeriode(revurdering, PERIODE_1).getFirst().getBegrunnelse())
             .as("vilkårsvurderingen for tidligere avklaring skal være erstattet av gjenopprettet vilkårsvurdering fra forrige behandling")
@@ -268,8 +268,8 @@ class VurderFaktaOmBistandOppdatererTest {
 
         var revurdering = opprettRevurderingMedGrunnlagKopiert(originalBehandling, vilkårsperiode(heleperioden, Utfall.IKKE_VURDERT));
 
-        oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
-        var vilkårResultat = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK));
+        oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
+        var vilkårResultat = oppdater(revurdering, dtoUtenVarsel(new ÅpenPeriode(FOM, TOM), BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID));
 
         assertThat(hentVilkårsperiode(vilkårResultat, heleperioden).getGjeldendeUtfall())
             .as("hele perioden det avklares på nytt for skal vurderes på nytt")

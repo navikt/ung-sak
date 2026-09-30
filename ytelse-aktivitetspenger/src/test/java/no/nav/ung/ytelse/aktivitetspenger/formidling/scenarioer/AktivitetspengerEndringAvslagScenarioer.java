@@ -93,8 +93,15 @@ public class AktivitetspengerEndringAvslagScenarioer {
     }
 
     public static AktivitetspengerTestScenario avslagPgaBistand(LocalDate fom, String fritekstTilBrev) {
+        return avslagPgaBistand(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, fritekstTilBrev);
+    }
+
+    public static AktivitetspengerTestScenario avslagPgaBistandKommetIUtdanning(LocalDate fom, String fritekstTilBrev) {
+        return avslagPgaBistand(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_UTDANNING, fritekstTilBrev);
+    }
+
+    public static AktivitetspengerTestScenario avslagPgaBistand(LocalDate fom, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
         var avslåttVilkårPeriode = avslåttPeriode(fom);
-        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
 
         var vurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(avslåttVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
@@ -144,7 +151,7 @@ public class AktivitetspengerEndringAvslagScenarioer {
 
         var inngangsvilkårVurderinger = InngangsvilkårVurderingTestData.builder()
             .medBostedsvilkårResultat(new Periode(fom, maksTom), true, null, null)
-            .medBistandsvilkårResultat(innvilgetPeriode, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, fritekstTilBrev)
+            .medBistandsvilkårResultat(innvilgetPeriode, false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, fritekstTilBrev)
             .build();
 
         return AktivitetspengerTestScenario.builder()

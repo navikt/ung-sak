@@ -42,7 +42,7 @@ class VilkårsavklaringKombinasjonTest {
     private static final LocalDate TOM = LocalDate.of(2026, 1, 31);
     private static final DatoIntervallEntitet PERIODE = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
     private static final BostedsvilkårIkkeOppfyltÅrsak BOSTED_ÅRSAK = BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM;
-    private static final BistandsvilkårIkkeOppfyltÅrsak BISTAND_ÅRSAK = BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK;
+    private static final BistandsvilkårIkkeOppfyltÅrsak BISTAND_ÅRSAK = BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID;
     private static final AndreLivsoppholdsytelserIkkeOppfyltÅrsak LIVSOPPHOLD_ÅRSAK = AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER;
 
     @Inject

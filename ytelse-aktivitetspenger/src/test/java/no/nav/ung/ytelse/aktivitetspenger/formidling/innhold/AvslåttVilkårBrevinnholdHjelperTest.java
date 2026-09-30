@@ -29,8 +29,8 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     private static final String FRITEKST = "Saksbehandlers begrunnelse.";
     private static final Periode PERIODE = new Periode(LocalDate.of(2025, 8, 1), LocalDate.of(2025, 8, 31));
 
-    // AVKORTET er kun et teknisk avslag, som ikke brevet skal begrunne, og UDEFINERT er ingen årsak.
-    private static final Set<String> IKKE_I_BREVET = Set.of("AVKORTET", "UDEFINERT");
+    // AVKORTET er kun et teknisk avslag, som ikke brevet skal begrunne, og UDEFINERT er ingen årsak. IKKE_14A_VEDTAK skal utgå
+    private static final Set<String> IKKE_I_BREVET = Set.of("AVKORTET", "UDEFINERT", "IKKE_14A_VEDTAK");
 
     @DisplayName("Hver bostedsårsak i kodeverket oversettes til sin egen årsak i brevet")
     @Test
@@ -94,17 +94,17 @@ class AvslåttVilkårBrevinnholdHjelperTest {
     @DisplayName("Årsak som krever fritekst feiler uten")
     @Test
     void fritekstErPåkrevdNårÅrsakenKreverDen() {
-        var vurdering = vurdering(VilkårType.BISTANDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, null);
+        var vurdering = vurdering(VilkårType.BISTANDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.ANNET, null);
 
         assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBistand(new AvslåttVurdering(vurdering, PERIODE)))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("IKKE_14A_VEDTAK");
+            .hasMessageContaining("ANNET");
     }
 
     @DisplayName("Årsak fra et annet vilkår feiler")
     @Test
     void årsakFraFeilVilkårFeiler() {
-        var vurdering = vurdering(VilkårType.BOSTEDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, FRITEKST);
+        var vurdering = vurdering(VilkårType.BOSTEDSVILKÅR, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, FRITEKST);
 
         assertThatThrownBy(() -> AvslåttVilkårBrevinnholdHjelper.lagAvslåttBosted(new AvslåttVurdering(vurdering, PERIODE)))
             .isInstanceOf(IllegalStateException.class)

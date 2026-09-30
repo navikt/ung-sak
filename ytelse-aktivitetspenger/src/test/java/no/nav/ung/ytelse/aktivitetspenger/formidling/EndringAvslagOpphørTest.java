@@ -236,10 +236,10 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Opphør pga bistandsvilkåret - mangler oppfølgingsvedtak etter § 14a")
+    @DisplayName("Opphør pga bistandsvilkåret - kommet i arbeid")
     @Test
     void opphørBistand() {
-        var fritekst = "Oppfølgingsvedtaket ditt etter § 14a er avsluttet.";
+        var fritekst = "Du har fått fast jobb hos en ny arbeidsgiver.";
         var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBistand(FOM, fritekst);
         var behandling = lagBehandling(scenario);
 
@@ -250,16 +250,16 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. "
-                    + "Fordi du ikke lenger har et slikt vedtak, får du ikke lenger aktivitetspenger.",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få jobb eller utdanning. "
+                    + "Fordi du nå har begynt å jobbe, stanser vi aktivitetspengene dine.",
                 fritekst
             );
     }
 
-    @DisplayName("Endring/avslag pga bistandsvilkåret - mangler oppfølgingsvedtak etter § 14a")
+    @DisplayName("Endring/avslag pga bistandsvilkåret - kommet i arbeid")
     @Test
     void endringAvslagBistand() {
-        var fritekst = "Du hadde ikke oppfølgingsvedtak etter § 14a i denne perioden.";
+        var fritekst = "Du har fått fast jobb hos en ny arbeidsgiver.";
         var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBistand(FOM, fritekst);
         var behandling = lagBehandling(scenario);
 
@@ -272,8 +272,50 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(bistandsperiode(scenario).getFom()) + " til "
                     + brevDatoString(bistandsperiode(scenario).getTom()),
-                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. "
-                    + "Fordi du ikke har et slikt vedtak i denne perioden, får du ikke aktivitetspenger.",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. "
+                    + "Fordi du jobber i perioden, stanser vi aktivitetspengene dine.",
+                fritekst
+            );
+    }
+
+    @DisplayName("Opphør pga bistandsvilkåret - kommet i utdanning")
+    @Test
+    void opphørBistandKommetIUtdanning() {
+        var fritekst = "Du har startet på en utdanning.";
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaBistandKommetIUtdanning(FOM, fritekst);
+        var behandling = lagBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få jobb eller utdanning. "
+                    + "Fordi du nå har begynt på en utdanning, stanser vi aktivitetspengene dine.",
+                fritekst
+            );
+    }
+
+    @DisplayName("Endring/avslag pga bistandsvilkåret - kommet i utdanning")
+    @Test
+    void endringAvslagBistandKommetIUtdanning() {
+        var fritekst = "Du har startet på en utdanning.";
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaBistandKommetIUtdanning(FOM, fritekst);
+        var behandling = lagBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har endret aktivitetspengene dine</h1>",
+                "Du får ikke aktivitetspenger i perioden fra "
+                    + brevDatoString(bistandsperiode(scenario).getFom()) + " til "
+                    + brevDatoString(bistandsperiode(scenario).getTom()),
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. "
+                    + "Fordi du tar en utdanning i perioden, stanser vi aktivitetspengene dine.",
                 fritekst
             );
     }

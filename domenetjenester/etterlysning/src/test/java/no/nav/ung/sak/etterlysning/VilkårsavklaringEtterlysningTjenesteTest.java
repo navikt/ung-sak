@@ -137,7 +137,7 @@ class VilkårsavklaringEtterlysningTjenesteTest {
         return new VilkårPeriodeAvklaringForeslått(
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-            BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK.getKode(),
+            BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode(),
             "begrunnelse",
             skalSendeVarsel,
             null,
