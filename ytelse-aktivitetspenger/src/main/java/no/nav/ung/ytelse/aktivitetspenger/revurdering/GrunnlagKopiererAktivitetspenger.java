@@ -9,7 +9,7 @@ import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgående
 import no.nav.ung.sak.behandlingslager.behandling.personopplysning.PersonopplysningRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
@@ -28,7 +28,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
     private TilkjentYtelseRepository tilkjentYtelseRepository;
     private UttalelseRepository uttalelseRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     private AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private StartdatoRepository startdatoRepository;
@@ -44,7 +44,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
                                             TilkjentYtelseRepository tilkjentYtelseRepository,
                                             UttalelseRepository uttalelseRepository,
                                             OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
-                                            BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                            BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository,
                                             AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
                                             InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository, StartdatoRepository startdatoRepository,
                                             VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository) {
@@ -53,7 +53,7 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         this.tilkjentYtelseRepository = tilkjentYtelseRepository;
         this.uttalelseRepository = uttalelseRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
-        this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
+        this.bostedSøknadsfaktaGrunnlagRepository = bostedSøknadsfaktaGrunnlagRepository;
         this.aktivitetspengerGrunnlagRepository = aktivitetspengerGrunnlagRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.startdatoRepository = startdatoRepository;
@@ -70,8 +70,8 @@ public class GrunnlagKopiererAktivitetspenger implements GrunnlagKopierer {
         tilkjentYtelseRepository.kopierKontrollPerioder(originalBehandlingId, nyBehandlingId);
         uttalelseRepository.kopier(originalBehandlingId, nyBehandlingId);
         startdatoRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        bostedsGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
-        // Felles vilkårsavklaringsgrunnlag (fase 0) — kopierer alle vilkårstyper, bl.a. bistandsvilkåret
+        bostedSøknadsfaktaGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
+        // Felles vilkårsavklaringsgrunnlag — kopierer alle vilkårstyper, bl.a. bosteds- og bistandsvilkåret
         vilkårsavklaringGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         aktivitetspengerGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandlingId, nyBehandlingId);
         inngangsvilkårVurderingRepository.kopier(originalBehandlingId, nyBehandlingId);

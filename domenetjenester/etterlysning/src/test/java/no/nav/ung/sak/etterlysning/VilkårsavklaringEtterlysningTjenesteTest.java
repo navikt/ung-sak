@@ -35,7 +35,7 @@ import static org.mockito.Mockito.*;
 
 /**
  * Verifiserer den vilkårsuavhengige logikken i {@link VilkårsavklaringEtterlysningTjeneste#oppdaterEtterlysninger}
- * (eksakt-match, endret periode, ny avklaring uten tidligere, ingen varsel). Bruker BISTANDSVILKÅR kun som et
+ * (eksakt-match, endret periode, endret årsak, ny avklaring uten tidligere, ingen varsel). Bruker BISTANDSVILKÅR kun som et
  * konkret eksempel på en vilkårstype — vilkårspesifikk logikk testes i den enkelte ytelsesmodulen.
  */
 @ExtendWith(JpaExtension.class)
@@ -133,11 +133,76 @@ class VilkårsavklaringEtterlysningTjenesteTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
+    @Test
+    void endret_aarsak_med_uendret_periode_skal_avbryte_og_opprette_ny_etterlysning() {
+        var tidligereAvklaring = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        var etterlysningSomVenter = lagOgLagreEtterlysningSomVenterPåSvar(tidligereAvklaring);
+
+        var medEndretÅrsak = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.AVKORTET, true);
+
+        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, tidligereAvklaring), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, medEndretÅrsak));
+
+        assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId()))
+            .extracting(Etterlysning::getId).containsExactly(etterlysningSomVenter.getId());
+
+        var nyeEtterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BISTAND);
+        assertThat(nyeEtterlysninger).hasSize(1);
+        assertThat(nyeEtterlysninger.getFirst().getGrunnlagsreferanse()).isEqualTo(medEndretÅrsak.getReferanse());
+
+        verify(prosessTaskTjeneste, times(2)).lagre(any(ProsessTaskData.class));
+    }
+
+    @Test
+    void ny_avklaring_som_ikke_skal_varsles_skal_avbryte_eksisterende_etterlysninger_uten_å_opprette_nye() {
+        var tidligereAvklaring = lagAvklaring(FOM, TOM, true);
+        var etterlysningSomVenter = lagOgLagreEtterlysningSomVenterPåSvar(tidligereAvklaring);
+
+        var nyAvklaringUtenVarsel = lagAvklaring(FOM, TOM, false);
+
+        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, tidligereAvklaring), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaringUtenVarsel));
+
+        assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId()))
+            .extracting(Etterlysning::getId).containsExactly(etterlysningSomVenter.getId());
+        assertThat(etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BISTAND)).isEmpty();
+
+        var taskCaptor = ArgumentCaptor.forClass(ProsessTaskData.class);
+        verify(prosessTaskTjeneste, times(1)).lagre(taskCaptor.capture());
+        assertThat(taskCaptor.getValue().getTaskType()).isEqualTo(AvbrytEtterlysningTask.TASKTYPE);
+    }
+
+    @Test
+    void eksisterende_etterlysning_uten_matchende_tidligere_avklaring_skal_avbrytes_når_ny_avklaring_opprettes() {
+        var eksisterendeEtterlysning = etterlysningRepository.lagre(Etterlysning.opprettForType(
+            behandling.getId(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            EtterlysningType.UTTALELSE_BISTAND
+        ));
+
+        var nyAvklaring = lagAvklaring(FOM, TOM, true);
+
+        vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, Map.of(), TestVilkårsvarselInnhold.tilMap(VilkårType.BISTANDSVILKÅR, nyAvklaring));
+
+        assertThat(etterlysningRepository.hentEtterlysningerSomSkalAvbrytes(behandling.getId()))
+            .extracting(Etterlysning::getId).containsExactly(eksisterendeEtterlysning.getId());
+
+        var nyeEtterlysninger = etterlysningRepository.hentOpprettetEtterlysninger(behandling.getId(), EtterlysningType.UTTALELSE_BISTAND);
+        assertThat(nyeEtterlysninger).hasSize(1);
+        assertThat(nyeEtterlysninger.getFirst().getGrunnlagsreferanse()).isEqualTo(nyAvklaring.getReferanse());
+
+        verify(prosessTaskTjeneste, times(2)).lagre(any(ProsessTaskData.class));
+    }
+
     private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, boolean skalSendeVarsel) {
+        return lagAvklaring(fom, tom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, skalSendeVarsel);
+    }
+
+    private VilkårPeriodeAvklaringForeslått lagAvklaring(LocalDate fom, LocalDate tom, BistandsvilkårIkkeOppfyltÅrsak årsak, boolean skalSendeVarsel) {
         return new VilkårPeriodeAvklaringForeslått(
             UUID.randomUUID(),
             DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-            BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID.getKode(),
+            årsak.getKode(),
             "begrunnelse",
             skalSendeVarsel,
             null,
