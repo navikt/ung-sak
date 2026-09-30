@@ -1,15 +1,16 @@
-package no.nav.ung.sak.behandlingslager.bosatt;
+package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import no.nav.ung.kodeverk.bosatt.Kilde;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedsinformasjonFraSøknad;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 
 public class BostedsfaktaOgAvklaring {
 
     private final BostedsinformasjonFraSøknad søknadsinformasjon;
-    private final BostedsPeriodeAvklaring foreslåttAvklaring;
-    private final BostedsPeriodeAvklaring ferdigstiltAvklaring;
+    private final VilkårPeriodeAvklaring foreslåttAvklaring;
+    private final VilkårPeriodeAvklaring ferdigstiltAvklaring;
 
-    private BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, BostedsPeriodeAvklaring foreslåttAvklaring, BostedsPeriodeAvklaring ferdigstiltAvklaring) {
+    private BostedsfaktaOgAvklaring(BostedsinformasjonFraSøknad søknadsinformasjon, VilkårPeriodeAvklaring foreslåttAvklaring, VilkårPeriodeAvklaring ferdigstiltAvklaring) {
         this.søknadsinformasjon = søknadsinformasjon;
         this.foreslåttAvklaring = foreslåttAvklaring;
         this.ferdigstiltAvklaring = ferdigstiltAvklaring;
@@ -19,11 +20,11 @@ public class BostedsfaktaOgAvklaring {
         return new BostedsfaktaOgAvklaring(søknadsinformasjon, null, null);
     }
 
-    BostedsfaktaOgAvklaring medForeslåttAvklaring(BostedsPeriodeAvklaring foreslåttAvklaring) {
+    BostedsfaktaOgAvklaring medForeslåttAvklaring(VilkårPeriodeAvklaring foreslåttAvklaring) {
         return foreslåttAvklaring == null ? this : new BostedsfaktaOgAvklaring(søknadsinformasjon, foreslåttAvklaring, ferdigstiltAvklaring);
     }
 
-    BostedsfaktaOgAvklaring medFerdigstiltAvklaring(BostedsPeriodeAvklaring ferdigstiltAvklaring) {
+    BostedsfaktaOgAvklaring medFerdigstiltAvklaring(VilkårPeriodeAvklaring ferdigstiltAvklaring) {
         return ferdigstiltAvklaring == null ? this : new BostedsfaktaOgAvklaring(søknadsinformasjon, foreslåttAvklaring, ferdigstiltAvklaring);
     }
 
@@ -31,18 +32,18 @@ public class BostedsfaktaOgAvklaring {
         return søknadsinformasjon;
     }
 
-    public BostedsPeriodeAvklaring getForeslåttAvklaring() {
+    public VilkårPeriodeAvklaring getForeslåttAvklaring() {
         return foreslåttAvklaring;
     }
 
-    public BostedsPeriodeAvklaring getFerdigstiltAvklaring() {
+    public VilkårPeriodeAvklaring getFerdigstiltAvklaring() {
         return ferdigstiltAvklaring;
     }
 
     /**
      * Den avklaringen som er gjeldende for perioden — foreslått avklaring har forrang over ferdigstilt.
      */
-    public BostedsPeriodeAvklaring getGjeldendeAvklaring() {
+    public VilkårPeriodeAvklaring getGjeldendeAvklaring() {
         return foreslåttAvklaring != null ? foreslåttAvklaring : ferdigstiltAvklaring;
     }
 

@@ -19,6 +19,7 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EndringType;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.bosatt.*;
@@ -26,6 +27,8 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsv
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.uttalelse.UttalelseV2;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagPeriodeDto;
@@ -33,8 +36,12 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDt
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsAvklaringDataMapper;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsfaktaOgAvklaring;
+import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsfaktaOgAvklaringFletter;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -52,7 +59,8 @@ public class BostedRestTjeneste {
     public static final String BOSATT_FAKTA_PATH = "/behandling/bosatt-fakta";
 
     private BehandlingRepository behandlingRepository;
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
+    private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     private UttalelseRepository uttalelseRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
 
@@ -62,10 +70,12 @@ public class BostedRestTjeneste {
 
     @Inject
     public BostedRestTjeneste(BehandlingRepository behandlingRepository,
-                              BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                              VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
+                              BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository,
                               UttalelseRepository uttalelseRepository, InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
         this.behandlingRepository = behandlingRepository;
-        this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
+        this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
+        this.bostedSøknadsfaktaGrunnlagRepository = bostedSøknadsfaktaGrunnlagRepository;
         this.uttalelseRepository = uttalelseRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
     }
@@ -97,13 +107,12 @@ public class BostedRestTjeneste {
     private BostedGrunnlagResponseDto hentBostedGrunnlagInternal(BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
 
-        var grunnlagOpt = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId());
-        if (grunnlagOpt.isEmpty()) {
+        var søknadsfaktaGrunnlag = bostedSøknadsfaktaGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId());
+        if (søknadsfaktaGrunnlag.isEmpty()) {
             return new BostedGrunnlagResponseDto(List.of());
         }
 
-        var grunnlag = grunnlagOpt.get();
-        var faktaOgResultat = lagFaktaOgResultatTidslinje(grunnlag, behandling);
+        var faktaOgResultat = lagFaktaOgResultatTidslinje(søknadsfaktaGrunnlag.get(), behandling);
 
         var uttalelser = uttalelseRepository.hentUttalelser(behandling.getId(), EndringType.AVKLAR_BOSTED);
         var uttalelseByReferanse = uttalelser.stream()
@@ -143,8 +152,12 @@ public class BostedRestTjeneste {
         return new BostedGrunnlagResponseDto(perioder.collect(Collectors.toList()));
     }
 
-    private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedsGrunnlag grunnlag, Behandling behandling) {
-        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = grunnlag.hentOppgittOgAlleAvklaringerSomTidslinje();
+    private LocalDateTimeline<BostedFaktaOgResultat> lagFaktaOgResultatTidslinje(BostedSøknadsfaktaGrunnlag søknadsfaktaGrunnlag, Behandling behandling) {
+        var avklaringGrunnlag = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
+        LocalDateTimeline<BostedsfaktaOgAvklaring> faktaOgAvklaringTidslinje = BostedsfaktaOgAvklaringFletter.flettMedAlleAvklaringer(
+            søknadsfaktaGrunnlag.hentSøknadsfaktaSomTidslinje(),
+            avklaringGrunnlag.map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer).orElse(Set.of()),
+            avklaringGrunnlag.map(VilkårsavklaringGrunnlag::getFerdigstilteAvklaringer).orElse(Set.of()));
 
         LocalDateTimeline<BostedsvilkårResultatPeriode> vurderingResultatTidslinje = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
@@ -211,12 +224,12 @@ public class BostedRestTjeneste {
             return new BostedAvklaringDto(
                 gjeldendeAvklaring.getPeriode().tilPeriode(),
                 faktaOgAvklaring.isErBosattITrondheim(),
-                gjeldendeAvklaring.getIkkeOppfyltÅrsak(),
+                BostedsAvklaringDataMapper.ikkeOppfyltÅrsak(gjeldendeAvklaring),
                 gjeldendeAvklaring.getBegrunnelse(),
                 gjeldendeAvklaring.skalSendeVarsel(),
                 gjeldendeAvklaring.getFritekstTilVarsel(),
                 gjeldendeAvklaring.getBegrunnelseIkkeVarsel(),
-                gjeldendeAvklaring.getKilde(),
+                BostedsAvklaringDataMapper.kilde(gjeldendeAvklaring),
                 gjeldendeAvklaring.getKildeFritekst(),
                 gjeldendeAvklaring.getAvklaringtype(),
                 faktaOgAvklaring.kanRedigeres()

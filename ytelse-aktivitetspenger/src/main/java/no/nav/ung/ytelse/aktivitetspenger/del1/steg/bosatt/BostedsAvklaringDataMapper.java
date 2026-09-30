@@ -1,35 +1,56 @@
 package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
+import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 public final class BostedsAvklaringDataMapper {
 
-    public static BostedVarselInnhold mapTilBostedAvklaringInnhold(BostedsPeriodeAvklaring bostedsPeriodeAvklaring) {
+    private BostedsAvklaringDataMapper() {
+    }
+
+    public static BostedVarselInnhold mapTilBostedAvklaringInnhold(VilkårPeriodeAvklaring avklaring) {
         return new BostedVarselInnhold(
-            bostedsPeriodeAvklaring.getPeriode().tilPeriode(),
-            bostedsPeriodeAvklaring.getIkkeOppfyltÅrsak(),
-            bostedsPeriodeAvklaring.skalSendeVarsel(),
-            bostedsPeriodeAvklaring.getFritekstTilVarsel(),
-            bostedsPeriodeAvklaring.getKilde(),
-            bostedsPeriodeAvklaring.getKildeFritekst(),
-            bostedsPeriodeAvklaring.getAvklaringtype()
+            avklaring.getPeriode().tilPeriode(),
+            ikkeOppfyltÅrsak(avklaring),
+            avklaring.skalSendeVarsel(),
+            avklaring.getFritekstTilVarsel(),
+            kilde(avklaring),
+            avklaring.getKildeFritekst(),
+            avklaring.getAvklaringtype()
         );
     }
 
-    public static BostedsPeriodeAvklaringForeslått mapTilBostedsPeriodeAvklaring(BostedAvklaring bostedAvklaring, UUID referanse) {
+    /**
+     * Felles-modellen lagrer kodeverket som tekst, siden hvert vilkår har sitt eget utvalg av årsaker.
+     */
+    public static BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak(VilkårPeriodeAvklaring avklaring) {
+        return BostedsvilkårIkkeOppfyltÅrsak.fraKode(avklaring.getIkkeOppfyltÅrsakKode());
+    }
+
+    public static BostedsavklaringKildeType kilde(VilkårPeriodeAvklaring avklaring) {
+        return BostedsavklaringKildeType.fraKode(avklaring.getKildeKode());
+    }
+
+    public static VilkårPeriodeAvklaringForeslått mapTilVilkårPeriodeAvklaring(BostedAvklaring bostedAvklaring, UUID referanse) {
         var innhold = bostedAvklaring.innhold();
-        return new BostedsPeriodeAvklaringForeslått(
+        Objects.requireNonNull(innhold.ikkeOppfyltÅrsak(), "Mangler årsak for hvorfor bostedsvilkåret ikke er oppfylt");
+        if (innhold.skalSendeVarsel() && innhold.ikkeOppfyltÅrsak().kreverFritekst()) {
+            Objects.requireNonNull(innhold.fritekstTilVarsel(), "fritekstTilVarsel må være satt når årsak=" + innhold.ikkeOppfyltÅrsak().getKode());
+        }
+        return new VilkårPeriodeAvklaringForeslått(
             referanse,
             innhold.hentPeriodeSomDatoIntervallEntitet(),
-            innhold.ikkeOppfyltÅrsak(),
+            innhold.ikkeOppfyltÅrsak().getKode(),
             bostedAvklaring.begrunnelse(),
             innhold.skalSendeVarsel(),
             innhold.fritekstTilVarsel(),
@@ -60,5 +81,4 @@ public final class BostedsAvklaringDataMapper {
 
         return new BostedAvklaring(innhold, dto.vurdering().begrunnelse(), dto.vurdering().begrunnelseIkkeVarsel(), vurdertAv, vurdertTidspunkt);
     }
-
 }

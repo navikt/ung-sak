@@ -5,7 +5,7 @@ import no.nav.ung.sak.behandlingslager.behandling.klage.KlageRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.formidling.VedtaksbrevValgRepository;
 import no.nav.ung.sak.behandlingslager.fritekst.FritekstRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
@@ -29,7 +29,7 @@ public record AktivitetspengerTestRepositories(
     FritekstRepository fritekstRepository,
     AktivitetspengerGrunnlagRepository aktivitetspengerGrunnlagRepository,
     BehandlingAnsvarligRepository behandlingAnsvarligRepository,
-    BostedsGrunnlagRepository bostedsGrunnlagRepository,
+    BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository,
     InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
     VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository) {
 
@@ -44,10 +44,10 @@ public record AktivitetspengerTestRepositories(
         var vedtaksbrevValgRepository = new VedtaksbrevValgRepository(entityManager);
         var aktivitetspengerGrunnlagRepository = new AktivitetspengerGrunnlagRepository(entityManager);
         var behandlingAnsvarligRepository = new BehandlingAnsvarligRepository(entityManager, repositoryProvider.getBehandlingRepository());
-        var bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
+        var bostedSøknadsfaktaGrunnlagRepository = new BostedSøknadsfaktaGrunnlagRepository(entityManager);
         var inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         var vilkårsavklaringGrunnlagRepository = new VilkårsavklaringGrunnlagRepository(entityManager);
-        return new AktivitetspengerTestRepositories(repositoryProvider, new StartdatoRepository(entityManager), tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste, vedtaksbrevValgRepository, klageRepository, fritekstRepository, aktivitetspengerGrunnlagRepository, behandlingAnsvarligRepository, bostedsGrunnlagRepository, inngangsvilkårVurderingRepository, vilkårsavklaringGrunnlagRepository);
+        return new AktivitetspengerTestRepositories(repositoryProvider, new StartdatoRepository(entityManager), tilkjentYtelseRepository, prosessTriggereRepository, inntektArbeidYtelseTjeneste, vedtaksbrevValgRepository, klageRepository, fritekstRepository, aktivitetspengerGrunnlagRepository, behandlingAnsvarligRepository, bostedSøknadsfaktaGrunnlagRepository, inngangsvilkårVurderingRepository, vilkårsavklaringGrunnlagRepository);
     }
 
 }

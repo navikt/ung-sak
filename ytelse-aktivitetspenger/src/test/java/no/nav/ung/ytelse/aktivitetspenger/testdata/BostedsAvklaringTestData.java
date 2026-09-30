@@ -6,7 +6,7 @@ import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.sak.typer.Periode;
 
 /**
- * Testdata for en bostedsavklaring gjort av saksbehandler. Lagres på behandlingens bostedsgrunnlag av
+ * Testdata for en bostedsavklaring gjort av saksbehandler. Lagres på behandlingens vilkårsavklaringsgrunnlag av
  * {@link AktivitetspengerTestScenarioBuilder}.
  */
 public record BostedsAvklaringTestData(
