@@ -1469,9 +1469,9 @@
         "x-enum-varnames" : [ "BRUKER", "ANNET" ]
       },
       "ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak" : {
-        "enum" : [ "IKKE_14A_VEDTAK", "AVKORTET", "UDEFINERT" ],
+        "enum" : [ "IKKE_14A_VEDTAK", "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ],
         "type" : "string",
-        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "AVKORTET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.BostedsavklaringKildeType" : {
         "enum" : [ "BRUKER", "FOLKEREGISTER", "ANNET" ],
