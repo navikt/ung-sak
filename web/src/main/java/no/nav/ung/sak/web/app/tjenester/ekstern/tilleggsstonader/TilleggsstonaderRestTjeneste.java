@@ -72,7 +72,10 @@ public class TilleggsstonaderRestTjeneste {
                 content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktivitetspengerPerioderResponse.class)))
         })
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.EKSTERN_SYSTEM,
-        eksterneSystemer = {EksterneSystemer.TILLEGGSSTØNADER_DEV, EksterneSystemer.TILLEGGSSTØNADER_PROD})
+        eksterneSystemer = {
+            EksterneSystemer.TILLEGGSSTØNADER_DEV,
+            EksterneSystemer.TILLEGGSSTØNADER_PROD
+        })
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public AktivitetspengerPerioderResponse hentAktivitetspengerPerioder(
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenAbacAttributter.class) AktivitetspengerPerioderRequest request) {
