@@ -62,8 +62,15 @@ public class AktivitetspengerOpphørScenarioer {
     }
 
     public static AktivitetspengerTestScenario opphørPgaBistand(LocalDate fom, String fritekstTilBrev) {
+        return opphørPgaBistand(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, fritekstTilBrev);
+    }
+
+    public static AktivitetspengerTestScenario opphørPgaBistandKommetIUtdanning(LocalDate fom, String fritekstTilBrev) {
+        return opphørPgaBistand(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_UTDANNING, fritekstTilBrev);
+    }
+
+    public static AktivitetspengerTestScenario opphørPgaBistand(LocalDate fom, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
         var opphørtVilkårPeriode = opphørtPeriode(fom);
-        var ikkeOppfyltÅrsak = BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID;
 
         var vurderinger = InngangsvilkårVurderingTestData.builder()
             .medBistandsvilkårResultat(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
