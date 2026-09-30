@@ -119,11 +119,11 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga bistandsvilkåret")
     @Test
     void uendretEtterVarsletOpphørBistand() {
-        var fritekst = "Du får likevel aktivitetspenger fordi oppfølgingsvedtaket ditt fortsatt gjelder.";
+        var fritekst = "Du får likevel aktivitetspenger fordi du fortsatt har behov for bistand fra Nav.";
         var scenario = AktivitetspengerUendretScenarioer.uendretBistandScenario(
             FOM,
             VilkårsavklaringTestData.opphør(vurdertPeriode(FOM),
-                BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK,
+                BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
                 BistandsavklaringKildeType.BRUKER),
             fritekst
         );

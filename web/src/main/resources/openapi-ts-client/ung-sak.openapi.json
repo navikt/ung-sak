@@ -1469,9 +1469,9 @@
         "x-enum-varnames" : [ "BRUKER", "ANNET" ]
       },
       "ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak" : {
-        "enum" : [ "IKKE_14A_VEDTAK", "AVKORTET", "UDEFINERT" ],
+        "enum" : [ "IKKE_14A_VEDTAK", "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ],
         "type" : "string",
-        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "AVKORTET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "IKKE_14A_VEDTAK", "KOMMET_I_UTDANNING", "KOMMET_I_ARBEID", "ANNET", "AVKORTET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.BostedsavklaringKildeType" : {
         "enum" : [ "BRUKER", "FOLKEREGISTER", "ANNET" ],
@@ -1479,9 +1479,9 @@
         "x-enum-varnames" : [ "BRUKER", "FOLKEREGISTER", "ANNET" ]
       },
       "ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak" : {
-        "enum" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "AVKORTET", "ANNET", "UDEFINERT" ],
+        "enum" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "AVKORTET", "ANNET", "UDEFINERT" ],
         "type" : "string",
-        "x-enum-varnames" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "AVKORTET", "ANNET", "UDEFINERT" ]
+        "x-enum-varnames" : [ "IKKE_BOSATTADRESSE_I_TRONDHEIM", "STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM", "AVKORTET", "ANNET", "UDEFINERT" ]
       },
       "ung.kodeverk.vilkår.Utfall" : {
         "enum" : [ "IKKE_OPPFYLT", "IKKE_VURDERT", "OPPFYLT", "IKKE_RELEVANT", "-" ],

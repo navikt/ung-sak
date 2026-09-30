@@ -7,7 +7,6 @@ import java.util.Optional;
 public enum BostedsvilkårIkkeOppfyltÅrsak implements IkkeOppfyltDetaljertÅrsak {
 
     IKKE_BOSATTADRESSE_I_TRONDHEIM(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, false),
-    IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, false),
     STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, false),
     // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
     AVKORTET(Avslagsårsak.AVKORTET, false),

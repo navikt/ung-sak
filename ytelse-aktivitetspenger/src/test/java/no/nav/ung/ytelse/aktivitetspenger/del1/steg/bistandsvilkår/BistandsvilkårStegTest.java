@@ -114,12 +114,10 @@ class BistandsvilkårStegTest {
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_VURDERT);
     }
 
-
-    @Disabled("Venter på avklaring om årsaker for ikkeOppfyltÅrsaker for bistandsvilkåret")
     @Test
-    void skal_avslå_automatisk_nar_ikke_14a_vedtak_og_bruker_ikke_har_uttalelse() {
+    void skal_avslå_automatisk_nar_kommer_i_arbeid_og_bruker_ikke_har_uttalelse() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 
         var etterlysningUtenUttalelse = new EtterlysningData(
             EtterlysningStatus.MOTTATT_SVAR,
@@ -138,7 +136,7 @@ class BistandsvilkårStegTest {
         assertThat(bistandsvurdering.getPeriode().getFomDato()).isEqualTo(FOM);
         assertThat(bistandsvurdering.getPeriode().getTomDato()).isEqualTo(TOM);
         assertThat(bistandsvurdering.isGodkjent()).isFalse();
-        assertThat(bistandsvurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
+        assertThat(bistandsvurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
 
         var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BISTANDSVILKÅR).orElseThrow().getPerioder();
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
@@ -147,7 +145,7 @@ class BistandsvilkårStegTest {
     @Test
     void skal_ikke_avslå_automatisk_nar_bruker_har_uttalelse() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 
         var etterlysningMedUttalelse = new EtterlysningData(
             EtterlysningStatus.MOTTATT_SVAR,
@@ -168,7 +166,7 @@ class BistandsvilkårStegTest {
     @Test
     void skal_ikke_avslå_automatisk_nar_det_er_valgt_a_ikke_varsle() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, false);
+        lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false);
 
         var resultat = utførSteg(behandling);
 
@@ -179,7 +177,7 @@ class BistandsvilkårStegTest {
     @Test
     void skal_sette_pa_vent_nar_periode_venter_pa_etterlysning() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = EtterlysningData.utenUttalelse(
@@ -205,8 +203,8 @@ class BistandsvilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        var avklaring1 = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
-        var avklaring2 = lagAvklaring(fom2, tom2, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        var avklaring1 = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
+        var avklaring2 = lagAvklaring(fom2, tom2, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
         var lagrede = vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BISTANDSVILKÅR, Set.of(avklaring1, avklaring2));
 
         var referanse1 = finnReferanse(lagrede, FOM);
@@ -268,7 +266,7 @@ class BistandsvilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 
         var etterlysningUtenUttalelse = new EtterlysningData(
             EtterlysningStatus.MOTTATT_SVAR,
@@ -326,8 +324,8 @@ class BistandsvilkårStegTest {
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
         vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BISTANDSVILKÅR, Set.of(
-            lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, false),
-            lagAvklaring(fom2, tom2, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, false)
+            lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false),
+            lagAvklaring(fom2, tom2, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false)
         ));
 
         var resultat = utførSteg(behandling);
@@ -352,7 +350,7 @@ class BistandsvilkårStegTest {
     void skal_ikke_regne_delvis_dekket_tidslinje_som_dekket_av_foreslatt_avklaring() {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
-        var avklaring = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true);
+        var avklaring = lagAvklaring(FOM, TOM, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true);
 
         var blandetTidslinje = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(FOM, TOM, new VilkårsavklaringUtfallUtleder(VilkårType.BISTANDSVILKÅR, avklaring)),
