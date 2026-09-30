@@ -1,133 +1,96 @@
 package no.nav.ung.sak.web.server.abac;
 
-import no.nav.k9.felles.konfigurasjon.env.Cluster;
-import no.nav.k9.felles.konfigurasjon.env.Environment;
-import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
-import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
-import no.nav.k9.felles.sikkerhet.abac.Tilgangsbeslutning;
-import no.nav.k9.felles.sikkerhet.abac.ÅrsakIkkeTilgang;
 import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.domene.person.pdl.AktørTjeneste;
+import no.nav.ung.sak.web.app.tjenester.ekstern.tilleggsstonader.TilleggsstonaderRestTjeneste;
+import no.nav.ung.sak.web.app.konfig.RestApiTester;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.file.Path;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
 
+/**
+ * Tilgangsbeslutningen for {@link BeskyttetRessursResourceType#EKSTERN_SYSTEM} tas i k9-felles (PepImpl) og testes der.
+ * Her sikres ung-sak sin konfigurasjon: at tilleggsstønader kun får lesetilgang til sitt eget endepunkt,
+ * og at annotasjonen stemmer med Nais-oppsettet.
+ */
 class TilleggsstonaderTilgangTest {
 
-    private static final String DUMMY_ID_TOKEN = "dummyheader.dymmypayload.dummysignaturee";
-    private static final String CLUSTER = Environment.current().getCluster().clusterName();
-    private static final String TILLEGGSSTØNADER_AZP = CLUSTER + ":tilleggsstonader:tilleggsstonader-integrasjoner";
+    private static final String TS_NAMESPACE = "tilleggsstonader";
+    private static final String TS_APP = "tilleggsstonader-integrasjoner";
 
-    private final PipRepository pipRepository = mock(PipRepository.class);
-    private final AppPdpRequestBuilderImpl requestBuilder = new AppPdpRequestBuilderImpl(pipRepository, mock(AktørTjeneste.class));
+    private final AppPdpRequestBuilderImpl requestBuilder = new AppPdpRequestBuilderImpl(mock(PipRepository.class), mock(AktørTjeneste.class));
 
     @Test
-    void skal_gi_tilleggsstonader_tilgang_til_ekstern_ressurstype_med_read() {
-        var attributter = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, BeskyttetRessursActionType.READ);
+    void endepunktet_skal_kun_gi_lesetilgang_til_tilleggsstonader() throws NoSuchMethodException {
+        BeskyttetRessurs annotasjon = tilleggsstonaderEndepunkt().getAnnotation(BeskyttetRessurs.class);
 
-        assertThat(requestBuilder.internAzureConsumer(TILLEGGSSTØNADER_AZP, attributter)).isTrue();
+        assertThat(annotasjon.resource()).isEqualTo(BeskyttetRessursResourceType.EKSTERN_SYSTEM);
+        assertThat(annotasjon.action()).isEqualTo(BeskyttetRessursActionType.READ);
+        assertThat(annotasjon.eksterneSystemer()).containsExactlyInAnyOrder(
+            "dev-gcp:tilleggsstonader:tilleggsstonader-integrasjoner",
+            "prod-gcp:tilleggsstonader:tilleggsstonader-integrasjoner");
+    }
+
+    @Test
+    void tilleggsstonader_skal_ikke_ha_tilgang_til_andre_endepunkter() {
+        var endepunkterMedTilleggsstonader = RestApiTester.finnAlleRestMetoder().stream()
+            .filter(m -> m.getAnnotation(BeskyttetRessurs.class) != null)
+            .filter(m -> Arrays.stream(m.getAnnotation(BeskyttetRessurs.class).eksterneSystemer())
+                .anyMatch(system -> system.endsWith(":" + TS_NAMESPACE + ":" + TS_APP)))
+            .map(m -> m.getDeclaringClass().getSimpleName() + "." + m.getName())
+            .toList();
+
+        assertThat(endepunkterMedTilleggsstonader).containsExactly("TilleggsstonaderRestTjeneste.hentAktivitetspengerPerioder");
     }
 
     @ParameterizedTest
-    @EnumSource(value = BeskyttetRessursResourceType.class, names = "EKSTERN_SYSTEM_TILLEGGSSTØNAD", mode = EnumSource.Mode.EXCLUDE)
-    void skal_nekte_tilleggsstonader_tilgang_til_andre_ressurstyper(BeskyttetRessursResourceType ressurstype) {
-        var attributter = attributter(ressurstype, BeskyttetRessursActionType.READ);
-
-        assertThat(requestBuilder.internAzureConsumer(TILLEGGSSTØNADER_AZP, attributter)).isFalse();
+    @ValueSource(strings = {EksterneSystemer.TILLEGGSSTØNADER_DEV, EksterneSystemer.TILLEGGSSTØNADER_PROD})
+    void tilleggsstonader_skal_ikke_regnes_som_intern_konsument(String azp) {
+        // Ellers ville TS fått systemtilgang til alle endepunkter via PepImpl.vurderTilgangTilApp
+        assertThat(requestBuilder.internAzureConsumer(azp)).isFalse();
     }
 
     @ParameterizedTest
-    @EnumSource(value = BeskyttetRessursActionType.class, names = "READ", mode = EnumSource.Mode.EXCLUDE)
-    void skal_nekte_tilleggsstonader_andre_actions_enn_read(BeskyttetRessursActionType action) {
-        var attributter = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, action);
+    @ValueSource(strings = {EksterneSystemer.TILLEGGSSTØNADER_DEV, EksterneSystemer.TILLEGGSSTØNADER_PROD})
+    void eksternt_system_skal_ha_inbound_regel_i_nais_for_samme_cluster(String eksterntSystem) throws IOException {
+        var deler = eksterntSystem.split(":");
+        var cluster = deler[0];
+        var namespace = deler[1];
+        var app = deler[2];
 
-        assertThat(requestBuilder.internAzureConsumer(TILLEGGSSTØNADER_AZP, attributter)).isFalse();
+        JsonNode regler = new ObjectMapper(new YAMLFactory())
+            .readTree(Path.of("..", "deploy", cluster + ".yml").toFile())
+            .at("/spec/accessPolicy/inbound/rules");
+
+        List<JsonNode> treff = StreamSupport.stream(regler.spliterator(), false)
+            .filter(r -> app.equals(r.path("application").asText()))
+            .filter(r -> namespace.equals(r.path("namespace").asText()))
+            .filter(r -> r.path("cluster").isMissingNode() || cluster.equals(r.path("cluster").asText()))
+            .toList();
+
+        assertThat(treff).as("inbound-regel for %s i deploy/%s.yml", eksterntSystem, cluster).hasSize(1);
     }
 
-    @Test
-    void skal_nekte_tilleggsstonader_uten_action() {
-        var attributter = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, null);
-
-        assertThat(requestBuilder.internAzureConsumer(TILLEGGSSTØNADER_AZP, attributter)).isFalse();
-    }
-
-    @Test
-    void skal_nekte_azp_som_bare_ligner() {
-        var attributter = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, BeskyttetRessursActionType.READ);
-
-        assertThat(requestBuilder.internAzureConsumer(TILLEGGSSTØNADER_AZP + "-x", attributter)).isFalse();
-        assertThat(requestBuilder.internAzureConsumer(TILLEGGSSTØNADER_AZP.toUpperCase(), attributter)).isFalse();
-        assertThat(requestBuilder.internAzureConsumer(annetCluster() + ":tilleggsstonader:tilleggsstonader-integrasjoner", attributter)).isFalse();
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"tilleggsstonader-sak", "tilleggsstonader-oppfolging"})
-    void skal_nekte_andre_apper_i_tilleggsstonader_namespace(String app) {
-        var attributter = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, BeskyttetRessursActionType.READ);
-
-        assertThat(requestBuilder.internAzureConsumer(CLUSTER + ":tilleggsstonader:" + app, attributter)).isFalse();
-    }
-
-    @Test
-    void interne_namespaces_skal_fungere_som_før() {
-        var fagsak = attributter(BeskyttetRessursResourceType.FAGSAK, BeskyttetRessursActionType.UPDATE);
-        var ekstern = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, BeskyttetRessursActionType.READ);
-
-        for (String azp : new String[]{
-            CLUSTER + ":k9saksbehandling:k9-sak",
-            Cluster.DEV_GCP.clusterName() + ":dusseldorf:ung-deltakelse-opplyser",
-            Cluster.PROD_GCP.clusterName() + ":dusseldorf:ung-deltakelse-opplyser"}) {
-            assertThat(requestBuilder.internAzureConsumer(azp, fagsak)).isEqualTo(requestBuilder.internAzureConsumer(azp)).isTrue();
-            assertThat(requestBuilder.internAzureConsumer(azp, ekstern)).isTrue();
-        }
-    }
-
-    @Test
-    void ukjent_namespace_skal_nektes_som_før() {
-        var attributter = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, BeskyttetRessursActionType.READ);
-
-        assertThat(requestBuilder.internAzureConsumer(CLUSTER + ":annet-namespace:app", attributter)).isFalse();
-    }
-
-    @Test
-    void skal_lage_pdp_request_uten_oppslag_for_ekstern_ressurstype() {
-        var attributter = attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, BeskyttetRessursActionType.READ);
-
-        PdpRequest pdpRequest = requestBuilder.lagPdpRequest(attributter);
-
-        assertThat(pdpRequest.getResourceType()).isEqualTo(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD);
-        assertThat(pdpRequest.getAktørIder()).isEmpty();
-        assertThat(pdpRequest.getFødselsnumre()).isEmpty();
-        verifyNoInteractions(pipRepository);
-    }
-
-    @Test
-    void saksbehandlertoken_mot_ekstern_ressurstype_skal_gi_avslag_og_ikke_500() {
-        var sifAbacPdpRestKlient = mock(SifAbacPdpRestKlient.class);
-        var pdpKlient = new AppPdpKlient(sifAbacPdpRestKlient);
-        var pdpRequest = requestBuilder.lagPdpRequest(attributter(BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD, BeskyttetRessursActionType.READ));
-
-        Tilgangsbeslutning beslutning = pdpKlient.forespørTilgang(pdpRequest);
-
-        assertThat(beslutning.fikkTilgang()).isFalse();
-        assertThat(beslutning.getÅrsakIkkeTilgang()).containsExactly(ÅrsakIkkeTilgang.HAR_IKKE_TILGANG_TIL_APPLIKASJONEN);
-        verifyNoInteractions(sifAbacPdpRestKlient);
-    }
-
-    private static AbacAttributtSamling attributter(BeskyttetRessursResourceType ressurstype, BeskyttetRessursActionType action) {
-        return AbacAttributtSamling.medJwtToken(DUMMY_ID_TOKEN)
-            .setResourceType(ressurstype)
-            .setActionType(action);
-    }
-
-    private static String annetCluster() {
-        return Cluster.DEV_GCP.clusterName().equals(CLUSTER) ? Cluster.PROD_GCP.clusterName() : Cluster.DEV_GCP.clusterName();
+    private static Method tilleggsstonaderEndepunkt() throws NoSuchMethodException {
+        return Arrays.stream(TilleggsstonaderRestTjeneste.class.getDeclaredMethods())
+            .filter(m -> m.getName().equals("hentAktivitetspengerPerioder"))
+            .findFirst()
+            .orElseThrow(NoSuchMethodException::new);
     }
 }

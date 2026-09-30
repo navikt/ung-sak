@@ -25,6 +25,7 @@ import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioder
 import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderResponse;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.PersonIdent;
+import no.nav.ung.sak.web.server.abac.EksterneSystemer;
 import no.nav.ung.ytelse.aktivitetspenger.perioder.AktivitetspengerPerioderTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,8 @@ public class TilleggsstonaderRestTjeneste {
             @ApiResponse(responseCode = "200", description = "Innvilgede perioder. Tom liste dersom personen ikke har vedtak om aktivitetspenger.",
                 content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AktivitetspengerPerioderResponse.class)))
         })
-    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD)
+    @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.EKSTERN_SYSTEM,
+        eksterneSystemer = {EksterneSystemer.TILLEGGSSTØNADER_DEV, EksterneSystemer.TILLEGGSSTØNADER_PROD})
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public AktivitetspengerPerioderResponse hentAktivitetspengerPerioder(
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenAbacAttributter.class) AktivitetspengerPerioderRequest request) {

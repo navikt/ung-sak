@@ -11,7 +11,6 @@ import no.nav.k9.felles.log.mdc.MdcExtendedLogContext;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtSamling;
 import no.nav.k9.felles.sikkerhet.abac.AbacAttributtType;
 import no.nav.k9.felles.sikkerhet.abac.BerørtePersonerForAuditlogg;
-import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequest;
 import no.nav.k9.felles.sikkerhet.abac.PdpRequestBuilder;
@@ -51,7 +50,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
         CLUSTER.DEV_GCP.clusterName() + ":dusseldorf",
         CLUSTER.PROD_GCP.clusterName() + ":dusseldorf"
     );
-    static final String TILLEGGSSTØNADER_AZP = CLUSTER.clusterName() + ":tilleggsstonader:tilleggsstonader-integrasjoner";
     private static final MdcExtendedLogContext LOG_CONTEXT = MdcExtendedLogContext.getContext("prosess"); //$NON-NLS-1$
     private PipRepository pipRepository;
     private AktørTjeneste aktørTjeneste;
@@ -72,10 +70,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             // 1. det er unødvendig å lage en ordentlig, da det uansett ikke kan gjøres sjekk i PDP for request mot PIP-tjenesten (siden den brukes fra PDP-en) (se også PepImpl) tilgang istedet er styrt med tilgangslister i applikasjonen
             // 2. PDP requesten brukes også til logging, men ikke for servicebrukere (og det er kun servicebrukere som får kalle PIP-tjenesten)
             // 3. å lage en ekte PDP-request tar tid siden det gjør oppslag mot databasen for å hente ut data
-            return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
-        }
-        if (BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD == attributter.getResourceType()) {
-            //tilgang avgjøres kun av internAzureConsumer (systemkall), og avvises for innloggede brukere i AppPdpKlient
             return lagPdpRequest(attributter, Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
         }
         validerAttributter(attributter);
@@ -131,24 +125,6 @@ public class AppPdpRequestBuilderImpl implements PdpRequestBuilder {
             LOG.warn("App fra ikke-godkjent namespace har etterspurt tilgang: " + azpName);
         }
         return match;
-    }
-
-    /**
-     * Tilleggsstønader får kun lesetilgang til endepunkter med ressurstype {@link BeskyttetRessursResourceType#EKSTERN_SYSTEM_TILLEGGSSTØNAD}.
-     * azp sammenlignes eksakt. Øvrige konsumenter vurderes som før via {@link #internAzureConsumer(String)}.
-     */
-    @Override
-    public boolean internAzureConsumer(String azpName, AbacAttributtSamling attributter) {
-        if (TILLEGGSSTØNADER_AZP.equals(azpName)) {
-            boolean tillatt = attributter.getResourceType() == BeskyttetRessursResourceType.EKSTERN_SYSTEM_TILLEGGSSTØNAD
-                && attributter.getActionType() == BeskyttetRessursActionType.READ;
-            if (!tillatt) {
-                LOG.warn("Tilleggsstønader har etterspurt tilgang til ikke-tillatt ressurs. azp={} resource={} action={}",
-                    azpName, attributter.getResourceType(), attributter.getActionType());
-            }
-            return tillatt;
-        }
-        return internAzureConsumer(azpName);
     }
 
     private PdpRequest lagPdpRequest(AbacAttributtSamling attributter, Set<AktørId> aktørIder, Set<AktørId> aktørIderForSporingslogg, Set<String> aksjonspunktType) {
