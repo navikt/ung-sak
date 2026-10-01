@@ -12,6 +12,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
@@ -85,6 +86,35 @@ public class SøknadRepositoryTest {
         assertThat(søknadRepository.finnesSøknadMedSøknadId(fagsak.getId(), "søknad-1")).isTrue();
         assertThat(søknadRepository.finnesSøknadMedSøknadId(fagsak.getId(), "søknad-2")).isFalse();
         assertThat(søknadRepository.finnesSøknadMedSøknadId(annenFagsak.getId(), "søknad-1")).isFalse();
+    }
+
+    @Test
+    public void skal_ikke_regne_søknad_i_henlagt_behandling_som_mottatt_men_beholde_merget_og_henlagt() {
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy());
+        fagsakRepository.opprettNy(fagsak);
+
+        Behandling trukket = lagreBehandlingMedSøknad(fagsak, "søknad-trukket", 1L);
+        trukket.setBehandlingResultatType(BehandlingResultatType.HENLAGT_SØKNAD_TRUKKET);
+        behandlingRepository.lagre(trukket, behandlingRepository.taSkriveLås(trukket));
+
+        Behandling merget = lagreBehandlingMedSøknad(fagsak, "søknad-merget", 2L);
+        merget.setBehandlingResultatType(BehandlingResultatType.MERGET_OG_HENLAGT);
+        behandlingRepository.lagre(merget, behandlingRepository.taSkriveLås(merget));
+        entityManager.flush();
+
+        assertThat(søknadRepository.finnesSøknadMedSøknadId(fagsak.getId(), "søknad-trukket")).isFalse();
+        assertThat(søknadRepository.finnesSøknadMedSøknadId(fagsak.getId(), "søknad-merget")).isTrue();
+    }
+
+    private Behandling lagreBehandlingMedSøknad(Fagsak fagsak, String søknadId, Long journalpostId) {
+        Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        søknadRepository.lagreOgFlush(behandling, new SøknadEntitet.Builder()
+            .medStartdato(søknadsperiode.getFomDato())
+            .medJournalpostId(new JournalpostId(journalpostId))
+            .medSøknadId(søknadId)
+            .build());
+        return behandling;
     }
 
     private SøknadEntitet opprettSøknad() {
