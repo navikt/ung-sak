@@ -15,17 +15,20 @@ import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandling.prosessering.task.StartBehandlingTask;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLåsRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRevurderingRepository;
+import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
@@ -33,6 +36,7 @@ import no.nav.ung.sak.mottak.dokumentmottak.DokumentGruppeRef;
 import no.nav.ung.sak.mottak.dokumentmottak.DokumentmottakMidlertidigFeil;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
 import no.nav.ung.sak.mottak.dokumentmottak.InnhentDokumentTjeneste;
+import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import org.slf4j.Logger;
@@ -40,7 +44,9 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +68,9 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
     private final ProsessTaskTjeneste prosessTaskTjeneste;
     private final FagsakProsessTaskRepository fagsakProsessTaskRepository;
     private final ProsessTriggereRepository prosessTriggereRepository;
+    private final SøknadRepository søknadRepository;
+    private final MottatteDokumentRepository mottatteDokumentRepository;
+    private final SøknadParser søknadParser;
 
 
     @Inject
@@ -71,7 +80,9 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
                                                 BehandlingProsesseringTjeneste behandlingProsesseringTjeneste,
                                                 ProsessTaskTjeneste prosessTaskTjeneste,
                                                 FagsakProsessTaskRepository fagsakProsessTaskRepository,
-                                                ProsessTriggereRepository prosessTriggereRepository) {
+                                                ProsessTriggereRepository prosessTriggereRepository,
+                                                MottatteDokumentRepository mottatteDokumentRepository,
+                                                SøknadParser søknadParser) {
         this.mottakere = mottakere;
         this.behandlingsoppretter = behandlingsoppretter;
         this.behandlingRepository = repositoryProvider.getBehandlingRepository();
@@ -81,9 +92,16 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.fagsakProsessTaskRepository = fagsakProsessTaskRepository;
         this.prosessTriggereRepository = prosessTriggereRepository;
+        this.søknadRepository = repositoryProvider.getSøknadRepository();
+        this.mottatteDokumentRepository = mottatteDokumentRepository;
+        this.søknadParser = søknadParser;
     }
 
-    public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottattDokument) {
+    public void mottaDokument(Fagsak fagsak, Collection<MottattDokument> mottatteDokumenter) {
+        var mottattDokument = filtrerBortDuplikateSøknader(fagsak, mottatteDokumenter);
+        if (mottattDokument.isEmpty()) {
+            return;
+        }
         var brevkodeMap = mottattDokument
             .stream()
             .collect(Collectors.groupingBy(MottattDokument::getType));
@@ -112,6 +130,40 @@ public class UngdomsytelseInnhentDokumentTjeneste implements InnhentDokumentTjen
 
         // Lagrer tasks til slutt for å sikre at disse blir kjørt etter at dokumentasjon er lagret
         prosessTaskTjeneste.lagre(taskGruppe);
+    }
+
+    /**
+     * Søknader med samme søknadId som en allerede mottatt søknad på fagsaken (eller tidligere i samme batch) er duplikater,
+     * f.eks. ved at innsender sendte inn på nytt etter en feil i et senere steg. De markeres som ugyldige og ignoreres,
+     * slik at det ikke opprettes ny behandling.
+     */
+    private Collection<MottattDokument> filtrerBortDuplikateSøknader(Fagsak fagsak, Collection<MottattDokument> mottatteDokumenter) {
+        var sett = new HashSet<String>();
+        var gyldige = new ArrayList<MottattDokument>();
+        var duplikater = new ArrayList<MottattDokument>();
+        for (MottattDokument dokument : mottatteDokumenter) {
+            var søknadId = Brevkode.UNGDOMSYTELSE_SOKNAD.equals(dokument.getType()) ? hentSøknadId(dokument) : null;
+            if (søknadId == null) {
+                gyldige.add(dokument);
+                continue;
+            }
+            if (!sett.add(søknadId) || søknadRepository.finnesSøknadMedSøknadId(fagsak.getId(), søknadId)) {
+                log.warn("Ignorerer duplikat søknad med søknadId={}, journalpostId={}, fagsakId={}", søknadId, dokument.getJournalpostId().getVerdi(), fagsak.getId());
+                dokument.setFeilmeldingOgOppdaterStatus("Duplikat søknad, søknadId=" + søknadId + " er allerede mottatt");
+                duplikater.add(dokument);
+            } else {
+                gyldige.add(dokument);
+            }
+        }
+        if (!duplikater.isEmpty()) {
+            mottatteDokumentRepository.oppdaterStatus(duplikater, DokumentStatus.UGYLDIG);
+        }
+        return gyldige;
+    }
+
+    private String hentSøknadId(MottattDokument dokument) {
+        var søknad = søknadParser.parseSøknad(dokument);
+        return søknad.getSøknadId() != null ? søknad.getSøknadId().getId() : null;
     }
 
     private boolean prosessenStårStillePåAksjonspunktForSøknadsfrist(Behandling behandling) {

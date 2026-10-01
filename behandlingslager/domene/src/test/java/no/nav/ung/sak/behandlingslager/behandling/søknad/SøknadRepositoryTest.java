@@ -67,6 +67,26 @@ public class SøknadRepositoryTest {
         assertThat(søknadEntitet).isPresent();
     }
 
+    @Test
+    public void skal_finne_søknad_med_søknadId_kun_på_samme_fagsak() {
+        Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy());
+        fagsakRepository.opprettNy(fagsak);
+        Fagsak annenFagsak = Fagsak.opprettNy(FagsakYtelseType.UNGDOMSYTELSE, AktørId.dummy());
+        fagsakRepository.opprettNy(annenFagsak);
+
+        Behandling behandling = Behandling.forFørstegangssøknad(fagsak).build();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+        søknadRepository.lagreOgFlush(behandling, new SøknadEntitet.Builder()
+            .medStartdato(søknadsperiode.getFomDato())
+            .medJournalpostId(new JournalpostId(1L))
+            .medSøknadId("søknad-1")
+            .build());
+
+        assertThat(søknadRepository.finnesSøknadMedSøknadId(fagsak.getId(), "søknad-1")).isTrue();
+        assertThat(søknadRepository.finnesSøknadMedSøknadId(fagsak.getId(), "søknad-2")).isFalse();
+        assertThat(søknadRepository.finnesSøknadMedSøknadId(annenFagsak.getId(), "søknad-1")).isFalse();
+    }
+
     private SøknadEntitet opprettSøknad() {
         return new SøknadEntitet.Builder()
             .medStartdato(søknadsperiode.getFomDato())

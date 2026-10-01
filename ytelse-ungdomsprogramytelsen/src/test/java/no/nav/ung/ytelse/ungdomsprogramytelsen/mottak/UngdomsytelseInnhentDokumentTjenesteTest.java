@@ -6,12 +6,16 @@ import no.nav.k9.prosesstask.api.ProsessTaskGruppe;
 import no.nav.k9.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
+import no.nav.k9.søknad.Søknad;
+import no.nav.k9.søknad.felles.type.SøknadId;
 import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.dokument.DokumentStatus;
 import no.nav.ung.kodeverk.produksjonsstyring.OrganisasjonsEnhet;
 import no.nav.ung.sak.behandling.prosessering.BehandlingProsesseringTjeneste;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingLås;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
@@ -21,6 +25,7 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
 import no.nav.ung.sak.mottak.dokumentmottak.Dokumentmottaker;
+import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.ung.sak.mottak.dokumentmottak.Trigger;
 import no.nav.ung.sak.produksjonsstyring.behandlingenhet.BehandlendeEnhetTjeneste;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
@@ -45,9 +50,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.time.LocalDate.now;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -63,6 +70,8 @@ public class UngdomsytelseInnhentDokumentTjenesteTest {
     private BehandlingRepository behandlingRepository;
     @Inject
     private FagsakRepository fagsakRepository;
+    @Inject
+    private MottatteDokumentRepository mottatteDokumentRepository;
 
     private AksjonspunktTestSupport aksjonspunktRepository;
 
@@ -80,6 +89,8 @@ public class UngdomsytelseInnhentDokumentTjenesteTest {
     private BehandlingProsesseringTjeneste behandlingProsesseringTjeneste;
     @Mock
     private FagsakProsessTaskRepository fagsakProsessTaskRepository;
+    @Mock
+    private SøknadParser søknadParser;
 
     private UngdomsytelseInnhentDokumentTjeneste innhentDokumentTjeneste;
 
@@ -96,7 +107,9 @@ public class UngdomsytelseInnhentDokumentTjenesteTest {
             behandlingProsesseringTjeneste,
             prosessTaskTjeneste,
             fagsakProsessTaskRepository,
-            prosessTriggereRepository));
+            prosessTriggereRepository,
+            mottatteDokumentRepository,
+            søknadParser));
 
         OrganisasjonsEnhet enhet = new OrganisasjonsEnhet("0312", "enhetNavn");
         when(behandlendeEnhetTjeneste.finnBehandlendeEnhetFor(any(Fagsak.class))).thenReturn(enhet);
@@ -166,6 +179,78 @@ public class UngdomsytelseInnhentDokumentTjenesteTest {
         // Assert
         verify(behandlingsoppretter).opprettFørstegangsbehandling(fagsak, BehandlingÅrsakType.UDEFINERT, Optional.empty());
         verify(dokumentmottaker).lagreDokumentinnhold(List.of(mottattDokument), førstegangsbehandling);
+    }
+
+    @Test
+    public void skal_ignorere_søknad_som_allerede_er_mottatt_på_fagsaken() {
+        var scenario = TestScenarioBuilder.builderMedSøknad();
+        scenario.medSøknad().medSøknadId("søknad-1");
+        Behandling behandling = scenario.lagre(repositoryProvider);
+        behandling.avsluttBehandling();
+        behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
+
+        MottattDokument duplikat = lagreSøknadDokument(behandling.getFagsakId(), "100", "søknad-1");
+
+        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(duplikat));
+
+        assertThat(duplikat.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
+        assertThat(duplikat.getFeilmelding()).contains("søknad-1");
+        verify(behandlingsoppretter, never()).opprettNyBehandlingFra(any(), any());
+        verify(dokumentmottaker, never()).lagreDokumentinnhold(any(), any());
+        verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskGruppe.class));
+    }
+
+    @Test
+    public void skal_behandle_søknad_med_ny_søknadId_som_vanlig() {
+        var scenario = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingStegStart(BehandlingStegType.INNHENT_REGISTEROPP);
+        scenario.medSøknad().medSøknadId("søknad-1");
+        Behandling behandling = scenario.lagre(repositoryProvider);
+
+        MottattDokument ny = lagreSøknadDokument(behandling.getFagsakId(), "100", "søknad-2");
+
+        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(ny));
+
+        assertThat(ny.getStatus()).isEqualTo(DokumentStatus.BEHANDLER);
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(ny), behandling);
+    }
+
+    @Test
+    public void skal_ikke_regne_søknad_uten_søknadId_som_duplikat() {
+        var scenario = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingStegStart(BehandlingStegType.INNHENT_REGISTEROPP);
+        Behandling behandling = scenario.lagre(repositoryProvider);
+
+        MottattDokument utenId = lagreSøknadDokument(behandling.getFagsakId(), "100", null);
+
+        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(utenId));
+
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(utenId), behandling);
+    }
+
+    @Test
+    public void skal_ignorere_duplikat_søknad_i_samme_batch() {
+        var scenario = TestScenarioBuilder.builderMedSøknad()
+            .medBehandlingStegStart(BehandlingStegType.INNHENT_REGISTEROPP);
+        Behandling behandling = scenario.lagre(repositoryProvider);
+
+        MottattDokument første = lagreSøknadDokument(behandling.getFagsakId(), "100", "søknad-3");
+        MottattDokument andre = lagreSøknadDokument(behandling.getFagsakId(), "101", "søknad-3");
+
+        innhentDokumentTjeneste.mottaDokument(behandling.getFagsak(), List.of(første, andre));
+
+        assertThat(andre.getStatus()).isEqualTo(DokumentStatus.UGYLDIG);
+        assertThat(første.getStatus()).isEqualTo(DokumentStatus.BEHANDLER);
+        verify(dokumentmottaker).lagreDokumentinnhold(List.of(første), behandling);
+    }
+
+    private MottattDokument lagreSøknadDokument(Long fagsakId, String journalpostId, String søknadId) {
+        var dokument = DokumentmottakTestUtil.byggMottattDokument(fagsakId, "{}", now(), journalpostId, Brevkode.UNGDOMSYTELSE_SOKNAD);
+        mottatteDokumentRepository.lagre(dokument, DokumentStatus.BEHANDLER);
+        var søknad = mock(Søknad.class);
+        when(søknad.getSøknadId()).thenReturn(søknadId == null ? null : new SøknadId(søknadId));
+        when(søknadParser.parseSøknad(dokument)).thenReturn(søknad);
+        return dokument;
     }
 
 }

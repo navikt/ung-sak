@@ -126,4 +126,19 @@ public class SøknadRepository {
         return ((Stream<SøknadEntitet>) queryBeh.getResultStream()).sorted(Comparator.comparing(SøknadEntitet::getMottattDato)).collect(Collectors.toList());
 
     }
+
+    /** Sjekker om en søknad med gitt ekstern søknadId finnes i noen behandling på fagsaken (også ikke-aktive grunnlag). */
+    public boolean finnesSøknadMedSøknadId(Long fagsakId, String søknadId) {
+        Objects.requireNonNull(fagsakId, "fagsakId");
+        Objects.requireNonNull(søknadId, "søknadId");
+        Query query = entityManager.createNativeQuery(""
+            + "select count(*) from SO_SOEKNAD so "
+            + " inner join GR_SOEKNAD gr ON gr.soeknad_id = so.id "
+            + " inner join BEHANDLING b on b.id = gr.behandling_id "
+            + " where b.fagsak_id = :fagsakId"
+            + "   AND so.soeknad_id = :søknadId");
+        query.setParameter("fagsakId", fagsakId);
+        query.setParameter("søknadId", søknadId);
+        return ((Number) query.getSingleResult()).longValue() > 0;
+    }
 }
