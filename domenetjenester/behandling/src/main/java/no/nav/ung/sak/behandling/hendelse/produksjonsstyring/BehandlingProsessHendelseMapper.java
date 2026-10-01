@@ -7,22 +7,17 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
-import no.nav.k9.søknad.JsonUtils;
-import no.nav.k9.søknad.Søknad;
-import no.nav.k9.søknad.felles.Kildesystem;
 import no.nav.ung.kodeverk.Fagsystem;
 import no.nav.ung.kodeverk.behandling.BehandlingDel;
+import no.nav.ung.kodeverk.behandling.BehandlingStegType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
-import no.nav.ung.kodeverk.dokument.Brevkode;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.hendelse.EventHendelse;
-import no.nav.ung.kodeverk.produksjonsstyring.UtvidetSøknadÅrsak;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.BehandlingAnsvarlig;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.Aksjonspunkt;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottattDokument;
-import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarligRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.VurdertSøktPeriode.SøktPeriodeData;
@@ -36,14 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Dependent
@@ -65,6 +53,7 @@ public class BehandlingProsessHendelseMapper {
 
         final boolean nyeKrav = sjekkOmDetHarKommetNyeKrav(behandling);
 
+
         Optional<BehandlingAnsvarlig> behandlingAnsvarlig = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.SENTRAL);
         Optional<BehandlingAnsvarlig> behandlingAnsvarligNavKontor = behandlingAnsvarligRepository.hentBehandlingAnsvarlig(behandling.getId(), BehandlingDel.LOKAL);
 
@@ -79,6 +68,7 @@ public class BehandlingProsessHendelseMapper {
             .medEventHendelse(eventHendelse)
             .medBehandlingStatus(behandling.getStatus().getKode())
             .medBehandlingSteg(behandling.getAktivtBehandlingSteg() == null ? null : behandling.getAktivtBehandlingSteg().getKode())
+            .medBehandlingenErHosNavKontor(uledOmBaehandlingErHosNavKontor(behandling))
             .medYtelseTypeKode(behandling.getFagsakYtelseType().getKode())
             .medBehandlingTypeKode(behandling.getType().getKode())
             .medOpprettetBehandling(behandling.getOpprettetDato())
@@ -86,14 +76,34 @@ public class BehandlingProsessHendelseMapper {
             .medBehandlingResultat(behandling.getBehandlingResultatType())
             .medBehandlendeEnhet(behandlingAnsvarlig.map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null))
             .medFagsakPeriode(fagsak.getPeriode().tilPeriode())
-            .medAnsvarligSaksbehandlerForTotrinn( behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
+            .medAnsvarligSaksbehandlerForTotrinn(behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medAnsvarligBeslutterForTotrinn(behandlingAnsvarlig.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
+            .medNavKontorBehandlendeEnhet(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getBehandlendeEnhet).orElse(null))
             .medNavKontorAnsvarligSaksbehandler(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligSaksbehandler).orElse(null))
             .medNavKontorBeslutter(behandlingAnsvarligNavKontor.map(BehandlingAnsvarlig::getAnsvarligBeslutter).orElse(null))
             .medAksjonspunktTilstander(lagAksjonspunkttilstander(behandling.getAksjonspunkter()))
             .medNyeKrav(nyeKrav)
             .medBehandlingsårsaker(behandling.getBehandlingÅrsaker().stream().map(årsak -> årsak.getBehandlingÅrsakType().getKode()).distinct().toList())
             .build();
+    }
+
+    private Boolean uledOmBaehandlingErHosNavKontor(Behandling behandling) {
+        if (behandling.getFagsakYtelseType() != FagsakYtelseType.AKTIVITETSPENGER) {
+            return null;
+        }
+        BehandlingStegType aktivtSteg = behandling.getAktivtBehandlingSteg();
+        if (aktivtSteg == null) {
+            return false; //behandlinen er avsluttet eller ikke startet
+        }
+        Set<BehandlingDel> muligeDeler = Arrays.stream(AksjonspunktDefinisjon.values())
+            .filter(ap -> ap.getBehandlingSteg().equals(aktivtSteg))
+            .map(AksjonspunktDefinisjon::getBehandlingDel)
+            .collect(Collectors.toSet());
+
+        if (muligeDeler.size() > 1) {
+            throw new IllegalStateException("Steget behandlingen står i har aksjonspunkt for både DEL1 og DEL2. Dette er ikke støttet i modell mot LOS. Enten flytt ett av aksjonspunktene, eller endre utledningen her");
+        }
+        return muligeDeler.contains(BehandlingDel.LOKAL);
     }
 
     public LocalDateTime finnEldsteMottattdato(Behandling behandling) {
