@@ -5775,6 +5775,12 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
+          "ikkeOppfyltÅrsak" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{N}_]+$",
+            "type" : "string"
+          },
           "input" : {
             "maxLength" : 1000000,
             "minLength" : 0,
