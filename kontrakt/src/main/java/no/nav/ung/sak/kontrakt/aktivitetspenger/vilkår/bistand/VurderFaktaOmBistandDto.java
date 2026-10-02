@@ -20,7 +20,7 @@ public class VurderFaktaOmBistandDto extends BekreftetAksjonspunktDto {
      */
     @JsonProperty("avklaringer")
     @NotNull
-    @Size(min = 1, max = 100)
+    @Size(min = 1, max = 1)
     private List<@Valid BistandFaktaavklaringPeriodeDto> avklaringer;
 
     public VurderFaktaOmBistandDto() {
