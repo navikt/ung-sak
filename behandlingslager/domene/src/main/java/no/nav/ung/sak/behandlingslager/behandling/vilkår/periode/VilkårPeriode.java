@@ -86,6 +86,9 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
     @Column(name = "fritekst_vurdering_brev")
     private String fritekstVurderingBrev;
 
+    @Column(name = "ikke_oppfylt_aarsak")
+    private String ikkeOppfyltÅrsak;
+
     @Lob
     @Column(name = "regel_evaluering_oid")
     @DiffIgnore
@@ -125,6 +128,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
 
         this.begrunnelse = vilkårPeriode.begrunnelse;
         this.fritekstVurderingBrev = vilkårPeriode.fritekstVurderingBrev;
+        this.ikkeOppfyltÅrsak = vilkårPeriode.ikkeOppfyltÅrsak;
     }
 
     private static String getPayload(Clob payload, AtomicReference<String> payloadStringRef) {
@@ -276,6 +280,17 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
         this.avslagsårsak = avslagsårsak == null ? Avslagsårsak.UDEFINERT : avslagsårsak;
     }
 
+    public String getIkkeOppfyltÅrsak() {
+        if (getGjeldendeUtfall().equals(Utfall.IKKE_OPPFYLT)) {
+            return ikkeOppfyltÅrsak;
+        }
+        return null;
+    }
+
+    void setIkkeOppfyltÅrsak(String ikkeOppfyltÅrsak) {
+        this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
+    }
+
     void setManueltVurdert(boolean manueltVurdert) {
         this.manueltVurdert = manueltVurdert;
     }
@@ -312,6 +327,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
             utfall == that.utfall &&
             Objects.equals(begrunnelse, that.begrunnelse) &&
             Objects.equals(fritekstVurderingBrev, that.fritekstVurderingBrev) &&
+            Objects.equals(ikkeOppfyltÅrsak, that.ikkeOppfyltÅrsak) &&
             avslagsårsak == that.avslagsårsak &&
             utfallMerknad == that.utfallMerknad &&
             merknadParametere == that.merknadParametere &&
@@ -320,7 +336,7 @@ public class VilkårPeriode extends BaseEntitet implements IndexKey, Comparable<
 
     @Override
     public int hashCode() {
-        return Objects.hash(manueltVurdert, utfall, begrunnelse, avslagsårsak, utfallMerknad, merknadParametere, overstyrtUtfall, fritekstVurderingBrev);
+        return Objects.hash(manueltVurdert, utfall, begrunnelse, avslagsårsak, utfallMerknad, merknadParametere, overstyrtUtfall, fritekstVurderingBrev, ikkeOppfyltÅrsak);
     }
 
     @Override
