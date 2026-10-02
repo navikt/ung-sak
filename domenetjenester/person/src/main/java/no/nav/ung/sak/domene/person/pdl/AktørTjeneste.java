@@ -101,6 +101,37 @@ public class AktørTjeneste {
     }
 
     /**
+     * Henter gjeldende og historiske aktørIder for en personident. Tom mengde dersom personen ikke finnes.
+     */
+    public Set<AktørId> hentAlleAktørIderForPersonIdent(PersonIdent personIdent) {
+        if (personIdent.erFdatNummer()) {
+            return Set.of();
+        }
+        var request = new HentIdenterQueryRequest();
+        request.setIdent(personIdent.getIdent());
+        request.setGrupper(List.of(AKTORID));
+        request.setHistorikk(Boolean.TRUE);
+
+        var projeksjon = new IdentlisteResponseProjection()
+            .identer(new IdentInformasjonResponseProjection()
+                .ident()
+                .historisk());
+
+        try {
+            return pdlKlient.hentIdenter(request, projeksjon).getIdenter().stream()
+                .map(IdentInformasjon::getIdent)
+                .map(AktørId::new)
+                .collect(toSet());
+        } catch (VLException e) {
+            if (PdlKlient.PDL_KLIENT_NOT_FOUND_KODE.equals(e.getKode())) {
+                log.info("Fant ikke aktørIder for oppgitt personident");
+                return Set.of();
+            }
+            throw e;
+        }
+    }
+
+    /**
      * returnerer map av aktørId->personident (null dersom ikke funnet).
      */
     public Map<AktørId, PersonIdent> hentPersonIdentForAktørIder(Set<AktørId> aktørIder) {
