@@ -15,6 +15,7 @@ import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 
 import no.nav.k9.felles.jpa.HibernateVerktøy;
+import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 
 @Dependent
@@ -125,5 +126,27 @@ public class SøknadRepository {
 
         return ((Stream<SøknadEntitet>) queryBeh.getResultStream()).sorted(Comparator.comparing(SøknadEntitet::getMottattDato)).collect(Collectors.toList());
 
+    }
+
+    /**
+     * Sjekker om en søknad med gitt ekstern søknadId er mottatt i en behandling på fagsaken (også ikke-aktive grunnlag).
+     * Behandlinger henlagt uten at søknaden er vurdert (f.eks. trukket eller feilopprettet) teller ikke med.
+     * MERGET_OG_HENLAGT teller med, siden søknaden følger med til den nye behandlingen.
+     */
+    public boolean finnesSøknadMedSøknadId(Long fagsakId, String søknadId) {
+        Objects.requireNonNull(fagsakId, "fagsakId");
+        Objects.requireNonNull(søknadId, "søknadId");
+        Long antall = entityManager.createQuery(
+                "select count(g) from SøknadGrunnlag g, Behandling b " +
+                    "where b.id = g.behandlingId " +
+                    "and b.fagsak.id = :fagsakId " +
+                    "and g.søknad.søknadId = :søknadId " +
+                    "and b.behandlingResultatType not in (:henlagteSøknad)",
+                Long.class)
+            .setParameter("fagsakId", fagsakId)
+            .setParameter("søknadId", søknadId)
+            .setParameter("henlagteSøknad", BehandlingResultatType.getHenleggelseskoderForSøknad())
+            .getSingleResult();
+        return antall > 0;
     }
 }
