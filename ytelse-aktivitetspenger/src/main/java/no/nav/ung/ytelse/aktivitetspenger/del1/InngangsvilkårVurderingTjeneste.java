@@ -4,18 +4,16 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.*;
+import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
+import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetsvilkårResultatPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 
@@ -55,12 +53,12 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : holder.getVurderinger()) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? avslagsårsak(vurdering.getIkkeOppfyltÅrsak()) : null;
+            var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak()) : null;
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medUtfallManuell(utfall)
-                .medAvslagsårsak(avslagsårsak));
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak));
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }
@@ -77,14 +75,14 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : vurderinger) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT
-                ? avslagsårsak(vurdering.getIkkeOppfyltÅrsak())
+            var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT
+                ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak())
                 : null;
 
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsak);
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak);
 
             if (vurdering.erManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -104,12 +102,12 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : grunnlag.hentAndreLivsoppholdsytelserResultatPerioder()) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? avslagsårsak(vurdering.getIkkeOppfyltÅrsak()) : null;
+            var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak()) : null;
 
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsak);
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak);
 
             if (vurdering.isManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -233,14 +231,14 @@ public class InngangsvilkårVurderingTjeneste {
         for (var vurdering : vurderinger) {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
-            var avslagsårsak = utfall == Utfall.IKKE_OPPFYLT
-                ? avslagsårsak(vurdering.getIkkeOppfyltÅrsak())
+            var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT
+                ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak())
                 : null;
 
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsak);
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak);
 
             if (vurdering.erManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -252,9 +250,15 @@ public class InngangsvilkårVurderingTjeneste {
         resultatBuilder.leggTil(vilkårBuilder);
     }
 
-    private static Avslagsårsak avslagsårsak(IkkeOppfyltDetaljertÅrsak årsak) {
-        Objects.requireNonNull(årsak, "avslagsårsak må være satt ved avslag");
-        return årsak.avslagsårsak()
-            .orElseThrow(() -> new IllegalStateException(årsak + " har ingen definert avslagsårsak, og kan derfor ikke føre til avslag"));
+    private static IkkeOppfyltDetaljertÅrsak påkrevdÅrsak(IkkeOppfyltDetaljertÅrsak årsak) {
+        return Objects.requireNonNull(årsak, "ikkeOppfyltÅrsak må være satt ved avslag");
+    }
+
+    private static Avslagsårsak avslagsårsakFor(IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak) {
+        if (ikkeOppfyltÅrsak == null) {
+            return null;
+        }
+        return ikkeOppfyltÅrsak.avslagsårsak()
+            .orElseThrow(() -> new IllegalArgumentException(ikkeOppfyltÅrsak + " har ingen definert avslagsårsak, og kan derfor ikke føre til avslag"));
     }
 }

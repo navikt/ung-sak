@@ -68,6 +68,11 @@ public class VilkårPeriodeDto {
     @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
     private String fritekstVurderingBrev;
 
+    @JsonProperty("ikkeOppfyltÅrsak")
+    @Size(max = 100)
+    @Pattern(regexp = "^[\\p{L}\\p{N}_]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    private String ikkeOppfyltÅrsak;
+
     /**
      * indikerer om en vilkårsperiode er aktuell for vurdering i inneværende behandling
      */
@@ -145,6 +150,14 @@ public class VilkårPeriodeDto {
         this.fritekstVurderingBrev = fritekstVurderingBrev;
     }
 
+    public String getIkkeOppfyltÅrsak() {
+        return ikkeOppfyltÅrsak;
+    }
+
+    public void setIkkeOppfyltÅrsak(String ikkeOppfyltÅrsak) {
+        this.ikkeOppfyltÅrsak = ikkeOppfyltÅrsak;
+    }
+
 
     public Boolean getVurderesIBehandlingen() {
         return vurderesIBehandlingen;
@@ -169,6 +182,7 @@ public class VilkårPeriodeDto {
             + ", vilkarStatus=" + vilkarStatus
             + (avslagKode == null ? "" : ", avslagKode=" + avslagKode)
             + (begrunnelse == null ? "" : ", begrunnelse=" + begrunnelse)
+            + (ikkeOppfyltÅrsak == null ? "" : ", ikkeOppfyltÅrsak=" + ikkeOppfyltÅrsak)
             + (merknadParametere == null ? "" : ", merknadParametere=" + merknadParametere)
             + (vurderesIBehandlingen == null ? "" : ", vurderesIBehandlingen=" + vurderesIBehandlingen)
             + ">";

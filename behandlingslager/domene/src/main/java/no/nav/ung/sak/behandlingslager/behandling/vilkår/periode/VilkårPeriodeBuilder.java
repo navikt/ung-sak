@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Properties;
 
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårUtfallMerknad;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -36,6 +37,12 @@ public class VilkårPeriodeBuilder {
 
     public VilkårPeriodeBuilder medAvslagsårsak(Avslagsårsak avslagsårsak) {
         this.entitet.setAvslagsårsak(avslagsårsak);
+        return this;
+    }
+
+    public VilkårPeriodeBuilder medAvslagsårsak(Avslagsårsak avslagsårsak, IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak) {
+        this.entitet.setAvslagsårsak(avslagsårsak);
+        this.entitet.setIkkeOppfyltÅrsak(ikkeOppfyltÅrsak == null ? null : ikkeOppfyltÅrsak.getKode());
         return this;
     }
 
@@ -93,6 +100,7 @@ public class VilkårPeriodeBuilder {
     public VilkårPeriodeBuilder forlengelseAv(VilkårPeriode eksisteredeVurdering) {
         this.entitet.setManueltVurdert(eksisteredeVurdering.getErManueltVurdert());
         this.entitet.setAvslagsårsak(eksisteredeVurdering.getAvslagsårsak());
+        this.entitet.setIkkeOppfyltÅrsak(eksisteredeVurdering.getIkkeOppfyltÅrsak());
         this.entitet.setMerknadParametere(eksisteredeVurdering.getMerknadParametere());
         this.entitet.setRegelEvaluering(eksisteredeVurdering.getRegelEvaluering());
         this.entitet.setRegelInput(eksisteredeVurdering.getRegelInput());
