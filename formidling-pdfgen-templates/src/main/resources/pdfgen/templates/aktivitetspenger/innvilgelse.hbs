@@ -49,8 +49,10 @@
             {{#if søkerBlirOverHøyesteAlder}}Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år.{{/if}}
             </p>
         {{else}}
-            <p>Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år.</p>
+            <p>Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i 52 uker.</p>
         {{/if}}
+
+        {{> aktivitetspenger/footer/hjemmel paragraf="§§ 2 til 6, 8 og 10 til 12"}}
 
         {{#with satsOgBeregning}}
             <h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>

@@ -32,7 +32,8 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
                 "Du får 8 382 kroner i aktivitetspenger for perioden fra 1. september 2025 til 30. september 2025. " +
                 "Pengene får du utbetalt innen fire dager. " +
                 "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
-                "Derfor har vi redusert aktivitetspengene dine med et beløp som tilsvarer 66 prosent av inntekten din. ");
+                "Derfor har vi redusert aktivitetspengene dine med et beløp som tilsvarer 66 prosent av inntekten din. " +
+                VedtaksbrevVerifikasjon.hjemmelsetning("§ 14"));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_INNTEKT);
@@ -56,7 +57,8 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
                 "Du får 9 062 kroner i aktivitetspenger for perioden fra 1. oktober 2025 til 31. oktober 2025. " +
                 "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
                 "Derfor har vi redusert aktivitetspengene dine med et beløp som tilsvarer 66 prosent av inntekten din. " +
-                "Pengene får du utbetalt innen fire dager. ");
+                "Pengene får du utbetalt innen fire dager. " +
+                VedtaksbrevVerifikasjon.hjemmelsetning("§ 14"));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_INNTEKT);
@@ -76,7 +78,8 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
             "Vi har endret aktivitetspengene dine " +
                 "Du får ikke utbetalt aktivitetspenger for perioden fra 1. september 2025 til 30. september 2025. " +
                 "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
-                standardTekstIngenUtbetalingEndringInntekt());
+                standardTekstIngenUtbetalingEndringInntekt() +
+                VedtaksbrevVerifikasjon.hjemmelsetning("§ 14"));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_INNTEKT);
@@ -100,7 +103,8 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
                 "Du får dette beløpet siden du hadde en inntekt på 10 000 kroner i denne perioden. " +
                 "Du får ikke utbetalt aktivitetspenger for perioden fra 1. september 2025 til 30. september 2025. " +
                 "Det er fordi du hadde en inntekt på 23 000 kroner i denne perioden. " +
-                standardTekstIngenUtbetalingEndringInntekt());
+                standardTekstIngenUtbetalingEndringInntekt() +
+                VedtaksbrevVerifikasjon.hjemmelsetning("§ 14"));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_INNTEKT);
@@ -124,7 +128,8 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
                 "Du får 2 667 kroner i aktivitetspenger for perioden fra 1. mars 2026 til 10. mars 2026. " +
                 "Pengene får du utbetalt innen fire dager. " +
                 "Siden du bare hadde aktivitetspenger for en del av måneden, " +
-                "brukte vi bare en del av inntekten din på 10 000 kroner i mars til å regne ut hvor mye penger du får for perioden fra 1. mars 2026 til 10. mars 2026. ");
+                "brukte vi bare en del av inntekten din på 10 000 kroner i mars til å regne ut hvor mye penger du får for perioden fra 1. mars 2026 til 10. mars 2026. " +
+                VedtaksbrevVerifikasjon.hjemmelsetning("§ 14"));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_INNTEKT);

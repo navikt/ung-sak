@@ -37,6 +37,7 @@ class EndringHøySatsTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygg
                 Du får mer i aktivitetspenger fordi du fyller 25 år \
                 Du får mer penger fordi du fyller 25 år 16. august 2025. \
                 Fra og med denne datoen får du 1 022 kroner per dag, utenom lørdag og søndag (før skatt). \
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag § 12 første ledd. \
                 """);
 
         assertThatHtml(generertBrev.dokument().html())
@@ -59,6 +60,7 @@ class EndringHøySatsTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygg
                 Du får mer i aktivitetspenger fordi du fyller 25 år \
                 Du får mer penger fordi du fyller 25 år 16. august 2025. \
                 Fra og med denne datoen får du 1 022 kroner per dag, utenom lørdag og søndag (før skatt). \
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag § 12 første ledd. \
                 """);
 
         assertThatHtml(generertBrev.dokument().html())
