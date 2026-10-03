@@ -59,6 +59,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPengerAvsnitt() + """
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Fordi du får én dagsats når du er under 25 år og en annen dagsats når du er over 25 år, har vi gjort to ulike beregninger. \
                 Slik har vi regnet ut satsen som du får før du fylte 25 år. \
@@ -104,6 +105,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPengerAvsnitt() + """
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er under 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -145,6 +147,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPengerAvsnitt() + """
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -186,6 +189,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPengerAvsnitt() + """
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen er høyere enn inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over 25 år. \
@@ -234,6 +238,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Hvorfor får du aktivitetspenger? \
                 Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 31. oktober 2025. \
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -279,6 +284,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025. \
                 Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år. \
+                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -322,7 +328,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         return """
             Hvorfor får du aktivitetspenger? \
             Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
-            Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år. \
+            Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i 52 uker. \
             """;
     }
 

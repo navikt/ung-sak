@@ -27,6 +27,11 @@ public class VedtaksbrevVerifikasjon {
         %s \
         side av""";
 
+    public static String hjemmelsetning(String paragraf) {
+        return "Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge " +
+            "(forsøket Et enklere Nav), Trondheim kommune, Trøndelag " + paragraf + ". ";
+    }
+
     public static String medHeaderOgFooter(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
 

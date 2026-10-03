@@ -3,6 +3,7 @@ package no.nav.ung.kodeverk.vilkår;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.hjemmel.AktivitetspengerForskrift;
 
 import java.util.*;
 
@@ -11,13 +12,13 @@ public enum VilkårType implements Kodeverdi {
         "Aldersvilkåret",
         Map.of(
             FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8 jamfør 3 bokstav a",
-            FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+            FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("5")),
         Avslagsårsak.SØKER_OVER_HØYESTE_ALDER,
         Avslagsårsak.SØKER_UNDER_MINSTE_ALDER),
     SØKNADSFRIST("UNG_VK_3",
         "Søknadsfristvilkåret",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "", // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
-            FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+            FagsakYtelseType.AKTIVITETSPENGER, "Folketrygdloven § 22-13"),
         Avslagsårsak.SØKT_FOR_SENT),
     SØKERSOPPLYSNINGSPLIKT("UNG_VK_4",
         "Søkers opplysningsplikt",
@@ -35,7 +36,7 @@ public enum VilkårType implements Kodeverdi {
     BOSTEDSVILKÅR(
         "AKT_VK_1",
         "Bostedsvilkåret",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("2")),
         Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
         Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE,
         Avslagsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED
@@ -43,26 +44,26 @@ public enum VilkårType implements Kodeverdi {
     ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR(
         "AKT_VK_4",
         "Andre livsoppholdsytelser-vilkåret",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("4")),
         Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE
     ),
     BISTANDSVILKÅR(
         "AKT_VK_2",
         "Bistandsvilkåret",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("6")),
         Avslagsårsak.IKKE_14A_VEDTAK
     ),
     AKTIVITETSVILKÅR(
         "AKT_VK_5",
         "Aktivitetsvilkår",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("8")),
         Avslagsårsak.AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK
     ),
 
     FORUTGÅENDE_MEDLEMSKAPSVILKÅRET(
         "AKT_VK_3",
         "Forutgående medlemskapsvilkåret",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse"),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("3")),
         Avslagsårsak.SØKER_ER_IKKE_MEDLEM
     ),
 

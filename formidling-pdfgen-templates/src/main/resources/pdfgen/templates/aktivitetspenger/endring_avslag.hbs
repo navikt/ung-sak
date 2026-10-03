@@ -27,6 +27,8 @@
                     {{fritekstBrev}}
                 </p>
             {{/if}}
+
+            {{> aktivitetspenger/footer/hjemmel paragraf="§ 2"}}
         {{/with}}
 
         {{#with bistand}}
@@ -38,7 +40,7 @@
             {{else eq årsak "KOMMET_I_UTDANNING"}}
                 <p>
                     Du får ikke aktivitetspenger i perioden fra {{periode.fom}} til {{periode.tom}}.
-                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du tar en utdanning i perioden, stanser vi aktivitetspengene dine.
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du tar en ordinær utdanning i perioden, stanser vi aktivitetspengene dine.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
                 <p>
@@ -51,6 +53,8 @@
                     {{fritekstBrev}}
                 </p>
             {{/if}}
+
+            {{> aktivitetspenger/footer/hjemmel paragraf="§ 6"}}
         {{/with}}
 
         {{#with andreLivsoppholdsytelser}}
@@ -58,7 +62,7 @@
                 <p>
                     Du får ikke aktivitetspenger i perioden fra {{periode.fom}} til {{periode.tom}}.
                     Det er fordi du får {{ytelseNavn}} i denne perioden.
-                    Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
+                    Du kan ikke få aktivitetspenger samtidig som du får denne ytelsen.
                 </p>
             {{/if}}
             {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
@@ -73,6 +77,8 @@
                     {{fritekstBrev}}
                 </p>
             {{/if}}
+
+            {{> aktivitetspenger/footer/hjemmel paragraf="§ 4"}}
         {{/with}}
 
     {{/felles/seksjon/hoved}}

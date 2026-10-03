@@ -174,7 +174,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "Det er fordi du får dagpenger fra denne datoen. Du kan ikke få aktivitetspenger samtidig som du får "
-                    + "en annen livsoppholdsytelse."
+                    + "denne ytelsen."
             );
     }
 
@@ -232,7 +232,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
                     + brevDatoString(livsoppholdsperiode(scenario).getTom()),
                 "Det er fordi du får tiltakspenger i denne perioden. Du kan ikke få aktivitetspenger samtidig som du får "
-                    + "en annen livsoppholdsytelse."
+                    + "denne ytelsen."
             );
     }
 
@@ -293,7 +293,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få jobb eller utdanning. "
-                    + "Fordi du nå har begynt på en utdanning, stanser vi aktivitetspengene dine.",
+                    + "Fordi du nå har begynt på en ordinær utdanning, stanser vi aktivitetspengene dine.",
                 fritekst
             );
     }
@@ -315,7 +315,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(bistandsperiode(scenario).getFom()) + " til "
                     + brevDatoString(bistandsperiode(scenario).getTom()),
                 "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. "
-                    + "Fordi du tar en utdanning i perioden, stanser vi aktivitetspengene dine.",
+                    + "Fordi du tar en ordinær utdanning i perioden, stanser vi aktivitetspengene dine.",
                 fritekst
             );
     }

@@ -150,8 +150,8 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "Du har ikke rett til aktivitetspenger fordi du får " + forventetYtelse + ". Du kan ikke få aktivitetspenger samtidig som du får en annen "
-                    + "livsoppholdsytelse. Derfor har vi avslått søknaden din."
+                "Du har ikke rett til aktivitetspenger fordi du får " + forventetYtelse + ". Du kan ikke få aktivitetspenger samtidig som du får "
+                    + "denne ytelsen. Derfor har vi avslått søknaden din."
             );
     }
 
@@ -210,10 +210,10 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse. "
+                "Du kan ikke få aktivitetspenger samtidig som du får denne ytelsen. "
                     + "Derfor har vi avslått søknaden din."
             )
-            .asPlainTextNotContains("Trondheim")
+            .asPlainTextNotContains("må du bo i Trondheim kommune")
             .asPlainTextNotContains("bosted");
     }
 
