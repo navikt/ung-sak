@@ -37,4 +37,11 @@ public class BrevGenereringSemafor {
 
     }
 
+    /**
+     * dette tar ikke semaforen, så kan bare gi en indikasjon på om det er ledig kapasitet
+     */
+    public static boolean harLedigKapasitet() {
+        return SEMAFOR.availablePermits() > 0;
+    }
+
 }
