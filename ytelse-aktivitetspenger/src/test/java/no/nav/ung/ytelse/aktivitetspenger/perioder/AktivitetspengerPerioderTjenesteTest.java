@@ -109,6 +109,14 @@ class AktivitetspengerPerioderTjenesteTest {
         assertThat(resultat).containsExactly(new Periode(FOM, TOM));
     }
 
+    /**
+     * Overlapper vedtaksperioden forespurt periode, returneres hele vedtaksperioden, ikke bare overlappet.
+     * <pre>
+     * Vedtak (5. jan - 30. jun)  |-----------------|
+     * Forespurt (mars)              |-----|
+     * Returnert                  |-----------------|   (ikke kuttet til forespurt)
+     * </pre>
+     */
     @Test
     void skal_returnere_hele_perioden_uten_å_kutte_ved_forespurt_fom_og_tom() {
         var aktørId = AktørId.dummy();
@@ -119,6 +127,14 @@ class AktivitetspengerPerioderTjenesteTest {
         assertThat(resultat).containsExactly(new Periode(FOM, TOM));
     }
 
+    /**
+     * Vedtaksperioder uten overlapp med forespurt periode returneres ikke.
+     * <pre>
+     * Vedtak (5. jan - 30. jun)  |-----------------|
+     * Forespurt (fra 1. jul)                         |-----|
+     * Returnert                  (ingen)
+     * </pre>
+     */
     @Test
     void skal_ikke_gi_perioder_som_ikke_overlapper_forespurt_periode() {
         var aktørId = AktørId.dummy();

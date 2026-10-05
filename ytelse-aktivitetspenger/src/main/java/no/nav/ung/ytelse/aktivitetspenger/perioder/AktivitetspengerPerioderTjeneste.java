@@ -45,7 +45,17 @@ public class AktivitetspengerPerioderTjeneste {
     }
 
     /**
-     * Returnerer innvilgede perioder som overlapper forespurt periode. Periodene kuttes ikke ved forespurt fom/tom.
+     * Returnerer innvilgede perioder som overlapper forespurt periode. Periodene kuttes ikke ved forespurt fom/tom,
+     * slik at konsumenten ikke får falske endringer i fom/tom.
+     * <pre>
+     * Forespurt        |------------|
+     * Innvilget   |---------|
+     * Returnert   |---------|          (hele perioden, ikke kuttet til forespurt)
+     *
+     * Forespurt                 |-----|
+     * Innvilget   |---------|
+     * Returnert   (ingen)               (ingen overlapp)
+     * </pre>
      */
     public List<Periode> hentInnvilgedePerioder(Collection<AktørId> aktørIder, Periode forespurtPeriode) {
         Objects.requireNonNull(forespurtPeriode, "forespurtPeriode");
