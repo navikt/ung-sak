@@ -10,6 +10,7 @@ import no.nav.ung.sak.web.app.tjenester.behandling.BehandlingRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.AksjonspunktRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aksjonspunkt.ForvaltningAksjonspunktSammendragRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.BostedRestTjeneste;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VilkårsavklaringRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.arbeidsforhold.ArbeidsgiverRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.beregningsresultat.BeregningsresultatRestTjeneste;
 import no.nav.ung.sak.web.app.tjenester.behandling.historikk.HistorikkRestTjeneste;
@@ -89,6 +90,7 @@ public class RestImplementationClasses {
         classes.add(AktivitetspengerRestTjeneste.class);
         classes.add(ForutgåendeMedlemskapRestTjeneste.class);
         classes.add(BostedRestTjeneste.class);
+        classes.add(VilkårsavklaringRestTjeneste.class);
 
         classes.add(KlageRestTjeneste.class);
 

@@ -36,6 +36,7 @@ class VilkårDtoMapper {
         dto.setMerknadParametere(it.getMerknadParametere());
         dto.setBegrunnelse(it.getBegrunnelse());
         dto.setFritekstVurderingBrev(it.getFritekstVurderingBrev());
+        dto.setIkkeOppfyltÅrsak(it.getIkkeOppfyltÅrsak());
         dto.setMerknad(it.getMerknad());
         dto.setVurderesIBehandlingen(true);
 

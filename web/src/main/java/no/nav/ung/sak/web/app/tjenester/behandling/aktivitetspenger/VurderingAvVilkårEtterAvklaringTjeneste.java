@@ -11,6 +11,7 @@ import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
@@ -45,9 +46,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         }
 
         var vilkårene = vilkårResultatRepository.hentHvisEksisterer(behandlingId).orElseThrow();
-        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = vilkårene.getVilkårTimeline(vilkårType)
-            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT)
-            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
+        LocalDateTimeline<VilkårPeriode> eksisterendeVilkårperioder = relevanteVilkårsperioder(vilkårene, vilkårType);
 
         if (eksisterendeVilkårperioder.isEmpty()) {
             throw new IllegalArgumentException("Fant ingen relevante vilkårsperioder for " + vilkårType
@@ -79,6 +78,13 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                 new LocalDateSegment<>(di, byggResultat(di, vilkårType, vurdering.getValue(), årsak.getValue(), vurdertAv, vurdertTidspunkt)),
             LocalDateTimeline.JoinStyle.INNER_JOIN
         );
+    }
+
+    // Delt med VilkårsavklaringRestTjeneste, slik at det som vises til vurdering er det samme som utled godtar
+    static LocalDateTimeline<VilkårPeriode> relevanteVilkårsperioder(Vilkårene vilkårene, VilkårType vilkårType) {
+        return vilkårene.getVilkårTimeline(vilkårType)
+            .filterValue(v -> v.getUtfall() != Utfall.IKKE_RELEVANT)
+            .filterValue(v -> v.getAvslagsårsak() != Avslagsårsak.AVKORTET);
     }
 
     private static void validerPerioderFraDtoOverlapperEksisterendeVilkårperioder(long behandlingId,

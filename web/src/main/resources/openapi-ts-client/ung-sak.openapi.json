@@ -2474,7 +2474,7 @@
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BostedFaktaavklaringPeriodeDto"
             },
-            "maxItems" : 100,
+            "maxItems" : 1,
             "minItems" : 1,
             "type" : "array"
           },
@@ -2563,6 +2563,155 @@
           }
         },
         "required" : [ "vurdertePerioder" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.UttalelseDto" : {
+        "properties" : {
+          "harUttalelse" : {
+            "type" : "boolean"
+          },
+          "mottattTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "uttalelseTekst" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto" : {
+        "properties" : {
+          "avklaringtype" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Avklaringtype"
+          },
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "begrunnelseIkkeVarsel" : {
+            "type" : "string"
+          },
+          "foreslåttIBehandlingen" : {
+            "type" : "boolean"
+          },
+          "fritekstTilVarsel" : {
+            "type" : "string"
+          },
+          "ikkeOppfyltÅrsak" : {
+            "type" : "string"
+          },
+          "kilde" : {
+            "type" : "string"
+          },
+          "kildeFritekst" : {
+            "type" : "string"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "referanse" : {
+            "format" : "uuid",
+            "type" : "string"
+          },
+          "skalSendeVarsel" : {
+            "type" : "boolean"
+          },
+          "uttalelse" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.UttalelseDto"
+          },
+          "vurdertAv" : {
+            "type" : "string"
+          },
+          "vurdertTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "avklaringtype", "ikkeOppfyltÅrsak", "kilde", "periode", "referanse" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingDto" : {
+        "properties" : {
+          "avklaring" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto"
+          },
+          "vurdering" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingDto"
+          }
+        },
+        "required" : [ "avklaring" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerDto" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto"
+            },
+            "type" : "array"
+          },
+          "vilkårType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          }
+        },
+        "required" : [ "perioder", "vilkårType" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerDto" : {
+        "properties" : {
+          "avklaringer" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto"
+            },
+            "type" : "array"
+          },
+          "vilkårType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          }
+        },
+        "required" : [ "avklaringer", "vilkårType" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingDto" : {
+        "properties" : {
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "erManuellVurdering" : {
+            "type" : "boolean"
+          },
+          "erVilkårOppfylt" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "type" : "string"
+          },
+          "ikkeOppfyltÅrsak" : {
+            "type" : "string"
+          },
+          "vurdertAv" : {
+            "type" : "string"
+          },
+          "vurdertTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto" : {
+        "properties" : {
+          "avklaringOgVurdering" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingDto"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "utfall" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.Utfall"
+          }
+        },
+        "required" : [ "periode", "utfall" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandAvklaringIkkeOppfyltDto" : {
@@ -2675,7 +2824,7 @@
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto"
             },
-            "maxItems" : 100,
+            "maxItems" : 1,
             "minItems" : 1,
             "type" : "array"
           },
@@ -2892,7 +3041,7 @@
             "items" : {
               "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.AndreLivsoppholdsytelserFaktaavklaringPeriodeDto"
             },
-            "maxItems" : 100,
+            "maxItems" : 1,
             "minItems" : 1,
             "type" : "array"
           },
@@ -5819,6 +5968,12 @@
             "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
             "type" : "string"
           },
+          "ikkeOppfyltÅrsak" : {
+            "maxLength" : 100,
+            "minLength" : 0,
+            "pattern" : "^[\\p{L}\\p{N}_]+$",
+            "type" : "string"
+          },
           "input" : {
             "maxLength" : 1000000,
             "minLength" : 0,
@@ -7843,6 +7998,78 @@
           }
         },
         "tags" : [ "vilkår" ]
+      }
+    },
+    "/api/behandling/vilkar/avklaringer" : {
+      "get" : {
+        "description" : "Hent foreslåtte og ferdigstilte vilkårsavklaringer for et vilkår",
+        "operationId" : "hentVilkårsavklaringer",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "vilkarType",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "aktivitetspenger" ]
+      }
+    },
+    "/api/behandling/vilkar/avklaringer/vurderinger" : {
+      "get" : {
+        "description" : "Hent vilkårsvurderinger per foreslått vilkårsavklaring",
+        "operationId" : "hentVilkårsavklaringVurderinger",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        }, {
+          "in" : "query",
+          "name" : "vilkarType",
+          "required" : true,
+          "schema" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerDto"
+                }
+              }
+            },
+            "description" : "default response"
+          }
+        },
+        "tags" : [ "aktivitetspenger" ]
       }
     },
     "/api/behandling/vilkar/full-v3" : {
