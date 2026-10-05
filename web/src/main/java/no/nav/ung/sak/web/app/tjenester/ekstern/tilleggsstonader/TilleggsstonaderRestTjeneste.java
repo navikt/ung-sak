@@ -79,15 +79,13 @@ public class TilleggsstonaderRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public AktivitetspengerPerioderResponse hentAktivitetspengerPerioder(
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenAbacAttributter.class) AktivitetspengerPerioderRequest request) {
-        long start = System.nanoTime();
-
         var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(new PersonIdent(request.ident()));
         var perioder = aktivitetspengerPerioderTjeneste.hentInnvilgedePerioder(aktørIder, new Periode(request.fom(), request.tom())).stream()
             .map(p -> new AktivitetspengerPeriode(p.getFom(), p.getTom()))
             .toList();
 
-        log.info("Tilleggsstønader hentet aktivitetspengeperioder. konsument={}, antallPerioder={}, varighetMs={}",
-            SubjectHandler.getSubjectHandler().getUid(), perioder.size(), (System.nanoTime() - start) / 1_000_000);
+        log.info("Tilleggsstønader hentet aktivitetspengeperioder. konsument={}, antallPerioder={}",
+            SubjectHandler.getSubjectHandler().getUid(), perioder.size());
         return new AktivitetspengerPerioderResponse(perioder);
     }
 
