@@ -41,7 +41,7 @@ class AktivitetspengerPerioderTjenesteTest {
 
     @Test
     void skal_gi_tom_liste_når_bruker_ikke_har_fagsak() {
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(AktørId.dummy()), HELE_ÅRET);
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(AktørId.dummy()), HELE_ÅRET);
 
         assertThat(resultat).isEmpty();
     }
@@ -51,7 +51,7 @@ class AktivitetspengerPerioderTjenesteTest {
         var aktørId = AktørId.dummy();
         opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), HELE_ÅRET);
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
         assertThat(resultat).containsExactly(new Periode(FOM, TOM));
     }
@@ -61,7 +61,7 @@ class AktivitetspengerPerioderTjenesteTest {
         var aktørId = AktørId.dummy();
         opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.IKKE_OPPFYLT), 2);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), HELE_ÅRET);
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
         assertThat(resultat).isEmpty();
     }
@@ -75,7 +75,7 @@ class AktivitetspengerPerioderTjenesteTest {
             new VilkårData(new Periode(FOM, opphørsdato.minusDays(1)), Utfall.OPPFYLT),
             new VilkårData(new Periode(opphørsdato, TOM), Utfall.IKKE_OPPFYLT)), 1);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), HELE_ÅRET);
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
         assertThat(resultat).containsExactly(new Periode(FOM, opphørsdato.minusDays(1)));
     }
@@ -89,7 +89,7 @@ class AktivitetspengerPerioderTjenesteTest {
             new VilkårData(new Periode(FOM, nyFom.minusDays(1)), Utfall.IKKE_OPPFYLT),
             new VilkårData(new Periode(nyFom, TOM), Utfall.OPPFYLT)), 1);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), HELE_ÅRET);
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
         assertThat(resultat).containsExactly(new Periode(nyFom, TOM));
     }
@@ -104,7 +104,7 @@ class AktivitetspengerPerioderTjenesteTest {
         leggTilVilkår(åpenRevurdering, vilkår(FOM, TOM, Utfall.IKKE_OPPFYLT));
         åpenRevurdering.lagre(entityManager);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), HELE_ÅRET);
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), HELE_ÅRET);
 
         assertThat(resultat).containsExactly(new Periode(FOM, TOM));
     }
@@ -112,9 +112,9 @@ class AktivitetspengerPerioderTjenesteTest {
     /**
      * Overlapper vedtaksperioden forespurt periode, returneres hele vedtaksperioden, ikke bare overlappet.
      * <pre>
-     * Vedtak (5. jan - 30. jun)  |-----------------|
-     * Forespurt (mars)              |-----|
-     * Returnert                  |-----------------|   (ikke kuttet til forespurt)
+     * Vedtak (5. jan - 30. jun)     |-----------------|
+     * Forespurt (mars)                    |-----|
+     * Returnert                     |-----------------|   (ikke kuttet til forespurt)
      * </pre>
      */
     @Test
@@ -122,7 +122,7 @@ class AktivitetspengerPerioderTjenesteTest {
         var aktørId = AktørId.dummy();
         opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)));
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 31)));
 
         assertThat(resultat).containsExactly(new Periode(FOM, TOM));
     }
@@ -130,9 +130,9 @@ class AktivitetspengerPerioderTjenesteTest {
     /**
      * Vedtaksperioder uten overlapp med forespurt periode returneres ikke.
      * <pre>
-     * Vedtak (5. jan - 30. jun)  |-----------------|
-     * Forespurt (fra 1. jul)                         |-----|
-     * Returnert                  (ingen)
+     * Vedtak (5. jan - 30. jun)     |-----------------|
+     * Forespurt (fra 1. jul)                           |-----|
+     * Returnert                     (ingen)
      * </pre>
      */
     @Test
@@ -140,7 +140,7 @@ class AktivitetspengerPerioderTjenesteTest {
         var aktørId = AktørId.dummy();
         opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(TOM.plusDays(1), TOM.plusMonths(1)));
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(TOM.plusDays(1), TOM.plusMonths(1)));
 
         assertThat(resultat).isEmpty();
     }
@@ -148,9 +148,9 @@ class AktivitetspengerPerioderTjenesteTest {
     /**
      * Vedtaksperioder som starter etter forespurt periode returneres ikke.
      * <pre>
-     * Forespurt (5. nov - 4. jan)  |-----------|
-     * Vedtak (5. jan - 30. jun)                 |-----------------|
-     * Returnert                    (ingen)
+     * Forespurt (5. nov - 4. jan)   |-----------|
+     * Vedtak (5. jan - 30. jun)                  |-----------------|
+     * Returnert                     (ingen)
      * </pre>
      */
     @Test
@@ -158,7 +158,7 @@ class AktivitetspengerPerioderTjenesteTest {
         var aktørId = AktørId.dummy();
         opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM.minusDays(1)));
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM.minusDays(1)));
 
         assertThat(resultat).isEmpty();
     }
@@ -166,9 +166,9 @@ class AktivitetspengerPerioderTjenesteTest {
     /**
      * Fom og tom er inklusive, så én felles dag er nok til å regnes som overlapp. Hele vedtaksperioden returneres.
      * <pre>
-     * Forespurt (5. nov - 5. jan)  |-----------|
-     * Vedtak (5. jan - 30. jun)                |-----------------|
-     * Returnert                                |-----------------|
+     * Forespurt (5. nov - 5. jan)   |-----------|
+     * Vedtak (5. jan - 30. jun)                 |-----------------|
+     * Returnert                                 |-----------------|
      * </pre>
      */
     @Test
@@ -176,7 +176,7 @@ class AktivitetspengerPerioderTjenesteTest {
         var aktørId = AktørId.dummy();
         opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM));
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM));
 
         assertThat(resultat).containsExactly(new Periode(FOM, TOM));
     }
@@ -184,9 +184,9 @@ class AktivitetspengerPerioderTjenesteTest {
     /**
      * Overlapper forespurt periode bare deler av vedtaket, returneres likevel hele vedtaksperioden.
      * <pre>
-     * Forespurt (5. nov - 31. mar)  |-----------|
-     * Vedtak (5. jan - 30. jun)               |-----------------|
-     * Returnert                               |-----------------|   (ikke kuttet til forespurt tom)
+     * Forespurt (5. nov - 31. mar)  |-------------|
+     * Vedtak (5. jan - 30. jun)              |-----------------|
+     * Returnert                              |-----------------|   (ikke kuttet til forespurt tom)
      * </pre>
      */
     @Test
@@ -194,7 +194,7 @@ class AktivitetspengerPerioderTjenesteTest {
         var aktørId = AktørId.dummy();
         opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), LocalDate.of(2026, 3, 31)));
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), LocalDate.of(2026, 3, 31)));
 
         assertThat(resultat).containsExactly(new Periode(FOM, TOM));
     }
@@ -208,7 +208,7 @@ class AktivitetspengerPerioderTjenesteTest {
         opprettAvsluttetBehandling(historiskAktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
         opprettAvsluttetBehandling(gjeldendeAktørId, null, vilkår(senereFom, senereTom, Utfall.OPPFYLT), 1);
 
-        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(gjeldendeAktørId, historiskAktørId), HELE_ÅRET);
+        var resultat = tjeneste.hentInnvilgedeOverlappendePerioder(Set.of(gjeldendeAktørId, historiskAktørId), HELE_ÅRET);
 
         assertThat(resultat).containsExactly(new Periode(FOM, senereTom));
     }

@@ -94,7 +94,6 @@ public class PdpRequestMapper {
     }
 
     static ResourceType resourceTypeFraKode(BeskyttetRessursResourceType kode) {
-        // EKSTERN_SYSTEM finnes ikke i sif-abac-pdp, og vurderes i PepImpl (k9-felles) uten kall til PDP
         return switch (kode) {
             case APPLIKASJON -> ResourceType.APPLIKASJON;
             case FAGSAK -> ResourceType.FAGSAK;

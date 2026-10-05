@@ -24,7 +24,6 @@ import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPeriode;
 import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderRequest;
 import no.nav.ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderResponse;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.sak.typer.PersonIdent;
 import no.nav.ung.sak.web.server.abac.EksterneSystemer;
 import no.nav.ung.ytelse.aktivitetspenger.perioder.AktivitetspengerPerioderTjeneste;
 import org.slf4j.Logger;
@@ -79,8 +78,8 @@ public class TilleggsstonaderRestTjeneste {
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public AktivitetspengerPerioderResponse hentAktivitetspengerPerioder(
         @NotNull @Valid @TilpassetAbacAttributt(supplierClass = IngenAbacAttributter.class) AktivitetspengerPerioderRequest request) {
-        var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(new PersonIdent(request.ident()));
-        var perioder = aktivitetspengerPerioderTjeneste.hentInnvilgedePerioder(aktørIder, new Periode(request.fom(), request.tom())).stream()
+        var aktørIder = aktørTjeneste.hentAlleAktørIderForPersonIdent(request.ident());
+        var perioder = aktivitetspengerPerioderTjeneste.hentInnvilgedeOverlappendePerioder(aktørIder, new Periode(request.fom(), request.tom())).stream()
             .map(p -> new AktivitetspengerPeriode(p.getFom(), p.getTom()))
             .toList();
 

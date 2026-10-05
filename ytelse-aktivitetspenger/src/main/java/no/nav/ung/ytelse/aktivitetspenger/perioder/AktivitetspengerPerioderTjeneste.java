@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 /**
- * Utleder innvilgede perioder med aktivitetspenger for eksterne konsumenter (tilleggsstønader).
+ * Utleder innvilgede perioder med aktivitetspenger.
  * <p>
  * Grunnlaget er gjeldende vedtak per fagsak, dvs. siste avsluttede, ikke-henlagte ytelsesbehandling. Åpne behandlinger
  * tas ikke med. En periode regnes som innvilget når samlet vilkårsutfall er {@link Utfall#OPPFYLT}, uavhengig av dagsats.
@@ -45,19 +45,17 @@ public class AktivitetspengerPerioderTjeneste {
     }
 
     /**
-     * Returnerer innvilgede perioder som overlapper forespurt periode. Periodene kuttes ikke ved forespurt fom/tom,
-     * slik at konsumenten ikke får falske endringer i fom/tom.
      * <pre>
      * Forespurt        |------------|
      * Innvilget   |---------|
-     * Returnert   |---------|          (hele perioden, ikke kuttet til forespurt)
+     * Returnert   |---------|
      *
-     * Forespurt                 |-----|
+     * Forespurt                  |-----|
      * Innvilget   |---------|
-     * Returnert   (ingen)               (ingen overlapp)
+     * Returnert   (ingen)
      * </pre>
      */
-    public List<Periode> hentInnvilgedePerioder(Collection<AktørId> aktørIder, Periode forespurtPeriode) {
+    public List<Periode> hentInnvilgedeOverlappendePerioder(Collection<AktørId> aktørIder, Periode forespurtPeriode) {
         Objects.requireNonNull(forespurtPeriode, "forespurtPeriode");
         var innvilget = aktørIder.stream()
             .flatMap(aktørId -> fagsakRepository.hentForBruker(aktørId, FagsakYtelseType.AKTIVITETSPENGER).stream())

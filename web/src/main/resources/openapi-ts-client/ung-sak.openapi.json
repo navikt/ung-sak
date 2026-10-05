@@ -3881,7 +3881,6 @@
             "type" : "string"
           },
           "ident" : {
-            "pattern" : "^\\d{11}$",
             "type" : "string"
           },
           "tom" : {

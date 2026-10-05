@@ -29,7 +29,7 @@ import static org.mockito.Mockito.mock;
  * Her sikres ung-sak sin konfigurasjon: at tilleggsstønader kun får lesetilgang til sitt eget endepunkt,
  * og at annotasjonen stemmer med Nais-oppsettet.
  */
-class TilleggsstonaderTilgangTest {
+class TilleggsstønaderTilgangTest {
 
     private static final String TS_NAMESPACE = "tilleggsstonader";
     private static final String TS_APP = "tilleggsstonader-integrasjoner";
