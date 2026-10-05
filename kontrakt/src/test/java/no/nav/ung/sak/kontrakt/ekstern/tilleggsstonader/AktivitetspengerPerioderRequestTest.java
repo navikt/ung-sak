@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class AktivitetspengerPerioderRequestTest {
 
-    private static final PersonIdent IDENT = new PersonIdent("01019010046");
+    private static final PersonIdent IDENT = new PersonIdent("01419010029");
     private static final LocalDate FOM = LocalDate.of(2026, 1, 1);
     private static final LocalDate TOM = LocalDate.of(2026, 12, 31);
 
@@ -48,7 +48,7 @@ class AktivitetspengerPerioderRequestTest {
 
     @Test
     void ident_med_ugyldig_kontrollsiffer_skal_gi_valideringsfeil() {
-        var feil = validator.validate(new AktivitetspengerPerioderRequest(new PersonIdent("01019010047"), FOM, TOM));
+        var feil = validator.validate(new AktivitetspengerPerioderRequest(new PersonIdent("01419010028"), FOM, TOM));
 
         assertThat(feil).extracting(ConstraintViolation::getMessage).containsExactly("ident må være et gyldig fødselsnummer eller d-nummer");
     }
