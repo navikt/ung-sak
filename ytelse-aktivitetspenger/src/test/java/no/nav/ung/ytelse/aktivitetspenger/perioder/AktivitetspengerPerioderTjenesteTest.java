@@ -145,6 +145,60 @@ class AktivitetspengerPerioderTjenesteTest {
         assertThat(resultat).isEmpty();
     }
 
+    /**
+     * Vedtaksperioder som starter etter forespurt periode returneres ikke.
+     * <pre>
+     * Forespurt (5. nov - 4. jan)  |-----------|
+     * Vedtak (5. jan - 30. jun)                 |-----------------|
+     * Returnert                    (ingen)
+     * </pre>
+     */
+    @Test
+    void skal_ikke_gi_perioder_som_starter_dagen_etter_forespurt_tom() {
+        var aktørId = AktørId.dummy();
+        opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
+
+        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM.minusDays(1)));
+
+        assertThat(resultat).isEmpty();
+    }
+
+    /**
+     * Fom og tom er inklusive, så én felles dag er nok til å regnes som overlapp. Hele vedtaksperioden returneres.
+     * <pre>
+     * Forespurt (5. nov - 5. jan)  |-----------|
+     * Vedtak (5. jan - 30. jun)                |-----------------|
+     * Returnert                                |-----------------|
+     * </pre>
+     */
+    @Test
+    void skal_gi_perioden_når_forespurt_tom_er_lik_vedtakets_fom() {
+        var aktørId = AktørId.dummy();
+        opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
+
+        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), FOM));
+
+        assertThat(resultat).containsExactly(new Periode(FOM, TOM));
+    }
+
+    /**
+     * Overlapper forespurt periode bare deler av vedtaket, returneres likevel hele vedtaksperioden.
+     * <pre>
+     * Forespurt (5. nov - 31. mar)  |-----------|
+     * Vedtak (5. jan - 30. jun)               |-----------------|
+     * Returnert                               |-----------------|   (ikke kuttet til forespurt tom)
+     * </pre>
+     */
+    @Test
+    void skal_returnere_hele_perioden_ved_delvis_overlapp() {
+        var aktørId = AktørId.dummy();
+        opprettAvsluttetBehandling(aktørId, null, vilkår(FOM, TOM, Utfall.OPPFYLT), 2);
+
+        var resultat = tjeneste.hentInnvilgedePerioder(Set.of(aktørId), new Periode(FOM.minusMonths(2), LocalDate.of(2026, 3, 31)));
+
+        assertThat(resultat).containsExactly(new Periode(FOM, TOM));
+    }
+
     @Test
     void skal_slå_sammen_perioder_fra_fagsaker_på_historiske_aktørIder() {
         var gjeldendeAktørId = AktørId.dummy();
