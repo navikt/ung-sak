@@ -9,6 +9,7 @@ import no.nav.k9.felles.sikkerhet.abac.AbacDto;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
+import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursValidator;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -54,6 +55,12 @@ public class RestApiAbacTest {
     @MethodSource("provideArguments")
     public void sjekk_at_ingen_metoder_er_ressurs_annotert_med_tomme_eller_ugyldige_verdier(Method restMethod) throws IllegalAccessException {
         assertAtIngenBrukerTommeEllerUgyldigeVerdierPåBeskyttetRessurs(restMethod);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideArguments")
+    public void sjekk_at_eksterne_systemer_er_gyldig_konfigurert(Method restMethod) {
+        BeskyttetRessursValidator.valider(restMethod);
     }
 
     /**

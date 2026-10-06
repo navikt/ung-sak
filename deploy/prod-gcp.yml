@@ -103,6 +103,8 @@ spec:
         - application: ung-sak
         - application: ung-sak-web
         - application: ung-tilbake
+        - application: tilleggsstonader-integrasjoner
+          namespace: tilleggsstonader
   gcp:
     sqlInstances:
       - type: POSTGRES_16
