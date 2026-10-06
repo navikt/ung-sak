@@ -119,7 +119,8 @@ public class KlageRestTjeneste {
     public Response hentValgbareKlagehjemler() {
         var klagehjemler = Arrays.stream(Hjemmel.values())
             .filter(hjemmel -> !Hjemmel.MANGLER.equals(hjemmel))
-            .filter(hjemmel -> !Hjemmel.AKT_FORSKRIFT_PARAGRAF_12.equals(hjemmel)) // Ingen Kabal-kode for aktivitetspenger ennå
+            // TODO: Fjern filteret når Kabal har hjemmelkode for forskrift om forsøk med aktivitetspenger
+            .filter(hjemmel -> !Hjemmel.AKT_FORSKRIFT_PARAGRAF_12.equals(hjemmel))
             .map(hjemmel -> new KlageHjemmelDto(hjemmel.getKode(), hjemmel.getNavn())
         );
 

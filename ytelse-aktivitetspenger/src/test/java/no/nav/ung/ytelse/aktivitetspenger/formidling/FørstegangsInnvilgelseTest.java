@@ -58,8 +58,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
-                """ + hvorforFårDuPengerAvsnitt() + """
-                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
+                """ + hvorforFårDuPengerAvsnitt() + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("2 til 6, 8 og 10 til 13") + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Fordi du får én dagsats når du er under 25 år og en annen dagsats når du er over 25 år, har vi gjort to ulike beregninger. \
                 Slik har vi regnet ut satsen som du får før du fylte 25 år. \
@@ -104,8 +103,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
-                """ + hvorforFårDuPengerAvsnitt() + """
-                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
+                """ + hvorforFårDuPengerAvsnitt() + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("2 til 6, 8 og 10 til 13") + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er under 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -120,6 +118,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får aktivitetspenger</h1>",
                 "<h2>Hvorfor får du aktivitetspenger?</h2>",
+                "Trøndelag §§&nbsp;2 til 6, 8 og 10 til 13.",
                 "<h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>",
                 "<h2>Meld fra til oss hvis du har arbeidsinntekt i tillegg til aktivitetspengene</h2>"
             );
@@ -146,8 +145,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
-                """ + hvorforFårDuPengerAvsnitt() + """
-                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
+                """ + hvorforFårDuPengerAvsnitt() + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("2 til 6, 8 og 10 til 13") + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -188,8 +186,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
-                """ + hvorforFårDuPengerAvsnitt() + """
-                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
+                """ + hvorforFårDuPengerAvsnitt() + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("2 til 6, 8 og 10 til 13") + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen er høyere enn inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over 25 år. \
@@ -236,9 +233,9 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å få eller beholde en jobb. \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 31. oktober 2025. \
-                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
+                """ + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("2 til 6, 8 og 10 til 13") + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -281,10 +278,10 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å få eller beholde en jobb. \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025. \
                 Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år. \
-                Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge (forsøket Et enklere Nav), Trondheim kommune, Trøndelag §§ 2 til 6, 8 og 10 til 12. \
+                """ + VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("2 til 6, 8 og 10 til 13") + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
                 Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
@@ -327,7 +324,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
     static String hvorforFårDuPengerAvsnitt() {
         return """
             Hvorfor får du aktivitetspenger? \
-            Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+            Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å få eller beholde en jobb. \
             Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i 52 uker. \
             """;
     }

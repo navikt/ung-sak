@@ -36,12 +36,14 @@ class EndringInntektUtenReduksjonTest extends AbstractAktivitetspengerVedtaksbre
                 "Vi har sjekket inntekten din i A-ordningen, men arbeidsgiveren din har ikke registrert at du hadde inntekt i perioden. " +
                 "Vi har derfor kommet frem til at du får fulle aktivitetspenger for perioden. " +
                 "Pengene får du utbetalt innen fire dager. " +
-                VedtaksbrevVerifikasjon.hjemmelsetning("§ 14"));
+                VedtaksbrevVerifikasjon.hjemmelsetning("14"));
 
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har ikke endret aktivitetspengene dine</h1>"
+                "<h1>Vi har ikke endret aktivitetspengene dine</h1>",
+                "folketrygdloven §&nbsp;25-13",
+                "Trøndelag §&nbsp;14."
             );
     }
 

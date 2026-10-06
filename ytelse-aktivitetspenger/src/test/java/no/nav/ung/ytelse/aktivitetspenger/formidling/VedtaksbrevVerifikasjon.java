@@ -27,9 +27,16 @@ public class VedtaksbrevVerifikasjon {
         %s \
         side av""";
 
+    // Malen bruker hardt mellomrom etter §, men Jsoup gjør det om til vanlig mellomrom i ren tekst.
+    private static final String HJEMMELSETNING_PREFIKS = "Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge " +
+        "(forsøket Et enklere Nav), Trondheim kommune, Trøndelag ";
+
     public static String hjemmelsetning(String paragraf) {
-        return "Vedtaket er gjort etter folketrygdloven § 25-13 og forskrift om forsøk med aktivitetspenger for unge " +
-            "(forsøket Et enklere Nav), Trondheim kommune, Trøndelag " + paragraf + ". ";
+        return HJEMMELSETNING_PREFIKS + "§ " + paragraf + ". ";
+    }
+
+    public static String hjemmelsetningFlereParagrafer(String paragrafer) {
+        return HJEMMELSETNING_PREFIKS + "§§ " + paragrafer + ". ";
     }
 
     public static String medHeaderOgFooter(String fnr, String body) {

@@ -14,7 +14,7 @@
                 <p>
                     Du får ikke aktivitetspenger i perioden fra {{periode.fom}} til {{periode.tom}}.
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
-                    Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune i denne perioden, får du ikke aktivitetspenger.
+                    Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune i denne perioden, regner vi deg ikke som bosatt i kommunen.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
                 <p>
@@ -28,24 +28,24 @@
                 </p>
             {{/if}}
 
-            {{> aktivitetspenger/footer/hjemmel paragraf="§ 2"}}
+            {{> aktivitetspenger/footer/hjemmel paragraf="2"}}
         {{/with}}
 
         {{#with bistand}}
             {{#eq årsak "KOMMET_I_ARBEID"}}
                 <p>
                     Du får ikke aktivitetspenger i perioden fra {{periode.fom}} til {{periode.tom}}.
-                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du jobber i perioden, stanser vi aktivitetspengene dine.
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få eller beholde en jobb. Fordi du jobber i perioden og ikke trenger slik hjelp, stanser vi aktivitetspengene dine.
                 </p>
             {{else eq årsak "KOMMET_I_UTDANNING"}}
                 <p>
                     Du får ikke aktivitetspenger i perioden fra {{periode.fom}} til {{periode.tom}}.
-                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du tar en ordinær utdanning i perioden, stanser vi aktivitetspengene dine.
+                    Du kan bare få aktivitetspenger mens du tar høyere utdanning hvis utdanningen er et arbeidsmarkedstiltak fra Nav. Fordi du i denne perioden tar høyere utdanning som ikke er et arbeidsmarkedstiltak, stanser vi aktivitetspengene dine.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
                 <p>
                     Du får ikke aktivitetspenger i perioden fra {{periode.fom}} til {{periode.tom}}.
-                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning.
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få eller beholde en jobb.
                 </p>
             {{/eq}}
             {{#if fritekstBrev}}
@@ -54,7 +54,11 @@
                 </p>
             {{/if}}
 
-            {{> aktivitetspenger/footer/hjemmel paragraf="§ 6"}}
+            {{#eq årsak "KOMMET_I_UTDANNING"}}
+                {{> aktivitetspenger/footer/hjemmel paragraf="7"}}
+            {{else}}
+                {{> aktivitetspenger/footer/hjemmel paragraf="6"}}
+            {{/eq}}
         {{/with}}
 
         {{#with andreLivsoppholdsytelser}}
@@ -78,7 +82,7 @@
                 </p>
             {{/if}}
 
-            {{> aktivitetspenger/footer/hjemmel paragraf="§ 4"}}
+            {{> aktivitetspenger/footer/hjemmel paragraf="4"}}
         {{/with}}
 
     {{/felles/seksjon/hoved}}
