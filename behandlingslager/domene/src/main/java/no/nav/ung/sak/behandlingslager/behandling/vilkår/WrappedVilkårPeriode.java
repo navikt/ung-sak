@@ -32,7 +32,8 @@ class WrappedVilkårPeriode {
             Objects.equals(vilkårPeriode.getErOverstyrt(), that.vilkårPeriode.getErOverstyrt()) &&
             Objects.equals(vilkårPeriode.getErManueltVurdert(), that.vilkårPeriode.getErManueltVurdert()) &&
             Objects.equals(vilkårPeriode.getBegrunnelse(), that.vilkårPeriode.getBegrunnelse()) &&
-            Objects.equals(vilkårPeriode.getFritekstVurderingBrev(), that.vilkårPeriode.getFritekstVurderingBrev());
+            Objects.equals(vilkårPeriode.getFritekstVurderingBrev(), that.vilkårPeriode.getFritekstVurderingBrev()) &&
+            Objects.equals(vilkårPeriode.getIkkeOppfyltÅrsak(), that.vilkårPeriode.getIkkeOppfyltÅrsak());
     }
 
     @Override
@@ -43,7 +44,8 @@ class WrappedVilkårPeriode {
             vilkårPeriode.getErOverstyrt(),
             vilkårPeriode.getErManueltVurdert(),
             vilkårPeriode.getBegrunnelse(),
-            vilkårPeriode.getFritekstVurderingBrev());
+            vilkårPeriode.getFritekstVurderingBrev(),
+            vilkårPeriode.getIkkeOppfyltÅrsak());
     }
 
     @Override

@@ -117,14 +117,14 @@ class VurderingAvBistandsvilkårEtterAvklaringOppdatererTest {
     @Test
     void lagrer_vurdering_med_årsak_fra_avklaringen() {
         var behandling = opprettFørstegangsbehandling(PERIODE_1);
-        lagreForeslåttAvklaring(behandling, PERIODE_1, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
+        lagreForeslåttAvklaring(behandling, PERIODE_1, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
 
         var dto = dto(vurdering(PERIODE_1, false, "mangler 14a-vedtak", "fritekst til brev"));
         utførOppdatering(behandling, dto);
 
         var vurdering = hentBistandvurdering(behandling, PERIODE_1);
         assertThat(vurdering.isGodkjent()).isFalse();
-        assertThat(vurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
+        assertThat(vurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
         assertThat(historikkinnslagRepository.hent(behandling.getId()))
             .extracting(Historikkinnslag::getSkjermlenke)
             .containsExactly(SkjermlenkeType.BISTANDSVILKÅR);

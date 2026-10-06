@@ -75,7 +75,7 @@ class InngangsvilkårVurderingRepositoryTest {
 
     @Test
     void skal_lagre_bistandsvurdering_med_avslagsårsak() {
-        var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
+        var vurdering = new BistandsvilkårResultatPeriode(PERIODE_1, false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, null, null, VURDERT_AV, VURDERT_TIDSPUNKT);
         repository.lagreBistandsVurderinger(behandling.getId(), List.of(vurdering));
 
         var holder = repository.hentEksisterendeGrunnlag(behandling.getId())
@@ -85,7 +85,7 @@ class InngangsvilkårVurderingRepositoryTest {
         assertThat(holder.getVurderinger()).hasSize(1);
         var lagretVurdering = holder.getVurderinger().iterator().next();
         assertThat(lagretVurdering.isGodkjent()).isFalse();
-        assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK);
+        assertThat(lagretVurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
     }
 
     @Test
@@ -142,7 +142,7 @@ class InngangsvilkårVurderingRepositoryTest {
 
         repository.lagreBistandsVurderinger(behandling.getId(),
             List.of(
-                new BistandsvilkårResultatPeriode(PERIODE_1, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1)),
+                new BistandsvilkårResultatPeriode(PERIODE_1, false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1)),
                 new BistandsvilkårResultatPeriode(PERIODE_2, true, null, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))
             ));
 
@@ -169,7 +169,7 @@ class InngangsvilkårVurderingRepositoryTest {
 
         // Kun PERIODE_2 oppdateres — PERIODE_1 skal beholdes fra eksisterende
         repository.lagreBistandsVurderinger(behandling.getId(),
-            List.of(new BistandsvilkårResultatPeriode(PERIODE_2, false, BistandsvilkårIkkeOppfyltÅrsak.IKKE_14A_VEDTAK, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
+            List.of(new BistandsvilkårResultatPeriode(PERIODE_2, false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, null, null, "saksbehandler2", VURDERT_TIDSPUNKT.plusHours(1))));
 
         BistandsvilkårResultatHolder nyHolder = repository.hentEksisterendeGrunnlag(behandling.getId())
             .flatMap(AktivitetspengerInngangsvilkårResultatGrunnlag::getBistandsvilkårResultatHolder)

@@ -16,7 +16,7 @@ import java.util.List;
 public class VurderFaktaOmAndreLivsoppholdsytelserDto extends BekreftetAksjonspunktDto {
 
     @NotNull
-    @Size(min = 1, max = 100)
+    @Size(min = 1, max = 1)
     private List<@Valid AndreLivsoppholdsytelserFaktaavklaringPeriodeDto> avklaringer;
 
     public VurderFaktaOmAndreLivsoppholdsytelserDto() {

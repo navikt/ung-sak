@@ -58,28 +58,42 @@ public class AvslåttVilkårBrevinnholdHjelper {
         return avklarteAvslag;
     }
 
-    public static AvslåttBosted lagAvslåttBosted(VilkårsvurderingResultat vurdering) {
+    public static AvslåttBosted lagAvslåttBosted(AvslåttVurdering avslag) {
+        if (avslag == null) {
+            return null;
+        }
+        var vurdering = avslag.vurdering();
         var årsak = årsakFra(vurdering, BostedsvilkårIkkeOppfyltÅrsak.class);
         var brevårsak = switch (årsak) {
             case IKKE_BOSATTADRESSE_I_TRONDHEIM -> Bostedsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED;
-            case IKKE_BOSTEDSADRESSE_OG_IKKE_FOLKEREGISTRERT_I_TRONDHEIM -> Bostedsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE;
             case STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM -> Bostedsårsak.YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED;
             case ANNET -> Bostedsårsak.ANNEN_ÅRSAK;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
-        return new AvslåttBosted(brevårsak, fritekstFra(vurdering, årsak));
+        return new AvslåttBosted(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());
     }
 
-    public static AvslåttBistand lagAvslåttBistand(VilkårsvurderingResultat vurdering) {
+    public static AvslåttBistand lagAvslåttBistand(AvslåttVurdering avslag) {
+        if (avslag == null) {
+            return null;
+        }
+        var vurdering = avslag.vurdering();
         var årsak = årsakFra(vurdering, BistandsvilkårIkkeOppfyltÅrsak.class);
         var brevårsak = switch (årsak) {
-            case IKKE_14A_VEDTAK -> Bistandsårsak.HAR_IKKE_14A_VEDTAK;
+            case KOMMET_I_ARBEID -> Bistandsårsak.KOMMET_I_ARBEID;
+            case KOMMET_I_UTDANNING -> Bistandsårsak.KOMMET_I_UTDANNING;
+            case ANNET -> Bistandsårsak.ANNEN_ÅRSAK;
+            case IKKE_14A_VEDTAK -> Bistandsårsak.ANNEN_ÅRSAK;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
-        return new AvslåttBistand(brevårsak, fritekstFra(vurdering, årsak));
+        return new AvslåttBistand(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());
     }
 
-    public static AvslåttAndreLivsoppholdsytelser lagAvslåttPgaAndreLivsoppholdsytelser(VilkårsvurderingResultat vurdering) {
+    public static AvslåttAndreLivsoppholdsytelser lagAvslåttPgaAndreLivsoppholdsytelser(AvslåttVurdering avslag) {
+        if (avslag == null) {
+            return null;
+        }
+        var vurdering = avslag.vurdering();
         var årsak = årsakFra(vurdering, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.class);
         var brevårsak = switch (årsak) {
             case MOTTAR_ARBEIDSAVKLARINGSPENGER -> Livsoppholdsårsak.MOTTAR_ARBEIDSAVKLARINGSPENGER;
@@ -94,7 +108,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
             case MOTTAR_ANNEN_YTELSE -> Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
-        return AvslåttAndreLivsoppholdsytelser.av(brevårsak, fritekstFra(vurdering, årsak));
+        return AvslåttAndreLivsoppholdsytelser.av(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());
     }
 
     private static <T extends IkkeOppfyltDetaljertÅrsak> T årsakFra(VilkårsvurderingResultat vurdering, Class<T> årsakstype) {

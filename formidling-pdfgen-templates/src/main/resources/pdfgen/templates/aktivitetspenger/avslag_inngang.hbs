@@ -3,24 +3,20 @@
     {{#> felles/seksjon/hoved }}
         <h1>Vi har avslått din søknad om aktivitetspenger</h1>
 
-        <p>Du har ikke rett på aktivitetspenger.</p>
-
-        <h2>Hvorfor får du ikke aktivitetspenger?</h2>
         {{#with bosted}}
             {{#eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.
                 </p>
-            {{else eq årsak "YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE"}}
-                <p>
-                    For å ha rett til aktivitetspenger må du bo eller være folkeregistrert i Trondheim kommune.
-                    Fordi du ikke har bostedsadresse eller er folkeregistrert i Trondheim kommune, har vi avslått søknaden din.
-                </p>
             {{else eq årsak "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED"}}
                 <p>
-                    For å ha rett til aktivitetspenger må du studere eller jobbe i Trondheim kommune.
+                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                     Fordi studie- eller arbeidsstedet ditt er utenfor Trondheim kommune, har vi avslått søknaden din.
+                </p>
+            {{else eq årsak "ANNEN_ÅRSAK"}}
+                <p>
+                    For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
                 </p>
             {{/eq}}
             {{#if fritekstBrev}}
@@ -31,10 +27,15 @@
         {{/with}}
 
         {{#with bistand}}
-            {{#eq årsak "HAR_IKKE_14A_VEDTAK"}}
+            {{#eq årsak "KOMMET_I_ARBEID"}}
                 <p>
-                    For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a. Fordi du ikke har et slikt vedtak, har vi avslått søknaden din.
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du er i jobb, har vi avslått søknaden din.
                 </p>
+            {{else eq årsak "KOMMET_I_UTDANNING"}}
+                <p>
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du tar en utdanning, har vi avslått søknaden din.
+                </p>
+            {{else eq årsak "ANNEN_ÅRSAK"}}
             {{/eq}}
             {{#if fritekstBrev}}
                 <p>
@@ -46,20 +47,28 @@
         {{#with andreLivsoppholdsytelser}}
             {{#if ytelseNavn}}
                 <p>
-                    Det er fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger samtidig som du får en annen
-                    livsoppholdsytelse. Derfor har vi avslått søknaden din.
+                    Du har ikke rett til aktivitetspenger fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger
+                    samtidig som du får en annen livsoppholdsytelse. Derfor har vi avslått søknaden din.
                 </p>
             {{/if}}
             {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
                 <p>
-                    Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
+                    Du har ikke rett til aktivitetspenger fordi du får en annen livsoppholdsytelse. Du kan ikke få
+                    aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
                 </p>
+                {{#if fritekstBrev}}
+                    <p>
+                        {{fritekstBrev}}
+                    </p>
+                {{/if}}
+                Derfor har vi avslått søknaden din.
+            {{else}}
+                {{#if fritekstBrev}}
+                    <p>
+                        {{fritekstBrev}}
+                    </p>
+                {{/if}}
             {{/eq}}
-            {{#if fritekstBrev}}
-                <p>
-                    {{fritekstBrev}}
-                </p>
-            {{/if}}
         {{/with}}
 
     {{/felles/seksjon/hoved}}

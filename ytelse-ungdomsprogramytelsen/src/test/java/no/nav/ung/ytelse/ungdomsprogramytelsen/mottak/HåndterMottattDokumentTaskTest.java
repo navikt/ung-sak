@@ -3,6 +3,8 @@ package no.nav.ung.ytelse.ungdomsprogramytelsen.mottak;
 import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.NY_SØKT_PERIODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -39,7 +41,10 @@ import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsessTaskRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.db.util.CdiDbAwareTest;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.k9.søknad.Søknad;
+import no.nav.ung.sak.behandlingslager.behandling.motattdokument.MottatteDokumentRepository;
 import no.nav.ung.sak.mottak.Behandlingsoppretter;
+import no.nav.ung.sak.mottak.dokumentmottak.SøknadParser;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.JournalpostId;
@@ -71,6 +76,10 @@ class HåndterMottattDokumentTaskTest {
     private EntityManager entityManager;
     @Inject
     private ProsessTriggereRepository prosessTriggereRepository;
+    @Inject
+    private MottatteDokumentRepository mottatteDokumentRepository;
+    @Mock
+    private SøknadParser søknadParser;
 
     private Fagsak fagsak;
     private Behandling behandling;
@@ -97,6 +106,7 @@ class HåndterMottattDokumentTaskTest {
             .build();
         mottatteDokumentTjeneste.lagreMottattDokumentPåFagsak(mottattDokument);
 
+        when(søknadParser.parseSøknad(any())).thenReturn(mock(Søknad.class));
         when(dokumentValidatorProvider.finnValidator(Brevkode.UNGDOMSYTELSE_SOKNAD)).thenReturn(dokumentValidator);
 
         when(dokumentmottaker.getTriggere(ArgumentMatchers.anyList())).thenReturn(List.of(new Trigger(DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.now(), LocalDate.now()), NY_SØKT_PERIODE)));
@@ -108,7 +118,9 @@ class HåndterMottattDokumentTaskTest {
             null,
             null,
             fagsakProsessTaskRepository,
-            prosessTriggereRepository
+            prosessTriggereRepository,
+            mottatteDokumentRepository,
+            søknadParser
         );
     }
 

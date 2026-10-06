@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
@@ -442,5 +443,47 @@ public class VilkårBuilderTest {
             return date;
         }
         return finnNærmeste(target, date.plusDays(1));
+    }
+
+    @Test
+    void skal_beholde_ikke_oppfylt_årsak_når_perioden_kopieres() {
+        var vilkårBuilder = new VilkårBuilder(VilkårType.BISTANDSVILKÅR)
+            .medKantIKantVurderer(new DefaultKantIKantVurderer());
+
+        var periode = vilkårBuilder.hentBuilderFor(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31))
+            .medUtfallManuell(Utfall.IKKE_OPPFYLT)
+            .medAvslagsårsak(Avslagsårsak.IKKE_14A_VEDTAK, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
+        vilkårBuilder.leggTil(periode);
+        var vilkår = vilkårBuilder.build();
+
+        var oppdatertVilkårBuilder = new VilkårBuilder(vilkår).medKantIKantVurderer(new DefaultKantIKantVurderer());
+        var oppdatertPeriode = oppdatertVilkårBuilder.hentBuilderFor(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31))
+            .medUtfallManuell(Utfall.IKKE_OPPFYLT)
+            .medBegrunnelse("ny begrunnelse");
+        oppdatertVilkårBuilder.leggTil(oppdatertPeriode);
+        var oppdatertVilkår = oppdatertVilkårBuilder.build();
+
+        var vilkårPeriode = oppdatertVilkår.getPerioder().iterator().next();
+        assertThat(vilkårPeriode.getIkkeOppfyltÅrsak()).isEqualTo("KOMMET_I_ARBEID");
+    }
+
+    @Test
+    void skal_ikke_slå_sammen_naboperioder_med_ulik_ikke_oppfylt_årsak() {
+        var vilkårBuilder = new VilkårBuilder(VilkårType.BISTANDSVILKÅR)
+            .medKantIKantVurderer(new DefaultKantIKantVurderer());
+
+        var førstePeriode = vilkårBuilder.hentBuilderFor(LocalDate.of(2026, 1, 1), LocalDate.of(2026, 1, 31))
+            .medUtfallManuell(Utfall.IKKE_OPPFYLT)
+            .medBegrunnelse("samme begrunnelse")
+            .medAvslagsårsak(Avslagsårsak.IKKE_14A_VEDTAK, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
+        var andrePeriode = vilkårBuilder.hentBuilderFor(LocalDate.of(2026, 2, 1), LocalDate.of(2026, 2, 28))
+            .medUtfallManuell(Utfall.IKKE_OPPFYLT)
+            .medBegrunnelse("samme begrunnelse")
+            .medAvslagsårsak(Avslagsårsak.IKKE_14A_VEDTAK, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_UTDANNING);
+        vilkårBuilder.leggTil(førstePeriode).leggTil(andrePeriode);
+
+        var vilkår = vilkårBuilder.build();
+
+        assertThat(vilkår.getPerioder()).hasSize(2);
     }
 }

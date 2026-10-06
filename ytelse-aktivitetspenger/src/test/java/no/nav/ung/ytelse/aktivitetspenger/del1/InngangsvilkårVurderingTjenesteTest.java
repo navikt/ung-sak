@@ -7,6 +7,7 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
+import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
@@ -16,6 +17,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -73,6 +75,23 @@ class InngangsvilkårVurderingTjenesteTest {
         assertThat(vilkårPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårPeriode.getErManueltVurdert()).isFalse();
         assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
+    }
+
+    @Test
+    void skal_sette_detaljert_årsak_for_bistandsvilkåret() {
+        var scenario = AktivitetspengerTestScenarioBuilder.builderMedSøknad();
+        scenario.leggTilVilkår(VilkårType.BISTANDSVILKÅR, Utfall.IKKE_VURDERT, PERIODE_1);
+        var behandling = scenario.lagre(entityManager);
+
+        inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of(
+            new BistandsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, "begrunnelse", null, "A111111", LocalDateTime.now())));
+
+        tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BISTANDSVILKÅR);
+
+        var vilkårPeriode = hentVilkårPeriode(vilkårResultatRepository.hent(behandling.getId()).getVilkårTimeline(VilkårType.BISTANDSVILKÅR), PERIODE_1);
+        assertThat(vilkårPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
+        assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(Avslagsårsak.IKKE_14A_VEDTAK);
+        assertThat(vilkårPeriode.getIkkeOppfyltÅrsak()).isEqualTo("KOMMET_I_ARBEID");
     }
 
     @Test

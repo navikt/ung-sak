@@ -48,7 +48,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             );
     }
 
-    @DisplayName("Avslag pga bistandsvilkåret - HAR_IKKE_14A_VEDTAK med fritekst i tillegg")
+    @DisplayName("Avslag pga bistandsvilkåret - KOMMET_I_ARBEID med fritekst i tillegg")
     @Test
     void avslagBistand() {
         var fom = LocalDate.of(2025, 8, 1);
@@ -62,26 +62,8 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du er i jobb, har vi avslått søknaden din.",
                 FRITEKST_BISTAND
-            );
-    }
-
-    @DisplayName("Avslag pga bostedsvilkåret - YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE")
-    @Test
-    void avslagBostedFolkeregistrertEllerBostedsadresse() {
-        var fom = LocalDate.of(2025, 8, 1);
-        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBostedFolkeregistrertEllerBostedsadresse(fom);
-
-        var behandling = lagAvslåttBehandling(scenario);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "bo eller være folkeregistrert i Trondheim kommune"
             );
     }
 
@@ -99,7 +81,8 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "studere eller jobbe i Trondheim kommune"
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
+                "Fordi studie- eller arbeidsstedet ditt er utenfor Trondheim kommune, har vi avslått søknaden din."
             );
     }
 
@@ -119,7 +102,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune. " +
                     "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.",
-                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du er i jobb, har vi avslått søknaden din.",
                 FRITEKST_BISTAND
             );
     }
@@ -167,7 +150,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "Det er fordi du får " + forventetYtelse + ". Du kan ikke få aktivitetspenger samtidig som du får en annen "
+                "Du har ikke rett til aktivitetspenger fordi du får " + forventetYtelse + ". Du kan ikke få aktivitetspenger samtidig som du får en annen "
                     + "livsoppholdsytelse. Derfor har vi avslått søknaden din."
             );
     }
@@ -187,10 +170,10 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
+                "Du har ikke rett til aktivitetspenger fordi du får en annen livsoppholdsytelse. "
+                    + "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
                 FRITEKST_LIVSOPPHOLD
-            )
-            .asPlainTextNotContains("Det er fordi du får");
+            );
     }
 
     @DisplayName("Avslag pga andre livsoppholdsytelser - fritekst kommer i tillegg til årsakssetningen")
@@ -208,7 +191,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "Det er fordi du får dagpenger.",
+                "Du har ikke rett til aktivitetspenger fordi du får dagpenger.",
                 FRITEKST_LIVSOPPHOLD
             );
     }
@@ -266,7 +249,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
-                "For å ha rett på aktivitetspenger må du ha et oppfølgingsvedtak etter NAV-loven § 14a",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du er i jobb, har vi avslått søknaden din.",
                 FRITEKST_BISTAND
             );
     }

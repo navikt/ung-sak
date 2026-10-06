@@ -109,7 +109,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Opphørsdato satt til 11.09.2026. Søker bor et sted som ikke er forenelig med ytelsen.", 0)
+            HistorikkinnslagLinje.tekst("Opphørsdato satt til 11.09.2026. Søker har ikke bostedsadresse i Trondheim kommune.", 0)
         );
     }
 
@@ -133,7 +133,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Opphørsdato satt til 30.09.2026. Søker bor et sted som ikke er forenelig med ytelsen.", 0)
+            HistorikkinnslagLinje.tekst("Opphørsdato satt til 30.09.2026. Søker har ikke bostedsadresse i Trondheim kommune.", 0)
         );
     }
 
@@ -233,7 +233,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Opphørsdato endret til 15.10.2026. Søker bor et sted som ikke er forenelig med ytelsen.", 0)
+            HistorikkinnslagLinje.tekst("Opphørsdato endret til 15.10.2026. Søker har ikke bostedsadresse i Trondheim kommune.", 0)
         );
     }
 
@@ -258,7 +258,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Vurdering ble endret for perioden 30.09.2026 - 30.10.2026 til Ikke oppfylt. Søker bor et sted som ikke er forenelig med ytelsen.", 0)
+            HistorikkinnslagLinje.tekst("Vurdering ble endret for perioden 30.09.2026 - 30.10.2026 til Ikke oppfylt. Søker har ikke bostedsadresse i Trondheim kommune.", 0)
         );
     }
 
@@ -280,7 +280,7 @@ class VilkårsvurderingHistorikkinnslagTjenesteTest {
         List<Historikkinnslag> historikkinnslag = tjeneste.lagHistorikkinnslag(fagsakId, input);
         assertThat(historikkinnslag).hasSize(1);
         assertThat(historikkinnslag.getFirst().getLinjer()).containsOnly(
-            HistorikkinnslagLinje.tekst("Avslagsårsak ble endret for perioden 11.09.2026 - 09.09.2027 til Søker har livsoppholdsytelse som ikke er forenelig med ytelsen.", 0)
+            HistorikkinnslagLinje.tekst("Avslagsårsak ble endret for perioden 11.09.2026 - 09.09.2027 til Søker har annen livsoppholdsytelse.", 0)
         );
     }
 
