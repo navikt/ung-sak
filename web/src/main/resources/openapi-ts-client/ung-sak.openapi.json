@@ -3860,6 +3860,49 @@
         "required" : [ "journalpostId" ],
         "type" : "object"
       },
+      "ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPeriode" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderRequest" : {
+        "properties" : {
+          "fom" : {
+            "format" : "date",
+            "type" : "string"
+          },
+          "ident" : {
+            "type" : "string"
+          },
+          "tom" : {
+            "format" : "date",
+            "type" : "string"
+          }
+        },
+        "required" : [ "fom", "ident", "tom" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderResponse" : {
+        "properties" : {
+          "perioder" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPeriode"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "perioder" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.etterlysning.EndreFristDto" : {
         "properties" : {
           "etterlysningEksternReferanse" : {
@@ -8575,6 +8618,35 @@
         },
         "summary" : "Oversikt over alle pdf dokumenter fra dokumentarkiv registrert for saksnummer.",
         "tags" : [ "dokument" ]
+      }
+    },
+    "/api/ekstern/tilleggsstonader/aktivitetspenger/perioder" : {
+      "post" : {
+        "description" : "Henter innvilgede perioder med aktivitetspenger som overlapper forespurt periode. Kun for tilleggsstønader.",
+        "operationId" : "hentAktivitetspengerPerioder",
+        "requestBody" : {
+          "content" : {
+            "application/json" : {
+              "schema" : {
+                "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderRequest"
+              }
+            }
+          },
+          "required" : true
+        },
+        "responses" : {
+          "200" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.ekstern.tilleggsstonader.AktivitetspengerPerioderResponse"
+                }
+              }
+            },
+            "description" : "Innvilgede perioder. Tom liste dersom personen ikke har vedtak om aktivitetspenger."
+          }
+        },
+        "tags" : [ "ekstern" ]
       }
     },
     "/api/fagsak" : {
