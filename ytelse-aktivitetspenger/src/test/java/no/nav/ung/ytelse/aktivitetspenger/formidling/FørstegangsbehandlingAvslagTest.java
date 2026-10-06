@@ -105,7 +105,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
-                "Fordi studie- eller arbeidsstedet ditt er utenfor Trondheim kommune, regner vi deg ikke som bosatt i kommunen. "
+                "Fordi du bor der du studerer eller jobber, utenfor Trondheim kommune, regner vi deg ikke som bosatt i kommunen. "
                     + "Derfor har vi avslått søknaden din."
             );
     }

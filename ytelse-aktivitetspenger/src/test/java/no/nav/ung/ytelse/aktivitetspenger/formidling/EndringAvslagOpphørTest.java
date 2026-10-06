@@ -59,7 +59,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
-                "Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune, regner vi deg ikke lenger som bosatt i kommunen."
+                "Fordi du bor der du studerer eller jobber, utenfor Trondheim kommune, regner vi deg ikke lenger som bosatt i kommunen."
             );
     }
 
@@ -116,7 +116,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
-                "Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune i denne perioden, regner vi deg ikke som bosatt i kommunen."
+                "Fordi du i denne perioden bor der du studerer eller jobber, utenfor Trondheim kommune, regner vi deg ikke som bosatt i kommunen."
             );
     }
 
