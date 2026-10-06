@@ -84,6 +84,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 true,
                 it.begrunnelse(),
                 it.fritekstVurderingBrev(),
+                it.ytelseNavn(),
                 vurdertAv,
                 vurdertTidspunkt))
             .toList();

@@ -583,7 +583,7 @@ public class AktivitetspengerTestScenarioBuilder {
                 it.ikkeOppfyltÅrsak().getKode(),
                 "Begrunnelse fra testscenario",
                 false,
-                null,
+                it.fritekstTilVarsel(),
                 "Varsles ikke i testscenario",
                 it.kilde(),
                 it.kildeFritekst(),

@@ -13,6 +13,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
@@ -164,10 +165,10 @@ public class InngangsvilkårVurderingTjeneste {
 
     public void settVilkårResultatIkkeVurdertForPeriode(VilkårResultatBuilder vilkårResultatBuilder, VilkårType vilkårType, SequencedCollection<DatoIntervallEntitet> perioder) {
         var resultatBuilderForVilkår = vilkårResultatBuilder.hentBuilderFor(vilkårType);
-        perioder.forEach(periode -> {
-            var periodeBuilder = resultatBuilderForVilkår.hentBuilderFor(periode).medUtfall(Utfall.IKKE_VURDERT);
-            resultatBuilderForVilkår.leggTil(periodeBuilder);
-        });
+        resultatBuilderForVilkår.tilbakestill(new TreeSet<>(perioder), false);
+        perioder.forEach(periode -> resultatBuilderForVilkår.leggTil(new VilkårPeriodeBuilder()
+            .medPeriode(periode)
+            .medUtfall(Utfall.IKKE_VURDERT)));
         vilkårResultatBuilder.leggTil(resultatBuilderForVilkår);
     }
 
@@ -202,7 +203,7 @@ public class InngangsvilkårVurderingTjeneste {
             case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> {
                 var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentLivsoppholdTidslinje().intersection(perioderSomSkalGjenopprettes)
                     .segmenter().stream()
-                    .map(it -> new AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
+                    .map(it -> new AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), (AndreLivsoppholdsytelserVurderingResultat) it.getValue()))
                     .toList();
                 vilkårVurderingRepository.lagreYtelseVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
             }

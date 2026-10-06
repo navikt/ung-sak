@@ -134,7 +134,7 @@ public class BostedsvilkårResultatPeriode extends BaseEntitet {
     }
 
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+        return new GenereltVilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, erManuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {

@@ -49,7 +49,7 @@ public record InngangsvilkårVurderingTestData(
     private record BistandVurderingInput(Periode periode, boolean oppfylt, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
     }
 
-    private record AndreYtelserVurderingInput(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
+    private record AndreYtelserVurderingInput(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev, String ytelseNavn) {
     }
 
     private record AktivitetVurderingInput(Periode periode, boolean oppfylt, AktivitetsvilkåretIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
@@ -90,7 +90,11 @@ public record InngangsvilkårVurderingTestData(
         }
 
         public Builder medAndreYtelser(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev) {
-            andreYtelserInput.add(new AndreYtelserVurderingInput(periode, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev));
+            return medAndreYtelser(periode, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev, null);
+        }
+
+        public Builder medAndreYtelser(Periode periode, boolean oppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstTilBrev, String ytelseNavn) {
+            andreYtelserInput.add(new AndreYtelserVurderingInput(periode, oppfylt, ikkeOppfyltÅrsak, fritekstTilBrev, ytelseNavn));
             return this;
         }
 
@@ -136,6 +140,7 @@ public record InngangsvilkårVurderingTestData(
                     true,
                     DEFAULT_BEGRUNNELSE,
                     input.fritekstTilBrev(),
+                    input.ytelseNavn(),
                     DEFAULT_VURDERT_AV,
                     LocalDateTime.now()))
                 .toList();

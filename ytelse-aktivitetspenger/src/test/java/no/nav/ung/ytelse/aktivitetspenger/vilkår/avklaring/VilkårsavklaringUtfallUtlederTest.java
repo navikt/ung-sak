@@ -96,16 +96,17 @@ class VilkårsavklaringUtfallUtlederTest {
     }
 
     @Test
-    void mottar_annen_ytelse_skal_aldri_avslås_automatisk() {
+    void mottar_annen_ytelse_skal_avslås_automatisk_fordi_den_ikke_regnes_som_fritekstbegrunnelse() {
         var avklaring = avklaring(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, LIVSOPPHOLD_KILDE, true);
 
         assertThat(utleder(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, avklaring)
             .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false)).utledUtfall())
             .as("ytelsen står kun i fritekst, så saksbehandler må vurdere den")
-            .isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+            .isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+
         assertThat(utleder(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, avklaring)
             .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, false)).utledUtfall())
-            .isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+            .isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
     }
 
     @Test

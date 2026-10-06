@@ -13,6 +13,7 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.GenereltVilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
 import no.nav.ung.sak.typer.Periode;
@@ -150,7 +151,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             }
         }
 
-        return new VilkårsvurderingResultat(
+        return new GenereltVilkårsvurderingResultat(
             vilkårType,
             vurdering.erVilkårOppfylt(),
             ikkeOppfyltÅrsak,

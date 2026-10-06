@@ -165,6 +165,7 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
                     false,
                     foreslåttAvklaring.getBegrunnelse(),
                     null,
+                    foreslåttAvklaring.getFritekstTilVarsel(),
                     foreslåttAvklaring.getVurdertAv(),
                     foreslåttAvklaring.getVurdertTidspunkt());
             }).collect(Collectors.toList());
