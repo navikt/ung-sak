@@ -107,6 +107,11 @@ public class BehandlingProsessHendelse {
     @JsonProperty(value = "behandlingSteg", required = false)
     private String behandlingSteg;
 
+    /**
+     * Indikerer om behandlingen ligger hos Nav kontor. Dette er utledet fra behandlingsteg, så behandlingen kan ha denne tilstanden uten å ha aksjonpunkt. Brukes kun for aktivitetspenger
+     */
+    private Boolean behandlingenErHosNavKontor;
+
     @Valid
     @Size(max = 50)
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
@@ -130,6 +135,13 @@ public class BehandlingProsessHendelse {
     @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
     @JsonProperty(value = "ansvarligSaksbehandlerForTotrinn", required = false)
     private String ansvarligSaksbehandlerForTotrinn;
+
+
+    @Valid
+    @Size(max = 50)
+    @Pattern(regexp = "^[\\p{Alnum}\\p{L}\\p{N}\\-_.]+$", message = "[${validatedValue}] matcher ikke tillatt pattern [{regexp}]")
+    @JsonProperty(value = "navKontorbehandlendeEnhet", required = false)
+    private String navKontorbehandlendeEnhet;
 
     /**
      * Ident for ansvarlig saksbehandler ved nav-kontor (brukes for aktivitetspenger)
@@ -229,6 +241,7 @@ public class BehandlingProsessHendelse {
         this.eventHendelse = kopierFra.eventHendelse;
         this.behandlingStatus = kopierFra.behandlingStatus;
         this.behandlingSteg = kopierFra.behandlingSteg;
+        this.behandlingenErHosNavKontor = kopierFra.behandlingenErHosNavKontor;
         this.behandlendeEnhet = kopierFra.behandlendeEnhet;
         this.ytelseTypeKode = kopierFra.ytelseTypeKode;
         this.resultatType = kopierFra.resultatType;
@@ -238,6 +251,7 @@ public class BehandlingProsessHendelse {
         this.fagsakPeriode = kopierFra.fagsakPeriode;
         this.ansvarligSaksbehandlerForTotrinn = kopierFra.ansvarligSaksbehandlerForTotrinn;
         this.ansvarligBeslutterForTotrinn = kopierFra.ansvarligBeslutterForTotrinn;
+        this.navKontorbehandlendeEnhet = kopierFra.navKontorbehandlendeEnhet;
         this.navKontorAnsvarligSaksbehandler = kopierFra.navKontorAnsvarligSaksbehandler;
         this.navKontorBeslutter = kopierFra.navKontorBeslutter;
         this.aksjonspunktTilstand = kopierFra.aksjonspunktTilstand.stream().map(AksjonspunktTilstandDto::new).toList();
@@ -282,6 +296,10 @@ public class BehandlingProsessHendelse {
         return behandlingSteg;
     }
 
+    public Boolean getBehandlingenErHosNavKontor() {
+        return behandlingenErHosNavKontor;
+    }
+
     public String getBehandlendeEnhet() {
         return behandlendeEnhet;
     }
@@ -296,6 +314,10 @@ public class BehandlingProsessHendelse {
 
     public LocalDateTime getOpprettetBehandling() {
         return opprettetBehandling;
+    }
+
+    public String getNavKontorbehandlendeEnhet() {
+        return navKontorbehandlendeEnhet;
     }
 
     public String getAnsvarligBeslutterForTotrinn() {
@@ -389,6 +411,11 @@ public class BehandlingProsessHendelse {
             return this;
         }
 
+        public Builder medBehandlingenErHosNavKontor(Boolean behandlingenErHosNavKontor) {
+            kladd.behandlingenErHosNavKontor = behandlingenErHosNavKontor;
+            return this;
+        }
+
         public Builder medBehandlendeEnhet(String behandlendeEnhet) {
             kladd.behandlendeEnhet = behandlendeEnhet;
             return this;
@@ -399,13 +426,18 @@ public class BehandlingProsessHendelse {
             return this;
         }
 
-        public Builder medNavKontorAnsvarligSaksbehandler(String navKontorAnsvarligSaksbehandler){
-            kladd.navKontorAnsvarligSaksbehandler= navKontorAnsvarligSaksbehandler;
+        public Builder medNavKontorBehandlendeEnhet(String navKontorBehandlendeEnhet) {
+            kladd.navKontorbehandlendeEnhet = navKontorBehandlendeEnhet;
             return this;
         }
 
-        public Builder medNavKontorBeslutter(String navKontorBeslutter){
-            kladd.navKontorBeslutter= navKontorBeslutter;
+        public Builder medNavKontorAnsvarligSaksbehandler(String navKontorAnsvarligSaksbehandler) {
+            kladd.navKontorAnsvarligSaksbehandler = navKontorAnsvarligSaksbehandler;
+            return this;
+        }
+
+        public Builder medNavKontorBeslutter(String navKontorBeslutter) {
+            kladd.navKontorBeslutter = navKontorBeslutter;
             return this;
         }
 
