@@ -463,7 +463,7 @@ private record RegelInput(UUID referanse, LocalDate skjaeringstidspunkt,
 > **NB:** Disse klassene finnes i det separate repoet `k9-verdikjede`, ikke i `ung-sak`.
 > Oppdater kun dette steget dersom du har tilgang til k9-verdikjede.
 
-**`LokalkontorSteg.java`** (k9-verdikjede):
+**`NavKontorSteg.java`** (k9-verdikjede):
 - Oppdater `saksbehandlerVurdererOgForeslårVilkår` med nye params: `UngSakFordelingSteg`, `UngdomsprogramDeltaker`, `String søkerIdent`
 - Legg til ny metode `sendInn<Vilkår>Bekreftelse(steg, deltaker, søkerIdent)` som poster `Vurder<Vilkår>Dto`
 - Fjern `VURDER_<VILKÅR>` fra `NavKontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
