@@ -7,7 +7,6 @@ import no.nav.k9.prosesstask.api.ProsessTaskData;
 import no.nav.k9.prosesstask.api.ProsessTaskHandler;
 import no.nav.ung.brukerdialog.kontrakt.sak.mikrofrontend.AktiverMikrofrontendRequest;
 import no.nav.ung.brukerdialog.typer.AktørId;
-import no.nav.ung.brukerdialog.typer.Saksnummer;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakProsesstaskRekkefølge;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.domene.vedtak.brukerdialog.UngBrukerdialogSakKlient;
@@ -44,9 +43,7 @@ public class AktiverMikrofrontendBrukerdialogTask implements ProsessTaskHandler 
     public void doTask(ProsessTaskData prosessTaskData) {
         var fagsak = fagsakRepository.finnEksaktFagsak(prosessTaskData.getFagsakId());
 
-        var request = new AktiverMikrofrontendRequest(
-            new AktørId(fagsak.getAktørId().getId()),
-            new Saksnummer(fagsak.getSaksnummer().getVerdi()));
+        var request = new AktiverMikrofrontendRequest(new AktørId(fagsak.getAktørId().getId()));
         klient.aktiverMikrofrontend(request);
 
         log.info("Ba ung-brukerdialog-api om å aktivere mikrofrontend for aktivitetspenger for saksnummer={}", fagsak.getSaksnummer());

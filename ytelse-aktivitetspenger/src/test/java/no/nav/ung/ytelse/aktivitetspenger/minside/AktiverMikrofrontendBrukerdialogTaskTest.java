@@ -33,7 +33,7 @@ class AktiverMikrofrontendBrukerdialogTaskTest {
     private UngBrukerdialogSakKlient klient;
 
     @Test
-    void senderAktørIdOgSaksnummerFraFagsakenTilBrukerdialog() {
+    void senderAktørIdFraFagsakenTilBrukerdialog() {
         // Arrange
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, AKTØR_ID, SAKSNUMMER, LocalDate.of(2026, 1, 1), null);
         fagsak.setId(FAGSAK_ID);
@@ -50,8 +50,6 @@ class AktiverMikrofrontendBrukerdialogTaskTest {
         // Assert
         var captor = ArgumentCaptor.forClass(AktiverMikrofrontendRequest.class);
         verify(klient).aktiverMikrofrontend(captor.capture());
-        var request = captor.getValue();
-        assertThat(request.aktørId().getId()).isEqualTo(AKTØR_ID.getId());
-        assertThat(request.saksnummer().getVerdi()).isEqualTo(SAKSNUMMER.getVerdi());
+        assertThat(captor.getValue().aktørId().getId()).isEqualTo(AKTØR_ID.getId());
     }
 }
