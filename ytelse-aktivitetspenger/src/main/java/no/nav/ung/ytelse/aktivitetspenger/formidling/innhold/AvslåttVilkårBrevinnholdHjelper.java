@@ -1,12 +1,7 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
-import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
@@ -30,7 +25,7 @@ public class AvslåttVilkårBrevinnholdHjelper {
         VilkårType.BOSTEDSVILKÅR,
         VilkårType.BISTANDSVILKÅR,
         VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
-        VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET  // TODO: Ikke i malen, men feiler i verdikjedetest uten
+        VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET
         );
 
     private AvslåttVilkårBrevinnholdHjelper() {
