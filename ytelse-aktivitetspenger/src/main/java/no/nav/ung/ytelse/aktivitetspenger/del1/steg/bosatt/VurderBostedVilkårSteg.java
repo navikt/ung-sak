@@ -8,23 +8,25 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.varsel.EtterlysningType;
+import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandlingprosessSporing;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
@@ -47,7 +49,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_BOSTEDVILKÅR;
-import static no.nav.ung.kodeverk.behandling.BehandlingÅrsakType.ENDRET_BOSTED;
 
 @ApplicationScoped
 @BehandlingStegRef(value = VURDER_BOSTEDVILKÅR)
@@ -60,7 +61,8 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
 
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private EtterlysningTjeneste etterlysningTjeneste;
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
+    private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private BehandingprosessSporingRepository behandingprosessSporingRepository;
@@ -76,7 +78,8 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                                   VilkårResultatRepository vilkårResultatRepository,
                                   VilkårTjeneste vilkårTjeneste,
                                   BehandlingRepository behandlingRepository,
-                                  BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                  VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
+                                  BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository,
                                   @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjeneste,
                                   EtterlysningTjeneste etterlysningTjeneste,
                                   InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
@@ -85,7 +88,8 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                                   VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, vilkårsPerioderTilVurderingTjeneste);
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
-        this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
+        this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
+        this.bostedSøknadsfaktaGrunnlagRepository = bostedSøknadsfaktaGrunnlagRepository;
         this.etterlysningTjeneste = etterlysningTjeneste;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
@@ -119,7 +123,12 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         var etterlysningTidslinje = new LocalDateTimeline<>(etterlysninger.stream().map(e -> new LocalDateSegment<>(e.periode().getFomDato(), e.periode().getTomDato(), e)).toList())
             .intersection(tidslinjeTilVurdering);
 
-        var grunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId).orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsavklaringer"));
+        var søknadsfaktaGrunnlag = bostedSøknadsfaktaGrunnlagRepository.hentGrunnlagHvisEksisterer(behandlingId)
+            .orElseThrow(() -> new IllegalStateException("Forventer grunnlag med bostedsfakta fra søknad"));
+        Set<VilkårPeriodeAvklaring> foreslåtteAvklaringer = vilkårsavklaringGrunnlagRepository
+            .hentGrunnlagHvisEksisterer(behandlingId, getAktuellVilkårType())
+            .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
+            .orElse(Set.of());
 
         var tidligereVilkårVurderingResultat = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandlingId)
             .map(AktivitetspengerInngangsvilkårResultatGrunnlag::hentBostedTidslinje)
@@ -127,7 +136,9 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, getAktuellVilkårType());
 
         var avklaringTidslinje = avgrensTilForeslåtteAvklaringerHvisFinnes(
-            grunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().intersection(tidslinjeTilVurdering)
+            BostedsfaktaOgAvklaringFletter.flettMedForeslåtteAvklaringer(
+                søknadsfaktaGrunnlag.hentSøknadsfaktaSomTidslinje(), foreslåtteAvklaringer)
+                .intersection(tidslinjeTilVurdering)
         );
 
         LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> vurderingTidslinje = avklaringTidslinje
@@ -156,7 +167,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                 return new BostedsvilkårResultatPeriode(
                     DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
                     false,
-                    foreslåttAvklaring.getIkkeOppfyltÅrsak(),
+                    BostedsvilkårIkkeOppfyltÅrsak.fraKode(foreslåttAvklaring.getIkkeOppfyltÅrsakKode()),
                     false,
                     null,
                     null,

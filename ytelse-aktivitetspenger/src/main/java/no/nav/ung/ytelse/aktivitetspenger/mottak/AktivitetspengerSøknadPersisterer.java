@@ -16,7 +16,7 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadEntitet;
 import no.nav.ung.sak.behandlingslager.behandling.søknad.SøknadRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -33,20 +33,20 @@ public class AktivitetspengerSøknadPersisterer {
     private final FagsakRepository fagsakRepository;
     private final OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private final StartdatoRepository startdatoRepository;
-    private final BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private final BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
 
 
     @Inject
     public AktivitetspengerSøknadPersisterer(BehandlingRepositoryProvider repositoryProvider,
                                              FagsakRepository fagsakRepository,
                                              OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository,
-                                             BostedsGrunnlagRepository bostedsGrunnlagRepository,
+                                             BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository,
                                              StartdatoRepository startdatoRepository) {
         this.søknadRepository = repositoryProvider.getSøknadRepository();
         this.fagsakRepository = fagsakRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.startdatoRepository = startdatoRepository;
-        this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
+        this.bostedSøknadsfaktaGrunnlagRepository = bostedSøknadsfaktaGrunnlagRepository;
     }
 
 
@@ -65,7 +65,7 @@ public class AktivitetspengerSøknadPersisterer {
     public void lagreVirkningsdato(LocalDate virkningsdato, JournalpostId journalpostId, Long behandlingId, Boolean erBosattITrondheim) {
         startdatoRepository.lagre(behandlingId, List.of(new SøktStartdato(virkningsdato, journalpostId)));
         if (erBosattITrondheim != null) {
-            bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), virkningsdato, erBosattITrondheim);
+            bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, journalpostId.getVerdi(), virkningsdato, erBosattITrondheim);
         }
     }
 

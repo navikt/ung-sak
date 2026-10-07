@@ -3,8 +3,7 @@ package no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsfaktaOgAvklaring;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
@@ -52,7 +51,7 @@ class BostedAvklaringOgUttalelseOgResultat {
         return etterlysning != null ? etterlysning.frist() : null;
     }
 
-    BostedsPeriodeAvklaring getForeslåttAvklaring() {
+    VilkårPeriodeAvklaring getForeslåttAvklaring() {
         return faktaOgAvklaring.getForeslåttAvklaring();
     }
 
@@ -70,8 +69,8 @@ class BostedAvklaringOgUttalelseOgResultat {
     }
 
     private boolean erÅrsakAnnet() {
-        var ikkeOppfyltÅrsak = faktaOgAvklaring.harForeslåttAvklaring() ? faktaOgAvklaring.getForeslåttAvklaring().getIkkeOppfyltÅrsak() : null;
-        return BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak);
+        var foreslåttAvklaring = faktaOgAvklaring.getForeslåttAvklaring();
+        return foreslåttAvklaring != null && BostedsvilkårIkkeOppfyltÅrsak.ANNET == BostedsvilkårIkkeOppfyltÅrsak.fraKode(foreslåttAvklaring.getIkkeOppfyltÅrsakKode());
     }
 
     private boolean erVentende() {

@@ -37,8 +37,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.*;
@@ -529,7 +528,7 @@ public class AktivitetspengerTestScenarioBuilder {
         }
 
         if (!aktivitetspengerTestscenario.bostedsAvklaringer().isEmpty()) {
-            lagreBostedsAvklaringer(repositories.bostedsGrunnlagRepository(), behandling1);
+            lagreBostedsAvklaringer(repositories.vilkårsavklaringGrunnlagRepository(), repositories.bostedSøknadsfaktaGrunnlagRepository(), behandling1);
         }
 
         aktivitetspengerTestscenario.vilkårsavklaringer().forEach((vilkårType, avklaringer) ->
@@ -542,21 +541,23 @@ public class AktivitetspengerTestScenarioBuilder {
         repositories.inngangsvilkårVurderingRepository().lagreAktivitetVurderinger(behandling1.getId(), inngangsvilkårVurderinger.aktivitetsvilkårResultater());
     }
 
-    private void lagreBostedsAvklaringer(BostedsGrunnlagRepository bostedsGrunnlagRepository, Behandling behandling1) {
+    private void lagreBostedsAvklaringer(VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
+                                         BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository,
+                                         Behandling behandling1) {
         var bostedsAvklaringer = aktivitetspengerTestscenario.bostedsAvklaringer();
         var behandlingId = behandling1.getId();
         var startdato = aktivitetspengerTestscenario.søknadsperioder() != null && !aktivitetspengerTestscenario.søknadsperioder().isEmpty()
             ? aktivitetspengerTestscenario.søknadsperioder().getFirst().getFom()
             : bostedsAvklaringer.getFirst().periode().getFom();
 
-        // Grunnlaget må eksistere før avklaringer kan lagres
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, "dummy-journalpostid", startdato, true);
+        // Søknadsfakta må finnes for at steget skal kunne flette fakta og avklaring
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandlingId, "dummy-journalpostid", startdato, true);
 
         var avklaringer = bostedsAvklaringer.stream()
-            .map(it -> new BostedsPeriodeAvklaringForeslått(
+            .map(it -> new VilkårPeriodeAvklaringForeslått(
                 UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(it.periode().getFom(), it.periode().getTom()),
-                it.ikkeOppfyltÅrsak(),
+                it.ikkeOppfyltÅrsak().getKode(),
                 "Begrunnelse fra testscenario",
                 false,
                 null,
@@ -568,7 +569,7 @@ public class AktivitetspengerTestScenarioBuilder {
                 it.avklaringtype()))
             .collect(Collectors.toCollection(LinkedHashSet::new));
 
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, avklaringer);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandlingId, VilkårType.BOSTEDSVILKÅR, avklaringer);
     }
 
     private void lagreVilkårsavklaringer(VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,

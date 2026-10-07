@@ -11,9 +11,10 @@ import no.nav.ung.brukerdialog.kontrakt.oppgaver.typer.bosted.BekreftBostedOpph�
 import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.Etterlysning;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.etterlysning.OppgaveYtelsetypeMapper;
 import no.nav.ung.sak.etterlysning.UngBrukerdialogOppgaveKlient;
 import no.nav.ung.sak.typer.AktørId;
@@ -25,27 +26,27 @@ import java.util.Objects;
 public class BostedOppgaveOppretter {
 
     private final UngBrukerdialogOppgaveKlient oppgaveKlient;
-    private final BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private final VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
 
     @Inject
     public BostedOppgaveOppretter(UngBrukerdialogOppgaveKlient oppgaveKlient,
-                                  BostedsGrunnlagRepository bostedsGrunnlagRepository) {
+                                  VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository) {
         this.oppgaveKlient = oppgaveKlient;
-        this.bostedsGrunnlagRepository = bostedsGrunnlagRepository;
+        this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
     }
 
     public void opprettOppgave(Behandling behandling, List<Etterlysning> etterlysninger, AktørId aktørId) {
         OppgaveYtelsetype ytelsetype = OppgaveYtelsetypeMapper.mapTilOppgaveYtelsetype(behandling.getFagsak().getYtelseType());
 
         for (Etterlysning etterlysning : etterlysninger) {
-            var periodeAvklaring = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
+            var periodeAvklaring = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BOSTEDSVILKÅR)
                 .stream()
                 .flatMap(g -> g.getForeslåtteAvklaringer().stream())
                 .filter(avklaring -> avklaring.getReferanse().equals(etterlysning.getGrunnlagsreferanse()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Fant ikke periodeAvklaring for referanse: " + etterlysning.getGrunnlagsreferanse()));
 
-            var ikkeOppfyltÅrsak = periodeAvklaring.getIkkeOppfyltÅrsak();
+            var ikkeOppfyltÅrsak = BostedsvilkårIkkeOppfyltÅrsak.fraKode(periodeAvklaring.getIkkeOppfyltÅrsakKode());
             if (ikkeOppfyltÅrsak == BostedsvilkårIkkeOppfyltÅrsak.AVKORTET) {
                 throw new IllegalStateException("Det er ikke forventet at AVKORTET skal brukes på periode det skal varsles om. Det er antagelig feil i løsningen som gjør at saksbehandler kan sette denne årsaken her.");
             }
@@ -54,7 +55,7 @@ public class BostedOppgaveOppretter {
             }
 
             var mappetÅrsak = mapIkkeOppfyltÅrsak(ikkeOppfyltÅrsak);
-            var mappetKilde = mapKilde(periodeAvklaring.getKilde());
+            var mappetKilde = mapKilde(BostedsavklaringKildeType.fraKode(periodeAvklaring.getKildeKode()));
             var avklaringtype = periodeAvklaring.getAvklaringtype();
 
             OppgavetypeDataDto oppgavetypeData;
