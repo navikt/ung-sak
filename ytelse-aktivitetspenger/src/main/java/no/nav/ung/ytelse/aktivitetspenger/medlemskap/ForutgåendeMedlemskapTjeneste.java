@@ -78,6 +78,7 @@ public class ForutgåendeMedlemskapTjeneste {
                 vp.getGjeldendeUtfall(),
                 avslagsårsak,
                 vp.getBegrunnelse(),
+                vp.getFritekstVurderingBrev(),
                 tilVurdering,
                 vp.getErManueltVurdert(),
                 medlemskapFraBruker

@@ -16,6 +16,8 @@ public record MedlemskapPeriodeInfoDto(
 
     String begrunnelse,
 
+    String fritekstVurderingBrev,
+
     @JsonProperty(required = true)
     boolean vurderesIBehandlingen,
 

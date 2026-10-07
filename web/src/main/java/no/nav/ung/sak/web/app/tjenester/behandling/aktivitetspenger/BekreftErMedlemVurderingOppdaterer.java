@@ -54,6 +54,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
         Utfall utfall = dto.getErVilkårInnvilget() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
+        String fritekstVurderingBrev = utfall == Utfall.IKKE_OPPFYLT ? dto.getFritekstVurderingBrev() : null;
 
         var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapForBehandlingSomDto(param.getBehandlingId())
             .stream()
@@ -71,6 +72,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
                     .medUtfallManuell(utfall)
                     .medAvslagsårsak(avslagsårsak)
                     .medRegelInput(regelInput)
+                    .medFritekstVurderingBrev(fritekstVurderingBrev)
                     .medBegrunnelse(dto.getBegrunnelse()));
             }
         );
