@@ -1,4 +1,4 @@
-package no.nav.ung.sak.kontrakt.aktivitetspenger;
+package no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår;
 
 import com.fasterxml.jackson.annotation.*;
 import jakarta.validation.Valid;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.typer.Periode;
 
 import java.util.Collections;

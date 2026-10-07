@@ -19,8 +19,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMappe
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BekreftErMedlemVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
