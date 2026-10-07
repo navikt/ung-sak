@@ -30,10 +30,12 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaring;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.etterlysning.EtterlysningRepository;
+import no.nav.ung.sak.etterlysning.VilkårsavklaringEtterlysningTjeneste;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
@@ -86,7 +88,8 @@ class VurderFaktaOmBostedOppdatererTest {
     @Inject
     private @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
+    private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private EtterlysningRepository etterlysningRepository;
     private ProsessTaskTjeneste prosessTaskTjeneste;
@@ -110,24 +113,27 @@ class VurderFaktaOmBostedOppdatererTest {
     void setUp() {
         var behandlingRepository = new BehandlingRepository(entityManager);
         var historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
-        bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
+        vilkårsavklaringGrunnlagRepository = new VilkårsavklaringGrunnlagRepository(entityManager);
+        bostedSøknadsfaktaGrunnlagRepository = new BostedSøknadsfaktaGrunnlagRepository(entityManager);
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
         etterlysningRepository = new EtterlysningRepository(entityManager);
         prosessTaskTjeneste = mock(ProsessTaskTjeneste.class);
         vilkårResultatRepository = new VilkårResultatRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, inngangsvilkårVurderingTjeneste, etterlysningRepository, prosessTaskTjeneste, vilkårResultatRepository);
+        bostedAvklaringTjeneste = new BostedAvklaringTjeneste(vilkårsavklaringGrunnlagRepository, inngangsvilkårVurderingTjeneste, vilkårResultatRepository);
+        var vilkårsavklaringEtterlysningTjeneste = new VilkårsavklaringEtterlysningTjeneste(etterlysningRepository, prosessTaskTjeneste);
 
         oppdaterer = new VurderFaktaOmBostedOppdaterer(
             behandlingRepository,
             historikkinnslagRepository,
+            vilkårsavklaringEtterlysningTjeneste,
             vilkårsPerioderTilVurderingTjenester,
             bostedAvklaringTjeneste,
             inngangsvilkårVurderingTjeneste
         );
 
         behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of());
     }
 
@@ -136,7 +142,7 @@ class VurderFaktaOmBostedOppdatererTest {
         var dto = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
         var bostedAvklaringPeriode = konverterTilBostedAvklaringPeriode(dto, behandling);
 
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(bostedAvklaringPeriode));
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(bostedAvklaringPeriode));
 
         oppdater(dto);
 
@@ -147,12 +153,12 @@ class VurderFaktaOmBostedOppdatererTest {
     @Test
     void skal_ikke_opprette_eller_avbryte_nar_kun_begrunnelse_er_endret() {
         var opprinnelig = dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "opprinnelig begrunnelse");
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(konverterTilBostedAvklaringPeriode(opprinnelig, behandling)));
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(konverterTilBostedAvklaringPeriode(opprinnelig, behandling)));
 
         oppdater(dtoMedEnAvklaring(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true, "rettet begrunnelse"));
 
         assertThat(hentSorterteAvklaringer())
-            .extracting(BostedsPeriodeAvklaring::getBegrunnelse)
+            .extracting(VilkårPeriodeAvklaring::getBegrunnelse)
             .as("den rettede begrunnelsen skal lagres")
             .containsExactly("rettet begrunnelse");
 
@@ -162,8 +168,8 @@ class VurderFaktaOmBostedOppdatererTest {
         verify(prosessTaskTjeneste, never()).lagre(any(ProsessTaskData.class));
     }
 
-    private static BostedsPeriodeAvklaringForeslått konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
-        return BostedsAvklaringDataMapper.mapTilBostedsPeriodeAvklaring(
+    private static VilkårPeriodeAvklaringForeslått konverterTilBostedAvklaringPeriode(VurderFaktaOmBostedDto dto, Behandling behandling) {
+        return BostedsAvklaringDataMapper.mapTilVilkårPeriodeAvklaring(
             BostedsAvklaringDataMapper.mapTilBostedAvklaring(dto.getAvklaringer().getFirst(), TOM, UUID.randomUUID().toString(), LocalDateTime.now()),
             UUID.randomUUID()
         );
@@ -329,7 +335,7 @@ class VurderFaktaOmBostedOppdatererTest {
         leggTilVilkårsperioder(builder, vilkårsperioder);
         var original = builder.lagre(entityManager);
 
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(original.getId(), "jp-original", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(original.getId(), "jp-original", FOM, true);
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(original.getId(), List.of());
         new ProsessTriggereRepository(entityManager).leggTil(original.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
@@ -343,7 +349,8 @@ class VurderFaktaOmBostedOppdatererTest {
         leggTilVilkårsperioder(builder, vilkårsperioder);
         var revurdering = builder.lagre(entityManager);
 
-        bostedsGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandling.getId(), revurdering.getId());
+        vilkårsavklaringGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandling.getId(), revurdering.getId());
+        bostedSøknadsfaktaGrunnlagRepository.kopierGrunnlagFraEksisterendeBehandling(originalBehandling.getId(), revurdering.getId());
         inngangsvilkårVurderingRepository.kopier(originalBehandling.getId(), revurdering.getId());
         new ProsessTriggereRepository(entityManager).leggTil(revurdering.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.ENDRET_BOSTED, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
@@ -416,8 +423,8 @@ class VurderFaktaOmBostedOppdatererTest {
         return behandling;
     }
 
-    private List<BostedsPeriodeAvklaring> hentSorterteAvklaringer() {
-        return bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId())
+    private List<VilkårPeriodeAvklaring> hentSorterteAvklaringer() {
+        return vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BOSTEDSVILKÅR)
             .orElseThrow()
             .getForeslåtteAvklaringer()
             .stream()

@@ -15,7 +15,8 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.perioder.ProsessTriggerPeriodeUtleder;
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -51,7 +53,7 @@ class VurderFaktaBostedStegTest {
 
     private BehandlingRepository behandlingRepository;
     private ProsessTriggereRepository prosessTriggereRepository;
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     private StartdatoRepository startdatoRepository;
     private VurderFaktaBostedSteg steg;
 
@@ -59,7 +61,7 @@ class VurderFaktaBostedStegTest {
     void setUp() {
         behandlingRepository = new BehandlingRepository(entityManager);
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
-        bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
+        bostedSøknadsfaktaGrunnlagRepository = new BostedSøknadsfaktaGrunnlagRepository(entityManager);
         startdatoRepository = new StartdatoRepository(entityManager);
 
         steg = new VurderFaktaBostedSteg(
@@ -95,18 +97,20 @@ class VurderFaktaBostedStegTest {
         var periode = DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM);
         var søktStartdato = new SøktStartdato(FOM, new JournalpostId("jp-1"));
 
-        startdatoRepository.lagre(behandling.getId(), java.util.List.of(søktStartdato));
-        startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(java.util.List.of(søktStartdato)));
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-1", FOM, true);
+        startdatoRepository.lagre(behandling.getId(), List.of(søktStartdato));
+        startdatoRepository.lagreRelevanteSøknader(behandling.getId(), new Startdatoer(List.of(søktStartdato)));
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-1", FOM, true);
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, periode)));
 
         utførSteg(behandling);
 
-        var lagretGrunnlag = bostedsGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
-        var periodeAvklaring = lagretGrunnlag.hentOppgittOgForeslåttFaktaSomTidslinje().stream().findFirst().orElseThrow();
-        assertThat(periodeAvklaring.getValue().isErBosattITrondheim()).isTrue();
-        assertThat(periodeAvklaring.getValue().getKilde()).isEqualTo(Kilde.SØKNAD);
+        var lagretGrunnlag = bostedSøknadsfaktaGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow();
+        var faktaOgAvklaring = BostedsfaktaOgAvklaringFletter.flettMedForeslåtteAvklaringer(
+                lagretGrunnlag.hentSøknadsfaktaSomTidslinje(), List.of())
+            .stream().findFirst().orElseThrow();
+        assertThat(faktaOgAvklaring.getValue().isErBosattITrondheim()).isTrue();
+        assertThat(faktaOgAvklaring.getValue().getKilde()).isEqualTo(Kilde.SØKNAD);
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {
