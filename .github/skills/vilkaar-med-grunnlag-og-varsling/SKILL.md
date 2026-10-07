@@ -702,7 +702,7 @@ modellBuilder
 ```
 
 **Plasseringsregler:**
-- **Lokal** (LOKALKONTOR_MANUELL): steget plasseres **før** `NAV_KONTOR_FORESLÅ_VILKÅR`
+- **Lokal** (NAV_KONTOR_MANUELL): steget plasseres **før** `NAV_KONTOR_FORESLÅ_VILKÅR`
 - **Sentral** (MANUELL): steget plasseres **etter** `NAV_KONTOR_BESLUTTER_VILKÅR`
 - **Varslings-variant:** legg til begge steg i rekkefølge — faktasteg **før** vilkårssteg
 
@@ -925,11 +925,11 @@ Fil: `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/t
 
 ## Viktige mønstre
 
-### Lokal vs. sentral aksjonspunkttype
+### Nav-kontor vs. sentral aksjonspunkttype
 
 | Type | AksjonspunktType | Prosessmodell-plassering |
 |------|-----------------|--------------------------|
-| **Lokal** (lokalkontor) | `NAV_KONTOR_MANUELL` | **Før** `NAV_KONTOR_FORESLÅ_VILKÅR` |
+| **Nav-kontor** | `NAV_KONTOR_MANUELL` | **Før** `NAV_KONTOR_FORESLÅ_VILKÅR` |
 | **Sentral** | `MANUELL` | **Etter** `NAV_KONTOR_BESLUTTER_VILKÅR` |
 
 ### VilkårResultatBuilder
