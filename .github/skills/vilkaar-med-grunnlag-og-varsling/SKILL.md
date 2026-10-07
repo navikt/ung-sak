@@ -702,8 +702,8 @@ modellBuilder
 ```
 
 **Plasseringsregler:**
-- **Lokal** (LOKALKONTOR_MANUELL): steget plasseres **før** `LOKALKONTOR_FORESLÅ_VILKÅR`
-- **Sentral** (MANUELL): steget plasseres **etter** `LOKALKONTOR_BESLUTTER_VILKÅR`
+- **Lokal** (LOKALKONTOR_MANUELL): steget plasseres **før** `NAV_KONTOR_FORESLÅ_VILKÅR`
+- **Sentral** (MANUELL): steget plasseres **etter** `NAV_KONTOR_BESLUTTER_VILKÅR`
 - **Varslings-variant:** legg til begge steg i rekkefølge — faktasteg **før** vilkårssteg
 
 ---
@@ -915,7 +915,7 @@ Fil: `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/t
 **`LokalkontorSteg.java`:**
 - Oppdater `saksbehandlerVurdererOgForeslårVilkår` med nye params
 - Legg til `sendInn<Vilkår>Bekreftelse(steg, deltaker, søkerIdent)` som poster `Vurder<Vilkår>Dto`
-- Fjern `VURDER_FAKTA_OM_MITT_VILKÅR` fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
+- Fjern `VURDER_FAKTA_OM_MITT_VILKÅR` fra `NavKontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
 
 **`AktivitetspengerTest.java`:**
 - Legg til `UngdomsprogramDeltaker deltaker`-felt
@@ -929,8 +929,8 @@ Fil: `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/t
 
 | Type | AksjonspunktType | Prosessmodell-plassering |
 |------|-----------------|--------------------------|
-| **Lokal** (lokalkontor) | `LOKALKONTOR_MANUELL` | **Før** `LOKALKONTOR_FORESLÅ_VILKÅR` |
-| **Sentral** | `MANUELL` | **Etter** `LOKALKONTOR_BESLUTTER_VILKÅR` |
+| **Lokal** (lokalkontor) | `NAV_KONTOR_MANUELL` | **Før** `NAV_KONTOR_FORESLÅ_VILKÅR` |
+| **Sentral** | `MANUELL` | **Etter** `NAV_KONTOR_BESLUTTER_VILKÅR` |
 
 ### VilkårResultatBuilder
 
@@ -976,7 +976,7 @@ Alle steg og oppdaterere oppdages automatisk via CDI-annotasjoner. Ingen manuell
 | Lambda-kompileringsfeil: "must be final or effectively final" | Bruk `final`-kopi før lambda: `final Map<...> avklaringLookup = periodeAvklaringPerFom;` |
 | Duplikat etterlysning sendt for `MOTTATT_SVAR` | Sjekk `hentBesvartEtterlysninger()` i tillegg til `hentEtterlysningerSomVenterPåSvar()` |
 | Beslutte AP for manuell vurdering feil | Bruk `VilkårPeriodeVurderingDto` med `erVilkårOppfylt=false` og `avslagsårsak` for avslag |
-| Beslutter godkjenner auto-vurderte vilkår | Fjern AP fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
+| Beslutter godkjenner auto-vurderte vilkår | Fjern AP fra `NavKontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
 | Søknadsdata trenger uavhengig persistering | Bruk eget søknadsaggregat — ikke koble søknadsdata direkte til holder |
 
 ---

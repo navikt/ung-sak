@@ -466,7 +466,7 @@ private record RegelInput(UUID referanse, LocalDate skjaeringstidspunkt,
 **`LokalkontorSteg.java`** (k9-verdikjede):
 - Oppdater `saksbehandlerVurdererOgForeslårVilkår` med nye params: `UngSakFordelingSteg`, `UngdomsprogramDeltaker`, `String søkerIdent`
 - Legg til ny metode `sendInn<Vilkår>Bekreftelse(steg, deltaker, søkerIdent)` som poster `Vurder<Vilkår>Dto`
-- Fjern `VURDER_<VILKÅR>` fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
+- Fjern `VURDER_<VILKÅR>` fra `NavKontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
 
 **`AktivitetspengerTest.java`** og **`ForutgåendeMedlemskapTest.java`** (k9-verdikjede):
 - Legg til `UngdomsprogramDeltaker deltaker` felt
@@ -482,7 +482,7 @@ private record RegelInput(UUID referanse, LocalDate skjaeringstidspunkt,
 | k9-format/brukerdialog-api ikke oppdatert | Sjekk `<k9format.version>` og `<ung-brukerdialog-api.version>` i root `pom.xml` |
 | Switch-exhaustiveness-feil | `EtterlysningType`-switch finnes i minst 4 filer — søk etter eksisterende `UTTALELSE_*` |
 | Beslutte AP for manuell vurdering feil | Bruk `VilkårPeriodeVurderingDto` med `erVilkårOppfylt=false` og `avslagsårsak` for avslag |
-| Beslutter skal ikke godkjenne auto-vurderte vilkår | Fjern AP fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
+| Beslutter skal ikke godkjenne auto-vurderte vilkår | Fjern AP fra `NavKontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
 | Oppdaterer for fakta returnerer `rekjørSteg()` | Steg re-kjøres og finner ny etterlysning (OPPRETTET) → setter autopunkt |
 | Oppdaterer for manuell vilkårsvurdering returnerer `nyttResultat()` | Ikke `rekjørSteg()` — vilkåret er allerede satt via `param.getVilkårResultatBuilder()` |
 | `UnknownEntityException: Could not resolve root entity` i tester | Mangler `pu-default.<vilkaar>.orm.xml` — se Steg 4 |
