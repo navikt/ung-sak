@@ -99,6 +99,9 @@ spec:
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: sif-abac-pdp
+        - application: sif-abac-pdp
+          namespace: k9saksbehandling
+          cluster: prod-fss
         - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
