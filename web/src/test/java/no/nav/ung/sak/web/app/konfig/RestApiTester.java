@@ -19,7 +19,7 @@ public class RestApiTester {
 
     static final List<Class<?>> UNNTATT = Collections.singletonList(OpenApiResource.class);
 
-    static Collection<Method> finnAlleRestMetoder() {
+    public static Collection<Method> finnAlleRestMetoder() {
         List<Method> liste = new ArrayList<>();
         for (Class<?> klasse : finnAlleRestTjenester()) {
             for (Method method : klasse.getDeclaredMethods()) {
