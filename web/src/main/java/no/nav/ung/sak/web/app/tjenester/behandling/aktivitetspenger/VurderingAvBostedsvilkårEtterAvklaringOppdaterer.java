@@ -4,7 +4,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
@@ -13,15 +12,17 @@ import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterParameter;
 import no.nav.ung.sak.behandling.aksjonspunkt.AksjonspunktOppdaterer;
 import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
-import no.nav.ung.sak.behandlingskontroll.BehandlingÅrsakTypeRef;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VurderingAvBostedsvilkårEtterAvklaringDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
+
+import java.util.Set;
 
 @ApplicationScoped
 @DtoTilServiceAdapter(dto = VurderingAvBostedsvilkårEtterAvklaringDto.class, adapter = AksjonspunktOppdaterer.class)
@@ -30,7 +31,7 @@ public class VurderingAvBostedsvilkårEtterAvklaringOppdaterer implements Aksjon
     private static final VilkårType AKTUELT_VILKÅR = VilkårType.BOSTEDSVILKÅR;
 
     private VurderingAvVilkårEtterAvklaringTjeneste vurderingAvVilkårEtterAvklaringTjeneste;
-    private BostedAvklaringTjeneste bostedAvklaringTjeneste;
+    private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
     private InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste;
     private VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste;
@@ -41,12 +42,12 @@ public class VurderingAvBostedsvilkårEtterAvklaringOppdaterer implements Aksjon
 
     @Inject
     public VurderingAvBostedsvilkårEtterAvklaringOppdaterer(VurderingAvVilkårEtterAvklaringTjeneste vurderingAvVilkårEtterAvklaringTjeneste,
-                                                            @BehandlingÅrsakTypeRef(BehandlingÅrsakType.ENDRET_BOSTED) BostedAvklaringTjeneste bostedAvklaringTjeneste,
+                                                            VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
                                                             InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
                                                             InngangsvilkårVurderingTjeneste inngangsvilkårVurderingTjeneste,
                                                             VilkårsvurderingHistorikkinnslagTjeneste vilkårsvurderingHistorikkinnslagTjeneste) {
         this.vurderingAvVilkårEtterAvklaringTjeneste = vurderingAvVilkårEtterAvklaringTjeneste;
-        this.bostedAvklaringTjeneste = bostedAvklaringTjeneste;
+        this.vilkårsavklaringGrunnlagRepository = vilkårsavklaringGrunnlagRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
         this.inngangsvilkårVurderingTjeneste = inngangsvilkårVurderingTjeneste;
         this.vilkårsvurderingHistorikkinnslagTjeneste = vilkårsvurderingHistorikkinnslagTjeneste;
@@ -78,9 +79,16 @@ public class VurderingAvBostedsvilkårEtterAvklaringOppdaterer implements Aksjon
     }
 
     private LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> hentÅrsakTidslinje(long behandlingId) {
-        return new LocalDateTimeline<>(bostedAvklaringTjeneste.hentForeslåtteAvklaringer(behandlingId).stream()
-            .map(a -> new LocalDateSegment<IkkeOppfyltDetaljertÅrsak>(
-                a.getPeriode().getFomDato(), a.getPeriode().getTomDato(), a.getIkkeOppfyltÅrsak()))
+        var foreslåtteAvklaringer = vilkårsavklaringGrunnlagRepository
+            .hentGrunnlagHvisEksisterer(behandlingId, AKTUELT_VILKÅR)
+            .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
+            .orElse(Set.of());
+
+        return new LocalDateTimeline<>(foreslåtteAvklaringer.stream()
+            .map(a -> new LocalDateSegment<>(
+                a.getPeriode().getFomDato(),
+                a.getPeriode().getTomDato(),
+                IkkeOppfyltDetaljertÅrsak.fraKode(AKTUELT_VILKÅR, a.getIkkeOppfyltÅrsakKode())))
             .toList());
     }
 }

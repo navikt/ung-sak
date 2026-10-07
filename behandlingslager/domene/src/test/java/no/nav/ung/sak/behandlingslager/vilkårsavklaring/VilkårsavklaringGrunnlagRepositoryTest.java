@@ -117,6 +117,24 @@ class VilkårsavklaringGrunnlagRepositoryTest {
     }
 
     @Test
+    void ferdigstilte_avklaringer_skal_staa_uroert_nar_et_nytt_og_annet_forslag_lagres() {
+        var ferdigstilt = lagAvklaring(FOM, LocalDate.of(2026, 1, 15));
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), VILKÅR_TYPE, Set.of(ferdigstilt));
+        repository.ferdigstillForeslåtteAvklaringer(behandling.getId(), VILKÅR_TYPE);
+
+        var nyttForslag = lagAvklaring(LocalDate.of(2026, 1, 16), TOM);
+        repository.lagreForeslåtteAvklaringer(behandling.getId(), VILKÅR_TYPE, Set.of(nyttForslag));
+
+        var grunnlag = repository.hentGrunnlagHvisEksisterer(behandling.getId(), VILKÅR_TYPE).orElseThrow();
+        assertThat(grunnlag.getFerdigstilteAvklaringer())
+            .extracting(VilkårPeriodeAvklaring::getReferanse)
+            .containsExactly(ferdigstilt.getReferanse());
+        assertThat(grunnlag.getForeslåtteAvklaringer())
+            .extracting(VilkårPeriodeAvklaring::getReferanse)
+            .containsExactly(nyttForslag.getReferanse());
+    }
+
+    @Test
     void ferdigstilling_skal_beholde_foreslaatte_avklaringer_og_vaere_idempotent() {
         var foreslått = lagAvklaring(FOM, TOM);
         repository.lagreForeslåtteAvklaringer(behandling.getId(), VILKÅR_TYPE, Set.of(foreslått));

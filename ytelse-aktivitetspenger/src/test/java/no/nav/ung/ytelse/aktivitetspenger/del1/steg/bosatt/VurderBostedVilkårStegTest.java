@@ -24,8 +24,10 @@ import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
@@ -82,7 +84,9 @@ class VurderBostedVilkårStegTest {
     @Inject
     private VilkårResultatRepository vilkårResultatRepository;
     @Inject
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
+    @Inject
+    private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     @Inject
     private StartdatoRepository startdatoRepository;
     @Inject
@@ -104,7 +108,7 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_ikke_utføre_vilkårsvurdering_automatisk_for_nye_perioder() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
         steg = lagSteg(List.of());
         var resultat = utførSteg(behandling);
@@ -121,10 +125,10 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_utføre_vilkårsvurdering_automatisk_når_standardkode_og_bruker_ikke_har_uttalelse() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
         var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = new EtterlysningData(
@@ -155,10 +159,10 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_ikke_utføre_vilkårsvurdering_automatisk_når_bruker_har_uttalelse() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
         var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = new EtterlysningData(
@@ -186,10 +190,10 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_ikke_utføre_vilkårsvurdering_automatisk_når_det_er_valgt_å_ikke_varsle() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
         var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = new EtterlysningData(
@@ -212,8 +216,8 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_sette_pa_vent_nar_periode_venter_pa_etterlysning() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(
             lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, false)
         ));
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
@@ -239,8 +243,8 @@ class VurderBostedVilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(
             lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true),
             lagBostedsPeriodeAvklaring(fom2, tom2, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, true)
         ));
@@ -275,11 +279,11 @@ class VurderBostedVilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
         // Kun første periode har en foreslått avklaring fra saksbehandler. Andre periode har bare søknadsfakta.
         var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(avklaring));
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(avklaring));
 
         var frist = LocalDateTime.of(2026, 2, 15, 12, 0);
         var ventendeEtterlysning = new EtterlysningData(
@@ -321,8 +325,8 @@ class VurderBostedVilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(
             lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true),
             lagBostedsPeriodeAvklaring(fom2, tom2, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true)
         ));
@@ -337,7 +341,7 @@ class VurderBostedVilkårStegTest {
         var fom2 = TOM.plusDays(1);
         var tom2 = fom2.plusDays(30);
         var behandling = opprettBehandlingMedToVilkårsperioder(fom2, tom2);
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
 
         var resultat = utførSteg(behandling);
 
@@ -349,15 +353,16 @@ class VurderBostedVilkårStegTest {
     @Test
     void skal_ikke_regne_delvis_dekket_tidslinje_som_dekket_av_foreslått_avklaring() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), Set.of(
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(
             lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true)
         ));
 
         // Søknadsfakta løper videre etter TOM, så tidslinjen har et haleparti uten avklaring.
-        LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> blandetTidslinje = bostedsGrunnlagRepository
-            .hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow()
-            .hentOppgittOgForeslåttFaktaSomTidslinje()
+        LocalDateTimeline<BostedAvklaringOgUttalelseOgResultat> blandetTidslinje = BostedsfaktaOgAvklaringFletter.flettMedForeslåtteAvklaringer(
+                bostedSøknadsfaktaGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId()).orElseThrow().hentSøknadsfaktaSomTidslinje(),
+                vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), VilkårType.BOSTEDSVILKÅR)
+                    .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer).orElseThrow())
             .mapValue(BostedAvklaringOgUttalelseOgResultat::new);
 
         assertThat(blandetTidslinje.segmenter()).hasSizeGreaterThan(1);
@@ -418,7 +423,8 @@ class VurderBostedVilkårStegTest {
             vilkårResultatRepository,
             vilkårTjeneste,
             behandlingRepository,
-            bostedsGrunnlagRepository,
+            vilkårsavklaringGrunnlagRepository,
+            bostedSøknadsfaktaGrunnlagRepository,
             vilkårsPerioderTilVurderingTjenester,
             etterlysningTjeneste,
             inngangsvilkårVurderingRepository,
@@ -436,15 +442,15 @@ class VurderBostedVilkårStegTest {
         return steg.utførSteg(kontekst);
     }
 
-    private BostedsPeriodeAvklaringForeslått lagBostedsPeriodeAvklaring(
+    private VilkårPeriodeAvklaringForeslått lagBostedsPeriodeAvklaring(
             LocalDate fom, LocalDate tom,
             BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
             boolean skalSendeVarsel) {
 
-        return new BostedsPeriodeAvklaringForeslått(
+        return new VilkårPeriodeAvklaringForeslått(
                 UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom),
-                ikkeOppfyltÅrsak,
+                ikkeOppfyltÅrsak.getKode(),
                 "Begrunnelse for relevante fakta lagt til grunn i avklaring",
                 skalSendeVarsel,
                 skalSendeVarsel && BostedsvilkårIkkeOppfyltÅrsak.ANNET.equals(ikkeOppfyltÅrsak) ? "Fritekst til varselet" : null,

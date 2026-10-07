@@ -23,13 +23,14 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
 import no.nav.ung.sak.behandlingslager.fagsak.FagsakRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VurderingAvBostedsvilkårEtterAvklaringDto;
@@ -39,7 +40,6 @@ import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedAvklaringTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -74,7 +74,8 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
     private BehandlingRepository behandlingRepository;
     private VilkårResultatRepository vilkårResultatRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
-    private BostedsGrunnlagRepository bostedsGrunnlagRepository;
+    private VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository;
+    private BostedSøknadsfaktaGrunnlagRepository bostedSøknadsfaktaGrunnlagRepository;
     private HistorikkinnslagRepository historikkinnslagRepository;
     private VurderingAvBostedsvilkårEtterAvklaringOppdaterer oppdaterer;
 
@@ -101,15 +102,15 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
         behandlingRepository = repositoryProvider.getBehandlingRepository();
         vilkårResultatRepository = repositoryProvider.getVilkårResultatRepository();
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
-        bostedsGrunnlagRepository = new BostedsGrunnlagRepository(entityManager);
+        vilkårsavklaringGrunnlagRepository = new VilkårsavklaringGrunnlagRepository(entityManager);
+        bostedSøknadsfaktaGrunnlagRepository = new BostedSøknadsfaktaGrunnlagRepository(entityManager);
         var inngangsvilkårVurderingTjeneste = new InngangsvilkårVurderingTjeneste(inngangsvilkårVurderingRepository, behandlingRepository, vilkårResultatRepository);
-        var bostedAvklaringTjeneste = new BostedAvklaringTjeneste(bostedsGrunnlagRepository, null, null, null, null);
         var vurderingAvVilkårEtterAvklaringTjeneste = new VurderingAvVilkårEtterAvklaringTjeneste(vilkårResultatRepository);
         historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
 
         oppdaterer = new VurderingAvBostedsvilkårEtterAvklaringOppdaterer(
             vurderingAvVilkårEtterAvklaringTjeneste,
-            bostedAvklaringTjeneste,
+            vilkårsavklaringGrunnlagRepository,
             inngangsvilkårVurderingRepository,
             inngangsvilkårVurderingTjeneste,
             vilkårsvurderingHistorikkinnslagTjeneste);
@@ -189,12 +190,12 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
     }
 
     private void lagreForeslåtteAvklaringer(Behandling behandling, BostedsvilkårIkkeOppfyltÅrsak årsak, Periode... perioder) {
-        bostedsGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "123456789", perioder[0].getFom(), true);
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "123456789", perioder[0].getFom(), true);
         var avklaringer = Arrays.stream(perioder)
-            .map(periode -> new BostedsPeriodeAvklaringForeslått(
+            .map(periode -> new VilkårPeriodeAvklaringForeslått(
                 UUID.randomUUID(),
                 DatoIntervallEntitet.fraOgMedTilOgMed(periode.getFom(), periode.getTom()),
-                årsak,
+                årsak.getKode(),
                 "begrunnelse for avklaring",
                 true,
                 årsak.kreverFritekst() ? "fritekst til varsel" : null,
@@ -205,7 +206,7 @@ class VurderingAvBostedsvilkårEtterAvklaringOppdatererTest {
                 LocalDateTime.now(),
                 Avklaringtype.OPPHØR))
             .collect(Collectors.toSet());
-        bostedsGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), avklaringer);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, avklaringer);
     }
 
     private static VurderingAvBostedsvilkårEtterAvklaringDto dto(VurderingAvVilkårPeriodeEtterAvklaringDto... perioder) {

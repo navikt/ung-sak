@@ -4,18 +4,12 @@
                  xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm https://jakarta.ee/xml/ns/persistence/orm/orm_3_2.xsd"
                  version="3.2">
 
-    <sequence-generator name="SEQ_BOSATT_AVKLARING_HOLDER" allocation-size="50" sequence-name="SEQ_BOSATT_AVKLARING_HOLDER"/>
-    <sequence-generator name="SEQ_BOSATT_PERIODE_AVKLARING" allocation-size="50" sequence-name="SEQ_BOSATT_PERIODE_AVKLARING"/>
-    <sequence-generator name="SEQ_BOSATT_PERIODE_AVKLARING_FORESLAATT" allocation-size="50" sequence-name="SEQ_BOSATT_PERIODE_AVKLARING_FORESLAATT"/>
-    <sequence-generator name="SEQ_GR_BOSATT_AVKLARING" allocation-size="50" sequence-name="SEQ_GR_BOSATT_AVKLARING"/>
     <sequence-generator name="SEQ_BOSTEDSINFORMASJON_SOEKNAD_HOLDER" allocation-size="50" sequence-name="SEQ_BOSTEDSINFORMASJON_SOEKNAD_HOLDER"/>
     <sequence-generator name="SEQ_BOSATT_INFORMASJON_FRA_SOEKNAD" allocation-size="50" sequence-name="SEQ_BOSATT_INFORMASJON_FRA_SOEKNAD"/>
+    <sequence-generator name="SEQ_GR_BOSTED_SOKNADSFAKTA" allocation-size="50" sequence-name="SEQ_GR_BOSTED_SOKNADSFAKTA"/>
 
-    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsAvklaringHolder"/>
-    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringFerdigstilt"/>
-    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsPeriodeAvklaringForeslått"/>
-    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsGrunnlag"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsinformasjonFraSøknadHolder"/>
     <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedsinformasjonFraSøknad"/>
+    <entity class="no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlag"/>
 
 </entity-mappings>
