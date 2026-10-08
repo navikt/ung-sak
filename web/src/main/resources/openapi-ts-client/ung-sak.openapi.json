@@ -3010,6 +3010,12 @@
           },
           "periode" : {
             "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "ytelseNavn" : {
+            "maxLength" : 200,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
           }
         },
         "required" : [ "begrunnelse", "erVilkårOppfylt", "periode" ],
