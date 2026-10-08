@@ -27,7 +27,7 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
@@ -78,6 +78,7 @@ public class ForutgåendeMedlemskapTjeneste {
                 vp.getGjeldendeUtfall(),
                 avslagsårsak,
                 vp.getBegrunnelse(),
+                vp.getFritekstVurderingBrev(),
                 tilVurdering,
                 vp.getErManueltVurdert(),
                 medlemskapFraBruker

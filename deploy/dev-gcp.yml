@@ -106,6 +106,9 @@ spec:
           namespace: k9saksbehandling
           cluster: dev-fss
         - application: sif-abac-pdp
+        - application: sif-abac-pdp
+          namespace: k9saksbehandling
+          cluster: dev-fss
         - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
@@ -317,4 +320,4 @@ spec:
       value: "srvPDP,srvk9-tilbake,srvsaf,srvk9-abakus,Z993210,Z994080,Z994692"
 
     - name: PIP_APPS
-      value: "dev-gcp:k9saksbehandling:sif-abac-pdp,dev-fss:teamdokumenthandtering:saf"
+      value: "dev-gcp:k9saksbehandling:sif-abac-pdp,dev-fss:k9saksbehandling:sif-abac-pdp,dev-fss:teamdokumenthandtering:saf"
