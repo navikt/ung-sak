@@ -57,6 +57,15 @@
 - Nytt eksternt system: legg til konstant i `EksterneSystemer`, bruk `resource = EKSTERN_SYSTEM` + `eksterneSystemer` på endepunktet, og legg til `inbound`-regel i `deploy/<cluster>.yml`.
 - Vedtakshendelsen (`ung-vedtakhendelse`) endres ikke for TS. Den planlagte `tilleggsstonader-oppfolging` vil bruke hendelsen som trigger og dette endepunktet for perioder.
 
+## Domain Notes: Min side-mikrofrontend for aktivitetspenger
+- Når en ny aktivitetspenger-fagsak opprettes, ber ung-sak ung-brukerdialog-api om å aktivere Min side-mikrofrontenden `aktivitetspenger-innsyn` for brukeren.
+- Trigger: `AktivitetspengerMikrofrontendObserver` (`ytelse-aktivitetspenger`, pakke `minside`) lytter på `FagsakStatusEvent` og reagerer kun på `forrigeStatus == null` → `OPPRETTET` for `FagsakYtelseType.AKTIVITETSPENGER`. Fagsaker med `erIkkeDigitalBruker()` hoppes over — ikke-digitale brukere får ikke mikrofrontend foreløpig.
+- Observeren oppretter `AktiverMikrofrontendBrukerdialogTask` (`brukerdialog.aktiver.mikrofrontend`), som kaller `UngBrukerdialogSakKlient.aktiverMikrofrontend` (`POST aktivitetspenger/mikrofrontend/aktiver`) med `AktiverMikrofrontendRequest`.
+- ung-sak sender kun aktørId — aldri fnr. Logg kun saksnummer, aldri aktørId/fnr (ung-brukerdialog-api logger uten identifikatorer; callId kobler loggene).
+- ung-brukerdialog-api eier statustabellen og Kafka-integrasjonen mot `min-side.aapen-microfrontend-v1` (mikrofrontend-id `aktivitetspenger-innsyn`, sensitivitet `high`). ung-sak har ingen Kafka-kobling mot Min side.
+- Toggle `AKTIVITETSPENGER_MIKROFRONTEND_ENABLED` (default av). På i `dev-gcp`; av i prod, og av i `app-vtp.properties` til en verdikjedetest finnes.
+- Ingen automatisk deaktivering — deaktivering skjer kun manuelt via forvaltning i ung-brukerdialog-api (`POST /forvaltning/sak/mikrofrontend/aktivitetspenger/{aktiver,deaktiver}` med fnr og begrunnelse, DRIFT-tilgang; fnr slås opp til aktørId i PDL og lagres ikke). Samme endepunkt brukes til etterfylling av eksisterende fagsaker. Endret aktørId støttes ikke foreløpig.
+
 ## Domain Notes: Vedtaksbrev-resultat
 - Brev-genereringen har ingen resultatklassifisering (tidligere `DetaljertResultatType`). `DefaultDetaljertResultatTidslinjeUtleder` (felles for begge ytelser) produserer kun en tynn grunnlagstidslinje av `DetaljertResultat` (behandlingsårsaker, avslåtte/ikke-vurderte vilkår, tilkjent ytelse, `vurderesIBehandlingen`), og hver brev-strategi utleder selv om den er relevant.
 - Grunnlaget krysses (`CROSS_JOIN`) med hele vilkårstidslinjen, så perioder utenfor vurdering er også med — med tomt årsaks-sett og `tilVurdering=false`. Typen `DetaljertResultatTidslinje` gjør skillet eksplisitt: `tilVurdering()` er normalen, `heleBildet()` brukes **kun** av avslagsstrategiene (som må kunne skille fullt avslag fra delvis). `harÅrsak(...)` spør alltid periodene til vurdering.
