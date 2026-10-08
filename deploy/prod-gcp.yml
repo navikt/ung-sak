@@ -313,4 +313,4 @@ spec:
     - name: PIP_USERS
       value: "srvPDP,srvsaf,srvk9-abakus"
     - name: PIP_APPS
-      value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf"
+      value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf,prod-fss:k9saksbehandling:sif-abac-pdp"
