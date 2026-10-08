@@ -14,6 +14,7 @@ import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
@@ -67,6 +68,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     private ForutgåendeMedlemskapsvilkårSteg steg;
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårTjeneste vilkårTjeneste;
+    private HistorikkinnslagRepository historikkinnslagRepository;
 
     @BeforeEach
     void setUp() {
@@ -78,13 +80,14 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         manuelleVilkårRekkefølgeTjeneste = new ManuelleVilkårRekkefølgeTjeneste(new BehandlingModellRepository());
         vilkårTjeneste = new VilkårTjeneste(behandlingRepository, perioderTilVurderingTjenester, vilkårResultatRepository);
+        historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
         steg = new ForutgåendeMedlemskapsvilkårSteg(
             vilkårResultatRepository,
             forutgåendeMedlemskapRepository,
             mottatteDokumentRepository,
             perioderTilVurderingTjenester,
             behandlingRepository,
-            manuelleVilkårRekkefølgeTjeneste, vilkårTjeneste);
+            manuelleVilkårRekkefølgeTjeneste, vilkårTjeneste, historikkinnslagRepository);
     }
 
     @Test
