@@ -122,10 +122,22 @@ public class ForutgåendeMedlemskapsvilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
+        var perioderMedEndretUtfall = finnPerioderSomIkkeAlleredeErOppfylt(behandlingId, perioderTilVurdering);
         oppfyllVilkår(behandlingId, forutgåendeMedlemskapslandTidslinje, stegerVurderinger);
-        opprettHistorikkinnslag(behandlingId, fagsakId, perioderTilVurdering);
+        if (!perioderMedEndretUtfall.isEmpty()) {
+            opprettHistorikkinnslag(behandlingId, fagsakId, perioderMedEndretUtfall);
+        }
 
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private List<LocalDateSegment<Boolean>> finnPerioderSomIkkeAlleredeErOppfylt(Long behandlingId, SequencedCollection<LocalDateSegment<Boolean>> perioderTilVurdering) {
+        var tidligereOppfylt = vilkårResultatRepository.hent(behandlingId)
+            .getVilkårTimeline(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
+            .filterValue(p -> p.getUtfall() == Utfall.OPPFYLT);
+        return perioderTilVurdering.stream()
+            .filter(p -> !new LocalDateTimeline<>(p.getLocalDateInterval(), true).disjoint(tidligereOppfylt).isEmpty())
+            .toList();
     }
 
     private void opprettHistorikkinnslag(Long behandlingId, Long fagsakId, SequencedCollection<LocalDateSegment<Boolean>> perioderVurdert) {
