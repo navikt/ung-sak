@@ -37,7 +37,7 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
                 Du får 37 kroner i barnetillegg per dag fra og med 16. august 2025, utenom lørdag og søndag. \
                 Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
-                """);
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextIsEqualTo(forventet)
@@ -60,7 +60,7 @@ class EndringBarnetilleggTest extends AbstractAktivitetspengerVedtaksbrevInnhold
                 Du får 74 kroner i barnetillegg per dag fra og med 16. august 2025, utenom lørdag og søndag. \
                 Det er fordi du fikk barn denne datoen. \
                 Når du har barn, får du et barnetillegg på 37 kroner per dag for hvert barn du har. \
-                """);
+                """ + VedtaksbrevVerifikasjon.hjemmelsetning("12 tredje ledd"));
 
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextIsEqualTo(forventet)

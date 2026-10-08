@@ -206,6 +206,10 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         return avslåttBistandScenario(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, fritekstBrev);
     }
 
+    public static AktivitetspengerTestScenario avslåttBistandKommetIUtdanning(LocalDate fom, String fritekstBrev) {
+        return avslåttBistandScenario(fom, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_UTDANNING, fritekstBrev);
+    }
+
     public static AktivitetspengerTestScenario avslåttBostedOgBistand(LocalDate fom, String fritekstBistand) {
         var vurderinger = InngangsvilkårVurderingTestData.builder()
             .medBostedsvilkårResultat(false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null)

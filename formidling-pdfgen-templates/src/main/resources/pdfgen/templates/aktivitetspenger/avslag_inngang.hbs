@@ -12,7 +12,8 @@
             {{else eq årsak "YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED"}}
                 <p>
                     For å ha rett til aktivitetspenger må du bo i Trondheim kommune.
-                    Fordi studie- eller arbeidsstedet ditt er utenfor Trondheim kommune, har vi avslått søknaden din.
+                    Fordi du bor der du studerer eller jobber, utenfor Trondheim kommune, regner vi deg ikke som bosatt i kommunen.
+                    Derfor har vi avslått søknaden din.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
                 <p>
@@ -24,16 +25,18 @@
                     {{fritekstBrev}}
                 </p>
             {{/if}}
+
+            {{> aktivitetspenger/footer/hjemmel paragraf="2"}}
         {{/with}}
 
         {{#with bistand}}
             {{#eq årsak "KOMMET_I_ARBEID"}}
                 <p>
-                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du er i jobb, har vi avslått søknaden din.
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få eller beholde en jobb. Fordi du er i jobb og ikke trenger slik hjelp, har vi avslått søknaden din.
                 </p>
             {{else eq årsak "KOMMET_I_UTDANNING"}}
                 <p>
-                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du tar en utdanning, har vi avslått søknaden din.
+                    Du kan bare få aktivitetspenger mens du tar høyere utdanning hvis utdanningen er et arbeidsmarkedstiltak fra Nav. Fordi du tar høyere utdanning som ikke er et arbeidsmarkedstiltak, har vi avslått søknaden din.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
             {{/eq}}
@@ -42,13 +45,19 @@
                     {{fritekstBrev}}
                 </p>
             {{/if}}
+
+            {{#eq årsak "KOMMET_I_UTDANNING"}}
+                {{> aktivitetspenger/footer/hjemmel paragraf="7"}}
+            {{else}}
+                {{> aktivitetspenger/footer/hjemmel paragraf="6"}}
+            {{/eq}}
         {{/with}}
 
         {{#with andreLivsoppholdsytelser}}
             {{#if ytelseNavn}}
                 <p>
                     Du har ikke rett til aktivitetspenger fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger
-                    samtidig som du får en annen livsoppholdsytelse. Derfor har vi avslått søknaden din.
+                    samtidig som du får denne ytelsen. Derfor har vi avslått søknaden din.
                 </p>
             {{/if}}
             {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
@@ -69,6 +78,8 @@
                     </p>
                 {{/if}}
             {{/eq}}
+
+            {{> aktivitetspenger/footer/hjemmel paragraf="4"}}
         {{/with}}
 
         {{#with medlemskap}}

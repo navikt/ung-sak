@@ -3,6 +3,7 @@ package no.nav.ung.kodeverk.vilkår;
 import com.fasterxml.jackson.annotation.JsonValue;
 import no.nav.ung.kodeverk.api.Kodeverdi;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
+import no.nav.ung.kodeverk.hjemmel.AktivitetspengerForskrift;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -12,13 +13,19 @@ import java.util.Set;
 public enum Avslagsårsak implements Kodeverdi {
 
     SØKT_FOR_SENT("1007", "Søkt for sent",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "22-13, 3. ledd")), // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
+        Map.of(
+            FagsakYtelseType.UNGDOMSYTELSE, "22-13, 3. ledd", // TODO: Legg til lovreferanse fra arbeidsmarkedsloven
+            FagsakYtelseType.AKTIVITETSPENGER, "Folketrygdloven § 22-13")),
     MANGLENDE_DOKUMENTASJON("1019", "Manglende dokumentasjon",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "forskrift om ungdomsprogrammet § 4")),
     SØKER_UNDER_MINSTE_ALDER("1089", "Søker er yngre enn minste tillate alder.",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
+        Map.of(
+            FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 3 bokstav a",
+            FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("5"))),
     SØKER_OVER_HØYESTE_ALDER("1090", "Søker er eldre enn høyeste tillate alder.",
-        Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 3 bokstav a")),
+        Map.of(
+            FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 3 bokstav a",
+            FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("5"))),
     SØKER_HAR_AVGÅTT_MED_DØDEN("1091", "Søker har avgått med døden.",
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "??")),
 
@@ -28,26 +35,26 @@ public enum Avslagsårsak implements Kodeverdi {
         Map.of(FagsakYtelseType.UNGDOMSYTELSE, "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 8")),
 
     YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED("3001", "Søker har ikke bostedsadresse i Trondheim kommune.",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("2"))),
 
     SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE("3003", "Søker har annen livsoppholdsytelse.",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("4"))),
 
     YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE("3004", "Søker har ikke bostedsadresse i Trondheim kommune.",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("2"))),
 
     YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED("3005", "Søker har ikke bostedsadresse i Trondheim kommune.",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("2"))),
 
     IKKE_14A_VEDTAK("3002", "Søker har ikke behov for bistand fra Nav",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("6"))),
 
     //FIXME spesifikke avlagsårsaker for aktivitetsvilkåret er var ikke klare. Oppdater med faktiske årsaker når de er på plass
     AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK("3011", "Søker oppfyller ikke aktivitetsvilkåret",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("8"))),
 
     SØKER_ER_IKKE_MEDLEM("4001", "Søker er ikke medlem.",
-        Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+        Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("3"))),
 
 
 
@@ -56,7 +63,7 @@ public enum Avslagsårsak implements Kodeverdi {
      * en kortere periode enn det saksbehandlingssystemet tillater.
      */
     AVKORTET("9000", "Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.",
-     Map.of(FagsakYtelseType.AKTIVITETSPENGER, "TODO AKT lovreferanse")),
+     Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("10"))),
 
     UDEFINERT("-", "Ikke definert",
         Map.of());
