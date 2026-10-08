@@ -48,7 +48,7 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅE
 public class ForutgåendeMedlemskapsvilkårSteg extends VilkårVurderingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(ForutgåendeMedlemskapsvilkårSteg.class);
-    public static final String MEDLEMSKAP_HISTORIKKINNSLAG_TEMPLATE = "Medlemskap pr. %s ble vurdert til %s";
+    public static final String MEDLEMSKAP_HISTORIKKINNSLAG_TEMPLATE = "Medlemskap på %s ble vurdert til %s";
 
     private VilkårResultatRepository vilkårResultatRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
