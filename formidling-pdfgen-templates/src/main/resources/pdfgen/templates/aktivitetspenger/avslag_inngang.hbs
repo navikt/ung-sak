@@ -62,6 +62,14 @@
             {{/if}}
         {{/with}}
 
+        {{#with medlemskap}}
+            {{#if fritekstBrev}}
+                <p>
+                    {{fritekstBrev}}
+                </p>
+            {{/if}}
+        {{/with}}
+
     {{/felles/seksjon/hoved}}
 
     {{> aktivitetspenger/footer/footer-vedtak }}
