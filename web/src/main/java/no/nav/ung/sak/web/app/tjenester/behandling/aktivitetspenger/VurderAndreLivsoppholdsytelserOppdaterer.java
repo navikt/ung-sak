@@ -20,8 +20,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VilkårLivsoppholdsytelserPeriodeVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderAndreLivsoppholdsytelserDto;
 import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
@@ -84,7 +84,7 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 true,
                 it.begrunnelse(),
                 it.fritekstVurderingBrev(),
-                it.ytelseNavn(),
+                utledYtelseNavn(it),
                 vurdertAv,
                 vurdertTidspunkt))
             .toList();
@@ -118,6 +118,16 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
             .map(it -> new LocalDateSegment<>(it.periode().getFom(), it.periode().getTom(), true))
             .toList());
         avkortTjeneste.validerAvkortBruktRiktig(behandlingId, perioderSattTilAvkortet, AKTUELT_VILKÅR);
+    }
+
+    // For å ikke stoppe testing før frontend er tilpasset
+    static String utledYtelseNavn(VilkårLivsoppholdsytelserPeriodeVurderingDto vurdering) {
+        if (vurdering.ytelseNavn() != null) {
+            return vurdering.ytelseNavn();
+        }
+        return vurdering.avslagsårsak() == AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE
+            ? vurdering.fritekstVurderingBrev()
+            : null;
     }
 
 }

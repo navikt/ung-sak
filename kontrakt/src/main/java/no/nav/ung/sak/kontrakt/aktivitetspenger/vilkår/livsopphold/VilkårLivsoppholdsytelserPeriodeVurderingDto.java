@@ -45,6 +45,10 @@ public record VilkårLivsoppholdsytelserPeriodeVurderingDto(
     String ytelseNavn
 ) {
 
+    public VilkårLivsoppholdsytelserPeriodeVurderingDto(Periode periode, boolean erVilkårOppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak avslagsårsak, String begrunnelse, String fritekstVurderingBrev) {
+        this(periode, erVilkårOppfylt, avslagsårsak, begrunnelse, fritekstVurderingBrev, null);
+    }
+
     @AssertFalse(message = "Avslagsårsak må være satt dersom vilkåret ikke er oppfylt")
     public boolean isManglerAvslagsårsak() {
         return !erVilkårOppfylt && avslagsårsak == null;

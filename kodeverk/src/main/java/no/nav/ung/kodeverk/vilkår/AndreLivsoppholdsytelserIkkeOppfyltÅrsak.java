@@ -15,7 +15,7 @@ public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements IkkeOppfyltDeta
     MOTTAR_UFØRETRYGD(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     MOTTAR_INTRODUKSJONSSTØNAD(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     MOTTAR_BARNEPENSJON(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
-    // Ytelsen navngis i fritekst, men fordi begrunnelsen ikke er fritekst kan den fremdeles automatisk vilkårvurderes.
+    // Ytelsen navngis som fritekst i avklaring, men fordi begrunnelsen ikke er fritekst krever den ikke fritekst i vilkårvurderingen.
     MOTTAR_ANNEN_YTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     AVKORTET(Avslagsårsak.AVKORTET, false),
     UDEFINERT(null, false),
