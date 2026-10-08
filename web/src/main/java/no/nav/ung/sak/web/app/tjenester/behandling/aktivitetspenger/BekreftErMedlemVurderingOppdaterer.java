@@ -19,8 +19,8 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMappe
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BekreftErMedlemVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.UtenlandsoppholdDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
@@ -54,6 +54,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
 
         Utfall utfall = dto.getErVilkårInnvilget() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
         Avslagsårsak avslagsårsak = utfall == Utfall.IKKE_OPPFYLT ? mapAvslagsårsak(dto.getAvslagsårsak()) : null;
+        String fritekstVurderingBrev = utfall == Utfall.IKKE_OPPFYLT ? dto.getFritekstVurderingBrev() : null;
 
         var medlemskap = forutgåendeMedlemskapTjeneste.hentMedlemskapForBehandlingSomDto(param.getBehandlingId())
             .stream()
@@ -71,6 +72,7 @@ public class BekreftErMedlemVurderingOppdaterer implements AksjonspunktOppdatere
                     .medUtfallManuell(utfall)
                     .medAvslagsårsak(avslagsårsak)
                     .medRegelInput(regelInput)
+                    .medFritekstVurderingBrev(fritekstVurderingBrev)
                     .medBegrunnelse(dto.getBegrunnelse()));
             }
         );

@@ -24,6 +24,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     private static final String FRITEKST_BOSTED = "Du har oppgitt adresse i et land som ikke er dekket av trygdeavtalen.";
     private static final String FRITEKST_BISTAND = "Du har ikke fått et vedtak fra NAV som sier at du har behov for bistand.";
     private static final String FRITEKST_LIVSOPPHOLD = "Du får en ytelse fra en annen ordning som dekker livsoppholdet ditt.";
+    private static final String FRITEKST_MEDLEMSKAP = "Du har ikke vært medlem i folketrygden de siste fem årene før du søkte.";
 
     FørstegangsbehandlingAvslagTest() {
         super(1, "Vi har avslått din søknad om aktivitetspenger");
@@ -251,6 +252,44 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du er i jobb, har vi avslått søknaden din.",
                 FRITEKST_BISTAND
+            );
+    }
+
+    @DisplayName("Avslag pga forutgående medlemskap - kun fritekst fra saksbehandler")
+    @Test
+    void avslagMedlemskap() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttMedlemskap(fom, FRITEKST_MEDLEMSKAP);
+
+        var behandling = lagAvslåttBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
+                FRITEKST_MEDLEMSKAP
+            )
+            .asPlainTextNotContains("Trondheim");
+    }
+
+    @DisplayName("Avslag på både bosted og forutgående medlemskap - bosted omtales før medlemskap")
+    @Test
+    void avslagBostedOgMedlemskap() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBostedOgMedlemskap(fom, FRITEKST_MEDLEMSKAP);
+
+        var behandling = lagAvslåttBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
+                "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.",
+                FRITEKST_MEDLEMSKAP
             );
     }
 
