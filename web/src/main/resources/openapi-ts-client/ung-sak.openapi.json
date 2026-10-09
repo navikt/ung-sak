@@ -2007,7 +2007,7 @@
             "5147" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderingAvAndreLivsoppholdsytelserEtterAvklaringDto",
             "5148" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.livsopphold.VurderFaktaOmAndreLivsoppholdsytelserDto",
             "5200" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.NavKontorBeslutterVilkårAksjonspunktDto",
-            "5301" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto",
+            "5301" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BekreftErMedlemVurderingDto",
             "8000" : "#/components/schemas/ung.sak.kontrakt.kontroll.FastsettInntektDto"
           },
           "propertyName" : "@type"
