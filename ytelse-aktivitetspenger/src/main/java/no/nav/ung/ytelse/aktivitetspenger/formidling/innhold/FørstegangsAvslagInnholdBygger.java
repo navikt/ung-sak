@@ -16,6 +16,7 @@ import no.nav.ung.sak.formidling.innhold.VedtaksbrevInnholdBygger;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertVilkårResultat;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslagInngangsvilkårDto;
+import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.AvslåttMedlemskap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -69,9 +70,31 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
         var andreLivsoppholdsytelser = avslåtteVilkårTyper.contains(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR)
             ? AvslåttVilkårBrevinnholdHjelper.lagAvslåttPgaAndreLivsoppholdsytelser(vurderingFor.apply(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR))
             : null;
+        var medlemskap = avslåtteVilkårTyper.contains(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
+            ? lagAvslåttMedlemskap(behandling, tidslinje.avslåttTidslinjeForVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET))
+            : null;
 
         return new TemplateInnholdResultat(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG,
-            new AvslagInngangsvilkårDto(bosted, bistand, andreLivsoppholdsytelser));
+            new AvslagInngangsvilkårDto(bosted, bistand, andreLivsoppholdsytelser, medlemskap));
+    }
+
+    private AvslåttMedlemskap lagAvslåttMedlemskap(Behandling behandling, LocalDateTimeline<Boolean> avslagsperiode) {
+        var fritekster = vilkårResultatRepository.hent(behandling.getId())
+            .getVilkårTimeline(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
+            .intersection(avslagsperiode)
+            .stream()
+            .map(it -> it.getValue().getFritekstVurderingBrev())
+            .filter(Objects::nonNull)
+            .distinct()
+            .toList();
+
+        if (fritekster.isEmpty()) {
+            throw new IllegalStateException("Mangler fritekst i brev for avslått " + VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET + ", behandlingId: " + behandling.getId());
+        }
+        if (fritekster.size() > 1) {
+            throw new IllegalStateException("Forventer kun én fritekst for " + VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET + ", men fant " + fritekster.size());
+        }
+        return new AvslåttMedlemskap(fritekster.getFirst());
     }
 
     private static VilkårsvurderingResultat hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vilkårVurdering,

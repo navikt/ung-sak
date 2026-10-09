@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.rest.OidcRestClient;
 import no.nav.k9.felles.integrasjon.rest.ScopedRestIntegration;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.brukerdialog.kontrakt.sak.mikrofrontend.AktiverMikrofrontendRequest;
 import no.nav.ung.brukerdialog.kontrakt.vedtak.MottaFagsakRequest;
 
 import java.net.URI;
@@ -16,6 +17,7 @@ public class UngBrukerdialogSakKlient {
 
     private final OidcRestClient restClient;
     private final URI fagsakUri;
+    private final URI aktiverMikrofrontendUri;
 
     @Inject
     public UngBrukerdialogSakKlient(
@@ -23,10 +25,15 @@ public class UngBrukerdialogSakKlient {
         @KonfigVerdi(value = "ung.brukerdialog.api.url", defaultVerdi = "http://ung-brukerdialog-api/ung/brukerdialog/intern/api") String url) {
         this.restClient = restClient;
         this.fagsakUri = tilUri(url, "aktivitetspenger/fagsak");
+        this.aktiverMikrofrontendUri = tilUri(url, "aktivitetspenger/mikrofrontend/aktiver");
     }
 
     public void sendVedtaksstatus(MottaFagsakRequest request) {
         restClient.post(fagsakUri, request);
+    }
+
+    public void aktiverMikrofrontend(AktiverMikrofrontendRequest request) {
+        restClient.post(aktiverMikrofrontendUri, request);
     }
 
     private static URI tilUri(String baseUrl, String path) {

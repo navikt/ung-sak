@@ -99,6 +99,9 @@ spec:
           namespace: k9saksbehandling
           cluster: prod-fss
         - application: sif-abac-pdp
+        - application: sif-abac-pdp
+          namespace: k9saksbehandling
+          cluster: prod-fss
         - application: ung-deltakelse-opplyser
         - application: ung-sak
         - application: ung-sak-web
@@ -276,6 +279,8 @@ spec:
       value: "false"
     - name: PROGRAMPERIODE_ENDRING_ENABLED
       value: "false"
+    - name: AKTIVITETSPENGER_MIKROFRONTEND_ENABLED
+      value: "true"
     - name: BRUK_PDL_SPESIFIKKE_BEHANDLINGNUMRE
       value: "false"
 
@@ -310,4 +315,4 @@ spec:
     - name: PIP_USERS
       value: "srvPDP,srvsaf,srvk9-abakus"
     - name: PIP_APPS
-      value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf"
+      value: "prod-gcp:k9saksbehandling:sif-abac-pdp,prod-fss:k9saksbehandling:sif-abac-pdp,prod-fss:teamdokumenthandtering:saf"

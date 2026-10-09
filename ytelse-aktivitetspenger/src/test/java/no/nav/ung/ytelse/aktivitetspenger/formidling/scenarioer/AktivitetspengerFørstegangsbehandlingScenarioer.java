@@ -4,9 +4,7 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
 import no.nav.ung.kodeverk.vilkår.*;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
@@ -228,6 +226,19 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
 
     public static AktivitetspengerTestScenario avslåttArbeidsstedStudiested(LocalDate fom, String fritekstBrev) {
         return avslåttBostedScenario(fom, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM, fritekstBrev);
+    }
+
+    public static AktivitetspengerTestScenario avslåttMedlemskap(LocalDate fom, String fritekstBrev) {
+        return fullAvslagScenario(fom, VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Avslagsårsak.SØKER_ER_IKKE_MEDLEM, fritekstBrev,
+            InngangsvilkårVurderingTestData.builder());
+    }
+
+    public static AktivitetspengerTestScenario avslåttBostedOgMedlemskap(LocalDate fom, String fritekstMedlemskap) {
+        var vurderinger = InngangsvilkårVurderingTestData.builder()
+            .medBostedsvilkårResultat(false, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, null);
+        return fullAvslagScenario(fom, Map.of(
+            VilkårType.BOSTEDSVILKÅR, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_BOSTED,
+            VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Avslagsårsak.SØKER_ER_IKKE_MEDLEM), fritekstMedlemskap, vurderinger);
     }
 
     private static AktivitetspengerTestScenario avslåttBostedScenario(LocalDate fom, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstBrev) {

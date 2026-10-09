@@ -2013,7 +2013,7 @@
           "propertyName" : "@type"
         },
         "oneOf" : [ {
-          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto"
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.BekreftErMedlemVurderingDto"
         }, {
           "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.NavKontorBeslutterVilkårAksjonspunktDto"
         }, {
@@ -2138,32 +2138,6 @@
         "required" : [ "periode" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.BekreftErMedlemVurderingDto" : {
-        "properties" : {
-          "avslagsårsak" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
-          },
-          "begrunnelse" : {
-            "maxLength" : 4000,
-            "minLength" : 0,
-            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
-            "type" : "string"
-          },
-          "erVilkårInnvilget" : {
-            "type" : "boolean"
-          },
-          "perioderVurdert" : {
-            "items" : {
-              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
-            },
-            "maxItems" : 2147483647,
-            "minItems" : 1,
-            "type" : "array"
-          }
-        },
-        "required" : [ "erVilkårInnvilget", "perioderVurdert" ],
-        "type" : "object"
-      },
       "ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsPeriodeDto" : {
         "properties" : {
           "antallBarn" : {
@@ -2272,10 +2246,43 @@
         "required" : [ "arbeidsinntekt", "næring", "sum", "sumAvkortet", "sumAvkortetOgOppjustert", "årstall" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType" : {
-        "enum" : [ "SØKER_IKKE_MEDLEM" ],
-        "type" : "string",
-        "x-enum-varnames" : [ "SØKER_IKKE_MEDLEM" ]
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.BekreftErMedlemVurderingDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType"
+          },
+          "avslagsårsakSattHvisVilkårIkkeOk" : {
+            "type" : "boolean"
+          },
+          "begrunnelse" : {
+            "maxLength" : 4000,
+            "minLength" : 0,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§]+$",
+            "type" : "string"
+          },
+          "erVilkårInnvilget" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "maxLength" : 10000,
+            "minLength" : 3,
+            "pattern" : "^[\\p{Graph}\\p{IsWhite_Space}\\p{Sc}\\p{L}\\p{M}\\p{N}§\\p{Pd}]*$",
+            "type" : "string"
+          },
+          "fritekstVurderingBrevSattHvisVilkårIkkeOk" : {
+            "type" : "boolean"
+          },
+          "perioderVurdert" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+            },
+            "maxItems" : 2147483647,
+            "minItems" : 1,
+            "type" : "array"
+          }
+        },
+        "required" : [ "erVilkårInnvilget", "perioderVurdert" ],
+        "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.BostedAvklaringDto" : {
         "properties" : {
@@ -3077,6 +3084,11 @@
         },
         "required" : [ "vurdertePerioder" ],
         "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType" : {
+        "enum" : [ "SØKER_IKKE_MEDLEM" ],
+        "type" : "string",
+        "x-enum-varnames" : [ "SØKER_IKKE_MEDLEM" ]
       },
       "ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto" : {
         "properties" : {
@@ -6062,13 +6074,16 @@
       "ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto" : {
         "properties" : {
           "avslagsårsak" : {
-            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.medlemskap.MedlemskapAvslagsÅrsakType"
+            "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType"
           },
           "begrunnelse" : {
             "type" : "string"
           },
           "erManueltVurdert" : {
             "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "type" : "string"
           },
           "medlemskapFraBruker" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto"
