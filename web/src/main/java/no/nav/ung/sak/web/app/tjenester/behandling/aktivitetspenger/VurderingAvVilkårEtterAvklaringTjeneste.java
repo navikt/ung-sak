@@ -20,6 +20,7 @@ import no.nav.ung.sak.typer.Periode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
 
@@ -69,6 +70,8 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         // avklaringen kan strekke seg over hull i vilkårsperiodene (f.eks. etter opphørsdato); der finnes ingen vilkårsperiode å vurdere
         var avklaringTidslinje = årsakTidslinje.intersection(eksisterendeVilkårperioder);
         validerVurdertPeriodeErDekketAvAvklaring(behandlingId, vilkårType, vurdertTidslinje, avklaringTidslinje);
+        // valideres mot den ikke-klippede avklaringen, slik at en avklaring som strekker seg over et hull i vilkårsperiodene ikke deler opp valideringen
+        validerÉnVurderingPerAvklaring(behandlingId, vilkårType, vurdertTidslinje, årsakTidslinje);
 
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
@@ -132,6 +135,25 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         if (!utenVurdering.isEmpty()) {
             throw new IllegalArgumentException(
                 "Vilkårsvurdering fyller ikke hele perioden som er avklart, og som derfor må vurderes på nytt. Gjelder perioder: " + utenVurdering);
+        }
+    }
+
+    // VilkårsavklaringRestTjeneste viser ett utfall og én vurdering per avklaring; Tillater derfor ikke flere vurderinger for en avklaring frem til vi har en måte å presentere det på.
+    // Sammenligner innholdet uten periode, siden periodene til dto-ene allerede er dekket av at de til sammen fyller avklaringen.
+    private static void validerÉnVurderingPerAvklaring(long behandlingId,
+                                                       VilkårType vilkårType,
+                                                       LocalDateTimeline<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertTidslinje,
+                                                       LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
+        for (var avklaring : årsakTidslinje.segmenter()) {
+            var ulikeVurderinger = vurdertTidslinje.intersection(avklaring.getLocalDateInterval()).stream()
+                .map(LocalDateSegment::getValue)
+                .map(v -> List.of(v.erVilkårOppfylt(), Objects.toString(v.begrunnelse(), ""), Objects.toString(v.fritekstVurderingBrev(), "")))
+                .distinct()
+                .toList();
+            if (ulikeVurderinger.size() > 1) {
+                throw new IllegalArgumentException("Avklaringen for " + vilkårType + " i periode " + avklaring.getLocalDateInterval()
+                    + " må vurderes samlet med ett utfall, men har " + ulikeVurderinger.size() + " ulike vurderinger. behandlingId=" + behandlingId);
+            }
         }
     }
 

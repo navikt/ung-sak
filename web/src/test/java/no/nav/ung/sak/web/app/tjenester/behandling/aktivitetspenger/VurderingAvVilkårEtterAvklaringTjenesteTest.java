@@ -142,6 +142,40 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
+    void ulikt_utfall_i_samme_avklaring_gir_feil() {
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            vilkårsperiode(MARS, Utfall.IKKE_VURDERT)
+        );
+
+        assertThatThrownBy(() -> tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
+                vurdering(JANUAR, false, "ikke oppfylt i januar", null),
+                vurdering(MARS, true, "oppfylt i mars", null)
+            ),
+            // Én sammenhengende avklaring, selv om vilkårsperiodene har et hull i februar
+            årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("må vurderes samlet med ett utfall");
+    }
+
+    @Test
+    void likt_innhold_i_flere_dto_er_fortsatt_én_vurdering() {
+        medVilkårsperioder(
+            vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
+            vilkårsperiode(MARS, Utfall.IKKE_VURDERT)
+        );
+
+        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE, List.of(
+                vurdering(JANUAR, false, "samme vurdering", null),
+                vurdering(MARS, false, "samme vurdering", null)
+            ),
+            årsakTidslinje(new Periode(JANUAR.getFom(), MARS.getTom()), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM)
+        );
+
+        assertThat(resultat.getLocalDateIntervals()).hasSize(2);
+    }
+
+    @Test
     void delvis_vurdering_av_avklart_periode_med_flere_relevante_vilkårsperioder_gir_feil() {
         medVilkårsperioder(
             vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT),
