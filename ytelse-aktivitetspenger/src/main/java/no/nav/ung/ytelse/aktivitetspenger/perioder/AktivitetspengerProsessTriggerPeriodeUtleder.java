@@ -13,7 +13,6 @@ import no.nav.ung.sak.trigger.ProsessTriggere;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
 
-import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Set;
@@ -51,19 +50,13 @@ public class AktivitetspengerProsessTriggerPeriodeUtleder implements ProsessTrig
     }
 
     private LocalDateInterval finnPeriodeForBehandlingsårsak(Long behandligId, Trigger p) {
-        // For nye søknader så vil triggerperioden være uendelig fordi vi ikke vet sluttdato ved oppretting av trigger,
-        // så vi begresenser det her til søknadsperioden
         if (p.getÅrsak() == BehandlingÅrsakType.NY_SØKT_PERIODE) {
-            var søknadsperioder = aktivitetspengerSøknadsperiodeTjeneste.utledPeriode(behandligId);
-            String triggerperiodeFomDato = p.getPeriode().getFomDato().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-            return søknadsperioder.stream()
+            // Behandlinger opprettet uten NY_SØKT_PERIODE (eks kontrollbehandling) vil ikke ha startdato ved tilbakehopp, så bruker triggerperioden som fallback
+            return aktivitetspengerSøknadsperiodeTjeneste.utledPeriode(behandligId).stream()
                 .filter(it -> it.getTomDato().isAfter(p.getPeriode().getFomDato()))
                 .min(Comparator.naturalOrder())
-                .orElseThrow(() -> new IllegalStateException("Hadde startdato som ikke kunne matches med søknadsperiode. behandlingId=" + behandligId
-                    + ", trigger-startdato=" + triggerperiodeFomDato
-                    + ", kjente søknadsperioder=" + søknadsperioder))
+                .orElse(p.getPeriode())
                 .toLocalDateInterval();
-
         }
 
         return p.getPeriode().toLocalDateInterval();
