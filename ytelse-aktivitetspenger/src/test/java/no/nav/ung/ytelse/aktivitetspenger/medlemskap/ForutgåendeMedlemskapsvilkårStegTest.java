@@ -7,13 +7,16 @@ import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.BehandleStegResultat;
 import no.nav.ung.sak.behandlingskontroll.BehandlingskontrollKontekst;
 import no.nav.ung.sak.behandlingskontroll.impl.BehandlingModellRepository;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittUtenlandsopphold;
@@ -67,6 +70,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
     private ForutgåendeMedlemskapsvilkårSteg steg;
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
     private VilkårTjeneste vilkårTjeneste;
+    private HistorikkinnslagRepository historikkinnslagRepository;
 
     @BeforeEach
     void setUp() {
@@ -78,13 +82,14 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         prosessTriggereRepository = new ProsessTriggereRepository(entityManager);
         manuelleVilkårRekkefølgeTjeneste = new ManuelleVilkårRekkefølgeTjeneste(new BehandlingModellRepository());
         vilkårTjeneste = new VilkårTjeneste(behandlingRepository, perioderTilVurderingTjenester, vilkårResultatRepository);
+        historikkinnslagRepository = new HistorikkinnslagRepository(entityManager);
         steg = new ForutgåendeMedlemskapsvilkårSteg(
             vilkårResultatRepository,
             forutgåendeMedlemskapRepository,
             mottatteDokumentRepository,
             perioderTilVurderingTjenester,
             behandlingRepository,
-            manuelleVilkårRekkefølgeTjeneste, vilkårTjeneste);
+            manuelleVilkårRekkefølgeTjeneste, vilkårTjeneste, historikkinnslagRepository);
     }
 
     @Test
@@ -216,6 +221,41 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         var perioderListe = vilkår.getPerioder().stream().sorted(Comparator.comparing(VilkårPeriode::getFom)).toList();
         assertThat(perioderListe.get(0).getGjeldendeUtfall()).isEqualTo(Utfall.OPPFYLT);
         assertThat(perioderListe.get(1).getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_RELEVANT);
+    }
+
+    @Test
+    void skal_opprette_historikkinnslag_ved_automatisk_oppfylt_vilkår() {
+        var behandling = lagBehandlingSomOppfyllesAutomatisk();
+
+        utførSteg(behandling);
+
+        var innslag = historikkinnslagRepository.hent(behandling.getId());
+        assertThat(innslag).hasSize(1);
+        assertThat(innslag.getFirst().getAktør()).isEqualTo(HistorikkAktør.VEDTAKSLØSNINGEN);
+        assertThat(innslag.getFirst().getSkjermlenke()).isEqualTo(SkjermlenkeType.FORUTGÅENDE_MEDLEMSKAP);
+        assertThat(innslag.getFirst().getTekstLinjer()).containsExactly("Medlemskap på 01.07.2024 ble vurdert til Oppfylt.");
+    }
+
+    @Test
+    void skal_ikke_opprette_nytt_historikkinnslag_når_steget_kjøres_på_nytt_uten_endring_i_utfall() {
+        var behandling = lagBehandlingSomOppfyllesAutomatisk();
+
+        utførSteg(behandling);
+        utførSteg(behandling);
+
+        assertThat(historikkinnslagRepository.hent(behandling.getId())).hasSize(1);
+    }
+
+
+    private Behandling lagBehandlingSomOppfyllesAutomatisk() {
+        var behandling = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
+            .leggTilVilkår(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET, Utfall.IKKE_VURDERT, VILKÅR_PERIODE)
+            .medVirkningstidspunkt(FOM)
+            .medMottattDokument(new MottattDokumentTestGrunnlag(null, null, LocalDateTime.now(), JP))
+            .lagre(entityManager);
+        forutgåendeMedlemskapRepository.leggTilOppgittPeriode(behandling.getId(), nyPeriode(JP, FOM.minusYears(5), FOM.minusDays(1), Set.of()));
+        prosessTriggereRepository.leggTil(behandling.getId(), Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM))));
+        return behandling;
     }
 
     private BehandleStegResultat utførSteg(Behandling behandling) {
