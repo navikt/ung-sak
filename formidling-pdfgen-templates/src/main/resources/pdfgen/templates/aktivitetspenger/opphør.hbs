@@ -54,25 +54,11 @@
         {{/with}}
 
         {{#with andreLivsoppholdsytelser}}
-            {{#if ytelseNavn}}
-                <p>
-                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
-                    Det er fordi du får {{ytelseNavn}} fra denne datoen.
-                    Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
-                </p>
-            {{/if}}
-            {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
-                <p>
-                    Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
-                    Det er fordi du får en annen livsoppholdsytelse fra denne datoen.
-                    Du kan ikke få aktivitetspenger samtidig.
-                </p>
-            {{/eq}}
-            {{#if fritekstBrev}}
-                <p>
-                    {{fritekstBrev}}
-                </p>
-            {{/if}}
+            <p>
+                Fra {{periode.fom}} får du ikke lenger aktivitetspenger.
+                Det er fordi du får {{ytelseNavn}} fra denne datoen.
+                Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
+            </p>
         {{/with}}
 
     {{/felles/seksjon/hoved}}

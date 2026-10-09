@@ -15,9 +15,8 @@ public enum AndreLivsoppholdsytelserIkkeOppfyltÅrsak implements IkkeOppfyltDeta
     MOTTAR_UFØRETRYGD(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     MOTTAR_INTRODUKSJONSSTØNAD(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     MOTTAR_BARNEPENSJON(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
-    // Ytelsen må navngis i fritekst, og avklaringen kan derfor aldri avslås automatisk.
-    MOTTAR_ANNEN_YTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, true),
-    // Saksbehandler har valgt å innvilge periode som er kortere enn perioden saksbehandlingssystemet tillater å innvilge.
+    // Ytelsen navngis som fritekst i avklaring, men fordi begrunnelsen ikke er fritekst krever den ikke fritekst i vilkårvurderingen.
+    MOTTAR_ANNEN_YTELSE(Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, false),
     AVKORTET(Avslagsårsak.AVKORTET, false),
     UDEFINERT(null, false),
     ;

@@ -53,7 +53,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -152,15 +151,16 @@ class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdatererTest {
     }
 
     @Test
-    void krever_fritekst_til_brev_når_årsaken_krever_det() {
+    void ikke_oppfylt_annen_ytelse_tar_med_ytelsenavn_fra_avklaringen() {
         var behandling = opprettFørstegangsbehandling(PERIODE_1);
-        lagreForeslåttAvklaring(behandling, PERIODE_1, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE);
+        lagreForeslåttAvklaring(behandling, PERIODE_1, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, "sosialhjelp");
 
-        var dto = dto(vurdering(PERIODE_1, false, "mottar annen ytelse", null));
+        utførOppdatering(behandling, dto(vurdering(PERIODE_1, false, "mottar annen ytelse", null)));
 
-        assertThatThrownBy(() -> utførOppdatering(behandling, dto))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("fritekstVurderingBrev");
+        var vurdering = hentLivsoppholdvurdering(behandling, PERIODE_1);
+        assertThat(vurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE);
+        assertThat(vurdering.getYtelseNavn()).isEqualTo("sosialhjelp");
+        assertThat(vurdering.getFritekstVurderingBrev()).isNull();
     }
 
     private void utførOppdatering(Behandling behandling, VurderingAvAndreLivsoppholdsytelserEtterAvklaringDto dto) {
@@ -200,6 +200,10 @@ class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdatererTest {
     }
 
     private void lagreForeslåttAvklaring(Behandling behandling, Periode periode, AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak) {
+        lagreForeslåttAvklaring(behandling, periode, årsak, null);
+    }
+
+    private void lagreForeslåttAvklaring(Behandling behandling, Periode periode, AndreLivsoppholdsytelserIkkeOppfyltÅrsak årsak, String fritekstTilVarsel) {
         vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, Set.of(
             new VilkårPeriodeAvklaringForeslått(
                 UUID.randomUUID(),
@@ -207,7 +211,7 @@ class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdatererTest {
                 årsak.getKode(),
                 "begrunnelse for avklaring",
                 true,
-                årsak.kreverFritekst() ? "fritekst til varsel" : null,
+                fritekstTilVarsel,
                 null,
                 AndreLivsoppholdsytelserAvklaringKildeType.NAV,
                 null,

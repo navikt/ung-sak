@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.*;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserVurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringMedVurdering;
@@ -103,7 +104,11 @@ public class AvslåttVilkårBrevinnholdHjelper {
             case MOTTAR_ANNEN_YTELSE -> Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE;
             case AVKORTET, UDEFINERT -> throw utenBrevtekst(årsak);
         };
-        return AvslåttAndreLivsoppholdsytelser.av(brevårsak, fritekstFra(vurdering, årsak), avslag.periode());
+
+        var fritekstBrev = fritekstFra(vurdering, årsak);
+        var ytelseNavnFraVurdering = vurdering instanceof AndreLivsoppholdsytelserVurderingResultat livsopphold ? livsopphold.ytelseNavn() : null;
+        var ytelseNavn = brevårsak == Livsoppholdsårsak.MOTTAR_ANNEN_YTELSE && ytelseNavnFraVurdering != null ? ytelseNavnFraVurdering : brevårsak.getYtelseNavn();
+        return new AvslåttAndreLivsoppholdsytelser(brevårsak, ytelseNavn, fritekstBrev, avslag.periode());
     }
 
     private static <T extends IkkeOppfyltDetaljertÅrsak> T årsakFra(VilkårsvurderingResultat vurdering, Class<T> årsakstype) {

@@ -13,7 +13,7 @@ import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.GenereltVilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultat;
 import no.nav.ung.sak.formidling.vedtak.resultat.DetaljertResultatTidslinje;
@@ -178,7 +178,7 @@ class EndringAvslagInnholdByggerTest {
                                                                                                     Avklaringtype avklaringtype,
                                                                                                     IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak) {
         var vilkårsavklaring = new Vilkårsavklaring(avklaringtype, DatoIntervallEntitet.fraOgMedTilOgMed(fom, tom), null, null);
-        var vurdering = new VilkårsvurderingResultat(vilkårType, false, ikkeOppfyltÅrsak, true,
+        var vurdering = new GenereltVilkårsvurderingResultat(vilkårType, false, ikkeOppfyltÅrsak, true,
             "Begrunnelse fra test", null, "A111111", LocalDateTime.now());
         var medVurdering = new VilkårsavklaringMedVurdering(vilkårType, BehandlingÅrsakType.UDEFINERT, vilkårsavklaring, vurdering);
         return Map.entry(vilkårType, new LocalDateSegment<>(fom, tom, medVurdering));

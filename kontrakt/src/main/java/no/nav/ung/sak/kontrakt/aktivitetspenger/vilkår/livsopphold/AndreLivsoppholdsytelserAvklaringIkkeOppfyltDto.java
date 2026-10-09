@@ -31,7 +31,10 @@ public record AndreLivsoppholdsytelserAvklaringIkkeOppfyltDto(
         if (ikkeOppfyltÅrsak == null || !skalSendeVarsel()) {
             return true; // dekkes av @NotNull på ikkeOppfyltÅrsak, evt. ikke relevant når varsel ikke sendes
         }
-        return !ikkeOppfyltÅrsak.kreverFritekst() || (fritekstTilVarsel != null && !fritekstTilVarsel.isBlank());
+
+        // MOTTAR_ANNEN_YTELSE er håndtert annerledes fordi den kun krever fritekst i vilkåravklaringen, ikke i gjentatt i vilkårvurderingen
+        boolean kreverFritekst = ikkeOppfyltÅrsak.kreverFritekst() || ikkeOppfyltÅrsak == AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE;
+        return !kreverFritekst || (fritekstTilVarsel != null && !fritekstTilVarsel.isBlank());
     }
 
     @JsonIgnore

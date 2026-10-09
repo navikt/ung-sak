@@ -45,30 +45,21 @@
         {{/with}}
 
         {{#with andreLivsoppholdsytelser}}
-            {{#if ytelseNavn}}
+            <p>
+                Du har ikke rett til aktivitetspenger fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger
+                samtidig som du får en annen livsoppholdsytelse.
+                {{#unless fritekstBrev}}
+                    Derfor har vi avslått søknaden din.
+                {{/unless}}
+            </p>
+            {{#if fritekstBrev}}
                 <p>
-                    Du har ikke rett til aktivitetspenger fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger
-                    samtidig som du får en annen livsoppholdsytelse. Derfor har vi avslått søknaden din.
+                    {{fritekstBrev}}
+                </p>
+                <p>
+                    Derfor har vi avslått søknaden din.
                 </p>
             {{/if}}
-            {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
-                <p>
-                    Du har ikke rett til aktivitetspenger fordi du får en annen livsoppholdsytelse. Du kan ikke få
-                    aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
-                </p>
-                {{#if fritekstBrev}}
-                    <p>
-                        {{fritekstBrev}}
-                    </p>
-                {{/if}}
-                Derfor har vi avslått søknaden din.
-            {{else}}
-                {{#if fritekstBrev}}
-                    <p>
-                        {{fritekstBrev}}
-                    </p>
-                {{/if}}
-            {{/eq}}
         {{/with}}
 
         {{#with medlemskap}}

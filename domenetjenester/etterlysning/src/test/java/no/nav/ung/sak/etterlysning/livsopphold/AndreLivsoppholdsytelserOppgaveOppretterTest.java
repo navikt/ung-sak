@@ -125,18 +125,6 @@ class AndreLivsoppholdsytelserOppgaveOppretterTest {
     }
 
     @Test
-    void krever_fritekst_til_varsel_når_årsaken_krever_det() {
-        var etterlysning = opprettEtterlysning();
-        stubAvklaring(etterlysning, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE,
-            AndreLivsoppholdsytelserAvklaringKildeType.NAV, Avklaringtype.AVSLAG, null);
-
-        assertThatThrownBy(() -> oppretter.opprettOppgave(behandling, List.of(etterlysning), new AktørId("1234567890123")))
-            .isInstanceOf(NullPointerException.class)
-            .hasMessageContaining("FritekstTilVarsel");
-        verifyNoInteractions(oppgaveKlient);
-    }
-
-    @Test
     void feiler_når_etterlysningen_ikke_peker_på_en_foreslått_avklaring() {
         var etterlysning = opprettEtterlysning();
         when(vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(BEHANDLING_ID, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR))
