@@ -38,8 +38,8 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedGrunnlagResponseDt
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.BostedResultatDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsfaktaOgAvklaring;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bosatt.BostedsfaktaOgAvklaringFletter;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedsfaktaOgAvklaring;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt.BostedsfaktaOgAvklaringFletter;
 
 import java.util.List;
 import java.util.Set;

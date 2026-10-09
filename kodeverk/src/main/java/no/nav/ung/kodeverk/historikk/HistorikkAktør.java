@@ -11,8 +11,8 @@ public enum HistorikkAktør implements Kodeverdi {
 
     BESLUTTER("BESL", "Beslutter"),
     SAKSBEHANDLER("SBH", "Saksbehandler"),
-    LOKALKONTOR_BESLUTTER("LOKALKONTOR_BESL", "Beslutter Nav-lokalt"),
-    LOKALKONTOR_SAKSBEHANDLER("LOKALKONTOR_SBH", "Saksbehandler Nav-lokalt"),
+    NAV_KONTOR_BESLUTTER("NAV_KONTOR_BESL", "Beslutter Nav-kontor"),
+    NAV_KONTOR_SAKSBEHANDLER("NAV_KONTOR_SBH", "Saksbehandler Nav-kontor"),
     SØKER("SOKER", "Søker"),
     ARBEIDSGIVER("ARBEIDSGIVER", "Arbeidsgiver"),
     VEDTAKSLØSNINGEN("VL", "Vedtaksløsningen"),

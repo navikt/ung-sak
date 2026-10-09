@@ -66,8 +66,8 @@ Bruk `ask_user` (eller `vscode_askQuestions`) for å stille spørsmålene nedenf
    question: "Hvilken kode skal aksjonspunktet ha? (sjekk neste ledige i AksjonspunktKodeDefinisjon.java, 5xxx for manuell, 7xxx for auto)"
 
 4. header: "Aksjonspunkttype"
-   question: "Skal aksjonspunktet løses av lokalkontor eller sentral saksbehandler?"
-   options: ["Lokal (LOKALKONTOR_MANUELL)", "Sentral (MANUELL)"]
+   question: "Skal aksjonspunktet løses av Nav-kontor eller sentral saksbehandler?"
+   options: ["Lokal (NAV_KONTOR_MANUELL)", "Sentral (MANUELL)"]
 
 5. header: "Steg"
    question: "Skal aksjonspunktet opprettes i et nytt steg eller legges til i et eksisterende steg?"
@@ -184,10 +184,10 @@ Bruk `UTEN_SKJERMLENKE` i `AksjonspunktDefinisjon` hvis ikke relevant.
 
 Fil: `kodeverk/src/main/java/no/nav/ung/kodeverk/behandling/aksjonspunkt/AksjonspunktDefinisjon.java`
 
-**Enkel variant — lokal (LOKALKONTOR_MANUELL):**
+**Enkel variant — lokal (NAV_KONTOR_MANUELL):**
 ```java
 MITT_AKSJONSPUNKT(AksjonspunktKodeDefinisjon.MITT_AKSJONSPUNKT_KODE,
-    AksjonspunktType.LOKALKONTOR_MANUELL, "Beskrivelse",
+    AksjonspunktType.NAV_KONTOR_MANUELL, "Beskrivelse",
     BehandlingStatus.UTREDES, BehandlingStegType.MITT_STEG,
     VilkårType.MITT_VILKÅR, SkjermlenkeType.MITT_AKSJONSPUNKT,
     TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
@@ -694,16 +694,16 @@ modellBuilder
     .medSteg(BehandlingStegType.ALDERSVILKÅRET)
     .medSteg(BehandlingStegType.VURDER_BOSTED)       // <-- fakta-steg for BOSTEDSVILKÅR
     .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
-    .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
-    .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
+    .medSteg(BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR)
+    .medSteg(BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR)
     .medSteg(BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
     .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
     // ...
 ```
 
 **Plasseringsregler:**
-- **Lokal** (LOKALKONTOR_MANUELL): steget plasseres **før** `LOKALKONTOR_FORESLÅ_VILKÅR`
-- **Sentral** (MANUELL): steget plasseres **etter** `LOKALKONTOR_BESLUTTER_VILKÅR`
+- **Lokal** (NAV_KONTOR_MANUELL): steget plasseres **før** `NAV_KONTOR_FORESLÅ_VILKÅR`
+- **Sentral** (MANUELL): steget plasseres **etter** `NAV_KONTOR_BESLUTTER_VILKÅR`
 - **Varslings-variant:** legg til begge steg i rekkefølge — faktasteg **før** vilkårssteg
 
 ---
@@ -912,10 +912,10 @@ Fil: `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/t
 
 ## Steg 13 — Integrasjonstester k9-verdikjede (kun ved varsling)
 
-**`LokalkontorSteg.java`:**
+**`NavKontorSteg.java`:**
 - Oppdater `saksbehandlerVurdererOgForeslårVilkår` med nye params
 - Legg til `sendInn<Vilkår>Bekreftelse(steg, deltaker, søkerIdent)` som poster `Vurder<Vilkår>Dto`
-- Fjern `VURDER_FAKTA_OM_MITT_VILKÅR` fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
+- Fjern `VURDER_FAKTA_OM_MITT_VILKÅR` fra `NavKontorBeslutterVilkårAksjonspunktDto` i beslutter-steget (vilkåret er nå auto-vurdert)
 
 **`AktivitetspengerTest.java`:**
 - Legg til `UngdomsprogramDeltaker deltaker`-felt
@@ -925,12 +925,12 @@ Fil: `ytelse-aktivitetspenger/src/test/java/no/nav/ung/ytelse/aktivitetspenger/t
 
 ## Viktige mønstre
 
-### Lokal vs. sentral aksjonspunkttype
+### Nav-kontor vs. sentral aksjonspunkttype
 
 | Type | AksjonspunktType | Prosessmodell-plassering |
 |------|-----------------|--------------------------|
-| **Lokal** (lokalkontor) | `LOKALKONTOR_MANUELL` | **Før** `LOKALKONTOR_FORESLÅ_VILKÅR` |
-| **Sentral** | `MANUELL` | **Etter** `LOKALKONTOR_BESLUTTER_VILKÅR` |
+| **Nav-kontor** | `NAV_KONTOR_MANUELL` | **Før** `NAV_KONTOR_FORESLÅ_VILKÅR` |
+| **Sentral** | `MANUELL` | **Etter** `NAV_KONTOR_BESLUTTER_VILKÅR` |
 
 ### VilkårResultatBuilder
 
@@ -976,7 +976,7 @@ Alle steg og oppdaterere oppdages automatisk via CDI-annotasjoner. Ingen manuell
 | Lambda-kompileringsfeil: "must be final or effectively final" | Bruk `final`-kopi før lambda: `final Map<...> avklaringLookup = periodeAvklaringPerFom;` |
 | Duplikat etterlysning sendt for `MOTTATT_SVAR` | Sjekk `hentBesvartEtterlysninger()` i tillegg til `hentEtterlysningerSomVenterPåSvar()` |
 | Beslutte AP for manuell vurdering feil | Bruk `VilkårPeriodeVurderingDto` med `erVilkårOppfylt=false` og `avslagsårsak` for avslag |
-| Beslutter godkjenner auto-vurderte vilkår | Fjern AP fra `LokalkontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
+| Beslutter godkjenner auto-vurderte vilkår | Fjern AP fra `NavKontorBeslutterVilkårAksjonspunktDto` i beslutter-steget |
 | Søknadsdata trenger uavhengig persistering | Bruk eget søknadsaggregat — ikke koble søknadsdata direkte til holder |
 
 ---

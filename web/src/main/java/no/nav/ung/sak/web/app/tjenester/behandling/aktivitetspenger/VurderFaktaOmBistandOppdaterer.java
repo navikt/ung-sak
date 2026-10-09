@@ -25,10 +25,10 @@ import no.nav.ung.sak.etterlysning.VilkårsvarselInnhold;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.BistandFaktaavklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bistand.VurderFaktaOmBistandDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaring;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringDataMapper;
-import no.nav.ung.ytelse.aktivitetspenger.del1.steg.bistandsvilkår.BistandAvklaringTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bistandsvilkår.BistandAvklaring;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bistandsvilkår.BistandAvklaringDataMapper;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bistandsvilkår.BistandAvklaringTjeneste;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -108,7 +108,7 @@ public class VurderFaktaOmBistandOppdaterer implements AksjonspunktOppdaterer<Vu
         vilkårsavklaringEtterlysningTjeneste.oppdaterEtterlysninger(behandling, EtterlysningType.UTTALELSE_BISTAND, tidligereForeslåtteAvklaringer, nyeForeslåtteAvklaringer);
 
         var historikkinnslag = new Historikkinnslag.Builder()
-            .medAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER)
+            .medAktør(HistorikkAktør.NAV_KONTOR_SAKSBEHANDLER)
             .medFagsakId(behandling.getFagsakId())
             .medBehandlingId(behandlingId)
             .medTittel(SkjermlenkeType.BISTANDSVILKÅR)

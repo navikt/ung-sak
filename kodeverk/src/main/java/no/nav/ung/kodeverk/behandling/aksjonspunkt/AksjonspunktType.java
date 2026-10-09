@@ -14,10 +14,10 @@ public enum AksjonspunktType implements Kodeverdi {
     OVERSTYRING("OVST", "Overstyring"),
     SAKSBEHANDLEROVERSTYRING("SAOV", "Saksbehandleroverstyring"),
 
-    LOKALKONTOR_AUTOPUNKT("LOKALKONTOR_AUTO", "Lokalkontor Autopunkt"),
-    LOKALKONTOR_MANUELL("LOKALKONTOR_MANU", "Lokalkontor Manuell"),
-    LOKALKONTOR_OVERSTYRING("LOKALKONTOR_OVST", "Lokalkontor Overstyring"),
-    LOKALKONTOR_SAKSBEHANDLEROVERSTYRING("LOKALKONTOR_SAOV", "Lokalkontor Saksbehandleroverstyring"),
+    NAV_KONTOR_AUTOPUNKT("NAV_KONTOR_AUTO", "Nav-kontor Autopunkt"),
+    NAV_KONTOR_MANUELL("NAV_KONTOR_MANU", "Nav-kontor Manuell"),
+    NAV_KONTOR_OVERSTYRING("NAV_KONTOR_OVST", "Nav-kontor Overstyring"),
+    NAV_KONTOR_SAKSBEHANDLEROVERSTYRING("NAV_KONTOR_SAOV", "Nav-kontor Saksbehandleroverstyring"),
 
     UDEFINERT("-", "Ikke definert"),
     ;
@@ -83,26 +83,26 @@ public enum AksjonspunktType implements Kodeverdi {
 
     public boolean erAutopunkt() {
         return this == AUTOPUNKT
-            || this == LOKALKONTOR_AUTOPUNKT;
+            || this == NAV_KONTOR_AUTOPUNKT;
     }
 
     public boolean erOverstyringpunkt() {
         return this == OVERSTYRING
             || this == SAKSBEHANDLEROVERSTYRING
-            || this == LOKALKONTOR_OVERSTYRING
-            || this == LOKALKONTOR_SAKSBEHANDLEROVERSTYRING;
+            || this == NAV_KONTOR_OVERSTYRING
+            || this == NAV_KONTOR_SAKSBEHANDLEROVERSTYRING;
     }
 
-    public boolean erLokalkontorAksjonspunkt() {
-        return this == LOKALKONTOR_MANUELL
-            || this == LOKALKONTOR_OVERSTYRING
-            || this == LOKALKONTOR_SAKSBEHANDLEROVERSTYRING
-            || this == LOKALKONTOR_AUTOPUNKT;
+    public boolean erNavKontorAksjonspunkt() {
+        return this == NAV_KONTOR_MANUELL
+            || this == NAV_KONTOR_OVERSTYRING
+            || this == NAV_KONTOR_SAKSBEHANDLEROVERSTYRING
+            || this == NAV_KONTOR_AUTOPUNKT;
 
     }
 
     public boolean erNavSentraltAksjonspunkt() {
-        return !erLokalkontorAksjonspunkt();
+        return !erNavKontorAksjonspunkt();
 
     }
 }
