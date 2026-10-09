@@ -19,7 +19,7 @@ public class ProsessModell {
     @BehandlingTypeRef(BehandlingType.FØRSTEGANGSSØKNAD)
     @Produces
     @ApplicationScoped
-    public BehandlingModell aktivitetspengerDel1() {
+    public BehandlingModell førstegangsbehandling() {
         var modellBuilder = BehandlingModellImpl.builder(BehandlingType.FØRSTEGANGSSØKNAD, FagsakYtelseType.AKTIVITETSPENGER);
         modellBuilder
             .medSteg(BehandlingStegType.START_STEG, StartpunktType.START)
@@ -32,8 +32,8 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
             .medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR)
-            .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
-            .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
+            .medSteg(BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR)
+            .medSteg(BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR)
             .medSteg(BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.AKTIVITETSPENGER_BEREGNING, StartpunktType.BEREGNING)
@@ -66,8 +66,8 @@ public class ProsessModell {
             .medSteg(BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER)
             .medSteg(BehandlingStegType.VURDER_BISTANDSVILKÅR)
             .medSteg(BehandlingStegType.VURDER_AKTIVITETSVILKÅR)
-            .medSteg(BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR)
-            .medSteg(BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR)
+            .medSteg(BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR)
+            .medSteg(BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR)
             .medSteg(BehandlingStegType.VURDER_FORUTGÅENDE_MEDLEMSKAPSVILKÅR)
             .medSteg(BehandlingStegType.FORESLÅ_BEHANDLINGSRESULTAT)
             .medSteg(BehandlingStegType.AKTIVITETSPENGER_BEREGNING, StartpunktType.BEREGNING)

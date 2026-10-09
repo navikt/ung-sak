@@ -63,7 +63,7 @@
 - Observeren oppretter `AktiverMikrofrontendBrukerdialogTask` (`brukerdialog.aktiver.mikrofrontend`), som kaller `UngBrukerdialogSakKlient.aktiverMikrofrontend` (`POST aktivitetspenger/mikrofrontend/aktiver`) med `AktiverMikrofrontendRequest`.
 - ung-sak sender kun aktørId — aldri fnr. Logg kun saksnummer, aldri aktørId/fnr (ung-brukerdialog-api logger uten identifikatorer; callId kobler loggene).
 - ung-brukerdialog-api eier statustabellen og Kafka-integrasjonen mot `min-side.aapen-microfrontend-v1` (mikrofrontend-id `aktivitetspenger-innsyn`, sensitivitet `high`). ung-sak har ingen Kafka-kobling mot Min side.
-- Toggle `AKTIVITETSPENGER_MIKROFRONTEND_ENABLED` (default av). På i `dev-gcp`; av i prod, og av i `app-vtp.properties` til en verdikjedetest finnes.
+- Toggle `AKTIVITETSPENGER_MIKROFRONTEND_ENABLED` (default av). På i `dev-gcp` og prod; av i `app-vtp.properties` til en verdikjedetest finnes.
 - Ingen automatisk deaktivering — deaktivering skjer kun manuelt via forvaltning i ung-brukerdialog-api (`POST /forvaltning/sak/mikrofrontend/aktivitetspenger/{aktiver,deaktiver}` med fnr og begrunnelse, DRIFT-tilgang; fnr slås opp til aktørId i PDL og lagres ikke). Samme endepunkt brukes til etterfylling av eksisterende fagsaker. Endret aktørId støttes ikke foreløpig.
 
 ## Domain Notes: Vedtaksbrev-resultat

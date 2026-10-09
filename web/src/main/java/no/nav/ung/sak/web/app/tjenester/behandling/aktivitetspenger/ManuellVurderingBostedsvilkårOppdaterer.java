@@ -28,8 +28,8 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.ManuellVurderingB
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.bosted.VilkårBostedPeriodeVurderingDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
-import no.nav.ung.ytelse.aktivitetspenger.del1.InngangsvilkårVurderingTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.avkort.AvkortTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.avkort.AvkortTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.HistorikkinnslagInput;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 
@@ -131,7 +131,7 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
         historikkinnslagInput
             .setSkjermlenkeType(SkjermlenkeType.BOSTEDSVILKÅR)
             .setNyeVilkårVurderinger(inngangsvilkårVurderingRepository.hentVurderingTidslinje(param.getBehandlingId(), AKTUELT_VILKÅR))
-            .setHistorikkAktør(HistorikkAktør.LOKALKONTOR_SAKSBEHANDLER);
+            .setHistorikkAktør(HistorikkAktør.NAV_KONTOR_SAKSBEHANDLER);
         vilkårsvurderingHistorikkinnslagTjeneste.lagreHistorikkinnslag(historikkinnslagInput);
 
         return OppdateringResultat.nyttResultat();
