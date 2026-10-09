@@ -761,6 +761,9 @@
           "kanDrifte" : {
             "type" : "boolean"
           },
+          "kanOppgavestyreAktivitetspenger" : {
+            "type" : "boolean"
+          },
           "kanVeiledeAktivitetspenger" : {
             "type" : "boolean"
           },
