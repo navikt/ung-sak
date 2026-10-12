@@ -13,7 +13,7 @@ public record FellesDto(
     MottakerDto mottaker,
     String fagsakYtelse,
     String fagsakYtelseNavn,
-    BrevAnsvarligDto brevAnsvarlig) {
+    BrevAnsvarligeDto brevAnsvarlige) {
 
     private static String ytelseNavnBruktIBrev(FagsakYtelseType fagsakYtelseType) {
         return switch (fagsakYtelseType) {
@@ -23,7 +23,7 @@ public record FellesDto(
         };
     }
 
-    public static FellesDto lag(MottakerDto mottakerDto, BrevAnsvarligDto brevAnsvarlig, FagsakYtelseType fagsakYtelseType) {
+    public static FellesDto lag(MottakerDto mottakerDto, BrevAnsvarligeDto brevAnsvarlig, FagsakYtelseType fagsakYtelseType) {
         return new FellesDto(LocalDate.now(),
             mottakerDto,
             fagsakYtelseType.getKode(),

@@ -20,10 +20,13 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligDto;
+import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligeDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 @ApplicationScoped
 public class InformasjonsbrevGenerererTjeneste {
@@ -64,7 +67,7 @@ public class InformasjonsbrevGenerererTjeneste {
         var bygger = bestemBygger(informasjonsbrevBestillingInput);
         var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
-        BrevAnsvarligDto brevAnsvarlig = lagBrevansvarlig(informasjonsbrevBestillingInput.bestillerIdent());
+        BrevAnsvarligeDto brevAnsvarlig = lagBrevansvarlig(informasjonsbrevBestillingInput.bestillerIdent());
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
                 FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brevAnsvarlig, behandling.getFagsakYtelseType()),
@@ -88,15 +91,12 @@ public class InformasjonsbrevGenerererTjeneste {
     }
 
 
-    private BrevAnsvarligDto lagBrevansvarlig(String bestillerIdent) {
+    private BrevAnsvarligeDto lagBrevansvarlig(String bestillerIdent) {
         if (!enableBrevAnsvarlig) {
-            return new BrevAnsvarligDto(false, null, null);
+            return new BrevAnsvarligeDto(false, List.of());
         }
-        return new BrevAnsvarligDto(
-            false,
-            microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null),
-            null
-        );
+        var bestillerNavn = microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null);
+        return new BrevAnsvarligeDto(false, List.of(new BrevAnsvarligDto(bestillerNavn, null)));
     }
 
 }
