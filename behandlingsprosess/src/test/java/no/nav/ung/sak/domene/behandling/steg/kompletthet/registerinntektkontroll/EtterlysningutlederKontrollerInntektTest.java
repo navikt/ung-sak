@@ -268,6 +268,50 @@ class EtterlysningutlederKontrollerInntektTest {
         assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
     }
 
+    @Test
+    void skal_avbryte_ventende_etterlysning_uten_ny_etterlysning_dersom_registerinntekt_endres_til_negativ() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = lagRapporterteInntekterMedNegativRegisterinntekt(fom, tom, 10);
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje = lagEtterlysningMedRegisterinntekt(fom, tom, 10_000, EtterlysningStatus.VENTER);
+
+        // Act
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
+
+        // Assert
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
+    }
+
+    @Test
+    void skal_ikke_opprette_ny_etterlysning_dersom_registerinntekt_endres_til_negativ_etter_mottatt_svar() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = lagRapporterteInntekterMedNegativRegisterinntekt(fom, tom, 10);
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje = lagEtterlysningMedRegisterinntekt(fom, tom, 10_000, EtterlysningStatus.MOTTATT_SVAR);
+
+        // Act
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
+
+        // Assert
+        assertEquals(new LocalDateTimeline<>(fom, tom, EtterlysningBehov.INGEN_ETTERLYSNING), resultat);
+    }
+
+    private static LocalDateTimeline<RapporterteInntekter> lagRapporterteInntekterMedNegativRegisterinntekt(LocalDate fom, LocalDate tom, int bruker) {
+        return new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
+            Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(bruker))),
+            Set.of(RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER))));
+    }
+
+    private static LocalDateTimeline<EtterlysningOgRegisterinntekt> lagEtterlysningMedRegisterinntekt(LocalDate fom, LocalDate tom, int register, EtterlysningStatus status) {
+        return new LocalDateTimeline<>(fom, tom, new EtterlysningOgRegisterinntekt(
+            Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(register))),
+            new InntektskontrollEtterlysningInfo(status, false)));
+    }
+
     private LocalDateTimeline<EtterlysningBehov> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje,
                                                        LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
                                                        LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
