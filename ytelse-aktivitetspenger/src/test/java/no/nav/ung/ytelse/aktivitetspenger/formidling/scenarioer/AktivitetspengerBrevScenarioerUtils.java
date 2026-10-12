@@ -3,12 +3,15 @@ package no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollerteInntekter;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.BarnetilleggSatsTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.GrunnbeløpfaktorTidslinje;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.Sats;
 import no.nav.ung.sak.behandlingslager.ytelse.sats.SatsOgGrunnbeløpfaktor;
+import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.grunnbeløp.GrunnbeløpTidslinje;
 import no.nav.ung.sak.typer.Beløp;
 import no.nav.ung.sak.ytelse.BeregnetSats;
@@ -20,10 +23,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningInput;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregnytelse.TotalBeløpForPeriodeMapper;
-
-import no.nav.ung.kodeverk.kontroll.KontrollertInntektKilde;
-import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
-import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,14 +36,18 @@ import java.util.Map;
 public class AktivitetspengerBrevScenarioerUtils {
 
     public static final String DEFAULT_NAVN = "Ung Testesen";
-    public static final String DEFAULT_SAKSBEHANDLER_NAVN = "Sara Saksbehandler";
-    public static final String DEFAULT_BESLUTTER_NAVN = "Birger Beslutter";
-    public static final String SAKSBEHANDLER1_IDENT = "SAKSB1";
-    public static final String BESLUTTER_IDENT = "BESLUTTER";
+    public static final String NAV_SENTRAL_SAKSBEHANDLER_NAVN = "Sara Saksbehandler";
+    public static final String NAV_SENTRAL_BESLUTTER_NAVN = "Birger Beslutter";
+    public static final String NAV_SENTRAL_IDENT = AktivitetspengerTestScenarioBuilder.SENTRAL_SAKSBEHANDLER_IDENT;
+    public static final String NAV_SENTRAL_BESLUTTER_IDENT = AktivitetspengerTestScenarioBuilder.SENTRAL_BESLUTTER_IDENT;
+    public static final String NAV_KONTOR_SAKSBEHANDLER_NAVN = "Kari Kontorsaksbehandler";
+    public static final String NAV_KONTOR_BESLUTTER_NAVN = "Kåre Kontorbeslutter";
 
     public static final Map<String, String> identNavnMap = Map.of(
-        SAKSBEHANDLER1_IDENT, DEFAULT_SAKSBEHANDLER_NAVN,
-        BESLUTTER_IDENT, DEFAULT_BESLUTTER_NAVN
+        NAV_SENTRAL_IDENT, NAV_SENTRAL_SAKSBEHANDLER_NAVN,
+        NAV_SENTRAL_BESLUTTER_IDENT, NAV_SENTRAL_BESLUTTER_NAVN,
+        AktivitetspengerTestScenarioBuilder.NAV_KONTOR_SAKSBEHANDLER_IDENT, NAV_KONTOR_SAKSBEHANDLER_NAVN,
+        AktivitetspengerTestScenarioBuilder.NAV_KONTOR_BESLUTTER_IDENT, NAV_KONTOR_BESLUTTER_NAVN
     );
 
     public static AktivitetspengerSatsGrunnlag.Builder lavSatsBuilder(LocalDate fom) {

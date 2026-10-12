@@ -181,7 +181,8 @@ public class AktivitetspengerEndringInntektScenarioer {
         AktivitetspengerTestRepositories repositories) {
 
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(testScenario);
+            .medAktivitetspengerTestGrunnlag(testScenario)
+            .medBehandlingsansvarlig(BehandlingDel.SENTRAL);
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
@@ -190,11 +191,6 @@ public class AktivitetspengerEndringInntektScenarioer {
         aksjonspunktTestSupport.leggTilAksjonspunkt(behandling, AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
         var aksjonspunkt = behandling.getAksjonspunktFor(AksjonspunktDefinisjon.KONTROLLER_INNTEKT);
         aksjonspunktTestSupport.setTilUtført(aksjonspunkt, "utført");
-
-        repositories.behandlingAnsvarligRepository().setAnsvarligSaksbehandler(
-            behandling.getId(), BehandlingDel.SENTRAL, SAKSBEHANDLER1_IDENT);
-        repositories.behandlingAnsvarligRepository().setAnsvarligBeslutter(
-            behandling.getId(), BehandlingDel.SENTRAL, BESLUTTER_IDENT);
 
         behandling.avsluttBehandling();
         return behandling;

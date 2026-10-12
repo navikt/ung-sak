@@ -86,6 +86,10 @@ import static org.mockito.Mockito.when;
 public class AktivitetspengerTestScenarioBuilder {
 
     public static final FagsakYtelseType TEST_YTELSE = FagsakYtelseType.AKTIVITETSPENGER;
+    public static final String SENTRAL_SAKSBEHANDLER_IDENT = "SAKSB1";
+    public static final String SENTRAL_BESLUTTER_IDENT = "BESLUTTER";
+    public static final String NAV_KONTOR_SAKSBEHANDLER_IDENT = "NAVKONTOR_SAKSB";
+    public static final String NAV_KONTOR_BESLUTTER_IDENT = "NAVKONTOR_BESLUTTER";
     private static final AtomicLong FAKE_ID = new AtomicLong(100999L);
     private final FagsakBuilder fagsakBuilder;
     private final Map<Long, PersonopplysningGrunnlagEntitet> personopplysningMap = new IdentityHashMap<>();
@@ -118,6 +122,7 @@ public class AktivitetspengerTestScenarioBuilder {
     private AktivitetspengerTestScenario aktivitetspengerTestscenario;
     private final List<MottattDokumentTestGrunnlag> mottatteDokumenter = new ArrayList<>();
     private final List<SøktStartdato> søktStartdatoer = new ArrayList<>();
+    private Set<BehandlingDel> behandlingsansvarlige = Set.of();
 
     private AktivitetspengerTestScenarioBuilder() {
         this.fagsakBuilder = FagsakBuilder
@@ -536,6 +541,19 @@ public class AktivitetspengerTestScenarioBuilder {
         repositories.inngangsvilkårVurderingRepository().lagreBistandsVurderinger(behandling1.getId(), inngangsvilkårVurderinger.bistandsvilkårResultater());
         repositories.inngangsvilkårVurderingRepository().lagreYtelseVurderinger(behandling1.getId(), inngangsvilkårVurderinger.andreYtelserResultater());
         repositories.inngangsvilkårVurderingRepository().lagreAktivitetVurderinger(behandling1.getId(), inngangsvilkårVurderinger.aktivitetsvilkårResultater());
+
+        lagreBehandlingsansvarlige(repositories, behandling1);
+    }
+
+    private void lagreBehandlingsansvarlige(AktivitetspengerTestRepositories repositories, Behandling behandling) {
+        var ansvarligRepository = repositories.behandlingAnsvarligRepository();
+        behandlingsansvarlige.forEach(behandlingDel -> {
+            var erNavKontor = behandlingDel == BehandlingDel.NAV_KONTOR;
+            ansvarligRepository.setAnsvarligSaksbehandler(behandling.getId(), behandlingDel,
+                erNavKontor ? NAV_KONTOR_SAKSBEHANDLER_IDENT : SENTRAL_SAKSBEHANDLER_IDENT);
+            ansvarligRepository.setAnsvarligBeslutter(behandling.getId(), behandlingDel,
+                erNavKontor ? NAV_KONTOR_BESLUTTER_IDENT : SENTRAL_BESLUTTER_IDENT);
+        });
     }
 
     private void lagreBostedsAvklaringer(VilkårsavklaringGrunnlagRepository vilkårsavklaringGrunnlagRepository,
@@ -943,6 +961,11 @@ public class AktivitetspengerTestScenarioBuilder {
 
     public AktivitetspengerTestScenarioBuilder leggTilVilkår(VilkårType vilkårType, Utfall utfall, Periode periode, Avslagsårsak avslagsårsak, String fritekstBrev) {
         vilkår.add(new VilkårData(vilkårType, utfall, periode, avslagsårsak, fritekstBrev));
+        return this;
+    }
+
+    public AktivitetspengerTestScenarioBuilder medBehandlingsansvarlig(BehandlingDel... behandlingDeler) {
+        this.behandlingsansvarlige = Set.of(behandlingDeler);
         return this;
     }
 

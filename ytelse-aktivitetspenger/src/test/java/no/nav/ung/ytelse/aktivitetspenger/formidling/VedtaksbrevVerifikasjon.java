@@ -27,6 +27,18 @@ public class VedtaksbrevVerifikasjon {
         %s \
         side av""";
 
+    public static final String HILSEN_SENTRAL = hilsen(
+        AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);
+    public static final String HILSEN_NAV_KONTOR = hilsen(
+        AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_BESLUTTER_NAVN);
+    public static final String HILSEN_NAV_KONTOR_OG_SENTRAL = hilsen(
+        AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_BESLUTTER_NAVN,
+        AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);
+
+    private static String hilsen(String... navn) {
+        return "Med vennlig hilsen Nav Tiltak Oslo " + String.join(" ", navn) + " side av";
+    }
+
     public static String medHeaderOgFooter(String fnr, String body) {
         LocalDate brevdato = LocalDate.now();
 
@@ -47,6 +59,17 @@ public class VedtaksbrevVerifikasjon {
                 AktivitetspengerBrevScenarioerUtils.DEFAULT_NAVN,
                 fnr,
                 body,
-                AktivitetspengerBrevScenarioerUtils.DEFAULT_SAKSBEHANDLER_NAVN + " " + AktivitetspengerBrevScenarioerUtils.DEFAULT_BESLUTTER_NAVN);
+                AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN + " " + AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);
+    }
+
+    public static String medHeaderOgFooterNavKontor(String fnr, String body) {
+        LocalDate brevdato = LocalDate.now();
+        return STANDARD_HEADER_FOOTER
+            .formatted(
+                BrevTestUtils.brevDatoString(brevdato),
+                AktivitetspengerBrevScenarioerUtils.DEFAULT_NAVN,
+                fnr,
+                body,
+                AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_SAKSBEHANDLER_NAVN + " " + AktivitetspengerBrevScenarioerUtils.NAV_KONTOR_BESLUTTER_NAVN);
     }
 }

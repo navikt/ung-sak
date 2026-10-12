@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
@@ -20,7 +21,8 @@ public class AktivitetspengerRevurderingTestOppsett {
 
     public static Behandling lagRevurdering(AktivitetspengerTestRepositories repositories,
                                             AktivitetspengerTestScenario originalScenario,
-                                            AktivitetspengerTestScenario revurderingScenario) {
+                                            AktivitetspengerTestScenario revurderingScenario,
+                                            BehandlingDel... behandlingsansvarlige) {
         var original = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medAktivitetspengerTestGrunnlag(originalScenario)
             .buildOgLagreMedAktivitspenger(repositories);
@@ -31,6 +33,7 @@ public class AktivitetspengerRevurderingTestOppsett {
             .medAktivitetspengerTestGrunnlag(revurderingScenario)
             .medBehandlingType(BehandlingType.REVURDERING)
             .medOriginalBehandling(original, førsteÅrsak(revurderingScenario))
+            .medBehandlingsansvarlig(behandlingsansvarlige)
             .buildOgLagreMedAktivitspenger(repositories);
         revurdering.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
         revurdering.avsluttBehandling();
