@@ -20,10 +20,6 @@ public class RapportertInntekt {
         this.negativRegisterinntekt = negativRegisterinntekt;
     }
 
-    /**
-     * Registerinntekt der summen for perioden var negativ, f.eks. fordi arbeidsgiver har korrigert tidligere rapportert inntekt.
-     * Beløpet tolkes som 0 kr, men skal alltid vurderes av saksbehandler.
-     */
     public static RapportertInntekt negativRegisterinntektTolketSomNull(InntektType inntektType) {
         return new RapportertInntekt(inntektType, BigDecimal.ZERO, true);
     }
