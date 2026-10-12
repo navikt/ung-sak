@@ -10,6 +10,7 @@ import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
 import no.nav.ung.sak.web.server.abac.UkjentBehandlingException;
+import no.nav.ung.sak.økonomi.simulering.klient.DomeneUtil;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.simulering.klient.dto.OppdragXmlDto;
 import org.slf4j.Logger;
@@ -65,11 +66,6 @@ public class IverksattOppdragDump implements DebugDumpFagsak {
     }
 
     private Domene utledDomene(Fagsak fagsak) {
-        return switch (fagsak.getYtelseType()){
-            case UNGDOMSYTELSE -> Domene.UNG;
-            case AKTIVITETSPENGER -> Domene.AKTIVITETSPENGER;
-            default -> throw new IllegalStateException("Ikke-støttet ytelsestype: " + fagsak.getYtelseType());
-        };
+        return DomeneUtil.ytelsestypeTilAbacDomene(fagsak.getYtelseType());
     }
-
 }

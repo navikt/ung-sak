@@ -13,6 +13,7 @@ import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
+import no.nav.ung.sak.økonomi.simulering.klient.DomeneUtil;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 
@@ -47,11 +48,7 @@ public class SimuleringIntegrasjonTjeneste {
     }
 
     private Domene utledDomene(Behandling behandling) {
-        return switch (behandling.getFagsakYtelseType()){
-            case UNGDOMSYTELSE -> Domene.UNG;
-            case AKTIVITETSPENGER -> Domene.AKTIVITETSPENGER;
-            default -> throw new IllegalStateException("Ikke-støttet ytelsestype: " + behandling.getFagsakYtelseType());
-        };
+        return DomeneUtil.ytelsestypeTilAbacDomene(behandling.getFagsakYtelseType());
     }
 
 }

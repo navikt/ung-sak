@@ -20,6 +20,7 @@ import no.nav.ung.sak.behandlingslager.pip.PipRepository;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.abac.UkjentBehandlingException;
+import no.nav.ung.sak.økonomi.simulering.klient.DomeneUtil;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 
 import java.util.Optional;
@@ -72,11 +73,7 @@ public class OppdragProxyRestTjeneste {
 
     private Domene utledDomene(UUID behandlingUuid) {
         PipBehandlingsData behandlingsdata = pipRepository.hentDataForBehandlingUuid(behandlingUuid).orElseThrow(() -> new UkjentBehandlingException(Set.of(behandlingUuid)));
-        return switch (behandlingsdata.fagsakYtelseType()){
-            case UNGDOMSYTELSE -> Domene.UNG;
-            case AKTIVITETSPENGER -> Domene.AKTIVITETSPENGER;
-            default -> throw new IllegalStateException("Ikke-støttet ytelsestype: " + behandlingsdata.fagsakYtelseType());
-        };
+        return DomeneUtil.ytelsestypeTilAbacDomene(behandlingsdata.fagsakYtelseType());
     }
 
 }
