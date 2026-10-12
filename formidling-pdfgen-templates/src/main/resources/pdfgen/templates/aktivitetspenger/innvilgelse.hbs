@@ -4,7 +4,7 @@
         <h1>Du får aktivitetspenger</h1>
 
         <p>
-            Fra {{ytelseFom}} får du aktivitetspenger på {{> felles/beløp dagsats}} utenom lørdag og søndag.
+            Du får aktivitetspenger fra og med {{ytelseFom}}. Du får {{> felles/beløp dagsats}} per dag, utenom lørdag og søndag.
         </p>
 
         {{#each satsEndringer}}
@@ -43,7 +43,15 @@
         </p>
 
         <h2>Hvorfor får du aktivitetspenger?</h2>
-        <p>Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning.</p>
+        Du får aktivitetspenger fordi du
+        <ul>
+            <li>har behov for hjelp fra Nav til å komme i jobb eller utdanning</li>
+            <li>er mellom 18 og 30 år</li>
+            <li>er bosatt i Trondheim kommune</li>
+            <li>ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger)</li>
+            <li>har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger</li>
+        </ul>
+
         {{#if ytelseTom}}
             <p>Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til {{ytelseTom}}.
             {{#if søkerBlirOverHøyesteAlder}}Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år.{{/if}}
@@ -95,6 +103,7 @@
                 {{/eq}}
                 <p>
                     For å finne dagsatsen din, har vi regnet ut hva 66 prosent av {{> felles/beløp beregnetPrAar}} er.
+                    {{#if avkortetMotSeksG}}Vi har brukt en årsinntekt som tilsvarer seks ganger grunnbeløpet fordi det er det maksimale beløpet Nav kan beregne aktivitetspengene ut fra.{{/if}}
                     Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager.
                 </p>
                 <p>Det vil si at du har rett på {{> felles/beløp dagsats}} per dag.</p>
@@ -106,7 +115,7 @@
                     {{#with minsteYtelsegrunnlag}}
                         <p>
                             Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene.
-                            Fordi minstesatsen er høyere enn inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over {{aldersgrenseSatsendring}} år.
+                            Fordi minstesatsen er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over {{aldersgrenseSatsendring}} år.
                         </p>
 
                         <p>
@@ -131,7 +140,7 @@
                         {{#with minsteYtelsegrunnlagOvergangTilHøySats}}
                         <p>
                             Når vi har regnet ut hvor mye du får i aktivitetspenger etter at du fylte {{aldersgrenseSatsendring}} år, har vi sett på inntekten din de tre siste årene.
-                            Fordi minstesatsen for deg som er over {{aldersgrenseSatsendring}} år, er høyere enn inntekten din de tre siste årene, får du minstesatsen.
+                            Fordi minstesatsen for deg som er over {{aldersgrenseSatsendring}} år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen.
                         </p>
                         <p>
                             Minstesatsen er {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}. Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.
@@ -148,7 +157,7 @@
                     {{#if harLavSatstype}}
                         <p>
                             Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene.
-                            Fordi minstesatsen for deg som er under {{aldersgrenseSatsendring}} år, er høyere enn inntekten din de tre siste årene, får du minstesatsen.
+                            Fordi minstesatsen for deg som er under {{aldersgrenseSatsendring}} år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen.
                         </p>
                         <p>
                             Minstesatsen er 2/3 av {{faktor}} ganger grunnbeløpet som er på {{> felles/beløp grunnbeløp}}. Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.
@@ -157,7 +166,7 @@
                     {{else}}
                         <p>
                             Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene.
-                            Fordi minstesatsen for deg som er over {{aldersgrenseSatsendring}} år, er høyere enn inntekten din de tre siste årene, får du minstesatsen.
+                            Fordi minstesatsen for deg som er over {{aldersgrenseSatsendring}} år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen.
                         </p>
                         <p>
                             Minstesatsen er {{faktor}} ganger grunnbeløpet på {{> felles/beløp grunnbeløp}}. Det vil si at du kan få opptil {{> felles/beløp minsteÅrligeYtelse}} i året.

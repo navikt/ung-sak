@@ -54,7 +54,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
-                Fra 1. august 2025 får du aktivitetspenger på 762 kroner utenom lørdag og søndag. \
+                Du får aktivitetspenger fra og med 1. august 2025. Du får 762 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fylte 25 år 16. august 2025, får du mer penger fra denne datoen. Da får du 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
@@ -68,7 +68,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 For å finne dagsatsen din, har vi regnet ut hva 66 prosent av 300 000 kroner er. Denne summen deler vi på antall dager i et år, men fordi du ikke får penger for lørdager og søndager, deler vi summen på 260 dager. \
                 Det vil si at du har rett på 762 kroner per dag. \
                 Slik har vi regnet ut satsen du får etter at du fylte 25 år. \
-                Når vi har regnet ut hvor mye du får i aktivitetspenger etter at du fylte 25 år, har vi sett på inntekten din de tre siste årene. Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
+                Når vi har regnet ut hvor mye du får i aktivitetspenger etter at du fylte 25 år, har vi sett på inntekten din de tre siste årene. Fordi minstesatsen for deg som er over 25 år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen. \
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
                 """ + meldFraOmArbeidsinntektAvsnitt()
@@ -100,14 +100,14 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
-                Fra 1. august 2025 får du aktivitetspenger på 681 kroner utenom lørdag og søndag. \
+                Du får aktivitetspenger fra og med 1. august 2025. Du får 681 kroner per dag, utenom lørdag og søndag. \
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPengerAvsnitt() + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
-                Fordi minstesatsen for deg som er under 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
+                Fordi minstesatsen for deg som er under 25 år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen. \
                 Minstesatsen er 2/3 av 2,041 ganger grunnbeløpet som er på 130 160 kroner. \
                 Det vil si at du kan få opptil 177 104 kroner i året. Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 681 kroner per dag. \
@@ -141,14 +141,14 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
-                Fra 1. august 2025 får du aktivitetspenger på 1 022 kroner utenom lørdag og søndag. \
+                Du får aktivitetspenger fra og med 1. august 2025. Du får 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 """ + hvorforFårDuPengerAvsnitt() + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
-                Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
+                Fordi minstesatsen for deg som er over 25 år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen. \
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
@@ -181,7 +181,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
-                Fra 1. august 2025 får du aktivitetspenger på 681 kroner utenom lørdag og søndag. \
+                Du får aktivitetspenger fra og med 1. august 2025. Du får 681 kroner per dag, utenom lørdag og søndag. \
                 Fordi du fylte 25 år 16. august 2025, får du mer penger fra denne datoen. Da får du 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
@@ -189,7 +189,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
                 """ + hvorforFårDuPengerAvsnitt() + """
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
-                Fordi minstesatsen er høyere enn inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over 25 år. \
+                Fordi minstesatsen er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen både når du er under og når du er over 25 år. \
                 Minstesatsen når du er under 25 år, er grunnbeløpet ganger 2/3 av 2,041. \
                 Det blir 177 104 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
@@ -228,16 +228,16 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
-                Fra 1. august 2025 får du aktivitetspenger på 1 022 kroner utenom lørdag og søndag. \
+                Du får aktivitetspenger fra og med 1. august 2025. Du får 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 31. oktober 2025. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
-                Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
+                Fordi minstesatsen for deg som er over 25 år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen. \
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
@@ -272,17 +272,17 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
-                Fra 1. august 2025 får du aktivitetspenger på 1 022 kroner utenom lørdag og søndag. \
+                Du får aktivitetspenger fra og med 1. august 2025. Du får 1 022 kroner per dag, utenom lørdag og søndag. \
                 Pengene blir utbetalt én gang i måneden. Den første utbetalingen får du innen 12. september, og deretter får du pengene innen den 12. hver måned. \
                 Pengene du får, blir det trukket skatt av. Hvis du har frikort, blir det ikke trukket skatt. \
                 Du finner mer informasjon om utbetalingen hvis du logger inn på Min side på nav.no. \
                 Hvorfor får du aktivitetspenger? \
-                Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+                Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
                 Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025. \
                 Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år. \
                 Hvordan har vi regnet ut hvor mye penger du får? \
                 Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi sett på inntekten din de tre siste årene. \
-                Fordi minstesatsen for deg som er over 25 år, er høyere enn inntekten din de tre siste årene, får du minstesatsen. \
+                Fordi minstesatsen for deg som er over 25 år, er høyere enn gjennomsnittet av inntekten din de tre siste årene, får du minstesatsen. \
                 Minstesatsen er 2,041 ganger grunnbeløpet på 130 160 kroner. Det vil si at du kan få opptil 265 657 kroner i året. \
                 Denne summen har vi delt på 260 dager, fordi du ikke får penger for lørdager og søndager. \
                 Det vil si at du har rett på 1 022 kroner per dag. \
@@ -316,13 +316,13 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce("Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn til 5. september 2025.")
-            .asPlainTextNotContains("30 år");
+            .asPlainTextNotContains("Det er fordi du bare kan få aktivitetspenger fram til du blir 30 år");
     }
 
     static String hvorforFårDuPengerAvsnitt() {
         return """
             Hvorfor får du aktivitetspenger? \
-            Du får aktivitetspenger fordi du har behov for hjelp til å komme i jobb eller utdanning. \
+            Du får aktivitetspenger fordi du har behov for hjelp fra Nav til å komme i jobb eller utdanning er mellom 18 og 30 år er bosatt i Trondheim kommune ikke mottar andre livsoppholdsytelser (utenom økonomisk sosialhjelp, sykepenger og pleiepenger) har vært medlem i folketrygden sammenhengende i minst fem år når du søker om aktivitetspenger \
             Du får penger så lenge du oppfyller vilkårene, men ikke lenger enn i ett år. \
             """;
     }
@@ -334,6 +334,10 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
             Du får en SMS den 1. hver måned. Når du har fått SMS-en, logger du inn på Min side på nav.no og gir oss beskjed om all arbeidsinntekt du har hatt måneden før. \
             Når du jobber og har en inntekt, får du mindre aktivitetspenger. \
             Likevel får du til sammen mer penger når du både har en inntekt og får aktivitetspenger enn hvis du bare får aktivitetspenger. \
+            Du må melde fra om endringer \
+            Hvis det skjer endringer som kan ha noe å si for saken din om aktivitetspenger, må du gi beskjed til oss om det så fort som mulig. \
+            På nav.no/aktivitetspenger#melde finner du en oversikt over hvilke endringer du må gi beskjed om, og hvordan du gjør det. \
+            Hvis du trenger mer veiledning, kan du ringe 55 55 33 33. \
             """;
     }
 

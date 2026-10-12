@@ -30,7 +30,9 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.UtbetalingD
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.SatsgrunnlagDto;
+import org.jspecify.annotations.NonNull;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.SequencedCollection;
@@ -151,14 +153,6 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var grunnsatsType = tidligsteSatsOgBeregning.utledGrunnsatsBenyttet();
         var harLavSatstype = UngdomsytelseSatsType.LAV.equals(tidligsteSatsOgBeregning.satsGrunnlag().satsType());
 
-        var beregningsgrunnlag = BEREGNINGSGRUNNLAG.equals(grunnsatsType) ?
-            lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning.beregningsgrunnlag()) :
-            null;
-
-        var minsteYtelsegrunnlag = MINSTEYTELSE.equals(grunnsatsType) ?
-            mapTilSatsgrunnlagDto(tidligsteSegment) :
-            null;
-
         var senesteSegment = beregningOgSatsSegmenter.getLast();
         var senesteSats = senesteSegment.getValue().satsGrunnlag();
         var minsteYtelsegrunnlagOvergangTilHøySats = satsTyper.size() > 1 ? kontrollerOgLagOvergangTilHøySats(senesteSegment) :  null;
@@ -172,6 +166,14 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             Satsberegner.beregnDagsatsInklBarnetillegg(senesteSegment.getValue()))
             : null;
 
+
+        var beregningsgrunnlag = BEREGNINGSGRUNNLAG.equals(grunnsatsType) ?
+            lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning.beregningsgrunnlag(), seksG(senesteSats.grunnbeløp())) :
+            null;
+
+        var minsteYtelsegrunnlag = MINSTEYTELSE.equals(grunnsatsType) ?
+            mapTilSatsgrunnlagDto(tidligsteSegment) :
+            null;
 
         return new SatsOgBeregningDto(
             Sats.HØY.getFomAlder(),
@@ -201,13 +203,18 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static BeregningDto lagBeregningsgrunnlagDto(Beregningsgrunnlag beregningsgrunnlag) {
+    private static BeregningDto lagBeregningsgrunnlagDto(Beregningsgrunnlag beregningsgrunnlag, BigDecimal seksG) {
         return new BeregningDto(
             beregningsgrunnlag.getSisteLignedeÅr().toString(),
             beregningsgrunnlag.utledBesteBeregningResultatType(),
             beregningsgrunnlag.getBeregnetPrAar(),
-            tilHeltall(beregningsgrunnlag.getDagsats())
+            tilHeltall(beregningsgrunnlag.getDagsats()),
+            beregningsgrunnlag.getBeregnetPrAar().compareTo(seksG) > 0
         );
+    }
+
+    private static BigDecimal seksG(BigDecimal grunnbeløp) {
+        return grunnbeløp.multiply(BigDecimal.valueOf(6L));
     }
 
     private LocalDate bestemDagensDato() {
