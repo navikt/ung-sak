@@ -7,7 +7,7 @@ import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
-import no.nav.ung.kodeverk.vilkår.Utfall;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.aksjonspunkt.AksjonspunktTestSupport;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -17,6 +17,7 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerS
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestRepositories;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -169,7 +170,7 @@ public class AktivitetspengerEndringInntektScenarioer {
             .medSatsperioder(satsperioder)
             .medBeregningsgrunnlag(beregningsgrunnlag)
             .medTilkjentYtelse(tilkjentYtelsePerioder)
-            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medVilkår(VilkårType.ALDERSVILKÅR, new LocalDateTimeline<>(p, VilkårUtfall.oppfylt()))
             .medFødselsdato(fødselsdato)
             .medTriggere(triggere)
             .medKontrollerteInntektperioder(kontrollerInntektPerioder);

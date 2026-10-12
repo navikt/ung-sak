@@ -115,7 +115,6 @@ class PdlFødselshendelseFagsakTilVurderingUtlederTest {
                 .medSatsperioder(LocalDateTimeline.empty())
                 .medBeregningsgrunnlag(LocalDateTimeline.empty())
                 .medTilkjentYtelse(LocalDateTimeline.empty())
-                .medAldersvilkår(LocalDateTimeline.empty())
                 .medFødselsdato(LocalDate.now().minusYears(19))
                 .medBarn(List.of(PersonInformasjon.builder(PersonopplysningVersjonType.REGISTRERT).leggTilPersonopplysning(Personopplysning.builder().aktørId(barnAktørId).fødselsdato(barnFødselsdato).build()).build()))
                 .build()

@@ -38,11 +38,11 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårsResultat;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.bosatt.BostedSøknadsfaktaGrunnlagRepository;
-import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
-import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.behandlingslager.fagsak.*;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
+import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
 import no.nav.ung.sak.diff.DiffResult;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.Whitebox;
@@ -471,9 +471,6 @@ public class AktivitetspengerTestScenarioBuilder {
         settOppPersoner();
 
         //Vilkår
-        if (aktivitetspengerTestscenario.aldersvilkår() != null) {
-            aktivitetspengerTestscenario.aldersvilkår().forEach(it -> leggTilVilkår(VilkårType.ALDERSVILKÅR, it.getValue(), new Periode(it.getFom(), it.getTom()), Avslagsårsak.SØKER_OVER_HØYESTE_ALDER, null));
-        }
         aktivitetspengerTestscenario.vilkår().forEach((vilkårType, tidslinje) ->
             tidslinje.forEach(segment -> leggTilVilkår(vilkårType, segment.getValue().utfall(),
                 new Periode(segment.getFom(), segment.getTom()), segment.getValue().avslagsårsak(), segment.getValue().fritekstBrev())));

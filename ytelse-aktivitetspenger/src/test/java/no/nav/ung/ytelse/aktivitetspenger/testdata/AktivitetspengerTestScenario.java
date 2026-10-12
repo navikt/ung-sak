@@ -1,7 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.testdata;
 
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.KontrollertInntektPeriode;
 import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
@@ -26,7 +25,6 @@ public record AktivitetspengerTestScenario(
     LocalDateTimeline<AktivitetspengerSatsPeriode> satsperioder,
     LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlag,
     LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder,
-    LocalDateTimeline<Utfall> aldersvilkår,
     LocalDate fødselsdato,
     Set<Trigger> behandlingTriggere,
     List<PersonInformasjon> barn,
@@ -47,7 +45,6 @@ public record AktivitetspengerTestScenario(
         private LocalDateTimeline<AktivitetspengerSatsPeriode> satsperioder;
         private LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlag;
         private LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder;
-        private LocalDateTimeline<Utfall> aldersvilkår;
         private LocalDate fødselsdato;
         private Set<Trigger> behandlingTriggere = Set.of();
         private List<PersonInformasjon> barn = List.of();
@@ -83,11 +80,6 @@ public record AktivitetspengerTestScenario(
             return this;
         }
 
-        public Builder medAldersvilkår(LocalDateTimeline<Utfall> aldersvilkår) {
-            this.aldersvilkår = aldersvilkår;
-            return this;
-        }
-
         public Builder medFødselsdato(LocalDate fødselsdato) {
             this.fødselsdato = fødselsdato;
             return this;
@@ -114,9 +106,6 @@ public record AktivitetspengerTestScenario(
         }
 
         public Builder medVilkår(VilkårType vilkårType, LocalDateTimeline<VilkårUtfall> tidslinje) {
-            if (vilkårType == VilkårType.ALDERSVILKÅR) {
-                throw new IllegalArgumentException("Aldersvilkåret settes med medAldersvilkår");
-            }
             if (vilkår.put(vilkårType, tidslinje) != null) {
                 throw new IllegalArgumentException("Vilkår er allerede satt: " + vilkårType);
             }
@@ -149,7 +138,7 @@ public record AktivitetspengerTestScenario(
 
         public AktivitetspengerTestScenario build() {
             return new AktivitetspengerTestScenario(navn, søknadsperioder, satsperioder, beregningsgrunnlag, tilkjentYtelsePerioder,
-                aldersvilkår, fødselsdato, behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.copyOf(vilkår), inngangsvilkårVurderinger,
+                fødselsdato, behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.copyOf(vilkår), inngangsvilkårVurderinger,
                 List.copyOf(bostedsAvklaringer), Map.copyOf(vilkårsavklaringer));
         }
     }

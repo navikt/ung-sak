@@ -17,7 +17,10 @@ import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
 
 import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerBrevScenarioerUtils.*;
 
@@ -247,7 +250,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         return AktivitetspengerTestScenario.builder()
             .medNavn(DEFAULT_NAVN)
             .medSøknadsperioder(List.of(new Periode(fom, p.getTomDato())))
-            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medVilkår(VilkårType.ALDERSVILKÅR, new LocalDateTimeline<>(p, VilkårUtfall.oppfylt()))
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(p))));
     }
@@ -269,9 +272,9 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
     public static AktivitetspengerTestScenario innvilgetMedAvkortetBostedFørAldersgrensen(LocalDate fom, LocalDate tom, LocalDate trettiårsdag) {
         var maksTom = fom.plusWeeks(52).minusDays(1);
         return innvilgetMedAvslåttVilkårBuilder(fom, tom, VilkårType.BOSTEDSVILKÅR, Avslagsårsak.AVKORTET)
-            .medAldersvilkår(new LocalDateTimeline<>(List.of(
-                new LocalDateSegment<>(fom, trettiårsdag, Utfall.OPPFYLT),
-                new LocalDateSegment<>(trettiårsdag.plusDays(1), maksTom, Utfall.IKKE_OPPFYLT))))
+            .medVilkår(VilkårType.ALDERSVILKÅR, new LocalDateTimeline<>(List.of(
+                new LocalDateSegment<>(fom, trettiårsdag, VilkårUtfall.oppfylt()),
+                new LocalDateSegment<>(trettiårsdag.plusDays(1), maksTom, VilkårUtfall.avslått(Avslagsårsak.SØKER_OVER_HØYESTE_ALDER)))))
             .build();
     }
 
@@ -315,15 +318,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
             .medFødselsdato(fødselsdato)
             .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fra(fagsakPeriode))));
 
-        // TODO: Flytt aldersvilkår til medVilkår
-        if (avslåttVilkår == VilkårType.ALDERSVILKÅR) {
-            builder.medAldersvilkår(avkortetTidslinje.mapValue(v -> Objects.equals(v, VilkårUtfall.oppfylt()) ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT));
-        } else {
-            builder.medVilkår(avslåttVilkår, avkortetTidslinje);
-        }
-
-
-
+        builder.medVilkår(avslåttVilkår, avkortetTidslinje);
 
         //Oppfyll vilkårene før
         SORTERTE_VILKÅR.headSet(avslåttVilkår, false)
@@ -333,7 +328,6 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
 
         //Sett til ikke relevant vilkårene etter
         SORTERTE_VILKÅR.tailSet(avslåttVilkår, false)
-            .stream().filter(it -> it != VilkårType.ALDERSVILKÅR)
             .forEach(vilkårType ->
                 builder.medVilkår(vilkårType,
                     new LocalDateTimeline<>(List.of(
