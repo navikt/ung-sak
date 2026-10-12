@@ -20,7 +20,7 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligDto;
-import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligeDto;
+import no.nav.ung.sak.formidling.template.dto.felles.BrevSignaturDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import org.slf4j.Logger;
@@ -67,10 +67,10 @@ public class InformasjonsbrevGenerererTjeneste {
         var bygger = bestemBygger(informasjonsbrevBestillingInput);
         var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
-        BrevAnsvarligeDto brevAnsvarlig = lagBrevansvarlig(informasjonsbrevBestillingInput.bestillerIdent());
+        BrevSignaturDto signatur = lagSignatur(informasjonsbrevBestillingInput.bestillerIdent());
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brevAnsvarlig, behandling.getFagsakYtelseType()),
+                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), signatur, behandling.getFagsakYtelseType()),
                 innhold.templateInnholdDto()
             ));
 
@@ -91,12 +91,12 @@ public class InformasjonsbrevGenerererTjeneste {
     }
 
 
-    private BrevAnsvarligeDto lagBrevansvarlig(String bestillerIdent) {
+    private BrevSignaturDto lagSignatur(String bestillerIdent) {
         if (!enableBrevAnsvarlig) {
-            return new BrevAnsvarligeDto(false, List.of());
+            return new BrevSignaturDto(false, List.of());
         }
         var bestillerNavn = microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null);
-        return new BrevAnsvarligeDto(false, List.of(new BrevAnsvarligDto(bestillerNavn, null)));
+        return new BrevSignaturDto(false, List.of(new BrevAnsvarligDto(bestillerNavn, null)));
     }
 
 }

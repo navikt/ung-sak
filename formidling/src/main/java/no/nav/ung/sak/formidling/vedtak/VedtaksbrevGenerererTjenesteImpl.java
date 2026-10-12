@@ -20,7 +20,7 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligDto;
-import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligeDto;
+import no.nav.ung.sak.formidling.template.dto.felles.BrevSignaturDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
@@ -77,13 +77,13 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
 
 
-        var brevAnsvarlig = bestemBrevansvarlig(behandlingId);
+        var signatur = bestemSignatur(behandlingId);
 
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
                 FellesDto.lag(
                     new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()),
-                    brevAnsvarlig,
+                    signatur,
                     behandling.getFagsakYtelseType()
                 ),
                 resultat.templateInnholdDto()
@@ -100,26 +100,26 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         );
     }
 
-    private BrevAnsvarligeDto bestemBrevansvarlig(Long behandlingId) {
+    private BrevSignaturDto bestemSignatur(Long behandlingId) {
         Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige = behandlingAnsvarligRepository.hentBehandlingAnsvarlige(behandlingId);
 
         boolean varAutomatisk = behandlingAnsvarlige.values().stream().allMatch(ba -> ba.getAnsvarligSaksbehandler() == null);
 
         return varAutomatisk
-            ? BrevAnsvarligeDto.automatisk()
-            : lagManuellBrevAnsvarlig(behandlingAnsvarlige);
+            ? BrevSignaturDto.automatisk()
+            : lagManuellSignatur(behandlingAnsvarlige);
     }
 
-    private BrevAnsvarligeDto lagManuellBrevAnsvarlig(Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige) {
+    private BrevSignaturDto lagManuellSignatur(Map<BehandlingDel, BehandlingAnsvarlig> behandlingAnsvarlige) {
         if (!enableBrevAnsvarlig) {
-            return new BrevAnsvarligeDto(false, List.of());
+            return new BrevSignaturDto(false, List.of());
         }
         var ansvarlige = REKKEFØLGE_I_BREV.stream()
             .map(behandlingAnsvarlige::get)
             .filter(it -> it != null && it.getAnsvarligSaksbehandler() != null)
             .map(it -> new BrevAnsvarligDto(hentNavn(it.getAnsvarligSaksbehandler()), hentNavn(it.getAnsvarligBeslutter())))
             .toList();
-        return new BrevAnsvarligeDto(false, ansvarlige);
+        return new BrevSignaturDto(false, ansvarlige);
     }
 
     private String hentNavn(String ident) {
@@ -139,7 +139,7 @@ public class VedtaksbrevGenerererTjenesteImpl implements VedtaksbrevGenerererTje
         var input = new TemplateInput(resultat.templateType(),
             new TemplateDto(
                 FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()),
-                    lagManuellBrevAnsvarlig(behandlingAnsvarlig),
+                    lagManuellSignatur(behandlingAnsvarlig),
                     behandling.getFagsakYtelseType()
                 ),
                 resultat.templateInnholdDto()
