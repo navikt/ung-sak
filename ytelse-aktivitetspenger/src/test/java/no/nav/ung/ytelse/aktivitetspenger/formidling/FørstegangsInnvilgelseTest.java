@@ -165,6 +165,21 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
             );
     }
 
+    @DisplayName("Førstegangsinnvilgelse med besteberegning avkortet mot 6G forklarer avkortingen")
+    @Test
+    void besteberegningAvkortetMotSeksG() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunHøySatsMedBesteberegningAvkortetMotSeksG(fom);
+
+        var behandling = lagScenario(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+
+        assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains("For å finne dagsatsen din, har vi regnet ut hva 66 prosent av 780 960 kroner er. " +
+                "Vi har brukt en årsinntekt som tilsvarer seks ganger grunnbeløpet fordi det er det maksimale beløpet Nav kan beregne aktivitetspengene ut fra.");
+    }
+
     @DisplayName("Førstegangsinnvilgelse med lav og høy sats (24 år blir 25)")
     @Test
     void lavOgHøySats() {

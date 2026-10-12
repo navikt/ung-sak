@@ -23,14 +23,12 @@ import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
-import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.InnvilgelseDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.SatsOgBeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.UtbetalingDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BarnetilleggDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.SatsgrunnlagDto;
-import org.jspecify.annotations.NonNull;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -153,6 +151,14 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var grunnsatsType = tidligsteSatsOgBeregning.utledGrunnsatsBenyttet();
         var harLavSatstype = UngdomsytelseSatsType.LAV.equals(tidligsteSatsOgBeregning.satsGrunnlag().satsType());
 
+        var beregningsgrunnlag = BEREGNINGSGRUNNLAG.equals(grunnsatsType) ?
+            lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning) :
+            null;
+
+        var minsteYtelsegrunnlag = MINSTEYTELSE.equals(grunnsatsType) ?
+            mapTilSatsgrunnlagDto(tidligsteSegment) :
+            null;
+
         var senesteSegment = beregningOgSatsSegmenter.getLast();
         var senesteSats = senesteSegment.getValue().satsGrunnlag();
         var minsteYtelsegrunnlagOvergangTilHøySats = satsTyper.size() > 1 ? kontrollerOgLagOvergangTilHøySats(senesteSegment) :  null;
@@ -166,14 +172,6 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
             Satsberegner.beregnDagsatsInklBarnetillegg(senesteSegment.getValue()))
             : null;
 
-
-        var beregningsgrunnlag = BEREGNINGSGRUNNLAG.equals(grunnsatsType) ?
-            lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning.beregningsgrunnlag(), seksG(senesteSats.grunnbeløp())) :
-            null;
-
-        var minsteYtelsegrunnlag = MINSTEYTELSE.equals(grunnsatsType) ?
-            mapTilSatsgrunnlagDto(tidligsteSegment) :
-            null;
 
         return new SatsOgBeregningDto(
             Sats.HØY.getFomAlder(),
@@ -203,18 +201,21 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static BeregningDto lagBeregningsgrunnlagDto(Beregningsgrunnlag beregningsgrunnlag, BigDecimal seksG) {
+    private static BeregningDto lagBeregningsgrunnlagDto(AktivitetspengerSatser satser) {
+        var beregningsgrunnlag = satser.beregningsgrunnlag();
         return new BeregningDto(
             beregningsgrunnlag.getSisteLignedeÅr().toString(),
             beregningsgrunnlag.utledBesteBeregningResultatType(),
             beregningsgrunnlag.getBeregnetPrAar(),
             tilHeltall(beregningsgrunnlag.getDagsats()),
-            beregningsgrunnlag.getBeregnetPrAar().compareTo(seksG) > 0
+            erAvkortetMotSeksG(beregningsgrunnlag.getBeregnetPrAar(), satser.satsGrunnlag().grunnbeløp())
         );
     }
 
-    private static BigDecimal seksG(BigDecimal grunnbeløp) {
-        return grunnbeløp.multiply(BigDecimal.valueOf(6L));
+    // Beregnet årsinntekt er allerede avkortet til 6G, med avrundingsavvik fra oppjusteringsfaktoren
+    private static boolean erAvkortetMotSeksG(BigDecimal beregnetPrAar, BigDecimal grunnbeløp) {
+        var seksGMinusToleranse = grunnbeløp.multiply(BigDecimal.valueOf(6)).subtract(BigDecimal.ONE);
+        return beregnetPrAar.compareTo(seksGMinusToleranse) >= 0;
     }
 
     private LocalDate bestemDagensDato() {

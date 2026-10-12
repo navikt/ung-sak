@@ -106,6 +106,15 @@ public class AktivitetspengerBrevScenarioerUtils {
         return new Beregningsgrunnlag(input, BigDecimal.valueOf(300_000), BigDecimal.valueOf(233_333), BigDecimal.valueOf(300_000), BigDecimal.valueOf(198_000), "test-sporing");
     }
 
+    /**
+     * Beregningsgrunnlag der siste år-inntekt er avkortet til 6G, med avrundingsavvik fra oppjusteringsfaktoren.
+     */
+    public static Beregningsgrunnlag lagBeregningsgrunnlagAvkortetMotSeksG(LocalDate skjæringstidspunkt) {
+        var seksGMedAvrundingsavvik = hentGrunnbeløpFor(skjæringstidspunkt).multiply(BigDecimal.valueOf(6)).subtract(new BigDecimal("0.0001"));
+        var input = new BeregningInput(new Beløp(1_000_000), new Beløp(1_000_000), new Beløp(1_000_000), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
+        return new Beregningsgrunnlag(input, seksGMedAvrundingsavvik, seksGMedAvrundingsavvik.subtract(BigDecimal.ONE), seksGMedAvrundingsavvik, seksGMedAvrundingsavvik.multiply(new BigDecimal("0.66")), "test-sporing");
+    }
+
     public static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(
         LocalDateTimeline<AktivitetspengerSatser> satser,
         LocalDateInterval tilkjentPeriode) {
