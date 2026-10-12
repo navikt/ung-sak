@@ -37,22 +37,6 @@ public record AktivitetspengerTestScenario(
     List<BostedsAvklaringTestData> bostedsAvklaringer,
     Map<VilkårType, List<VilkårsavklaringTestData>> vilkårsavklaringer) {
 
-    public AktivitetspengerTestScenario(
-        String navn,
-        List<Periode> søknadsperioder,
-        LocalDateTimeline<AktivitetspengerSatsPeriode> satsperioder,
-        LocalDateTimeline<Beregningsgrunnlag> beregningsgrunnlag,
-        LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder,
-        LocalDateTimeline<Utfall> aldersvilkår,
-        LocalDate fødselsdato,
-        Set<Trigger> behandlingTriggere,
-        List<PersonInformasjon> barn,
-        LocalDate dødsdato,
-        LocalDateTimeline<KontrollertInntektPeriode> kontrollerInntektPerioder) {
-        this(navn, søknadsperioder, satsperioder, beregningsgrunnlag, tilkjentYtelsePerioder, aldersvilkår, fødselsdato,
-            behandlingTriggere, barn, dødsdato, kontrollerInntektPerioder, Map.of(), InngangsvilkårVurderingTestData.tom(), List.of(), Map.of());
-    }
-
     public static Builder builder() {
         return new Builder();
     }

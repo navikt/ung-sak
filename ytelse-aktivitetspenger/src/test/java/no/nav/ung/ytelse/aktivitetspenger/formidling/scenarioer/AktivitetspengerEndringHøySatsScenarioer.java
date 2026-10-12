@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Year;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -31,41 +30,7 @@ public class AktivitetspengerEndringHøySatsScenarioer {
      * Bruker fyller 25 år 16 dager etter fom.
      */
     public static AktivitetspengerTestScenario lavTilHøySats(LocalDate fom) {
-        LocalDate tjuvefemårsdag = fom.plusDays(15);
-        LocalDate fødselsdato = tjuvefemårsdag.minusYears(25);
-        var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-
-        var lavSats = lavSatsBuilder(fom).build();
-        var høySats = høySatsBuilder(tjuvefemårsdag).build();
-
-        var satsperioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, tjuvefemårsdag.minusDays(1)), lavSats)),
-            new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), new AktivitetspengerSatsPeriode(new LocalDateInterval(tjuvefemårsdag, p.getTomDato()), høySats))
-        ));
-
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), lavSats),
-            new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), høySats)
-        ));
-
-        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
-        ));
-
-        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth()));
-
-        return new AktivitetspengerTestScenario(
-            DEFAULT_NAVN,
-            List.of(new Periode(fom, p.getTomDato())),
-            satsperioder,
-            beregningsgrunnlag,
-            tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdato,
-            Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, p.getTomDato()))),
-            Collections.emptyList(),
-            null,
-            null);
+        return lavTilHøySatsBuilder(fom, lagBeregningsgrunnlag(fom)).build();
     }
 
     /**
@@ -74,42 +39,7 @@ public class AktivitetspengerEndringHøySatsScenarioer {
      * men for høy sats er minstesatsen høyere enn beregningsgrunnlaget.
      */
     public static AktivitetspengerTestScenario beregningsgrunnlagTilHøySats(LocalDate fom) {
-        LocalDate tjuvefemårsdag = fom.plusDays(15);
-        LocalDate fødselsdato = tjuvefemårsdag.minusYears(25);
-        var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-
-        var lavSats = lavSatsBuilder(fom).build();
-        var høySats = høySatsBuilder(tjuvefemårsdag).build();
-
-        var satsperioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, tjuvefemårsdag.minusDays(1)), lavSats)),
-            new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), new AktivitetspengerSatsPeriode(new LocalDateInterval(tjuvefemårsdag, p.getTomDato()), høySats))
-        ));
-
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), lavSats),
-            new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), høySats)
-        ));
-
-        // Beregningsgrunnlag som er høyere enn lav minstesats men lavere enn høy minstesats
-        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagHøytBeregningsgrunnlag(fom))
-        ));
-
-        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth()));
-
-        return new AktivitetspengerTestScenario(
-            DEFAULT_NAVN,
-            List.of(new Periode(fom, p.getTomDato())),
-            satsperioder,
-            beregningsgrunnlag,
-            tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdato,
-            Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, p.getTomDato()))),
-            Collections.emptyList(),
-            null,
-            null);
+        return lavTilHøySatsBuilder(fom, lagHøytBeregningsgrunnlag(fom)).build();
     }
 
     /**
@@ -117,6 +47,10 @@ public class AktivitetspengerEndringHøySatsScenarioer {
      * I dette tilfellet skal det IKKE sendes brev.
      */
     public static AktivitetspengerTestScenario beregningsgrunnlagHøyereEnnSatsForAllePerioder(LocalDate fom) {
+        return lavTilHøySatsBuilder(fom, lagSværtHøytBeregningsgrunnlag(fom)).build();
+    }
+
+    private static AktivitetspengerTestScenario.Builder lavTilHøySatsBuilder(LocalDate fom, Beregningsgrunnlag beregningsgrunnlagVerdi) {
         LocalDate tjuvefemårsdag = fom.plusDays(15);
         LocalDate fødselsdato = tjuvefemårsdag.minusYears(25);
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
@@ -134,25 +68,21 @@ public class AktivitetspengerEndringHøySatsScenarioer {
             new LocalDateSegment<>(tjuvefemårsdag, p.getTomDato(), høySats)
         ));
 
-        // Beregningsgrunnlag svært høyt - overstiger både lav og høy minstesats
         var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagSværtHøytBeregningsgrunnlag(fom))
+            new LocalDateSegment<>(fom, null, beregningsgrunnlagVerdi)
         ));
 
         LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth()));
 
-        return new AktivitetspengerTestScenario(
-            DEFAULT_NAVN,
-            List.of(new Periode(fom, p.getTomDato())),
-            satsperioder,
-            beregningsgrunnlag,
-            tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdato,
-            Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, p.getTomDato()))),
-            Collections.emptyList(),
-            null,
-            null);
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, p.getTomDato())))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode))
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdato)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.RE_TRIGGER_BEREGNING_HØY_SATS, DatoIntervallEntitet.fra(tjuvefemårsdag, p.getTomDato()))));
     }
 
     private static Beregningsgrunnlag lagHøytBeregningsgrunnlag(LocalDate skjæringstidspunkt) {

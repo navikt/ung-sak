@@ -12,7 +12,6 @@ import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerS
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
 
 import java.time.LocalDate;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -24,53 +23,23 @@ public class AktivitetspengerEndringBarnetilleggScenarioer {
      * Fødselshendelse som gir barnetillegg. Bruker lav sats, får ett barn på fødselsdato.
      */
     public static AktivitetspengerTestScenario fødselMedEttBarn(LocalDate fom) {
-        LocalDate fødselsdatoBarn = fom.plusDays(15);
-        LocalDate fødselsdatoBruker = fom.minusYears(20);
-        var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
-
-        var satsUtenBarn = lavSatsBuilder(fom).build();
-        var satsMedBarn = lavSatsMedBarnBuilder(fødselsdatoBarn, 1).build();
-
-        var satsperioder = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, fødselsdatoBarn.minusDays(1), new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, fødselsdatoBarn.minusDays(1)), satsUtenBarn)),
-            new LocalDateSegment<>(fødselsdatoBarn, p.getTomDato(), new AktivitetspengerSatsPeriode(new LocalDateInterval(fødselsdatoBarn, p.getTomDato()), satsMedBarn))
-        ));
-
-        var satsGrunnlagTidslinje = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, fødselsdatoBarn.minusDays(1), satsUtenBarn),
-            new LocalDateSegment<>(fødselsdatoBarn, p.getTomDato(), satsMedBarn)
-        ));
-
-        var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
-        ));
-
-        LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, p.getTomDato());
-
-        return new AktivitetspengerTestScenario(
-            DEFAULT_NAVN,
-            List.of(new Periode(fom, p.getTomDato())),
-            satsperioder,
-            beregningsgrunnlag,
-            tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdatoBruker,
-            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(fødselsdatoBarn, p.getTomDato()))),
-            Collections.emptyList(),
-            null,
-            null);
+        return fødselBuilder(fom, 1).build();
     }
 
     /**
      * Fødselshendelse som gir barnetillegg for to barn.
      */
     public static AktivitetspengerTestScenario fødselMedToBarn(LocalDate fom) {
+        return fødselBuilder(fom, 2).build();
+    }
+
+    private static AktivitetspengerTestScenario.Builder fødselBuilder(LocalDate fom, int antallBarn) {
         LocalDate fødselsdatoBarn = fom.plusDays(15);
         LocalDate fødselsdatoBruker = fom.minusYears(20);
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
         var satsUtenBarn = lavSatsBuilder(fom).build();
-        var satsMedBarn = lavSatsMedBarnBuilder(fødselsdatoBarn, 2).build();
+        var satsMedBarn = lavSatsMedBarnBuilder(fødselsdatoBarn, antallBarn).build();
 
         var satsperioder = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom, fødselsdatoBarn.minusDays(1), new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, fødselsdatoBarn.minusDays(1)), satsUtenBarn)),
@@ -88,18 +57,15 @@ public class AktivitetspengerEndringBarnetilleggScenarioer {
 
         LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, p.getTomDato());
 
-        return new AktivitetspengerTestScenario(
-            DEFAULT_NAVN,
-            List.of(new Periode(fom, p.getTomDato())),
-            satsperioder,
-            beregningsgrunnlag,
-            tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode),
-            new LocalDateTimeline<>(p, Utfall.OPPFYLT),
-            fødselsdatoBruker,
-            Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(fødselsdatoBarn, p.getTomDato()))),
-            Collections.emptyList(),
-            null,
-            null);
+        return AktivitetspengerTestScenario.builder()
+            .medNavn(DEFAULT_NAVN)
+            .medSøknadsperioder(List.of(new Periode(fom, p.getTomDato())))
+            .medSatsperioder(satsperioder)
+            .medBeregningsgrunnlag(beregningsgrunnlag)
+            .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag), tilkjentPeriode))
+            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medFødselsdato(fødselsdatoBruker)
+            .medTriggere(Set.of(new Trigger(BehandlingÅrsakType.RE_HENDELSE_FØDSEL, DatoIntervallEntitet.fra(fødselsdatoBarn, p.getTomDato()))));
     }
 }
 
