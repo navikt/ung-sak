@@ -31,8 +31,6 @@ import java.util.stream.Collectors;
 @Dependent
 public class K9OppdragRestKlient {
 
-    private static final Domene DOMENE =  Domene.UNG;
-
     private OidcRestClient restClient;
     private URI uriIverksett;
     private URI uriSimulering;
@@ -85,33 +83,33 @@ public class K9OppdragRestKlient {
         return restClient.post(uriSimuleringDiagnostikk, tilkjentYtelseOppdrag);
     }
 
-    public Optional<SimuleringResultatDto> hentSimuleringResultat(UUID behandlingUuid) {
+    public Optional<SimuleringResultatDto> hentSimuleringResultat(UUID behandlingUuid, Domene domene) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
-        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, DOMENE);
+        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, domene);
         return restClient.postReturnsOptional(uriSimuleringResultat, behandlingReferanseDomene, SimuleringResultatDto.class);
     }
 
-    public Optional<SimuleringDto> hentDetaljertSimuleringResultat(UUID behandlingUuid) {
+    public Optional<SimuleringDto> hentDetaljertSimuleringResultat(UUID behandlingUuid, Domene domene) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
-        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, DOMENE);
+        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, domene);
         return restClient.postReturnsOptional(uriDetaljertSimuleringResultat, behandlingReferanseDomene, SimuleringDto.class);
     }
 
-    public void kansellerSimulering(UUID behandlingUuid) {
+    public void kansellerSimulering(UUID behandlingUuid, Domene domene) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
-        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, DOMENE);
+        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, domene);
         restClient.post(uriKansellerSimulering, behandlingReferanseDomene);
     }
 
-    public OppsummeringDto hentOppsummering(UUID behandlingUuid) {
+    public OppsummeringDto hentOppsummering(UUID behandlingUuid, Domene domene) {
         BehandlingReferanse behandlingreferanse = new BehandlingReferanse(behandlingUuid);
-        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, DOMENE);
+        BehandlingReferanseDomene behandlingReferanseDomene = new BehandlingReferanseDomene(behandlingreferanse, domene);
         return restClient.post(uriOppsummering, behandlingReferanseDomene, OppsummeringDto.class);
     }
 
-    public List<OppdragXmlDto> alleOppdragXmler(Saksnummer saksnummer) {
+    public List<OppdragXmlDto> alleOppdragXmler(Saksnummer saksnummer, Domene domene) {
         no.nav.k9.oppdrag.kontrakt.Saksnummer oppdragSaksnummer = new no.nav.k9.oppdrag.kontrakt.Saksnummer(saksnummer.getVerdi());
-        SaksnummerDomene saksnummerDomene = new SaksnummerDomene(oppdragSaksnummer, DOMENE);
+        SaksnummerDomene saksnummerDomene = new SaksnummerDomene(oppdragSaksnummer, domene);
         OppdragXmlDto[] resultat = restClient.post(uriAlleOppdragXmler, saksnummerDomene, OppdragXmlDto[].class);
         return resultat != null ? Arrays.asList(resultat) : null;
     }
