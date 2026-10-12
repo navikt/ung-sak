@@ -2,13 +2,18 @@ package no.nav.ung.sak.økonomi.simulering.tjeneste;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 
+import no.nav.k9.oppdrag.kontrakt.Domene;
 import no.nav.k9.oppdrag.kontrakt.simulering.v1.SimuleringResultatDto;
 import no.nav.k9.oppdrag.kontrakt.tilkjentytelse.TilkjentYtelseOppdrag;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
+import no.nav.ung.sak.økonomi.simulering.klient.DomeneUtil;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.tilkjentytelse.TilkjentYtelseTjeneste;
 
@@ -34,12 +39,16 @@ public class SimuleringIntegrasjonTjeneste {
     }
 
     public void kansellerSimulering(Behandling behandling) {
-        restKlient.kansellerSimulering(behandling.getUuid());
+        restKlient.kansellerSimulering(behandling.getUuid(), utledDomene(behandling));
     }
 
     public Optional<SimuleringResultatDto> hentResultat(Behandling behandling) {
         Objects.requireNonNull(behandling, "Utviklerfeil: behandling kan ikke være null");
-        return restKlient.hentSimuleringResultat(behandling.getUuid());
+        return restKlient.hentSimuleringResultat(behandling.getUuid(), utledDomene(behandling));
+    }
+
+    private Domene utledDomene(Behandling behandling) {
+        return DomeneUtil.ytelsestypeTilAbacDomene(behandling.getFagsakYtelseType());
     }
 
 }

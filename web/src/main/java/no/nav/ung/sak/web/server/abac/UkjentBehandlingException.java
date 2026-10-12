@@ -6,11 +6,11 @@ import java.util.UUID;
 
 public class UkjentBehandlingException extends UkjentAbacVerdiException {
 
-    protected UkjentBehandlingException(Long behandlingId) {
+    public UkjentBehandlingException(Long behandlingId) {
         super("Behandlingen med id " + behandlingId + " finnes ikke i applikasjonen.");
     }
 
-    protected UkjentBehandlingException(Set<UUID> behandlingUuid) {
+    public UkjentBehandlingException(Set<UUID> behandlingUuid) {
         super("Minst en av behandlingen med uuid " + behandlingUuid + " finnes ikke i applikasjonen.");
     }
 }
