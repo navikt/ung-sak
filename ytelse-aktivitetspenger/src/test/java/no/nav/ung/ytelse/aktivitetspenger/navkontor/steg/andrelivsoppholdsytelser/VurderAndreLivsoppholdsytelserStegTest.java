@@ -146,7 +146,7 @@ class VurderAndreLivsoppholdsytelserStegTest {
     }
 
     @Test
-    void skal_ikke_avslå_automatisk_nar_arsaken_krever_fritekst() {
+    void skal_avslå_automatisk_ved_annen_ytelse_med_ytelsenavn_fra_varselet() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         var avklaring = lagreForeslåttAvklaring(behandling.getId(), FOM, TOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, true);
 
@@ -162,10 +162,11 @@ class VurderAndreLivsoppholdsytelserStegTest {
 
         var resultat = utførSteg(behandling);
 
-        assertThat(resultat.getAksjonspunktListe())
-            .as("ytelsen står kun i fritekst, og saksbehandler må derfor vurdere den")
-            .containsExactly(AksjonspunktDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_OPPHØR);
-        assertThat(hentVurderinger(behandling)).isEmpty();
+        assertThat(resultat.getAksjonspunktListe()).isEmpty();
+        var vurdering = hentVurderinger(behandling).stream().findFirst().orElseThrow();
+        assertThat(vurdering.getIkkeOppfyltÅrsak()).isEqualTo(AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE);
+        assertThat(vurdering.getYtelseNavn()).isEqualTo("Fritekst til varselet");
+        assertThat(vurdering.getFritekstVurderingBrev()).isNull();
     }
 
     @Test

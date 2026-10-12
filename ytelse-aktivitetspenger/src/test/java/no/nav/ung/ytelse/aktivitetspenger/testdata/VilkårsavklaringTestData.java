@@ -14,17 +14,22 @@ public record VilkårsavklaringTestData(
     Avklaringtype avklaringtype,
     IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak,
     AvklaringKilde kilde,
-    String kildeFritekst) {
+    String kildeFritekst,
+    String fritekstTilVarsel) {
 
     public static VilkårsavklaringTestData opphør(Periode periode, IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak, AvklaringKilde kilde) {
-        return new VilkårsavklaringTestData(periode, Avklaringtype.OPPHØR, ikkeOppfyltÅrsak, kilde, null);
+        return new VilkårsavklaringTestData(periode, Avklaringtype.OPPHØR, ikkeOppfyltÅrsak, kilde, null, null);
     }
 
     public static VilkårsavklaringTestData avslag(Periode periode, IkkeOppfyltDetaljertÅrsak ikkeOppfyltÅrsak, AvklaringKilde kilde) {
-        return new VilkårsavklaringTestData(periode, Avklaringtype.AVSLAG, ikkeOppfyltÅrsak, kilde, null);
+        return new VilkårsavklaringTestData(periode, Avklaringtype.AVSLAG, ikkeOppfyltÅrsak, kilde, null, null);
     }
 
     public VilkårsavklaringTestData medKilde(AvklaringKilde nyKilde, String nyKildeFritekst) {
-        return new VilkårsavklaringTestData(periode, avklaringtype, ikkeOppfyltÅrsak, nyKilde, nyKildeFritekst);
+        return new VilkårsavklaringTestData(periode, avklaringtype, ikkeOppfyltÅrsak, nyKilde, nyKildeFritekst, fritekstTilVarsel);
+    }
+
+    public VilkårsavklaringTestData medFritekstTilVarsel(String nyFritekstTilVarsel) {
+        return new VilkårsavklaringTestData(periode, avklaringtype, ikkeOppfyltÅrsak, kilde, kildeFritekst, nyFritekstTilVarsel);
     }
 }
