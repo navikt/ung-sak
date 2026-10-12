@@ -23,7 +23,7 @@ public class VedtaksbrevVerifikasjon {
         På nav.no/kontakt kan du chatte eller skrive til oss. \
         Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
         Med vennlig hilsen \
-        Nav Tiltak Oslo \
+        Nav \
         %s \
         side av""";
 
@@ -36,7 +36,7 @@ public class VedtaksbrevVerifikasjon {
         AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);
 
     private static String hilsen(String... navn) {
-        return "Med vennlig hilsen Nav Tiltak Oslo " + String.join(" ", navn) + " side av";
+        return "Med vennlig hilsen Nav " + String.join(" ", navn) + " side av";
     }
 
     public static String medHeaderOgFooter(String fnr, String body) {
