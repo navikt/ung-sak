@@ -42,3 +42,16 @@ Alternatively, the caseworker can determine a different income based on the info
 
 In case where the income from a-ordningen is zero and the reported income from the applicant is above zero the case is also flagged for manual review by a caseworker (aksjonspunkt).
 In this case the caseworker is asked to determine the correct income and possibly contact the applicant for more information. It is likely that the applicant has misunderstood the income reporting.
+
+## Negative income from a-ordningen
+An employer can correct previously reported income, which may make the sum for a month negative (e.g. a correction reported in September for income paid in August). We only know the payment month (`Inntektspost.periode`), not which month the correction concerns, so the correction is not moved back to the earlier month.
+The income from a-ordningen is summed per income type (arbeidsinntekt/ytelse) and month, and a negative sum is interpreted as 0 NOK (`RapportertInntektMapper`). Positive income in the same month is still netted against the correction, but a negative arbeidsinntekt is not netted against ytelse. The rules for zero income from a-ordningen then apply:
+- Applicant reported no income or 0: no notification of discrepancy, no reduction, full payment.
+- Applicant reported income: discrepancy without register income, i.e. manual review by a caseworker (aksjonspunkt).
+
+All income used in the calculation is therefore at least 0 (the applicant's reported income and the income set by the caseworker are validated to be ≥ 0), which keeps utbetalingsgrad within 0–100 (DB constraint `chk_utbetalingsgrad_range`).
+
+Routine when the correction concerns an earlier month: the caseworker decides the month containing the correction in the aksjonspunkt (income can not be set below 0). The corrected month is then revurdert manually with `RE_KONTROLL_REGISTER_INNTEKT`.
+
+## Manually created revurdering for income control
+A manually created revurdering with `RE_KONTROLL_REGISTER_INNTEKT` (`BehandlingÅrsak.erManueltOpprettet()`) always gives the aksjonspunkt `KONTROLLER_INNTEKT` in `KontrollerInntektSteg`, the same way as for non-digital users. The automatic control is skipped, and the caseworker determines the income for the period. Without this, a month without discrepancy would be automatically controlled again with unchanged register income, and the caseworker could not correct it.

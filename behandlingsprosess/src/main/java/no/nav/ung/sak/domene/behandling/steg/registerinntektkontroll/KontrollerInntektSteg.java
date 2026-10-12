@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
@@ -28,6 +29,7 @@ import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 /**
  * Fullfører kontroll av inntekt basert på rapporterte inntekter og svar på etterlysninger. Steget oppretter perioder for kontrollert inntekt dersom det enten ikke er avvik eller bruker har godkjent bruk av registerinntekt.
  * Steget returnerer aksjonspunkt dersom bruker ikke har godkjent registerinntekt eller dersom det er bruker har rapportert inntekt uten at det er inntekt i registeret.
+ * Ved ikke-digital bruker eller manuelt opprettet revurdering av kontroll returneres alltid aksjonspunkt, slik at saksbehandler fastsetter inntekten.
  */
 @ApplicationScoped
 @BehandlingStegRef(value = KONTROLLER_REGISTER_INNTEKT)
@@ -80,6 +82,12 @@ public class KontrollerInntektSteg implements BehandlingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
         }
 
+        // Ved manuelt opprettet revurdering av kontroll skal saksbehandler alltid fastsette inntekten, f.eks. når en senere korrigering fra arbeidsgiver gjelder en allerede kontrollert måned.
+        if (erManueltOpprettetRevurderingAvKontroll(behandling)) {
+            log.info("Fagsak {} har manuelt opprettet revurdering av kontroll av inntekt, oppretter aksjonspunkt for manuell kontroll av inntekt.", fagsak.getSaksnummer());
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
+        }
+
         var behandlingReferanse = BehandlingReferanse.fra(behandling);
         var input = inputMapper.mapInput(behandlingReferanse);
         var kontrollResultat = new KontrollerInntektTjeneste(BigDecimal.valueOf(akseptertDifferanse)).utførKontroll(input);
@@ -128,6 +136,11 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
     private boolean erKontrollbehandling(Behandling behandling) {
         return !kontrollPerioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId()).isEmpty();
+    }
+
+    private static boolean erManueltOpprettetRevurderingAvKontroll(Behandling behandling) {
+        return behandling.getBehandlingÅrsaker().stream()
+            .anyMatch(årsak -> årsak.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT && årsak.erManueltOpprettet());
     }
 
 }

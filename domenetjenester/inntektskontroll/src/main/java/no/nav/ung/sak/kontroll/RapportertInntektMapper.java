@@ -85,7 +85,7 @@ public class RapportertInntektMapper {
 
     private LocalDateTimeline<EtterlysningOgRegisterinntekt> finnRegisterinntekterVurdertIUttalelse(Long behandlingId, InntektskontrollEtterlysningsPeriode it) {
         final var registerinntekter = finnRegisterinntekterForPeriodeOgGrunnlag(behandlingId, it.iayGrunnlagUUID(), it.periode());
-        Set<RapportertInntekt> rapportertInntekter = mapTilRapporterteInntekterPrType(registerinntekter);
+        Set<RapportertInntekt> rapportertInntekter = mapTilRapporterteInntekterPrType(registerinntekter, it.periode());
         return new LocalDateTimeline<>(it.periode(), new EtterlysningOgRegisterinntekt(rapportertInntekter, it.inntektskontrollEtterlysningInfo()));
     }
 
@@ -122,29 +122,36 @@ public class RapportertInntektMapper {
 
         final var overlappendeInntekter = finnOverlappendeInntekter(intervall, grupperteInntekter);
 
-        return mapTilRapporterteInntekterPrType(overlappendeInntekter);
+        return mapTilRapporterteInntekterPrType(overlappendeInntekter, intervall);
     }
 
-    private static Set<RapportertInntekt> mapTilRapporterteInntekterPrType(List<InntekterForKilde> overlappendeInntekter) {
+    private static Set<RapportertInntekt> mapTilRapporterteInntekterPrType(List<InntekterForKilde> overlappendeInntekter, LocalDateInterval periode) {
         final var inntekterForPeriode = new HashSet<RapportertInntekt>();
-        overlappendeInntekter
-            .stream()
-            .filter(it -> it.inntektType() == InntektType.ARBEIDSTAKER_ELLER_FRILANSER)
-            .flatMap(it -> it.inntekter().stream())
-            .map(Inntektsperiode::beløp)
-            .reduce(Beløp::adder)
-            .map(it -> new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, it.getVerdi()))
-            .ifPresent(inntekterForPeriode::add);
-
-        overlappendeInntekter
-            .stream()
-            .filter(it -> it.inntektType() == InntektType.YTELSE)
-            .flatMap(it -> it.inntekter().stream())
-            .map(Inntektsperiode::beløp)
-            .reduce(Beløp::adder)
-            .map(it -> new RapportertInntekt(InntektType.YTELSE, it.getVerdi()))
-            .ifPresent(inntekterForPeriode::add);
+        summerForType(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, overlappendeInntekter, periode).ifPresent(inntekterForPeriode::add);
+        summerForType(InntektType.YTELSE, overlappendeInntekter, periode).ifPresent(inntekterForPeriode::add);
         return inntekterForPeriode;
+    }
+
+    /**
+     * Summerer registerinntekt for en inntektstype i perioden. Arbeidsgiver kan korrigere tidligere rapportert inntekt slik at
+     * summen for måneden blir negativ. Negativ sum tolkes som 0 kr, siden inntekt for en måned ikke kan være lavere enn 0.
+     */
+    private static Optional<RapportertInntekt> summerForType(InntektType inntektType, List<InntekterForKilde> overlappendeInntekter, LocalDateInterval periode) {
+        return overlappendeInntekter
+            .stream()
+            .filter(it -> it.inntektType() == inntektType)
+            .flatMap(it -> it.inntekter().stream())
+            .map(Inntektsperiode::beløp)
+            .reduce(Beløp::adder)
+            .map(sum -> new RapportertInntekt(inntektType, begrensTilMinimumNull(inntektType, sum.getVerdi(), periode)));
+    }
+
+    private static BigDecimal begrensTilMinimumNull(InntektType inntektType, BigDecimal sum, LocalDateInterval periode) {
+        if (sum.signum() < 0) {
+            LOGGER.info("Negativ registerinntekt av type {} for periode {} tolkes som 0", inntektType, periode);
+            return BigDecimal.ZERO;
+        }
+        return sum;
     }
 
     private static void validerBrukersRapporterteInntekterTidslinje(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<Boolean> ytelseTidslinje) {
