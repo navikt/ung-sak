@@ -45,9 +45,10 @@ In this case the caseworker is asked to determine the correct income and possibl
 
 ## Negative income from a-ordningen
 An employer can correct previously reported income, which may make the sum for a month negative (e.g. a correction reported in September for income paid in August). We only know the payment month (`Inntektspost.periode`), not which month the correction concerns, so the correction is not moved back to the earlier month.
-The income from a-ordningen is summed per income type (arbeidsinntekt/ytelse) and month, and a negative sum is interpreted as 0 NOK (`RapportertInntektMapper`). Positive income in the same month is still netted against the correction, but a negative arbeidsinntekt is not netted against ytelse. The rules for zero income from a-ordningen then apply:
-- Applicant reported no income or 0: no notification of discrepancy, no reduction, full payment.
-- Applicant reported income: discrepancy without register income, i.e. manual review by a caseworker (aksjonspunkt).
+The income from a-ordningen is summed per income type (arbeidsinntekt/ytelse) and month, and a negative sum is interpreted as 0 NOK (`RapportertInntektMapper`). Positive income in the same month is still netted against the correction, but a negative arbeidsinntekt is not netted against ytelse. The interpreted value is marked (`RapportertInntekt.erNegativRegisterinntekt()`), and `Avviksvurdering` gives `AvvikResultatType.NEGATIV_REGISTERINNTEKT` for that type, regardless of what the applicant reported. It has the highest priority (also over a discrepancy with register income for the other type), so:
+- The period always goes to manual review by a caseworker (aksjonspunkt `KONTROLLER_INNTEKT`), also when the applicant reported no income or 0, and also when the applicant has already answered a notification without a statement.
+- No notification is sent to the applicant (only `AVVIK_MED_REGISTERINNTEKT` gives a notification).
+- In the aksjonspunkt, "use register income" gives 0 for the type. The caseworker can see the individual negative income posts and may set the income manually if none of the alternatives are correct.
 
 All income used in the calculation is therefore at least 0 (the applicant's reported income and the income set by the caseworker are validated to be ≥ 0), which keeps utbetalingsgrad within 0–100 (DB constraint `chk_utbetalingsgrad_range`).
 

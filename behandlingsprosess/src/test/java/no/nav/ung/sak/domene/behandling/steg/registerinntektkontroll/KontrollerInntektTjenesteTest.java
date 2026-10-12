@@ -214,6 +214,63 @@ class KontrollerInntektTjenesteTest {
     }
 
 
+    @Test
+    void skal_opprette_aksjonspunkt_dersom_negativ_registerinntekt_og_ingen_rapportert_inntekt_fra_bruker() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
+            Set.of(),
+            Set.of(RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER))));
+
+        // Act
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, LocalDateTimeline.empty());
+
+        // Assert
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_AKSJONSPUNKT), resultat);
+    }
+
+    @Test
+    void skal_opprette_aksjonspunkt_dersom_negativ_registerinntekt_og_bruker_har_svart_uten_uttalelse() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var negativRegisterinntekt = RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER);
+        final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(Set.of(), Set.of(negativRegisterinntekt)));
+        LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje = new LocalDateTimeline<>(fom, tom,
+            new EtterlysningOgRegisterinntekt(
+                Set.of(negativRegisterinntekt),
+                new InntektskontrollEtterlysningInfo(EtterlysningStatus.MOTTATT_SVAR, false)
+            ));
+
+        // Act
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, etterlysningTidslinje);
+
+        // Assert
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_AKSJONSPUNKT), resultat);
+    }
+
+    @Test
+    void skal_opprette_aksjonspunkt_dersom_negativ_registerinntekt_for_en_type_og_avvik_med_registerinntekt_for_annen_type() {
+        // Arrange
+        final var fom = LocalDate.now().minusDays(10);
+        final var tom = LocalDate.now().plusDays(10);
+        LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
+        final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
+            Set.of(),
+            Set.of(
+                RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER),
+                new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000)))));
+
+        // Act
+        var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, LocalDateTimeline.empty());
+
+        // Assert
+        assertEquals(new LocalDateTimeline<>(fom, tom, KontrollResultatType.OPPRETT_AKSJONSPUNKT), resultat);
+    }
+
     private LocalDateTimeline<KontrollResultatType> utfør(LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje, LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter, LocalDateTimeline<EtterlysningOgRegisterinntekt> ikkeGodkjentUttalelseTidslinje) {
         KontrollerInntektInput input = new KontrollerInntektInput(
             prosessTriggerTidslinje.mapValue(it -> true),

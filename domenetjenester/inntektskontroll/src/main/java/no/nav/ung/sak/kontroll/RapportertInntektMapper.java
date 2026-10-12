@@ -134,7 +134,8 @@ public class RapportertInntektMapper {
 
     /**
      * Summerer registerinntekt for en inntektstype i perioden. Arbeidsgiver kan korrigere tidligere rapportert inntekt slik at
-     * summen for måneden blir negativ. Negativ sum tolkes som 0 kr, siden inntekt for en måned ikke kan være lavere enn 0.
+     * summen for måneden blir negativ. Negativ sum tolkes som 0 kr, siden inntekt for en måned ikke kan være lavere enn 0,
+     * og markeres slik at kontrollen alltid sender perioden til saksbehandler.
      */
     private static Optional<RapportertInntekt> summerForType(InntektType inntektType, List<InntekterForKilde> overlappendeInntekter, LocalDateInterval periode) {
         return overlappendeInntekter
@@ -143,15 +144,15 @@ public class RapportertInntektMapper {
             .flatMap(it -> it.inntekter().stream())
             .map(Inntektsperiode::beløp)
             .reduce(Beløp::adder)
-            .map(sum -> new RapportertInntekt(inntektType, begrensTilMinimumNull(inntektType, sum.getVerdi(), periode)));
+            .map(sum -> tilRapportertInntekt(inntektType, sum.getVerdi(), periode));
     }
 
-    private static BigDecimal begrensTilMinimumNull(InntektType inntektType, BigDecimal sum, LocalDateInterval periode) {
+    private static RapportertInntekt tilRapportertInntekt(InntektType inntektType, BigDecimal sum, LocalDateInterval periode) {
         if (sum.signum() < 0) {
             LOGGER.info("Negativ registerinntekt av type {} for periode {} tolkes som 0", inntektType, periode);
-            return BigDecimal.ZERO;
+            return RapportertInntekt.negativRegisterinntektTolketSomNull(inntektType);
         }
-        return sum;
+        return new RapportertInntekt(inntektType, sum);
     }
 
     private static void validerBrukersRapporterteInntekterTidslinje(LocalDateTimeline<Set<RapportertInntekt>> brukersRapporterteInntekter, LocalDateTimeline<Boolean> ytelseTidslinje) {

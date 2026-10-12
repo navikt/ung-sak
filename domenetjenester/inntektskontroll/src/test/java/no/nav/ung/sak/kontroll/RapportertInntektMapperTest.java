@@ -160,6 +160,7 @@ class RapportertInntektMapperTest {
         final var registerinntekt = registerinntekter.iterator().next();
         assertThat(registerinntekt.inntektType()).isEqualTo(InntektType.ARBEIDSTAKER_ELLER_FRILANSER);
         assertThat(registerinntekt.beløp()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(registerinntekt.erNegativRegisterinntekt()).isTrue();
     }
 
     @Test
@@ -175,6 +176,22 @@ class RapportertInntektMapperTest {
         final var registerinntekter = tidslinje.getSegment(periode.toLocalDateInterval()).getValue().registerRapporterteInntekter();
         assertThat(registerinntekter).hasSize(1);
         assertThat(registerinntekter.iterator().next().beløp()).isEqualByComparingTo(BigDecimal.valueOf(6000));
+        assertThat(registerinntekter.iterator().next().erNegativRegisterinntekt()).isFalse();
+    }
+
+    @Test
+    void skal_ikke_markere_registerinntekt_som_negativ_når_korrigering_gir_null() {
+        // Arrange
+        final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(LocalDate.of(2026, 9, 1), LocalDate.of(2026, 9, 30));
+        mockIAYMedRegisterinntekter(List.of(), periode, List.of(BigDecimal.valueOf(4000), BigDecimal.valueOf(-4000)));
+
+        // Act
+        final var tidslinje = rapportertInntektMapper.mapAlleGjeldendeRegisterOgBrukersInntekter(1L, new LocalDateTimeline<>(periode.toLocalDateInterval(), true));
+
+        // Assert
+        final var registerinntekt = tidslinje.getSegment(periode.toLocalDateInterval()).getValue().registerRapporterteInntekter().iterator().next();
+        assertThat(registerinntekt.beløp()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(registerinntekt.erNegativRegisterinntekt()).isFalse();
     }
 
     private static OppgittOpptjening lagMottattATFLInntekt(DatoIntervallEntitet periode, BigDecimal inntekt, LocalDateTime innsendt) {

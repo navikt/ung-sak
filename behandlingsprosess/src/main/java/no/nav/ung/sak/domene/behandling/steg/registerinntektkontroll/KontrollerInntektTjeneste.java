@@ -37,8 +37,8 @@ public class KontrollerInntektTjeneste {
 
         var avviksresultat = new Avviksvurdering(akseptertDifferanse).finnAvviksresultatTidslinje(gjeldendeRapporterteInntekter, relevantTidslinje);
 
-        // Avvik der registerinntekt = 0 => Aksjonspunkt
-        var avvikUtenRegisterinntektResultat = opprettAksjonspunktForAvvikUtenRegisterinntekt(avviksresultat);
+        // Avvik der registerinntekt = 0 eller negativ registerinntekt => Aksjonspunkt
+        var avvikUtenRegisterinntektResultat = opprettAksjonspunktForAvvikUtenRegisterinntektEllerNegativRegisterinntekt(avviksresultat);
         resultatTidslinje = resultatTidslinje.crossJoin(avvikUtenRegisterinntektResultat, StandardCombinators::coalesceLeftHandSide);
 
         // Inntekt fra bruker = 0 og ingen avvik => Ferdig kontrollert
@@ -64,8 +64,8 @@ public class KontrollerInntektTjeneste {
             .mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.OPPRETT_AKSJONSPUNKT));
     }
 
-    private LocalDateTimeline<Kontrollresultat> opprettAksjonspunktForAvvikUtenRegisterinntekt(LocalDateTimeline<AvvikResultatType> avviksresultat) {
-        return avviksresultat.filterValue(it -> it == AvvikResultatType.AVVIK_UTEN_REGISTERINNTEKT)
+    private LocalDateTimeline<Kontrollresultat> opprettAksjonspunktForAvvikUtenRegisterinntektEllerNegativRegisterinntekt(LocalDateTimeline<AvvikResultatType> avviksresultat) {
+        return avviksresultat.filterValue(it -> it == AvvikResultatType.AVVIK_UTEN_REGISTERINNTEKT || it == AvvikResultatType.NEGATIV_REGISTERINNTEKT)
             .mapValue(it -> Kontrollresultat.utenInntektresultat(KontrollResultatType.OPPRETT_AKSJONSPUNKT));
     }
 
