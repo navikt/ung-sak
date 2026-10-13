@@ -1,11 +1,8 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.formidling.TemplateType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.typer.Periode;
@@ -45,6 +42,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
 
         assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_NAV_KONTOR)
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
                 "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom())
@@ -142,7 +140,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
     // Uendret-brevet krever en originalbehandling å sammenligne resultatet mot, så scenarioet bygges som en revurdering.
     private Behandling lagUendretScenario(AktivitetspengerTestScenario scenario) {
-        return AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, scenario, scenario);
+        return AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, scenario, scenario, BehandlingDel.NAV_KONTOR);
     }
 
     private static Periode vurdertPeriode(LocalDate fom) {
