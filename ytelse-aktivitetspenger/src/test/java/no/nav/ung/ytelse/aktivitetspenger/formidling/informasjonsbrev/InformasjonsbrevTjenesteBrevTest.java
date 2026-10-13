@@ -31,6 +31,7 @@ import java.time.LocalDate;
 
 import static no.nav.ung.ytelse.aktivitetspenger.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -133,6 +134,22 @@ class InformasjonsbrevTjenesteBrevTest {
         assertThat(bestilling.getMottaker().getMottakerId()).isEqualTo(behandling.getAktørId().getAktørId());
         assertThat(bestilling.getMottaker().getMottakerIdType()).isEqualTo(IdType.AKTØRID);
         assertThat(bestilling.isVedtaksbrev()).isFalse();
+    }
+
+    @Test
+    void skal_feile_hvis_mottaker_ikke_er_gyldig_valg() {
+        AktivitetspengerTestScenario scenario = AktivitetspengerFørstegangsbehandlingScenarioer.innvilgetKunLavSats(LocalDate.of(2025, 8, 1));
+        Behandling behandling = lagStandardBehandling(scenario);
+
+        var request = new InformasjonsbrevBestillingRequest(
+            behandling.getId(), DokumentMalType.GENERELT_FRITEKSTBREV,
+            new InformasjonsbrevMottakerDto("1234567890123", IdType.AKTØRID),
+            new GenereltFritekstBrevDto("overskrift", "brødtekst")
+        );
+
+        assertThatThrownBy(() -> informasjonsbrevTjeneste.forhåndsvis(request, AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_IDENT, true))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Mottaker er ikke et gyldig valg");
     }
 
     private Behandling lagStandardBehandling(AktivitetspengerTestScenario scenario) {

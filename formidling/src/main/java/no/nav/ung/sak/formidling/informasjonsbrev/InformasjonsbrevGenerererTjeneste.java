@@ -64,22 +64,25 @@ public class InformasjonsbrevGenerererTjeneste {
     public GenerertBrev genererInformasjonsbrev(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
         var behandling = behandlingRepository.hentBehandling(informasjonsbrevBestillingInput.behandlingId());
 
-        var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
+        if (!behandling.getAktørId().equals(informasjonsbrevBestillingInput.mottaker())) {
+            throw new IllegalArgumentException("Støtter kun informasjonsbrev til bruker på behandlingen");
+        }
+        var mottaker = brevMottakerTjeneste.hentMottaker(behandling);
         var bygger = bestemBygger(informasjonsbrevBestillingInput.dokumentMalType(), behandling.getFagsakYtelseType());
         var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
         BrevSignaturDto signatur = lagSignatur(informasjonsbrevBestillingInput.bestillerIdent());
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), signatur, behandling.getFagsakYtelseType()),
+                FellesDto.lag(new MottakerDto(mottaker.navn(), mottaker.fnr()), signatur, behandling.getFagsakYtelseType()),
                 innhold.templateInnholdDto()
             ));
 
         PdfGenDokument dokument = pdfGen.lagDokument(input, informasjonsbrevBestillingInput.kunHtml());
         return new GenerertBrev(
             dokument,
-            pdlMottaker,
-            pdlMottaker,
+            mottaker,
+            mottaker,
             informasjonsbrevBestillingInput.dokumentMalType(),
             innhold.templateType()
         );
