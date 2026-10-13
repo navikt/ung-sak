@@ -36,8 +36,18 @@ public record VilkårLivsoppholdsytelserPeriodeVurderingDto(
     @Size(max = 10000)
     @Valid
     @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
-    String fritekstVurderingBrev
+    String fritekstVurderingBrev,
+
+    @JsonProperty("ytelseNavn")
+    @Size(max = 200)
+    @Valid
+    @Pattern(regexp = Patterns.FRITEKST, message = Patterns.FRITEKST_MISMATCH_MELDING)
+    String ytelseNavn
 ) {
+
+    public VilkårLivsoppholdsytelserPeriodeVurderingDto(Periode periode, boolean erVilkårOppfylt, AndreLivsoppholdsytelserIkkeOppfyltÅrsak avslagsårsak, String begrunnelse, String fritekstVurderingBrev) {
+        this(periode, erVilkårOppfylt, avslagsårsak, begrunnelse, fritekstVurderingBrev, null);
+    }
 
     @AssertFalse(message = "Avslagsårsak må være satt dersom vilkåret ikke er oppfylt")
     public boolean isManglerAvslagsårsak() {

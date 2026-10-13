@@ -11,10 +11,15 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline.JoinStyle;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
+import no.nav.ung.kodeverk.behandling.aksjonspunkt.SkjermlenkeType;
 import no.nav.ung.kodeverk.geografisk.Landkoder;
+import no.nav.ung.kodeverk.historikk.HistorikkAktør;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingskontroll.*;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.Historikkinnslag;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagLinjeBuilder;
+import no.nav.ung.sak.behandlingslager.behandling.historikk.HistorikkinnslagRepository;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapGrunnlag;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapPeriode;
 import no.nav.ung.sak.behandlingslager.behandling.medlemskap.OppgittForutgåendeMedlemskapRepository;
@@ -43,11 +48,14 @@ import static no.nav.ung.kodeverk.behandling.BehandlingStegType.VURDER_FORUTGÅE
 public class ForutgåendeMedlemskapsvilkårSteg extends VilkårVurderingSteg {
 
     private static final Logger log = LoggerFactory.getLogger(ForutgåendeMedlemskapsvilkårSteg.class);
+    public static final String MEDLEMSKAP_HISTORIKKINNSLAG_TEMPLATE = "Medlemskap på %s ble vurdert til %s";
 
     private VilkårResultatRepository vilkårResultatRepository;
     private OppgittForutgåendeMedlemskapRepository forutgåendeMedlemskapRepository;
     private MottatteDokumentRepository mottatteDokumentRepository;
     private ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste;
+    private HistorikkinnslagRepository historikkinnslagRepository;
+
     public ForutgåendeMedlemskapsvilkårSteg() {
     }
 
@@ -58,12 +66,13 @@ public class ForutgåendeMedlemskapsvilkårSteg extends VilkårVurderingSteg {
                                             @Any Instance<VilkårsPerioderTilVurderingTjeneste> perioderTilVurderingTjenester,
                                             BehandlingRepository behandlingRepository,
                                             ManuelleVilkårRekkefølgeTjeneste manuelleVilkårRekkefølgeTjeneste,
-                                            VilkårTjeneste vilkårTjeneste) {
+                                            VilkårTjeneste vilkårTjeneste, HistorikkinnslagRepository historikkinnslagRepository) {
         super(vilkårResultatRepository, vilkårTjeneste, behandlingRepository, perioderTilVurderingTjenester);
         this.vilkårResultatRepository = vilkårResultatRepository;
         this.forutgåendeMedlemskapRepository = forutgåendeMedlemskapRepository;
         this.mottatteDokumentRepository = mottatteDokumentRepository;
         this.manuelleVilkårRekkefølgeTjeneste = manuelleVilkårRekkefølgeTjeneste;
+        this.historikkinnslagRepository = historikkinnslagRepository;
     }
 
     @Override
@@ -113,8 +122,41 @@ public class ForutgåendeMedlemskapsvilkårSteg extends VilkårVurderingSteg {
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.AVKLAR_GYLDIG_MEDLEMSKAP));
         }
 
+        var perioderMedEndretUtfall = finnPerioderSomIkkeAlleredeErOppfylt(behandlingId, perioderTilVurdering);
         oppfyllVilkår(behandlingId, forutgåendeMedlemskapslandTidslinje, stegerVurderinger);
+        if (!perioderMedEndretUtfall.isEmpty()) {
+            opprettHistorikkinnslag(behandlingId, fagsakId, perioderMedEndretUtfall);
+        }
+
         return BehandleStegResultat.utførtUtenAksjonspunkter();
+    }
+
+    private List<LocalDateSegment<Boolean>> finnPerioderSomIkkeAlleredeErOppfylt(Long behandlingId, SequencedCollection<LocalDateSegment<Boolean>> perioderTilVurdering) {
+        var tidligereOppfylt = vilkårResultatRepository.hent(behandlingId)
+            .getVilkårTimeline(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
+            .filterValue(p -> p.getUtfall() == Utfall.OPPFYLT);
+        return perioderTilVurdering.stream()
+            .filter(p -> !new LocalDateTimeline<>(p.getLocalDateInterval(), true).disjoint(tidligereOppfylt).isEmpty())
+            .toList();
+    }
+
+    private void opprettHistorikkinnslag(Long behandlingId, Long fagsakId, SequencedCollection<LocalDateSegment<Boolean>> perioderVurdert) {
+        var innslag = new Historikkinnslag.Builder()
+            .medFagsakId(fagsakId)
+            .medBehandlingId(behandlingId)
+            .medAktør(HistorikkAktør.VEDTAKSLØSNINGEN)
+            .medTittel(SkjermlenkeType.FORUTGÅENDE_MEDLEMSKAP);
+
+        perioderVurdert.stream()
+            .map(LocalDateSegment::getFom)
+            .forEach(virkningstidspunkt -> innslag.addLinje(HistorikkinnslagLinjeBuilder.plainTekstLinje(
+                MEDLEMSKAP_HISTORIKKINNSLAG_TEMPLATE.formatted(
+                    HistorikkinnslagLinjeBuilder.format(virkningstidspunkt),
+                    HistorikkinnslagLinjeBuilder.format(Utfall.OPPFYLT)
+                    ))));
+
+
+        historikkinnslagRepository.lagre(innslag.build());
     }
 
     private static StegVurdering vurder(LocalDateInterval periode, LocalDateTimeline<Landkoder> landTidslinje) {

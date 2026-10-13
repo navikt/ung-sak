@@ -8,6 +8,7 @@ import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.BostedsavklaringKildeType;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.GenereltVilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.test.util.UnitTestLookupInstanceImpl;
@@ -79,6 +80,6 @@ class VilkårsavklaringOgVurderingTidslinjeUtlederTest {
     }
 
     private VilkårsvurderingResultat enkelVurdering(DatoIntervallEntitet periode) {
-        return new VilkårsvurderingResultat(VilkårType.BOSTEDSVILKÅR, true, null, false, null, null, null, null);
+        return new GenereltVilkårsvurderingResultat(VilkårType.BOSTEDSVILKÅR, true, null, false, null, null, null, null);
     }
 }

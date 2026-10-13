@@ -28,7 +28,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.ForutgåendeMedlemskapResponse;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapDto;
 import no.nav.ung.sak.kontrakt.vilkår.medlemskap.MedlemskapPeriodeInfoDto;
@@ -88,8 +87,8 @@ public class ForutgåendeMedlemskapTjeneste {
     }
 
 
-    public ForutgåendeMedlemskapResponse hentMedlemskapOgVilkårSomDto(BehandlingUuidDto behandlingUuid) {
-        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
+    public ForutgåendeMedlemskapResponse hentMedlemskapOgVilkårSomDto(UUID behandlingUuid) {
+        Behandling behandling = behandlingRepository.hentBehandling(behandlingUuid);
 
         var medlemskap = hentMedlemskapForBehandlingSomDto(behandling.getId());
 

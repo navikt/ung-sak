@@ -64,7 +64,7 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
     BistandsvilkårResultatPeriode(BistandsvilkårResultatPeriode kilde) {
         this(kilde.getPeriode(), kilde);
     }
-  
+
     public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
         this(periode,
             vilkårsvurderingResultat.godkjent(),
@@ -126,7 +126,7 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
     }
 
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+        return new GenereltVilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {

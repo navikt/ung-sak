@@ -45,10 +45,23 @@ public class AktivitetspengerOpphørScenarioer {
     public static AktivitetspengerTestScenario opphørPgaAndreLivsoppholdsytelser(LocalDate fom,
                                                                                  AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
                                                                                  String fritekstTilBrev) {
+        return opphørPgaAndreLivsoppholdsytelser(fom, ikkeOppfyltÅrsak, fritekstTilBrev, null);
+    }
+
+    public static AktivitetspengerTestScenario opphørPgaAnnenLivsoppholdsytelse(LocalDate fom,
+                                                                                String fritekstFraVarsel) {
+        return opphørPgaAndreLivsoppholdsytelser(
+            fom, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, null, fritekstFraVarsel);
+    }
+
+    private static AktivitetspengerTestScenario opphørPgaAndreLivsoppholdsytelser(LocalDate fom,
+                                                                                  AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak,
+                                                                                  String fritekstTilBrev,
+                                                                                  String fritekstFraVarsel) {
         var opphørtVilkårPeriode = opphørtPeriode(fom);
 
         var vurderinger = InngangsvilkårVurderingTestData.builder()
-            .medAndreYtelser(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev)
+            .medAndreYtelser(opphørtVilkårPeriode, false, ikkeOppfyltÅrsak, fritekstTilBrev, fritekstFraVarsel)
             .build();
 
         return opphørBuilder(fom, opphørtVilkårPeriode)
@@ -57,7 +70,8 @@ public class AktivitetspengerOpphørScenarioer {
             .medVilkår(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
                 avslåttTidslinje(opphørtVilkårPeriode, Avslagsårsak.SØKER_HAR_ANNEN_LIVSOPPHOLDSYTELSE, fritekstTilBrev))
             .medVilkårsavklaringer(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
-                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER)))
+                List.of(VilkårsavklaringTestData.opphør(opphørtVilkårPeriode, ikkeOppfyltÅrsak, AndreLivsoppholdsytelserAvklaringKildeType.BRUKER)
+                    .medFritekstTilVarsel(fritekstFraVarsel)))
             .build();
     }
 
