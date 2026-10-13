@@ -222,7 +222,7 @@ class KontrollerInntektTjenesteTest {
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
             Set.of(),
-            Set.of(RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER))));
+            Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(-5830.54)))));
 
         // Act
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, LocalDateTimeline.empty());
@@ -237,7 +237,7 @@ class KontrollerInntektTjenesteTest {
         final var fom = LocalDate.now().minusDays(10);
         final var tom = LocalDate.now().plusDays(10);
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
-        final var negativRegisterinntekt = RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER);
+        final var negativRegisterinntekt = new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(-5830.54));
         final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(Set.of(), Set.of(negativRegisterinntekt)));
         LocalDateTimeline<EtterlysningOgRegisterinntekt> etterlysningTidslinje = new LocalDateTimeline<>(fom, tom,
             new EtterlysningOgRegisterinntekt(
@@ -261,7 +261,7 @@ class KontrollerInntektTjenesteTest {
         final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
             Set.of(),
             Set.of(
-                RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER),
+                new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(-5830.54)),
                 new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000)))));
 
         // Act

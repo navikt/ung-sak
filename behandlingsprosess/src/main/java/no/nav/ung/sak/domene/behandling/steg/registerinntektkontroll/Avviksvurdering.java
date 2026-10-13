@@ -45,10 +45,10 @@ public class Avviksvurdering {
     }
 
     private AvvikResultatType finnKontrollresultatForType(InntektType inntektType, Set<RapportertInntekt> registerinntekter, Set<RapportertInntekt> brukersInntekter) {
-        if (harNegativRegisterinntekt(inntektType, registerinntekter)) {
+        final var register = summer(inntektType, registerinntekter);
+        if (register.signum() < 0) {
             return AvvikResultatType.NEGATIV_REGISTERINNTEKT;
         }
-        final var register = summer(inntektType, registerinntekter);
         final var bruker = summer(inntektType, brukersInntekter);
 
         final var differanse = register.subtract(bruker).abs();
@@ -61,11 +61,6 @@ public class Avviksvurdering {
         } else {
             return AvvikResultatType.INGEN_AVVIK;
         }
-    }
-
-    private static boolean harNegativRegisterinntekt(InntektType inntektType, Set<RapportertInntekt> registerinntekter) {
-        return registerinntekter.stream()
-            .anyMatch(inntekt -> inntekt.inntektType().equals(inntektType) && inntekt.erNegativRegisterinntekt());
     }
 
     private static BigDecimal summer(InntektType inntektType, Set<RapportertInntekt> registerinntekter) {

@@ -240,7 +240,7 @@ class EtterlysningutlederKontrollerInntektTest {
         LocalDateTimeline<Set<BehandlingÅrsakType>> prosessTriggerTidslinje = lagProsesstriggerTidslinjeForKontroll(fom, tom);
         final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
             Set.of(),
-            Set.of(RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER))));
+            Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(-5830.54)))));
 
         // Act
         var resultat = utfør(prosessTriggerTidslinje, gjeldendeRapporterteInntekter, LocalDateTimeline.empty());
@@ -258,7 +258,7 @@ class EtterlysningutlederKontrollerInntektTest {
         final var gjeldendeRapporterteInntekter = new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
             Set.of(),
             Set.of(
-                RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER),
+                new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(-5830.54)),
                 new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(10_000)))));
 
         // Act
@@ -303,7 +303,7 @@ class EtterlysningutlederKontrollerInntektTest {
     private static LocalDateTimeline<RapporterteInntekter> lagRapporterteInntekterMedNegativRegisterinntekt(LocalDate fom, LocalDate tom, int bruker) {
         return new LocalDateTimeline<>(fom, tom, new RapporterteInntekter(
             Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(bruker))),
-            Set.of(RapportertInntekt.negativRegisterinntektTolketSomNull(InntektType.ARBEIDSTAKER_ELLER_FRILANSER))));
+            Set.of(new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(-5830.54)))));
     }
 
     private static LocalDateTimeline<EtterlysningOgRegisterinntekt> lagEtterlysningMedRegisterinntekt(LocalDate fom, LocalDate tom, int register, EtterlysningStatus status) {
