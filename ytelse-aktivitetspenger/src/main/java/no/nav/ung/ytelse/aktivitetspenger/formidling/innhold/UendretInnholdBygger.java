@@ -57,7 +57,7 @@ public class UendretInnholdBygger implements VedtaksbrevInnholdBygger {
             .map(VilkårsvurderingResultat::fritekstVurderingBrev)
             .filter(Objects::nonNull)
             .findFirst()
-            .orElse(null);
+            .orElseThrow(() -> new IllegalStateException("Uendret vedtaksbrev må ha fritekst. behandlingId: " + behandling.getId()));
 
         return lagDto(vilkårsavklaringOgVurdering.getFirst().vilkårsavklaring(), fritekst);
     }
