@@ -38,8 +38,8 @@ public class KontrollerInntektTjeneste {
         var avviksresultat = new Avviksvurdering(akseptertDifferanse).finnAvviksresultatTidslinje(gjeldendeRapporterteInntekter, relevantTidslinje);
 
         // Avvik der registerinntekt = 0 eller negativ registerinntekt => Aksjonspunkt
-        var avvikUtenRegisterinntektResultat = opprettAksjonspunktForAvvikUtenRegisterinntektEllerNegativRegisterinntekt(avviksresultat);
-        resultatTidslinje = resultatTidslinje.crossJoin(avvikUtenRegisterinntektResultat, StandardCombinators::coalesceLeftHandSide);
+        var avvikUtenRegisterinntektEllerNegativRegisterInntektResultat = opprettAksjonspunktForAvvikUtenRegisterinntektEllerNegativRegisterinntekt(avviksresultat);
+        resultatTidslinje = resultatTidslinje.crossJoin(avvikUtenRegisterinntektEllerNegativRegisterInntektResultat, StandardCombinators::coalesceLeftHandSide);
 
         // Inntekt fra bruker = 0 og ingen avvik => Ferdig kontrollert
         var ingenAvvikUtenRapportertInntektFraBruker = lagResultatDersomIngenRapportertInntektFraBrukerOgRegister(avviksresultat, gjeldendeRapporterteInntekter);
