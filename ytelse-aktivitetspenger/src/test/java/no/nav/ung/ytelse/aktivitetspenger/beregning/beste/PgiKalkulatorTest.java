@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 import java.time.Month;
 import java.time.Year;
 import java.util.List;
+import java.util.Set;
 
 import static no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningTjeneste.lagBeregningInput;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -112,6 +113,23 @@ class PgiKalkulatorTest {
         )).avgrensÅrsinntekterUtenOppjustering();
 
         assertThat(resultat.get(Year.of(2024))).isEqualByComparingTo(new BigDecimal(733_350));
+    }
+
+    @Test
+    void finnÅrAvkortetMotSeksG_gir_kun_år_med_inntekt_over_6Gsnitt() {
+        var år2024 = Year.of(2024);
+        // 6G snitt 2024 = 733 350, 6G snitt 2023 = 6 * 116 239 = 697 434
+        var nøyaktigSeksG2024 = lagInntektspost(BigDecimal.valueOf(733_350), årsperiodeAv(år2024));
+        var overSeksG2023 = lagInntektspost(BigDecimal.valueOf(697_500), årsperiodeAv(Year.of(2023)));
+        var underSeksG2022 = lagInntektspost(BigDecimal.valueOf(100_000), årsperiodeAv(Year.of(2022)));
+
+        var resultat = new PgiKalkulator(lagBeregningInput(
+            år2024,
+            år2024.atDay(1),
+            List.of(nøyaktigSeksG2024, overSeksG2023, underSeksG2022)
+        )).finnÅrAvkortetMotSeksG();
+
+        assertThat(resultat).isEqualTo(Set.of(Year.of(2023)));
     }
 
     private static Periode årsperiodeAv(Year år) {

@@ -23,6 +23,8 @@ import no.nav.ung.sak.formidling.vedtak.satsendring.SatsEndringUtlederInput;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.beregning.AktivitetspengerSatsType;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerGrunnlagRepository;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.PgiKalkulator;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.InnvilgelseDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.SatsOgBeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.UtbetalingDto;
@@ -30,7 +32,6 @@ import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.B
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.BeregningDto;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.dto.innvilgelse.beregning.SatsgrunnlagDto;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.SequencedCollection;
@@ -152,7 +153,7 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var harLavSatstype = UngdomsytelseSatsType.LAV.equals(tidligsteSatsOgBeregning.satsGrunnlag().satsType());
 
         var beregningsgrunnlag = BEREGNINGSGRUNNLAG.equals(grunnsatsType) ?
-            lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning) :
+            lagBeregningsgrunnlagDto(tidligsteSatsOgBeregning.beregningsgrunnlag()) :
             null;
 
         var minsteYtelsegrunnlag = MINSTEYTELSE.equals(grunnsatsType) ?
@@ -201,21 +202,20 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         );
     }
 
-    private static BeregningDto lagBeregningsgrunnlagDto(AktivitetspengerSatser satser) {
-        var beregningsgrunnlag = satser.beregningsgrunnlag();
+    // Siste lignede år avkortet gir alltid 6G i resultatet, fordi det da er minst like høyt som gjennomsnittet av de avkortede årene
+    private static BeregningDto lagBeregningsgrunnlagDto(Beregningsgrunnlag beregningsgrunnlag) {
+        var sisteLignedeÅr = beregningsgrunnlag.getSisteLignedeÅr();
+        var beregningInput = beregningsgrunnlag.getBeregningInput();
+        var årAvkortetMotSeksG = new PgiKalkulator(beregningInput).finnÅrAvkortetMotSeksG();
+        var avkortetMotSeksG = årAvkortetMotSeksG.contains(sisteLignedeÅr) || årAvkortetMotSeksG.size() > 2;
+
         return new BeregningDto(
-            beregningsgrunnlag.getSisteLignedeÅr().toString(),
+            sisteLignedeÅr.toString(),
             beregningsgrunnlag.utledBesteBeregningResultatType(),
             beregningsgrunnlag.getBeregnetPrAar(),
             tilHeltall(beregningsgrunnlag.getDagsats()),
-            erAvkortetMotSeksG(beregningsgrunnlag.getBeregnetPrAar(), satser.satsGrunnlag().grunnbeløp())
+            avkortetMotSeksG
         );
-    }
-
-    // Beregnet årsinntekt er allerede avkortet til 6G, med avrundingsavvik fra oppjusteringsfaktoren
-    private static boolean erAvkortetMotSeksG(BigDecimal beregnetPrAar, BigDecimal grunnbeløp) {
-        var seksGMinusToleranse = grunnbeløp.multiply(BigDecimal.valueOf(6)).subtract(BigDecimal.ONE);
-        return beregnetPrAar.compareTo(seksGMinusToleranse) >= 0;
     }
 
     private LocalDate bestemDagensDato() {

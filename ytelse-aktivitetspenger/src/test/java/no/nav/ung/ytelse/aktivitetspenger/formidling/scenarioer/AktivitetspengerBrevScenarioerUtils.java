@@ -20,6 +20,7 @@ import no.nav.ung.sak.ytelse.ReduksjonBeregner;
 import no.nav.ung.sak.ytelse.TilkjentYtelseBeregner;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.AktivitetspengerSatser;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningInput;
+import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.BeregningTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.beste.Beregningsgrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsGrunnlag;
 import no.nav.ung.ytelse.aktivitetspenger.beregnytelse.TotalBeløpForPeriodeMapper;
@@ -107,12 +108,22 @@ public class AktivitetspengerBrevScenarioerUtils {
     }
 
     /**
-     * Beregningsgrunnlag der siste år-inntekt er avkortet til 6G, med avrundingsavvik fra oppjusteringsfaktoren.
+     * Beregningsgrunnlag der siste lignede år er over 6G, slik at beregnet årsinntekt avkortes til 6G.
      */
     public static Beregningsgrunnlag lagBeregningsgrunnlagAvkortetMotSeksG(LocalDate skjæringstidspunkt) {
-        var seksGMedAvrundingsavvik = hentGrunnbeløpFor(skjæringstidspunkt).multiply(BigDecimal.valueOf(6)).subtract(new BigDecimal("0.0001"));
-        var input = new BeregningInput(new Beløp(1_000_000), new Beløp(1_000_000), new Beløp(1_000_000), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
-        return new Beregningsgrunnlag(input, seksGMedAvrundingsavvik, seksGMedAvrundingsavvik.subtract(BigDecimal.ONE), seksGMedAvrundingsavvik, seksGMedAvrundingsavvik.multiply(new BigDecimal("0.66")), "test-sporing");
+        return lagBesteberegning(skjæringstidspunkt, 1_000_000, 1_000_000, 1_000_000);
+    }
+
+    private static Beregningsgrunnlag lagBesteberegning(LocalDate skjæringstidspunkt, int pgi1, int pgi2, int pgi3) {
+        var input = new BeregningInput(new Beløp(pgi1), new Beløp(pgi2), new Beløp(pgi3), skjæringstidspunkt, Year.from(skjæringstidspunkt).minusYears(1));
+        var resultat = BeregningTjeneste.avgjørBesteberegning(input);
+        return new Beregningsgrunnlag(
+            input,
+            resultat.getÅrsinntektSisteÅr(),
+            resultat.getÅrsinntektSisteTreÅr(),
+            resultat.getBeregningsgrunnlag(),
+            resultat.getBeregningsgrunnlag().multiply(BigDecimal.valueOf(0.66)),
+            resultat.getRegelSporing());
     }
 
     public static LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelsePerioder(

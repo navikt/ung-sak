@@ -26,7 +26,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     private static final String FRITEKST = "Du får likevel aktivitetspenger fordi vilkåret fortsatt er oppfylt.";
 
     UendretInnholdByggerTest() {
-        super(1, "Nav har ikke endret aktivitetspengene dine");
+        super(2, "Nav har ikke endret aktivitetspengene dine");
     }
 
     @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga bosted, men vilkåret er fortsatt oppfylt")

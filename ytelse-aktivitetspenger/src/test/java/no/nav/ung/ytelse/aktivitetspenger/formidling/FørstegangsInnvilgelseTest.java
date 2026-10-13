@@ -165,7 +165,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
             );
     }
 
-    @DisplayName("Førstegangsinnvilgelse med besteberegning avkortet mot 6G forklarer avkortingen")
+    @DisplayName("Førstegangsinnvilgelse med siste år over 6G forklarer at beregnet årsinntekt er avkortet til 6G")
     @Test
     void besteberegningAvkortetMotSeksG() {
         var fom = LocalDate.of(2025, 8, 1);
@@ -176,6 +176,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
 
         assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains("har vi brukt årsinntekten din for 2024 på 780 960 kroner.")
             .asPlainTextContains("For å finne dagsatsen din, har vi regnet ut hva 66 prosent av 780 960 kroner er. " +
                 "Vi har brukt en årsinntekt som tilsvarer seks ganger grunnbeløpet fordi det er det maksimale beløpet Nav kan beregne aktivitetspengene ut fra.");
     }

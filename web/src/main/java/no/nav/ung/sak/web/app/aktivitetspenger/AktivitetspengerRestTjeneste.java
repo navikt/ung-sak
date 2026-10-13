@@ -171,7 +171,7 @@ public class AktivitetspengerRestTjeneste {
     }
 
     private static BeregningsgrunnlagDto mapTilBeregningsgrunnlagDto(Beregningsgrunnlag grunnlag, List<Inntektspost> inntektsposter) {
-        BeregningInput beregningInput = grunnlag.getBeregningInput().getBeregningInput(grunnlag.getSkjæringstidspunkt());
+        BeregningInput beregningInput = grunnlag.getBeregningInput();
         PgiKalkulator pgiKalkulator = new PgiKalkulator(beregningInput);
         Map<Year, BigDecimal> sumAvkortetPerÅr = pgiKalkulator.avgrensÅrsinntekterUtenOppjustering();
         Map<Year, BigDecimal> sumAvkortetOgOppjustertPerÅr = pgiKalkulator.avgrensOgOppjusterÅrsinntekter();
