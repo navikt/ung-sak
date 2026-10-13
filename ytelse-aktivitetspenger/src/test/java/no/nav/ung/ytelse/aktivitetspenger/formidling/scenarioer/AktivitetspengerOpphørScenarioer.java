@@ -4,23 +4,12 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserAvklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
-import no.nav.ung.kodeverk.vilkår.Utfall;
-import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.kodeverk.vilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.trigger.Trigger;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.beregning.minstesats.AktivitetspengerSatsPeriode;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.InngangsvilkårVurderingTestData;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårsavklaringTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -179,7 +168,7 @@ public class AktivitetspengerOpphørScenarioer {
             .medBeregningsgrunnlag(beregningsgrunnlag)
             .medTilkjentYtelse(tilkjentYtelsePerioder(lagSatserTidslinje(satsGrunnlagTidslinje, beregningsgrunnlag),
                 new LocalDateInterval(fom, opphørtVilkårPeriode.getFom().minusDays(1))))
-            .medAldersvilkår(new LocalDateTimeline<>(p, Utfall.OPPFYLT))
+            .medVilkår(VilkårType.ALDERSVILKÅR, new LocalDateTimeline<>(p, VilkårUtfall.oppfylt()))
             .medFødselsdato(fødselsdato);
     }
 }

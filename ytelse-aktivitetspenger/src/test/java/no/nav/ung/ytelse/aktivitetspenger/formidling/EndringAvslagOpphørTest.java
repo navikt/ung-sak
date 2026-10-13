@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
@@ -38,6 +39,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
 
         assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_NAV_KONTOR)
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
@@ -332,7 +334,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
     private Behandling lagBehandling(AktivitetspengerTestScenario scenario) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(scenario);
+            .medAktivitetspengerTestGrunnlag(scenario)
+            .medBehandlingsansvarlig(BehandlingDel.NAV_KONTOR);
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);
