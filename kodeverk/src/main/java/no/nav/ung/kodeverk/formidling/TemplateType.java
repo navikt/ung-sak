@@ -27,6 +27,7 @@ public enum TemplateType {
     AKTIVITETSPENGER_OPPHØR("opphør", "aktivitetspenger", "Opphør av aktivitetspenger"),
     AKTIVITETSPENGER_ENDRING_AVSLAG("endring_avslag", "aktivitetspenger", "Endring til ikke oppfylt periode"),
     AKTIVITETSPENGER_UENDRET("uendret", "aktivitetspenger", "Uendret vedtak"),
+    AKTIVITETSPENGER_GENERELT_FRITEKSTBREV("generelt_fritekstbrev", "aktivitetspenger", "Generelt fritekstbrev"),
 
     KLAGE_AVVIST("avvist", "klage", "Avvist klage grunnet formkrav"),
     KLAGE_MEDHOLD("medhold", "klage", "Medhold i klage - omgjøres"),

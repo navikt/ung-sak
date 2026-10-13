@@ -11,17 +11,17 @@ import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingRepository;
 import no.nav.ung.sak.behandlingslager.formidling.bestilling.BrevbestillingStatusType;
 import no.nav.ung.sak.db.util.JpaExtension;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
 import no.nav.ung.sak.formidling.GenerertBrev;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.PdlKlientFake;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.BrevScenarioerUtils;
-import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevBestillingRequest;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.InformasjonsbrevMottakerDto;
-import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.TestScenarioBuilder;
+import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestRepositories;
 import no.nav.ung.sak.test.util.behandling.ungdomsprogramytelse.UngTestScenario;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.BrevTestUtils;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.PdlKlientFake;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.BrevScenarioerUtils;
+import no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.scenarioer.FørstegangsbehandlingScenarioer;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,6 +30,7 @@ import java.time.LocalDate;
 
 import static no.nav.ung.ytelse.ungdomsprogramytelsen.formidling.HtmlAssert.assertThatHtml;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(CdiAwareExtension.class)
 @ExtendWith(JpaExtension.class)
@@ -135,6 +136,23 @@ class InformasjonsbrevTjenesteBrevTest {
         assertThat(bestilling.isVedtaksbrev()).isFalse();
 
     }
+
+    @Test
+    void skal_feile_hvis_mottaker_ikke_er_gyldig_valg() {
+        UngTestScenario scenario = FørstegangsbehandlingScenarioer.innvilget19år(LocalDate.of(2024, 12, 1));
+        Behandling behandling = lagStandardBehandling(scenario);
+
+        var request = new InformasjonsbrevBestillingRequest(
+            behandling.getId(), DokumentMalType.GENERELT_FRITEKSTBREV,
+            new InformasjonsbrevMottakerDto("1234567890123", IdType.AKTØRID),
+            new GenereltFritekstBrevDto("overskrift", "brødtekst")
+        );
+
+        assertThatThrownBy(() -> informasjonsbrevTjeneste.forhåndsvis(request, BrevScenarioerUtils.SAKSBEHANDLER1_IDENT, true))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Mottaker er ikke et gyldig valg");
+    }
+
     private Behandling lagStandardBehandling(UngTestScenario scenario) {
 
         return TestScenarioBuilder.builderMedSøknad()
