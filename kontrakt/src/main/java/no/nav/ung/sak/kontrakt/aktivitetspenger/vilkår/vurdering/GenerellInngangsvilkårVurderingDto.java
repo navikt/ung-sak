@@ -15,18 +15,22 @@ public record GenerellInngangsvilkårVurderingDto(
     @Valid
     Periode periode,
 
+    @NotNull
     boolean erVilkårOppfylt,
 
     String avslagsårsak,
 
+    @NotNull
     boolean erManuellVurdering,
 
     String begrunnelse,
 
     String fritekstVurderingBrev,
 
+    @NotNull
     String vurdertAv,
 
+    @NotNull
     LocalDateTime vurdertTidspunkt
 ) implements InngangsvilkårVurderingDto {
 }

@@ -29,8 +29,10 @@ import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingR
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingerResponse;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingerResponse;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
@@ -78,11 +80,11 @@ public class InngangsvilkårVurderingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @CacheControl()
-    public List<InngangsvilkårVurderingDto> hentInngangsvilkårVurderinger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public InngangsvilkårVurderingerResponse hentInngangsvilkårVurderinger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
-            .map(grunnlag -> tilVurderinger(behandling, grunnlag))
-            .orElse(List.of());
+            .map(grunnlag -> new InngangsvilkårVurderingerResponse(tilVurderinger(behandling, grunnlag)))
+            .orElseGet(() -> new InngangsvilkårVurderingerResponse(List.of()));
     }
 
     @GET
@@ -93,11 +95,11 @@ public class InngangsvilkårVurderingRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     @CacheControl()
-    public List<AndreLivsoppholdsytelserVurderingDto> hentAndreLivsoppholdsytelserVurderinger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
+    public AndreLivsoppholdsytelserVurderingerResponse hentAndreLivsoppholdsytelserVurderinger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
-            .map(grunnlag -> tilLivsoppholdVurderinger(behandling, grunnlag))
-            .orElse(List.of());
+            .map(grunnlag -> new AndreLivsoppholdsytelserVurderingerResponse(tilLivsoppholdVurderinger(behandling, grunnlag)))
+            .orElseGet(() -> new AndreLivsoppholdsytelserVurderingerResponse(List.of()));
     }
 
     private List<InngangsvilkårVurderingDto> tilVurderinger(Behandling behandling, AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag) {
@@ -123,6 +125,7 @@ public class InngangsvilkårVurderingRestTjeneste {
             .map(s -> {
                 var v = (AndreLivsoppholdsytelserVurderingResultat) s.getValue();
                 return new AndreLivsoppholdsytelserVurderingDto(
+                    VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR,
                     new Periode(s.getFom(), s.getTom()),
                     v.godkjent(),
                     (AndreLivsoppholdsytelserIkkeOppfyltÅrsak) v.ikkeOppfyltÅrsak(),

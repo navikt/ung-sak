@@ -79,15 +79,15 @@ class InngangsvilkårVurderingRestTjenesteTest {
 
     @Test
     void uten_grunnlag_gir_tomme_lister() {
-        assertThat(tjeneste.hentInngangsvilkårVurderinger(behandlingUuid)).isEmpty();
-        assertThat(tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid)).isEmpty();
+        assertThat(tjeneste.hentInngangsvilkårVurderinger(behandlingUuid).vurderinger()).isEmpty();
+        assertThat(tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid).vurderinger()).isEmpty();
     }
 
     @Test
     void andre_livsoppholdsytelser_gir_ytelseNavn_og_fritekst_til_brev_sortert_på_periode() {
         lagreLivsoppholdVurderinger();
 
-        var vurderinger = tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid);
+        var vurderinger = tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid).vurderinger();
 
         assertThat(vurderinger).containsExactly(livsoppholdOppfylt(), livsoppholdIkkeOppfylt());
     }
@@ -98,7 +98,7 @@ class InngangsvilkårVurderingRestTjenesteTest {
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
             new BostedsvilkårResultatPeriode(tilIntervall(JAN), false, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true, "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT)));
 
-        var vurderinger = tjeneste.hentInngangsvilkårVurderinger(behandlingUuid);
+        var vurderinger = tjeneste.hentInngangsvilkårVurderinger(behandlingUuid).vurderinger();
 
         assertThat(vurderinger).containsExactly(
             new GenerellInngangsvilkårVurderingDto(VilkårType.BOSTEDSVILKÅR, JAN, false, BostedsvilkårIkkeOppfyltÅrsak.ANNET.getKode(), true,
@@ -114,8 +114,8 @@ class InngangsvilkårVurderingRestTjenesteTest {
             new BostedsvilkårResultatPeriode(tilIntervall(JAN), false, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true, "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT)));
         when(perioderTilVurderingTjeneste.utled(eq(behandling.getId()), any())).thenReturn(new TreeSet<>(List.of(tilIntervall(FEB))));
 
-        assertThat(tjeneste.hentInngangsvilkårVurderinger(behandlingUuid)).containsExactly(livsoppholdIkkeOppfylt());
-        assertThat(tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid)).containsExactly(livsoppholdIkkeOppfylt());
+        assertThat(tjeneste.hentInngangsvilkårVurderinger(behandlingUuid).vurderinger()).containsExactly(livsoppholdIkkeOppfylt());
+        assertThat(tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid).vurderinger()).containsExactly(livsoppholdIkkeOppfylt());
     }
 
     @Test
@@ -124,7 +124,7 @@ class InngangsvilkårVurderingRestTjenesteTest {
         var halvFeb = new Periode(LocalDate.of(2026, 2, 15), FEB.getTom());
         when(perioderTilVurderingTjeneste.utled(eq(behandling.getId()), any())).thenReturn(new TreeSet<>(List.of(tilIntervall(halvFeb))));
 
-        var vurderinger = tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid);
+        var vurderinger = tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid).vurderinger();
 
         assertThat(vurderinger).hasSize(1);
         assertThat(vurderinger.get(0).periode()).isEqualTo(halvFeb);
@@ -164,12 +164,12 @@ class InngangsvilkårVurderingRestTjenesteTest {
     }
 
     private static AndreLivsoppholdsytelserVurderingDto livsoppholdOppfylt() {
-        return new AndreLivsoppholdsytelserVurderingDto(JAN, true, null, true,
+        return new AndreLivsoppholdsytelserVurderingDto(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, JAN, true, null, true,
             "mottar ingenting", null, null, SAKSBEHANDLER, VURDERT_TIDSPUNKT);
     }
 
     private static AndreLivsoppholdsytelserVurderingDto livsoppholdIkkeOppfylt() {
-        return new AndreLivsoppholdsytelserVurderingDto(FEB, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, true,
+        return new AndreLivsoppholdsytelserVurderingDto(VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, FEB, false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, true,
             "mottar livsoppholdytelse fra Tyskland", "fritekst til brev", "livsoppholdytelse fra Tyskland", SAKSBEHANDLER, VURDERT_TIDSPUNKT);
     }
 
