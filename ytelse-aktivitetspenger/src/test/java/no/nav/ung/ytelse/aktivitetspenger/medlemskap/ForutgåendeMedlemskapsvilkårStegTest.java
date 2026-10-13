@@ -233,7 +233,7 @@ class ForutgåendeMedlemskapsvilkårStegTest {
         assertThat(innslag).hasSize(1);
         assertThat(innslag.getFirst().getAktør()).isEqualTo(HistorikkAktør.VEDTAKSLØSNINGEN);
         assertThat(innslag.getFirst().getSkjermlenke()).isEqualTo(SkjermlenkeType.FORUTGÅENDE_MEDLEMSKAP);
-        assertThat(innslag.getFirst().getTekstLinjer()).containsExactly("Medlemskap på 01.07.2024 ble vurdert til Oppfylt.");
+        assertThat(innslag.getFirst().getTekstLinjer()).containsExactly("5 år med forutgående medlemskap før 01.07.2024 ble vurdert til Oppfylt.");
     }
 
     @Test
