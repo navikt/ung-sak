@@ -8,8 +8,9 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdBygger;
@@ -64,7 +65,7 @@ public class InformasjonsbrevGenerererTjeneste {
         var behandling = behandlingRepository.hentBehandling(informasjonsbrevBestillingInput.behandlingId());
 
         var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
-        var bygger = bestemBygger(informasjonsbrevBestillingInput);
+        var bygger = bestemBygger(informasjonsbrevBestillingInput.dokumentMalType(), behandling.getFagsakYtelseType());
         var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
         BrevSignaturDto signatur = lagSignatur(informasjonsbrevBestillingInput.bestillerIdent());
@@ -79,15 +80,16 @@ public class InformasjonsbrevGenerererTjeneste {
             dokument,
             pdlMottaker,
             pdlMottaker,
-            DokumentMalType.GENERELT_FRITEKSTBREV,
-            TemplateType.GENERELT_FRITEKSTBREV
+            informasjonsbrevBestillingInput.dokumentMalType(),
+            innhold.templateType()
         );
     }
 
-    private InformasjonsbrevInnholdBygger<?> bestemBygger(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
-        return informasjonsbrevInnholdByggere
-            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(informasjonsbrevBestillingInput.dokumentMalType()))
-            .get();
+    private InformasjonsbrevInnholdBygger<?> bestemBygger(DokumentMalType dokumentMalType, FagsakYtelseType ytelseType) {
+        var byggereForMal = informasjonsbrevInnholdByggere
+            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(dokumentMalType));
+        return FagsakYtelseTypeRef.Lookup.find(byggereForMal, ytelseType)
+            .orElseThrow(() -> new IllegalStateException("Fant ingen informasjonsbrevbygger for " + dokumentMalType + " og " + ytelseType));
     }
 
 

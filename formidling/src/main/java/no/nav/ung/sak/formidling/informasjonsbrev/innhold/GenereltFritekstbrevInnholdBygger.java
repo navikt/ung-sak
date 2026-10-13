@@ -3,14 +3,17 @@ package no.nav.ung.sak.formidling.informasjonsbrev.innhold;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.template.dto.GenereltFritekstBrevTemplateDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 
 @InformasjonsbrevInnholdByggerTypeRef(DokumentMalType.GENERELT_FRITEKSTBREV)
+@FagsakYtelseTypeRef(FagsakYtelseType.UNGDOMSYTELSE)
 @ApplicationScoped
 public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnholdBygger<GenereltFritekstBrevDto> {
 
