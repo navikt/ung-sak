@@ -60,6 +60,12 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(20), lavSatsBuilder(fom).build()).build();
     }
 
+    public static AktivitetspengerTestScenario innvilgetKunLavSatsDød(LocalDate fom) {
+        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(20), lavSatsBuilder(fom).build())
+            .medDødsdato(fom.plusDays(15))
+            .build();
+    }
+
     /**
      * 24 år, blir 25 år etter 15 dager i programmet.
      * Får både lav og høy sats i førstegangsbehandlingen.
