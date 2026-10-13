@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Any;
+import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
@@ -13,26 +15,31 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
+import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
+import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatHolder;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserVurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
+import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.web.server.abac.AbacAttributtSupplier;
 import no.nav.ung.sak.web.server.caching.CacheControl;
 
+import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import static no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursActionType.READ;
@@ -48,6 +55,7 @@ public class InngangsvilkårVurderingRestTjeneste {
 
     private BehandlingRepository behandlingRepository;
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester;
 
     public InngangsvilkårVurderingRestTjeneste() {
         // for CDI proxy
@@ -55,7 +63,9 @@ public class InngangsvilkårVurderingRestTjeneste {
 
     @Inject
     public InngangsvilkårVurderingRestTjeneste(BehandlingRepository behandlingRepository,
-                                               InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository) {
+                                               InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository,
+                                               @Any Instance<VilkårsPerioderTilVurderingTjeneste> vilkårsPerioderTilVurderingTjenester) {
+        this.vilkårsPerioderTilVurderingTjenester = vilkårsPerioderTilVurderingTjenester;
         this.behandlingRepository = behandlingRepository;
         this.inngangsvilkårVurderingRepository = inngangsvilkårVurderingRepository;
     }
@@ -71,7 +81,7 @@ public class InngangsvilkårVurderingRestTjeneste {
     public List<InngangsvilkårVurderingDto> hentInngangsvilkårVurderinger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
-            .map(InngangsvilkårVurderingRestTjeneste::tilVurderinger)
+            .map(grunnlag -> tilVurderinger(behandling, grunnlag))
             .orElse(List.of());
     }
 
@@ -86,51 +96,54 @@ public class InngangsvilkårVurderingRestTjeneste {
     public List<AndreLivsoppholdsytelserVurderingDto> hentAndreLivsoppholdsytelserVurderinger(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
         var behandling = behandlingRepository.hentBehandling(behandlingUuid.getBehandlingUuid());
         return inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(behandling.getId())
-            .map(InngangsvilkårVurderingRestTjeneste::tilLivsoppholdVurderinger)
+            .map(grunnlag -> tilLivsoppholdVurderinger(behandling, grunnlag))
             .orElse(List.of());
     }
 
-    private static List<InngangsvilkårVurderingDto> tilVurderinger(AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag) {
-        var bosted = grunnlag.hentBostedTidslinje()
-            .stream()
-            .map(LocalDateSegment::getValue)
-            .map(p -> tilGenerellVurdering(p.getPeriode().tilPeriode(), p.tilVilkårsvurderingResultat()));
+    private List<InngangsvilkårVurderingDto> tilVurderinger(Behandling behandling, AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag) {
+        var bosted = grunnlag.hentBostedTidslinjeVilkårResultat().intersection(perioderTilVurdering(behandling, VilkårType.BOSTEDSVILKÅR)).stream()
+            .map(s -> tilGenerellVurdering(s.getFom(), s.getTom(), s.getValue()));
 
-        var bistand = grunnlag.hentBistandTidslinje().stream()
-            .map(s -> tilGenerellVurdering(new Periode(s.getFom(), s.getTom()), s.getValue()));
+        var bistand = grunnlag.hentBistandTidslinje().intersection(perioderTilVurdering(behandling, VilkårType.BISTANDSVILKÅR)).stream()
+            .map(s -> tilGenerellVurdering(s.getFom(), s.getTom(), s.getValue()));
 
-        var livsopphold = tilLivsoppholdVurderinger(grunnlag).stream().map(InngangsvilkårVurderingDto.class::cast);
+        var livsopphold = tilLivsoppholdVurderinger(behandling, grunnlag).stream().map(InngangsvilkårVurderingDto.class::cast);
 
-        var aktivitet = grunnlag.hentAktivitetsvilkårTidslinje().stream()
-            .map(s -> tilGenerellVurdering(new Periode(s.getFom(), s.getTom()), s.getValue()));
+        var aktivitet = grunnlag.hentAktivitetsvilkårTidslinje().intersection(perioderTilVurdering(behandling, VilkårType.AKTIVITETSVILKÅR)).stream()
+            .map(s -> tilGenerellVurdering(s.getFom(), s.getTom(), s.getValue()));
 
         return Stream.of(bosted, bistand, livsopphold, aktivitet)
             .flatMap(vilkår -> vilkår.sorted(Comparator.comparing(v -> v.periode().getFom())))
             .toList();
     }
 
-    private static List<AndreLivsoppholdsytelserVurderingDto> tilLivsoppholdVurderinger(AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag) {
-        return grunnlag.getAndreLivsoppholdsytelserResultatHolder()
-            .map(AndreLivsoppholdsytelserResultatHolder::getVurderinger)
-            .orElse(Set.of()).stream()
-            .sorted(Comparator.comparing(p -> p.getPeriode().getFomDato()))
-            .map(p -> new AndreLivsoppholdsytelserVurderingDto(
-                p.getPeriode().tilPeriode(),
-                p.isGodkjent(),
-                p.getIkkeOppfyltÅrsak(),
-                p.isManuellVurdering(),
-                p.getBegrunnelse(),
-                p.getFritekstVurderingBrev(),
-                p.getYtelseNavn(),
-                p.getVurdertAv(),
-                p.getVurdertTidspunkt())
-            ).toList();
+    private List<AndreLivsoppholdsytelserVurderingDto> tilLivsoppholdVurderinger(Behandling behandling, AktivitetspengerInngangsvilkårResultatGrunnlag grunnlag) {
+        var perioderTilVurdering = perioderTilVurdering(behandling, VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR);
+        return grunnlag.hentLivsoppholdTidslinje().intersection(perioderTilVurdering).stream()
+            .map(s -> {
+                var v = (AndreLivsoppholdsytelserVurderingResultat) s.getValue();
+                return new AndreLivsoppholdsytelserVurderingDto(
+                    new Periode(s.getFom(), s.getTom()),
+                    v.godkjent(),
+                    (AndreLivsoppholdsytelserIkkeOppfyltÅrsak) v.ikkeOppfyltÅrsak(),
+                    v.erManuellVurdering(),
+                    v.begrunnelse(),
+                    v.fritekstVurderingBrev(),
+                    v.ytelseNavn(),
+                    v.vurdertAv(),
+                    v.vurdertTidspunkt());
+            }).toList();
     }
 
-    private static InngangsvilkårVurderingDto tilGenerellVurdering(Periode periode, VilkårsvurderingResultat v) {
+    private LocalDateTimeline<Boolean> perioderTilVurdering(Behandling behandling, VilkårType vilkårType) {
+        var tjeneste = VilkårsPerioderTilVurderingTjeneste.finnTjeneste(vilkårsPerioderTilVurderingTjenester, behandling.getFagsakYtelseType(), behandling.getType());
+        return TidslinjeUtil.tilTidslinje(tjeneste.utled(behandling.getId(), vilkårType));
+    }
+
+    private static InngangsvilkårVurderingDto tilGenerellVurdering(LocalDate fom, LocalDate tom, VilkårsvurderingResultat v) {
         return new GenerellInngangsvilkårVurderingDto(
             v.vilkårType(),
-            periode,
+            new Periode(fom, tom),
             v.godkjent(),
             v.ikkeOppfyltÅrsak() != null ? v.ikkeOppfyltÅrsak().getKode() : null,
             v.erManuellVurdering(),

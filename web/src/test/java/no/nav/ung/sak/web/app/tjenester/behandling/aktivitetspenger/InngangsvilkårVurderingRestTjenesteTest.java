@@ -3,6 +3,7 @@ package no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
+import no.nav.k9.felles.testutilities.cdi.UnitTestLookupInstanceImpl;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
 import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
@@ -20,6 +21,7 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppho
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
+import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.typer.AktørId;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.sak.typer.Saksnummer;
@@ -31,8 +33,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(JpaExtension.class)
 @ExtendWith(CdiAwareExtension.class)
@@ -47,6 +54,7 @@ class InngangsvilkårVurderingRestTjenesteTest {
     private EntityManager entityManager;
 
     private InngangsvilkårVurderingRepository inngangsvilkårVurderingRepository;
+    private VilkårsPerioderTilVurderingTjeneste perioderTilVurderingTjeneste;
     private InngangsvilkårVurderingRestTjeneste tjeneste;
     private Behandling behandling;
     private BehandlingUuidDto behandlingUuid;
@@ -56,7 +64,9 @@ class InngangsvilkårVurderingRestTjenesteTest {
         var repositoryProvider = new BehandlingRepositoryProvider(entityManager);
         var behandlingRepository = repositoryProvider.getBehandlingRepository();
         inngangsvilkårVurderingRepository = new InngangsvilkårVurderingRepository(entityManager);
-        tjeneste = new InngangsvilkårVurderingRestTjeneste(behandlingRepository, inngangsvilkårVurderingRepository);
+        perioderTilVurderingTjeneste = mock(VilkårsPerioderTilVurderingTjeneste.class);
+        tjeneste = new InngangsvilkårVurderingRestTjeneste(behandlingRepository, inngangsvilkårVurderingRepository,
+            new UnitTestLookupInstanceImpl<>(perioderTilVurderingTjeneste));
 
         var fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, new AktørId("11223344"), new Saksnummer("VURDERINGER1"),
             LocalDate.of(2026, 1, 1), LocalDate.of(2026, 12, 31));
@@ -64,6 +74,7 @@ class InngangsvilkårVurderingRestTjenesteTest {
         behandling = Behandling.nyBehandlingFor(fagsak, BehandlingType.FØRSTEGANGSSØKNAD).build();
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
         behandlingUuid = new BehandlingUuidDto(behandling.getUuid());
+        when(perioderTilVurderingTjeneste.utled(eq(behandling.getId()), any())).thenReturn(new TreeSet<>(List.of(tilIntervall(JAN), tilIntervall(FEB))));
     }
 
     @Test
@@ -94,6 +105,29 @@ class InngangsvilkårVurderingRestTjenesteTest {
                 "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT),
             livsoppholdOppfylt(),
             livsoppholdIkkeOppfylt());
+    }
+
+    @Test
+    void vurderinger_utenfor_perioder_til_vurdering_leveres_ikke_ut() {
+        lagreLivsoppholdVurderinger();
+        inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
+            new BostedsvilkårResultatPeriode(tilIntervall(JAN), false, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true, "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT)));
+        when(perioderTilVurderingTjeneste.utled(eq(behandling.getId()), any())).thenReturn(new TreeSet<>(List.of(tilIntervall(FEB))));
+
+        assertThat(tjeneste.hentInngangsvilkårVurderinger(behandlingUuid)).containsExactly(livsoppholdIkkeOppfylt());
+        assertThat(tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid)).containsExactly(livsoppholdIkkeOppfylt());
+    }
+
+    @Test
+    void vurdering_klippes_til_perioden_som_er_til_vurdering() {
+        lagreLivsoppholdVurderinger();
+        var halvFeb = new Periode(LocalDate.of(2026, 2, 15), FEB.getTom());
+        when(perioderTilVurderingTjeneste.utled(eq(behandling.getId()), any())).thenReturn(new TreeSet<>(List.of(tilIntervall(halvFeb))));
+
+        var vurderinger = tjeneste.hentAndreLivsoppholdsytelserVurderinger(behandlingUuid);
+
+        assertThat(vurderinger).hasSize(1);
+        assertThat(vurderinger.get(0).periode()).isEqualTo(halvFeb);
     }
 
     @Test
