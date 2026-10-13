@@ -3130,7 +3130,19 @@
             "type" : "string"
           }
         },
-        "required" : [ "periode", "vilkårType" ],
+        "required" : [ "erManuellVurdering", "erVilkårOppfylt", "periode", "vilkårType", "vurdertAv", "vurdertTidspunkt" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingerResponse" : {
+        "properties" : {
+          "vurderinger" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurderinger" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto" : {
@@ -3164,7 +3176,7 @@
             "type" : "string"
           }
         },
-        "required" : [ "periode", "vilkårType" ],
+        "required" : [ "erManuellVurdering", "erVilkårOppfylt", "periode", "vilkårType", "vurdertAv", "vurdertTidspunkt" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto" : {
@@ -3188,6 +3200,18 @@
           }
         },
         "required" : [ "vilkårType" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingerResponse" : {
+        "properties" : {
+          "vurderinger" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurderinger" ],
         "type" : "object"
       },
       "ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto" : {
@@ -8231,10 +8255,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto"
-                  },
-                  "type" : "array"
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingerResponse"
                 }
               }
             },
@@ -8263,10 +8284,7 @@
             "content" : {
               "application/json" : {
                 "schema" : {
-                  "items" : {
-                    "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto"
-                  },
-                  "type" : "array"
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingerResponse"
                 }
               }
             },
