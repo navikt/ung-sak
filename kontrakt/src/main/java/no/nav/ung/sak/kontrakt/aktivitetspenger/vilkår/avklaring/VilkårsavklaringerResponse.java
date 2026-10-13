@@ -6,8 +6,8 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 
 import java.util.List;
 
-public record VilkårsavklaringVurderingerDto(
+public record VilkårsavklaringerResponse(
     @NotNull VilkårType vilkårType,
-    @NotNull @Valid List<VilkårsvurderingRadDto> perioder
+    @NotNull @Valid List<VilkårsavklaringRadDto> perioder
 ) {
 }

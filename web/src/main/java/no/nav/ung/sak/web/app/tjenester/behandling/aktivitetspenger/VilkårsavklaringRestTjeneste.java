@@ -18,7 +18,6 @@ import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.k9.felles.sikkerhet.abac.BeskyttetRessursResourceType;
 import no.nav.k9.felles.sikkerhet.abac.TilpassetAbacAttributt;
 import no.nav.ung.kodeverk.varsel.EndringType;
-import no.nav.ung.kodeverk.vilkår.Avklaringtype;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.kodeverk.vilkår.VilkårsavklaringÅrsaker;
@@ -39,8 +38,8 @@ import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.UttalelseDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringRadDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerResponse;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerResponse;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
@@ -107,7 +106,7 @@ public class VilkårsavklaringRestTjeneste {
     @Operation(description = "Hent foreslåtte og ferdigstilte vilkårsavklaringer for et vilkår", tags = "aktivitetspenger")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public VilkårsavklaringerDto hentVilkårsavklaringer(
+    public VilkårsavklaringerResponse hentVilkårsavklaringer(
         @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC)
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid,
         @NotNull @QueryParam("vilkarType")
@@ -121,7 +120,7 @@ public class VilkårsavklaringRestTjeneste {
     @Operation(description = "Hent vilkårsvurderinger per foreslått vilkårsavklaring", tags = "aktivitetspenger")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public VilkårsavklaringVurderingerDto hentVilkårsavklaringVurderinger(
+    public VilkårsavklaringVurderingerResponse hentVilkårsavklaringVurderinger(
         @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC)
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid,
         @NotNull @QueryParam("vilkarType")
@@ -130,7 +129,7 @@ public class VilkårsavklaringRestTjeneste {
         return hentVurderinger(behandling, vilkårType);
     }
 
-    VilkårsavklaringerDto hentAvklaringer(Behandling behandling, VilkårType vilkårType) {
+    VilkårsavklaringerResponse hentAvklaringer(Behandling behandling, VilkårType vilkårType) {
         validerVilkårType(vilkårType);
         var grunnlag = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), vilkårType);
         var foreslåtte = grunnlag.map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer).orElse(Set.of());
@@ -159,10 +158,10 @@ public class VilkårsavklaringRestTjeneste {
         var historikkrader = Stream.concat(ferdigstilteRader, vilkårsrader)
             .sorted(Comparator.comparing((VilkårsavklaringRadDto rad) -> rad.periode().getFom()).reversed());
 
-        return new VilkårsavklaringerDto(vilkårType, Stream.concat(foreslåtteRader, historikkrader).toList());
+        return new VilkårsavklaringerResponse(vilkårType, Stream.concat(foreslåtteRader, historikkrader).toList());
     }
 
-    VilkårsavklaringVurderingerDto hentVurderinger(Behandling behandling, VilkårType vilkårType) {
+    VilkårsavklaringVurderingerResponse hentVurderinger(Behandling behandling, VilkårType vilkårType) {
         validerVilkårType(vilkårType);
         var foreslåtte = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), vilkårType)
             .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
@@ -202,7 +201,7 @@ public class VilkårsavklaringRestTjeneste {
         var perioder = Stream.concat(raderMedAvklaring, raderUtenAvklaring)
             .sorted(Comparator.comparing((VilkårsvurderingRadDto rad) -> rad.periode().getFom()).reversed())
             .toList();
-        return new VilkårsavklaringVurderingerDto(vilkårType, perioder);
+        return new VilkårsavklaringVurderingerResponse(vilkårType, perioder);
     }
 
     private static void validerVilkårType(VilkårType vilkårType) {

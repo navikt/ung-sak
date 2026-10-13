@@ -12,17 +12,17 @@ public record VilkårsavklaringDto(
     @NotNull UUID referanse,
     @NotNull @Valid Periode periode,
     @NotNull Avklaringtype avklaringtype,
-    // Koder som strenger: årsak og kilde er interfaces med én enum per vilkår, og gir ikke et brukbart OpenAPI-skjema
+    // Koder som strenger: årsak og kilde er interfaces med én enum per vilkår
     @NotNull String ikkeOppfyltÅrsak,
     String begrunnelse,
-    boolean skalSendeVarsel,
+    @NotNull boolean skalSendeVarsel,
     String fritekstTilVarsel,
     String begrunnelseIkkeVarsel,
     @NotNull String kilde,
     String kildeFritekst,
-    String vurdertAv,
-    LocalDateTime vurdertTidspunkt,
-    boolean foreslåttIBehandlingen,
+    @NotNull String vurdertAv,
+    @NotNull LocalDateTime vurdertTidspunkt,
+    @NotNull boolean foreslåttIBehandlingen,
     @Valid UttalelseDto uttalelse
 ) {
 }
