@@ -2,10 +2,15 @@ package no.nav.ung.sak.web.app.tjenester.forvaltning.dump.oppdrag.iverksett;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.k9.oppdrag.kontrakt.Domene;
 import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
+import no.nav.ung.sak.behandlingslager.fagsak.Fagsak;
+import no.nav.ung.sak.behandlingslager.pip.PipBehandlingsData;
 import no.nav.ung.sak.domene.typer.tid.JsonObjectMapper;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DebugDumpFagsak;
 import no.nav.ung.sak.web.app.tjenester.forvaltning.dump.DumpMottaker;
+import no.nav.ung.sak.web.server.abac.UkjentBehandlingException;
+import no.nav.ung.sak.økonomi.simulering.klient.DomeneUtil;
 import no.nav.ung.sak.økonomi.simulering.klient.K9OppdragRestKlient;
 import no.nav.ung.sak.økonomi.simulering.klient.dto.OppdragXmlDto;
 import org.slf4j.Logger;
@@ -15,6 +20,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static no.nav.ung.kodeverk.behandling.FagsakYtelseType.UNGDOMSYTELSE;
 
@@ -37,7 +44,7 @@ public class IverksattOppdragDump implements DebugDumpFagsak {
 
     @Override
     public void dump(DumpMottaker dumpMottaker) {
-        List<OppdragXmlDto> resultat = restKlient.alleOppdragXmler(dumpMottaker.getFagsak().getSaksnummer());
+        List<OppdragXmlDto> resultat = restKlient.alleOppdragXmler(dumpMottaker.getFagsak().getSaksnummer(), utledDomene(dumpMottaker.getFagsak()));
         int meldingTeller = 1;
         for (OppdragXmlDto xml : resultat) {
             dumpMottaker.newFile("k9oppdrag/iverksatt/" + meldingTeller + "/sendt.xml");
@@ -58,4 +65,7 @@ public class IverksattOppdragDump implements DebugDumpFagsak {
         }
     }
 
+    private Domene utledDomene(Fagsak fagsak) {
+        return DomeneUtil.ytelsestypeTilAbacDomene(fagsak.getYtelseType());
+    }
 }

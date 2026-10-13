@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Optional;
 
+import no.nav.k9.oppdrag.kontrakt.Domene;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,7 +115,7 @@ public class SimulerOppdragStegTest {
         steg.vedHoppOverBakover(kontekst, null, null, null);
 
         // Verify
-        verify(k9OppdragRestKlientMock).kansellerSimulering(behandling.getUuid());
+        verify(k9OppdragRestKlientMock).kansellerSimulering(behandling.getUuid(), Domene.UNG);
     }
 
     @Test
@@ -126,7 +127,7 @@ public class SimulerOppdragStegTest {
         steg.vedHoppOverBakover(kontekst, null, BehandlingStegType.SIMULER_OPPDRAG, null);
 
         // Verify
-        verify(k9OppdragRestKlientMock, never()).kansellerSimulering(behandling.getUuid());
+        verify(k9OppdragRestKlientMock, never()).kansellerSimulering(behandling.getUuid(), Domene.UNG);
     }
 
     @Test
@@ -153,7 +154,7 @@ public class SimulerOppdragStegTest {
         var varseltekst = "Her er en fin varseltekst";
         tilbakekrevingRepository.lagre(behandling, TilbakekrevingValg.utenMulighetForInntrekk(TilbakekrevingVidereBehandling.OPPRETT_TILBAKEKREVING, varseltekst));
         tilbakekrevingRepository.deaktiverEksisterendeTilbakekrevingValg(behandling);
-        when(k9OppdragRestKlientMock.hentSimuleringResultat(any())).thenReturn(Optional.of(new SimuleringResultatDto(1000L, 0L, 0L,false)));
+        when(k9OppdragRestKlientMock.hentSimuleringResultat(any(), any())).thenReturn(Optional.of(new SimuleringResultatDto(1000L, 0L, 0L,false)));
 
         steg = opprettSteg();
 
