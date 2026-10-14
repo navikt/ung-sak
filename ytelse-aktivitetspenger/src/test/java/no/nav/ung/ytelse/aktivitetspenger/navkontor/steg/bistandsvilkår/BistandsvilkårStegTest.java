@@ -4,6 +4,7 @@ import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
@@ -22,6 +23,7 @@ import no.nav.ung.sak.behandlingslager.behandling.sporing.BehandingprosessSporin
 import no.nav.ung.sak.behandlingslager.behandling.startdato.StartdatoRepository;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.Startdatoer;
 import no.nav.ung.sak.behandlingslager.behandling.startdato.SøktStartdato;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AktivitetspengerInngangsvilkårResultatGrunnlag;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
@@ -44,6 +46,7 @@ import no.nav.ung.sak.vilkår.VilkårTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.navkontor.InngangsvilkårVurderingTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.historikkinnslag.VilkårsvurderingHistorikkinnslagTjeneste;
 import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
+import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfall;
 import no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring.VilkårsavklaringUtfallUtleder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -138,8 +141,23 @@ class BistandsvilkårStegTest {
         assertThat(bistandsvurdering.isGodkjent()).isFalse();
         assertThat(bistandsvurdering.getIkkeOppfyltÅrsak()).isEqualTo(BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID);
 
+        var json = new VilkårJsonObjectMapper();
+        var regelsporing = bistandsvurdering.getRegelsporing().orElseThrow();
+        var input = json.readValue(regelsporing.input(), VilkårsavklaringUtfallUtleder.RegelInput.class);
+        var evaluering = json.readValue(regelsporing.evaluering(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class);
+        assertThat(input.avklaringReferanse()).isEqualTo(avklaring.getReferanse());
+        assertThat(input.etterlysningStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
+        assertThat(input.harUttalelse()).isFalse();
+        assertThat(evaluering.utfall()).isEqualTo(VilkårsavklaringUtfall.AVSLÅS_AUTOMATISK);
+
         var vilkår = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BISTANDSVILKÅR).orElseThrow().getPerioder();
         assertThat(vilkår).allMatch(it -> it.getGjeldendeUtfall() == Utfall.IKKE_OPPFYLT);
+
+        var vilkårsperiode = vilkår.getFirst();
+        var vilkårsperiodeInput = json.readValue(vilkårsperiode.getRegelInput(), JsonNode.class);
+        assertThat(vilkårsperiodeInput.get("manuellVurdering").asBoolean()).isFalse();
+        assertThat(vilkårsperiodeInput.get("automatisering").get("avklaringReferanse").asText()).isEqualTo(avklaring.getReferanse().toString());
+        assertThat(json.readValue(vilkårsperiode.getRegelEvaluering(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class)).isEqualTo(evaluering);
     }
 
     @Test
@@ -196,6 +214,9 @@ class BistandsvilkårStegTest {
         assertThat(resultat.getAksjonspunktResultater()).hasSize(1);
         assertThat(resultat.getAksjonspunktResultater().getFirst().getFrist()).isEqualTo(frist);
         assertThat(hentVurderinger(behandling)).isEmpty();
+
+        var vilkårsperiode = vilkårResultatRepository.hent(behandling.getId()).getVilkår(VilkårType.BISTANDSVILKÅR).orElseThrow().getPerioder().getFirst();
+        assertThat(vilkårsperiode.getRegelInput()).isNull();
     }
 
     @Test
@@ -248,7 +269,7 @@ class BistandsvilkårStegTest {
                 "Vurdert i tidligere behandling",
                 null,
                 "A12345",
-                LocalDateTime.now())
+                LocalDateTime.now(), null)
         ));
 
         var resultat = utførSteg(behandling);

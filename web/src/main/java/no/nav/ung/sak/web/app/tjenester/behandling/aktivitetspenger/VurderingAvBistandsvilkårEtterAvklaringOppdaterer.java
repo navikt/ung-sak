@@ -65,7 +65,7 @@ public class VurderingAvBistandsvilkårEtterAvklaringOppdaterer implements Aksjo
 
         var periodeVurderinger = resultatTidslinje.segmenter().stream()
             .map(s -> new BistandsvilkårResultatPeriode(
-                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
+                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue(), null))
             .toList();
 
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, periodeVurderinger);

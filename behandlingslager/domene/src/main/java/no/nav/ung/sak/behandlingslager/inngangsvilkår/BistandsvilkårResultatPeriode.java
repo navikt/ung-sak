@@ -13,6 +13,7 @@ import org.hibernate.annotations.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 @Immutable
 @Entity(name = "BistandsvilkårResultatPeriode")
@@ -50,22 +51,29 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
+    @Column(name = "regel_input", updatable = false)
+    private String regelInput;
+
+    @Column(name = "regel_evaluering", updatable = false)
+    private String regelEvaluering;
+
     protected BistandsvilkårResultatPeriode() {
         // Hibernate
     }
 
-    /**
-     * Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer.
-     */
-    BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, BistandsvilkårResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
-    }
 
     BistandsvilkårResultatPeriode(BistandsvilkårResultatPeriode kilde) {
         this(kilde.getPeriode(), kilde);
     }
 
-    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
+    /**
+     * Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer.
+     */
+    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, BistandsvilkårResultatPeriode kilde) {
+        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
+    }
+
+    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat, Regelsporing regelsporing) {
         this(periode,
             vilkårsvurderingResultat.godkjent(),
             (BistandsvilkårIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
@@ -73,10 +81,11 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
             vilkårsvurderingResultat.begrunnelse(),
             vilkårsvurderingResultat.fritekstVurderingBrev(),
             vilkårsvurderingResultat.vurdertAv(),
-            vilkårsvurderingResultat.vurdertTidspunkt());
+            vilkårsvurderingResultat.vurdertTidspunkt(),
+            regelsporing);
     }
 
-    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public BistandsvilkårResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, BistandsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt, Regelsporing regelsporing) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
@@ -91,6 +100,8 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
         this.fritekstVurderingBrev = fritekstVurderingBrev;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.regelInput = regelsporing != null ? regelsporing.input() : null;
+        this.regelEvaluering = regelsporing != null ? regelsporing.evaluering() : null;
     }
 
     public Long getId() {
@@ -137,6 +148,10 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
         return vurdertTidspunkt;
     }
 
+    public Optional<Regelsporing> getRegelsporing() {
+        return regelInput == null ? Optional.empty() : Optional.of(new Regelsporing(regelInput, regelEvaluering));
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BistandsvilkårResultatPeriode annen
@@ -147,7 +162,9 @@ public class BistandsvilkårResultatPeriode extends BaseEntitet {
             && Objects.equals(begrunnelse, annen.begrunnelse)
             && Objects.equals(fritekstVurderingBrev, annen.fritekstVurderingBrev)
             && Objects.equals(vurdertAv, annen.vurdertAv)
-            && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt);
+            && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt)
+            && Objects.equals(regelInput, annen.regelInput)
+            && Objects.equals(regelEvaluering, annen.regelEvaluering);
     }
 
     @Override

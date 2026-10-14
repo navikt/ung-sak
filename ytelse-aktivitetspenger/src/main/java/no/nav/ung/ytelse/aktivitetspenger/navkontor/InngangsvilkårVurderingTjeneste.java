@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.navkontor;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import com.fasterxml.jackson.annotation.JsonRawValue;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -13,11 +14,13 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositor
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatBuilder;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriodeBuilder;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.*;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -59,7 +62,9 @@ public class InngangsvilkårVurderingTjeneste {
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medUtfallManuell(utfall)
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak));
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), vurdering.getRegelsporing()))
+                .medRegelEvaluering(vurdering.getRegelsporing().map(Regelsporing::evaluering).orElse(null)));
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }
@@ -83,7 +88,9 @@ public class InngangsvilkårVurderingTjeneste {
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak);
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), Optional.empty()))
+                .medRegelEvaluering(null);
 
             if (vurdering.erManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -108,7 +115,9 @@ public class InngangsvilkårVurderingTjeneste {
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak);
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), vurdering.getRegelsporing()))
+                .medRegelEvaluering(vurdering.getRegelsporing().map(Regelsporing::evaluering).orElse(null));
 
             if (vurdering.isManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -194,16 +203,16 @@ public class InngangsvilkårVurderingTjeneste {
                 vilkårVurderingRepository.lagreBostedVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
             }
             case BISTANDSVILKÅR -> {
-                var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentBistandTidslinje().intersection(perioderSomSkalGjenopprettes)
+                var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentBistandResultatPeriodeTidslinje().intersection(perioderSomSkalGjenopprettes)
                     .segmenter().stream()
                     .map(it -> new BistandsvilkårResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
                     .toList();
                 vilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
             }
             case ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR -> {
-                var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentLivsoppholdTidslinje().intersection(perioderSomSkalGjenopprettes)
+                var tidligereVurderingerSomSkalGjenopprettes = originalGrunnlag.hentLivsoppholdResultatPeriodeTidslinje().intersection(perioderSomSkalGjenopprettes)
                     .segmenter().stream()
-                    .map(it -> new AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), (AndreLivsoppholdsytelserVurderingResultat) it.getValue()))
+                    .map(it -> new AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet.fraOgMedTilOgMed(it.getFom(), it.getTom()), it.getValue()))
                     .toList();
                 vilkårVurderingRepository.lagreYtelseVurderinger(behandlingId, tidligereVurderingerSomSkalGjenopprettes);
             }
@@ -239,7 +248,9 @@ public class InngangsvilkårVurderingTjeneste {
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak);
+                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), Optional.empty()))
+                .medRegelEvaluering(null);
 
             if (vurdering.erManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -249,6 +260,25 @@ public class InngangsvilkårVurderingTjeneste {
             vilkårBuilder.leggTil(vilkårPeriodeBuilder);
         }
         resultatBuilder.leggTil(vilkårBuilder);
+    }
+
+    private static String regelInput(VilkårsvurderingResultat vurdering, Optional<Regelsporing> automatisering) {
+        var årsak = vurdering.ikkeOppfyltÅrsak();
+        return new VilkårJsonObjectMapper().writeValueAsString(new VurderingRegelInput(
+            vurdering.godkjent(),
+            årsak == null ? null : årsak.getKode(),
+            vurdering.erManuellVurdering(),
+            vurdering.vurdertAv(),
+            vurdering.vurdertTidspunkt(),
+            automatisering.map(Regelsporing::input).orElse(null)));
+    }
+
+    record VurderingRegelInput(boolean godkjent,
+                               String ikkeOppfyltÅrsak,
+                               boolean manuellVurdering,
+                               String vurdertAv,
+                               LocalDateTime vurdertTidspunkt,
+                               @JsonRawValue String automatisering) {
     }
 
     private static IkkeOppfyltDetaljertÅrsak påkrevdÅrsak(IkkeOppfyltDetaljertÅrsak årsak) {
