@@ -14,8 +14,12 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.GenereltVilkårsvurderingResultat;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.VurderingAvVilkårPeriodeEtterAvklaringDto;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.AvklartPeriode;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.RegelEvaluering;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.RegelInput;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.VilkårsvurderingResultatOgEvaluering;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.VurdertPeriode;
 import no.nav.ung.sak.typer.Periode;
 
 import java.time.LocalDate;
@@ -37,10 +41,10 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         this.vilkårResultatRepository = vilkårResultatRepository;
     }
 
-    public LocalDateTimeline<VilkårsvurderingResultat> utled(long behandlingId,
-                                                             VilkårType vilkårType,
-                                                             List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
-                                                             LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
+    public VurderingEtterAvklaringResultat utled(long behandlingId,
+                                                 VilkårType vilkårType,
+                                                 List<VurderingAvVilkårPeriodeEtterAvklaringDto> vurdertePerioder,
+                                                 LocalDateTimeline<IkkeOppfyltDetaljertÅrsak> årsakTidslinje) {
         if (årsakTidslinje.isEmpty()) {
             throw new IllegalArgumentException("Kan ikke vurdere " + vilkårType
                 + " ved avslått periode/opphør uten at det finnes en ikkeOppfyltÅrsak (foreslått vilkårsavklaring) på behandlingen. behandlingId=" + behandlingId);
@@ -74,11 +78,29 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         String vurdertAv = SubjectHandler.getSubjectHandler().getUid();
         LocalDateTime vurdertTidspunkt = LocalDateTime.now();
 
-        return vurdertTidslinje.combine(avklaringTidslinje,
+        var vurderinger = vurdertTidslinje.combine(avklaringTidslinje,
             (di, vurdering, årsak) ->
-                new LocalDateSegment<>(di, byggResultat(di, vilkårType, vurdering.getValue(), årsak.getValue(), vurdertAv, vurdertTidspunkt)),
+                new LocalDateSegment<>(di, byggResultat(di, vilkårType, vurdering.getValue(), årsak.getValue(), maksDatoIVilkårsperioden, vurdertAv, vurdertTidspunkt)),
             LocalDateTimeline.JoinStyle.INNER_JOIN
         );
+
+        var regelInput = new RegelInput(
+            vurdertePerioder.stream().map(VurderingAvVilkårEtterAvklaringTjeneste::tilVurdertPeriode).toList(),
+            årsakTidslinje.segmenter().stream()
+                .map(s -> new AvklartPeriode(s.getFom(), s.getTom(), s.getValue() == null ? null : s.getValue().getKode()))
+                .toList(),
+            eksisterendeVilkårperioder.getLocalDateIntervals().stream()
+                .map(i -> new Periode(i.getFomDato(), i.getTomDato()))
+                .toList());
+
+        return new VurderingEtterAvklaringResultat(vurderinger, regelInput);
+    }
+
+    private static VurdertPeriode tilVurdertPeriode(VurderingAvVilkårPeriodeEtterAvklaringDto dto) {
+        return new VurdertPeriode(
+            dto.periode().getFom(),
+            dto.periode().getTom(),
+            dto.erVilkårOppfylt());
     }
 
     // Delt med VilkårsavklaringRestTjeneste, slik at det som vises til vurdering er det samme som utled godtar
@@ -136,12 +158,13 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
         }
     }
 
-    private static VilkårsvurderingResultat byggResultat(LocalDateInterval interval,
-                                                         VilkårType vilkårType,
-                                                         VurderingAvVilkårPeriodeEtterAvklaringDto vurdering,
-                                                         IkkeOppfyltDetaljertÅrsak årsakFraAvklaring,
-                                                         String vurdertAv,
-                                                         LocalDateTime vurdertTidspunkt) {
+    private static VilkårsvurderingResultatOgEvaluering byggResultat(LocalDateInterval interval,
+                                                                     VilkårType vilkårType,
+                                                                     VurderingAvVilkårPeriodeEtterAvklaringDto vurdering,
+                                                                     IkkeOppfyltDetaljertÅrsak årsakFraAvklaring,
+                                                                     LocalDate maksDatoIVilkårsperioden,
+                                                                     String vurdertAv,
+                                                                     LocalDateTime vurdertTidspunkt) {
         var ikkeOppfyltÅrsak = vurdering.erVilkårOppfylt() ? null : årsakFraAvklaring;
 
         if (ikkeOppfyltÅrsak != null && ikkeOppfyltÅrsak.kreverFritekst()) {
@@ -151,7 +174,7 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             }
         }
 
-        return new GenereltVilkårsvurderingResultat(
+        var resultat = new GenereltVilkårsvurderingResultat(
             vilkårType,
             vurdering.erVilkårOppfylt(),
             ikkeOppfyltÅrsak,
@@ -160,6 +183,18 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
             vurdering.fritekstVurderingBrev(),
             vurdertAv,
             vurdertTidspunkt);
+
+        var periode = vurdering.periode();
+        var lukketTom = lukkÅpenPeriode(periode, maksDatoIVilkårsperioden);
+        var evaluering = new RegelEvaluering(
+            interval.getFomDato(),
+            interval.getTomDato(),
+            (vurdering.erVilkårOppfylt() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT).getKode(),
+            ikkeOppfyltÅrsak == null ? null : ikkeOppfyltÅrsak.getKode(),
+            !interval.getFomDato().equals(periode.getFom()) || !interval.getTomDato().equals(lukketTom)
+        );
+
+        return new VilkårsvurderingResultatOgEvaluering(resultat, evaluering);
     }
 
     static LocalDate lukkÅpenPeriode(Periode periode, LocalDate senesteTomVilkårsperiode) {

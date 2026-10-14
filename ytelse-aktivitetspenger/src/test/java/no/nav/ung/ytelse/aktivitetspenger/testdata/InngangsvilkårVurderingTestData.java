@@ -117,7 +117,8 @@ public record InngangsvilkårVurderingTestData(
                     DEFAULT_BEGRUNNELSE,
                     input.fritekstTilBrev(),
                     DEFAULT_VURDERT_AV,
-                    LocalDateTime.now()))
+                    LocalDateTime.now(),
+                    null))
                 .toList();
 
             List<BistandsvilkårResultatPeriode> bistandsvilkårResultater = bistandsvilkårInput.stream()

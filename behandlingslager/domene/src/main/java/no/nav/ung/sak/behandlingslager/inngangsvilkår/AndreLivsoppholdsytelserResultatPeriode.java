@@ -73,7 +73,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         this(kilde.getPeriode(), kilde);
     }
 
-    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserVurderingResultat vilkårsvurderingResultat) {
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserVurderingResultat vilkårsvurderingResultat, Regelsporing regelsporing) {
         this(periode,
             vilkårsvurderingResultat.godkjent(),
             (AndreLivsoppholdsytelserIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
@@ -82,7 +82,8 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
             vilkårsvurderingResultat.fritekstVurderingBrev(),
             vilkårsvurderingResultat.ytelseNavn(),
             vilkårsvurderingResultat.vurdertAv(),
-            vilkårsvurderingResultat.vurdertTidspunkt());
+            vilkårsvurderingResultat.vurdertTidspunkt(),
+            regelsporing);
     }
 
     public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt) {

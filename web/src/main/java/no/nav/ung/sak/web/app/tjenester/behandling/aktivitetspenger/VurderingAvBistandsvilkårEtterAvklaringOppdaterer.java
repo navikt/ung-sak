@@ -59,13 +59,15 @@ public class VurderingAvBistandsvilkårEtterAvklaringOppdaterer implements Aksjo
 
         HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, AKTUELT_VILKÅR);
 
-        var resultatTidslinje = vurderingAvVilkårEtterAvklaringTjeneste.utled(
+        var vurderingResultat = vurderingAvVilkårEtterAvklaringTjeneste.utled(
             behandlingId, AKTUELT_VILKÅR, dto.getVurdertePerioder(), hentÅrsakTidslinje(behandlingId)
         );
 
-        var periodeVurderinger = resultatTidslinje.segmenter().stream()
+        var periodeVurderinger = vurderingResultat.vurderinger().segmenter().stream()
             .map(s -> new BistandsvilkårResultatPeriode(
-                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue(), null))
+                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
+                s.getValue().resultat(),
+                vurderingResultat.tilRegelsporing(s.getValue().evaluering())))
             .toList();
 
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandlingId, periodeVurderinger);

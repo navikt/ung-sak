@@ -70,7 +70,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
             new BostedsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
-                false, "Automatisk avslag", null, "A111111", LocalDateTime.now())));
+                false, "Automatisk avslag", null, "A111111", LocalDateTime.now(), null)));
 
         tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
 
@@ -284,7 +284,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
     private void leggTilBostedVurderinger(Long behandlingId, BostedVurderingData... vurderinger) {
         var perioder = List.of(vurderinger).stream()
-            .map(v -> new BostedsvilkårResultatPeriode(tilIntervall(v.periode()), v.godkjent(), v.ikkeOppfyltÅrsak(), true, "begrunnelse", v.fritekstVurderingBrev(), "A111111", LocalDateTime.now()))
+            .map(v -> new BostedsvilkårResultatPeriode(tilIntervall(v.periode()), v.godkjent(), v.ikkeOppfyltÅrsak(), true, "begrunnelse", v.fritekstVurderingBrev(), "A111111", LocalDateTime.now(), null))
             .toList();
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, perioder);
     }

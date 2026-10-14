@@ -172,7 +172,9 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                     null,
                     null,
                     null,
-                    foreslåttAvklaring.getVurdertTidspunkt());
+                    foreslåttAvklaring.getVurdertTidspunkt(),
+                    null
+                );
             }).collect(Collectors.toList());
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, vurderingResultat);
