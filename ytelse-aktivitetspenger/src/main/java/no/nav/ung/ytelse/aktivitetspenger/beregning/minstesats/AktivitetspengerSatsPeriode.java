@@ -45,7 +45,7 @@ public class AktivitetspengerSatsPeriode extends BaseEntitet {
 
     @Convert(converter = HjemmelKodeverdiConverter.class)
     @Column(name = "hjemmel", nullable = false)
-    private Hjemmel hjemmel = Hjemmel.UNG_FORSKRIFT_PARAGRAF_9;
+    private Hjemmel hjemmel = Hjemmel.AKT_FORSKRIFT_PARAGRAF_12;
 
     @Column(name = "antall_barn", nullable = false)
     private int antallBarn;

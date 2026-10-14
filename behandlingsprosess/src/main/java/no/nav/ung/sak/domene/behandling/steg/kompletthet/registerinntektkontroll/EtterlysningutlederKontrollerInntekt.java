@@ -32,6 +32,10 @@ public class EtterlysningutlederKontrollerInntekt {
 
         var resultatTidslinje = new LocalDateTimeline<EtterlysningBehov>(List.of());
 
+        // Negativ registerinntekt skal alltid vurderes av saksbehandler og aldri varsles, heller ikke ved endret registeropplysning
+        var negativRegisterinntektTidslinje = finnTidslinjeForNegativRegisterinntekt(gjeldendeRapporterteInntekter, tidslinjeTilVurdering);
+        resultatTidslinje = resultatTidslinje.crossJoin(negativRegisterinntektTidslinje, StandardCombinators::coalesceLeftHandSide);
+
         // Sjekker om bruker har etterlysning/uttalelse som ikke lenger er gyldig pga endret registeropplysning
         var etterlysningResultatFraEndretRegisteropplysning = finnNyeEtterlysningerGrunnetRegisterendring(gjeldendeRapporterteInntekter, gjeldendeEtterlysningTidslinje, tidslinjeTilVurdering);
         resultatTidslinje = resultatTidslinje.crossJoin(etterlysningResultatFraEndretRegisteropplysning, StandardCombinators::coalesceLeftHandSide);
@@ -77,6 +81,14 @@ public class EtterlysningutlederKontrollerInntekt {
         var endringsresultatEtterlysninger = FinnResultatForEndretRegisteropplysninger.finnTidslinjeForEndring(gjeldendeRapporterteInntekter, mottattSvarTidslinje);
         return endringsresultatEtterlysninger.filterValue(it -> it == FinnResultatForEndretRegisteropplysninger.Endringsresultat.INGEN_ENDRING)
                 .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING);
+    }
+
+    private LocalDateTimeline<EtterlysningBehov> finnTidslinjeForNegativRegisterinntekt(
+        LocalDateTimeline<RapporterteInntekter> gjeldendeRapporterteInntekter,
+        LocalDateTimeline<Boolean> tidslinjeTilVurdering) {
+        return new Avviksvurdering(akseptertDifferanse).finnAvviksresultatTidslinje(gjeldendeRapporterteInntekter, tidslinjeTilVurdering)
+            .filterValue(it -> it == AvvikResultatType.NEGATIV_REGISTERINNTEKT)
+            .mapValue(it -> EtterlysningBehov.INGEN_ETTERLYSNING);
     }
 
     private LocalDateTimeline<EtterlysningBehov> finnTidslinjeForEtterlysningFraAvvik(
