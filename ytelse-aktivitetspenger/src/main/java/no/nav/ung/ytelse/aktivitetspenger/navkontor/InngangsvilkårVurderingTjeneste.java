@@ -266,7 +266,7 @@ public class InngangsvilkårVurderingTjeneste {
         resultatBuilder.leggTil(vilkårBuilder);
     }
 
-    private static String regelInput(VilkårsvurderingResultat vurdering, Optional<Regelsporing> automatisering) {
+    private static String regelInput(VilkårsvurderingResultat vurdering, Optional<Regelsporing> regelsporingFraGrunnlag) {
         var årsak = vurdering.ikkeOppfyltÅrsak();
         return new VilkårJsonObjectMapper().writeValueAsString(new VurderingRegelInput(
             vurdering.godkjent(),
@@ -274,8 +274,8 @@ public class InngangsvilkårVurderingTjeneste {
             vurdering.erManuellVurdering(),
             vurdering.vurdertAv(),
             vurdering.vurdertTidspunkt(),
-            automatisering.map(Regelsporing::input).orElse(null),
-            automatisering.map(Regelsporing::evaluering).orElse(null)));
+            regelsporingFraGrunnlag.map(Regelsporing::input).orElse(null),
+            regelsporingFraGrunnlag.map(Regelsporing::evaluering).orElse(null)));
     }
 
     private static String regelEvaluering(Utfall utfall, Avslagsårsak avslagsårsak) {
@@ -290,8 +290,8 @@ public class InngangsvilkårVurderingTjeneste {
                                boolean manuellVurdering,
                                String vurdertAv,
                                LocalDateTime vurdertTidspunkt,
-                               @JsonRawValue String automatisering,
-                               @JsonRawValue String automatiseringEvaluering) {
+                               @JsonRawValue String regelInputGrunnlag,
+                               @JsonRawValue String regelEvalueringGrunnlag) {
     }
 
     record VurderingRegelEvaluering(String utfall, String avslagsårsak, boolean automatiskUtledetFraGrunnlag) {

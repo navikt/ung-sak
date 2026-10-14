@@ -156,8 +156,8 @@ class BistandsvilkårStegTest {
         var vilkårsperiode = vilkår.getFirst();
         var vilkårsperiodeInput = json.readValue(vilkårsperiode.getRegelInput(), JsonNode.class);
         assertThat(vilkårsperiodeInput.get("manuellVurdering").asBoolean()).isFalse();
-        assertThat(vilkårsperiodeInput.get("automatisering").get("avklaringReferanse").asText()).isEqualTo(avklaring.getReferanse().toString());
-        assertThat(json.readValue(vilkårsperiodeInput.get("automatiseringEvaluering").toString(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class)).isEqualTo(evaluering);
+        assertThat(vilkårsperiodeInput.get("regelInputGrunnlag").get("avklaringReferanse").asText()).isEqualTo(avklaring.getReferanse().toString());
+        assertThat(json.readValue(vilkårsperiodeInput.get("regelEvalueringGrunnlag").toString(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class)).isEqualTo(evaluering);
         assertThat(json.readValue(vilkårsperiode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
     }
 
