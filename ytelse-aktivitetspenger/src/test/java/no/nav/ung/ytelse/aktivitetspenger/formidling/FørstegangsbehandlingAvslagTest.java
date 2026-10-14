@@ -294,11 +294,12 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
 
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_SENTRAL)
+            .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("3").trim())
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 FRITEKST_MEDLEMSKAP
             )
-            .asPlainTextNotContains("Trondheim");
+            .asPlainTextNotContains("må du bo i Trondheim kommune");
     }
 
     @DisplayName("Avslag på både bosted og forutgående medlemskap - bosted omtales før medlemskap")
@@ -317,7 +318,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.",
-                FRITEKST_MEDLEMSKAP
+                "Trøndelag §&nbsp;2.",
+                FRITEKST_MEDLEMSKAP,
+                "Trøndelag §&nbsp;3."
             );
     }
 
