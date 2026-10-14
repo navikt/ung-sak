@@ -91,7 +91,7 @@ public class InngangsvilkårVurderingTjeneste {
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medAvslagsårsak(avslagsårsak, ikkeOppfyltÅrsak)
-                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), Optional.empty()))
+                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), vurdering.getRegelsporing()))
                 .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak));
 
             if (vurdering.erManuellVurdering()) {
@@ -253,7 +253,7 @@ public class InngangsvilkårVurderingTjeneste {
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medAvslagsårsak(avslagsårsak, ikkeOppfyltÅrsak)
-                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), Optional.empty()))
+                .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), vurdering.getRegelsporing()))
                 .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak));
 
             if (vurdering.erManuellVurdering()) {

@@ -86,10 +86,6 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
             regelsporing);
     }
 
-    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt) {
-        this(periode, godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, ytelseNavn, vurdertAv, vurdertTidspunkt, null);
-    }
-
     public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt, Regelsporing regelsporing) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");

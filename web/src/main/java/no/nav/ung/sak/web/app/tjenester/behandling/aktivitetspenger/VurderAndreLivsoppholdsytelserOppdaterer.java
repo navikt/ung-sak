@@ -86,7 +86,8 @@ public class VurderAndreLivsoppholdsytelserOppdaterer implements AksjonspunktOpp
                 it.fritekstVurderingBrev(),
                 utledYtelseNavn(it),
                 vurdertAv,
-                vurdertTidspunkt))
+                vurdertTidspunkt,
+                null))
             .toList();
         inngangsvilkårVurderingRepository.lagreYtelseVurderinger(param.getBehandlingId(), periodeVurderinger);
 
