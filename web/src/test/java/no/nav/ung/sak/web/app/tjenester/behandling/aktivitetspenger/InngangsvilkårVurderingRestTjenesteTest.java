@@ -96,7 +96,7 @@ class InngangsvilkårVurderingRestTjenesteTest {
     void alle_vilkår_gir_spesifikk_dto_for_andre_livsoppholdsytelser_og_generell_for_øvrige() {
         lagreLivsoppholdVurderinger();
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
-            new BostedsvilkårResultatPeriode(tilIntervall(JAN), false, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true, "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT)));
+            new BostedsvilkårResultatPeriode(tilIntervall(JAN), false, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true, "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT, null)));
 
         var vurderinger = tjeneste.hentInngangsvilkårVurderinger(behandlingUuid).vurderinger();
 
@@ -111,7 +111,7 @@ class InngangsvilkårVurderingRestTjenesteTest {
     void vurderinger_utenfor_perioder_til_vurdering_leveres_ikke_ut() {
         lagreLivsoppholdVurderinger();
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
-            new BostedsvilkårResultatPeriode(tilIntervall(JAN), false, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true, "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT)));
+            new BostedsvilkårResultatPeriode(tilIntervall(JAN), false, BostedsvilkårIkkeOppfyltÅrsak.ANNET, true, "bor utenfor", "fritekst bosted", SAKSBEHANDLER, VURDERT_TIDSPUNKT, null)));
         when(perioderTilVurderingTjeneste.utled(eq(behandling.getId()), any())).thenReturn(new TreeSet<>(List.of(tilIntervall(FEB))));
 
         assertThat(tjeneste.hentInngangsvilkårVurderinger(behandlingUuid).vurderinger()).containsExactly(livsoppholdIkkeOppfylt());
@@ -158,9 +158,9 @@ class InngangsvilkårVurderingRestTjenesteTest {
     private void lagreLivsoppholdVurderinger() {
         inngangsvilkårVurderingRepository.lagreYtelseVurderinger(behandling.getId(), List.of(
             new AndreLivsoppholdsytelserResultatPeriode(tilIntervall(FEB), false, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE,
-                true, "mottar livsoppholdytelse fra Tyskland", "fritekst til brev", "livsoppholdytelse fra Tyskland", SAKSBEHANDLER, VURDERT_TIDSPUNKT),
+                true, "mottar livsoppholdytelse fra Tyskland", "fritekst til brev", "livsoppholdytelse fra Tyskland", SAKSBEHANDLER, VURDERT_TIDSPUNKT, null),
             new AndreLivsoppholdsytelserResultatPeriode(tilIntervall(JAN), true, null,
-                true, "mottar ingenting", null, null, SAKSBEHANDLER, VURDERT_TIDSPUNKT)));
+                true, "mottar ingenting", null, null, SAKSBEHANDLER, VURDERT_TIDSPUNKT, null)));
     }
 
     private static AndreLivsoppholdsytelserVurderingDto livsoppholdOppfylt() {

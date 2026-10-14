@@ -91,7 +91,8 @@ public class VurderingAvVilkårEtterAvklaringTjeneste {
                 .toList(),
             eksisterendeVilkårperioder.getLocalDateIntervals().stream()
                 .map(i -> new Periode(i.getFomDato(), i.getTomDato()))
-                .toList());
+                .toList()
+        );
 
         return new VurderingEtterAvklaringResultat(vurderinger, regelInput);
     }
