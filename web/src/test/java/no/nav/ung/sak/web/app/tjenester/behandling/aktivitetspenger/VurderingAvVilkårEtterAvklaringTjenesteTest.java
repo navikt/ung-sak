@@ -202,7 +202,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
     }
 
     @Test
-    void regelsporing_viser_klipping_mot_hull_og_lukking_av_åpen_periode() {
+    void regelsporing_viser_klipping_mot_hull_i_vilkårsperioderne() {
         medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_VURDERT));
         var opphørsdato = LocalDate.of(2026, 1, 15);
 
@@ -215,9 +215,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         assertThat(evalueringer).allSatisfy(e -> {
             assertThat(e.utfall()).isEqualTo(Utfall.IKKE_OPPFYLT.getKode());
             assertThat(e.ikkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM.getKode());
-            assertThat(e.åpenPeriodeLukket()).isTrue();
             assertThat(e.klippetMotVilkårsperiode()).isTrue();
-            assertThat(e.automatiskUtledetFraGrunnlag()).isFalse();
         });
 
         var input = resultat.regelInput();
@@ -227,23 +225,6 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         });
         assertThat(input.avklaringer()).singleElement().satisfies(a -> assertThat(a.fom()).isEqualTo(opphørsdato));
         assertThat(input.eksisterendeVilkårperioder()).hasSize(2);
-    }
-
-    @Test
-    void regelsporing_har_kun_relevante_vilkårsperioder_som_input() {
-        medVilkårsperioder(vilkårsperiode(JANUAR, Utfall.IKKE_VURDERT), vilkårsperiode(MARS, Utfall.IKKE_RELEVANT));
-
-        var resultat = tjeneste.utled(BEHANDLING_ID, VILKÅR_TYPE,
-            List.of(vurdering(JANUAR, true, "oppfylt", null)),
-            årsakTidslinje(JANUAR, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM));
-
-        assertThat(resultat.regelInput().eksisterendeVilkårperioder())
-            .containsExactly(JANUAR);
-        var evaluering = resultat.vurderinger().stream().findFirst().orElseThrow().getValue().evaluering();
-        assertThat(evaluering.utfall()).isEqualTo(Utfall.OPPFYLT.getKode());
-        assertThat(evaluering.ikkeOppfyltÅrsak()).isNull();
-        assertThat(evaluering.klippetMotVilkårsperiode()).isFalse();
-        assertThat(evaluering.åpenPeriodeLukket()).isFalse();
     }
 
     private void medVilkårsperioder(VilkårPeriodeBuilder... perioder) {

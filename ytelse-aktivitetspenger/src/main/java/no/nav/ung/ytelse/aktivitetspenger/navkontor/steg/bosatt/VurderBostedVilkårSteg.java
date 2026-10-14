@@ -173,7 +173,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                     null,
                     null,
                     foreslåttAvklaring.getVurdertTidspunkt(),
-                    null
+                    s.getValue().tilRegelsporing()
                 );
             }).collect(Collectors.toList());
 

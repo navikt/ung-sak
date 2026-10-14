@@ -82,10 +82,10 @@ class InngangsvilkårVurderingTjenesteTest {
         assertThat(vilkårPeriode.getRegelInput()).contains("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM").contains("A111111");
         var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
         assertThat(json.hasNonNull("automatisering")).isFalse();
+        assertThat(json.get("ikkeOppfyltÅrsak").asText()).isEqualTo("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM");
         var evaluering = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class);
         assertThat(evaluering.get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
         assertThat(evaluering.get("automatiskUtledetFraGrunnlag").asBoolean()).isTrue();
-        assertThat(evaluering.get("ikkeOppfyltÅrsak").asText()).isEqualTo("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM");
         assertThat(evaluering.get("avslagsårsak").asText()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE.getKode());
     }
 

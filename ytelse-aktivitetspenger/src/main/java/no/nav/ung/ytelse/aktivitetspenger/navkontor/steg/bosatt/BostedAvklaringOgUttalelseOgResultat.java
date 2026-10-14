@@ -3,16 +3,21 @@ package no.nav.ung.ytelse.aktivitetspenger.navkontor.steg.bosatt;
 import no.nav.ung.kodeverk.bosatt.Kilde;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.Regelsporing;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 /**
  * Per-segment hjelpeobjekt som kombinerer avklaring og etterlysning, og reduserer til et {@link StegUtfall}.
  */
 class BostedAvklaringOgUttalelseOgResultat {
+
+    private static final VilkårJsonObjectMapper JSON = new VilkårJsonObjectMapper();
 
     private final BostedsfaktaOgAvklaring faktaOgAvklaring;
     private final EtterlysningData etterlysning;
@@ -45,6 +50,24 @@ class BostedAvklaringOgUttalelseOgResultat {
             return StegUtfall.OPPHØR_AUTOMATISK;
         }
         return StegUtfall.BOSATT_HELE_PERIODEN;
+    }
+
+    Regelsporing tilRegelsporing() {
+        return new Regelsporing(JSON.writeValueAsString(tilRegelInput()), JSON.writeValueAsString(new RegelEvaluering(utledUtfall())));
+    }
+
+    private RegelInput tilRegelInput() {
+        var foreslått = faktaOgAvklaring.getForeslåttAvklaring();
+        var uttalelse = etterlysning != null ? etterlysning.uttalelseData() : null;
+        return new RegelInput(
+            faktaOgAvklaring.getKilde(),
+            faktaOgAvklaring.isErBosattITrondheim(),
+            foreslått != null ? foreslått.getReferanse() : null,
+            foreslått != null ? foreslått.getIkkeOppfyltÅrsakKode() : null,
+            foreslått != null && foreslått.skalSendeVarsel(),
+            etterlysning != null ? etterlysning.status() : null,
+            uttalelse != null ? uttalelse.harUttalelse() : null,
+            getFrist());
     }
 
     LocalDateTime getFrist() {
@@ -83,6 +106,19 @@ class BostedAvklaringOgUttalelseOgResultat {
         return etterlysning != null
             && etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
             && etterlysning.uttalelseData() != null && etterlysning.uttalelseData().harUttalelse();
+    }
+
+    record RegelInput(Kilde kilde,
+                      boolean erBosattITrondheim,
+                      UUID avklaringReferanse,
+                      String ikkeOppfyltÅrsak,
+                      boolean skalSendeVarsel,
+                      EtterlysningStatus etterlysningStatus,
+                      Boolean harUttalelse,
+                      LocalDateTime frist) {
+    }
+
+    record RegelEvaluering(StegUtfall utfall) {
     }
 
     enum StegUtfall {

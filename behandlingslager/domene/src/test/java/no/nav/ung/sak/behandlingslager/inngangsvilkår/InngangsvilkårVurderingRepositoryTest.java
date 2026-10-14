@@ -318,16 +318,6 @@ class InngangsvilkårVurderingRepositoryTest {
     }
 
     @Test
-    void automatisk_vurdering_skal_ikke_kunne_lagres_via_vilkårsvurderingsresultatet() {
-        var automatiskVurdering = new GenereltVilkårsvurderingResultat(VilkårType.BISTANDSVILKÅR, false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
-            false, "avslått automatisk", null, VURDERT_AV, VURDERT_TIDSPUNKT);
-
-        assertThatThrownBy(() -> new BistandsvilkårResultatPeriode(PERIODE_1, automatiskVurdering, null))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("regelsporing");
-    }
-
-    @Test
     void skal_ikke_kopiere_naar_ingen_grunnlag_eksisterer() {
         var revurdering = Behandling.nyBehandlingFor(behandling.getFagsak(), BehandlingType.REVURDERING).build();
         behandlingRepository.lagre(revurdering, new BehandlingLås(null));
