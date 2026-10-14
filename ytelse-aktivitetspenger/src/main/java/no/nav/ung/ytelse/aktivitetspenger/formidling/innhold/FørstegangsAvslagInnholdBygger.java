@@ -79,9 +79,11 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
     }
 
     private AvslåttMedlemskap lagAvslåttMedlemskap(Behandling behandling, LocalDateTimeline<Boolean> avslagsperiode) {
-        var fritekster = vilkårResultatRepository.hent(behandling.getId())
+        var forutgåendeMedlemskapPeriode = vilkårResultatRepository.hent(behandling.getId())
             .getVilkårTimeline(VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET)
-            .intersection(avslagsperiode)
+            .intersection(avslagsperiode);
+
+        var fritekster = forutgåendeMedlemskapPeriode
             .stream()
             .map(it -> it.getValue().getFritekstVurderingBrev())
             .filter(Objects::nonNull)
@@ -94,7 +96,7 @@ public class FørstegangsAvslagInnholdBygger implements VedtaksbrevInnholdBygger
         if (fritekster.size() > 1) {
             throw new IllegalStateException("Forventer kun én fritekst for " + VilkårType.FORUTGÅENDE_MEDLEMSKAPSVILKÅRET + ", men fant " + fritekster.size());
         }
-        return new AvslåttMedlemskap(fritekster.getFirst());
+        return new AvslåttMedlemskap(forutgåendeMedlemskapPeriode.getMinLocalDate(), fritekster.getFirst());
     }
 
     private static VilkårsvurderingResultat hentVilkårsvurderingResultatPeriodeForVilkår(LocalDateTimeline<Map<VilkårType, VilkårsvurderingResultat>> vilkårVurdering,

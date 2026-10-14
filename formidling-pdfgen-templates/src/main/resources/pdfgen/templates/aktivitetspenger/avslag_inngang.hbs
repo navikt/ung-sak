@@ -36,6 +36,9 @@
                     For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du tar en utdanning, har vi avslått søknaden din.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
+                <p>
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. Fordi du ikke har behov for denne hjelpen fra Nav, har vi avslått søknaden din.
+                </p>
             {{/eq}}
             {{#if fritekstBrev}}
                 <p>
@@ -63,6 +66,10 @@
         {{/with}}
 
         {{#with medlemskap}}
+        <p>
+            Du har ikke rett til aktivitetspenger. For å ha rett til aktivitetspenger må du ha vært medlem i folketrygden de siste fem årene før {{fom}}.
+            Fordi du ikke har vært medlem av folketrygden de siste fem årene, har vi avslått søknaden din.
+        </p>
             {{#if fritekstBrev}}
                 <p>
                     {{fritekstBrev}}

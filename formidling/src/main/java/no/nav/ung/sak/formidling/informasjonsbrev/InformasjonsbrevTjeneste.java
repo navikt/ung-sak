@@ -127,17 +127,19 @@ public class InformasjonsbrevTjeneste {
                 .toList()));
         }
 
-        boolean valgtMottakerErDød = valg.get().mottakere().stream().anyMatch(
-            mottaker -> mottaker.idType() == dto.mottaker().type()
-                && mottaker.id().equals(dto.mottaker().id())
-                && mottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD);
+        var valgtMottaker = valg.get().mottakere().stream()
+            .filter(mottaker -> mottaker.idType() == dto.mottaker().type()
+                && mottaker.id().equals(dto.mottaker().id()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException("Mottaker er ikke et gyldig valg for maltype " + dto.dokumentMalType()));
 
-        if (valgtMottakerErDød) {
+        if (valgtMottaker.utilgjengeligÅrsak() == UtilgjengeligÅrsak.PERSON_DØD) {
             throw new IllegalArgumentException(("Støtter ikke brev der mottaker er død"));
         }
 
         return informasjonsbrevGenerererTjeneste.genererInformasjonsbrev(
-            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(), bestillerIdent, Boolean.TRUE.equals(kunHtml)));
+            new InformasjonsbrevBestillingInput(dto.behandlingId(), dto.dokumentMalType(), dto.innhold(),
+                new AktørId(valgtMottaker.id()), bestillerIdent, Boolean.TRUE.equals(kunHtml)));
     }
 
 }

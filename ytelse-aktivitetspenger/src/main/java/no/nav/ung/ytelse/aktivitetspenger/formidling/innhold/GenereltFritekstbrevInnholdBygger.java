@@ -1,16 +1,22 @@
-package no.nav.ung.sak.formidling.informasjonsbrev.innhold;
+package no.nav.ung.ytelse.aktivitetspenger.formidling.innhold;
 
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdBygger;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdByggerTypeRef;
+import no.nav.ung.sak.formidling.informasjonsbrev.innhold.MarkdownParser;
 import no.nav.ung.sak.formidling.innhold.TemplateInnholdResultat;
 import no.nav.ung.sak.formidling.template.dto.GenereltFritekstBrevTemplateDto;
 import no.nav.ung.sak.kontrakt.formidling.informasjonsbrev.GenereltFritekstBrevDto;
 
 @InformasjonsbrevInnholdByggerTypeRef(DokumentMalType.GENERELT_FRITEKSTBREV)
+@FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @ApplicationScoped
 public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnholdBygger<GenereltFritekstBrevDto> {
 
@@ -20,9 +26,8 @@ public class GenereltFritekstbrevInnholdBygger implements InformasjonsbrevInnhol
 
     @Override
     public TemplateInnholdResultat bygg(Behandling behandling, GenereltFritekstBrevDto innhold) {
-
         return new TemplateInnholdResultat(
-                TemplateType.GENERELT_FRITEKSTBREV,
+            TemplateType.AKTIVITETSPENGER_GENERELT_FRITEKSTBREV,
             new GenereltFritekstBrevTemplateDto(
                 innhold.overskrift(),
                 MarkdownParser.markdownTilHtml(innhold.brødtekst())
