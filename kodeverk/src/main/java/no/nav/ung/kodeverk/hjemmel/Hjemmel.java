@@ -23,6 +23,9 @@ public enum Hjemmel implements Kodeverdi {
     UNG_FORSKRIFT_PARAGRAF_12("UNG_FRSKRFT_12", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 12"),
     UNG_FORSKRIFT_PARAGRAF_14("UNG_FRSKRFT_14", "Forskrift om forsøk med ungdomsprogram og ungdomsprogramytelse § 14"),
 
+    // Brukes kun som lagret hjemmel i beregning. Skal ikke tilbys som klagehjemmel før Kabal har tilsvarende koder.
+    AKT_FORSKRIFT_PARAGRAF_12("AKT_FRSKRFT_12", AktivitetspengerForskrift.paragraf("12")),
+
     ARBEIDSMARKEDSLOVEN_PARAGRAF_12("AML_12", "Arbeidsmarkedsloven § 12"),
     ARBEIDSMARKEDSLOVEN_PARAGRAF_13("AML_13", "Arbeidsmarkedsloven § 13"),
     ARBEIDSMARKEDSLOVEN_PARAGRAF_17("AML_17", "Arbeidsmarkedsloven § 17"),
