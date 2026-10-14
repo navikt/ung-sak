@@ -82,7 +82,11 @@ class InngangsvilkårVurderingTjenesteTest {
         assertThat(vilkårPeriode.getRegelInput()).contains("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM").contains("A111111");
         var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
         assertThat(json.hasNonNull("automatisering")).isFalse();
-        assertThat(vilkårPeriode.getRegelEvaluering()).isNull();
+        var evaluering = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class);
+        assertThat(evaluering.get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
+        assertThat(evaluering.get("automatiskUtledetFraGrunnlag").asBoolean()).isTrue();
+        assertThat(evaluering.get("ikkeOppfyltÅrsak").asText()).isEqualTo("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM");
+        assertThat(evaluering.get("avslagsårsak").asText()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE.getKode());
     }
 
     @Test
@@ -99,7 +103,8 @@ class InngangsvilkårVurderingTjenesteTest {
         var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
         assertThat(json.get("automatisering").get("fra").asText()).isEqualTo("steg");
         assertThat(json.get("manuellVurdering").asBoolean()).isFalse();
-        assertThat(vilkårPeriode.getRegelEvaluering()).isEqualTo("{\"utfall\":\"AVSLÅS_AUTOMATISK\"}");
+        assertThat(json.get("automatiseringEvaluering").get("utfall").asText()).isEqualTo("AVSLÅS_AUTOMATISK");
+        assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
     }
 
     @Test
@@ -119,7 +124,7 @@ class InngangsvilkårVurderingTjenesteTest {
         var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
         assertThat(json.get("manuellVurdering").asBoolean()).isTrue();
         assertThat(json.hasNonNull("automatisering")).isFalse();
-        assertThat(vilkårPeriode.getRegelEvaluering()).isNull();
+        assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("OPPFYLT");
     }
 
     @Test
@@ -209,7 +214,8 @@ class InngangsvilkårVurderingTjenesteTest {
         var vilkårPeriode = hentVilkårPeriode(vilkårResultatRepository.hent(revurdering.getId()).getVilkårTimeline(VilkårType.BISTANDSVILKÅR), PERIODE_1);
         var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
         assertThat(json.get("automatisering").get("fra").asText()).isEqualTo("steg");
-        assertThat(vilkårPeriode.getRegelEvaluering()).isEqualTo(regelsporing.evaluering());
+        assertThat(json.get("automatiseringEvaluering").toString()).isEqualTo(regelsporing.evaluering());
+        assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
     }
 
     @Test

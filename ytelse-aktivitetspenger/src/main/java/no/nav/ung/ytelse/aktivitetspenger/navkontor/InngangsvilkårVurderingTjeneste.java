@@ -58,13 +58,14 @@ public class InngangsvilkårVurderingTjeneste {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak()) : null;
+            var avslagsårsak = avslagsårsakFor(ikkeOppfyltÅrsak);
             vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
                 .medUtfallManuell(utfall)
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medAvslagsårsak(avslagsårsak, ikkeOppfyltÅrsak)
                 .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), vurdering.getRegelsporing()))
-                .medRegelEvaluering(vurdering.getRegelsporing().map(Regelsporing::evaluering).orElse(null)));
+                .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak)));
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }
@@ -84,13 +85,14 @@ public class InngangsvilkårVurderingTjeneste {
             var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT
                 ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak())
                 : null;
+            var avslagsårsak = avslagsårsakFor(ikkeOppfyltÅrsak);
 
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medAvslagsårsak(avslagsårsak, ikkeOppfyltÅrsak)
                 .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), Optional.empty()))
-                .medRegelEvaluering(null);
+                .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak));
 
             if (vurdering.erManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -111,13 +113,14 @@ public class InngangsvilkårVurderingTjeneste {
             var periode = vurdering.getPeriode();
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak()) : null;
+            var avslagsårsak = avslagsårsakFor(ikkeOppfyltÅrsak);
 
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medAvslagsårsak(avslagsårsak, ikkeOppfyltÅrsak)
                 .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), vurdering.getRegelsporing()))
-                .medRegelEvaluering(vurdering.getRegelsporing().map(Regelsporing::evaluering).orElse(null));
+                .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak));
 
             if (vurdering.isManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -244,13 +247,14 @@ public class InngangsvilkårVurderingTjeneste {
             var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT
                 ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak())
                 : null;
+            var avslagsårsak = avslagsårsakFor(ikkeOppfyltÅrsak);
 
             var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medAvslagsårsak(avslagsårsakFor(ikkeOppfyltÅrsak), ikkeOppfyltÅrsak)
+                .medAvslagsårsak(avslagsårsak, ikkeOppfyltÅrsak)
                 .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), Optional.empty()))
-                .medRegelEvaluering(null);
+                .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak));
 
             if (vurdering.erManuellVurdering()) {
                 vilkårPeriodeBuilder.medUtfallManuell(utfall);
@@ -270,7 +274,15 @@ public class InngangsvilkårVurderingTjeneste {
             vurdering.erManuellVurdering(),
             vurdering.vurdertAv(),
             vurdering.vurdertTidspunkt(),
-            automatisering.map(Regelsporing::input).orElse(null)));
+            automatisering.map(Regelsporing::input).orElse(null),
+            automatisering.map(Regelsporing::evaluering).orElse(null)));
+    }
+
+    private static String regelEvaluering(Utfall utfall, Avslagsårsak avslagsårsak) {
+        return new VilkårJsonObjectMapper().writeValueAsString(new VurderingRegelEvaluering(
+            utfall.getKode(),
+            avslagsårsak == null ? null : avslagsårsak.getKode(),
+            true));
     }
 
     record VurderingRegelInput(boolean godkjent,
@@ -278,7 +290,11 @@ public class InngangsvilkårVurderingTjeneste {
                                boolean manuellVurdering,
                                String vurdertAv,
                                LocalDateTime vurdertTidspunkt,
-                               @JsonRawValue String automatisering) {
+                               @JsonRawValue String automatisering,
+                               @JsonRawValue String automatiseringEvaluering) {
+    }
+
+    record VurderingRegelEvaluering(String utfall, String avslagsårsak, boolean automatiskUtledetFraGrunnlag) {
     }
 
     private static IkkeOppfyltDetaljertÅrsak påkrevdÅrsak(IkkeOppfyltDetaljertÅrsak årsak) {

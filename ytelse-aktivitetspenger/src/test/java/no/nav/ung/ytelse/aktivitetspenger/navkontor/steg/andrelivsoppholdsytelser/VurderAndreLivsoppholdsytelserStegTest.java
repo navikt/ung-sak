@@ -160,7 +160,8 @@ class VurderAndreLivsoppholdsytelserStegTest {
         var vilkårsperiodeInput = json.readValue(vilkårsperiode.getRegelInput(), JsonNode.class);
         assertThat(vilkårsperiodeInput.get("manuellVurdering").asBoolean()).isFalse();
         assertThat(vilkårsperiodeInput.get("automatisering").get("avklaringReferanse").asText()).isEqualTo(avklaring.getReferanse().toString());
-        assertThat(json.readValue(vilkårsperiode.getRegelEvaluering(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class)).isEqualTo(evaluering);
+        assertThat(json.readValue(vilkårsperiodeInput.get("automatiseringEvaluering").toString(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class)).isEqualTo(evaluering);
+        assertThat(json.readValue(vilkårsperiode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
     }
 
     @Test
