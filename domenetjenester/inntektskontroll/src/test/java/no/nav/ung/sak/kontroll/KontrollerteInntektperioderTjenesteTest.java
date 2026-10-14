@@ -63,6 +63,26 @@ class KontrollerteInntektperioderTjenesteTest {
     }
 
     @Test
+    void skal_sette_negativ_registerinntekt_til_null_per_type_og_lagre_registerinntekt_uendret() {
+        var registerinntekter = Set.of(
+            new RapportertInntekt(InntektType.ARBEIDSTAKER_ELLER_FRILANSER, BigDecimal.valueOf(-4000)),
+            new RapportertInntekt(InntektType.YTELSE, BigDecimal.valueOf(3000))
+        );
+        var inntektsresultat = new Inntektsresultat(registerinntekter, KontrollertInntektKilde.REGISTER);
+        var inntektTidslinje = new LocalDateTimeline<>(List.of(new LocalDateSegment<>(FOM, TOM, inntektsresultat)));
+        var rapporterteInntekterTidslinje = new LocalDateTimeline<>(FOM, TOM, new RapporterteInntekter(Set.of(), registerinntekter));
+
+        tjeneste.opprettKontrollerteInntekterPerioderFraBruker(1L, inntektTidslinje, rapporterteInntekterTidslinje, "input", "sporing");
+
+        ArgumentCaptor<List<KontrollertInntektPeriode>> captor = ArgumentCaptor.captor();
+        verify(tilkjentYtelseRepository).lagreKontrollertePerioder(eq(1L), captor.capture(), anyString(), anyString());
+        var periode = captor.getValue().get(0);
+        assertThat(periode.getInntekt()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(periode.getYtelse()).isEqualByComparingTo(BigDecimal.valueOf(3000));
+        assertThat(periode.getRegisterInntekt()).isEqualByComparingTo(BigDecimal.valueOf(-1000));
+    }
+
+    @Test
     void skal_sette_ytelse_til_null_naar_bare_atfl() {
         var atflBeløp = BigDecimal.valueOf(4000);
         var inntektsresultat = new Inntektsresultat(

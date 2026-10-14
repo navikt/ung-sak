@@ -84,7 +84,7 @@ public class FastsettInntektOppdaterer implements AksjonspunktOppdaterer<Fastset
             }
             case BRUK_REGISTER_INNTEKT -> {
                 Set<RapportertInntekt> registersRapporterteInntekt = inntekt == null ? Set.of() : inntekt.getValue().registersRapporterteInntekt;
-                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.REGISTER, summerRapporterteInntekter(registersRapporterteInntekt), valgOgBegrunnelse.getValue().begrunnelse()));
+                yield new LocalDateSegment<>(di, new ManueltKontrollertInntekt(KontrollertInntektKilde.REGISTER, InntektMedNedreGrense.summerAlleTyper(registersRapporterteInntekt), valgOgBegrunnelse.getValue().begrunnelse()));
             }
             case MANUELT_FASTSATT -> {
                 if (inntekt == null) {
