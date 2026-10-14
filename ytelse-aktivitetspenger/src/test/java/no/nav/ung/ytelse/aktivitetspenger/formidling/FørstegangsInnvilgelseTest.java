@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
@@ -50,7 +51,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
         var brevtekst = generertBrev.dokument().html();
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
                 Fra 1. august 2025 får du aktivitetspenger på 762 kroner utenom lørdag og søndag. \
@@ -96,7 +97,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
         var brevtekst = generertBrev.dokument().html();
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
                 Fra 1. august 2025 får du aktivitetspenger på 681 kroner utenom lørdag og søndag. \
@@ -138,7 +139,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
         var brevtekst = generertBrev.dokument().html();
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
                 Fra 1. august 2025 får du aktivitetspenger på 1 022 kroner utenom lørdag og søndag. \
@@ -178,7 +179,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
         var brevtekst = generertBrev.dokument().html();
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
                 Fra 1. august 2025 får du aktivitetspenger på 681 kroner utenom lørdag og søndag. \
@@ -225,7 +226,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
         var brevtekst = generertBrev.dokument().html();
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
                 Fra 1. august 2025 får du aktivitetspenger på 1 022 kroner utenom lørdag og søndag. \
@@ -270,7 +271,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
         var brevtekst = generertBrev.dokument().html();
 
-        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooter(fnr,
+        var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterNavKontor(fnr,
             """
                 Du får aktivitetspenger \
                 Fra 1. august 2025 får du aktivitetspenger på 1 022 kroner utenom lørdag og søndag. \
@@ -341,7 +342,8 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
 
     private Behandling lagScenario(AktivitetspengerTestScenario testScenario) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(testScenario);
+            .medAktivitetspengerTestGrunnlag(testScenario)
+            .medBehandlingsansvarlig(BehandlingDel.NAV_KONTOR);
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);

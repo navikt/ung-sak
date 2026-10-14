@@ -53,7 +53,7 @@ public enum Avslagsårsak implements Kodeverdi {
     AKTIVITETSVILKÅR_GENERELL_AVSLAGSÅRSAK("3011", "Søker oppfyller ikke aktivitetsvilkåret",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("8"))),
 
-    SØKER_ER_IKKE_MEDLEM("4001", "Søker er ikke medlem.",
+    SØKER_ER_IKKE_MEDLEM("4001", "Søker har ikke 5 år forutgående medlemskap.",
         Map.of(FagsakYtelseType.AKTIVITETSPENGER, AktivitetspengerForskrift.paragraf("3"))),
 
 

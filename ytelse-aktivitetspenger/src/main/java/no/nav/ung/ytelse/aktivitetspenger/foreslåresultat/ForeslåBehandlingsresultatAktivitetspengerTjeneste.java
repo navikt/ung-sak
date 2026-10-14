@@ -26,7 +26,7 @@ import no.nav.ung.sak.domene.behandling.steg.foreslåresultat.ForeslåBehandling
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.inngangsvilkår.avklaring.VilkårsavklaringTjeneste;
-import no.nav.ung.ytelse.aktivitetspenger.del1.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
+import no.nav.ung.ytelse.aktivitetspenger.navkontor.AktivitetspengerVilkårsPerioderTilVurderingTjeneste;
 
 @FagsakYtelseTypeRef(FagsakYtelseType.AKTIVITETSPENGER)
 @ApplicationScoped

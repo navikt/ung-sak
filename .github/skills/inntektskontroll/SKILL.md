@@ -42,3 +42,17 @@ Alternatively, the caseworker can determine a different income based on the info
 
 In case where the income from a-ordningen is zero and the reported income from the applicant is above zero the case is also flagged for manual review by a caseworker (aksjonspunkt).
 In this case the caseworker is asked to determine the correct income and possibly contact the applicant for more information. It is likely that the applicant has misunderstood the income reporting.
+
+## Negative income from a-ordningen
+An employer can correct previously reported income, which may make the sum for a month negative (e.g. a correction reported in September for income paid in August). We only know the payment month (`Inntektspost.periode`), not which month the correction concerns, so the correction is not moved back to the earlier month.
+The income from a-ordningen is summed per income type (arbeidsinntekt/ytelse) and month, and the sum is kept as is, also when negative (cash principle — `RapportertInntektMapper`). Positive income in the same month is netted against the correction. `Avviksvurdering` gives `AvvikResultatType.NEGATIV_REGISTERINNTEKT` for a type with a negative sum, regardless of what the applicant reported. It has the highest priority (also over a discrepancy with register income for the other type), so:
+- The period always goes to manual review by a caseworker (aksjonspunkt `KONTROLLER_INNTEKT`), also when the applicant reported no income or 0, and also when the applicant has already answered a notification without a statement.
+- No notification is sent to the applicant (only `AVVIK_MED_REGISTERINNTEKT` gives a notification). `EtterlysningutlederKontrollerInntekt` checks negative register income before changed register income, so a change from positive to negative register income cancels a waiting notification instead of replacing it with a new one.
+- The caseworker sees the negative sum and the individual income posts, and may set the income manually if none of the alternatives are correct.
+
+Negative income must not increase the benefit. Wherever register income becomes kontrollert inntekt, the sum per type is set to at least 0 (`InntektMedNedreGrense`), so a negative arbeidsinntekt is not netted against ytelse: "use register income" in the aksjonspunkt (`FastsettInntektOppdaterer`) and automatic control (`KontrollerteInntektperioderTjeneste`). The stored `registerInntekt` (tracking/statistics) keeps the negative value. Together with the validation of the applicant's reported income and the income set by the caseworker (≥ 0), all income used in the calculation is at least 0, which keeps utbetalingsgrad within 0–100 (DB constraint `chk_utbetalingsgrad_range`).
+
+Routine when the correction concerns an earlier month: the caseworker decides the month containing the correction in the aksjonspunkt (income can not be set below 0). The corrected month is then revurdert manually with `RE_KONTROLL_REGISTER_INNTEKT`.
+
+## Manually created revurdering for income control
+A manually created revurdering with `RE_KONTROLL_REGISTER_INNTEKT` (`BehandlingÅrsak.erManueltOpprettet()`) always gives the aksjonspunkt `KONTROLLER_INNTEKT` in `KontrollerInntektSteg`, the same way as for non-digital users. The automatic control is skipped, and the caseworker determines the income for the period. Without this, a month without discrepancy would be automatically controlled again with unchanged register income, and the caseworker could not correct it.

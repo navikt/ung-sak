@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
@@ -38,6 +39,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
 
         assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_NAV_KONTOR)
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
@@ -178,12 +180,13 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             );
     }
 
-    @DisplayName("Opphør pga andre livsoppholdsytelser - MOTTAR_ANNEN_YTELSE navngir ytelsen i friteksten")
+    @DisplayName("Opphør pga andre livsoppholdsytelser - MOTTAR_ANNEN_YTELSE henter ytelsen fra fritekst i varsel")
     @Test
     void opphørAndreLivsoppholdsytelserAnnenYtelse() {
-        var fritekst = "Du får en ytelse fra en annen ordning som dekker livsoppholdet ditt.";
-        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
-            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_ANNEN_YTELSE, fritekst);
+        var fritekstFraVarsel = "økonomisk sosialhjelp";
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAnnenLivsoppholdsytelse(
+            FOM, fritekstFraVarsel
+        );
         var behandling = lagBehandling(scenario);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
@@ -192,8 +195,9 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
-                "Det er fordi du får en annen livsoppholdsytelse fra denne datoen. Du kan ikke få aktivitetspenger samtidig.",
-                fritekst
+                "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger. "
+                    + "Det er fordi du får " + fritekstFraVarsel + " fra denne datoen. "
+                    + "Du kan ikke få aktivitetspenger samtidig som du får denne ytelsen."
             );
     }
 
@@ -334,7 +338,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
 
     private Behandling lagBehandling(AktivitetspengerTestScenario scenario) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(scenario);
+            .medAktivitetspengerTestGrunnlag(scenario)
+            .medBehandlingsansvarlig(BehandlingDel.NAV_KONTOR);
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.INNVILGET);

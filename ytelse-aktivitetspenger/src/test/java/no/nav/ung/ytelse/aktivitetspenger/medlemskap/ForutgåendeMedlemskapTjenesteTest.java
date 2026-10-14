@@ -22,7 +22,6 @@ import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatReposit
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.medlemskap.MedlemskapAvslagsÅrsakType;
-import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.perioder.VilkårsPerioderTilVurderingTjeneste;
 import no.nav.ung.sak.trigger.ProsessTriggereRepository;
 import no.nav.ung.sak.trigger.Trigger;
@@ -170,7 +169,7 @@ class ForutgåendeMedlemskapTjenesteTest {
         prosessTriggereRepository.leggTil(behandling.getId(), Set.of(
             new Trigger(BehandlingÅrsakType.NY_SØKT_PERIODE, DatoIntervallEntitet.fraOgMedTilOgMed(periode1.getFom(), periode1.getTom()))));
 
-        var response = tjeneste.hentMedlemskapOgVilkårSomDto(new BehandlingUuidDto(behandling.getUuid()));
+        var response = tjeneste.hentMedlemskapOgVilkårSomDto(behandling.getUuid());
 
         // IKKE_RELEVANT-perioden skal være filtrert bort
         assertThat(response.perioder())

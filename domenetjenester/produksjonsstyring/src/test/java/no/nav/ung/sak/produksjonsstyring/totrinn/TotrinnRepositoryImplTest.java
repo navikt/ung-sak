@@ -85,7 +85,7 @@ public class TotrinnRepositoryImplTest {
     }
 
     @Test
-    public void skal_finne_totrinnsgrunnlag_for_lokal_del_for_lokalkontoraksjonspunkt() {
+    public void skal_finne_totrinnsgrunnlag_for_lokal_del_for_nav_kontoraksjonspunkt() {
 
         Fagsak fagsak = Fagsak.opprettNy(FagsakYtelseType.AKTIVITETSPENGER, AktørId.dummy());
         fagsakRepository.opprettNy(fagsak);
@@ -94,8 +94,8 @@ public class TotrinnRepositoryImplTest {
         behandlingRepository.lagre(behandling, behandlingRepository.taSkriveLås(behandling));
 
         // Opprett vurderinger som skal være inaktive
-        AksjonspunktDefinisjon lokalkontorAksjonspunkt = AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR;
-        Totrinnsvurdering inaktivTotrinnsvurdering1 = lagTotrinnsvurdering(behandling, lokalkontorAksjonspunkt, false, "", VurderÅrsak.FEIL_FAKTA);
+        AksjonspunktDefinisjon navKontorAksjonspunkt = AksjonspunktDefinisjon.VURDER_BISTANDSVILKÅR;
+        Totrinnsvurdering inaktivTotrinnsvurdering1 = lagTotrinnsvurdering(behandling, navKontorAksjonspunkt, false, "", VurderÅrsak.FEIL_FAKTA);
         List<Totrinnsvurdering> totrinnsvurderinger = new ArrayList<>();
         totrinnsvurderinger.add(inaktivTotrinnsvurdering1);
         totrinnRepository.lagreOgFlush(behandling, totrinnsvurderinger);
@@ -106,7 +106,7 @@ public class TotrinnRepositoryImplTest {
         Assertions.assertThat(repoAktiveTotrinnsvurderinger).hasSize(1);
         Totrinnsvurdering totrinnsvurdering = repoAktiveTotrinnsvurderinger.iterator().next();
         assertThat(totrinnsvurdering.isAktiv()).isTrue();
-        assertThat(totrinnsvurdering.getAksjonspunktDefinisjon()).isEqualTo(lokalkontorAksjonspunkt);
+        assertThat(totrinnsvurdering.getAksjonspunktDefinisjon()).isEqualTo(navKontorAksjonspunkt);
     }
 
     @Test

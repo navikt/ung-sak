@@ -1,5 +1,6 @@
 package no.nav.ung.ytelse.aktivitetspenger.formidling;
 
+import no.nav.ung.kodeverk.behandling.BehandlingDel;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.formidling.TemplateType;
 import no.nav.ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak;
@@ -42,6 +43,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
 
         assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_NAV_KONTOR)
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune. " +
@@ -196,7 +198,7 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "Du har ikke rett til aktivitetspenger fordi du får en annen livsoppholdsytelse. "
-                    + "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
+                    + "Du kan ikke få aktivitetspenger samtidig som du får denne ytelsen.",
                 FRITEKST_LIVSOPPHOLD
             );
     }
@@ -285,12 +287,13 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         var fom = LocalDate.of(2025, 8, 1);
         var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttMedlemskap(fom, FRITEKST_MEDLEMSKAP);
 
-        var behandling = lagAvslåttBehandling(scenario);
+        var behandling = lagAvslåttBehandling(scenario, BehandlingDel.SENTRAL);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
 
         assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_SENTRAL)
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 FRITEKST_MEDLEMSKAP
@@ -304,12 +307,13 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
         var fom = LocalDate.of(2025, 8, 1);
         var scenario = AktivitetspengerFørstegangsbehandlingScenarioer.avslåttBostedOgMedlemskap(fom, FRITEKST_MEDLEMSKAP);
 
-        var behandling = lagAvslåttBehandling(scenario);
+        var behandling = lagAvslåttBehandling(scenario, BehandlingDel.NAV_KONTOR, BehandlingDel.SENTRAL);
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_AVSLAG_INNGANG);
 
         assertThatHtml(generertBrev.dokument().html())
+            .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_NAV_KONTOR_OG_SENTRAL)
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.",
@@ -318,8 +322,13 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
     }
 
     private Behandling lagAvslåttBehandling(AktivitetspengerTestScenario scenario) {
+        return lagAvslåttBehandling(scenario, BehandlingDel.NAV_KONTOR);
+    }
+
+    private Behandling lagAvslåttBehandling(AktivitetspengerTestScenario scenario, BehandlingDel... behandlingsansvarlige) {
         AktivitetspengerTestScenarioBuilder scenarioBuilder = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
-            .medAktivitetspengerTestGrunnlag(scenario);
+            .medAktivitetspengerTestGrunnlag(scenario)
+            .medBehandlingsansvarlig(behandlingsansvarlige);
 
         var behandling = scenarioBuilder.buildOgLagreMedAktivitspenger(repositories);
         behandling.setBehandlingResultatType(BehandlingResultatType.AVSLÅTT);

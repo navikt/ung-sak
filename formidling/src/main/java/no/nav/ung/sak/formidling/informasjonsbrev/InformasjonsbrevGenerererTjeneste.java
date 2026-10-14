@@ -8,8 +8,9 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import no.nav.k9.felles.integrasjon.microsoftgraph.MicrosoftGraphTjeneste;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
+import no.nav.ung.kodeverk.behandling.FagsakYtelseType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
-import no.nav.ung.kodeverk.formidling.TemplateType;
+import no.nav.ung.sak.behandlingskontroll.FagsakYtelseTypeRef;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.formidling.GenerertBrev;
 import no.nav.ung.sak.formidling.informasjonsbrev.innhold.InformasjonsbrevInnholdBygger;
@@ -20,10 +21,13 @@ import no.nav.ung.sak.formidling.pdfgen.PdfGenKlient;
 import no.nav.ung.sak.formidling.template.TemplateInput;
 import no.nav.ung.sak.formidling.template.dto.TemplateDto;
 import no.nav.ung.sak.formidling.template.dto.felles.BrevAnsvarligDto;
+import no.nav.ung.sak.formidling.template.dto.felles.BrevSignaturDto;
 import no.nav.ung.sak.formidling.template.dto.felles.FellesDto;
 import no.nav.ung.sak.formidling.template.dto.felles.MottakerDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
 
 @ApplicationScoped
 public class InformasjonsbrevGenerererTjeneste {
@@ -60,43 +64,44 @@ public class InformasjonsbrevGenerererTjeneste {
     public GenerertBrev genererInformasjonsbrev(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
         var behandling = behandlingRepository.hentBehandling(informasjonsbrevBestillingInput.behandlingId());
 
-        var pdlMottaker = brevMottakerTjeneste.hentMottaker(behandling);
-        var bygger = bestemBygger(informasjonsbrevBestillingInput);
+        if (!behandling.getAktørId().equals(informasjonsbrevBestillingInput.mottaker())) {
+            throw new IllegalArgumentException("Støtter kun informasjonsbrev til bruker på behandlingen");
+        }
+        var mottaker = brevMottakerTjeneste.hentMottaker(behandling);
+        var bygger = bestemBygger(informasjonsbrevBestillingInput.dokumentMalType(), behandling.getFagsakYtelseType());
         var innhold = bygger.bygg(behandling, informasjonsbrevBestillingInput.getTypedInnhold());
 
-        BrevAnsvarligDto brevAnsvarlig = lagBrevansvarlig(informasjonsbrevBestillingInput.bestillerIdent());
+        BrevSignaturDto signatur = lagSignatur(informasjonsbrevBestillingInput.bestillerIdent());
         var input = new TemplateInput(innhold.templateType(),
             new TemplateDto(
-                FellesDto.lag(new MottakerDto(pdlMottaker.navn(), pdlMottaker.fnr()), brevAnsvarlig, behandling.getFagsakYtelseType()),
+                FellesDto.lag(new MottakerDto(mottaker.navn(), mottaker.fnr()), signatur, behandling.getFagsakYtelseType()),
                 innhold.templateInnholdDto()
             ));
 
         PdfGenDokument dokument = pdfGen.lagDokument(input, informasjonsbrevBestillingInput.kunHtml());
         return new GenerertBrev(
             dokument,
-            pdlMottaker,
-            pdlMottaker,
-            DokumentMalType.GENERELT_FRITEKSTBREV,
-            TemplateType.GENERELT_FRITEKSTBREV
+            mottaker,
+            mottaker,
+            informasjonsbrevBestillingInput.dokumentMalType(),
+            innhold.templateType()
         );
     }
 
-    private InformasjonsbrevInnholdBygger<?> bestemBygger(InformasjonsbrevBestillingInput informasjonsbrevBestillingInput) {
-        return informasjonsbrevInnholdByggere
-            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(informasjonsbrevBestillingInput.dokumentMalType()))
-            .get();
+    private InformasjonsbrevInnholdBygger<?> bestemBygger(DokumentMalType dokumentMalType, FagsakYtelseType ytelseType) {
+        var byggereForMal = informasjonsbrevInnholdByggere
+            .select(new InformasjonsbrevInnholdByggerTypeRef.InformasjonsbrevInnholdByggerTypeRefLiteral(dokumentMalType));
+        return FagsakYtelseTypeRef.Lookup.find(byggereForMal, ytelseType)
+            .orElseThrow(() -> new IllegalStateException("Fant ingen informasjonsbrevbygger for " + dokumentMalType + " og " + ytelseType));
     }
 
 
-    private BrevAnsvarligDto lagBrevansvarlig(String bestillerIdent) {
+    private BrevSignaturDto lagSignatur(String bestillerIdent) {
         if (!enableBrevAnsvarlig) {
-            return new BrevAnsvarligDto(false, null, null);
+            return new BrevSignaturDto(false, List.of());
         }
-        return new BrevAnsvarligDto(
-            false,
-            microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null),
-            null
-        );
+        var bestillerNavn = microsoftGraphTjeneste.navnPåNavAnsatt(bestillerIdent).orElse(null);
+        return new BrevSignaturDto(false, List.of(new BrevAnsvarligDto(bestillerNavn, null)));
     }
 
 }

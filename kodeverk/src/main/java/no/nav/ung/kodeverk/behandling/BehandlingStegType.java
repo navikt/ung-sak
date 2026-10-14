@@ -16,8 +16,8 @@ public enum BehandlingStegType implements Kodeverdi {
 
     BEREGN_YTELSE("BERYT", "Beregn ytelse", UTREDES),
     FATTE_VEDTAK("FVEDSTEG", "Fatte Vedtak", BehandlingStatus.FATTER_VEDTAK),
-    LOKALKONTOR_FORESLÅ_VILKÅR("LOKALKONTOR_FORESLÅ_VILKÅR_STEG", "Lokalkontor foreslå vilkår til beslutning", UTREDES),
-    LOKALKONTOR_BESLUTTER_VILKÅR("LOKALKONTOR_BESLUTTE_VILKÅR_STEG", "Lokalkontor beslutte vilkår", BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR),
+    NAV_KONTOR_FORESLÅ_VILKÅR("NAV_KONTOR_FORESLÅ_VILKÅR_STEG", "Nav-kontor foreslå vilkår til beslutning", UTREDES),
+    NAV_KONTOR_BESLUTTER_VILKÅR("NAV_KONTOR_BESLUTTE_VILKÅR_STEG", "Nav-kontor beslutte vilkår", BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR),
     FORESLÅ_BEHANDLINGSRESULTAT("FORBRES", "Foreslå behandlingsresultat", UTREDES),
     FORESLÅ_VEDTAK("FORVEDSTEG", "Foreslå vedtak", UTREDES),
     VURDER_SØKNADSFRIST("VURDER_SØKNADSFRIST", "Vurder søknadsfrist", UTREDES),

@@ -21,7 +21,7 @@ import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefini
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.AVBRYTES;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.ENTRINN;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.FORBLI;
-import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.LOKALKONTOR_BESLUTTER_VILKÅR_KODE;
+import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.NAV_KONTOR_BESLUTTER_VILKÅR_KODE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TILBAKE;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.TOTRINN;
 import static no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktKodeDefinisjon.UTEN_SKJERMLENKE;
@@ -47,16 +47,16 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         UTEN_VILKÅR,
         SkjermlenkeType.VEDTAK,
         ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
-    LOKALKONTOR_BESLUTTER_VILKÅR(LOKALKONTOR_BESLUTTER_VILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Lokalkontor beslutter vilkår",
-        Set.of(BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR, BehandlingStatus.UTREDES), BehandlingStegType.LOKALKONTOR_BESLUTTER_VILKÅR,
+    NAV_KONTOR_BESLUTTER_VILKÅR(NAV_KONTOR_BESLUTTER_VILKÅR_KODE,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Nav-kontor beslutter vilkår",
+        Set.of(BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR, BehandlingStatus.UTREDES), BehandlingStegType.NAV_KONTOR_BESLUTTER_VILKÅR,
         UTEN_VILKÅR,
-        SkjermlenkeType.LOKALKONTOR_BESLUTTER_VILKÅR,
+        SkjermlenkeType.NAV_KONTOR_BESLUTTER_VILKÅR,
         ENTRINN, TILBAKE, AVBRYTES, AVVENTER_SAKSBEHANDLER),
 
-    LOKALKONTOR_FORESLÅR_VILKÅR(AksjonspunktKodeDefinisjon.LOKALKONTOR_FORESLÅR_VILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Lokalkontor foreslår vilkår", BehandlingStatus.UTREDES, BehandlingStegType.LOKALKONTOR_FORESLÅ_VILKÅR,
-        UTEN_VILKÅR, SkjermlenkeType.LOKALKONTOR_FORESLÅR_VILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
+    NAV_KONTOR_FORESLÅR_VILKÅR(AksjonspunktKodeDefinisjon.NAV_KONTOR_FORESLÅR_VILKÅR_KODE,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Nav-kontor foreslår vilkår", BehandlingStatus.UTREDES, BehandlingStegType.NAV_KONTOR_FORESLÅ_VILKÅR,
+        UTEN_VILKÅR, SkjermlenkeType.NAV_KONTOR_FORESLÅR_VILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
 
     SØKERS_OPPLYSNINGSPLIKT_MANU(
         AksjonspunktKodeDefinisjon.SØKERS_OPPLYSNINGSPLIKT_MANU_KODE, AksjonspunktType.MANUELL,
@@ -93,36 +93,36 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
         VilkårType.SØKNADSFRIST, SkjermlenkeType.SOEKNADSFRIST, TOTRINN, TILBAKE, null, AVVENTER_SAKSBEHANDLER),
 
     VURDER_FAKTA_OM_BOSTED(AksjonspunktKodeDefinisjon.VURDER_FAKTA_OM_BOSTED,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder fakta om bosted", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BOSTED,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder fakta om bosted", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BOSTED,
         UTEN_VILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BOSTEDVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BOSTEDVILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTEDVILKÅR,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Manuell vurdering av bostedsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BOSTEDVILKÅR,
         VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BOSTEDSVILKÅR_OPPHØR(AksjonspunktKodeDefinisjon.VURDER_BOSTEDSVILKÅR_OPPHØR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder opphør av bostedsvilkåret", BehandlingStatus.UTREDES,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder opphør av bostedsvilkåret", BehandlingStatus.UTREDES,
         BehandlingStegType.VURDER_BOSTEDVILKÅR,
         VilkårType.BOSTEDSVILKÅR, SkjermlenkeType.BOSTEDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_FAKTA_OM_BISTAND(AksjonspunktKodeDefinisjon.VURDER_FAKTA_OM_BISTAND_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder fakta om bistandsbehov", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BISTAND,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder fakta om bistandsbehov", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_BISTAND,
         UTEN_VILKÅR, SkjermlenkeType.BISTANDSVILKÅR, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BISTANDSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder bistandsvilkåret", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_BISTANDSVILKÅR,
         VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_BISTANDSVILKÅR_OPPHØR(AksjonspunktKodeDefinisjon.VURDER_BISTANDSVILKÅR_OPPHØR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder opphør av bistandsvilkåret", BehandlingStatus.UTREDES,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder opphør av bistandsvilkåret", BehandlingStatus.UTREDES,
         BehandlingStegType.VURDER_BISTANDSVILKÅR,
         VilkårType.BISTANDSVILKÅR, SkjermlenkeType.BISTANDSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_AKTIVITETSVILKÅR(AksjonspunktKodeDefinisjon.VURDER_AKTIVITETSVILKÅR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder aktivitet", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_AKTIVITETSVILKÅR,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder aktivitet", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_AKTIVITETSVILKÅR,
         VilkårType.AKTIVITETSVILKÅR, SkjermlenkeType.AKTIVITETSVILKÅR, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER(AksjonspunktKodeDefinisjon.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder fakta om andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder fakta om andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_FAKTA_OM_ANDRE_LIVSOPPHOLDSYTELSER,
         UTEN_VILKÅR, SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER, ENTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_ANDRE_LIVSOPPHOLDSYTELSER(AksjonspunktKodeDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder andre livsoppholdsytelser", BehandlingStatus.UTREDES, BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER,
         VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER, TOTRINN, AVVENTER_SAKSBEHANDLER),
     VURDER_ANDRE_LIVSOPPHOLDSYTELSER_OPPHØR(AksjonspunktKodeDefinisjon.VURDER_ANDRE_LIVSOPPHOLDSYTELSER_OPPHØR_KODE,
-        AksjonspunktType.LOKALKONTOR_MANUELL, "Vurder opphør av andre livsoppholdsytelser", BehandlingStatus.UTREDES,
+        AksjonspunktType.NAV_KONTOR_MANUELL, "Vurder opphør av andre livsoppholdsytelser", BehandlingStatus.UTREDES,
         BehandlingStegType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER,
         VilkårType.ANDRE_LIVSOPPHOLDSYTELSER_VILKÅR, SkjermlenkeType.VURDER_ANDRE_LIVSOPPHOLDSYTELSER, TOTRINN, AVVENTER_SAKSBEHANDLER),
 
@@ -501,8 +501,8 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     }
 
     private boolean isBeslutningspunkt(AksjonspunktStatus aksjonspunktStatus, BehandlingStatus status) {
-        // I FatterVedtak/LokalkontorBeslutter kan beslutter reåpne (derav OPPRETTET) eksisterende aksjonspunkter før det sendes tilbake til saksbehandler
-        return Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.LOKALKONTOR_BESLUTTER_VILKÅR).contains(status)
+        // I FatterVedtak/NavKontorBeslutter kan beslutter reåpne (derav OPPRETTET) eksisterende aksjonspunkter før det sendes tilbake til saksbehandler
+        return Set.of(BehandlingStatus.FATTER_VEDTAK, BehandlingStatus.NAV_KONTOR_BESLUTTER_VILKÅR).contains(status)
             && Objects.equals(aksjonspunktStatus, AksjonspunktStatus.OPPRETTET);
     }
 
@@ -541,6 +541,6 @@ public enum AksjonspunktDefinisjon implements Kodeverdi {
     }
 
     public BehandlingDel getBehandlingDel() {
-        return getAksjonspunktType().erLokalkontorAksjonspunkt() ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+        return getAksjonspunktType().erNavKontorAksjonspunkt() ? BehandlingDel.NAV_KONTOR : BehandlingDel.SENTRAL;
     }
 }

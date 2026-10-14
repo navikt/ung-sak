@@ -39,6 +39,9 @@
                     Du kan bare få aktivitetspenger mens du tar høyere utdanning hvis utdanningen er et arbeidsmarkedstiltak fra Nav. Fordi du tar høyere utdanning som ikke er et arbeidsmarkedstiltak, har vi avslått søknaden din.
                 </p>
             {{else eq årsak "ANNEN_ÅRSAK"}}
+                <p>
+                    For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få eller beholde en jobb. Fordi du ikke har behov for denne hjelpen fra Nav, har vi avslått søknaden din.
+                </p>
             {{/eq}}
             {{#if fritekstBrev}}
                 <p>
@@ -54,35 +57,30 @@
         {{/with}}
 
         {{#with andreLivsoppholdsytelser}}
-            {{#if ytelseNavn}}
+            <p>
+                Du har ikke rett til aktivitetspenger fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger
+                samtidig som du får denne ytelsen.
+                {{#unless fritekstBrev}}
+                    Derfor har vi avslått søknaden din.
+                {{/unless}}
+            </p>
+            {{#if fritekstBrev}}
                 <p>
-                    Du har ikke rett til aktivitetspenger fordi du får {{ytelseNavn}}. Du kan ikke få aktivitetspenger
-                    samtidig som du får denne ytelsen. Derfor har vi avslått søknaden din.
+                    {{fritekstBrev}}
+                </p>
+                <p>
+                    Derfor har vi avslått søknaden din.
                 </p>
             {{/if}}
-            {{#eq årsak "MOTTAR_ANNEN_YTELSE"}}
-                <p>
-                    Du har ikke rett til aktivitetspenger fordi du får en annen livsoppholdsytelse. Du kan ikke få
-                    aktivitetspenger samtidig som du får en annen livsoppholdsytelse.
-                </p>
-                {{#if fritekstBrev}}
-                    <p>
-                        {{fritekstBrev}}
-                    </p>
-                {{/if}}
-                Derfor har vi avslått søknaden din.
-            {{else}}
-                {{#if fritekstBrev}}
-                    <p>
-                        {{fritekstBrev}}
-                    </p>
-                {{/if}}
-            {{/eq}}
 
             {{> aktivitetspenger/footer/hjemmel paragraf="4"}}
         {{/with}}
 
         {{#with medlemskap}}
+        <p>
+            Du har ikke rett til aktivitetspenger. For å ha rett til aktivitetspenger må du ha vært medlem i folketrygden de siste fem årene før {{fom}}.
+            Fordi du ikke har vært medlem av folketrygden de siste fem årene, har vi avslått søknaden din.
+        </p>
             {{#if fritekstBrev}}
                 <p>
                     {{fritekstBrev}}

@@ -5,7 +5,7 @@ import no.nav.ung.kodeverk.api.Kodeverdi;
 public enum BehandlingDel implements Kodeverdi {
 
     SENTRAL("SENTRAL", "Del av behandling som utføres i en sentral instans"),
-    LOKAL("LOKAL", "Del av behandling som utføres ved et lokalkontor"),
+    NAV_KONTOR("NAV_KONTOR", "Del av behandling som utføres ved et Nav-kontor"),
     ;
 
     private final String kode;

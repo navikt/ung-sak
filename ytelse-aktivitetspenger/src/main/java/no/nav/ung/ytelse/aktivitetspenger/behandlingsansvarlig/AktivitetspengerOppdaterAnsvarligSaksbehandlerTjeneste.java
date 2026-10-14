@@ -11,7 +11,7 @@ import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingAnsvarlig
 import no.nav.ung.sak.domene.vedtak.OppdaterAnsvarligSaksbehandlerTjeneste;
 import no.nav.ung.sak.kontrakt.aksjonspunkt.BekreftetAksjonspunktDto;
 import no.nav.ung.sak.kontrakt.vedtak.FatterVedtakAksjonspunktDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.LokalkontorBeslutterVilkårAksjonspunktDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.NavKontorBeslutterVilkårAksjonspunktDto;
 
 import java.util.Collection;
 
@@ -32,23 +32,23 @@ public class AktivitetspengerOppdaterAnsvarligSaksbehandlerTjeneste implements O
 
     @Override
     public void oppdaterAnsvarligSaksbehandler(Collection<BekreftetAksjonspunktDto> bekreftedeAksjonspunktDtoer, Long behandlingId) {
-        if (bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> dto instanceof FatterVedtakAksjonspunktDto || dto instanceof LokalkontorBeslutterVilkårAksjonspunktDto)) {
+        if (bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> dto instanceof FatterVedtakAksjonspunktDto || dto instanceof NavKontorBeslutterVilkårAksjonspunktDto)) {
             return;
         }
-        boolean harDel1Aksjonspunkt = bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> AksjonspunktDefinisjon.fraKode(dto.getKode()).getAksjonspunktType().erLokalkontorAksjonspunkt());
-        boolean harAnnetAksjonspunkt = bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> !AksjonspunktDefinisjon.fraKode(dto.getKode()).getAksjonspunktType().erLokalkontorAksjonspunkt());
-        if (harDel1Aksjonspunkt && harAnnetAksjonspunkt) {
-            throw new IllegalArgumentException("Ikke støttet å løse både DEL1-aksjonspunkt og andre aksjonspunkt i samme kall");
+        boolean harNavKontorAksjonspunkt = bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> AksjonspunktDefinisjon.fraKode(dto.getKode()).getAksjonspunktType().erNavKontorAksjonspunkt());
+        boolean harAnnetAksjonspunkt = bekreftedeAksjonspunktDtoer.stream().anyMatch(dto -> !AksjonspunktDefinisjon.fraKode(dto.getKode()).getAksjonspunktType().erNavKontorAksjonspunkt());
+        if (harNavKontorAksjonspunkt && harAnnetAksjonspunkt) {
+            throw new IllegalArgumentException("Ikke støttet å løse både NavKontor-aksjonspunkt og andre aksjonspunkt i samme kall");
         }
         String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
-        BehandlingDel behandlingDel = harDel1Aksjonspunkt ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+        BehandlingDel behandlingDel = harNavKontorAksjonspunkt ? BehandlingDel.NAV_KONTOR : BehandlingDel.SENTRAL;
         behandlingAnsvarligRepository.setAnsvarligSaksbehandler(behandlingId, behandlingDel, saksbehandlerIdent);
     }
 
     @Override
     public void oppdaterAnsvarligBeslutter(AksjonspunktDefinisjon fatteVedtakAksjonspunktDefinisjon, Long behandlingId) {
-        boolean gjelderDel1 = fatteVedtakAksjonspunktDefinisjon.getAksjonspunktType().erLokalkontorAksjonspunkt();
-        BehandlingDel behandlingDel = gjelderDel1 ? BehandlingDel.LOKAL : BehandlingDel.SENTRAL;
+        boolean gjelderNavKontor = fatteVedtakAksjonspunktDefinisjon.getAksjonspunktType().erNavKontorAksjonspunkt();
+        BehandlingDel behandlingDel = gjelderNavKontor ? BehandlingDel.NAV_KONTOR : BehandlingDel.SENTRAL;
         String saksbehandlerIdent = SubjectHandler.getSubjectHandler().getUid();
         behandlingAnsvarligRepository.setAnsvarligBeslutter(behandlingId, behandlingDel, saksbehandlerIdent);
     }

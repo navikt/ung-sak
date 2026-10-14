@@ -47,7 +47,7 @@ public class ForutgåendeMedlemskapRestTjeneste {
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
     public ForutgåendeMedlemskapResponse medlemskap(@NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC) @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid) {
-        return forutgåendeMedlemskapTjeneste.hentMedlemskapOgVilkårSomDto(behandlingUuid);
+        return forutgåendeMedlemskapTjeneste.hentMedlemskapOgVilkårSomDto(behandlingUuid.getBehandlingUuid());
     }
 
 }

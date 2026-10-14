@@ -44,6 +44,9 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
     @Column(name = "fritekst_vurdering_brev", updatable = false)
     private String fritekstVurderingBrev;
 
+    @Column(name = "ytelse_navn", updatable = false)
+    private String ytelseNavn;
+
     @Column(name = "vurdert_av", nullable = false, updatable = false)
     private String vurdertAv;
 
@@ -56,25 +59,26 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
 
     /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
     AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.vurdertAv, kilde.vurdertTidspunkt);
+        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.ytelseNavn, kilde.vurdertAv, kilde.vurdertTidspunkt);
     }
 
     AndreLivsoppholdsytelserResultatPeriode(AndreLivsoppholdsytelserResultatPeriode kilde) {
         this(kilde.getPeriode(), kilde);
     }
 
-    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, VilkårsvurderingResultat vilkårsvurderingResultat) {
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserVurderingResultat vilkårsvurderingResultat) {
         this(periode,
             vilkårsvurderingResultat.godkjent(),
             (AndreLivsoppholdsytelserIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
             vilkårsvurderingResultat.erManuellVurdering(),
             vilkårsvurderingResultat.begrunnelse(),
             vilkårsvurderingResultat.fritekstVurderingBrev(),
+            vilkårsvurderingResultat.ytelseNavn(),
             vilkårsvurderingResultat.vurdertAv(),
             vilkårsvurderingResultat.vurdertTidspunkt());
     }
 
-    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
@@ -87,6 +91,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         this.manuellVurdering = manuellVurdering;
         this.begrunnelse = begrunnelse;
         this.fritekstVurderingBrev = fritekstVurderingBrev;
+        this.ytelseNavn = ytelseNavn;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
     }
@@ -123,8 +128,12 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         return fritekstVurderingBrev;
     }
 
+    public String getYtelseNavn() {
+        return ytelseNavn;
+    }
+
     public VilkårsvurderingResultat tilVilkårsvurderingResultat() {
-        return new VilkårsvurderingResultat(getVilkårType(), godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, vurdertAv, vurdertTidspunkt);
+        return new AndreLivsoppholdsytelserVurderingResultat(godkjent, ikkeOppfyltÅrsak, manuellVurdering, begrunnelse, fritekstVurderingBrev, ytelseNavn, vurdertAv, vurdertTidspunkt);
     }
 
     public String getVurdertAv() {
@@ -144,6 +153,7 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
             && manuellVurdering == annen.manuellVurdering
             && Objects.equals(begrunnelse, annen.begrunnelse)
             && Objects.equals(fritekstVurderingBrev, annen.fritekstVurderingBrev)
+            && Objects.equals(ytelseNavn, annen.ytelseNavn)
             && Objects.equals(vurdertAv, annen.vurdertAv)
             && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt);
     }

@@ -8,42 +8,30 @@ import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingResultatType;
 import no.nav.ung.kodeverk.dokument.DokumentMalType;
 import no.nav.ung.kodeverk.vilkår.Avslagsårsak;
-import no.nav.ung.kodeverk.vilkår.BistandsavklaringKildeType;
-import no.nav.ung.kodeverk.vilkår.BistandsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.BostedsvilkårIkkeOppfyltÅrsak;
 import no.nav.ung.kodeverk.vilkår.Utfall;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
+import no.nav.ung.sak.behandlingslager.tilkjentytelse.TilkjentYtelseVerdi;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.formidling.vedtak.regler.BehandlingVedtaksbrevResultat;
-import no.nav.ung.sak.formidling.vedtak.regler.IngenBrevÅrsakType;
 import no.nav.ung.sak.formidling.vedtak.regler.Vedtaksbrev;
 import no.nav.ung.sak.formidling.vedtak.regler.YtelseVedtaksbrevRegler;
 import no.nav.ung.sak.typer.Periode;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.BrevTestUtils;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.innhold.FørstegangsInnvilgelseInnholdBygger;
-import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerEndringInntektScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerFørstegangsbehandlingScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerOpphørScenarioer;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerRevurderingTestOppsett;
 import no.nav.ung.ytelse.aktivitetspenger.formidling.scenarioer.AktivitetspengerUendretScenarioer;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestRepositories;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenario;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.AktivitetspengerTestScenarioBuilder;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.BostedsAvklaringTestData;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårUtfall;
-import no.nav.ung.ytelse.aktivitetspenger.testdata.VilkårsavklaringTestData;
+import no.nav.ung.ytelse.aktivitetspenger.testdata.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -118,7 +106,9 @@ class YtelseVedtaksbrevReglerTest {
     @Test
     void skal_ikke_gi_uendret_brev_når_dagsatsen_har_endret_seg() {
         var scenario = uendretBostedScenario();
-        var original = AktivitetspengerRevurderingTestOppsett.medEndretDagsats(scenario, BigDecimal.TEN);
+        var original = uendretBostedScenarioBuilder()
+            .medTilkjentYtelse(medEndretDagsats(scenario.tilkjentYtelsePerioder(), BigDecimal.TEN))
+            .build();
         var behandling = AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, original, scenario);
 
         var totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
@@ -128,7 +118,7 @@ class YtelseVedtaksbrevReglerTest {
 
     @Test
     void skal_ikke_gi_uendret_brev_uten_vilkårsavklaring() {
-        var scenario = AktivitetspengerRevurderingTestOppsett.utenVilkårsavklaringer(uendretBostedScenario());
+        var scenario = uendretBostedScenarioBuilder().medBostedsAvklaringer(List.of()).build();
         var behandling = AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, scenario, scenario);
 
         var totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
@@ -149,13 +139,10 @@ class YtelseVedtaksbrevReglerTest {
     @Test
     void skal_ikke_feile_når_et_vilkår_til_vurdering_ikke_er_vurdert() {
         var uendret = uendretBostedScenario();
-        var vilkår = new HashMap<>(uendret.vilkår());
-        vilkår.put(VilkårType.BISTANDSVILKÅR, new LocalDateTimeline<>(FOM, FOM.plusWeeks(52).minusDays(1),
-            new VilkårUtfall(Utfall.IKKE_VURDERT, null, null)));
-        var scenario = new AktivitetspengerTestScenario(uendret.navn(), uendret.søknadsperioder(), uendret.satsperioder(),
-            uendret.beregningsgrunnlag(), uendret.tilkjentYtelsePerioder(), uendret.aldersvilkår(), uendret.fødselsdato(),
-            uendret.behandlingTriggere(), uendret.barn(), uendret.dødsdato(), uendret.kontrollerInntektPerioder(),
-            Map.copyOf(vilkår), uendret.inngangsvilkårVurderinger(), uendret.bostedsAvklaringer(), uendret.vilkårsavklaringer());
+        var scenario = uendretBostedScenarioBuilder()
+            .medVilkår(VilkårType.BISTANDSVILKÅR, new LocalDateTimeline<>(FOM, FOM.plusWeeks(52).minusDays(1),
+                new VilkårUtfall(Utfall.IKKE_VURDERT, null, null)))
+            .build();
         var behandling = AktivitetspengerRevurderingTestOppsett.lagRevurdering(repositories, uendret, scenario);
 
         var totalresultater = vedtaksbrevRegler.kjør(behandling.getId());
@@ -164,10 +151,20 @@ class YtelseVedtaksbrevReglerTest {
     }
 
     private static AktivitetspengerTestScenario uendretBostedScenario() {
+        return uendretBostedScenarioBuilder().build();
+    }
+
+    private static AktivitetspengerTestScenario.Builder uendretBostedScenarioBuilder() {
         var vurdertPeriode = new Periode(FOM.plusMonths(3), FOM.plusWeeks(52).minusDays(1));
-        return AktivitetspengerUendretScenarioer.uendretScenario(FOM,
+        return AktivitetspengerUendretScenarioer.uendretScenarioBuilder(FOM,
             BostedsAvklaringTestData.opphør(vurdertPeriode, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
             null);
+    }
+
+    private static LocalDateTimeline<TilkjentYtelseVerdi> medEndretDagsats(LocalDateTimeline<TilkjentYtelseVerdi> tilkjentYtelse, BigDecimal tillegg) {
+        return tilkjentYtelse.mapValue(it -> new TilkjentYtelseVerdi(
+            it.uredusertBeløp(), it.reduksjon(), it.redusertBeløp(),
+            it.dagsats().add(tillegg), it.utbetalingsgrad(), it.tilkjentBeløp()));
     }
 
     private static List<DokumentMalType> malTyper(BehandlingVedtaksbrevResultat totalresultater) {
