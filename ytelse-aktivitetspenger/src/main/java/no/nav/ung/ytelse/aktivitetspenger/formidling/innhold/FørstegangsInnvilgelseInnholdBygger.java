@@ -131,7 +131,8 @@ public class FørstegangsInnvilgelseInnholdBygger implements VedtaksbrevInnholdB
         var satserGrunnlag = aktivitetspengerSatser.satsGrunnlag();
         return new SatsEndringUtlederInput(
             satserGrunnlag.antallBarn(),
-            satserGrunnlag.satsType() == UngdomsytelseSatsType.HØY,
+            // Høy sats gir bare mer penger når minstesatsen brukes, ikke når besteberegningen er høyere
+            aktivitetspengerSatser.hentSatsType() == AktivitetspengerSatsType.HØY,
             Satsberegner.beregnDagsatsInklBarnetillegg(aktivitetspengerSatser),
             Satsberegner.beregnBarnetilleggSats(satserGrunnlag),
             segment.getFom()

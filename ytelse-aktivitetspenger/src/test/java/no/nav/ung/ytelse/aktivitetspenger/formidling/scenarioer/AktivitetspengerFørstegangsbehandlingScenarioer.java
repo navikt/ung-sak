@@ -52,6 +52,15 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
     }
 
     /**
+     * 24 år, blir 25 år etter 15 dager i programmet.
+     * Besteberegning som er høyere enn høy minstesats, slik at dagsatsen er den samme før og etter 25-årsdagen.
+     * Ingen inntektsgradering og ingen barn.
+     */
+    public static AktivitetspengerTestScenario innvilget24ÅrBle25ÅrMedBesteberegningHøyereEnnHøyMinstesats(LocalDate fom) {
+        return innvilget24ÅrBle25ÅrBuilder(fom, lagBeregningsgrunnlagHøyereEnnHøyMinstesats(fom), 0).build();
+    }
+
+    /**
      * Person over 25 år gjennom hele programperioden.
      * Kun høy sats (minstesats) med ett barn. Ingen inntektsgradering.
      */

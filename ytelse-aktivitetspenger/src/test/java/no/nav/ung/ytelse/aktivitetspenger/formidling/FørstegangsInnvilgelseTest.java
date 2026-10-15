@@ -213,6 +213,19 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
             .asPlainTextContains("i barnetillegg. " + VedtaksbrevVerifikasjon.hjemmelsetning("11 første ledd og § 12") + "Meld fra til oss");
     }
 
+    @DisplayName("Førstegangsinnvilgelse der søker fyller 25 år og besteberegningen er høyere enn høy minstesats, sier ikke at søker får mer penger")
+    @Test
+    void fyller25ÅrMedBesteberegningHøyereEnnHøyMinstesats() {
+        var fom = LocalDate.of(2025, 8, 1);
+        var behandling = lagScenario(AktivitetspengerFørstegangsbehandlingScenarioer.innvilget24ÅrBle25ÅrMedBesteberegningHøyereEnnHøyMinstesats(fom));
+
+        assertThatHtml(genererVedtaksbrev(behandling.getId()).dokument().html())
+            .asPlainTextNotContains("Fordi du fylte 25 år")
+            .asPlainTextNotContains("to ulike beregninger")
+            .asPlainTextContains("Når vi har regnet ut hvor mye du får i aktivitetspenger, har vi brukt årsinntektene dine")
+            .asPlainTextContains("per dag. " + VedtaksbrevVerifikasjon.hjemmelsetning("11 første ledd") + "Meld fra til oss");
+    }
+
     @DisplayName("Førstegangsinnvilgelse med lav og høy sats (24 år blir 25)")
     @Test
     void lavOgHøySats() {
