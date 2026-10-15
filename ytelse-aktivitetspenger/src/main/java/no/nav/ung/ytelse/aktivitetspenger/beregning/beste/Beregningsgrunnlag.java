@@ -92,8 +92,8 @@ public class Beregningsgrunnlag {
         return BesteBeregningResultatType.SNITT_SISTE_TRE_ÅR;
     }
 
-    public BeregningsgrunnlagInput getBeregningInput() {
-        return beregningInput;
+    public BeregningInput getBeregningInput() {
+        return beregningInput.getBeregningInput(skjæringstidspunkt);
     }
 
     public String getRegelSporing() {

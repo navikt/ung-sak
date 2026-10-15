@@ -49,7 +49,15 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
      * Kun høy sats (minstesats). Ingen inntektsgradering og ingen barn.
      */
     public static AktivitetspengerTestScenario innvilgetKunHøySats(LocalDate fom) {
-        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilder(fom).build()).build();
+        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilder(fom).build(), lagBeregningsgrunnlag(fom)).build();
+    }
+
+    /**
+     * Person over 25 år gjennom hele programperioden.
+     * Besteberegning der årsinntekten er avkortet til 6G. Ingen inntektsgradering og ingen barn.
+     */
+    public static AktivitetspengerTestScenario innvilgetKunHøySatsMedBesteberegningAvkortetMotSeksG(LocalDate fom) {
+        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilder(fom).build(), lagBeregningsgrunnlagAvkortetMotSeksG(fom)).build();
     }
 
     /**
@@ -107,6 +115,10 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
     }
 
     private static AktivitetspengerTestScenario.Builder innvilgetMedÉnSatsBuilder(LocalDate fom, LocalDate fødselsdato, AktivitetspengerSatsGrunnlag sats) {
+        return innvilgetMedÉnSatsBuilder(fom, fødselsdato, sats, lagBeregningsgrunnlag(fom));
+    }
+
+    private static AktivitetspengerTestScenario.Builder innvilgetMedÉnSatsBuilder(LocalDate fom, LocalDate fødselsdato, AktivitetspengerSatsGrunnlag sats, Beregningsgrunnlag beregningsgrunnlagVerdi) {
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
         var satsperioder = new LocalDateTimeline<>(List.of(
@@ -118,7 +130,7 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
         ));
 
         var beregningsgrunnlag = new LocalDateTimeline<>(List.of(
-            new LocalDateSegment<>(fom, null, lagBeregningsgrunnlag(fom))
+            new LocalDateSegment<>(fom, null, beregningsgrunnlagVerdi)
         ));
 
         LocalDateInterval tilkjentPeriode = new LocalDateInterval(fom, fom.with(TemporalAdjusters.lastDayOfMonth()));
