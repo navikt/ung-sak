@@ -129,7 +129,7 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
                 "Pengene får du utbetalt innen fire dager. " +
                 "Siden du bare hadde aktivitetspenger for en del av måneden, " +
                 "brukte vi bare en del av inntekten din på 10 000 kroner i mars til å regne ut hvor mye du får for perioden fra 1. mars 2026 til 10. mars 2026. " +
-                "Se eksempel på PRODUKTSIDE PÅ NAV.NO på hvordan vi regner ut aktivitetspengene dine for den siste måneden. " +
+                "Se eksempel på nav.no/aktivitetspenger på hvordan vi regner ut aktivitetspengene dine for den siste måneden. " +
                 VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("10–14"));
 
         GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
@@ -138,7 +138,8 @@ class EndringInntektTest extends AbstractAktivitetspengerVedtaksbrevInnholdBygge
         assertThatHtml(generertBrev.dokument().html())
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
-                "<h1>Vi har endret aktivitetspengene dine</h1>"
+                "<h1>Vi har endret aktivitetspengene dine</h1>",
+                "<a title=\"aktivitetspenger\" href=\"https://www.nav.no/aktivitetspenger\">nav.no/aktivitetspenger</a>"
             );
     }
 
