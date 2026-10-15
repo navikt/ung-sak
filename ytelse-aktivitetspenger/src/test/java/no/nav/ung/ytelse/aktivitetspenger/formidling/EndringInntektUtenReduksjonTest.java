@@ -33,7 +33,7 @@ class EndringInntektUtenReduksjonTest extends AbstractAktivitetspengerVedtaksbre
         var forventet = VedtaksbrevVerifikasjon.medHeaderOgFooterManuell(fnr,
             "Vi har ikke endret aktivitetspengene dine " +
                 "Du har gitt oss beskjed om at du hadde inntekt i perioden fra 1. september 2025 til 30. september 2025. " +
-                "Vi har sjekket inntekten din i A-ordningen, men arbeidsgiveren din har ikke registrert at du hadde en inntekt i perioden. " +
+                "Vi har sjekket inntekten din i Aa-registeret, men arbeidsgiveren din har ikke registrert at du hadde en inntekt i perioden. " +
                 "Vi har derfor kommet frem til at du får full utbetaling av aktivitetspenger for perioden. " +
                 "Pengene får du utbetalt innen fire dager. " +
                 VedtaksbrevVerifikasjon.hjemmelsetningFlereParagrafer("10–14"));
