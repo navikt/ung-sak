@@ -113,6 +113,34 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), avkortetFom.minusDays(1));
     }
 
+    @DisplayName("Maksdato er slutten av den innvilgede perioden, også når den er etter perioden til vurdering")
+    @Test
+    void uendretMedKortVurderingsperiode() {
+        var scenario = AktivitetspengerUendretScenarioer.uendretBistandMedKortVurderingsperiode(
+            FOM,
+            VilkårsavklaringTestData.opphør(kortVurdertPeriode(FOM),
+                BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
+                BistandsavklaringKildeType.BRUKER)
+        );
+
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), MAKSDATO);
+    }
+
+    @DisplayName("Maksdato er siste dag før en avkortet periode som er etter perioden til vurdering")
+    @Test
+    void uendretMedKortVurderingsperiodeOgAvkortetHale() {
+        var avkortetFom = FOM.plusMonths(9);
+        var scenario = AktivitetspengerUendretScenarioer.uendretBistandMedKortVurderingsperiodeOgAvkortetHale(
+            FOM,
+            VilkårsavklaringTestData.opphør(kortVurdertPeriode(FOM),
+                BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID,
+                BistandsavklaringKildeType.BRUKER),
+            avkortetFom
+        );
+
+        assertUendretBrev(genererVedtaksbrev(lagUendretScenario(scenario).getId()), avkortetFom.minusDays(1));
+    }
+
     private static void assertUendretBrev(GenerertBrev generertBrev, LocalDate maksdato) {
         assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
         assertThatHtml(generertBrev.dokument().html())
@@ -136,6 +164,10 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
     private static Periode vurdertPeriode(LocalDate fom) {
         var tom = fom.plusWeeks(52).minusDays(1);
         return new Periode(fom.plusMonths(3), tom);
+    }
+
+    private static Periode kortVurdertPeriode(LocalDate fom) {
+        return new Periode(fom.plusMonths(3), fom.plusMonths(6).minusDays(1));
     }
 
     @Override
