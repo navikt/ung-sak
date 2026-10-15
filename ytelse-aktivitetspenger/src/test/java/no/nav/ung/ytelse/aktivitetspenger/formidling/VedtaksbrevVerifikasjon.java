@@ -27,7 +27,7 @@ public class VedtaksbrevVerifikasjon {
         %s \
         side av""";
 
-    // Malen bruker hardt mellomrom etter §, men Jsoup gjør det om til vanlig mellomrom i ren tekst.
+    // Sammenlignes med ren tekst, så span-en som hindrer linjeskift i paragrafhenvisningen er ikke med.
     private static final String HJEMMELSETNING_PREFIKS = "Vedtaket er gjort etter folketrygdloven § 25-13 tredje ledd og forskrift om forsøk med aktivitetspenger for unge " +
         "(forsøket Et enklere Nav), Trondheim kommune, Trøndelag ";
 
