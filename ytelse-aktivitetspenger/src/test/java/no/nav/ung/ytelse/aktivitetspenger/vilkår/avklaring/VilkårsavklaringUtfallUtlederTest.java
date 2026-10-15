@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring;
 
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.vilkår.*;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaringForeslått;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
@@ -114,6 +115,79 @@ class VilkårsavklaringUtfallUtlederTest {
         var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, false));
 
         assertThat(utleder.utledUtfall()).isEqualTo(VilkårsavklaringUtfall.VILKÅR_VURDERES_MANUELT);
+    }
+
+    @Test
+    void skal_gi_regelinput_for_utløpt_etterlysning() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
+
+        var input = utleder.tilRegelInput();
+
+        assertThat(input.etterlysningStatus()).isEqualTo(EtterlysningStatus.UTLØPT);
+        assertThat(input.harUttalelse()).isNull();
+    }
+
+    @Test
+    void skal_gi_regelinput_for_tom_bekreftelse() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, false));
+
+        var input = utleder.tilRegelInput();
+
+        assertThat(input.etterlysningStatus()).isEqualTo(EtterlysningStatus.MOTTATT_SVAR);
+        assertThat(input.harUttalelse()).isFalse();
+    }
+
+    @Test
+    void skal_gi_regelinput_for_uttalelse() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, true));
+
+        var input = utleder.tilRegelInput();
+
+        assertThat(input.harUttalelse()).isTrue();
+        assertThat(utleder.tilRegelsporing().input()).doesNotContain("uenig");
+    }
+
+    @Test
+    void skal_gi_regelinput_når_det_ikke_er_varslet() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, false));
+
+        var input = utleder.tilRegelInput();
+
+        assertThat(input.skalSendeVarsel()).isFalse();
+        assertThat(input.etterlysningStatus()).isNull();
+    }
+
+    @Test
+    void skal_gi_regelinput_uten_avklaring() {
+        var input = utleder(VilkårType.BOSTEDSVILKÅR, null).tilRegelInput();
+
+        assertThat(input.avklaringReferanse()).isNull();
+        assertThat(input.ikkeOppfyltÅrsak()).isNull();
+    }
+
+    @Test
+    void skal_gi_regelevaluering_med_utfallet() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.UTLØPT, false));
+
+        assertThat(utleder.tilRegelEvaluering().utfall()).isEqualTo(utleder.utledUtfall());
+    }
+
+    @Test
+    void skal_gi_regelsporing_som_kan_leses_tilbake() {
+        var utleder = utleder(VilkårType.BOSTEDSVILKÅR, avklaring(VilkårType.BOSTEDSVILKÅR, AUTOMATISERBAR, BOSTED_KILDE, true))
+            .medEtterlysning(etterlysning(EtterlysningStatus.MOTTATT_SVAR, true));
+        var json = new VilkårJsonObjectMapper();
+
+        var regelsporing = utleder.tilRegelsporing();
+        var lestInput = json.readValue(regelsporing.input(), VilkårsavklaringUtfallUtleder.RegelInput.class);
+        var lestEvaluering = json.readValue(regelsporing.evaluering(), VilkårsavklaringUtfallUtleder.RegelEvaluering.class);
+
+        assertThat(lestInput).isEqualTo(utleder.tilRegelInput());
+        assertThat(lestEvaluering).isEqualTo(utleder.tilRegelEvaluering());
     }
 
     private static VilkårsavklaringUtfallUtleder utleder(VilkårType vilkårType, VilkårPeriodeAvklaring avklaring) {

@@ -13,6 +13,7 @@ import org.hibernate.annotations.Type;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 
 @Immutable
 @Entity(name = "AndreLivsoppholdsytelserResultatPeriode")
@@ -53,20 +54,26 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
     @Column(name = "vurdert_tidspunkt", nullable = false, updatable = false)
     private LocalDateTime vurdertTidspunkt;
 
+    @Column(name = "regel_input", updatable = false)
+    private String regelInput;
+
+    @Column(name = "regel_evaluering", updatable = false)
+    private String regelEvaluering;
+
     AndreLivsoppholdsytelserResultatPeriode() {
         // Hibernate
     }
 
     /** Oppretter en kopi med ny periode, men med verdiene fra kildeentiteten. Brukes ved sammenslåing av tidslinjer. */
-    AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserResultatPeriode kilde) {
-        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.ytelseNavn, kilde.vurdertAv, kilde.vurdertTidspunkt);
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserResultatPeriode kilde) {
+        this(periode, kilde.godkjent, kilde.ikkeOppfyltÅrsak, kilde.manuellVurdering, kilde.begrunnelse, kilde.fritekstVurderingBrev, kilde.ytelseNavn, kilde.vurdertAv, kilde.vurdertTidspunkt, kilde.getRegelsporing().orElse(null));
     }
 
     AndreLivsoppholdsytelserResultatPeriode(AndreLivsoppholdsytelserResultatPeriode kilde) {
         this(kilde.getPeriode(), kilde);
     }
 
-    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserVurderingResultat vilkårsvurderingResultat) {
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, AndreLivsoppholdsytelserVurderingResultat vilkårsvurderingResultat, Regelsporing regelsporing) {
         this(periode,
             vilkårsvurderingResultat.godkjent(),
             (AndreLivsoppholdsytelserIkkeOppfyltÅrsak) vilkårsvurderingResultat.ikkeOppfyltÅrsak(),
@@ -75,10 +82,11 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
             vilkårsvurderingResultat.fritekstVurderingBrev(),
             vilkårsvurderingResultat.ytelseNavn(),
             vilkårsvurderingResultat.vurdertAv(),
-            vilkårsvurderingResultat.vurdertTidspunkt());
+            vilkårsvurderingResultat.vurdertTidspunkt(),
+            regelsporing);
     }
 
-    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt) {
+    public AndreLivsoppholdsytelserResultatPeriode(DatoIntervallEntitet periode, boolean godkjent, AndreLivsoppholdsytelserIkkeOppfyltÅrsak ikkeOppfyltÅrsak, boolean manuellVurdering, String begrunnelse, String fritekstVurderingBrev, String ytelseNavn, String vurdertAv, LocalDateTime vurdertTidspunkt, Regelsporing regelsporing) {
         Objects.requireNonNull(periode, "periode");
         Objects.requireNonNull(vurdertAv, "vurdertAv");
         Objects.requireNonNull(vurdertTidspunkt, "vurdertTidspunkt");
@@ -94,6 +102,8 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         this.ytelseNavn = ytelseNavn;
         this.vurdertAv = vurdertAv;
         this.vurdertTidspunkt = vurdertTidspunkt;
+        this.regelInput = regelsporing != null ? regelsporing.input() : null;
+        this.regelEvaluering = regelsporing != null ? regelsporing.evaluering() : null;
     }
 
     public Long getId() {
@@ -144,6 +154,10 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
         return vurdertTidspunkt;
     }
 
+    public Optional<Regelsporing> getRegelsporing() {
+        return regelInput == null ? Optional.empty() : Optional.of(new Regelsporing(regelInput, regelEvaluering));
+    }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof AndreLivsoppholdsytelserResultatPeriode annen
@@ -155,7 +169,9 @@ public class AndreLivsoppholdsytelserResultatPeriode extends BaseEntitet {
             && Objects.equals(fritekstVurderingBrev, annen.fritekstVurderingBrev)
             && Objects.equals(ytelseNavn, annen.ytelseNavn)
             && Objects.equals(vurdertAv, annen.vurdertAv)
-            && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt);
+            && Objects.equals(vurdertTidspunkt, annen.vurdertTidspunkt)
+            && Objects.equals(regelInput, annen.regelInput)
+            && Objects.equals(regelEvaluering, annen.regelEvaluering);
     }
 
     @Override

@@ -361,7 +361,8 @@ class VurderFaktaOmBistandOppdatererTest {
                 v.begrunnelse(),
                 null,
                 SAKSBEHANDLER,
-                LocalDateTime.now()))
+                LocalDateTime.now(),
+                null))
             .toList();
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), perioder);
     }
