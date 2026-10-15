@@ -24,7 +24,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
 
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
-    private static final String MELD_FRA_OM_ENDRINGER = "<h2>Du må melde fra om endringer</h2>";
+    // Avsnittet skal bare med i innvilgelse og uendret, ikke i brev som avslår eller stanser ytelsen.
+    private static final String MELD_FRA_OM_ENDRINGER = "Du må melde fra om endringer";
 
     EndringAvslagOpphørTest() {
         super(1, "får du ikke lenger aktivitetspenger");
@@ -101,7 +102,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
             )
-            .asPlainTextNotContains("Du må melde fra om endringer");
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER);
     }
 
     @DisplayName("Endring/avslag pga bostedsvilkåret - YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED")
@@ -237,9 +238,9 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
                     + brevDatoString(livsoppholdsperiode(scenario).getTom()) + " får du ikke aktivitetspenger. "
                     + "Det er fordi du får tiltakspenger i denne perioden. Du kan ikke få aktivitetspenger samtidig som du får "
-                    + "en annen livsoppholdsytelse.",
-                MELD_FRA_OM_ENDRINGER
-            );
+                    + "en annen livsoppholdsytelse."
+            )
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER);
     }
 
     @DisplayName("Opphør pga andre livsoppholdsytelser - fritekst kommer etter årsakssetningen")
@@ -260,7 +261,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 fritekst,
                 "Trøndelag <span class=\"ikke-bryt\">§ 4</span>."
             )
-            .asPlainTextNotContains("Du må melde fra om endringer");
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER);
     }
 
     @DisplayName("Endring/avslag pga andre livsoppholdsytelser - fritekst kommer etter årsakssetningen")
@@ -279,9 +280,9 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
                 fritekst,
-                "Trøndelag <span class=\"ikke-bryt\">§ 4</span>.",
-                MELD_FRA_OM_ENDRINGER
-            );
+                "Trøndelag <span class=\"ikke-bryt\">§ 4</span>."
+            )
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER);
     }
 
     @DisplayName("Opphør pga bistandsvilkåret - kommet i arbeid")
@@ -322,9 +323,9 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(bistandsperiode(scenario).getTom()),
                 "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. "
                     + "Fordi du jobber i perioden, stanser vi aktivitetspengene dine.",
-                fritekst,
-                MELD_FRA_OM_ENDRINGER
-            );
+                fritekst
+            )
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER);
     }
 
     @DisplayName("Opphør pga bistandsvilkåret - kommet i utdanning")
@@ -347,7 +348,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             )
             .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("6").trim())
             .asPlainTextNotContains("Trøndelag § 7.")
-            .asPlainTextNotContains("Du må melde fra om endringer");
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER);
     }
 
     @DisplayName("Endring/avslag pga bistandsvilkåret - kommet i utdanning")
@@ -368,9 +369,9 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(bistandsperiode(scenario).getTom()),
                 "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. "
                     + "Fordi du tar en utdanning i perioden, stanser vi aktivitetspengene dine.",
-                fritekst,
-                MELD_FRA_OM_ENDRINGER
+                fritekst
             )
+            .asPlainTextNotContains(MELD_FRA_OM_ENDRINGER)
             .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("6").trim())
             .asPlainTextNotContains("Trøndelag § 7.");
     }
