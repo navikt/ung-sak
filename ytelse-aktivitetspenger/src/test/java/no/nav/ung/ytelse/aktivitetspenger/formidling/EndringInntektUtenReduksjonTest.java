@@ -42,8 +42,8 @@ class EndringInntektUtenReduksjonTest extends AbstractAktivitetspengerVedtaksbre
             .asPlainTextIsEqualTo(forventet)
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har ikke endret aktivitetspengene dine</h1>",
-                "folketrygdloven §&nbsp;25-13 tredje ledd",
-                "Trøndelag §§&nbsp;10–14."
+                "folketrygdloven <span class=\"ikke-bryt\">§ 25-13</span> tredje ledd",
+                "Trøndelag <span class=\"ikke-bryt\">§§ 10–14</span>."
             );
     }
 

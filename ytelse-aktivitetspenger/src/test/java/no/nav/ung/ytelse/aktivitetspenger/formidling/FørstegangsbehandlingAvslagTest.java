@@ -318,9 +318,9 @@ class FørstegangsbehandlingAvslagTest extends AbstractAktivitetspengerVedtaksbr
             .containsHtmlSubSequenceOnce(
                 "<h1>Vi har avslått din søknad om aktivitetspenger</h1>",
                 "Fordi du ikke har bostedsadresse i Trondheim kommune, har vi avslått søknaden din.",
-                "Trøndelag §&nbsp;2.",
+                "Trøndelag <span class=\"ikke-bryt\">§ 2</span>.",
                 FRITEKST_MEDLEMSKAP,
-                "Trøndelag §&nbsp;3."
+                "Trøndelag <span class=\"ikke-bryt\">§ 3</span>."
             );
     }
 

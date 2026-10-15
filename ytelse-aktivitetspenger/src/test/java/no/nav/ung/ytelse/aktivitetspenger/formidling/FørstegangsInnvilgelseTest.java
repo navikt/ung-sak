@@ -119,7 +119,7 @@ class FørstegangsInnvilgelseTest extends AbstractAktivitetspengerVedtaksbrevInn
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får aktivitetspenger</h1>",
                 "<h2>Hvorfor får du aktivitetspenger?</h2>",
-                "Trøndelag §§&nbsp;1–14 og §&nbsp;18.",
+                "Trøndelag <span class=\"ikke-bryt\">§§ 1–14 og § 18</span>.",
                 "<h2>Hvordan har vi regnet ut hvor mye penger du får?</h2>",
                 "<h2>Meld fra til oss hvis du har arbeidsinntekt i tillegg til aktivitetspengene</h2>"
             );
