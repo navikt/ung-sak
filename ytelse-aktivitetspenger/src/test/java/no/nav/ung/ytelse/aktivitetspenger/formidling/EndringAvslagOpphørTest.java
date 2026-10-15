@@ -235,8 +235,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har endret aktivitetspengene dine</h1>",
-                "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
-                    + brevDatoString(livsoppholdsperiode(scenario).getTom()) + " får du ikke aktivitetspenger. "
+                "Du får ikke aktivitetspenger i perioden fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
+                    + brevDatoString(livsoppholdsperiode(scenario).getTom()) + ". "
                     + "Det er fordi du får tiltakspenger i denne perioden. Du kan ikke få aktivitetspenger samtidig som du får "
                     + "en annen livsoppholdsytelse."
             )
