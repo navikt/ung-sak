@@ -258,7 +258,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
                 fritekst,
-                "Trøndelag §&nbsp;4."
+                "Trøndelag <span class=\"ikke-bryt\">§ 4</span>."
             )
             .asPlainTextNotContains("Du må melde fra om endringer");
     }
@@ -279,7 +279,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Nav har endret aktivitetspengene dine</h1>",
                 "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
                 fritekst,
-                "Trøndelag §&nbsp;4.",
+                "Trøndelag <span class=\"ikke-bryt\">§ 4</span>.",
                 MELD_FRA_OM_ENDRINGER
             );
     }
