@@ -24,6 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
 
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
+    private static final String MELD_FRA_OM_ENDRINGER = "<h2>Du må melde fra om endringer</h2>";
 
     EndringAvslagOpphørTest() {
         super(1, "får du ikke lenger aktivitetspenger");
@@ -60,8 +61,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
-                "Fordi du bor der du studerer eller jobber, utenfor Trondheim kommune, regner vi deg ikke lenger som bosatt i kommunen."
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune. "
+                    + "Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune, får du ikke lenger aktivitetspenger."
             );
     }
 
@@ -99,7 +100,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
                 "For å ha rett til aktivitetspenger må du bo i Trondheim kommune"
-            );
+            )
+            .asPlainTextNotContains("Du må melde fra om endringer");
     }
 
     @DisplayName("Endring/avslag pga bostedsvilkåret - YTELSE_IKKE_PÅ_ARBEIDSSTED_STUDIESTED")
@@ -117,8 +119,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()) + " til "
                     + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getTom()),
-                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune.",
-                "Fordi du i denne perioden bor der du studerer eller jobber, utenfor Trondheim kommune, regner vi deg ikke som bosatt i kommunen."
+                "For å ha rett til aktivitetspenger må du bo i Trondheim kommune. "
+                    + "Fordi studie- eller arbeidsstedet ditt ligger utenfor Trondheim kommune i denne perioden, får du ikke aktivitetspenger."
             );
     }
 
@@ -176,7 +178,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
                 "Det er fordi du får dagpenger fra denne datoen. Du kan ikke få aktivitetspenger samtidig som du får "
-                    + "denne ytelsen."
+                    + "en annen livsoppholdsytelse."
             );
     }
 
@@ -197,7 +199,7 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger. "
                     + "Det er fordi du får " + fritekstFraVarsel + " fra denne datoen. "
-                    + "Du kan ikke få aktivitetspenger samtidig som du får denne ytelsen."
+                    + "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse."
             );
     }
 
@@ -232,11 +234,53 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har endret aktivitetspengene dine</h1>",
-                "Du får ikke aktivitetspenger i perioden fra "
-                    + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
-                    + brevDatoString(livsoppholdsperiode(scenario).getTom()),
-                "Det er fordi du får tiltakspenger i denne perioden. Du kan ikke få aktivitetspenger samtidig som du får "
-                    + "denne ytelsen."
+                "Fra " + brevDatoString(livsoppholdsperiode(scenario).getFom()) + " til "
+                    + brevDatoString(livsoppholdsperiode(scenario).getTom()) + " får du ikke aktivitetspenger. "
+                    + "Det er fordi du får tiltakspenger i denne perioden. Du kan ikke få aktivitetspenger samtidig som du får "
+                    + "en annen livsoppholdsytelse.",
+                MELD_FRA_OM_ENDRINGER
+            );
+    }
+
+    @DisplayName("Opphør pga andre livsoppholdsytelser - fritekst kommer etter årsakssetningen")
+    @Test
+    void opphørAndreLivsoppholdsytelserFritekst() {
+        var fritekst = "Du får dagpenger fra Nav fra samme dato.";
+        var scenario = AktivitetspengerOpphørScenarioer.opphørPgaAndreLivsoppholdsytelser(
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_DAGPENGER, fritekst);
+        var behandling = lagBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_OPPHØR);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Du får ikke lenger aktivitetspenger</h1>",
+                "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
+                fritekst,
+                "Trøndelag §&nbsp;4."
+            )
+            .asPlainTextNotContains("Du må melde fra om endringer");
+    }
+
+    @DisplayName("Endring/avslag pga andre livsoppholdsytelser - fritekst kommer etter årsakssetningen")
+    @Test
+    void endringAvslagAndreLivsoppholdsytelserFritekst() {
+        var fritekst = "Du får tiltakspenger i hele perioden.";
+        var scenario = AktivitetspengerEndringAvslagScenarioer.avslagPgaAndreLivsoppholdsytelser(
+            FOM, AndreLivsoppholdsytelserIkkeOppfyltÅrsak.MOTTAR_TILTAKSPENGER, fritekst);
+        var behandling = lagBehandling(scenario);
+
+        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
+        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_ENDRING_AVSLAG);
+
+        assertThatHtml(generertBrev.dokument().html())
+            .containsHtmlSubSequenceOnce(
+                "<h1>Nav har endret aktivitetspengene dine</h1>",
+                "Du kan ikke få aktivitetspenger samtidig som du får en annen livsoppholdsytelse.",
+                fritekst,
+                "Trøndelag §&nbsp;4.",
+                MELD_FRA_OM_ENDRINGER
             );
     }
 
@@ -254,8 +298,8 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
-                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få eller beholde en jobb. "
-                    + "Fordi du nå har begynt å jobbe og ikke lenger trenger slik hjelp, stanser vi aktivitetspengene dine.",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få jobb eller utdanning. "
+                    + "Fordi du nå har begynt å jobbe, stanser vi aktivitetspengene dine.",
                 fritekst
             );
     }
@@ -276,9 +320,10 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(bistandsperiode(scenario).getFom()) + " til "
                     + brevDatoString(bistandsperiode(scenario).getTom()),
-                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få eller beholde en jobb. "
-                    + "Fordi du jobber i perioden og ikke trenger slik hjelp, stanser vi aktivitetspengene dine.",
-                fritekst
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. "
+                    + "Fordi du jobber i perioden, stanser vi aktivitetspengene dine.",
+                fritekst,
+                MELD_FRA_OM_ENDRINGER
             );
     }
 
@@ -296,12 +341,13 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .containsHtmlSubSequenceOnce(
                 "<h1>Du får ikke lenger aktivitetspenger</h1>",
                 "Fra " + brevDatoString(bistandsperiode(scenario).getFom()) + " får du ikke lenger aktivitetspenger",
-                "Du kan bare få aktivitetspenger mens du tar høyere utdanning hvis utdanningen er et arbeidsmarkedstiltak fra Nav. "
-                    + "Fordi du har begynt på høyere utdanning som ikke er et arbeidsmarkedstiltak, stanser vi aktivitetspengene dine.",
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å få jobb eller utdanning. "
+                    + "Fordi du nå har begynt på en utdanning, stanser vi aktivitetspengene dine.",
                 fritekst
             )
-            .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("7").trim())
-            .asPlainTextNotContains("Trøndelag § 6.");
+            .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("6").trim())
+            .asPlainTextNotContains("Trøndelag § 7.")
+            .asPlainTextNotContains("Du må melde fra om endringer");
     }
 
     @DisplayName("Endring/avslag pga bistandsvilkåret - kommet i utdanning")
@@ -320,12 +366,13 @@ class EndringAvslagOpphørTest extends AbstractAktivitetspengerVedtaksbrevInnhol
                 "Du får ikke aktivitetspenger i perioden fra "
                     + brevDatoString(bistandsperiode(scenario).getFom()) + " til "
                     + brevDatoString(bistandsperiode(scenario).getTom()),
-                "Du kan bare få aktivitetspenger mens du tar høyere utdanning hvis utdanningen er et arbeidsmarkedstiltak fra Nav. "
-                    + "Fordi du i denne perioden tar høyere utdanning som ikke er et arbeidsmarkedstiltak, stanser vi aktivitetspengene dine.",
-                fritekst
+                "For å ha rett til aktivitetspenger må du ha behov for hjelp fra Nav til å komme i jobb eller utdanning. "
+                    + "Fordi du tar en utdanning i perioden, stanser vi aktivitetspengene dine.",
+                fritekst,
+                MELD_FRA_OM_ENDRINGER
             )
-            .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("7").trim())
-            .asPlainTextNotContains("Trøndelag § 6.");
+            .asPlainTextContains(VedtaksbrevVerifikasjon.hjemmelsetning("6").trim())
+            .asPlainTextNotContains("Trøndelag § 7.");
     }
 
     private static Periode bistandsperiode(AktivitetspengerTestScenario scenario) {
