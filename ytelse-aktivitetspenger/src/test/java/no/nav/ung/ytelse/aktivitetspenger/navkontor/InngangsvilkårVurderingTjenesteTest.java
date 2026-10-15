@@ -102,13 +102,14 @@ class InngangsvilkårVurderingTjenesteTest {
         var vilkårPeriode = hentVilkårPeriode(vilkårResultatRepository.hent(behandling.getId()).getVilkårTimeline(VilkårType.BISTANDSVILKÅR), PERIODE_1);
         var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
         assertThat(json.get("regelInputGrunnlag").get("fra").asText()).isEqualTo("steg");
+        assertThat(vilkårPeriode.getErManueltVurdert()).isFalse();
         assertThat(json.get("manuellVurdering").asBoolean()).isFalse();
         assertThat(json.get("regelEvalueringGrunnlag").get("utfall").asText()).isEqualTo("AVSLÅS_AUTOMATISK");
         assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
     }
 
     @Test
-    void skal_fjerne_regelsporing_fra_automatiseringen_når_vurderingen_blir_manuell() {
+    void skal_fjerne_regelsporing_fra_automatiseringen_når_saksbehandler_vurderer_direkte() {
         var behandling = opprettFørstegangsbehandling(VilkårType.BISTANDSVILKÅR, vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
 
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of(
@@ -122,6 +123,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
         var vilkårPeriode = hentVilkårPeriode(vilkårResultatRepository.hent(behandling.getId()).getVilkårTimeline(VilkårType.BISTANDSVILKÅR), PERIODE_1);
         var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
+        assertThat(vilkårPeriode.getErManueltVurdert()).isTrue();
         assertThat(json.get("manuellVurdering").asBoolean()).isTrue();
         assertThat(json.hasNonNull("regelInputGrunnlag")).isFalse();
         assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("OPPFYLT");

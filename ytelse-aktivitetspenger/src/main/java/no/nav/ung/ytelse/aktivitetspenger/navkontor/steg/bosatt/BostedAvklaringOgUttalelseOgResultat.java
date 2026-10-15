@@ -56,7 +56,7 @@ class BostedAvklaringOgUttalelseOgResultat {
         return new Regelsporing(JSON.writeValueAsString(tilRegelInput()), JSON.writeValueAsString(new RegelEvaluering(utledUtfall())));
     }
 
-    private RegelInput tilRegelInput() {
+    RegelInput tilRegelInput() {
         var foreslått = faktaOgAvklaring.getForeslåttAvklaring();
         var uttalelse = etterlysning != null ? etterlysning.uttalelseData() : null;
         return new RegelInput(

@@ -59,13 +59,19 @@ public class InngangsvilkårVurderingTjeneste {
             var utfall = vurdering.isGodkjent() ? Utfall.OPPFYLT : Utfall.IKKE_OPPFYLT;
             var ikkeOppfyltÅrsak = utfall == Utfall.IKKE_OPPFYLT ? påkrevdÅrsak(vurdering.getIkkeOppfyltÅrsak()) : null;
             var avslagsårsak = avslagsårsakFor(ikkeOppfyltÅrsak);
-            vilkårBuilder.leggTil(vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
+            var vilkårPeriodeBuilder = vilkårBuilder.hentBuilderFor(periode.getFomDato(), periode.getTomDato())
                 .medBegrunnelse(vurdering.getBegrunnelse())
                 .medFritekstVurderingBrev(vurdering.getFritekstVurderingBrev())
-                .medUtfallManuell(utfall)
                 .medAvslagsårsak(avslagsårsak, ikkeOppfyltÅrsak)
                 .medRegelInput(regelInput(vurdering.tilVilkårsvurderingResultat(), vurdering.getRegelsporing()))
-                .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak)));
+                .medRegelEvaluering(regelEvaluering(utfall, avslagsårsak));
+
+            if (vurdering.erManuellVurdering()) {
+                vilkårPeriodeBuilder.medUtfallManuell(utfall);
+            } else {
+                vilkårPeriodeBuilder.tilbakestillManuellVurdering().medUtfall(utfall);
+            }
+            vilkårBuilder.leggTil(vilkårPeriodeBuilder);
         }
         resultatBuilder.leggTil(vilkårBuilder);
     }

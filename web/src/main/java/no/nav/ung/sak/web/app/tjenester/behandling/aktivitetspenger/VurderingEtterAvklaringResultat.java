@@ -47,6 +47,6 @@ public record VurderingEtterAvklaringResultat(
         LocalDate tom,
         String utfall,
         String ikkeOppfyltÅrsak,
-        boolean klippetMotVilkårsperiode
+        boolean avvikerFraVurdertPeriode
     ) {}
 }

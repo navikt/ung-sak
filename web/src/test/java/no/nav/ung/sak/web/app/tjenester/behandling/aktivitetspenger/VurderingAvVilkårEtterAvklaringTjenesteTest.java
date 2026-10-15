@@ -215,7 +215,7 @@ class VurderingAvVilkårEtterAvklaringTjenesteTest {
         assertThat(evalueringer).allSatisfy(e -> {
             assertThat(e.utfall()).isEqualTo(Utfall.IKKE_OPPFYLT.getKode());
             assertThat(e.ikkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM.getKode());
-            assertThat(e.klippetMotVilkårsperiode()).isTrue();
+            assertThat(e.avvikerFraVurdertPeriode()).isTrue();
         });
 
         var input = resultat.regelInput();

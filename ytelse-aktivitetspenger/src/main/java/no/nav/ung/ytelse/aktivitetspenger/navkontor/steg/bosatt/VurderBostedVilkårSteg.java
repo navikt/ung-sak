@@ -219,7 +219,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         try {
             behandingprosessSporingRepository.lagreSporing(new BehandlingprosessSporing(
                 behandlingId,
-                JsonObjectMapper.getJson(vurderingTidslinje),
+                JsonObjectMapper.getJson(vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::tilRegelInput)),
                 JsonObjectMapper.getJson(stegutfallTidslinje),
                 VURDER_BOSTEDVILKÅR.getKode())
             );
