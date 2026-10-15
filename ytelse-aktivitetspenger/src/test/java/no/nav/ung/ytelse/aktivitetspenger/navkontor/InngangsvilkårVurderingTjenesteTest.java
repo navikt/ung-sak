@@ -2,6 +2,7 @@ package no.nav.ung.ytelse.aktivitetspenger.navkontor;
 
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import com.fasterxml.jackson.databind.JsonNode;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.testutilities.cdi.CdiAwareExtension;
 import no.nav.ung.kodeverk.behandling.BehandlingType;
@@ -14,12 +15,14 @@ import no.nav.ung.kodeverk.vilkår.VilkårType;
 import no.nav.ung.sak.behandlingslager.behandling.Behandling;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepository;
 import no.nav.ung.sak.behandlingslager.behandling.repository.BehandlingRepositoryProvider;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårResultatRepository;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.Vilkårene;
 import no.nav.ung.sak.behandlingslager.behandling.vilkår.periode.VilkårPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BistandsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.BostedsvilkårResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.Regelsporing;
 import no.nav.ung.sak.db.util.JpaExtension;
 import no.nav.ung.sak.domene.typer.tid.DatoIntervallEntitet;
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
@@ -63,11 +66,11 @@ class InngangsvilkårVurderingTjenesteTest {
 
     @Test
     void skal_sette_automatisk_utfall_når_vurderingen_ikke_er_manuell() {
-        var behandling = opprettFørstegangsbehandling(vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
+        var behandling = opprettFørstegangsbehandling(VilkårType.BOSTEDSVILKÅR, vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), List.of(
             new BostedsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM,
-                false, "Automatisk avslag", null, "A111111", LocalDateTime.now())));
+                false, "Automatisk avslag", null, "A111111", LocalDateTime.now(), null)));
 
         tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BOSTEDSVILKÅR);
 
@@ -75,6 +78,55 @@ class InngangsvilkårVurderingTjenesteTest {
         assertThat(vilkårPeriode.getGjeldendeUtfall()).isEqualTo(Utfall.IKKE_OPPFYLT);
         assertThat(vilkårPeriode.getErManueltVurdert()).isFalse();
         assertThat(vilkårPeriode.getAvslagsårsak()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE);
+        assertThat(vilkårPeriode.getIkkeOppfyltÅrsak()).isEqualTo(BostedsvilkårIkkeOppfyltÅrsak.STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM.getKode());
+        assertThat(vilkårPeriode.getRegelInput()).contains("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM").contains("A111111");
+        var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
+        assertThat(json.hasNonNull("regelInputGrunnlag")).isFalse();
+        assertThat(json.get("ikkeOppfyltÅrsak").asText()).isEqualTo("STUDIE_ELLER_ARBEIDSSTED_UTENFOR_TRONDHEIM");
+        var evaluering = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class);
+        assertThat(evaluering.get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
+        assertThat(evaluering.get("automatiskUtledetFraGrunnlag").asBoolean()).isTrue();
+        assertThat(evaluering.get("avslagsårsak").asText()).isEqualTo(Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE.getKode());
+    }
+
+    @Test
+    void skal_ta_med_regelsporing_fra_grunnlaget() {
+        var behandling = opprettFørstegangsbehandling(VilkårType.BISTANDSVILKÅR, vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
+
+        inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of(
+            new BistandsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false, "begrunnelse", null, "A111111", LocalDateTime.now(),
+                new Regelsporing("{\"fra\":\"steg\"}", "{\"utfall\":\"AVSLÅS_AUTOMATISK\"}"))));
+
+        tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BISTANDSVILKÅR);
+
+        var vilkårPeriode = hentVilkårPeriode(vilkårResultatRepository.hent(behandling.getId()).getVilkårTimeline(VilkårType.BISTANDSVILKÅR), PERIODE_1);
+        var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
+        assertThat(json.get("regelInputGrunnlag").get("fra").asText()).isEqualTo("steg");
+        assertThat(vilkårPeriode.getErManueltVurdert()).isFalse();
+        assertThat(json.get("manuellVurdering").asBoolean()).isFalse();
+        assertThat(json.get("regelEvalueringGrunnlag").get("utfall").asText()).isEqualTo("AVSLÅS_AUTOMATISK");
+        assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
+    }
+
+    @Test
+    void skal_fjerne_regelsporing_fra_automatiseringen_når_saksbehandler_vurderer_direkte() {
+        var behandling = opprettFørstegangsbehandling(VilkårType.BISTANDSVILKÅR, vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
+
+        inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of(
+            new BistandsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false, "begrunnelse", null, "A111111", LocalDateTime.now(),
+                new Regelsporing("{\"fra\":\"steg\"}", "{\"utfall\":\"AVSLÅS_AUTOMATISK\"}"))));
+        tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BISTANDSVILKÅR);
+
+        inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of(
+            new BistandsvilkårResultatPeriode(tilIntervall(PERIODE_1), true, null, true, "manuell begrunnelse", null, "A111111", LocalDateTime.now(), null)));
+        tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BISTANDSVILKÅR);
+
+        var vilkårPeriode = hentVilkårPeriode(vilkårResultatRepository.hent(behandling.getId()).getVilkårTimeline(VilkårType.BISTANDSVILKÅR), PERIODE_1);
+        var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
+        assertThat(vilkårPeriode.getErManueltVurdert()).isTrue();
+        assertThat(json.get("manuellVurdering").asBoolean()).isTrue();
+        assertThat(json.hasNonNull("regelInputGrunnlag")).isFalse();
+        assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("OPPFYLT");
     }
 
     @Test
@@ -84,7 +136,7 @@ class InngangsvilkårVurderingTjenesteTest {
         var behandling = scenario.lagre(entityManager);
 
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(behandling.getId(), List.of(
-            new BistandsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, "begrunnelse", null, "A111111", LocalDateTime.now())));
+            new BistandsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, true, "begrunnelse", null, "A111111", LocalDateTime.now(), null)));
 
         tjeneste.oppdaterVilkårResultatFraVurdering(behandling.getId(), VilkårType.BISTANDSVILKÅR);
 
@@ -96,7 +148,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
     @Test
     void skal_fylle_inn_ikke_vurderte_perioder_fra_forrige_behandling_uten_å_overskrive_vurdering_i_denne_behandlingen() {
-        var originalBehandling = opprettFørstegangsbehandling(
+        var originalBehandling = opprettFørstegangsbehandling(VilkårType.BOSTEDSVILKÅR,
             vilkår(PERIODE_1, Utfall.IKKE_OPPFYLT, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, "fra original periode 1"),
             vilkår(PERIODE_2, Utfall.IKKE_OPPFYLT, Avslagsårsak.YTELSE_IKKE_TILGJENGELIG_PÅ_FOLKEREGISTRERT_ELLER_BOSTEDSADRESSE, "fra original periode 2"),
             vilkår(PERIODE_3, Utfall.OPPFYLT, null, "fra original periode 3"));
@@ -109,7 +161,7 @@ class InngangsvilkårVurderingTjenesteTest {
         var PERIODE_1_AVKORTET = new Periode(PERIODE_1.getFom(), PERIODE_1.getTom().minusDays(15));
         var PERIODE_2_3_FLYTTET = new Periode(PERIODE_2.getFom().minusDays(15), PERIODE_3.getTom().minusDays(15));
 
-        var revurdering = opprettRevurdering(originalBehandling,
+        var revurdering = opprettRevurdering(VilkårType.BOSTEDSVILKÅR, originalBehandling,
             vilkår(PERIODE_1_AVKORTET, Utfall.OPPFYLT, null, "vurdert i denne behandlingen"),
             vilkår(PERIODE_2_3_FLYTTET, Utfall.IKKE_VURDERT)
         );
@@ -143,14 +195,40 @@ class InngangsvilkårVurderingTjenesteTest {
     }
 
     @Test
+    void skal_bevare_regelsporing_når_automatisk_vurdering_gjenopprettes_fra_forrige_behandling() {
+        var regelsporing = new Regelsporing("{\"fra\":\"steg\"}", "{\"utfall\":\"AVSLÅS_AUTOMATISK\"}");
+        var originalBehandling = opprettFørstegangsbehandling(VilkårType.BISTANDSVILKÅR,
+            vilkår(PERIODE_1, Utfall.IKKE_OPPFYLT, Avslagsårsak.IKKE_14A_VEDTAK, null));
+        inngangsvilkårVurderingRepository.lagreBistandsVurderinger(originalBehandling.getId(), List.of(
+            new BistandsvilkårResultatPeriode(tilIntervall(PERIODE_1), false, BistandsvilkårIkkeOppfyltÅrsak.KOMMET_I_ARBEID, false, "begrunnelse", null, "A111111", LocalDateTime.now(), regelsporing)));
+
+        var revurdering = opprettRevurdering(VilkårType.BISTANDSVILKÅR, originalBehandling, vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
+
+        var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(revurdering.getId()));
+        tjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(revurdering.getId(), vilkårResultatBuilder, VilkårType.BISTANDSVILKÅR, UBEGRENSET_AVGRENSNING);
+        tjeneste.oppdaterVilkårResultatFraVurdering(revurdering.getId(), VilkårType.BISTANDSVILKÅR);
+
+        var gjenopprettet = inngangsvilkårVurderingRepository.hentEksisterendeGrunnlag(revurdering.getId()).orElseThrow()
+            .hentBistandResultatPeriodeTidslinje().segmenter().getFirst().getValue();
+        assertThat(gjenopprettet.erManuellVurdering()).isFalse();
+        assertThat(gjenopprettet.getRegelsporing()).contains(regelsporing);
+
+        var vilkårPeriode = hentVilkårPeriode(vilkårResultatRepository.hent(revurdering.getId()).getVilkårTimeline(VilkårType.BISTANDSVILKÅR), PERIODE_1);
+        var json = new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelInput(), JsonNode.class);
+        assertThat(json.get("regelInputGrunnlag").get("fra").asText()).isEqualTo("steg");
+        assertThat(json.get("regelEvalueringGrunnlag").toString()).isEqualTo(regelsporing.evaluering());
+        assertThat(new VilkårJsonObjectMapper().readValue(vilkårPeriode.getRegelEvaluering(), JsonNode.class).get("utfall").asText()).isEqualTo("IKKE_OPPFYLT");
+    }
+
+    @Test
     void skal_ikke_gjenopprette_perioder_som_ikke_var_vurdert_i_forrige_behandling() {
-        var originalBehandling = opprettFørstegangsbehandling(
+        var originalBehandling = opprettFørstegangsbehandling(VilkårType.BOSTEDSVILKÅR,
             vilkår(PERIODE_1, Utfall.OPPFYLT, null, "fra original periode 1"));
 
         leggTilBostedVurderinger(originalBehandling.getId(),
             bostedVurdering(PERIODE_1, true, "fra original periode 1"));
 
-        var revurdering = opprettRevurdering(originalBehandling,
+        var revurdering = opprettRevurdering(VilkårType.BOSTEDSVILKÅR, originalBehandling,
             vilkår(PERIODE_1, Utfall.IKKE_VURDERT),
             vilkår(PERIODE_2, Utfall.IKKE_VURDERT));
 
@@ -167,7 +245,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
     @Test
     void skal_ikke_gjenopprette_noe_når_behandlingen_ikke_har_original_behandling() {
-        var behandling = opprettFørstegangsbehandling(vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
+        var behandling = opprettFørstegangsbehandling(VilkårType.BOSTEDSVILKÅR, vilkår(PERIODE_1, Utfall.IKKE_VURDERT));
 
         var vilkårResultatBuilder = Vilkårene.builderFraEksisterende(vilkårResultatRepository.hent(behandling.getId()));
         tjeneste.gjenopprettForrigeVurderingForPerioderIkkeVurdert(behandling.getId(), vilkårResultatBuilder, VilkårType.BOSTEDSVILKÅR, UBEGRENSET_AVGRENSNING);
@@ -178,7 +256,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
     @Test
     void skal_fjerne_vurdering_og_sette_vilkår_til_ikke_vurdert_for_angitte_perioder() {
-        var behandling = opprettFørstegangsbehandling(
+        var behandling = opprettFørstegangsbehandling(VilkårType.BOSTEDSVILKÅR,
             vilkår(PERIODE_1, Utfall.OPPFYLT),
             vilkår(PERIODE_2, Utfall.IKKE_OPPFYLT));
 
@@ -208,7 +286,7 @@ class InngangsvilkårVurderingTjenesteTest {
 
     private void leggTilBostedVurderinger(Long behandlingId, BostedVurderingData... vurderinger) {
         var perioder = List.of(vurderinger).stream()
-            .map(v -> new BostedsvilkårResultatPeriode(tilIntervall(v.periode()), v.godkjent(), v.ikkeOppfyltÅrsak(), true, "begrunnelse", v.fritekstVurderingBrev(), "A111111", LocalDateTime.now()))
+            .map(v -> new BostedsvilkårResultatPeriode(tilIntervall(v.periode()), v.godkjent(), v.ikkeOppfyltÅrsak(), true, "begrunnelse", v.fritekstVurderingBrev(), "A111111", LocalDateTime.now(), null))
             .toList();
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, perioder);
     }
@@ -221,23 +299,23 @@ class InngangsvilkårVurderingTjenesteTest {
     private record BostedVurderingData(Periode periode, boolean godkjent, BostedsvilkårIkkeOppfyltÅrsak ikkeOppfyltÅrsak, String fritekstVurderingBrev) {
     }
 
-    private Behandling opprettFørstegangsbehandling(VilkårsperiodeData... vilkårsperioder) {
+    private Behandling opprettFørstegangsbehandling(VilkårType vilkårType, VilkårsperiodeData... vilkårsperioder) {
         var scenario = AktivitetspengerTestScenarioBuilder.builderMedSøknad();
-        leggTilVilkår(scenario, vilkårsperioder);
+        leggTilVilkår(vilkårType, scenario, vilkårsperioder);
         return scenario.lagre(entityManager);
     }
 
-    private Behandling opprettRevurdering(Behandling originalBehandling, VilkårsperiodeData... vilkårsperioder) {
+    private Behandling opprettRevurdering(VilkårType vilkårType, Behandling originalBehandling, VilkårsperiodeData... vilkårsperioder) {
         var scenario = AktivitetspengerTestScenarioBuilder.builderMedSøknad()
             .medBehandlingType(BehandlingType.REVURDERING)
             .medOriginalBehandling(originalBehandling, BehandlingÅrsakType.ENDRET_BOSTED);
-        leggTilVilkår(scenario, vilkårsperioder);
+        leggTilVilkår(vilkårType, scenario, vilkårsperioder);
         return scenario.lagre(entityManager);
     }
 
-    private static void leggTilVilkår(AktivitetspengerTestScenarioBuilder scenario, VilkårsperiodeData... vilkårsperioder) {
+    private static void leggTilVilkår(VilkårType vilkårType, AktivitetspengerTestScenarioBuilder scenario, VilkårsperiodeData... vilkårsperioder) {
         for (var v : vilkårsperioder) {
-            scenario.leggTilVilkår(VilkårType.BOSTEDSVILKÅR, v.utfall(), v.periode(), v.avslagsårsak(), v.fritekstBrev());
+            scenario.leggTilVilkår(vilkårType, v.utfall(), v.periode(), v.avslagsårsak(), v.fritekstBrev());
             scenario.leggTilVilkår(VilkårType.ALDERSVILKÅR, Utfall.OPPFYLT, v.periode());
         }
     }

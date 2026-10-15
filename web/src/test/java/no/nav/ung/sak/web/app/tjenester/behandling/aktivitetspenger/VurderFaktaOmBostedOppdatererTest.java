@@ -373,7 +373,8 @@ class VurderFaktaOmBostedOppdatererTest {
                 v.begrunnelse(),
                 null,
                 SAKSBEHANDLER,
-                LocalDateTime.now()))
+                LocalDateTime.now(),
+                null))
             .toList();
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandling.getId(), perioder);
     }

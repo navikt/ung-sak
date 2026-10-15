@@ -122,7 +122,9 @@ public class ManuellVurderingBostedsvilkårOppdaterer implements AksjonspunktOpp
                     it.getValue().begrunnelse(),
                     it.getValue().fritekstVurderingBrev(),
                     vurdertAv,
-                    vurdertTidspunkt))
+                    vurdertTidspunkt,
+                    null
+                ))
             .toList();
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(param.getBehandlingId(), periodeVurderinger);

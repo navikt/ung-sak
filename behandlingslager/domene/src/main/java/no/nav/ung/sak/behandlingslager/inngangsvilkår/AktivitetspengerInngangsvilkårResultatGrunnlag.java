@@ -97,6 +97,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
             .toList());
     }
 
+    public LocalDateTimeline<BistandsvilkårResultatPeriode> hentBistandResultatPeriodeTidslinje() {
+        return new LocalDateTimeline<>(getBistandsvilkårResultatHolder().map(BistandsvilkårResultatHolder::getVurderinger).orElse(Set.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
+            .toList());
+    }
+
     public Optional<AndreLivsoppholdsytelserResultatHolder> getAndreLivsoppholdsytelserResultatHolder() {
         return Optional.ofNullable(andreLivsoppholdsytelserResultatHolder);
     }
@@ -109,6 +115,12 @@ public class AktivitetspengerInngangsvilkårResultatGrunnlag extends BaseEntitet
     public LocalDateTimeline<VilkårsvurderingResultat> hentLivsoppholdTidslinje() {
         return new LocalDateTimeline<>(getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger).orElse(Set.of()).stream()
             .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v.tilVilkårsvurderingResultat()))
+            .toList());
+    }
+
+    public LocalDateTimeline<AndreLivsoppholdsytelserResultatPeriode> hentLivsoppholdResultatPeriodeTidslinje() {
+        return new LocalDateTimeline<>(getAndreLivsoppholdsytelserResultatHolder().map(AndreLivsoppholdsytelserResultatHolder::getVurderinger).orElse(Set.of()).stream()
+            .map(v -> new LocalDateSegment<>(v.getPeriode().getFomDato(), v.getPeriode().getTomDato(), v))
             .toList());
     }
 

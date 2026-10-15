@@ -117,7 +117,8 @@ public record InngangsvilkårVurderingTestData(
                     DEFAULT_BEGRUNNELSE,
                     input.fritekstTilBrev(),
                     DEFAULT_VURDERT_AV,
-                    LocalDateTime.now()))
+                    LocalDateTime.now(),
+                    null))
                 .toList();
 
             List<BistandsvilkårResultatPeriode> bistandsvilkårResultater = bistandsvilkårInput.stream()
@@ -129,7 +130,7 @@ public record InngangsvilkårVurderingTestData(
                     DEFAULT_BEGRUNNELSE,
                     input.fritekstTilBrev(),
                     DEFAULT_VURDERT_AV,
-                    LocalDateTime.now()))
+                    LocalDateTime.now(), null))
                 .toList();
 
             List<AndreLivsoppholdsytelserResultatPeriode> andreYtelserResultater = andreYtelserInput.stream()
@@ -142,7 +143,8 @@ public record InngangsvilkårVurderingTestData(
                     input.fritekstTilBrev(),
                     input.ytelseNavn(),
                     DEFAULT_VURDERT_AV,
-                    LocalDateTime.now()))
+                    LocalDateTime.now(),
+                    null))
                 .toList();
 
             List<AktivitetsvilkårResultatPeriode> aktivitetsvilkårResultater = aktivitetsvilkårInput.stream()
@@ -154,7 +156,8 @@ public record InngangsvilkårVurderingTestData(
                     DEFAULT_BEGRUNNELSE,
                     input.fritekstTilBrev(),
                     DEFAULT_VURDERT_AV,
-                    LocalDateTime.now()))
+                    LocalDateTime.now(),
+                    null))
                 .toList();
 
             return new InngangsvilkårVurderingTestData(bostedsvilkårResultater, bistandsvilkårResultater, andreYtelserResultater, aktivitetsvilkårResultater);

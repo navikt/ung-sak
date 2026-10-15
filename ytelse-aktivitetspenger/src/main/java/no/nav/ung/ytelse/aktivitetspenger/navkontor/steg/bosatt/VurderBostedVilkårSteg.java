@@ -172,7 +172,9 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
                     null,
                     null,
                     null,
-                    foreslåttAvklaring.getVurdertTidspunkt());
+                    foreslåttAvklaring.getVurdertTidspunkt(),
+                    s.getValue().tilRegelsporing()
+                );
             }).collect(Collectors.toList());
 
         inngangsvilkårVurderingRepository.lagreBostedVurderinger(behandlingId, vurderingResultat);
@@ -217,7 +219,7 @@ public class VurderBostedVilkårSteg extends VilkårVurderingSteg {
         try {
             behandingprosessSporingRepository.lagreSporing(new BehandlingprosessSporing(
                 behandlingId,
-                JsonObjectMapper.getJson(vurderingTidslinje),
+                JsonObjectMapper.getJson(vurderingTidslinje.mapValue(BostedAvklaringOgUttalelseOgResultat::tilRegelInput)),
                 JsonObjectMapper.getJson(stegutfallTidslinje),
                 VURDER_BOSTEDVILKÅR.getKode())
             );
