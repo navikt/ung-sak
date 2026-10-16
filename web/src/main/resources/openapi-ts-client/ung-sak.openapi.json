@@ -2640,7 +2640,7 @@
         "required" : [ "avklaringtype", "foreslåttIBehandlingen", "ikkeOppfyltÅrsak", "kilde", "periode", "referanse", "skalSendeVarsel", "vurdertAv", "vurdertTidspunkt" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringRadDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringOgUtfallPeriodeDto" : {
         "properties" : {
           "avklaring" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto"
@@ -2671,7 +2671,7 @@
         "properties" : {
           "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto"
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingOgAvklaringPeriodeDto"
             },
             "type" : "array"
           },
@@ -2686,7 +2686,7 @@
         "properties" : {
           "perioder" : {
             "items" : {
-              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringRadDto"
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringOgUtfallPeriodeDto"
             },
             "type" : "array"
           },
@@ -2725,7 +2725,7 @@
         "required" : [ "erManuellVurdering", "erVilkårOppfylt", "vurdertAv", "vurdertTidspunkt" ],
         "type" : "object"
       },
-      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto" : {
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingOgAvklaringPeriodeDto" : {
         "properties" : {
           "avklaringOgVurdering" : {
             "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingDto"
