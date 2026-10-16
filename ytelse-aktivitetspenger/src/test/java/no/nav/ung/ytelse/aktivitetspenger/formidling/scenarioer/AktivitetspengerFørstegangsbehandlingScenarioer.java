@@ -41,7 +41,30 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
      * Ingen inntektsgradering og ingen barn.
      */
     public static AktivitetspengerTestScenario innvilget24ÅrBle25ÅrLavSatsMedBesteberegning(LocalDate fom) {
-        return innvilget24ÅrBle25ÅrBuilder(fom, lagBeregningsgrunnlagHøyereEnnLavMinstesats(fom)).build();
+        return innvilget24ÅrBle25ÅrBuilder(fom, lagBeregningsgrunnlagHøyereEnnLavMinstesats(fom), 0).build();
+    }
+
+    /**
+     * Som {@link #innvilget24ÅrBle25ÅrLavSatsMedBesteberegning(LocalDate)}, men med ett barn.
+     */
+    public static AktivitetspengerTestScenario innvilget24ÅrBle25ÅrLavSatsMedBesteberegningOgBarn(LocalDate fom) {
+        return innvilget24ÅrBle25ÅrBuilder(fom, lagBeregningsgrunnlagHøyereEnnLavMinstesats(fom), 1).build();
+    }
+
+    /**
+     * Person over 25 år gjennom hele programperioden.
+     * Kun høy sats (minstesats) med ett barn. Ingen inntektsgradering.
+     */
+    public static AktivitetspengerTestScenario innvilgetKunHøySatsMedBarn(LocalDate fom) {
+        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilderMedBarn(fom, 1).build()).build();
+    }
+
+    /**
+     * Person over 25 år gjennom hele programperioden.
+     * Besteberegning som er høyere enn høy minstesats, og ett barn. Ingen inntektsgradering.
+     */
+    public static AktivitetspengerTestScenario innvilgetKunHøySatsMedBesteberegningOgBarn(LocalDate fom) {
+        return innvilgetMedÉnSatsBuilder(fom, fom.minusYears(30), høySatsBuilderMedBarn(fom, 1).build(), lagBeregningsgrunnlagHøyereEnnHøyMinstesats(fom)).build();
     }
 
     /**
@@ -80,17 +103,17 @@ public class AktivitetspengerFørstegangsbehandlingScenarioer {
      * Ingen inntektsgradering og ingen barn.
      */
     public static AktivitetspengerTestScenario innvilget24årBle25årførsteMåned(LocalDate fom) {
-        return innvilget24ÅrBle25ÅrBuilder(fom, lagBeregningsgrunnlag(fom)).build();
+        return innvilget24ÅrBle25ÅrBuilder(fom, lagBeregningsgrunnlag(fom), 0).build();
     }
 
-    private static AktivitetspengerTestScenario.Builder innvilget24ÅrBle25ÅrBuilder(LocalDate fom, Beregningsgrunnlag beregningsgrunnlagVerdi) {
+    private static AktivitetspengerTestScenario.Builder innvilget24ÅrBle25ÅrBuilder(LocalDate fom, Beregningsgrunnlag beregningsgrunnlagVerdi, int antallBarn) {
         LocalDate tjuvefemårsdag = fom.plusDays(15);
         LocalDate fødselsdato = tjuvefemårsdag.minusYears(25);
         LocalDate tom25årmnd = tjuvefemårsdag.with(TemporalAdjusters.lastDayOfMonth());
         var p = new LocalDateInterval(fom, fom.plusWeeks(52).minusDays(1));
 
-        var lavSats = lavSatsBuilder(p.getFomDato()).build();
-        var høySats = høySatsBuilder(tjuvefemårsdag).build();
+        var lavSats = lavSatsMedBarnBuilder(p.getFomDato(), antallBarn).build();
+        var høySats = høySatsBuilderMedBarn(tjuvefemårsdag, antallBarn).build();
 
         var satsperioder = new LocalDateTimeline<>(List.of(
             new LocalDateSegment<>(fom, tjuvefemårsdag.minusDays(1), new AktivitetspengerSatsPeriode(new LocalDateInterval(fom, tjuvefemårsdag.minusDays(1)), lavSats)),
