@@ -2,7 +2,7 @@
     {{#> felles/seksjon/hoved }}
         <h1>Vi har endret aktivitetspengene dine</h1>
         {{#each utbetalingsperioder}}
-            <p>Du får {{> felles/beløp utbetalingBeløp}} i aktivitetspenger for perioden {{> felles/periode-inline periode}}.</p>
+            <p>Du får {{> felles/beløp utbetalingBeløp}} i aktivitetspenger for perioden {{> felles/periode-inline periode}} (før skatt).</p>
             {{#unless harFlereUtbetalinger}}<p>Pengene får du utbetalt innen fire dager.</p>{{/unless}}
 
             {{#unless ufullstendigMåned}}
@@ -12,8 +12,9 @@
                 </p>
             {{else}}
                 <p>
-                    Siden du bare hadde aktivitetspenger for en del av måneden, brukte vi bare en del av inntekten din på {{> felles/beløp inntekt}} i {{ufullstendigMåned}} til å regne ut hvor mye penger du får for perioden {{> felles/periode-inline periode}}.
+                    Siden du bare hadde aktivitetspenger for en del av måneden, brukte vi bare en del av inntekten din på {{> felles/beløp inntekt}} i {{ufullstendigMåned}} til å regne ut hvor mye du får for perioden {{> felles/periode-inline periode}}.
                 </p>
+                <p>Se eksempel på <a title="aktivitetspenger" href="https://www.nav.no/aktivitetspenger">nav.no/aktivitetspenger</a> på hvordan vi regner ut aktivitetspengene dine for den siste måneden.</p>
             {{/unless}}
 
         {{/each}}
@@ -29,8 +30,8 @@
             {{/each}}
 
             <h2>Hvorfor får du ingen utbetaling?</h2>
-            <p>Når du har en inntekt, får du mindre penger i aktivitetspenger.
-                Vi regnet ut hva {{reduksjonssats}} prosent av inntekten din var for denne perioden, og så trakk vi dette beløpet fra pengene du får i aktivitetspenger.</p>
+            <p>Når du har inntekt, får du mindre i aktivitetspenger.
+                Vi har regnet ut hva {{reduksjonssats}} prosent av inntekten din var for denne perioden, og så trakk vi dette beløpet fra pengene du får i aktivitetspenger.</p>
             <p>Siden {{reduksjonssats}} prosent av inntekten din var høyere enn det du ville fått utbetalt i aktivitetspenger for denne perioden, får du ingen utbetaling.</p>
         {{/if}}
 
