@@ -36,11 +36,12 @@ import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnl
 import no.nav.ung.sak.domene.typer.tid.TidslinjeUtil;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.UttalelseDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringOgUtfallPeriodeDto;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringVurderingerResponse;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsavklaringerResponse;
 import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingDto;
-import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingRadDto;
+import no.nav.ung.sak.kontrakt.aktivitetspenger.vilkår.avklaring.VilkårsvurderingOgAvklaringPeriodeDto;
 import no.nav.ung.sak.kontrakt.behandling.BehandlingUuidDto;
 import no.nav.ung.sak.typer.JournalpostId;
 import no.nav.ung.sak.typer.Periode;
@@ -51,7 +52,6 @@ import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -106,7 +106,7 @@ public class VilkårsavklaringRestTjeneste {
     @Operation(description = "Hent foreslåtte og ferdigstilte vilkårsavklaringer for et vilkår", tags = "aktivitetspenger")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public VilkårsavklaringerDto hentVilkårsavklaringer(
+    public VilkårsavklaringerResponse hentVilkårsavklaringer(
         @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC)
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid,
         @NotNull @QueryParam("vilkarType")
@@ -120,7 +120,7 @@ public class VilkårsavklaringRestTjeneste {
     @Operation(description = "Hent vilkårsvurderinger per foreslått vilkårsavklaring", tags = "aktivitetspenger")
     @BeskyttetRessurs(action = READ, resource = BeskyttetRessursResourceType.FAGSAK)
     @SuppressWarnings("findsecbugs:JAXRS_ENDPOINT")
-    public VilkårsavklaringVurderingerDto hentVilkårsavklaringVurderinger(
+    public VilkårsavklaringVurderingerResponse hentVilkårsavklaringVurderinger(
         @NotNull @QueryParam(BehandlingUuidDto.NAME) @Parameter(description = BehandlingUuidDto.DESC)
         @Valid @TilpassetAbacAttributt(supplierClass = AbacAttributtSupplier.class) BehandlingUuidDto behandlingUuid,
         @NotNull @QueryParam("vilkarType")
@@ -129,28 +129,38 @@ public class VilkårsavklaringRestTjeneste {
         return hentVurderinger(behandling, vilkårType);
     }
 
-    VilkårsavklaringerDto hentAvklaringer(Behandling behandling, VilkårType vilkårType) {
+    VilkårsavklaringerResponse hentAvklaringer(Behandling behandling, VilkårType vilkårType) {
         validerVilkårType(vilkårType);
         var grunnlag = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), vilkårType);
-        if (grunnlag.isEmpty()) {
-            return new VilkårsavklaringerDto(vilkårType, List.of());
-        }
-        var foreslåtte = grunnlag.get().getForeslåtteAvklaringer();
-        var foreslåtteReferanser = foreslåtte.stream().map(VilkårPeriodeAvklaring::getReferanse).collect(Collectors.toSet());
+        var foreslåtte = grunnlag.map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer).orElse(Set.of());
 
         // Etter iverksettelse ligger behandlingens forslag også blant de ferdigstilte, med samme referanse
-        var ferdigstilte = grunnlag.get().getFerdigstilteAvklaringer().stream()
+        var foreslåtteReferanser = foreslåtte.stream().map(VilkårPeriodeAvklaring::getReferanse).collect(Collectors.toSet());
+        var ferdigstilte = grunnlag.map(VilkårsavklaringGrunnlag::getFerdigstilteAvklaringer).orElse(Set.of()).stream()
             .filter(a -> !foreslåtteReferanser.contains(a.getReferanse()))
             .toList();
+
         var uttalelser = hentUttalelserPerReferanse(behandling);
-        var avklaringer = Stream.concat(
-                sortertNyestFørst(foreslåtte).map(a -> tilAvklaringDto(a, true, uttalelser)),
-                sortertNyestFørst(ferdigstilte).map(a -> tilAvklaringDto(a, false, uttalelser)))
-            .toList();
-        return new VilkårsavklaringerDto(vilkårType, avklaringer);
+        var foreslåtteRader = sortertSenesteFomFørst(foreslåtte).map(a -> tilAvklaringRad(a, true, uttalelser));
+        var ferdigstilteRader = ferdigstilte.stream().map(a -> tilAvklaringRad(a, false, uttalelser));
+
+        // Avklaringene kan overlappe hverandre (f.eks. en foreslått avklaring som overstyrer deler av en ferdigstilt)
+        var perioderDekketAvAvklaring = TidslinjeUtil.tilTidslinje(Stream.concat(foreslåtte.stream(), ferdigstilte.stream()).map(VilkårPeriodeAvklaring::getPeriode).toList());
+
+        var relevanteVilkårsperioder = vilkårResultatRepository.hentHvisEksisterer(behandling.getId())
+            .map(v -> VurderingAvVilkårEtterAvklaringTjeneste.relevanteVilkårsperioder(v, vilkårType))
+            .orElse(LocalDateTimeline.empty());
+        var vilkårsrader = relevanteVilkårsperioder.disjoint(perioderDekketAvAvklaring).stream()
+            .map(s -> new VilkårsavklaringOgUtfallPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
+
+        // Foreslåtte står øverst; ferdigstilte er historikk og flettes kronologisk inn blant vilkårsperiodene
+        var historikkrader = Stream.concat(ferdigstilteRader, vilkårsrader)
+            .sorted(Comparator.comparing((VilkårsavklaringOgUtfallPeriodeDto avklaringOgUtfallPeriode) -> avklaringOgUtfallPeriode.periode().getFom()).reversed());
+
+        return new VilkårsavklaringerResponse(vilkårType, Stream.concat(foreslåtteRader, historikkrader).toList());
     }
 
-    VilkårsavklaringVurderingerDto hentVurderinger(Behandling behandling, VilkårType vilkårType) {
+    VilkårsavklaringVurderingerResponse hentVurderinger(Behandling behandling, VilkårType vilkårType) {
         validerVilkårType(vilkårType);
         var foreslåtte = vilkårsavklaringGrunnlagRepository.hentGrunnlagHvisEksisterer(behandling.getId(), vilkårType)
             .map(VilkårsavklaringGrunnlag::getForeslåtteAvklaringer)
@@ -165,7 +175,7 @@ public class VilkårsavklaringRestTjeneste {
         var raderMedAvklaring = foreslåtte.stream()
             .map(avklaring -> {
                 var avklaringTidslinje = new LocalDateTimeline<>(avklaring.getPeriode().toLocalDateInterval(), Boolean.TRUE);
-                // Hele den avklarte perioden har i praksis samme utfall, så den første vilkårsperioden er representativ
+                // Hele den avklarte perioden har samme utfall (garantert av VurderingAvVilkårEtterAvklaringTjeneste#validerÉnVurderingPerAvklaring), så den første vilkårsperioden er representativ
                 var utfall = relevanteVilkårsperioder.intersection(avklaringTidslinje).stream()
                     .findFirst()
                     .map(s -> s.getValue().getGjeldendeUtfall())
@@ -176,7 +186,7 @@ public class VilkårsavklaringRestTjeneste {
                     .max(Comparator.comparing(VilkårsvurderingResultat::vurdertTidspunkt, Comparator.nullsFirst(Comparator.naturalOrder())))
                     .map(VilkårsavklaringRestTjeneste::tilVurderingDto)
                     .orElse(null);
-                return new VilkårsvurderingRadDto(
+                return new VilkårsvurderingOgAvklaringPeriodeDto(
                     avklaring.getPeriode().tilPeriode(),
                     utfall,
                     new VilkårsavklaringVurderingDto(tilAvklaringDto(avklaring, true, uttalelser), vurdering));
@@ -185,12 +195,12 @@ public class VilkårsavklaringRestTjeneste {
         // tilTidslinje tåler overlapp, i tilfelle eldre data har flere foreslåtte avklaringer
         var foreslåtteTidslinje = TidslinjeUtil.tilTidslinje(foreslåtte.stream().map(VilkårPeriodeAvklaring::getPeriode).toList());
         var raderUtenAvklaring = relevanteVilkårsperioder.disjoint(foreslåtteTidslinje).stream()
-            .map(s -> new VilkårsvurderingRadDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
+            .map(s -> new VilkårsvurderingOgAvklaringPeriodeDto(new Periode(s.getFom(), s.getTom()), s.getValue().getGjeldendeUtfall(), null));
 
         var perioder = Stream.concat(raderMedAvklaring, raderUtenAvklaring)
-            .sorted(Comparator.comparing((VilkårsvurderingRadDto rad) -> rad.periode().getFom()).reversed())
+            .sorted(Comparator.comparing((VilkårsvurderingOgAvklaringPeriodeDto vurderingPeriode) -> vurderingPeriode.periode().getFom()).reversed())
             .toList();
-        return new VilkårsavklaringVurderingerDto(vilkårType, perioder);
+        return new VilkårsavklaringVurderingerResponse(vilkårType, perioder);
     }
 
     private static void validerVilkårType(VilkårType vilkårType) {
@@ -199,9 +209,13 @@ public class VilkårsavklaringRestTjeneste {
         }
     }
 
-    private static Stream<VilkårPeriodeAvklaring> sortertNyestFørst(Collection<VilkårPeriodeAvklaring> avklaringer) {
+    private static Stream<VilkårPeriodeAvklaring> sortertSenesteFomFørst(Collection<VilkårPeriodeAvklaring> avklaringer) {
         return avklaringer.stream()
             .sorted(Comparator.comparing((VilkårPeriodeAvklaring a) -> a.getPeriode().getFomDato()).reversed());
+    }
+
+    private static VilkårsavklaringOgUtfallPeriodeDto tilAvklaringRad(VilkårPeriodeAvklaring a, boolean foreslått, Map<UUID, UttalelseDto> uttalelser) {
+        return new VilkårsavklaringOgUtfallPeriodeDto(a.getPeriode().tilPeriode(), Utfall.IKKE_OPPFYLT, tilAvklaringDto(a, foreslått, uttalelser));
     }
 
     private static VilkårsavklaringDto tilAvklaringDto(VilkårPeriodeAvklaring a, boolean foreslått, Map<UUID, UttalelseDto> uttalelser) {
