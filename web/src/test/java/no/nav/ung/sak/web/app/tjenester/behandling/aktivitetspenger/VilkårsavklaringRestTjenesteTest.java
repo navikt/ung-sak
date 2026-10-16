@@ -392,7 +392,9 @@ class VilkårsavklaringRestTjenesteTest {
             "begrunnelse for vurdering",
             "fritekst til brev",
             SAKSBEHANDLER,
-            vurdertTidspunkt);
+            vurdertTidspunkt,
+            null
+        );
     }
 
     private static UUID avklaringsreferanse(VilkårsvurderingRadDto rad) {

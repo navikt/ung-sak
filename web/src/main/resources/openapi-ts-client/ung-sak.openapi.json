@@ -3112,6 +3112,124 @@
         "type" : "string",
         "x-enum-varnames" : [ "SØKER_IKKE_MEDLEM" ]
       },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.AndreLivsoppholdsytelserIkkeOppfyltÅrsak"
+          },
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "erManuellVurdering" : {
+            "type" : "boolean"
+          },
+          "erVilkårOppfylt" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "type" : "string"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "vilkårType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          },
+          "vurdertAv" : {
+            "type" : "string"
+          },
+          "vurdertTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          },
+          "ytelseNavn" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "erManuellVurdering", "erVilkårOppfylt", "periode", "vilkårType", "vurdertAv", "vurdertTidspunkt" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingerResponse" : {
+        "properties" : {
+          "vurderinger" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurderinger" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto" : {
+        "properties" : {
+          "avslagsårsak" : {
+            "type" : "string"
+          },
+          "begrunnelse" : {
+            "type" : "string"
+          },
+          "erManuellVurdering" : {
+            "type" : "boolean"
+          },
+          "erVilkårOppfylt" : {
+            "type" : "boolean"
+          },
+          "fritekstVurderingBrev" : {
+            "type" : "string"
+          },
+          "periode" : {
+            "$ref" : "#/components/schemas/ung.sak.typer.Periode"
+          },
+          "vilkårType" : {
+            "$ref" : "#/components/schemas/ung.kodeverk.vilkår.VilkårType"
+          },
+          "vurdertAv" : {
+            "type" : "string"
+          },
+          "vurdertTidspunkt" : {
+            "format" : "date-time",
+            "type" : "string"
+          }
+        },
+        "required" : [ "erManuellVurdering", "erVilkårOppfylt", "periode", "vilkårType", "vurdertAv", "vurdertTidspunkt" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto" : {
+        "discriminator" : {
+          "mapping" : {
+            "AKT_VK_1" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto",
+            "AKT_VK_2" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto",
+            "AKT_VK_4" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto",
+            "AKT_VK_5" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto"
+          },
+          "propertyName" : "vilkårType"
+        },
+        "oneOf" : [ {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingDto"
+        }, {
+          "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.GenerellInngangsvilkårVurderingDto"
+        } ],
+        "properties" : {
+          "vilkårType" : {
+            "type" : "string"
+          }
+        },
+        "required" : [ "vilkårType" ],
+        "type" : "object"
+      },
+      "ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingerResponse" : {
+        "properties" : {
+          "vurderinger" : {
+            "items" : {
+              "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingDto"
+            },
+            "type" : "array"
+          }
+        },
+        "required" : [ "vurderinger" ],
+        "type" : "object"
+      },
       "ung.sak.kontrakt.aktivitetspenger.ytelse.AktivitetspengerUtbetaltMånedDto" : {
         "properties" : {
           "antallDager" : {
@@ -8132,6 +8250,64 @@
         },
         "summary" : "Returnerer info om vilkår, inkludert hvordan eventuelt kjørt (input og evaluering).",
         "tags" : [ "vilkår", "forvaltning" ]
+      }
+    },
+    "/api/behandling/vilkar/inngangsvilkar-vurderinger" : {
+      "get" : {
+        "description" : "Hent vurderinger av alle inngangsvilkår for en behandling",
+        "operationId" : "hentInngangsvilkårVurderinger",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.InngangsvilkårVurderingerResponse"
+                }
+              }
+            },
+            "description" : "Returnerer vurderinger per vilkår og periode, tom liste hvis ikke eksisterer"
+          }
+        },
+        "tags" : [ "vilkår" ]
+      }
+    },
+    "/api/behandling/vilkar/inngangsvilkar-vurderinger/andre-livsoppholdsytelser" : {
+      "get" : {
+        "description" : "Hent vurderinger av andre livsoppholdsytelser-vilkåret for en behandling",
+        "operationId" : "hentAndreLivsoppholdsytelserVurderinger",
+        "parameters" : [ {
+          "description" : "behandlingUUID",
+          "in" : "query",
+          "name" : "behandlingUuid",
+          "required" : true,
+          "schema" : {
+            "format" : "uuid",
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/ung.sak.kontrakt.aktivitetspenger.vilkår.vurdering.AndreLivsoppholdsytelserVurderingerResponse"
+                }
+              }
+            },
+            "description" : "Returnerer vurderinger per periode, tom liste hvis ikke eksisterer"
+          }
+        },
+        "tags" : [ "vilkår" ]
       }
     },
     "/api/behandling/vilkar/samlet" : {

@@ -15,8 +15,9 @@ import no.nav.ung.sak.behandling.aksjonspunkt.DtoTilServiceAdapter;
 import no.nav.ung.sak.behandling.aksjonspunkt.OppdateringResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserResultatPeriode;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.AndreLivsoppholdsytelserVurderingResultat;
-import no.nav.ung.sak.behandlingslager.inngangsvilkår.VilkårsvurderingResultat;
 import no.nav.ung.sak.behandlingslager.inngangsvilkår.InngangsvilkårVurderingRepository;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.RegelEvaluering;
+import no.nav.ung.sak.web.app.tjenester.behandling.aktivitetspenger.VurderingEtterAvklaringResultat.VilkårsvurderingResultatOgEvaluering;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlag;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårsavklaringGrunnlagRepository;
@@ -64,15 +65,17 @@ public class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdaterer impleme
         HistorikkinnslagInput historikkinnslagInput = vilkårsvurderingHistorikkinnslagTjeneste.hentInitielleVerdier(behandlingId, AKTUELT_VILKÅR);
 
         var foreslåtteAvklaringer = hentForeslåtteAvklaringer(behandlingId);
-        var resultatTidslinje = vurderingAvVilkårEtterAvklaringTjeneste.utled(
+        var vurderingResultat = vurderingAvVilkårEtterAvklaringTjeneste.utled(
             behandlingId, AKTUELT_VILKÅR, dto.getVurdertePerioder(), hentÅrsakTidslinje(foreslåtteAvklaringer)
         );
 
-        var periodeVurderinger = resultatTidslinje
+        var periodeVurderinger = vurderingResultat.vurderinger()
             .combine(hentFritekstTilVarsel(foreslåtteAvklaringer), VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdaterer::medYtelseNavn, LocalDateTimeline.JoinStyle.LEFT_JOIN)
             .segmenter().stream()
             .map(s -> new AndreLivsoppholdsytelserResultatPeriode(
-                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()), s.getValue()))
+                DatoIntervallEntitet.fraOgMedTilOgMed(s.getFom(), s.getTom()),
+                s.getValue().resultat(),
+                vurderingResultat.tilRegelsporing(s.getValue().evaluering())))
             .toList();
 
         inngangsvilkårVurderingRepository.lagreYtelseVurderinger(behandlingId, periodeVurderinger);
@@ -87,11 +90,16 @@ public class VurderingAvAndreLivsoppholdsytelserEtterAvklaringOppdaterer impleme
     }
 
     // Fordi avklaring for andre livsoppholdytelser ikke både har ytelsenavn og fritekst, bruker vi fritekstfeltet som ytelsenavn.
-    private static LocalDateSegment<AndreLivsoppholdsytelserVurderingResultat> medYtelseNavn(LocalDateInterval intervall,
-                                                                            LocalDateSegment<VilkårsvurderingResultat> vurdering,
-                                                                            LocalDateSegment<String> fritekstTilVarsel) {
+    private static LocalDateSegment<YtelseVurdering> medYtelseNavn(LocalDateInterval intervall,
+                                                                   LocalDateSegment<VilkårsvurderingResultatOgEvaluering> vurdering,
+                                                                   LocalDateSegment<String> fritekstTilVarsel) {
         var navn = fritekstTilVarsel == null ? null : fritekstTilVarsel.getValue();
-        return new LocalDateSegment<>(intervall, AndreLivsoppholdsytelserVurderingResultat.fra(vurdering.getValue(), navn));
+        return new LocalDateSegment<>(intervall, new YtelseVurdering(
+            AndreLivsoppholdsytelserVurderingResultat.fra(vurdering.getValue().resultat(), navn),
+            vurdering.getValue().evaluering()));
+    }
+
+    private record YtelseVurdering(AndreLivsoppholdsytelserVurderingResultat resultat, RegelEvaluering evaluering) {
     }
 
     private Set<VilkårPeriodeAvklaring> hentForeslåtteAvklaringer(long behandlingId) {

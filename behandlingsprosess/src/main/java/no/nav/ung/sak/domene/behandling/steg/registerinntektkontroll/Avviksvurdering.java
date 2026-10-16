@@ -46,6 +46,9 @@ public class Avviksvurdering {
 
     private AvvikResultatType finnKontrollresultatForType(InntektType inntektType, Set<RapportertInntekt> registerinntekter, Set<RapportertInntekt> brukersInntekter) {
         final var register = summer(inntektType, registerinntekter);
+        if (register.signum() < 0) {
+            return AvvikResultatType.NEGATIV_REGISTERINNTEKT;
+        }
         final var bruker = summer(inntektType, brukersInntekter);
 
         final var differanse = register.subtract(bruker).abs();

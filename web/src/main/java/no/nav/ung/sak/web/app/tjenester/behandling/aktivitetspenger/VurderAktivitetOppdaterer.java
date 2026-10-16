@@ -83,7 +83,9 @@ public class VurderAktivitetOppdaterer implements AksjonspunktOppdaterer<VurderA
                 it.begrunnelse(),
                 it.fritekstVurderingBrev(),
                 vurdertAv,
-                vurdertTidspunkt))
+                vurdertTidspunkt,
+                null
+            ))
             .toList();
         inngangsvilkårVurderingRepository.lagreAktivitetVurderinger(param.getBehandlingId(), periodeVurderinger);
         inngangsvilkårVurderingTjeneste.settAktivitetsvilkårResultat(param.getBehandlingId(), param.getVilkårResultatBuilder());

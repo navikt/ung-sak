@@ -23,9 +23,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnholdByggerTest {
 
     private static final LocalDate FOM = LocalDate.of(2025, 8, 1);
+    private static final String FRITEKST = "Du får likevel aktivitetspenger fordi vilkåret fortsatt er oppfylt.";
 
     UendretInnholdByggerTest() {
-        super(1, "Nav har ikke endret aktivitetspengene dine");
+        super(2, "Nav har ikke endret aktivitetspengene dine");
     }
 
     @DisplayName("Uendret vedtak etter at bruker ble varslet om mulig opphør pga bosted, men vilkåret er fortsatt oppfylt")
@@ -34,7 +35,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
             FOM,
             BostedsAvklaringTestData.opphør(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            null
+            FRITEKST
         );
         var behandling = lagUendretScenario(scenario);
 
@@ -45,7 +46,8 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
             .asPlainTextContains(VedtaksbrevVerifikasjon.HILSEN_NAV_KONTOR)
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom())
+                "Du vil fortsatt få aktivitetspenger fra " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()),
+                FRITEKST
             );
     }
 
@@ -55,7 +57,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
             FOM,
             BostedsAvklaringTestData.avslag(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            null
+            FRITEKST
         );
         var behandling = lagUendretScenario(scenario);
 
@@ -65,28 +67,8 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         assertThatHtml(generertBrev.dokument().html())
             .containsHtmlSubSequenceOnce(
                 "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                "Du får likevel aktivitetspenger i perioden fra og med " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom())
-            );
-    }
-
-    @DisplayName("Uendret vedtak med fritekst på bostedsvurderingen")
-    @Test
-    void uendretMedFritekst() {
-        var fritekst = "Fritekstbegrunnelse som beskriver hvorfor du likevel beholder ytelsen";
-        var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
-            FOM,
-            BostedsAvklaringTestData.opphør(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            fritekst
-        );
-        var behandling = lagUendretScenario(scenario);
-
-        GenerertBrev generertBrev = genererVedtaksbrev(behandling.getId());
-        assertThat(generertBrev.templateType()).isEqualTo(TemplateType.AKTIVITETSPENGER_UENDRET);
-
-        assertThatHtml(generertBrev.dokument().html())
-            .containsHtmlSubSequenceOnce(
-                "<h1>Nav har ikke endret aktivitetspengene dine</h1>",
-                fritekst
+                "Du får likevel aktivitetspenger i perioden fra og med " + brevDatoString(scenario.bostedsAvklaringer().getFirst().periode().getFom()),
+                FRITEKST
             );
     }
 
@@ -153,7 +135,7 @@ class UendretInnholdByggerTest extends AbstractAktivitetspengerVedtaksbrevInnhol
         var scenario = AktivitetspengerUendretScenarioer.uendretScenario(
             FOM,
             BostedsAvklaringTestData.opphør(vurdertPeriode(FOM), BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM),
-            null
+            FRITEKST
         );
         return lagUendretScenario(scenario);
     }

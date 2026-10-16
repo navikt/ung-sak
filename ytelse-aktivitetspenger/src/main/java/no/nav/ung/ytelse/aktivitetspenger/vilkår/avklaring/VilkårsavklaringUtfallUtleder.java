@@ -3,13 +3,18 @@ package no.nav.ung.ytelse.aktivitetspenger.vilkår.avklaring;
 import no.nav.ung.kodeverk.varsel.EtterlysningStatus;
 import no.nav.ung.kodeverk.vilkår.IkkeOppfyltDetaljertÅrsak;
 import no.nav.ung.kodeverk.vilkår.VilkårType;
+import no.nav.ung.sak.behandlingslager.behandling.vilkår.VilkårJsonObjectMapper;
+import no.nav.ung.sak.behandlingslager.inngangsvilkår.Regelsporing;
 import no.nav.ung.sak.behandlingslager.vilkårsavklaring.VilkårPeriodeAvklaring;
 import no.nav.ung.sak.etterlysning.EtterlysningData;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 public class VilkårsavklaringUtfallUtleder {
+
+    private static final VilkårJsonObjectMapper JSON = new VilkårJsonObjectMapper();
 
     private final VilkårType vilkårType;
     private final VilkårPeriodeAvklaring foreslåttAvklaring;
@@ -70,5 +75,36 @@ public class VilkårsavklaringUtfallUtleder {
         return etterlysning != null
             && etterlysning.status() == EtterlysningStatus.MOTTATT_SVAR
             && etterlysning.uttalelseData() != null && etterlysning.uttalelseData().harUttalelse();
+    }
+
+    // Uttalelsens innhold er utelatt med vilje. Bare om deltakeren har uttalt seg, er relevant.
+    public record RegelInput(UUID avklaringReferanse,
+                              String ikkeOppfyltÅrsak,
+                              boolean skalSendeVarsel,
+                              EtterlysningStatus etterlysningStatus,
+                              Boolean harUttalelse,
+                              LocalDateTime frist) {
+    }
+
+    public record RegelEvaluering(VilkårsavklaringUtfall utfall) {
+    }
+
+    public RegelInput tilRegelInput() {
+        var uttalelse = etterlysning != null ? etterlysning.uttalelseData() : null;
+        return new RegelInput(
+            foreslåttAvklaring != null ? foreslåttAvklaring.getReferanse() : null,
+            foreslåttAvklaring != null ? foreslåttAvklaring.getIkkeOppfyltÅrsakKode() : null,
+            foreslåttAvklaring != null && foreslåttAvklaring.skalSendeVarsel(),
+            etterlysning != null ? etterlysning.status() : null,
+            uttalelse != null ? uttalelse.harUttalelse() : null,
+            getFrist());
+    }
+
+    public RegelEvaluering tilRegelEvaluering() {
+        return new RegelEvaluering(utledUtfall());
+    }
+
+    public Regelsporing tilRegelsporing() {
+        return new Regelsporing(JSON.writeValueAsString(tilRegelInput()), JSON.writeValueAsString(tilRegelEvaluering()));
     }
 }

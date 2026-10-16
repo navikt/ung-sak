@@ -21,11 +21,23 @@ public class VedtaksbrevVerifikasjon {
         Trenger du mer informasjon? \
         Du finner mer informasjon på nav.no/aktivitetspenger. \
         På nav.no/kontakt kan du chatte eller skrive til oss. \
-        Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00-15:00. \
+        Hvis du ikke finner svar på nav.no kan du ringe oss på telefon 55 55 33 33, hverdager 09:00–15:00. \
         Med vennlig hilsen \
         Nav \
         %s \
         side av""";
+
+    // Sammenlignes med ren tekst, så span-en som hindrer linjeskift i paragrafhenvisningen er ikke med.
+    private static final String HJEMMELSETNING_PREFIKS = "Vedtaket er gjort etter folketrygdloven § 25-13 tredje ledd og forskrift om forsøk med aktivitetspenger for unge " +
+        "(forsøket Et enklere Nav), Trondheim kommune, Trøndelag ";
+
+    public static String hjemmelsetning(String paragraf) {
+        return HJEMMELSETNING_PREFIKS + "§ " + paragraf + ". ";
+    }
+
+    public static String hjemmelsetningFlereParagrafer(String paragrafer) {
+        return HJEMMELSETNING_PREFIKS + "§§ " + paragrafer + ". ";
+    }
 
     public static final String HILSEN_SENTRAL = hilsen(
         AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_SAKSBEHANDLER_NAVN, AktivitetspengerBrevScenarioerUtils.NAV_SENTRAL_BESLUTTER_NAVN);

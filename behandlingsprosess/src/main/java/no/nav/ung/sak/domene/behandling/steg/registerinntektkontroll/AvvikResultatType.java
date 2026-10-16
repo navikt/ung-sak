@@ -1,6 +1,7 @@
 package no.nav.ung.sak.domene.behandling.steg.registerinntektkontroll;
 
 public enum AvvikResultatType {
+    NEGATIV_REGISTERINNTEKT(0),
     AVVIK_MED_REGISTERINNTEKT(1),
     AVVIK_UTEN_REGISTERINNTEKT(2),
     INGEN_AVVIK(3);

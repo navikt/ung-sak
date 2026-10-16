@@ -83,7 +83,9 @@ public class VurderBehovForBistandOppdaterer implements AksjonspunktOppdaterer<V
                 it.begrunnelse(),
                 it.fritekstVurderingBrev(),
                 vurdertAv,
-                vurdertTidspunkt))
+                vurdertTidspunkt,
+                null
+            ))
             .toList();
         inngangsvilkårVurderingRepository.lagreBistandsVurderinger(param.getBehandlingId(), periodeVurderinger);
 

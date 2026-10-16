@@ -181,6 +181,30 @@ class UngdomsytelseFastsettInntektOppdatererTest {
     }
 
     @Test
+    void skal_bruke_null_når_valg_av_register_inntekt_og_registerinntekt_er_negativ() {
+        // Arrange
+        final var førsteRapporteringsmånedFom = FOM.plusMonths(1).withDayOfMonth(1);
+        final var førsteRapporteringsmånedTom = FOM.plusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        final var periode = DatoIntervallEntitet.fraOgMedTilOgMed(førsteRapporteringsmånedFom, førsteRapporteringsmånedTom);
+        lagreIAYMedRapportertInntekt(periode, 100);
+        final var registerinntekt = -5830;
+        lagreRegisterinntekt(periode, registerinntekt);
+        leggTilTriggerForKontroll(periode);
+
+        final FastsettInntektDto dto = lagDto(periode, BrukKontrollertInntektValg.BRUK_REGISTER_INNTEKT);
+        final var param = new AksjonspunktOppdaterParameter(behandling, aksjonspunkt, dto);
+
+        // Act
+        oppdaterer.oppdater(dto, param);
+
+        // Assert
+        final var kontrollertperiode = tilkjentYtelseRepository.hentKontrollertInntektPerioder(behandling.getId()).orElseThrow().getPerioder().getFirst();
+        assertThat(kontrollertperiode.getKilde()).isEqualTo(KontrollertInntektKilde.REGISTER);
+        assertThat(kontrollertperiode.getInntekt()).isEqualByComparingTo(BigDecimal.ZERO);
+        assertThat(kontrollertperiode.getRegisterInntekt()).isEqualByComparingTo(BigDecimal.valueOf(registerinntekt));
+    }
+
+    @Test
     void skal_bekrefte_med_manuelt_fastsatt_inntekt() {
         // Arrange
         final var førsteRapporteringsmånedFom = FOM.plusMonths(1).withDayOfMonth(1);

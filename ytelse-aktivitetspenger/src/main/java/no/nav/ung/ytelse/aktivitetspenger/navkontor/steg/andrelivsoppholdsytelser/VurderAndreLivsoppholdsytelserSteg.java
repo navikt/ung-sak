@@ -136,7 +136,7 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
                 LocalDateTimeline.JoinStyle.LEFT_JOIN);
 
         LocalDateTimeline<VilkårsavklaringUtfall> stegutfallTidslinje = vurderingTidslinje.mapValue(VilkårsavklaringUtfallUtleder::utledUtfall);
-        vilkårsutfallsporing.lagreSporing(behandlingId, vurderingTidslinje, stegutfallTidslinje, VURDER_ANDRE_LIVSOPPHOLDSYTELSER);
+        vilkårsutfallsporing.lagreSporing(behandlingId, vurderingTidslinje.mapValue(VilkårsavklaringUtfallUtleder::tilRegelInput), stegutfallTidslinje, VURDER_ANDRE_LIVSOPPHOLDSYTELSER);
 
         if (!stegutfallTidslinje.filterValue(VilkårsavklaringUtfall.VENTER_PÅ_UTTALELSE_FRA_BRUKER::equals).isEmpty()) {
             return settPåVent(vurderingTidslinje);
@@ -167,7 +167,8 @@ public class VurderAndreLivsoppholdsytelserSteg extends VilkårVurderingSteg {
                     null,
                     foreslåttAvklaring.getFritekstTilVarsel(),
                     foreslåttAvklaring.getVurdertAv(),
-                    foreslåttAvklaring.getVurdertTidspunkt());
+                    foreslåttAvklaring.getVurdertTidspunkt(),
+                    s.getValue().tilRegelsporing());
             }).collect(Collectors.toList());
 
         // Kalles også med tom liste, slik at grunnlaget alltid finnes når settAndreLivsoppholdsytelserResultat kjører under.

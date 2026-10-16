@@ -351,6 +351,30 @@ class VurderBostedVilkårStegTest {
     }
 
     @Test
+    void skal_ikke_lagre_uttalelsestekst_i_sporing() {
+        var behandling = opprettBehandlingMedVilkårOgPeriode();
+        bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);
+        var avklaring = lagBostedsPeriodeAvklaring(FOM, TOM, BostedsvilkårIkkeOppfyltÅrsak.IKKE_BOSATTADRESSE_I_TRONDHEIM, true);
+        vilkårsavklaringGrunnlagRepository.lagreForeslåtteAvklaringer(behandling.getId(), VilkårType.BOSTEDSVILKÅR, Set.of(avklaring));
+
+        steg = lagSteg(List.of(new EtterlysningData(
+            EtterlysningStatus.MOTTATT_SVAR,
+            LocalDateTime.of(2026, 2, 15, 12, 0),
+            avklaring.getReferanse(),
+            DatoIntervallEntitet.fraOgMedTilOgMed(FOM, TOM),
+            LocalDateTime.of(2026, 1, 10, 9, 0),
+            new UttalelseData(true, "Hemmelig uttalelsestekst", new JournalpostId("jp-uttalelse-1")))));
+        utførSteg(behandling);
+
+        var input = behandlingprosessSporingRepository.hentSporinger(behandling.getId(), "VURDER_BOSTEDVILKÅR").getFirst().getInput();
+        assertThat(input)
+            .doesNotContain("Hemmelig uttalelsestekst")
+            .doesNotContain("jp-uttalelse-1")
+            .contains("harUttalelse")
+            .contains("etterlysningStatus");
+    }
+
+    @Test
     void skal_ikke_regne_delvis_dekket_tidslinje_som_dekket_av_foreslått_avklaring() {
         var behandling = opprettBehandlingMedVilkårOgPeriode();
         bostedSøknadsfaktaGrunnlagRepository.lagreInformasjonFraSøknad(behandling.getId(), "jp-søknad-1", FOM, true);

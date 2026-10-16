@@ -5,6 +5,7 @@ import jakarta.inject.Inject;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.k9.felles.konfigurasjon.konfig.KonfigVerdi;
 import no.nav.ung.kodeverk.behandling.BehandlingStegType;
+import no.nav.ung.kodeverk.behandling.BehandlingÅrsakType;
 import no.nav.ung.kodeverk.behandling.aksjonspunkt.AksjonspunktDefinisjon;
 import no.nav.ung.sak.behandling.BehandlingReferanse;
 import no.nav.ung.sak.behandlingskontroll.*;
@@ -74,9 +75,13 @@ public class KontrollerInntektSteg implements BehandlingSteg {
         Fagsak fagsak = behandling.getFagsak();
         boolean ikkeDigitalBruker = fagsak.erIkkeDigitalBruker();
 
-        // Ved ikke-digital bruker opprettes aksjonspunkt for manuell kontroll av inntekt alltid.
         if (ikkeDigitalBruker) {
-            log.info("Fagsak {} gjelder ikke-digital bruker, oppretter aksjonspunkt for manuell kontroll av inntekt.", fagsak.getSaksnummer());
+            log.info("Fagsak gjelder ikke-digital bruker, oppretter aksjonspunkt for manuell kontroll av inntekt.");
+            return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
+        }
+
+        if (erManueltOpprettetRevurderingAvKontroll(behandling)) {
+            log.info("Fagsak har manuelt opprettet revurdering av kontroll av inntekt, oppretter aksjonspunkt for manuell kontroll av inntekt.");
             return BehandleStegResultat.utførtMedAksjonspunkter(List.of(AksjonspunktDefinisjon.KONTROLLER_INNTEKT));
         }
 
@@ -128,6 +133,11 @@ public class KontrollerInntektSteg implements BehandlingSteg {
 
     private boolean erKontrollbehandling(Behandling behandling) {
         return !kontrollPerioderUtleder.utledPerioderForKontrollAvInntekt(behandling.getId()).isEmpty();
+    }
+
+    private static boolean erManueltOpprettetRevurderingAvKontroll(Behandling behandling) {
+        return behandling.getBehandlingÅrsaker().stream()
+            .anyMatch(årsak -> årsak.getBehandlingÅrsakType() == BehandlingÅrsakType.RE_KONTROLL_REGISTER_INNTEKT && årsak.erManueltOpprettet());
     }
 
 }
